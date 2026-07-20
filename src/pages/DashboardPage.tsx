@@ -30,6 +30,14 @@ import {
   Flame,
   MapPin,
   Menu,
+  Truck,
+  BadgeCheck,
+  CreditCard,
+  RotateCcw,
+  Headphones,
+  Banknote,
+  Award,
+  Gift,
 } from 'lucide-react';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
@@ -50,7 +58,6 @@ import {
 } from '../components/content';
 import { PRODUCTS } from '../constants';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { CHOOSIFY_ANNOUNCEMENTS_THREAD_ID } from '../lib/announcements';
 import { cn } from '../lib/utils';
 import { PLACEHOLDER_IMAGE } from '../constants';
 import { PublicReviewCard } from '../components/PublicReviewCard';
@@ -59,6 +66,95 @@ import toast from 'react-hot-toast';
 import { toPlatformRole } from '../lib/platform/roles';
 import { getDashboardNavForRole, isDashboardTabAllowed } from '../lib/platform/dashboardRegistry';
 import { SellerWorkspaceSection } from './ReviewDetailPage';
+import { MessagesPage } from './MessagesPage';
+import { CustomerOrdersPage } from './CustomerOrdersPage';
+import { DealsVerticalSponsoredCard } from '../components/deals/DealsLowerSections';
+
+/** Tabs with their own right column / dense forms — do not inject sponsored rail */
+const DASHBOARD_TABS_WITH_RIGHT_CONTENT = new Set([
+  'overview',
+  'messages',
+  'addresses',
+  'settings',
+  'orders',
+  'my-reviews',
+]);
+
+const OVERVIEW_TRUST = [
+  { id: 'verified', label: 'Verified Sellers', icon: BadgeCheck },
+  { id: 'payments', label: 'Secure Payments', icon: CreditCard },
+  { id: 'returns', label: 'Easy Returns', icon: RotateCcw },
+  { id: 'cod', label: 'COD Available', icon: Banknote },
+  { id: 'support', label: '24/7 Support', icon: Headphones },
+] as const;
+
+const OVERVIEW_BADGES = [
+  { id: 'verified-buyer', label: 'Verified Buyer', emoji: '✓' },
+  { id: 'top-reviewer', label: 'Top Reviewer', emoji: '★' },
+  { id: 'early-adopter', label: 'Early Adopter', emoji: '◆' },
+  { id: 'deal-hunter', label: 'Deal Hunter', emoji: '৳' },
+] as const;
+
+function formatOrderStatus(status: string): { label: string; className: string } {
+  switch (status) {
+    case 'delivered':
+      return { label: 'Delivered', className: 'bg-emerald-50 border-emerald-200 text-emerald-700' };
+    case 'dispatched':
+    case 'transit':
+      return { label: 'Shipped', className: 'bg-blue-50 border-blue-200 text-blue-700' };
+    case 'pending':
+    default:
+      return { label: 'Processing', className: 'bg-amber-50 border-amber-200 text-amber-700' };
+  }
+}
+
+function scoreMeterColor(pct: number): string {
+  // < 50% red · < 70% blue · otherwise green (site palette)
+  if (pct < 50) return '#FF000D';
+  if (pct < 70) return '#2323FF';
+  return '#07A828';
+}
+
+function ScoreRing({ score, max = 100 }: { score: number; max?: number }) {
+  const pct = Math.min(100, Math.max(0, (score / max) * 100));
+  const color = scoreMeterColor(pct);
+  const r = 28;
+  const c = 2 * Math.PI * r;
+  const offset = c - (pct / 100) * c;
+  return (
+    <div className="relative w-[72px] h-[72px] shrink-0">
+      <svg width="72" height="72" viewBox="0 0 72 72" className="-rotate-90" aria-hidden>
+        <circle cx="36" cy="36" r={r} fill="none" stroke="#E8EDF2" strokeWidth="6" />
+        <circle
+          cx="36"
+          cy="36"
+          r={r}
+          fill="none"
+          stroke={color}
+          strokeWidth="6"
+          strokeLinecap="round"
+          strokeDasharray={c}
+          strokeDashoffset={offset}
+        />
+      </svg>
+      <div className="absolute inset-0 flex flex-col items-center justify-center px-1">
+        <span className="text-[15px] font-extrabold text-[#1A1A2E] leading-none tabular-nums">{score}</span>
+        <span className="text-[9px] font-bold text-[#9AA0AC] mt-0.5 leading-none">/{max}</span>
+      </div>
+    </div>
+  );
+}
+
+function DashboardSponsoredRail() {
+  return (
+    <aside
+      className="hidden lg:block w-full max-w-[240px] shrink-0 sticky top-[88px] self-start isolate z-0"
+      aria-label="Sponsored advertisement"
+    >
+      <DealsVerticalSponsoredCard />
+    </aside>
+  );
+}
 
 function mapFollowedToCreatorCard(item: any) {
   return {
@@ -102,9 +198,9 @@ const COLLECTION_TAB_IDS = new Set([
   'saved-brands',
   'loved-brands',
   'followed-brands',
+  'recently-viewed',
 ]);
 const ACTIVITY_TAB_IDS = new Set([
-  'recently-viewed',
   'saved-recommendations',
   'orders',
 ]);
@@ -166,101 +262,436 @@ const OverviewSection = ({
   onTabChange?: (tab: string) => void;
   userName?: string;
 }) => {
-  const { recentlyViewed } = useDashboard();
+  const { savedProducts } = useDashboard();
+  const { orders, currentUser } = useGlobalState();
   const displayName = userName?.trim() || 'there';
 
+  const choosifyScore = Math.min(
+    100,
+    Math.max(0, Math.round(currentUser?.reputation_score ?? 0)),
+  );
+  const scoreEncouragement =
+    choosifyScore >= 90
+      ? 'Excellent standing — keep shopping smart.'
+      : choosifyScore >= 70
+        ? 'Great progress — a few more orders unlock more perks.'
+        : 'Shop & review to boost your Choosify Score.';
+
+  const flatItems = orders.flatMap((order) =>
+    order.subOrders.flatMap((sub) =>
+      sub.items.map((item) => ({
+        orderId: order.orderId,
+        createdAt: order.createdAt,
+        seller: sub.sellerBusinessName,
+        status: sub.trackingStatus,
+        title: item.productTitle,
+        price: item.price * item.quantity,
+        quantity: item.quantity,
+        image:
+          PRODUCTS.find((p) => p.title === item.productTitle)?.image || PLACEHOLDER_IMAGE,
+      })),
+    ),
+  );
+
+  const totalOrdersCount = orders.length || currentUser?.orderStats?.totalOrders || 0;
+  const deliveredCount = orders.reduce(
+    (n, o) => n + o.subOrders.filter((s) => s.trackingStatus === 'delivered').length,
+    0,
+  );
+  const processingCount = orders.reduce(
+    (n, o) =>
+      n +
+      o.subOrders.filter(
+        (s) =>
+          s.trackingStatus === 'pending' ||
+          s.trackingStatus === 'dispatched' ||
+          s.trackingStatus === 'transit',
+      ).length,
+    0,
+  );
+
+  const parseMoney = (value: unknown) => {
+    if (typeof value === 'number' && Number.isFinite(value)) return value;
+    if (typeof value === 'string') {
+      const n = Number(value.replace(/[^\d.]/g, ''));
+      return Number.isFinite(n) ? n : 0;
+    }
+    return 0;
+  };
+
+  const totalSpent = orders.reduce((sum, o) => sum + (o.overallTotal || 0), 0);
+
+  const totalSavings = flatItems.reduce((sum, row) => {
+    const prod = PRODUCTS.find((p) => p.title === row.title) as
+      | { price?: string | number; originalPrice?: string | number }
+      | undefined;
+    if (!prod) return sum;
+    const price = parseMoney(prod.price);
+    const original = parseMoney(prod.originalPrice);
+    if (original > price) {
+      return sum + (original - price) * (row.quantity || 1);
+    }
+    return sum;
+  }, 0);
+
+  const recentOrderRows = flatItems.slice(0, 5);
+
+  const recommended = PRODUCTS.filter((p) => {
+    const price = parseMoney((p as { price?: string | number }).price);
+    const original = parseMoney((p as { originalPrice?: string | number }).originalPrice);
+    const tag = String((p as { tag?: string }).tag || '').toLowerCase();
+    return original > price || tag.includes('off') || tag.includes('deal') || tag.includes('%');
+  }).slice(0, 8);
+  const recommendedFallback =
+    recommended.length > 0 ? recommended : PRODUCTS.slice(0, 8);
+
+  const wishlistPreview = savedProducts.slice(0, 6);
+
+  const scoreBenefits = [
+    { label: 'Priority COD', unlocked: choosifyScore >= 70 },
+    { label: 'Early deal access', unlocked: choosifyScore >= 80 },
+    { label: 'Free express tips', unlocked: choosifyScore >= 90 },
+    { label: 'Buyer protection boost', unlocked: choosifyScore >= 60 },
+  ];
+
+  const memberSince = currentUser?.createdAt
+    ? new Date(currentUser.createdAt).toLocaleDateString('en-BD', {
+        month: 'short',
+        year: 'numeric',
+      })
+    : 'Dec 2024';
+
   return (
-    <div className="space-y-7 animate-in fade-in slide-in-from-bottom-5 duration-700">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
-        <div>
-          <div className="text-[13px] text-[#6B7280] mb-0.5">Welcome back,</div>
-          <h2 className="text-[26px] font-extrabold text-[#1A1A2E] leading-tight mb-1.5">
-            Hi, {displayName}!
-          </h2>
-          <p className="text-[12.5px] text-[#9AA0AC]">
-            Bangladesh&apos;s smartest product discovery platform.
-          </p>
-        </div>
-        <div className="bg-[#FFF3EA] rounded-xl px-5 py-4 min-w-[260px] relative overflow-hidden">
-          <div className="text-[12.5px] font-bold text-[#1A1A2E] mb-0.5">Premium Member</div>
-          <div className="text-[11px] text-[#9AA0AC] mb-3">Member since Dec 2024</div>
-          <span className="inline-block bg-[#1A1A2E] text-white text-[10px] font-extrabold px-3 py-1.5 rounded-full">
-            ★ PREMIUM ACTIVE
-          </span>
-          <div className="absolute right-[-6px] bottom-[-10px] text-[52px] opacity-15 pointer-events-none" aria-hidden>
-            ♛
-          </div>
-        </div>
+    <div className="space-y-6 animate-in fade-in slide-in-from-bottom-5 duration-700">
+      <div className="min-w-0">
+        <div className="text-[13px] text-[#6B7280] mb-0.5">Welcome back,</div>
+        <h2 className="text-[26px] font-extrabold text-[#1A1A2E] leading-tight mb-1.5">
+          Hi, {displayName}!
+        </h2>
+        <p className="text-[12.5px] text-[#9AA0AC]">
+          Bangladesh&apos;s smartest product discovery platform.
+        </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[3fr_1.1fr] gap-5">
-        <div className="bg-white border border-[#E8EDF2] rounded-[14px] p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-[14px] font-extrabold text-[#1A1A2E] flex items-center gap-2">
-              <Clock className="text-[#EB4501]" size={16} /> Recently Viewed
-            </h3>
-            <button
-              type="button"
-              onClick={() => onTabChange?.('recently-viewed')}
-              className="text-[11.5px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer"
-            >
-              View all history →
-            </button>
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_260px] gap-5 min-w-0 items-start">
+        <div className="space-y-5 min-w-0 overflow-hidden">
+          {/* 2×2 stats — middle column is too narrow for 4-up without overlap */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 min-w-0">
+            <div className="bg-white border border-[#E8EDF2] rounded-none p-4 flex flex-col gap-3 min-w-0 overflow-hidden">
+              <div className="flex gap-3 items-start min-w-0">
+                <ScoreRing score={choosifyScore} max={100} />
+                <div className="min-w-0 flex-1">
+                  <div className="text-[11px] font-extrabold text-[#9AA0AC] tracking-wide uppercase mb-1">
+                    Choosify Score
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onTabChange?.('my-reviews')}
+                    className="text-[11.5px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer p-0"
+                  >
+                    Score Details →
+                  </button>
+                </div>
+              </div>
+              <p className="text-[11.5px] text-[#4B5563] leading-snug break-words">
+                {scoreEncouragement}
+              </p>
+            </div>
+
+            <div className="bg-white border border-[#E8EDF2] rounded-none p-4 flex flex-col min-w-0 overflow-hidden">
+              <div className="text-[11px] font-extrabold text-[#9AA0AC] tracking-wide uppercase mb-1">
+                Total Orders
+              </div>
+              <div className="text-[22px] font-extrabold text-[#1A1A2E] leading-none mb-1.5 tabular-nums">
+                {totalOrdersCount}
+              </div>
+              <p className="text-[11.5px] text-[#6B7280] mb-3 flex-1 break-words leading-snug">
+                {deliveredCount} delivered · {processingCount} processing
+              </p>
+              <button
+                type="button"
+                onClick={() => onTabChange?.('orders')}
+                className="text-[11.5px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer p-0 text-left"
+              >
+                View All Orders →
+              </button>
+            </div>
+
+            <div className="bg-white border border-[#E8EDF2] rounded-none p-4 flex flex-col min-w-0 overflow-hidden">
+              <div className="text-[11px] font-extrabold text-[#9AA0AC] tracking-wide uppercase mb-1">
+                Total Spent
+              </div>
+              <div className="text-[18px] sm:text-[20px] font-extrabold text-[#1A1A2E] leading-snug mb-1.5 tabular-nums break-all">
+                ৳{totalSpent.toLocaleString('en-BD')}
+              </div>
+              <p className="text-[11.5px] text-[#6B7280] mb-3 flex-1">Across all purchases</p>
+              <button
+                type="button"
+                onClick={() => onTabChange?.('orders')}
+                className="text-[11.5px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer p-0 text-left"
+              >
+                View Spending →
+              </button>
+            </div>
+
+            <div className="bg-white border border-[#E8EDF2] rounded-none p-4 flex flex-col min-w-0 overflow-hidden">
+              <div className="text-[11px] font-extrabold text-[#9AA0AC] tracking-wide uppercase mb-1">
+                Total Savings
+              </div>
+              <div className="text-[18px] sm:text-[20px] font-extrabold text-[#1A1A2E] leading-snug mb-1.5 tabular-nums break-all">
+                ৳{Math.round(totalSavings).toLocaleString('en-BD')}
+              </div>
+              <p className="text-[11.5px] text-[#6B7280] mb-3 flex-1">Deals & promo savings</p>
+              <button
+                type="button"
+                onClick={() => onTabChange?.('orders')}
+                className="text-[11.5px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer p-0 text-left"
+              >
+                View My Savings →
+              </button>
+            </div>
           </div>
 
-          {recentlyViewed.length > 0 ? (
-            <div className="flex gap-4 overflow-x-auto no-scrollbar scroll-smooth pb-2">
-              {recentlyViewed.map((p, i) => (
-                <div key={i} className="min-w-[240px] sm:min-w-[280px] shrink-0">
-                  <ProductCard product={p} variant="grid" />
+          <div className="bg-white border border-[#E8EDF2] rounded-none p-4 sm:p-5 min-w-0 overflow-hidden">
+            <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
+              <h3 className="text-[14px] font-extrabold text-[#1A1A2E] flex items-center gap-2 min-w-0">
+                <Package className="text-[#EB4501] shrink-0" size={16} />
+                <span className="truncate">Recent Orders</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => onTabChange?.('orders')}
+                className="text-[11.5px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer shrink-0 whitespace-nowrap"
+              >
+                View All →
+              </button>
+            </div>
+
+            {recentOrderRows.length > 0 ? (
+              <div className="flex flex-col gap-3 min-w-0">
+                {recentOrderRows.map((row, i) => {
+                  const status = formatOrderStatus(row.status);
+                  return (
+                    <div
+                      key={`${row.orderId}-${i}`}
+                      className="flex flex-col gap-3 border border-[#E8EDF2] rounded-xl p-3 bg-[#F4F7F9]/40 min-w-0 sm:flex-row sm:items-center"
+                    >
+                      <img
+                        src={row.image}
+                        alt=""
+                        loading="lazy"
+                        onError={(e) => {
+                          e.currentTarget.src = PLACEHOLDER_IMAGE;
+                        }}
+                        className="w-14 h-14 rounded-lg object-cover border border-[#E8EDF2] shrink-0"
+                      />
+                      <div className="min-w-0 flex-1 overflow-hidden">
+                        <div className="text-[13px] font-bold text-[#1A1A2E] truncate">{row.title}</div>
+                        <div className="text-[11.5px] text-[#9AA0AC] mt-0.5 truncate">
+                          {row.seller}
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                          <span
+                            className={cn(
+                              'inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full border capitalize shrink-0',
+                              status.className,
+                            )}
+                          >
+                            {row.status === 'delivered' && <CheckCircle2 size={10} />}
+                            {(row.status === 'dispatched' || row.status === 'transit') && (
+                              <Truck size={10} />
+                            )}
+                            {row.status === 'pending' && <Clock size={10} />}
+                            {status.label}
+                          </span>
+                          <span className="text-[11px] text-[#9AA0AC] shrink-0">
+                            {new Date(row.createdAt).toLocaleDateString('en-BD')}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-between gap-3 sm:flex-col sm:items-end sm:justify-center shrink-0 min-w-0 sm:min-w-[96px]">
+                        <div className="text-[14px] font-extrabold text-[#1A1A2E] tabular-nums whitespace-nowrap">
+                          ৳{row.price.toLocaleString('en-BD')}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => onTabChange?.('orders')}
+                          className="text-[11.5px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer p-0 whitespace-nowrap"
+                        >
+                          View Details
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="py-12 border border-dashed border-[#E8EDF2] rounded-xl flex flex-col items-center justify-center text-center bg-[#F4F7F9]">
+                <p className="text-[12px] font-semibold text-[#9AA0AC]">No orders yet</p>
+                <Link
+                  to="/products"
+                  className="mt-3 text-[11.5px] font-bold text-[#EB4501] hover:underline"
+                >
+                  Start shopping →
+                </Link>
+              </div>
+            )}
+          </div>
+
+          <div className="bg-white border border-[#E8EDF2] rounded-none p-4 sm:p-5 min-w-0 overflow-hidden">
+            <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
+              <h3 className="text-[14px] font-extrabold text-[#1A1A2E] flex items-center gap-2 min-w-0">
+                <Gift className="text-[#EB4501] shrink-0" size={16} />
+                <span className="truncate">Recommended For You</span>
+              </h3>
+              <Link
+                to="/products"
+                className="text-[11.5px] font-bold text-[#EB4501] hover:underline shrink-0 whitespace-nowrap"
+              >
+                Browse more →
+              </Link>
+            </div>
+            <div className="w-full max-w-full min-w-0 overflow-x-auto overflow-y-hidden no-scrollbar scroll-smooth">
+              <div className="flex gap-3 w-max max-w-none pb-1">
+                {recommendedFallback.map((p) => (
+                  <div key={p.id} className="w-[156px] sm:w-[168px] shrink-0">
+                    <ProductCard product={p} variant="compact" />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div
+            className="bg-white rounded-none border border-[#E8EDF2] px-4 sm:px-5 py-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 min-w-0"
+            aria-label="Choosify trust guarantees"
+          >
+            {OVERVIEW_TRUST.map(({ id, label, icon: Icon }) => (
+              <div key={id} className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-full bg-[#EB4501]/10 text-[#EB4501] flex items-center justify-center shrink-0">
+                  <Icon size={15} aria-hidden />
+                </div>
+                <span className="text-[11.5px] font-bold text-[#1A1A2E] leading-snug break-words">
+                  {label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <aside className="space-y-4 min-w-0 lg:sticky lg:top-[88px]">
+          {(currentUser?.premiumStatus ?? true) && (
+            <div className="bg-[#FFF3EA] rounded-xl px-5 py-4 relative overflow-hidden">
+              <div className="text-[12.5px] font-bold text-[#1A1A2E] mb-0.5">Premium Member</div>
+              <div className="text-[11px] text-[#9AA0AC] mb-3">Member since {memberSince}</div>
+              <span className="inline-block bg-[#1A1A2E] text-white text-[10px] font-extrabold px-3 py-1.5 rounded-full">
+                ★ PREMIUM ACTIVE
+              </span>
+              <div
+                className="absolute right-[-6px] bottom-[-10px] text-[52px] opacity-15 pointer-events-none"
+                aria-hidden
+              >
+                ♛
+              </div>
+            </div>
+          )}
+
+          <div className="bg-white border border-[#E8EDF2] rounded-none p-4 min-w-0 overflow-hidden">
+            <h3 className="text-[13px] font-extrabold text-[#1A1A2E] mb-1 flex items-center gap-2">
+              <Award className="text-[#EB4501] shrink-0" size={15} /> Your Score / Benefits
+            </h3>
+            <p className="text-[11.5px] text-[#9AA0AC] mb-3 break-words">
+              Score {choosifyScore}/100 unlocks these perks
+            </p>
+            <ul className="space-y-2">
+              {scoreBenefits.map((b) => (
+                <li key={b.label} className="flex items-start gap-2 text-[12px] min-w-0">
+                  <CheckCircle2
+                    size={14}
+                    className={cn(
+                      'shrink-0 mt-0.5',
+                      b.unlocked ? 'text-emerald-500' : 'text-[#D1D5DB]',
+                    )}
+                  />
+                  <span
+                    className={cn(
+                      'min-w-0 break-words',
+                      b.unlocked ? 'text-[#1A1A2E] font-semibold' : 'text-[#9AA0AC]',
+                    )}
+                  >
+                    {b.label}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="bg-white border border-[#E8EDF2] rounded-none p-4 min-w-0 overflow-hidden">
+            <div className="flex items-center justify-between mb-3 gap-2">
+              <h3 className="text-[13px] font-extrabold text-[#1A1A2E]">Badges</h3>
+              <button
+                type="button"
+                onClick={() => onTabChange?.('settings')}
+                className="text-[11px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer p-0 shrink-0"
+              >
+                View All
+              </button>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {OVERVIEW_BADGES.map((b) => (
+                <div
+                  key={b.id}
+                  title={b.label}
+                  className="w-10 h-10 rounded-full bg-[#F4F7F9] border border-[#E8EDF2] flex items-center justify-center text-[13px] font-extrabold text-[#EB4501]"
+                >
+                  {b.emoji}
                 </div>
               ))}
             </div>
-          ) : (
-            <div className="py-16 border border-dashed border-[#E8EDF2] rounded-xl flex flex-col items-center justify-center text-center bg-[#F4F7F9] w-full">
-              <p className="text-[12px] font-semibold text-[#9AA0AC]">No recently viewed history</p>
+          </div>
+
+          <div className="bg-white border border-[#E8EDF2] rounded-none p-4 min-w-0 overflow-hidden">
+            <div className="flex items-center justify-between mb-3 gap-2">
+              <h3 className="text-[13px] font-extrabold text-[#1A1A2E] min-w-0 truncate">
+                Wishlist{' '}
+                <span className="text-[#9AA0AC] font-bold">({savedProducts.length})</span>
+              </h3>
               <button
                 type="button"
-                onClick={() => onTabChange?.('recently-viewed')}
-                className="mt-3 text-[11.5px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer"
+                onClick={() => onTabChange?.('saved-products')}
+                className="text-[11px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer p-0 shrink-0"
               >
-                Browse products →
+                View All
               </button>
             </div>
-          )}
-        </div>
-
-        <div className="bg-white border border-[#E8EDF2] rounded-[14px] overflow-hidden flex flex-col">
-          <div className="h-[130px] bg-[#F4F7F9] shrink-0">
-            <img
-              src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=600&h=600&fit=crop"
-              loading="lazy"
-              onError={(e) => {
-                e.currentTarget.src = PLACEHOLDER_IMAGE;
-              }}
-              className="w-full h-full object-cover"
-              alt=""
-            />
+            {wishlistPreview.length > 0 ? (
+              <div className="grid grid-cols-3 gap-2">
+                {wishlistPreview.map((p) => (
+                  <button
+                    key={p.id}
+                    type="button"
+                    onClick={() => onTabChange?.('saved-products')}
+                    className="aspect-square rounded-lg overflow-hidden border border-[#E8EDF2] bg-[#F4F7F9] p-0 cursor-pointer"
+                  >
+                    <img
+                      src={p.image || PLACEHOLDER_IMAGE}
+                      alt=""
+                      loading="lazy"
+                      onError={(e) => {
+                        e.currentTarget.src = PLACEHOLDER_IMAGE;
+                      }}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            ) : (
+              <p className="text-[11.5px] text-[#9AA0AC] text-center py-4">
+                No saved products yet
+              </p>
+            )}
           </div>
-          <div className="p-4 flex-1 flex flex-col">
-            <div className="text-[10.5px] font-extrabold text-[#9AA0AC] tracking-[0.04em] mb-1.5">
-              TODAY&apos;S RECOMMENDATION
-            </div>
-            <h4 className="text-[14px] font-extrabold text-[#1A1A2E] leading-snug mb-2">
-              Best Noise Cancelling Headphones in 2025
-            </h4>
-            <p className="text-[11.5px] text-[#9AA0AC] leading-relaxed mb-3 flex-1">
-              Top picks based on your recent views and interests.
-            </p>
-            <button
-              type="button"
-              onClick={() => onTabChange?.('saved-recommendations')}
-              className="text-[11.5px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer text-left"
-            >
-              Discover Now →
-            </button>
-          </div>
-        </div>
+        </aside>
       </div>
     </div>
   );
@@ -549,7 +980,7 @@ const RecentlyViewedSection = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
           <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">
-            Browsing History <span className="text-[#9AA0AC] text-lg font-bold">({recentlyViewed.length})</span>
+            Recently Viewed <span className="text-[#9AA0AC] text-lg font-bold">({recentlyViewed.length})</span>
           </h2>
           <p className="text-[#9AA0AC] text-[12.5px]">Products you recently browsed</p>
         </div>
@@ -829,7 +1260,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
       {settingsSubTab === 'personal' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-6">
-            <div className="flex flex-col items-center p-8 bg-white border border-[#E8EDF2] rounded-[14px] relative overflow-hidden group">
+            <div className="flex flex-col items-center p-8 bg-white border border-[#E8EDF2] rounded-none relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-b from-[#EB4501]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative w-28 h-28 mb-5 cursor-pointer group/avatar">
                 <img
@@ -845,7 +1276,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
               <p className="text-[#9AA0AC] text-[12px] font-semibold">Premium Member</p>
             </div>
 
-            <div className="space-y-5 bg-white border border-[#E8EDF2] rounded-[14px] p-6">
+            <div className="space-y-5 bg-white border border-[#E8EDF2] rounded-none p-6">
               <h3 className="text-[13px] font-bold text-[#1A1A2E]">Profile</h3>
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -886,7 +1317,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
           </div>
 
           <div className="space-y-6">
-            <div className="bg-white border border-[#E8EDF2] rounded-[14px] p-6 space-y-3 text-left">
+            <div className="bg-white border border-[#E8EDF2] rounded-none p-6 space-y-3 text-left">
               <h3 className="text-[13px] font-bold text-[#1A1A2E]">Quick links</h3>
               <p className="text-[13px] font-medium text-[#9AA0AC] leading-relaxed">
                 Manage delivery locations from the Addresses tab or sidebar menu.
@@ -920,7 +1351,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
       {settingsSubTab === 'notifications' && (
         <div className="space-y-4 max-w-2xl">
           <h3 className="text-[13px] font-bold text-[#1A1A2E]">Notifications</h3>
-          <div className="bg-white border border-[#E8EDF2] rounded-[14px] p-6 space-y-5">
+          <div className="bg-white border border-[#E8EDF2] rounded-none p-6 space-y-5">
             {[
               { label: 'Sale Alerts', desc: 'When your saved product goes on flash sale', checked: true },
               { label: 'Expert Tips', desc: 'Weekly curated guides for your categories', checked: true },
@@ -955,7 +1386,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
       )}
 
       {settingsSubTab === 'privacy' && (
-        <div className="max-w-2xl bg-white border border-[#E8EDF2] rounded-[14px] p-6 text-left">
+        <div className="max-w-2xl bg-white border border-[#E8EDF2] rounded-none p-6 text-left">
           <h3 className="text-[13px] font-extrabold tracking-tight text-[#1A1A2E] mb-2">Privacy</h3>
           <p className="text-[12.5px] text-[#9AA0AC] leading-relaxed">
             Control how your browsing activity and profile data are used across Choosify. Privacy controls
@@ -966,6 +1397,213 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
     </div>
   );
 };
+
+
+const DEMO_SELLER_RATINGS = [
+  {
+    id: 'sr-1',
+    sellerName: 'Samsung Official Store',
+    sellerType: 'Brand',
+    orderRef: 'ORD-24018',
+    productName: 'Samsung Galaxy S24 Ultra',
+    rating: 5,
+    comment:
+      'Excellent buyer — clear communication, accepted delivery on time, and left helpful product feedback.',
+    date: 'Jun 2, 2026',
+    tags: ['On-time', 'Reliable'],
+  },
+  {
+    id: 'sr-2',
+    sellerName: 'TechLand BD',
+    sellerType: 'Seller',
+    orderRef: 'ORD-23991',
+    productName: 'Sony WH-1000XM5',
+    rating: 5,
+    comment: 'Smooth COD experience. Buyer was available and verified the order quickly.',
+    date: 'May 21, 2026',
+    tags: ['COD OK', 'Responsive'],
+  },
+  {
+    id: 'sr-3',
+    sellerName: 'Aarong Official',
+    sellerType: 'Brand',
+    orderRef: 'ORD-23844',
+    productName: 'Premium Cotton Panjabi',
+    rating: 4,
+    comment: 'Good buyer overall. One reschedule request, but completed the purchase cleanly.',
+    date: 'May 4, 2026',
+    tags: ['Completed'],
+  },
+  {
+    id: 'sr-4',
+    sellerName: 'Pickaboo',
+    sellerType: 'Seller',
+    orderRef: 'ORD-23702',
+    productName: 'Apple AirPods Pro 2',
+    rating: 5,
+    comment: 'Highly recommended customer. Fast confirmation and zero return issues.',
+    date: 'Apr 18, 2026',
+    tags: ['Trusted', 'No returns'],
+  },
+] as const;
+
+function MyReviewsSection() {
+  const { currentUser } = useGlobalState();
+  const { reviews } = useDashboard();
+  const choosifyScore = Math.min(
+    100,
+    Math.max(0, Math.round(currentUser?.reputation_score ?? 0)),
+  );
+  const avgSellerRating =
+    DEMO_SELLER_RATINGS.reduce((sum, r) => sum + r.rating, 0) / DEMO_SELLER_RATINGS.length;
+
+  return (
+    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-5 duration-700">
+      <div className="text-left">
+        <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">My Reviews</h2>
+        <p className="text-[#9AA0AC] text-[12.5px]">
+          Seller ratings from your purchases and reviews you&apos;ve written
+        </p>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_240px] gap-5 items-start">
+        <div className="bg-white border border-[#E8EDF2] rounded-none p-5 flex flex-col sm:flex-row gap-5 items-start min-w-0">
+          <ScoreRing score={choosifyScore} max={100} />
+          <div className="min-w-0 flex-1 text-left">
+            <div className="text-[11px] font-extrabold text-[#9AA0AC] tracking-wide uppercase mb-1">
+              Choosify Score
+            </div>
+            <h3 className="text-[18px] font-extrabold text-[#1A1A2E] mb-1.5">
+              Built from seller ratings &amp; purchase trust
+            </h3>
+            <p className="text-[12.5px] text-[#6B7280] leading-relaxed mb-3">
+              Brands and sellers rate you after completed orders. Higher scores unlock better COD
+              trust, deals, and premium perks.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F4F7F9] border border-[#E8EDF2] text-[11px] font-bold text-[#1A1A2E]">
+                <Star size={12} className="text-[#EB4501] fill-[#EB4501]" />
+                Avg seller rating {avgSellerRating.toFixed(1)}
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F4F7F9] border border-[#E8EDF2] text-[11px] font-bold text-[#1A1A2E]">
+                {DEMO_SELLER_RATINGS.length} seller reviews
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section className="space-y-4 text-left">
+        <div>
+          <h3 className="text-[15px] font-extrabold text-[#1A1A2E]">Reviews from sellers</h3>
+          <p className="text-[12px] text-[#9AA0AC] mt-0.5">
+            Ratings left by brands and sellers you purchased from
+          </p>
+        </div>
+
+        <div className="space-y-3 max-w-3xl">
+          {DEMO_SELLER_RATINGS.map((item) => (
+            <article
+              key={item.id}
+              className="bg-white border border-[#E8EDF2] rounded-none p-5 text-left"
+            >
+              <div className="flex items-start justify-between gap-3 mb-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <div className="w-10 h-10 rounded-xl bg-[#FFF3EA] text-[#EB4501] flex items-center justify-center shrink-0">
+                    <Store size={18} />
+                  </div>
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h4 className="text-[13px] font-extrabold text-[#1A1A2E] truncate">
+                        {item.sellerName}
+                      </h4>
+                      <span className="px-2 py-0.5 rounded-md bg-[#F4F7F9] border border-[#E8EDF2] text-[9px] font-bold text-[#9AA0AC] uppercase tracking-wide">
+                        {item.sellerType}
+                      </span>
+                    </div>
+                    <p className="text-[11px] font-semibold text-[#9AA0AC] mt-0.5">
+                      Order {item.orderRef} · {item.date}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-0.5 shrink-0" aria-label={`${item.rating} out of 5`}>
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Star
+                      key={i}
+                      size={13}
+                      className={
+                        i < item.rating
+                          ? 'text-[#EB4501] fill-[#EB4501]'
+                          : 'text-[#E8EDF2] fill-[#E8EDF2]'
+                      }
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <p className="text-[12.5px] text-[#4B5563] leading-relaxed mb-3">{item.comment}</p>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[10px] font-bold text-[#9AA0AC] uppercase tracking-wide">
+                  Purchase
+                </span>
+                <span className="text-[12px] font-bold text-[#1A1A2E]">{item.productName}</span>
+                {item.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="px-2 py-0.5 rounded-lg bg-[#07A828]/10 text-[#07A828] text-[10px] font-bold"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="space-y-4 text-left">
+        <div>
+          <h3 className="text-[15px] font-extrabold text-[#1A1A2E]">Reviews you wrote</h3>
+          <p className="text-[12px] text-[#9AA0AC] mt-0.5">
+            Product feedback you shared with the community
+          </p>
+        </div>
+
+        <div className="space-y-4 max-w-3xl">
+          {reviews && reviews.length > 0 ? (
+            reviews.map((r, idx) => {
+              const productImage =
+                PRODUCTS.find((p) => p.title === r.product)?.image || PLACEHOLDER_IMAGE;
+              return (
+                <PublicReviewCard
+                  key={r.id || idx}
+                  review={{
+                    name: currentUser.name || 'You',
+                    avatar: undefined,
+                    rating: r.rating || 5,
+                    comment: r.comment,
+                    date: r.date || r.createdAt || 'Just now',
+                    productName: r.product,
+                    productImage,
+                    verified: true,
+                  }}
+                  showActions
+                />
+              );
+            })
+          ) : (
+            <div className="py-16 border border-dashed border-[#E8EDF2] rounded-none flex flex-col items-center justify-center text-center bg-white w-full">
+              <p className="text-[13px] font-medium text-[#9AA0AC] tracking-tight">
+                You haven&apos;t written any product reviews yet
+              </p>
+            </div>
+          )}
+        </div>
+      </section>
+    </div>
+  );
+}
 
 
 // --- MAIN PAGE ---
@@ -980,8 +1618,6 @@ export function DashboardPage() {
     followedBrands, 
     recentlyViewed,
     messages,
-    reviews,
-    setReviews,
     threads,
   } = useDashboard();
   const location = useLocation();
@@ -1056,6 +1692,7 @@ export function DashboardPage() {
   const [activeTab, setActiveTab] = useState('overview');
   const [settingsSubTab, setSettingsSubTab] = useState<SettingsSubTab>('personal');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [messagesThreadId, setMessagesThreadId] = useState<string | undefined>();
 
   useEffect(() => {
     // TODO: addToRecentlyViewed called from ProductDetailPage â€” see Prompt 6
@@ -1098,15 +1735,10 @@ export function DashboardPage() {
   }, [location.state, location.search, platformRole]);
 
   useEffect(() => {
-    if (activeTab === 'messages') {
-      navigate('/messages');
-    }
-  }, [activeTab, navigate]);
-
-  useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.get('tab') === 'notifications' || activeTab === 'notifications') {
-      navigate(`/messages/${CHOOSIFY_ANNOUNCEMENTS_THREAD_ID}`, { replace: true });
+      setActiveTab('messages');
+      navigate('/dashboard?tab=messages', { replace: true });
     }
   }, [location.search, activeTab, navigate]);
 
@@ -1124,26 +1756,18 @@ export function DashboardPage() {
       case 'followed-brands': return <FollowedBrandsSection />;
       case 'recently-viewed': return <RecentlyViewedSection />;
       case 'saved-recommendations': return <SavedGuidesSection />;
-      case 'messages': return (
-        <div className="flex flex-col items-center justify-center p-12 text-center max-w-lg mx-auto h-[500px]">
-          <div className="w-16 h-16 bg-[#F96500]/10 text-orange-primary rounded-full flex items-center justify-center mb-4">
-            <MessageSquare size={28} className="animate-pulse" />
-          </div>
-          <h3 className="text-base font-extrabold text-[#1A1A2E] tracking-tight">Opening workspace chat</h3>
-          <p className="text-[13px] text-[#9AA0AC] leading-relaxed font-medium mb-6">
-            Connecting you to your buyer/seller network in the messenger…
-          </p>
-          <Link 
-            to="/messages" 
-            className="px-6 py-3 bg-[#EB4501] text-white text-[13px] font-bold tracking-tight rounded-lg hover:brightness-110 transition-all leading-none"
-          >
-            Go to Messenger
-          </Link>
-        </div>
-      );
+      case 'messages':
+        return <MessagesPage embedded initialThreadId={messagesThreadId} />;
       case 'orders':
-        navigate('/profile/orders');
-        return null;
+        return (
+          <CustomerOrdersPage
+            embedded
+            onOpenConversation={(threadId) => {
+              setMessagesThreadId(threadId);
+              setActiveTab('messages');
+            }}
+          />
+        );
       case 'seller-products':
       case 'seller-orders':
       case 'spotlight-requests':
@@ -1159,41 +1783,8 @@ export function DashboardPage() {
       case 'admin-marketing':
         navigate('/marketing/studio');
         return null;
-      case 'my-reviews': return (
-        <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
-            <div>
-               <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">My Reviews</h2>
-               <p className="text-[#9AA0AC] text-[12.5px]">Your community contributions and feedback</p>
-            </div>
-            <div className="space-y-4 max-w-3xl">
-               {reviews && reviews.length > 0 ? (
-                 reviews.map((r, idx) => {
-                   const productImage = PRODUCTS.find(p => p.title === r.product)?.image || PLACEHOLDER_IMAGE;
-                   return (
-                     <PublicReviewCard
-                       key={r.id || idx}
-                       review={{
-                         name: currentUser.name || 'You',
-                         avatar: undefined,
-                         rating: r.rating || 5,
-                         comment: r.comment,
-                         date: r.date || r.createdAt || 'Just now',
-                         productName: r.product,
-                         productImage,
-                         verified: true,
-                       }}
-                       showActions
-                     />
-                   );
-                 })
-               ) : (
-                 <div className="py-20 border border-dashed border-[#E8EDF2] rounded-[14px] flex flex-col items-center justify-center text-center bg-white w-full">
-                    <p className="text-[13px] font-medium text-[#9AA0AC] tracking-tight">No review records found</p>
-                 </div>
-               )}
-            </div>
-        </div>
-      );
+      case 'my-reviews':
+        return <MyReviewsSection />;
       case 'settings':
         return <SettingsSection initialSubTab={settingsSubTab} />;
       case 'addresses':
@@ -1207,7 +1798,8 @@ export function DashboardPage() {
 
   const handleNavClick = (item: { id: string; href?: string }) => {
     setMobileNavOpen(false);
-    if (item.href) {
+    // Keep Orders / Messages inside the dashboard shell; only leave for true external workspace routes
+    if (item.href && item.id !== 'orders' && item.id !== 'messages') {
       navigate(item.href);
     } else {
       setActiveTab(item.id);
@@ -1326,23 +1918,13 @@ export function DashboardPage() {
     </nav>
   );
 
-  const premiumCard = (
-    <div className="choosify-dark-surface rounded-[14px] p-5 text-white mb-3.5">
-      <div className="text-[13px] font-extrabold mb-1">Premium Member</div>
-      <div className="text-[11px] text-white/55 mb-3.5">Enjoy exclusive benefits</div>
-      {['Early access to deals', 'Premium support', 'Exclusive rewards'].map((perk) => (
-        <div key={perk} className="flex items-center gap-2 text-[11.5px] text-white/85 mb-2.5">
-          <span className="text-[#EB4501]">●</span>
-          {perk}
-        </div>
-      ))}
-      <button
-        type="button"
-        className="w-full bg-[#EB4501] text-white border-none py-2.5 rounded-lg text-[12px] font-extrabold cursor-pointer mt-1.5 hover:brightness-105"
-      >
-        View Benefits
-      </button>
-    </div>
+  const browseChoosifyLink = (
+    <Link
+      to="/"
+      className="flex items-center gap-2 border border-[#E8EDF2] rounded-[10px] px-3.5 py-2.5 text-[12px] font-semibold text-[#1A1A2E] hover:bg-[#F4F7F9] transition-colors bg-white"
+    >
+      Browse Choosify.bd
+    </Link>
   );
 
   return (
@@ -1390,7 +1972,6 @@ export function DashboardPage() {
             </div>
             {renderSidebarNav(true)}
             <div className="p-4 mt-auto border-t border-[#E8EDF2]">
-              {premiumCard}
               <Link
                 to="/"
                 onClick={() => setMobileNavOpen(false)}
@@ -1406,21 +1987,24 @@ export function DashboardPage() {
       <div className="flex flex-1 w-full max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-10 py-6 lg:py-7 gap-7 items-start">
         {/* Sidebar Desktop — light sticky */}
         <aside className="hidden lg:flex w-[240px] shrink-0 flex-col sticky top-[88px] max-h-[calc(100vh-100px)] overflow-y-auto no-scrollbar">
+          <div className="bg-white border border-[#E8EDF2] rounded-none p-3 flex flex-col min-h-0">
           {renderSidebarNav()}
-          <div className="mt-4 pt-2">
-            {premiumCard}
-            <Link
-              to="/"
-              className="flex items-center gap-2 border border-[#E8EDF2] rounded-[10px] px-3.5 py-2.5 text-[12px] font-semibold text-[#1A1A2E] hover:bg-white transition-colors bg-white"
-            >
-              Browse Choosify.bd
-            </Link>
+          <div className="mt-2 pt-2 border-t border-[#E8EDF2]">
+            {browseChoosifyLink}
+          </div>
           </div>
         </aside>
 
-        {/* Main Content */}
+        {/* Main Content — optional right sponsored rail when column is empty */}
         <main className="flex-1 w-full min-w-0 relative">
-          <div className="animate-in fade-in transition-all duration-700">{renderContent()}</div>
+          {DASHBOARD_TABS_WITH_RIGHT_CONTENT.has(activeTab) ? (
+            <div className="animate-in fade-in transition-all duration-700 min-w-0">{renderContent()}</div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_240px] gap-5 items-start animate-in fade-in transition-all duration-700">
+              <div className="min-w-0 overflow-x-clip relative z-[1]">{renderContent()}</div>
+              <DashboardSponsoredRail />
+            </div>
+          )}
         </main>
       </div>
     </div>

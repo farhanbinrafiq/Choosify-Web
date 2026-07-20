@@ -276,13 +276,17 @@ export function ProductDetailBuyBox({
               className={cn(
                 'w-full bg-white border py-3 rounded-lg text-[12.5px] font-semibold inline-flex items-center justify-center gap-2 transition-colors',
                 isWishlisted
-                  ? 'border-[#FF000D] text-[#FF000D]'
-                  : 'border-[#E5E7EB] text-[#9AA0AC]',
+                  ? 'border-[#EB4501] text-[#EB4501]'
+                  : 'border-[#E5E7EB] text-[#EB4501]',
               )}
             >
               <Heart
                 size={14}
-                className={cn(isWishlisted && 'fill-[#FF000D] text-[#FF000D]')}
+                strokeWidth={2}
+                className={cn(
+                  'text-[#EB4501]',
+                  isWishlisted && 'fill-[#EB4501]',
+                )}
               />
               {isWishlisted ? 'Wishlisted' : 'Add to Wishlist'}
             </button>

@@ -125,7 +125,7 @@ export function BrandOverviewSection({ brandName, overviewData, claimStatus }: B
             <div className="w-8 h-8 rounded-lg bg-[#FFF3EA] text-[#EB4501] flex items-center justify-center">
               <CheckCircle2 size={16} fill="currentColor" className="text-[#EB4501] stroke-white" />
             </div>
-            <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-[#2323FF]">Best For #Tags</h4>
+            <h4 className="text-[11px] font-extrabold uppercase tracking-wider text-[#8A00C4]">Best For #Tags</h4>
           </div>
           <div className="flex flex-wrap gap-2">
             {overviewData.tags.map((tag, idx) => (

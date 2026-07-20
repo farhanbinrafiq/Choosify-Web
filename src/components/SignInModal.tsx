@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Mail, Lock, LogIn, Github, ArrowRight, Search } from 'lucide-react';
+import { X, Mail, Lock, LogIn, Github, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { useGlobalState } from '../context/GlobalStateContext';
 
@@ -141,7 +141,16 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
                     type="button"
                     className="h-11 bg-white/5 border border-white/10 rounded-xl flex items-center justify-center gap-2 text-white text-[13px] font-bold tracking-tight hover:bg-white/10 transition-all"
                   >
-                    <Search size={15} /> Google
+                    <img
+                      src="/icons/google.svg"
+                      alt=""
+                      width={15}
+                      height={15}
+                      className="w-[15px] h-[15px] object-contain"
+                      draggable={false}
+                      aria-hidden
+                    />{' '}
+                    Google
                   </button>
                 </div>
               </div>

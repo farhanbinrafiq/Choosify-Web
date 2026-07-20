@@ -120,7 +120,7 @@ export function OrderSuccessPage() {
       <div className="w-full px-5 sm:px-10 pt-4">
         <div
           ref={heroRef}
-          className="max-w-[1100px] mx-auto choosify-dark-surface text-white px-5 sm:px-10 pt-6 pb-10 text-center rounded-[14px] overflow-hidden"
+          className="max-w-[1100px] mx-auto choosify-dark-surface text-white px-5 sm:px-10 pt-6 pb-10 text-center rounded-none overflow-hidden"
         >
           <nav className="text-xs text-white/45 text-left mb-5" aria-label="Breadcrumb">
             <Link to="/" className="hover:text-[#CF4400] transition-colors">

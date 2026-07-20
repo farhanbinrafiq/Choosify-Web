@@ -95,14 +95,14 @@ export function AddressFormDrawer({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex justify-end" role="dialog" aria-modal="true" aria-labelledby="address-form-title">
+    <div className="fixed inset-0 z-[200] flex justify-end" role="dialog" aria-modal="true" aria-labelledby="address-form-title">
       <button
         type="button"
         className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"
         onClick={onClose}
         aria-label="Close address form"
       />
-      <div className="relative w-full max-w-xl h-full bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300">
+      <div className="relative w-full max-w-xl h-full bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 z-[201]">
         <div className="flex items-center justify-between gap-4 border-b border-[#e8edf2] px-5 py-4 shrink-0">
           <div className="text-left">
             <h2 id="address-form-title" className="text-lg font-extrabold tracking-tight text-[#1A1A2E]">
@@ -122,7 +122,7 @@ export function AddressFormDrawer({
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 py-5 space-y-5 text-left">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-5 py-5 space-y-5 text-left">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <TextField
               label="Address Name"

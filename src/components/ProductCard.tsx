@@ -227,6 +227,7 @@ export const ProductCard = memo(function ProductCard({
   isGuideDetail?: boolean;
 }) {
   const variant = variantProp === 'compact' ? 'grid' : variantProp;
+  const isCompactGrid = variantProp === 'compact';
   const navigate = useNavigate();
   const { savedProducts, setSavedProducts, addToCompare, comparedProducts } = useDashboard();
   const { allBrands, addToCart, siteConfig } = useGlobalState();
@@ -395,7 +396,7 @@ export const ProductCard = memo(function ProductCard({
                 type="button"
                 onClick={handleCompare}
                 className={cn(
-                  'w-7 h-7 rounded-full border-0 cursor-pointer inline-flex items-center justify-center bg-transparent',
+                  'w-7 h-7 rounded-full border-0 cursor-pointer inline-flex items-center justify-center bg-white shadow-sm',
                   isInCompare && 'bg-[#07A828] text-white',
                 )}
                 aria-label="Compare"
@@ -428,8 +429,8 @@ export const ProductCard = memo(function ProductCard({
       onClick={openProduct}
       id={`product-${product.id}`}
     >
-      {/* Image plane — fixed 170px */}
-      <div className="relative h-[170px] w-full shrink-0 bg-[#F4F7F9]">
+      {/* Image plane — fixed 170px (compact: 118px) */}
+      <div className={cn('relative w-full shrink-0 bg-[#F4F7F9]', isCompactGrid ? 'h-[118px]' : 'h-[170px]')}>
         <img
           src={imageSrc}
           alt={product.title || 'Product'}
@@ -458,10 +459,9 @@ export const ProductCard = memo(function ProductCard({
         >
           <Heart
             size={12}
-            strokeWidth={1.6}
-            className={cn(
-              isSaved ? 'text-[#FF000D] fill-[#FF000D]' : 'text-[#CBD5E1]',
-            )}
+            strokeWidth={2}
+            className="text-[#EB4501]"
+            fill={isSaved ? '#EB4501' : 'none'}
           />
         </button>
 
@@ -473,9 +473,12 @@ export const ProductCard = memo(function ProductCard({
       </div>
 
       {/* Body */}
-      <div className="px-3 pt-[11px] pb-3 flex flex-col flex-1 min-h-0 text-left">
+      <div className={cn('px-3 flex flex-col flex-1 min-h-0 text-left', isCompactGrid ? 'pt-2 pb-2.5' : 'pt-[11px] pb-3')}>
         <div
-          className="text-[12.5px] font-bold text-[#1A1A2E] mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis group-hover:text-[#CF4400] transition-colors"
+          className={cn(
+            'font-bold text-[#1A1A2E] mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis group-hover:text-[#CF4400] transition-colors',
+            isCompactGrid ? 'text-[11px]' : 'text-[12.5px]',
+          )}
           style={titleStyle}
         >
           {product.title}
@@ -488,7 +491,7 @@ export const ProductCard = memo(function ProductCard({
         )}
 
         <div className="flex items-baseline gap-1.5 flex-wrap mb-[3px]">
-          <div className="text-[13.5px] font-extrabold text-[#1A1A2E]">{priceLabel}</div>
+          <div className={cn('font-extrabold text-[#1A1A2E]', isCompactGrid ? 'text-[12px]' : 'text-[13.5px]')}>{priceLabel}</div>
           {origLabel && (
             <div className="text-[10px] text-[#9AA0AC] line-through">{origLabel}</div>
           )}
@@ -533,7 +536,7 @@ export const ProductCard = memo(function ProductCard({
               title="Add to Compare"
               aria-label="Add to Compare"
               className={cn(
-                'w-7 h-7 rounded-full border-0 cursor-pointer inline-flex items-center justify-center bg-transparent',
+                'w-7 h-7 rounded-full border-0 cursor-pointer inline-flex items-center justify-center bg-white shadow-sm',
                 isInCompare && 'bg-[#07A828] text-white',
               )}
             >

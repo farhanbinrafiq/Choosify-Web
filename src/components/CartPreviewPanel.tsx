@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Trash2, ShoppingBag, ArrowRight, Plus, Minus } from 'lucide-react';
+import { X, Trash2, ShoppingCart, ArrowRight, Plus, Minus } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { cn } from '../lib/utils';
 import { useGlobalState, type CartItem } from '../context/GlobalStateContext';
@@ -79,7 +79,7 @@ export function CartPreviewPanel({ onClose, className }: CartPreviewPanelProps) 
       <div className="px-4 sm:px-5 py-4 border-b border-[#e8edf2] flex items-center justify-between shrink-0 bg-white">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-9 h-9 rounded-full bg-[#EB4501]/10 flex items-center justify-center text-[#EB4501] shrink-0">
-            <ShoppingBag size={16} />
+            <ShoppingCart size={16} strokeWidth={2} />
           </div>
           <div className="min-w-0 text-left">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#8a9bb0]">
@@ -105,8 +105,8 @@ export function CartPreviewPanel({ onClose, className }: CartPreviewPanelProps) 
       <div className="flex-1 overflow-y-auto px-4 sm:px-5 py-4 space-y-3 min-h-0 no-scrollbar">
         {cartItems.length === 0 ? (
           <div className="py-10 text-center flex flex-col items-center gap-3">
-            <div className="w-12 h-12 rounded-full border border-[#e8edf2] bg-[#F8FAFC] flex items-center justify-center text-[#8a9bb0]">
-              <ShoppingBag size={20} />
+            <div className="w-12 h-12 rounded-full border border-[#e8edf2] bg-[#F8FAFC] flex items-center justify-center text-[#EB4501]">
+              <ShoppingCart size={20} strokeWidth={2} />
             </div>
             <p className="text-[11px] font-bold uppercase tracking-wider text-[#8a9bb0]">
               Nothing in your cart yet

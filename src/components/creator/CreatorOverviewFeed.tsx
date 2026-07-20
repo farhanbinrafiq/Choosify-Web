@@ -347,7 +347,7 @@ export function CreatorOverviewFeed({
             {COLLAB_TYPES.map((ct) => (
               <span
                 key={ct}
-                className="bg-[#F4F7F9] text-[10.5px] font-semibold text-[#4B5563] px-3 py-1.5 rounded-[14px]"
+                className="bg-[#F4F7F9] text-[10.5px] font-semibold text-[#4B5563] px-3 py-1.5 rounded-none"
               >
                 {ct}
               </span>
@@ -382,7 +382,7 @@ export function CreatorOverviewFeed({
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
           {COMMUNITY.map((cs) => (
-            <div key={cs.name} className="bg-white border border-[#E8EDF2] rounded-[14px] p-4">
+            <div key={cs.name} className="bg-white border border-[#E8EDF2] rounded-none p-4">
               <div className="flex items-center justify-between mb-2.5">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-[#EB4501] text-white flex items-center justify-center text-[11px] font-extrabold shrink-0">

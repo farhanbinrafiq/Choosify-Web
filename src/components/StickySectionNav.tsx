@@ -13,6 +13,8 @@ interface StickySectionNavProps {
   /** Left label — compare page "Decision profile" strip */
   profileLabel?: string;
   className?: string;
+  /** Override inner max-width shell (e.g. match page feed column) */
+  contentClassName?: string;
   /** Override auto-detect; hide Filter shortcut when false */
   showFilter?: boolean;
 }
@@ -38,7 +40,7 @@ function NavButton({
       data-section-nav-item={itemId}
       onClick={onClick}
       className={cn(
-        'shrink-0 px-4 py-2.5 sm:py-2 rounded-lg text-[12px] font-bold transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap relative touch-manipulation min-h-[40px] sm:min-h-0 border-0',
+        'shrink-0 px-4 py-2.5 sm:py-2 rounded-none text-[12px] font-bold transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap relative touch-manipulation min-h-[40px] sm:min-h-0 border-0',
         active
           ? 'bg-[#FFF3EA] text-[#EB4501]'
           : 'bg-transparent text-[#4B5563] hover:bg-[#F4F7F9] hover:text-[#1A1A2E]',
@@ -69,6 +71,7 @@ export function StickySectionNav({
   allId = 'all',
   profileLabel = 'On this page',
   className,
+  contentClassName,
   showFilter,
 }: StickySectionNavProps) {
   const items = sections.filter((s) => !s.hidden);
@@ -116,8 +119,8 @@ export function StickySectionNav({
         className,
       )}
     >
-      <div className="max-w-[1440px] mx-auto">
-        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between min-w-0 bg-white border border-[#E8EDF2] rounded-[14px] px-3 sm:px-4 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
+      <div className={cn('max-w-[1440px] mx-auto', contentClassName)}>
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between min-w-0 bg-white border border-[#E8EDF2] rounded-none px-3 sm:px-4 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
           <div className="flex items-center gap-2 shrink-0 min-w-0 select-none">
             <span className="text-[10.5px] font-extrabold uppercase tracking-wide text-[#9AA0AC] whitespace-nowrap truncate">
               {profileLabel}

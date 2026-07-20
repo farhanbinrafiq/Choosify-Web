@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { PAGE_LISTING_SINGLE_SHELL, GUIDE_MEDIA_GRID } from "../lib/pageLayout";
 import { StickySectionNav } from '../components/StickySectionNav';
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
-import { BookOpen, Search, Youtube, ArrowRight, User, Calendar, LucidePenTool, Heart, Shirt, Smartphone, Tv, Compass, Baby, Smile, Car, Droplets, Bookmark, Eye, Share2, Play, Instagram, ChevronRight, Award, Flame, Zap, Star, Check } from 'lucide-react';
+import { BookOpen, Search, Youtube, ArrowRight, User, Calendar, LucidePenTool, Heart, Shirt, Smartphone, Tv, Compass, Baby, Smile, Car, Droplets, Eye, Share2, Play, Instagram, ChevronRight, Award, Flame, Zap, Star, Check } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { motion } from 'motion/react';
@@ -73,7 +73,7 @@ export function FeaturedCard({ guide }: { guide: any }) {
   return (
     <Link
       to={catalogGuideHref(guide)}
-      className="group cursor-pointer block bg-white rounded-[5px] border border-[#e8edf2] p-5 relative overflow-hidden shadow-none hover:border-orange-primary/30 transition-all duration-300 w-full"
+      className="group cursor-pointer block bg-white rounded-[5px] p-5 relative overflow-hidden shadow-none hover:shadow-sm transition-all duration-300 w-full"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
@@ -169,7 +169,11 @@ export function FeaturedCard({ guide }: { guide: any }) {
                 : "border-[#e8edf2] text-gray-400 hover:text-orange-primary hover:border-orange-primary"
             )}
           >
-            <Bookmark className={cn("w-4 h-4", isBookmarked ? "fill-current" : "")} />
+            <Heart
+              className="w-4 h-4 text-[#EB4501]"
+              fill={isBookmarked ? '#EB4501' : 'none'}
+              strokeWidth={2}
+            />
           </button>
         </div>
       </div>

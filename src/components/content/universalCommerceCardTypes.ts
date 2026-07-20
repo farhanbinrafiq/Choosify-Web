@@ -44,6 +44,11 @@ export interface UniversalCommerceCardProps {
   showPublisherHeader?: boolean;
   onNavigate?: () => void;
   className?: string;
+  /**
+   * Discover Blog Stories lane — horizontal row:
+   * 40% square thumbnail | 60% title + byline.
+   */
+  compactMedia?: boolean;
 }
 
 const LAYOUT_TO_VARIANT: Record<ContentCardLayoutVariant, CommerceCardVariant> = {

@@ -29,7 +29,7 @@ export function HeroMedia({ slideKey, image, className }: HeroMediaProps) {
               loading="eager"
             />
           ) : (
-            <div className="aspect-[4/5] rounded-3xl bg-gradient-to-br from-white/10 to-white/5 border border-white/10 backdrop-blur-sm" />
+            <div className="aspect-[4/5] rounded-none bg-gradient-to-br from-white/10 to-white/5 border border-white/10 backdrop-blur-sm" />
           )}
         </motion.div>
       </AnimatePresence>

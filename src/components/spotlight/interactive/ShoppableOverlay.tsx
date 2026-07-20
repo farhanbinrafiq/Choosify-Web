@@ -7,7 +7,7 @@ import type { SpotlightInteractiveCommerceEvent } from '../../../types/spotlight
 import type { SpotlightLiveTimelineChapter } from '../../../types/spotlight/interactive/timeline';
 import { useDashboard } from '../../../context/DashboardContext';
 import { trackInteractiveEvent } from '../../../hooks/useInteractiveCommerce';
-
+import { cn } from '../../../lib/utils';
 interface ShoppableOverlayProps {
   event: SpotlightInteractiveCommerceEvent;
   products: CatalogProduct[];
@@ -71,8 +71,15 @@ export function ShoppableOverlay({ event, products, activeChapter, heroProductId
             >
               <ShoppingBag size={12} /> Buy
             </button>
-            <button type="button" onClick={() => toggleWishlist(hero)} className="p-2 border rounded text-gray-500 hover:text-[#CF4400]" aria-label="Wishlist">
-              <Heart size={14} />
+            <button type="button" onClick={() => toggleWishlist(hero)} className="p-2 border rounded text-[#EB4501] hover:text-[#CF4400]" aria-label="Wishlist">
+              <Heart
+                size={14}
+                strokeWidth={2}
+                className={cn(
+                  'text-[#EB4501]',
+                  savedProducts.some((p) => p.id === hero.id) && 'fill-[#EB4501]',
+                )}
+              />
             </button>
             <button
               type="button"

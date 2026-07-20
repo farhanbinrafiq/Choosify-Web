@@ -54,7 +54,7 @@ export function PopularSearchKeywords({
               motionClass.hoverLift,
               isHero
                 ? 'bg-white border border-white/20 shadow-sm'
-                : 'bg-white border shadow-sm',
+                : 'bg-white border border-[#E8EDF2] shadow-sm',
             )}
             style={{
               borderRadius: radius.full,

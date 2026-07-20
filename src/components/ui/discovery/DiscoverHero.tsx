@@ -146,7 +146,7 @@ export function DiscoverHero({
 
           {/* Right Column: Hero Collage & Featured Statistic / Editor's Pick Box */}
           <div className="lg:col-span-5 relative flex justify-center items-center">
-            <div className="relative w-full max-w-[440px] aspect-[4/3] rounded-3xl overflow-hidden bg-slate-900/50 border border-white/10 shadow-2xl flex items-center justify-center">
+            <div className="relative w-full max-w-[440px] aspect-[4/3] rounded-none overflow-hidden bg-slate-900/50 border border-white/10 shadow-2xl flex items-center justify-center">
               
               {backgroundIllustrationUrl ? (
                 <img 

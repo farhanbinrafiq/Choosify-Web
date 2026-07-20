@@ -272,11 +272,16 @@ export function SpotlightCardRenderer({
             <button
               type="button"
               onClick={toggleWishlist}
-              className={cn('p-2 rounded-full border min-h-[44px] min-w-[44px] bg-white', isSaved ? 'border-[#FF000D] text-[#FF000D]' : 'border-[#E5E7EB] text-[#CBD5E1]')}
+              className={cn('p-2 rounded-full border min-h-[44px] min-w-[44px] bg-white', isSaved ? 'border-[#EB4501] text-[#EB4501]' : 'border-[#E5E7EB] text-[#EB4501]')}
               aria-pressed={isSaved}
               aria-label="Wishlist"
             >
-              <Heart size={14} className={isSaved ? 'fill-current' : ''} />
+              <Heart
+                size={14}
+                className={cn('text-[#EB4501]', isSaved && 'fill-[#EB4501]')}
+                strokeWidth={2}
+                fill={isSaved ? '#EB4501' : 'none'}
+              />
             </button>
             <button
               type="button"

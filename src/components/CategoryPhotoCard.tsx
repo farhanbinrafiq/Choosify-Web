@@ -23,7 +23,7 @@ export function CategoryPhotoCard({
   className,
 }: CategoryPhotoCardProps) {
   const cardClass = cn(
-    'choosify-category-photo-card choosify-category-card bg-white border rounded-[5px] flex flex-col overflow-hidden transition-[border-color,box-shadow,transform] duration-200 cursor-pointer group relative text-left p-0',
+    'choosify-category-photo-card choosify-category-card bg-white rounded-[5px] flex flex-col overflow-hidden transition-[border-color,box-shadow,transform] duration-200 cursor-pointer group relative text-left p-0 border',
     isExpanded
       ? 'border-[#EB4501] ring-4 ring-[#EB4501]/5 z-20 shadow-md'
       : 'border-[#e8edf2] hover:border-[#EB4501]/25 hover:shadow-sm',

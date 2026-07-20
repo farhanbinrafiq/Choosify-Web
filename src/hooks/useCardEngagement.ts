@@ -52,6 +52,17 @@ export function useCardEngagement(options: {
   const [loveCount, setLoveCount] = useState(baseLove);
   const [saveCount, setSaveCount] = useState(baseSave);
   const [hasLoved, setHasLoved] = useState(() => readLovedSet().has(loveKey));
+  /** LocalStorage-backed saves need explicit state so the heart re-renders after toggle. */
+  const [localSaved, setLocalSaved] = useState(() => {
+    if (options.entityType === 'product' || options.entityType === 'guide') return false;
+    try {
+      const raw = localStorage.getItem(`choosify_saved_${options.entityType}`);
+      const list: Array<{ id: string | number }> = raw ? JSON.parse(raw) : [];
+      return list.some((item) => String(item.id) === String(options.entityId));
+    } catch {
+      return false;
+    }
+  });
 
   const isSaved = useMemo(() => {
     if (options.entityType === 'product') {
@@ -60,14 +71,8 @@ export function useCardEngagement(options: {
     if (options.entityType === 'guide') {
       return savedGuides.some((item) => String(item?.id) === String(options.entityId));
     }
-    try {
-      const raw = localStorage.getItem(`choosify_saved_${options.entityType}`);
-      const list: Array<{ id: string | number }> = raw ? JSON.parse(raw) : [];
-      return list.some((item) => String(item.id) === String(options.entityId));
-    } catch {
-      return false;
-    }
-  }, [options.entityType, options.entityId, savedProducts, savedGuides]);
+    return localSaved;
+  }, [options.entityType, options.entityId, savedProducts, savedGuides, localSaved]);
 
   const toggleLove = useCallback(
     (event?: React.MouseEvent) => {
@@ -135,10 +140,12 @@ export function useCardEngagement(options: {
             storageKey,
             JSON.stringify(list.filter((item) => String(item.id) !== String(options.entityId))),
           );
+          setLocalSaved(false);
           setSaveCount((count) => Math.max(0, count - 1));
           toast.success('Removed from saved items');
         } else {
           localStorage.setItem(storageKey, JSON.stringify([payload, ...list]));
+          setLocalSaved(true);
           setSaveCount((count) => count + 1);
           toast.success('Saved for later');
         }

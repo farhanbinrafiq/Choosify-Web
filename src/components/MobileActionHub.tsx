@@ -1,5 +1,6 @@
 import React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { getFloatingPanelMotion } from './FilterEngine';
 import {
   LayoutGrid,
   SlidersHorizontal,
@@ -47,19 +48,21 @@ export function MobileActionHub({
         {isOpen && (
           <>
             <motion.div
+              key="mobile-hub-backdrop"
               initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: { duration: 0.15, ease: 'easeOut' } }}
+              exit={{ opacity: 0, transition: { duration: 0.12, ease: 'easeIn' } }}
               className="fixed inset-0 z-[218] bg-black/40"
               onClick={onClose}
             />
             <motion.div
-              initial={{ y: '100%', opacity: 1 }}
-              animate={{ y: 0, opacity: 1 }}
-              exit={{ y: '100%', opacity: 1 }}
-              transition={{ type: 'spring', damping: 28, stiffness: 340 }}
-              className="fixed bottom-0 left-0 right-0 z-[219] max-h-[min(70vh,520px)] rounded-t-[24px] bg-white border border-[#e8edf2] shadow-[0_-12px_40px_rgba(0,0,0,0.12)] overflow-hidden"
-              style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+              key="mobile-hub-panel"
+              {...getFloatingPanelMotion(true)}
+              className="fixed bottom-0 left-0 right-0 z-[219] max-h-[min(70vh,520px)] rounded-t-[24px] bg-white border border-[#e8edf2] shadow-[0_-12px_40px_rgba(0,0,0,0.12)] overflow-hidden transform-gpu backface-hidden"
+              style={{
+                paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+                willChange: 'transform',
+              }}
             >
               <div className="w-12 h-1 rounded-full bg-gray-200 mx-auto mt-3 shrink-0" />
               <div className="flex items-center justify-between px-5 pt-4 pb-3 border-b border-[#e8edf2]">

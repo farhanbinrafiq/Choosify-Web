@@ -5,11 +5,11 @@
 
 export const typography = {
   fontFamily: {
-    sans: '"Inter", "Helvetica Neue", Arial, sans-serif',
+    sans: '"Satoshi", "Helvetica Neue", Arial, sans-serif',
     mono: '"JetBrains Mono", monospace',
-    display: '"DM Serif Display", Georgia, serif',
-    dmSans: '"DM Sans", sans-serif',
-    space: 'font-space', // utility class used in heroes
+    display: '"Satoshi", "Helvetica Neue", Arial, sans-serif',
+    dmSans: '"Satoshi", "Helvetica Neue", Arial, sans-serif',
+    space: '"Satoshi", "Helvetica Neue", Arial, sans-serif',
   },
   fontSize: {
     xs: '0.625rem', // 10px — legacy micro labels

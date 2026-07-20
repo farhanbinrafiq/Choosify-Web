@@ -1,6 +1,7 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
+import { getFloatingPanelMotion } from './FilterEngine';
 import { cn } from '../lib/utils';
 import {
   CartPreviewPanel,
@@ -101,47 +102,36 @@ export function CartDrawer({ isOpen, onClose, anchorEl }: CartDrawerProps) {
         <>
           {isMobileSheet && (
             <motion.div
+              key="cart-drawer-backdrop"
               initial={{ opacity: 0 }}
-              animate={{ opacity: 0.45 }}
-              exit={{ opacity: 0 }}
+              animate={{ opacity: 0.45, transition: { duration: 0.15, ease: 'easeOut' } }}
+              exit={{ opacity: 0, transition: { duration: 0.12, ease: 'easeIn' } }}
               onClick={onClose}
               className="fixed inset-0 bg-black z-[220] cursor-pointer"
             />
           )}
 
           <motion.div
+            key="cart-drawer-panel"
             ref={panelRef}
             id="choosify-cart-preview"
             role="dialog"
             aria-modal="true"
             aria-label="Shopping cart"
-            initial={
-              isMobileSheet
-                ? { y: '100%', opacity: 1 }
-                : { opacity: 0, y: -8, scale: 0.98 }
-            }
-            animate={
-              isMobileSheet
-                ? { y: 0, opacity: 1 }
-                : { opacity: 1, y: 0, scale: 1 }
-            }
-            exit={
-              isMobileSheet
-                ? { y: '100%', opacity: 1 }
-                : { opacity: 0, y: -8, scale: 0.98 }
-            }
-            transition={{ type: 'spring', damping: 28, stiffness: 320 }}
-            style={
-              isMobileSheet
+            {...getFloatingPanelMotion(isMobileSheet, false)}
+            style={{
+              ...(isMobileSheet
                 ? undefined
                 : {
                     top: dropdownStyle.top,
                     right: dropdownStyle.right,
-                  }
-            }
+                  }),
+              willChange: 'transform, opacity',
+              transformOrigin: isMobileSheet ? 'bottom center' : 'top right',
+            }}
             className={cn(
               cartPreviewShellClass,
-              'z-[230]',
+              'z-[230] transform-gpu backface-hidden',
               isMobileSheet
                 ? cn('fixed', cartPreviewMobileShellClass)
                 : cn('fixed', cartPreviewDesktopShellClass),

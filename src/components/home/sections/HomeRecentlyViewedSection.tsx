@@ -34,8 +34,8 @@ export function HomeRecentlyViewedSection({ products }: HomeRecentlyViewedSectio
                 className="w-full h-full object-contain p-3"
                 loading="lazy"
               />
-              <span className="absolute top-2 right-2 w-[26px] h-[26px] rounded-full bg-white flex items-center justify-center text-[#CBD5E1] shadow-sm">
-                <Heart size={13} />
+              <span className="absolute top-2 right-2 w-[26px] h-[26px] rounded-full bg-white flex items-center justify-center text-[#EB4501] shadow-sm">
+                <Heart size={13} className="text-[#EB4501]" strokeWidth={2} />
               </span>
             </div>
             <div className="px-3 py-2.5 pb-3.5">

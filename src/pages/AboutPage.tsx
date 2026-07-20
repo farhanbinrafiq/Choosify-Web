@@ -119,7 +119,7 @@ export function AboutPage() {
         </aside>
 
         <div className="order-1 lg:order-2 min-w-0">
-          <div className="bg-[#F4F7F9] rounded-[14px] p-6 md:p-8 grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-6 items-center mb-8">
+          <div className="bg-[#F4F7F9] rounded-none p-6 md:p-8 grid grid-cols-1 md:grid-cols-[1.1fr_0.9fr] gap-6 items-center mb-8">
             <div>
               <div className="text-[11px] font-extrabold text-[#2323FF] tracking-wide mb-2.5">ABOUT CHOOSIFY</div>
               <h1 className="text-[28px] md:text-[32px] font-extrabold leading-tight text-[#1A1A2E] mb-3.5">

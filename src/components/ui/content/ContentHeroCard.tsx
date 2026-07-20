@@ -1,5 +1,5 @@
 import React from 'react';
-import { Share2, Bookmark, Heart, ChevronRight } from 'lucide-react';
+import { Share2, Heart, ChevronRight } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../buttons/Button';
 import { Badge } from '../badges/Badge';
@@ -106,7 +106,12 @@ export const ContentHeroCard: React.FC<ContentHeroCardProps> = ({
                 <Heart size={16} className={cn(isLiked && "fill-current")} /> {isLiked ? 'Liked' : 'Like'}
               </Button>
               <Button onClick={onSave} variant={isSaved ? "primary" : "outline"} className={cn("gap-2 border-white/20", isSaved ? "bg-white text-[#000435] border-transparent" : "text-white hover:bg-white/10")}>
-                <Bookmark size={16} className={cn(isSaved && "fill-current")} /> {isSaved ? 'Saved' : 'Save'}
+                <Heart
+                  size={16}
+                  className="text-[#EB4501]"
+                  strokeWidth={2}
+                  fill={isSaved ? '#EB4501' : 'none'}
+                /> {isSaved ? 'Saved' : 'Save'}
               </Button>
               <Button onClick={onShare} variant="outline" className="gap-2 text-white border-white/20 hover:bg-white/10">
                 <Share2 size={16} /> Share
@@ -116,7 +121,7 @@ export const ContentHeroCard: React.FC<ContentHeroCardProps> = ({
           
           <div className="lg:col-span-6 relative group">
             <div className="absolute inset-0 bg-gradient-to-tr from-[#EB4501]/20 to-purple-500/20 rounded-3xl blur-2xl group-hover:blur-3xl transition-all duration-700 opacity-50" />
-            <div className="relative aspect-[4/3] rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+            <div className="relative aspect-[4/3] rounded-none overflow-hidden border border-white/10 shadow-2xl">
               <img src={coverImage} alt={title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
               <div className="absolute inset-0 bg-gradient-to-t from-[#000435] via-transparent to-transparent opacity-80" />
             </div>

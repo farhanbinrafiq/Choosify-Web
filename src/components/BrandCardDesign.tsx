@@ -153,10 +153,9 @@ export const BrandCardDesign = memo(function BrandCardDesign({
         >
           <Heart
             size={12}
-            strokeWidth={1.6}
-            className={cn(
-              isSaved ? 'text-[#FF000D] fill-[#FF000D]' : 'text-[#CBD5E1]',
-            )}
+            strokeWidth={2}
+            className="text-[#EB4501]"
+            fill={isSaved ? '#EB4501' : 'none'}
           />
         </button>
       </div>
@@ -174,7 +173,7 @@ export const BrandCardDesign = memo(function BrandCardDesign({
         <div className="flex items-center justify-between gap-1 px-1 py-3.5 mb-3.5">
           <div className="min-w-0 text-left">
             <div className="text-[13px] font-extrabold text-[#1A1A2E] leading-tight">Best For</div>
-            <div className="text-[12px] font-bold text-[#FF000D] truncate">{bestForText}</div>
+            <div className="text-[12px] font-bold text-[#8A00C4] truncate">{bestForText}</div>
           </div>
           <div className="min-w-0 text-center px-1">
             <div className="text-[15px] font-extrabold text-[#2323FF] truncate leading-tight">

@@ -1,6 +1,6 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Bookmark, Package } from 'lucide-react';
+import { Heart, Package } from 'lucide-react';
 import type { ViralTodayItem } from '../../../utils/homeViralToday';
 import { DcHomePanel } from '../DcHomePanel';
 import { ViewAllLink } from '../../design/ViewAllLink';
@@ -11,6 +11,33 @@ interface HomeSpotlightPreviewSectionProps {
 }
 
 const AVATAR_COLORS = ['#EB4501', '#2323FF', '#07A828', '#EB4501', '#000435', '#7C3AED'];
+
+function ViralSaveButton({ size, className }: { size: number; className?: string }) {
+  const [isSaved, setIsSaved] = useState(false);
+  return (
+    <button
+      type="button"
+      className={cn(
+        'rounded-full bg-white shadow-sm flex items-center justify-center border-0 cursor-pointer',
+        className,
+      )}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsSaved((prev) => !prev);
+      }}
+      aria-label={isSaved ? 'Unsave' : 'Save'}
+      aria-pressed={isSaved}
+    >
+      <Heart
+        size={size}
+        className="text-[#EB4501]"
+        strokeWidth={2}
+        fill={isSaved ? '#EB4501' : 'none'}
+      />
+    </button>
+  );
+}
 
 /** Choosify.dc.html — "Viral Today" YouTube grid + Reels strip */
 export function HomeSpotlightPreviewSection({ items }: HomeSpotlightPreviewSectionProps) {
@@ -55,14 +82,7 @@ export function HomeSpotlightPreviewSection({ items }: HomeSpotlightPreviewSecti
                 <span className="absolute top-2 left-2 bg-[#FF000D] text-white text-[8.5px] font-extrabold px-2 py-0.5 rounded pointer-events-none">
                   YOUTUBE
                 </span>
-                <button
-                  type="button"
-                  className="absolute top-2 right-2 w-6 h-6 rounded-full bg-black/40 flex items-center justify-center text-white border-0"
-                  onClick={(e) => e.preventDefault()}
-                  aria-label="Save"
-                >
-                  <Bookmark size={11} />
-                </button>
+                <ViralSaveButton size={11} className="absolute top-2 right-2 w-6 h-6" />
                 {card.duration && (
                   <span className="absolute bottom-2 right-2 bg-black/75 text-white text-[10px] font-bold px-1.5 py-0.5 rounded pointer-events-none">
                     {card.duration}
@@ -130,14 +150,10 @@ export function HomeSpotlightPreviewSection({ items }: HomeSpotlightPreviewSecti
                 <span className="absolute top-2 left-2 bg-[#FF000D] text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded pointer-events-none flex items-center gap-0.5">
                   ⏵ REELS
                 </span>
-                <button
-                  type="button"
-                  className="absolute top-2 right-2 w-[22px] h-[22px] rounded-full bg-black/40 flex items-center justify-center text-white z-[1] border-0"
-                  onClick={(e) => e.preventDefault()}
-                  aria-label="Save"
-                >
-                  <Bookmark size={10} />
-                </button>
+                <ViralSaveButton
+                  size={10}
+                  className="absolute top-2 right-2 w-[22px] h-[22px] z-[1]"
+                />
                 {card.duration && (
                   <span className="absolute bottom-2 right-2 bg-black/75 text-white text-[9.5px] font-bold px-1.5 py-0.5 rounded pointer-events-none">
                     {card.duration}

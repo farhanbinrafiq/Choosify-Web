@@ -8,6 +8,7 @@ import {
   Shield,
   ShieldCheck,
 } from 'lucide-react';
+import { IconBrandApple } from '@tabler/icons-react';
 
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useGlobalState } from '../context/GlobalStateContext';
@@ -68,26 +69,34 @@ const BACKDROP_TILES = [
 
 function GoogleLogo() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-      <path fill="#EA4335" d="M12 10.2v3.6h5.1c-.2 1.2-1.5 3.6-5.1 3.6-3.1 0-5.6-2.5-5.6-5.6S8.9 6.2 12 6.2c1.8 0 3 .8 3.7 1.5l2.5-2.4C16.9 3.9 14.7 3 12 3 7 3 3 7 3 12s4 9 9 9c5.2 0 8.6-3.7 8.6-8.9 0-.6-.1-1-.2-1.4H12z" />
-    </svg>
+    <img
+      src="/icons/google.svg"
+      alt=""
+      width={18}
+      height={18}
+      className="w-[18px] h-[18px] object-contain"
+      draggable={false}
+      aria-hidden
+    />
   );
 }
 
 function FacebookLogo() {
   return (
-    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-      <path fill="#1877F2" d="M22 12a10 10 0 1 0-11.6 9.9v-7h-2.3V12h2.3V9.8c0-2.3 1.4-3.6 3.5-3.6 1 0 2 .2 2 .2v2.2h-1.1c-1.1 0-1.4.7-1.4 1.4V12h2.4l-.4 2.9h-2v7A10 10 0 0 0 22 12z" />
-    </svg>
+    <img
+      src="/icons/facebook.svg"
+      alt=""
+      width={18}
+      height={18}
+      className="w-[18px] h-[18px] object-contain"
+      draggable={false}
+      aria-hidden
+    />
   );
 }
 
 function AppleLogo() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">
-      <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.52-3.24 0-1.44.62-2.2.44-3.06-.4C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12.03 7.25c-.15-2.23 1.66-4.04 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-    </svg>
-  );
+  return <IconBrandApple size={18} stroke={1.75} aria-hidden />;
 }
 
 function AuthField({
@@ -193,10 +202,7 @@ export function LoginSignUpPage() {
   const isSignUp = activeTab === 'sign-up';
 
   return (
-    <div
-      className="min-h-screen font-sans relative overflow-hidden"
-      style={{ background: PAGE_BG }}
-    >
+    <div className="min-h-screen font-sans relative overflow-hidden choosify-dark-surface">
       {/* Optional blurred product collage backdrop */}
       <div
         className="absolute inset-0 grid grid-cols-5 gap-3.5 px-6 pt-[100px] pb-6 opacity-30 blur-[1px] pointer-events-none"
@@ -213,11 +219,8 @@ export function LoginSignUpPage() {
         ))}
       </div>
       <div
-        className="absolute inset-0 pointer-events-none"
-        style={{
-          background:
-            'linear-gradient(180deg,rgba(13,15,29,0.75),rgba(13,15,29,0.94) 60%,#000435)',
-        }}
+        className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/20 via-transparent to-black/35"
+        aria-hidden
       />
 
       <div className="relative z-[2] flex flex-col min-h-screen">
@@ -441,7 +444,7 @@ export function LoginSignUpPage() {
 
         {/* Bottom trust strip */}
         <div className="max-w-[1100px] mx-auto w-full px-6 sm:px-10 pb-10">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border border-white/12 rounded-[14px] px-5 sm:px-[30px] py-[26px]">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border border-white/12 rounded-none px-5 sm:px-[30px] py-[26px]">
             {TRUST_POINTS.map((point) => {
               const Icon = point.icon;
               return (

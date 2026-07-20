@@ -70,9 +70,9 @@ export function CreatorProfileHero({
       {/* Cover — feed silhouette (not viewport edge-to-edge); matches Creator Profile max-w-[1180px] */}
       <div className="w-full px-5 sm:px-8 lg:px-10 pt-4">
         <div className="max-w-[1180px] mx-auto relative">
-          <div className="relative h-[220px] sm:h-[280px] md:h-[320px] overflow-hidden choosify-dark-surface rounded-[14px]">
+          <div className="relative h-[220px] sm:h-[280px] md:h-[320px] overflow-hidden choosify-dark-surface rounded-none">
             <img src={cover} alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-[14px]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-none" />
           </div>
           <div className="absolute left-1/2 top-full -translate-x-1/2 -translate-y-[60px] w-[100px] h-[100px] md:w-[120px] md:h-[120px] z-[5]">
             <div className="w-full h-full rounded-full bg-[#1A1A2E] border-[5px] border-white shadow-[0_16px_36px_rgba(0,0,0,0.28),0_0_0_4px_rgba(7,208,80,0.18)] overflow-hidden flex items-center justify-center text-white text-[30px] font-extrabold">
@@ -164,7 +164,7 @@ export function CreatorProfileHero({
         </div>
 
         <div className="flex flex-col md:flex-row gap-4 mb-2">
-          <div className="bg-white border border-[#E8EDF2] rounded-[14px] p-5 md:w-[300px] shadow-[0_2px_10px_rgba(0,0,0,0.03)] shrink-0">
+          <div className="bg-white border border-[#E8EDF2] rounded-none p-5 md:w-[300px] shadow-[0_2px_10px_rgba(0,0,0,0.03)] shrink-0">
             <div className="text-[11px] font-extrabold text-[#9AA0AC] tracking-wide mb-2.5">TRUST SCORE</div>
             <div className="flex items-baseline gap-2 mb-4">
               <div className="text-[30px] font-extrabold text-[#1A1A2E]">{trustScore}</div>
@@ -181,7 +181,7 @@ export function CreatorProfileHero({
             ))}
           </div>
 
-          <div className="bg-white border border-[#E8EDF2] rounded-[14px] p-5 flex-1 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
+          <div className="bg-white border border-[#E8EDF2] rounded-none p-5 flex-1 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
             <div className="text-[11px] font-extrabold text-[#9AA0AC] tracking-wide mb-4">CREATOR INFO</div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-5">
               {info.map((f) => (

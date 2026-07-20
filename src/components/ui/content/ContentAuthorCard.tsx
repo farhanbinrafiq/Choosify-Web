@@ -1,8 +1,9 @@
 import React from 'react';
-import { CheckCircle2, UserPlus, Globe, Twitter, Instagram, Linkedin } from 'lucide-react';
+import { CheckCircle2, UserPlus, Globe } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../buttons/Button';
 import { Badge } from '../badges/Badge';
+import { BRAND_ICON } from '../../icons/brandIcons';
 
 export interface ContentAuthorCardProps {
   author: {
@@ -80,18 +81,18 @@ export const ContentAuthorCard: React.FC<ContentAuthorCardProps> = ({
               </a>
             )}
             {author.socials.twitter && (
-              <a href={author.socials.twitter} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-blue-400 hover:bg-blue-50 transition-colors">
-                <Twitter size={14} />
+              <a href={author.socials.twitter} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full overflow-hidden bg-white border border-slate-100 flex items-center justify-center hover:opacity-90 transition-opacity">
+                <img src={BRAND_ICON.twitter} alt="" className="w-4 h-4 object-contain" draggable={false} />
               </a>
             )}
             {author.socials.instagram && (
-              <a href={author.socials.instagram} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-pink-500 hover:bg-pink-50 transition-colors">
-                <Instagram size={14} />
+              <a href={author.socials.instagram} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full overflow-hidden bg-white border border-slate-100 flex items-center justify-center hover:opacity-90 transition-opacity">
+                <img src={BRAND_ICON.instagram} alt="" className="w-4 h-4 object-contain" draggable={false} />
               </a>
             )}
             {author.socials.linkedin && (
-              <a href={author.socials.linkedin} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors">
-                <Linkedin size={14} />
+              <a href={author.socials.linkedin} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full overflow-hidden bg-white border border-slate-100 flex items-center justify-center hover:opacity-90 transition-opacity">
+                <img src={BRAND_ICON.linkedin} alt="" className="w-4 h-4 object-contain" draggable={false} />
               </a>
             )}
           </div>

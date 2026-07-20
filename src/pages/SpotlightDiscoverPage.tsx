@@ -1,5 +1,5 @@
 import React, { useMemo, useState, useEffect } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { PAGE_LISTING_SINGLE_SHELL, PAGE_MIDDLE_FEED } from '../lib/pageLayout';
 import { useSpotlightExperience } from '../hooks/useSpotlightExperience';
@@ -17,9 +17,23 @@ import { useSpotlightFloatingFilters } from '../hooks/useSpotlightFloatingFilter
 import { filterSpotlightFeedItems, SPOTLIGHT_FEED_VISIBLE_KEY } from '../utils/spotlightMixedFeed';
 import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
 
+const FORMAT_FILTER_TABS = new Set<SpotlightContentTabId>([
+  'videos',
+  'reels',
+  'live',
+  'reviews',
+  'guides',
+  'campaigns',
+  'blogs',
+  'launches',
+  'announcements',
+  'recommendations',
+]);
+
 export function SpotlightDiscoverPage() {
-  const { allContent, filters, setFilters, hasContent } = useSpotlightExperience();
+  const { allContent, filters, setFilters, resetFilters, hasContent } = useSpotlightExperience();
   const { allCatalogProducts } = useGlobalState();
+  const navigate = useNavigate();
   const { recordView } = useSpotlightHistory(allContent);
   const impressionCallbacks = useMemo(() => {
     const base = createSpotlightImpressionLogger();
@@ -42,7 +56,7 @@ export function SpotlightDiscoverPage() {
   const [replayOnly, setReplayOnly] = useState(false);
   const [upcomingOnly, setUpcomingOnly] = useState(false);
 
-  const { quickFilters } = useSpotlightFloatingFilters({
+  const { quickFilters, activeFilterCount } = useSpotlightFloatingFilters({
     filters,
     setFilters,
     activeTab,
@@ -95,20 +109,30 @@ export function SpotlightDiscoverPage() {
     return base;
   }, [allContent, filters, activeTab, followedIds, savedIds, replayOnly, upcomingOnly, linkedProductId, linkedBrandId]);
 
+  const hasActiveFilters = useMemo(() => {
+    if (activeFilterCount > 0) return true;
+    if (filters.verifiedOnly) return true;
+    if (filters.sort !== 'trending') return true;
+    if (
+      filters.brandIds.length ||
+      filters.publisherIds.length ||
+      filters.categoryIds.length ||
+      filters.serviceIds.length ||
+      filters.campaignIds.length ||
+      filters.creatorIds.length
+    ) {
+      return true;
+    }
+    if (linkedProductId || linkedBrandId) return true;
+    if (FORMAT_FILTER_TABS.has(activeTab)) return true;
+    return false;
+  }, [activeFilterCount, filters, linkedProductId, linkedBrandId, activeTab]);
+
   const clearAllFilters = () => {
-    setFilters({
-      ...filters,
-      contentTypes: [],
-      query: '',
-      liveOnly: false,
-      sponsoredOnly: false,
-      verifiedOnly: false,
-      trendingOnly: false,
-      promotionsOnly: false,
-      publisherTypes: [],
-    });
+    resetFilters();
     setReplayOnly(false);
     setUpcomingOnly(false);
+    navigate('/spotlight');
   };
 
   return (
@@ -144,6 +168,7 @@ export function SpotlightDiscoverPage() {
               setFilters={setFilters}
               activeTab={activeTab}
               onClearFilters={clearAllFilters}
+              hasActiveFilters={hasActiveFilters}
             />
           )}
 

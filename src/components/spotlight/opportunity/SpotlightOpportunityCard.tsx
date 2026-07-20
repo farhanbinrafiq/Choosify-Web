@@ -22,7 +22,7 @@ export function SpotlightOpportunityCard({
 }: SpotlightOpportunityCardProps) {
   const inner = (
     <div className={cn(
-      'bg-white border rounded-xl p-4 space-y-3 transition-shadow hover:shadow-md',
+      'bg-white rounded-xl p-4 space-y-3 transition-shadow hover:shadow-md border border-[#E8EDF2]',
       opportunity.status === 'pinned' ? 'border-[#EB4501] ring-1 ring-[#EB4501]/20' : 'border-[#e8edf2]',
       opportunity.status === 'dismissed' && 'opacity-50',
     )}>

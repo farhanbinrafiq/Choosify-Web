@@ -20,23 +20,23 @@ export function PageBreadcrumbsBar({ className }: { className?: string }) {
     <nav
       aria-label="Breadcrumb"
       className={cn(
-        'w-full border-b border-gray-100 bg-gradient-to-b from-[#f4f6fa] to-[#eef1f8]/80',
+        'choosify-chrome-header w-full border-b border-white/[0.06]',
         className,
       )}
     >
       <div className="max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-4">
-        <ol className="flex flex-wrap items-center gap-2 text-[12px] font-medium tracking-tight text-[#9AA0AC] list-none m-0 p-0">
+        <ol className="flex flex-wrap items-center gap-2 text-[12px] font-medium tracking-tight text-white/70 list-none m-0 p-0">
           {items.map((crumb, index) => {
             const isLast = index === items.length - 1;
 
             return (
               <li key={`${crumb.path}-${index}`} className="flex items-center gap-2 min-w-0">
                 {index > 0 && (
-                  <ChevronRight size={12} className="shrink-0 text-gray-300" aria-hidden />
+                  <ChevronRight size={12} className="shrink-0 text-white/35" aria-hidden />
                 )}
                 {isLast ? (
                   <span
-                    className="text-[#EB4501] truncate max-w-[min(100%,28rem)]"
+                    className="text-white truncate max-w-[min(100%,28rem)]"
                     aria-current="page"
                   >
                     {crumb.name}
@@ -44,7 +44,7 @@ export function PageBreadcrumbsBar({ className }: { className?: string }) {
                 ) : (
                   <Link
                     to={crumb.path}
-                    className="hover:text-[#CF4400] transition-colors truncate max-w-[min(100%,16rem)] text-gray-400"
+                    className="hover:text-white transition-colors truncate max-w-[min(100%,16rem)] text-white/60"
                   >
                     {crumb.name}
                   </Link>

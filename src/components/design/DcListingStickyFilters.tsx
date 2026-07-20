@@ -58,7 +58,7 @@ export function DcListingStickyFilters({
       <div
         className={cn(
           maxWidthClass,
-          'mx-auto flex bg-white border border-[#E8EDF2] rounded-[14px] shadow-[0_12px_30px_rgba(0,0,0,0.08)] overflow-x-auto',
+          'mx-auto flex bg-white border border-[#E8EDF2] rounded-none shadow-[0_12px_30px_rgba(0,0,0,0.08)] overflow-x-auto',
           children
             ? 'items-end h-[88px] px-[18px] sm:px-[26px]'
             : 'items-center min-h-[88px] px-[18px] sm:px-[26px]',

@@ -2,13 +2,13 @@
 import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  ShoppingCart, MessageCircle, X, SlidersHorizontal, X as XIcon, RotateCcw, ChevronUp, ArrowRight
+  ShoppingCart, MessageCircle, X, SlidersHorizontal, X as XIcon, RotateCcw, ChevronUp
 } from 'lucide-react';
 import { EmiAiLogo } from './EmiAiLogo';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
 import { cn } from '../lib/utils';
-import { useFloatingFilter, useFloatingFilters, scrollToFilterResultsTarget } from './FilterEngine';
+import { useFloatingFilter, useFloatingFilters, scrollToFilterResultsTarget, getFloatingPanelMotion } from './FilterEngine';
 import { VideoLightbox } from './VideoLightbox';
 import {
   CartPreviewPanel,
@@ -30,6 +30,7 @@ import {
 } from './EmiChatPanel';
 import { AlphabetFilterStrip } from './AlphabetFilterStrip';
 import { getFloatingPanelClassName } from './FloatingPanelShell';
+import { useEmiUnread, markEmiMessagesRead } from '../hooks/useEmiUnread';
 
 export function FloatingOverlays() {
   const location = useLocation();
@@ -41,13 +42,17 @@ export function FloatingOverlays() {
   const { retailCart, activeVideo, closeVideo, isLoggedIn, isFeatureEnabled } = useGlobalState();
   const { threads } = useDashboard();
 
-  const showEmiFab = isFeatureEnabled('enable_emi_assistant') && !onEmiPage;
+  const { hasUnread: hasEmiUnread } = useEmiUnread();
+
+  const showEmiFab =
+    isFeatureEnabled('enable_emi_assistant') && !onEmiPage && hasEmiUnread;
 
   // Active floating panel state: cart preview, messages preview, or Emi
   const [activePanel, setActivePanel] = useState<'cart' | 'messages' | 'emi' | null>(null);
   const [emiSeedPrompt, setEmiSeedPrompt] = useState<string | undefined>();
   const [filterOpen, setFilterOpen] = useState(false);
   const filterDrawerRef = useRef<HTMLDivElement>(null);
+  const pendingFilterScrollRef = useRef<string | null>(null);
 
   const { config: filterConfig } = useFloatingFilter();
   const {
@@ -89,6 +94,12 @@ export function FloatingOverlays() {
   }, []);
 
   useEffect(() => {
+    if (activePanel === 'emi') {
+      markEmiMessagesRead();
+    }
+  }, [activePanel]);
+
+  useEffect(() => {
     const onOpenEmi = (e: Event) => {
       const detail = (e as CustomEvent<{ prompt?: string }>).detail;
       setEmiSeedPrompt(detail?.prompt);
@@ -102,12 +113,17 @@ export function FloatingOverlays() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const closeFilterPanel = () => {
-    const targetId = filterConfig.scrollTargetId;
+  const closeFilterPanel = (options?: { scrollToResults?: boolean }) => {
+    pendingFilterScrollRef.current = options?.scrollToResults
+      ? (filterConfig.scrollTargetId ?? null)
+      : null;
     setFilterOpen(false);
-    window.requestAnimationFrame(() => {
-      window.setTimeout(() => scrollToFilterResultsTarget(targetId), 80);
-    });
+  };
+
+  const handleLegacyFilterExitComplete = () => {
+    const targetId = pendingFilterScrollRef.current;
+    pendingFilterScrollRef.current = null;
+    if (targetId) scrollToFilterResultsTarget(targetId);
   };
 
   const closeAllOverlays = () => {
@@ -242,10 +258,7 @@ export function FloatingOverlays() {
     triggerHeights.reduce((sum, h) => sum + h, 0) +
     (triggerHeights.length > 1 ? (triggerHeights.length - 1) * 12 : 0);
 
-  // Custom motion transitions matching standard Choosify velocity
-  const desktopDrawerTransition = { type: 'spring' as const, damping: 32, stiffness: 280, mass: 0.8 };
-  const mobileDrawerTransition = { type: 'tween' as const, ease: [0.32, 0.72, 0, 1] as const, duration: 0.28 };
-  const panelTransition = { type: 'spring' as const, damping: 32, stiffness: 280, mass: 0.8 };
+  const floatingPanelMotion = getFloatingPanelMotion(isMobile, isTablet);
 
   return (
     <>
@@ -267,18 +280,21 @@ export function FloatingOverlays() {
         {/* PANEL 1: MINI FLOATING CART — matches navbar cart dropdown */}
         {activePanel === 'cart' && (
           <motion.div 
+            key="floating-cart-panel"
             ref={panelRef}
-            initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
-            animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-            exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
-            transition={panelTransition}
-            style={isMobile || isTablet ? undefined : { bottom: `${triggerStackHeight + 16}px` }}
+            {...floatingPanelMotion}
+            style={{
+              ...(isMobile || isTablet ? undefined : { bottom: `${triggerStackHeight + 16}px` }),
+              willChange: 'transform, opacity',
+              transformOrigin: isTablet ? 'bottom center' : 'bottom right',
+            }}
             className={cn(
               cartPreviewShellClass,
+              'transform-gpu backface-hidden',
               isMobile
                 ? cn('fixed z-[250] pointer-events-auto', cartPreviewMobileShellClass, 'h-[82vh]')
                 : isTablet
-                  ? cn('fixed bottom-4 left-1/2 -translate-x-1/2 z-[250]', cartPreviewDesktopShellClass, 'w-[min(24rem,calc(100vw-1.5rem))]')
+                  ? cn('fixed bottom-4 left-1/2 z-[250]', cartPreviewDesktopShellClass, 'w-[min(24rem,calc(100vw-1.5rem))]')
                   : cn('absolute right-0 z-[250]', cartPreviewDesktopShellClass),
             )}
             id="floating-mini-cart-drawer"
@@ -289,18 +305,21 @@ export function FloatingOverlays() {
 
         {activePanel === 'messages' && (
           <motion.div
+            key="floating-messages-panel"
             ref={panelRef}
-            initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
-            animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-            exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
-            transition={panelTransition}
-            style={isMobile || isTablet ? undefined : { bottom: `${triggerStackHeight + 16}px` }}
+            {...floatingPanelMotion}
+            style={{
+              ...(isMobile || isTablet ? undefined : { bottom: `${triggerStackHeight + 16}px` }),
+              willChange: 'transform, opacity',
+              transformOrigin: isTablet ? 'bottom center' : 'bottom right',
+            }}
             className={cn(
               messagesPreviewShellClass,
+              'transform-gpu backface-hidden',
               isMobile
                 ? cn('fixed z-[250] pointer-events-auto', messagesPreviewMobileShellClass, 'h-[82vh]')
                 : isTablet
-                  ? cn('fixed bottom-4 left-1/2 -translate-x-1/2 z-[250]', messagesPreviewDesktopShellClass, 'w-[min(28rem,calc(100vw-1.5rem))]')
+                  ? cn('fixed bottom-4 left-1/2 z-[250]', messagesPreviewDesktopShellClass, 'w-[min(28rem,calc(100vw-1.5rem))]')
                   : cn('absolute right-0 z-[250]', messagesPreviewDesktopShellClass, 'w-[min(28rem,calc(100vw-2rem))]'),
             )}
             id="floating-messages-drawer"
@@ -311,18 +330,21 @@ export function FloatingOverlays() {
 
         {activePanel === 'emi' && (
           <motion.div
+            key="floating-emi-panel"
             ref={panelRef}
-            initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
-            animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-            exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 35, scale: 0.98 }}
-            transition={panelTransition}
-            style={isMobile || isTablet ? undefined : { bottom: `${triggerStackHeight + 16}px` }}
+            {...floatingPanelMotion}
+            style={{
+              ...(isMobile || isTablet ? undefined : { bottom: `${triggerStackHeight + 16}px` }),
+              willChange: 'transform, opacity',
+              transformOrigin: isTablet ? 'bottom center' : 'bottom right',
+            }}
             className={cn(
               emiChatShellClass,
+              'transform-gpu backface-hidden',
               isMobile
                 ? cn('fixed z-[250] pointer-events-auto', emiChatMobileShellClass, 'h-[85vh]')
                 : isTablet
-                  ? cn('fixed bottom-4 left-1/2 -translate-x-1/2 z-[250]', emiChatDesktopShellClass)
+                  ? cn('fixed bottom-4 left-1/2 z-[250]', emiChatDesktopShellClass)
                   : cn('absolute right-0 z-[250]', emiChatDesktopShellClass, 'max-h-[min(36rem,calc(100vh-10rem))]'),
             )}
             id="floating-emi-drawer"
@@ -453,18 +475,20 @@ export function FloatingOverlays() {
     {/* FILTER LAUNCHER — legacy useRegisterPageFilters pages; drawer stacked above pill */}
     {hasFilters && (
       <>
-        {!isMobile && filterOpen && (
-          <motion.button
-            type="button"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-[218] bg-black/10 cursor-pointer border-0"
-            aria-label="Close filters"
-            onClick={closeFilterPanel}
-          />
-        )}
+        <AnimatePresence>
+          {!isMobile && filterOpen && (
+            <motion.button
+              key="legacy-filter-backdrop"
+              type="button"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: { duration: 0.15, ease: 'easeOut' } }}
+              exit={{ opacity: 0, transition: { duration: 0.12, ease: 'easeIn' } }}
+              className="fixed inset-0 z-[218] bg-black/10 cursor-pointer border-0"
+              aria-label="Close filters"
+              onClick={() => closeFilterPanel()}
+            />
+          )}
+        </AnimatePresence>
 
         <div
           className={cn(
@@ -476,26 +500,32 @@ export function FloatingOverlays() {
                 : 'bottom-6 left-6 lg:bottom-8 lg:left-8 pointer-events-none',
           )}
         >
-        <AnimatePresence>
+        <AnimatePresence onExitComplete={handleLegacyFilterExitComplete}>
           {filterOpen && (
             <motion.div
+              key="legacy-filter-drawer-panel"
               ref={filterDrawerRef}
-              initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 12 }}
-              animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0 }}
-              exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 12 }}
-              transition={isMobile ? mobileDrawerTransition : desktopDrawerTransition}
-              style={{ willChange: 'transform' }}
-              drag={isMobile ? 'y' : false}
-              dragConstraints={{ top: 0, bottom: 250 }}
-              dragElastic={{ top: 0.1, bottom: 0.8 }}
-              onDragEnd={(_e: any, info: any) => {
-                if (info.offset.y > 120) closeFilterPanel();
+              {...getFloatingPanelMotion(isMobile, isTablet)}
+              style={{
+                willChange: 'transform, opacity',
+                transformOrigin: isTablet ? 'bottom center' : 'bottom left',
               }}
-              className={getFloatingPanelClassName({
-                isMobile,
-                isTablet,
-                textClass: 'text-[#1A1A2E]',
-              })}
+              drag={isMobile ? 'y' : false}
+              dragConstraints={isMobile ? { top: 0, bottom: 280 } : undefined}
+              dragElastic={isMobile ? { top: 0, bottom: 0.35 } : undefined}
+              dragMomentum={false}
+              dragSnapToOrigin
+              onDragEnd={(_e: any, info: any) => {
+                if (info.offset.y > 90 || info.velocity.y > 650) closeFilterPanel();
+              }}
+              className={cn(
+                getFloatingPanelClassName({
+                  isMobile,
+                  isTablet,
+                  textClass: 'text-[#1A1A2E]',
+                }),
+                'transform-gpu backface-hidden',
+              )}
             >
               {/* Mobile drag indicator */}
               {isMobile && (
@@ -599,7 +629,7 @@ export function FloatingOverlays() {
               {isMobile && (
                 <div className="px-5 py-4 border-t border-[#e8edf2] bg-white shrink-0">
                   <button
-                    onClick={closeFilterPanel}
+                    onClick={() => closeFilterPanel({ scrollToResults: true })}
                     className="w-full py-3.5 bg-[#EB4501] hover:bg-[#E04E00] text-white text-[11px] font-black uppercase tracking-widest rounded-lg transition-colors cursor-pointer border-0"
                   >
                     Show Results
@@ -621,32 +651,25 @@ export function FloatingOverlays() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           className={cn(
-            "h-[52px] rounded-[26px] bg-white border border-[#e8edf2] flex items-center gap-2.5 px-5 shadow-[0_8px_24px_rgba(0,0,0,0.18)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.22)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none pointer-events-auto",
-            filterOpen && "ring-2 ring-[#EB4501]/30",
+            'relative w-14 h-14 rounded-full bg-white border border-[#e8edf2] shadow-[0_8px_24px_rgba(0,0,0,0.18)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.22)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none pointer-events-auto',
+            filterOpen && 'ring-2 ring-[#EB4501]/30',
           )}
+          aria-label="Open filters"
+          title="Filters"
         >
           <SlidersHorizontal
-            size={18}
+            size={22}
+            strokeWidth={2}
             className={cn(
-              "transition-colors shrink-0",
-              filterOpen ? "text-[#EB4501]" : "text-[#8a9bb0] group-hover:text-[#CF4400]"
+              'transition-colors shrink-0',
+              filterOpen ? 'text-[#EB4501]' : 'text-[#8a9bb0] group-hover:text-[#CF4400]',
             )}
           />
-          <span className="text-[10px] font-black uppercase tracking-wider text-[#1A1A2E]">
-            FILTERS
-          </span>
           {filterConfig.activeFilterCount > 0 && (
-            <span className="min-w-[18px] h-[18px] px-1 rounded-lg bg-[#EB4501] text-white text-[9px] font-bold flex items-center justify-center leading-none">
+            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-lg bg-[#EB4501] text-white text-[9px] font-bold flex items-center justify-center leading-none">
               {filterConfig.activeFilterCount > 9 ? '9+' : filterConfig.activeFilterCount}
             </span>
           )}
-          <ArrowRight
-            size={14}
-            className={cn(
-              "transition-transform duration-300 shrink-0 ml-1",
-              filterOpen ? "text-[#EB4501] rotate-90" : "text-[#8a9bb0] group-hover:text-[#CF4400] group-hover:translate-x-0.5"
-            )}
-          />
         </motion.button>
         )}
         </div>
@@ -670,6 +693,31 @@ export function FloatingOverlays() {
         title="Ask Emi"
       >
         <EmiAiLogo size={36} className="w-9 h-9" />
+      </motion.button>
+    )}
+
+    {isMobile && totalCartItems > 0 && (
+      <motion.button
+        type="button"
+        onClick={() => setActivePanel(activePanel === 'cart' ? null : 'cart')}
+        whileTap={{ scale: 0.95 }}
+        className={cn(
+          'fixed z-[218] w-14 h-14 rounded-full bg-white text-[#EB4501] shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden',
+          activePanel === 'cart' && 'ring-2 ring-[#EB4501]/50 brightness-110',
+        )}
+        style={{
+          bottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))',
+          right: showEmiFab
+            ? 'calc(4.5rem + max(1rem, env(safe-area-inset-right, 0px)))'
+            : 'max(1rem, env(safe-area-inset-right, 0px))',
+        }}
+        aria-label="Quick Cart Checklist"
+        title="Quick Cart Checklist"
+      >
+        <ShoppingCart size={22} strokeWidth={2} className="text-[#EB4501]" />
+        <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-lg bg-[#EB4501] text-white text-[9px] font-bold flex items-center justify-center leading-none">
+          {totalCartItems > 99 ? '99+' : totalCartItems}
+        </span>
       </motion.button>
     )}
 

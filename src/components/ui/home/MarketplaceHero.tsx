@@ -93,7 +93,7 @@ export const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
                 initial={{ y: 20, opacity: 0 }}
                 animate={{ y: 0, opacity: 1 }}
                 transition={{ delay: 0.2, duration: 0.8 }}
-                className="absolute right-[20%] top-0 w-[300px] h-[400px] rounded-3xl overflow-hidden shadow-2xl border border-white/10 rotate-[-5deg]"
+                className="absolute right-[20%] top-0 w-[300px] h-[400px] rounded-none overflow-hidden shadow-2xl border border-white/10 rotate-[-5deg]"
               >
                 <img src={HERO_SLIDES[currentSlide].imageLeft} className="w-full h-full object-cover" alt="" />
               </motion.div>
@@ -101,7 +101,7 @@ export const MarketplaceHero: React.FC<MarketplaceHeroProps> = ({
                 initial={{ y: 40, opacity: 0 }}
                 animate={{ y: 20, opacity: 1 }}
                 transition={{ delay: 0.4, duration: 0.8 }}
-                className="absolute right-0 top-[10%] w-[280px] h-[380px] rounded-3xl overflow-hidden shadow-2xl border border-white/10 rotate-[5deg]"
+                className="absolute right-0 top-[10%] w-[280px] h-[380px] rounded-none overflow-hidden shadow-2xl border border-white/10 rotate-[5deg]"
               >
                 <img src={HERO_SLIDES[currentSlide].imageRight} className="w-full h-full object-cover" alt="" />
               </motion.div>

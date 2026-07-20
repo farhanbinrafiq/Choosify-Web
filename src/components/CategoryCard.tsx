@@ -72,9 +72,10 @@ export const CategoryCard = memo(function CategoryCard({
           title="Save category"
         >
           <Heart 
+            strokeWidth={2}
             className={cn(
-              "w-3.5 h-3.5 transition-colors",
-              activeLiked ? "fill-[#FF000D] text-[#FF000D]" : "text-[#CBD5E1]"
+              "w-3.5 h-3.5 transition-colors text-[#EB4501]",
+              activeLiked && "fill-[#EB4501]"
             )} 
           />
         </button>

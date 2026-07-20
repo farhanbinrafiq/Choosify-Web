@@ -43,10 +43,18 @@ export function useSpotlightFloatingFilters({
     if (filters.liveOnly) count += 1;
     if (filters.trendingOnly) count += 1;
     if (filters.sponsoredOnly) count += 1;
+    if (filters.verifiedOnly) count += 1;
     if (filters.query && filters.query !== COLLECTION_QUERY) count += 1;
     if (filters.query === COLLECTION_QUERY) count += 1;
     if (filters.publisherTypes.length) count += 1;
     if (filters.promotionsOnly) count += 1;
+    if (filters.brandIds.length) count += 1;
+    if (filters.publisherIds.length) count += 1;
+    if (filters.categoryIds.length) count += 1;
+    if (filters.serviceIds.length) count += 1;
+    if (filters.campaignIds.length) count += 1;
+    if (filters.creatorIds.length) count += 1;
+    if (filters.sort !== 'trending') count += 1;
     if (replayOnly) count += 1;
     if (upcomingOnly) count += 1;
     return count;
@@ -58,16 +66,23 @@ export function useSpotlightFloatingFilters({
     setFilters({
       ...filters,
       contentTypes: [],
+      brandIds: [],
+      publisherIds: [],
+      publisherTypes: [],
+      categoryIds: [],
+      serviceIds: [],
+      campaignIds: [],
+      creatorIds: [],
       query: '',
       liveOnly: false,
       sponsoredOnly: false,
       verifiedOnly: false,
       trendingOnly: false,
       promotionsOnly: false,
-      publisherTypes: [],
+      sort: 'trending',
     });
-    onReplayToggle?.();
-    onUpcomingToggle?.();
+    if (replayOnly) onReplayToggle?.();
+    if (upcomingOnly) onUpcomingToggle?.();
   };
 
   const quickFilters = useMemo(() => {

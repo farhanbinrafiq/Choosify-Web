@@ -94,9 +94,9 @@ export function FlashDealCard({
           >
             <Heart
               size={12}
-              strokeWidth={1.6}
+              strokeWidth={2}
               className={cn(
-                wished ? 'text-[#FF000D] fill-[#FF000D]' : 'text-[#CBD5E1]',
+                wished ? 'text-[#EB4501] fill-[#EB4501]' : 'text-[#EB4501]',
               )}
             />
             {likes}
@@ -161,7 +161,7 @@ export function DealOfTheDayCard({
         </div>
         <div className="text-[9.5px] text-white/50">New deal in {refreshLabel}</div>
       </div>
-      <Link to={to} className="relative h-[130px] rounded-[10px] overflow-hidden mb-3 block">
+      <Link to={to} className="relative h-[185px] rounded-[10px] overflow-hidden mb-3 block">
         <img
           src={image || PLACEHOLDER_IMAGE}
           alt=""

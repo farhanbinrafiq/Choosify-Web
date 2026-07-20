@@ -27,7 +27,7 @@ function renderInlineMarkdown(text: string) {
   return parts.map((part, i) => {
     if (part.startsWith('**') && part.endsWith('**')) {
       return (
-        <strong key={i} className="font-bold text-[#1A1D4E]">
+        <strong key={i} className="font-bold text-[#1A1A2E]">
           {part.slice(2, -2)}
         </strong>
       );
@@ -38,13 +38,19 @@ function renderInlineMarkdown(text: string) {
       const isInternal = href.startsWith('/');
       if (isInternal) {
         return (
-          <Link key={i} to={href} className="text-[#EB4501] font-bold hover:underline">
+          <Link key={i} to={href} className="choosify-emi-gradient-text font-bold hover:underline">
             {label}
           </Link>
         );
       }
       return (
-        <a key={i} href={href} className="text-[#EB4501] font-bold hover:underline" target="_blank" rel="noreferrer">
+        <a
+          key={i}
+          href={href}
+          className="choosify-emi-gradient-text font-bold hover:underline"
+          target="_blank"
+          rel="noreferrer"
+        >
           {label}
         </a>
       );
@@ -61,13 +67,20 @@ function PickCard({ pick }: { pick: EmiCatalogPick }) {
         className="flex items-center gap-2 p-2 rounded-lg border border-[#e8edf2] bg-white hover:border-[#EB4501]/35 transition-colors text-left"
       >
         <div className="min-w-0 flex-1">
-          <p className="text-[10px] font-bold text-[#1A1D4E] truncate">{pick.title}</p>
+          <p className="text-[10px] font-bold text-[#1A1A2E] truncate">{pick.title}</p>
           <p className="text-[9px] text-[#8a9bb0] truncate">
             {pick.brand || 'Product'}
-            {pick.price != null ? ` · ৳${pick.price.toLocaleString()}` : ''}
+            {pick.price != null ? (
+              <>
+                {' · '}
+                <span className="choosify-emi-gradient-text font-bold">
+                  ৳{pick.price.toLocaleString()}
+                </span>
+              </>
+            ) : null}
           </p>
         </div>
-        <ArrowRight size={12} className="text-[#EB4501] shrink-0" />
+        <ArrowRight size={12} className="text-[#EB4501] shrink-0" stroke="url(#choosify-emi-icon-grad)" />
       </Link>
     );
   }
@@ -77,8 +90,8 @@ function PickCard({ pick }: { pick: EmiCatalogPick }) {
         to={pick.url}
         className="flex items-center gap-2 p-2 rounded-lg border border-[#e8edf2] bg-white hover:border-[#EB4501]/35 transition-colors text-left"
       >
-        <p className="text-[10px] font-bold text-[#1A1D4E] truncate flex-1">{pick.name}</p>
-        <ArrowRight size={12} className="text-[#EB4501] shrink-0" />
+        <p className="text-[10px] font-bold text-[#1A1A2E] truncate flex-1">{pick.name}</p>
+        <ArrowRight size={12} className="shrink-0" stroke="url(#choosify-emi-icon-grad)" />
       </Link>
     );
   }
@@ -87,8 +100,8 @@ function PickCard({ pick }: { pick: EmiCatalogPick }) {
       to={pick.url}
       className="flex items-center gap-2 p-2 rounded-lg border border-[#e8edf2] bg-white hover:border-[#EB4501]/35 transition-colors text-left"
     >
-      <p className="text-[10px] font-bold text-[#1A1D4E] truncate flex-1">{pick.title}</p>
-      <ArrowRight size={12} className="text-[#EB4501] shrink-0" />
+      <p className="text-[10px] font-bold text-[#1A1A2E] truncate flex-1">{pick.title}</p>
+      <ArrowRight size={12} className="shrink-0" stroke="url(#choosify-emi-icon-grad)" />
     </Link>
   );
 }
@@ -127,24 +140,28 @@ export function EmiChatPanel({ onClose, className, variant = 'panel', seedPrompt
 
   return (
     <div className={cn('flex flex-col min-h-0 h-full', className)}>
-      <div className="px-4 sm:px-5 py-4 border-b border-[#e8edf2] flex items-center justify-between shrink-0 bg-[#000435] text-white gap-3">
+      <div className="px-4 sm:px-5 py-4 border-b border-white/10 flex items-center justify-between shrink-0 choosify-emi-gradient text-white gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 shadow-lg p-1 overflow-hidden">
             <EmiAiLogo size={32} className="w-8 h-8" />
           </div>
           <div className="min-w-0 text-left">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/60 flex items-center gap-1">
-              <Sparkles size={10} className="text-[#EB4501]" />
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white flex items-center gap-1">
+              <Sparkles size={10} className="text-white" />
               Choosify Assistant
             </p>
-            <h3 className="text-sm font-black uppercase tracking-wide truncate">Emi</h3>
+            <h3 className="text-sm font-black uppercase tracking-wide truncate m-0">
+              <span className="inline-block bg-white px-1.5 py-0.5 rounded choosify-emi-gradient-text">
+                Emi
+              </span>
+            </h3>
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
           <button
             type="button"
             onClick={clearChat}
-            className="text-[9px] font-black uppercase tracking-wider text-white/70 hover:text-white cursor-pointer border-0 bg-transparent px-1 flex items-center gap-1"
+            className="text-[9px] font-black uppercase tracking-wider text-white/90 hover:text-white cursor-pointer border-0 bg-transparent px-1 flex items-center gap-1"
             title="Clear chat"
           >
             <RotateCcw size={11} />
@@ -154,7 +171,7 @@ export function EmiChatPanel({ onClose, className, variant = 'panel', seedPrompt
             <button
               type="button"
               onClick={onClose}
-              className="w-8 h-8 rounded-full border border-white/20 hover:bg-white/10 flex items-center justify-center text-white transition-colors cursor-pointer"
+              className="w-8 h-8 rounded-full border border-white/25 hover:bg-white/10 flex items-center justify-center text-white transition-colors cursor-pointer"
               aria-label="Close Emi"
             >
               <X size={16} />
@@ -173,8 +190,8 @@ export function EmiChatPanel({ onClose, className, variant = 'panel', seedPrompt
               className={cn(
                 'rounded-[10px] px-3.5 py-2.5 text-[12px] leading-relaxed whitespace-pre-wrap',
                 msg.role === 'user'
-                  ? 'bg-[#EB4501] text-white'
-                  : 'bg-white border border-[#e8edf2] text-[#1A1D4E] shadow-sm',
+                  ? 'bg-[#EB4501] text-[#1A1A2E]'
+                  : 'bg-white border border-[#e8edf2] text-[#1A1A2E] shadow-sm',
               )}
             >
               {renderInlineMarkdown(msg.content)}
@@ -204,9 +221,9 @@ export function EmiChatPanel({ onClose, className, variant = 'panel', seedPrompt
               type="button"
               onClick={() => void sendMessage(prompt)}
               disabled={isLoading}
-              className="px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wide border border-[#e8edf2] text-[#64748b] hover:border-[#EB4501]/40 hover:text-[#CF4400] bg-white cursor-pointer transition-colors disabled:opacity-50"
+              className="px-2.5 py-1 rounded-full text-[9px] font-bold uppercase tracking-wide border border-[#e8edf2] bg-white cursor-pointer transition-colors disabled:opacity-50"
             >
-              {prompt}
+              <span className="choosify-emi-gradient-text">{prompt}</span>
             </button>
           ))}
         </div>
@@ -226,7 +243,7 @@ export function EmiChatPanel({ onClose, className, variant = 'panel', seedPrompt
           type="button"
           onClick={handleSend}
           disabled={!draft.trim() || isLoading}
-          className="h-11 w-11 rounded-lg bg-[#EB4501] hover:bg-[#E04E00] text-white flex items-center justify-center disabled:opacity-40 cursor-pointer border-0 shrink-0"
+          className="h-11 w-11 rounded-lg choosify-emi-gradient text-white flex items-center justify-center disabled:opacity-40 cursor-pointer border-0 shrink-0 hover:brightness-110"
           aria-label="Send to Emi"
         >
           <Send size={15} />
@@ -240,7 +257,8 @@ export function EmiChatPanel({ onClose, className, variant = 'panel', seedPrompt
             onClick={onClose}
             className="text-[9px] font-black uppercase tracking-wider text-[#8a9bb0] hover:text-[#CF4400] flex items-center justify-center gap-1"
           >
-            Open full Emi chat <ArrowRight size={10} />
+            <span className="choosify-emi-gradient-text">Open full Emi chat</span>
+            <ArrowRight size={10} stroke="url(#choosify-emi-icon-grad)" />
           </Link>
         </div>
       ) : null}

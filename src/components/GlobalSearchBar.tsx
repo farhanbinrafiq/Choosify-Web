@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
-import { Search, Folder, User, Clock, ArrowRight, Sparkles, X, Flame, Rocket, BookOpen, Store, ShoppingBag, LayoutGrid } from 'lucide-react';
+import { SearchCheck, Folder, User, Clock, ArrowRight, Sparkles, X, Flame, Rocket, BookOpen, Store, ShoppingBag, LayoutGrid } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { CATEGORIES } from '../constants';
 import { CREATORS } from '../data/creators';
@@ -443,7 +443,7 @@ export function GlobalSearchBar({
           </button>
         )}
         <div className="pl-2.5 sm:pl-4 text-[#EB4501] shrink-0">
-          <Search className="w-4 h-4" />
+          <SearchCheck className="w-4 h-4" strokeWidth={2} />
         </div>
         <input
           ref={inputRef}
@@ -467,7 +467,7 @@ export function GlobalSearchBar({
             'w-full min-w-0 bg-transparent outline-none text-navy font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none',
             mode === 'overlay'
               ? 'h-10 pl-2 pr-24 text-xs'
-              : 'h-9 sm:h-9 md:h-10 pl-2 sm:pl-3 pr-11 sm:pr-14 md:pr-20 lg:pr-24 text-[11px] sm:text-xs',
+              : 'h-9 sm:h-9 md:h-10 pl-2 sm:pl-3 pr-[4.25rem] sm:pr-14 md:pr-20 lg:pr-24 text-[11px] sm:text-xs',
           )}
         />
         <button
@@ -477,14 +477,14 @@ export function GlobalSearchBar({
             'absolute right-1 sm:right-1.5 top-1 sm:top-1.5 bottom-1 sm:bottom-1.5 rounded-full bg-[#EB4501] hover:bg-[#CF4400] text-white font-bold tracking-wide uppercase flex items-center justify-center gap-1 transition-all duration-200 cursor-pointer',
             mode === 'overlay'
               ? 'px-4 text-[9px]'
-              : 'px-2 sm:px-2.5 md:px-4 lg:px-5 text-[8px] sm:text-[8px] md:text-[9px] min-w-[2rem] sm:min-w-[2.25rem] md:min-w-0',
+              : 'px-2 sm:px-2.5 md:px-4 lg:px-5 text-[8px] sm:text-[8px] md:text-[9px] min-w-[3.25rem] sm:min-w-[2.25rem] md:min-w-0 max-w-[42%] sm:max-w-none',
           )}
         >
           {mode === 'overlay' ? (
             submitLabel
           ) : (
             <>
-              <Search className="w-3.5 h-3.5 md:hidden shrink-0" />
+              <SearchCheck className="w-3.5 h-3.5 md:hidden shrink-0" strokeWidth={2} />
               <span className="hidden md:inline">{submitLabel}</span>
             </>
           )}
@@ -500,9 +500,9 @@ export function GlobalSearchBar({
           type="button"
           aria-label="Open search"
           onClick={openMobileSearch}
-          className="sm:hidden flex w-10 h-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+          className="sm:hidden flex w-10 h-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#EB4501] hover:bg-white/10 transition-colors"
         >
-          <Search size={20} />
+          <SearchCheck size={20} strokeWidth={2} />
         </button>
       )}
 
@@ -530,8 +530,8 @@ export function GlobalSearchBar({
           onSubmit={handleSearchSubmit} 
           className="relative w-full bg-white/5 hover:bg-white/10 focus-within:bg-white/10 backdrop-blur-md px-2 py-1 lg:px-2.5 lg:py-1.5 xl:px-3 xl:py-1.5 rounded-full border border-white/10 focus-within:border-white/20 transition-all duration-300 flex items-center min-w-0"
         >
-          <div className="text-gray-400 shrink-0">
-            <Search className="w-3 h-3 lg:w-3.5 lg:h-3.5" />
+          <div className="text-[#EB4501] shrink-0">
+            <SearchCheck className="w-3 h-3 lg:w-3.5 lg:h-3.5" strokeWidth={2} />
           </div>
           <input 
             ref={inputRef}
@@ -575,7 +575,7 @@ export function GlobalSearchBar({
         >
           <div className="flex items-center bg-white rounded-full relative min-w-0">
             <div className="pl-4 text-[#EB4501] shrink-0">
-              <Search className="w-4 h-4" />
+              <SearchCheck className="w-4 h-4" strokeWidth={2} />
             </div>
             <input
               ref={inputRef}
@@ -796,7 +796,7 @@ export function GlobalSearchBar({
                               isActive ? 'bg-[#EB4501]/5 text-[#EB4501]' : 'text-[#1A1A2E] hover:bg-gray-50'
                             }`}
                           >
-                            <Search size={12} className="opacity-40" />
+                            <SearchCheck size={12} strokeWidth={2} className="opacity-40 text-[#EB4501]" />
                             <span className="truncate italic">"{item.title}"</span>
                           </div>
                         );
@@ -826,7 +826,7 @@ export function GlobalSearchBar({
                               <img src={item.image} className="w-8 h-8 rounded-[5px] object-cover shrink-0 border border-gray-100" alt={item.title} />
                             ) : (
                               <div className="w-8 h-8 rounded-[5px] bg-gray-100 flex items-center justify-center shrink-0 text-gray-400">
-                                <Search size={12} />
+                                <SearchCheck size={12} strokeWidth={2} className="text-[#EB4501]" />
                               </div>
                             )}
                             <div className="flex-1 min-w-0 text-left">

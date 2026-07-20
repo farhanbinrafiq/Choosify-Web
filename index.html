@@ -67,10 +67,12 @@
     <link rel="mask-icon" href="/masked-icon.svg?v=8" color="#FF5B00" />
     <link rel="manifest" href="/manifest.webmanifest" />
 
-    <!-- Google Fonts -->
+    <!-- Satoshi (local) + JetBrains Mono (code) -->
+    <link rel="preload" href="/fonts/satoshi/Satoshi-Variable.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/satoshi/Satoshi-Regular.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Inter:wght@400;500;600;700;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet" />
     <!-- Swiper.js CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
@@ -78,7 +80,7 @@
       html, body {
         scroll-behavior: smooth;
         background-color: #EEF1F8;
-        font-family: 'Inter', sans-serif;
+        font-family: 'Satoshi', 'Helvetica Neue', Arial, sans-serif;
       }
       .no-scrollbar::-webkit-scrollbar {
         display: none;

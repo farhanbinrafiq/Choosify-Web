@@ -51,7 +51,7 @@ export function PublicReviewCard({
   return (
     <div
       className={cn(
-        'rounded-[14px] p-[18px] flex flex-col text-left',
+        'rounded-none p-[18px] flex flex-col text-left',
         isDark
           ? 'bg-white/5 border border-white/10 text-white'
           : 'bg-white border border-[#E8EDF2]',

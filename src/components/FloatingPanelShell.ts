@@ -10,7 +10,7 @@ export const floatingPanelDesktopClass =
   'w-[min(24rem,calc(100vw-1.5rem))] max-h-[min(32rem,calc(100vh-10rem))] rounded-2xl';
 
 export const floatingPanelTabletClass =
-  'fixed bottom-4 left-1/2 -translate-x-1/2 w-[min(24rem,calc(100vw-1.5rem))] max-h-[70vh] rounded-2xl z-[250]';
+  'fixed bottom-4 left-1/2 w-[min(24rem,calc(100vw-1.5rem))] max-h-[70vh] rounded-2xl z-[250]';
 
 export const floatingPanelMobileClass =
   'fixed bottom-0 left-0 right-0 h-[72vh] rounded-t-2xl z-[250] w-full pointer-events-auto';

@@ -15,7 +15,14 @@ import {
 import { PRODUCTS, PLACEHOLDER_IMAGE } from '../constants';
 import toast from 'react-hot-toast';
 
-export function CustomerOrdersPage() {
+export function CustomerOrdersPage({
+  embedded = false,
+  onOpenConversation,
+}: {
+  /** Render inside Dashboard shell (keep sidebar) */
+  embedded?: boolean;
+  onOpenConversation?: (threadId: string) => void;
+} = {}) {
   const navigate = useNavigate();
   const { orders, cancelOrder } = useGlobalState();
   const { createNewThread, addNotification } = useDashboard();
@@ -40,7 +47,11 @@ export function CustomerOrdersPage() {
     );
 
     toast.success(`Active channel opened with ${subOrder.sellerBusinessName}`);
-    navigate(`/messages/${threadId}`);
+    if (onOpenConversation) {
+      onOpenConversation(threadId);
+    } else {
+      navigate(`/messages/${threadId}`);
+    }
   };
 
   const handleDownloadInvoice = (order: any, sub: any) => {
@@ -78,9 +89,16 @@ Thank you for shopping with Choosify.bd
   };
 
   return (
-    <div className="flex flex-col min-h-screen bg-choosify-feed text-[#1A1A2E] font-sans">
+    <div
+      className={
+        embedded
+          ? 'w-full text-[#1A1A2E] font-sans animate-in fade-in slide-in-from-bottom-5 duration-700'
+          : 'flex flex-col min-h-screen bg-choosify-feed text-[#1A1A2E] font-sans'
+      }
+    >
+      {!embedded && (
       <div className="w-full px-5 sm:px-8 pt-4">
-        <header className="max-w-7xl mx-auto choosify-dark-surface text-white border border-white/5 rounded-[14px] overflow-hidden">
+        <header className="max-w-7xl mx-auto choosify-dark-surface text-white border border-white/5 rounded-none overflow-hidden">
           <div className="w-full px-5 sm:px-8 py-7 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
               <Link
@@ -98,7 +116,8 @@ Thank you for shopping with Choosify.bd
             </div>
 
             <Link
-              to="/messages"
+              to="/dashboard"
+              state={{ activeTab: 'messages' }}
               className="inline-flex items-center gap-1.5 self-start sm:self-auto bg-white/10 hover:bg-white/15 border border-white/15 text-white font-bold text-[12px] px-4 py-2.5 rounded-lg transition-all"
             >
               <MessageSquare size={14} className="text-[#EB4501]" />
@@ -107,8 +126,18 @@ Thank you for shopping with Choosify.bd
           </div>
         </header>
       </div>
+      )}
 
-      <div className="max-w-7xl mx-auto w-full px-4 md:px-8 py-10 flex-1">
+      {embedded && (
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
+          <div className="text-left">
+            <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">My Orders</h2>
+            <p className="text-[#9AA0AC] text-[12.5px]">Active and past purchases across Choosify sellers</p>
+          </div>
+        </div>
+      )}
+
+      <div className={embedded ? 'w-full' : 'max-w-7xl mx-auto w-full px-4 md:px-8 py-10 flex-1'}>
         {orders.length === 0 ? (
           <div className="bg-white border border-[#E8EDF2] rounded-xl p-12 sm:p-16 text-center max-w-xl mx-auto space-y-6 shadow-sm">
             <div className="w-16 h-16 bg-[#F4F7F9] rounded-full border border-[#E8EDF2] flex items-center justify-center text-[#9AA0AC] mx-auto">

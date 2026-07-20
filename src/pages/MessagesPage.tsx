@@ -18,14 +18,39 @@ import { MessagesRightRail } from '../components/messages/MessagesRightRail';
 
 type ConversationTab = 'all' | 'orders' | 'support' | 'unread';
 
-export function MessagesPage() {
-  const { threadId } = useParams<{ threadId?: string }>();
+export function MessagesPage({
+  embedded = false,
+  initialThreadId,
+}: {
+  /** Render inside Dashboard shell (keep sidebar; no full-page chrome redirects) */
+  embedded?: boolean;
+  initialThreadId?: string;
+} = {}) {
+  const { threadId: routeThreadId } = useParams<{ threadId?: string }>();
   const navigate = useNavigate();
   const { threads, threadMessages, addThreadMessage, createNewThread, markAllAsRead, setThreads, setThreadMessages } = useDashboard();
   const { orders } = useGlobalState();
   const [inputText, setInputText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [conversationTab, setConversationTab] = useState<ConversationTab>('all');
+  const [localThreadId, setLocalThreadId] = useState<string | undefined>(initialThreadId);
+
+  useEffect(() => {
+    if (embedded && initialThreadId) {
+      setLocalThreadId(initialThreadId);
+    }
+  }, [embedded, initialThreadId]);
+
+  const threadId = embedded ? localThreadId : routeThreadId;
+
+  const selectThread = (id: string | undefined) => {
+    if (embedded) {
+      setLocalThreadId(id);
+      return;
+    }
+    if (id) navigate(`/messages/${id}`);
+    else navigate('/messages');
+  };
 
   // Interactive Modal states
   const [showSourcingModal, setShowSourcingModal] = useState(false);
@@ -239,7 +264,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
       'general',
       'How can we help you today?',
     );
-    navigate(`/messages/${id}`);
+    selectThread(id);
     setConversationTab('support');
   };
 
@@ -253,16 +278,23 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
   ];
 
   return (
-    <div className="flex flex-col bg-choosify-feed text-[#1A1A2E] h-[calc(100dvh-var(--choosify-navbar-height,4rem))] max-h-[calc(100dvh-var(--choosify-navbar-height,4rem))] overflow-hidden">
+    <div
+      className={
+        embedded
+          ? 'flex flex-col bg-transparent text-[#1A1A2E] h-[min(720px,calc(100dvh-10rem))] max-h-[calc(100dvh-10rem)] overflow-hidden rounded-none border border-[#E8EDF2] bg-white'
+          : 'flex flex-col bg-choosify-feed text-[#1A1A2E] h-[calc(100dvh-var(--choosify-navbar-height,4rem))] max-h-[calc(100dvh-var(--choosify-navbar-height,4rem))] overflow-hidden'
+      }
+    >
       {/* Messages Header bar — constrained to feed silhouette */}
+      {!embedded && (
       <div className="w-full px-5 sm:px-10 pt-3 shrink-0">
-        <div className="max-w-[1400px] mx-auto w-full choosify-dark-surface text-white px-5 sm:px-10 py-5 flex items-center justify-between gap-3.5 flex-wrap rounded-[14px] overflow-hidden">
+        <div className="max-w-[1400px] mx-auto w-full choosify-dark-surface text-white px-5 sm:px-10 py-5 flex items-center justify-between gap-3.5 flex-wrap rounded-none overflow-hidden">
         <div className="flex items-center gap-3 min-w-0">
           <button
             type="button"
             onClick={() => {
               if (threadId && window.innerWidth < 768) {
-                navigate('/messages');
+                selectThread(undefined);
               } else {
                 navigate('/dashboard');
               }
@@ -311,7 +343,8 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
             Dashboard
           </Link>
           <Link
-            to="/profile/orders"
+            to="/dashboard"
+            state={{ activeTab: 'orders' }}
             className="px-4 py-2.5 bg-[#EB4501] hover:bg-[#CF4400] rounded-lg text-[11px] font-bold text-white transition-all flex items-center gap-1.5"
           >
             <Package size={12} />
@@ -320,9 +353,36 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
         </div>
         </div>
       </div>
+      )}
+
+      {embedded && (
+        <div className="px-4 py-3 border-b border-[#E8EDF2] bg-white shrink-0 flex items-center justify-between gap-3">
+          <div className="min-w-0">
+            <h2 className="text-[15px] font-extrabold text-[#1A1A2E] tracking-tight">Messages</h2>
+            <p className="text-[11.5px] text-[#9AA0AC]">Buyer and seller conversations</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              if (hasUnread) {
+                markAllAsRead();
+                toast.success('All support chats marked as read!');
+              }
+            }}
+            disabled={!hasUnread}
+            className={`px-3 py-2 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1.5 border border-[#E8EDF2]
+              ${hasUnread
+                ? 'bg-[#F4F7F9] text-[#1A1A2E] cursor-pointer hover:border-[#EB4501]/40'
+                : 'bg-[#F4F7F9] text-[#9AA0AC] cursor-not-allowed'}`}
+          >
+            <CheckSquare size={12} />
+            Mark all as read
+          </button>
+        </div>
+      )}
 
       {/* 3-column shell: list | chat | rail */}
-      <div className="flex flex-1 min-h-0 overflow-hidden max-w-[1400px] w-full mx-auto">
+      <div className={`flex flex-1 min-h-0 overflow-hidden w-full mx-auto ${embedded ? '' : 'max-w-[1400px]'}`}>
         {/* Sidebar: conversation list (~300px) */}
         <aside
           className={`w-full md:w-[300px] bg-white border-r border-[#E8EDF2] flex flex-col shrink-0 min-h-0 ${
@@ -396,7 +456,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                   <button
                     key={t.id}
                     type="button"
-                    onClick={() => navigate(`/messages/${t.id}`)}
+                    onClick={() => selectThread(t.id)}
                     aria-current={isActive ? 'true' : undefined}
                     className={`w-full p-3 flex gap-3 text-left transition-all rounded-lg border-none cursor-pointer ${
                       isActive
@@ -476,13 +536,14 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
         >
           {threadId && (
             <div className="md:hidden flex items-center gap-3 px-4 py-3 bg-white border-b border-[#E8EDF2] flex-shrink-0">
-              <Link
-                to="/messages"
-                className="flex items-center gap-2 text-[11px] font-bold text-[#4B5563] hover:text-[#000435] transition-colors"
+              <button
+                type="button"
+                onClick={() => selectThread(undefined)}
+                className="flex items-center gap-2 text-[11px] font-bold text-[#4B5563] hover:text-[#000435] transition-colors bg-transparent border-none cursor-pointer p-0"
               >
                 <ArrowLeft size={14} />
                 Back to messages
-              </Link>
+              </button>
             </div>
           )}
           {activeThread ? (
@@ -795,8 +856,31 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                 </div>
               </div>
 
-              {/* Composer */}
-              {!isAnnouncementsThread && (
+              {/* Composer — active for normal threads; disabled strip for read-only broadcasts */}
+              {isAnnouncementsThread ? (
+                <div className="px-5 py-3.5 bg-[#F4F7F9] border-t border-[#E8EDF2] shrink-0">
+                  <div
+                    className="flex items-center gap-3 h-[42px] px-3.5 rounded-lg bg-[#E8EDF2]/70 border border-[#E5E7EB] text-[#9AA0AC] select-none pointer-events-none"
+                    role="status"
+                    aria-live="polite"
+                  >
+                    <Lock size={14} className="shrink-0 text-[#9AA0AC]" aria-hidden />
+                    <span className="flex-1 text-[12px] font-medium leading-snug">
+                      This is a broadcast channel — replies aren&apos;t supported
+                    </span>
+                    <span
+                      className="w-[42px] h-[42px] -mr-1 rounded-lg bg-[#D1D5DB] text-white/80 flex items-center justify-center shrink-0"
+                      aria-hidden
+                    >
+                      <Send size={15} />
+                    </span>
+                  </div>
+                  <div className="mt-2 text-center text-[10px] text-[#9AA0AC] flex items-center justify-center gap-1">
+                    <Megaphone size={10} className="text-[#EB4501]" />
+                    Read-only broadcast
+                  </div>
+                </div>
+              ) : (
                 <div className="px-5 py-3.5 bg-white border-t border-[#E8EDF2] flex flex-col gap-2.5 shrink-0">
                   <div className="flex flex-wrap gap-2.5">
                     <button

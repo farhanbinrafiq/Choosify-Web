@@ -42,13 +42,68 @@ export interface FilterProfile {
 // ==========================================
 const DRAG_SCROLL_SWIPE_THRESHOLD_PX = 6;
 
-/** Scroll to the page results section after closing the floating filter drawer. */
+/** Scroll to the page results section after applying filters (not on dismiss). */
 export function scrollToFilterResultsTarget(targetId?: string | null, offset = 200) {
   if (!targetId) return;
   const el = document.getElementById(targetId);
   if (!el) return;
   const top = el.getBoundingClientRect().top + window.pageYOffset - offset;
-  window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+  // Instant jump — smooth page scroll after the drawer made close feel unfinished/laggy
+  window.scrollTo({ top: Math.max(0, top), behavior: 'auto' });
+}
+
+/** Open/close tweens — short, ease-out close so floating panels don't feel sticky or laggy. */
+export const FLOATING_PANEL_OPEN_TRANSITION = {
+  type: 'tween' as const,
+  ease: [0.22, 1, 0.36, 1] as const,
+  duration: 0.22,
+};
+
+export const FLOATING_PANEL_CLOSE_TRANSITION = {
+  type: 'tween' as const,
+  ease: [0.32, 0, 0.67, 0] as const,
+  duration: 0.16,
+};
+
+/** @deprecated Use FLOATING_PANEL_OPEN_TRANSITION */
+export const FILTER_DRAWER_OPEN_TRANSITION = FLOATING_PANEL_OPEN_TRANSITION;
+/** @deprecated Use FLOATING_PANEL_CLOSE_TRANSITION */
+export const FILTER_DRAWER_CLOSE_TRANSITION = FLOATING_PANEL_CLOSE_TRANSITION;
+
+/** Shared motion for filter drawer, cart, messages, Emi, and other floating panels. */
+export function getFloatingPanelMotion(isMobile: boolean, isTablet = false) {
+  if (isMobile) {
+    return {
+      initial: { y: '100%' },
+      animate: { y: 0, transition: FLOATING_PANEL_OPEN_TRANSITION },
+      exit: { y: '100%', transition: FLOATING_PANEL_CLOSE_TRANSITION },
+    };
+  }
+
+  // Keep x in motion (not CSS -translate) so exit y/opacity don't fight tablet centering.
+  const x = isTablet ? '-50%' : 0;
+  return {
+    initial: { opacity: 0, y: 18, x, scale: 0.98 },
+    animate: {
+      opacity: 1,
+      y: 0,
+      x,
+      scale: 1,
+      transition: FLOATING_PANEL_OPEN_TRANSITION,
+    },
+    exit: {
+      opacity: 0,
+      y: 14,
+      x,
+      scale: 0.98,
+      transition: FLOATING_PANEL_CLOSE_TRANSITION,
+    },
+  };
+}
+
+/** @deprecated Use getFloatingPanelMotion */
+export function getFilterDrawerMotion(isMobile: boolean, isTablet = false) {
+  return getFloatingPanelMotion(isMobile, isTablet);
 }
 
 export interface AlphabetFilterConfig {
@@ -940,7 +995,7 @@ export function FullSidebarFilterPanel({
         <>
           <button
             type="button"
-            onClick={() => closeDrawer()}
+            onClick={() => closeDrawer({ scrollToResults: true })}
             className="flex-1 py-3 bg-orange-primary text-white hover:bg-orange-deep font-sans text-[10px] font-black uppercase tracking-wider rounded-lg flex items-center justify-center transition-all cursor-pointer shadow-xs border-none"
           >
             Apply Filters
@@ -1053,7 +1108,7 @@ interface DrawerFilterContextType {
   activeFiltersData: FloatingFilterData | null;
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  closeDrawer: () => void;
+  closeDrawer: (options?: { scrollToResults?: boolean }) => void;
   /** StickySectionNav already exposes Filter — hide duplicate left floating launchers */
   stickyFilterChromeCount: number;
   registerStickyFilterChrome: () => () => void;
@@ -1071,14 +1126,12 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
   const [stickyFilterChromeCount, setStickyFilterChromeCount] = useState(0);
   const filterDrawerRef = useRef<HTMLDivElement>(null);
   const filterContainerRef = useRef<HTMLDivElement>(null);
+  const pendingScrollTargetRef = useRef<string | null>(null);
 
   const registerStickyFilterChrome = useCallback(() => {
     setStickyFilterChromeCount((n) => n + 1);
     return () => setStickyFilterChromeCount((n) => Math.max(0, n - 1));
   }, []);
-
-  const desktopDrawerTransition = { type: 'spring' as const, damping: 32, stiffness: 280, mass: 0.8 };
-  const mobileDrawerTransition = { type: 'tween' as const, ease: [0.32, 0.72, 0, 1] as const, duration: 0.28 };
 
   useEffect(() => {
     const mobileMedia = window.matchMedia('(max-width: 640px)');
@@ -1110,13 +1163,19 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
 
   const activeFiltersData = activePageId ? activeFiltersMap[activePageId] : null;
 
-  const closeDrawer = useCallback(() => {
+  const closeDrawer = useCallback((options?: { scrollToResults?: boolean }) => {
     const targetId = activePageId ? activeFiltersMap[activePageId]?.scrollTargetId : null;
+    // Only scroll after Apply / Show Results — dismiss (X, backdrop, Esc) must not
+    // kick off a page scroll that makes the close feel laggy.
+    pendingScrollTargetRef.current = options?.scrollToResults ? (targetId ?? null) : null;
     setIsOpen(false);
-    window.requestAnimationFrame(() => {
-      window.setTimeout(() => scrollToFilterResultsTarget(targetId), 80);
-    });
   }, [activePageId, activeFiltersMap]);
+
+  const handleFilterDrawerExitComplete = useCallback(() => {
+    const targetId = pendingScrollTargetRef.current;
+    pendingScrollTargetRef.current = null;
+    if (targetId) scrollToFilterResultsTarget(targetId);
+  }, []);
 
   // ESC key to close
   useEffect(() => {
@@ -1128,6 +1187,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
   }, [isOpen, closeDrawer]);
 
   useEffect(() => {
+    pendingScrollTargetRef.current = null;
     setIsOpen(false);
   }, [location.pathname]);
 
@@ -1160,18 +1220,20 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
 
       {activeFiltersData && (
         <>
-        {!isMobile && isOpen && (
-          <motion.button
-            type="button"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="fixed inset-0 z-[218] bg-black/10 cursor-pointer border-0"
-            aria-label="Close filters"
-            onClick={() => closeDrawer()}
-          />
-        )}
+        <AnimatePresence>
+          {!isMobile && isOpen && (
+            <motion.button
+              key="floating-filter-backdrop"
+              type="button"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1, transition: { duration: 0.15, ease: 'easeOut' } }}
+              exit={{ opacity: 0, transition: { duration: 0.12, ease: 'easeIn' } }}
+              className="fixed inset-0 z-[218] bg-black/10 cursor-pointer border-0"
+              aria-label="Close filters"
+              onClick={() => closeDrawer()}
+            />
+          )}
+        </AnimatePresence>
         <div
           ref={filterContainerRef}
           className={cn(
@@ -1183,27 +1245,35 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                 : 'bottom-6 left-6 lg:bottom-8 lg:left-8',
           )}
         >
-          <AnimatePresence>
+          <AnimatePresence onExitComplete={handleFilterDrawerExitComplete}>
             {isOpen && (
               <motion.div
+                key="floating-filter-drawer-panel"
                 ref={filterDrawerRef}
                 id="floating-filter-drawer"
-                initial={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 12 }}
-                animate={isMobile ? { y: 0, opacity: 1 } : { opacity: 1, y: 0 }}
-                exit={isMobile ? { y: '100%', opacity: 1 } : { opacity: 0, y: 12 }}
-                transition={isMobile ? mobileDrawerTransition : desktopDrawerTransition}
-                style={{ willChange: 'transform' }}
-                drag={isMobile ? 'y' : false}
-                dragConstraints={{ top: 0, bottom: 250 }}
-                dragElastic={{ top: 0.1, bottom: 0.8 }}
-                onDragEnd={(_e, info) => {
-                  if (info.offset.y > 120) closeDrawer();
+                {...getFloatingPanelMotion(isMobile, isTablet)}
+                style={{
+                  willChange: 'transform, opacity',
+                  transformOrigin: isTablet ? 'bottom center' : 'bottom left',
                 }}
-                className={getFloatingPanelClassName({
-                  isMobile,
-                  isTablet,
-                  textClass: 'text-[#1A1A2E]',
-                })}
+                drag={isMobile ? 'y' : false}
+                dragConstraints={isMobile ? { top: 0, bottom: 280 } : undefined}
+                dragElastic={isMobile ? { top: 0, bottom: 0.35 } : undefined}
+                dragMomentum={false}
+                dragSnapToOrigin
+                onDragEnd={(_e, info) => {
+                  if (info.offset.y > 90 || info.velocity.y > 650) {
+                    closeDrawer();
+                  }
+                }}
+                className={cn(
+                  getFloatingPanelClassName({
+                    isMobile,
+                    isTablet,
+                    textClass: 'text-[#1A1A2E]',
+                  }),
+                  'transform-gpu backface-hidden',
+                )}
               >
                 {isMobile && (
                   <div className="w-12 h-1 rounded-full bg-gray-200 mx-auto mt-3 shrink-0" />
@@ -1355,7 +1425,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                   <div className="px-5 py-4 border-t border-[#e8edf2] bg-white shrink-0">
                     <button
                       type="button"
-                      onClick={() => closeDrawer()}
+                      onClick={() => closeDrawer({ scrollToResults: true })}
                       className="w-full py-3.5 bg-orange-primary hover:bg-orange-deep text-white text-[11px] font-black uppercase tracking-widest rounded-[5px] transition-colors cursor-pointer border-0"
                     >
                       Show Results
@@ -1374,28 +1444,18 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className={cn(
-              'w-[185px] h-12 rounded-full border flex items-center justify-between px-3.5 py-3 shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:shadow-[0_4px_22px_rgba(235, 69, 1,0.18)] transition-all duration-300 font-sans cursor-pointer group focus:outline-none pointer-events-auto',
-              isOpen
-                ? 'bg-surface-selected border-orange-primary text-orange-primary'
-                : 'bg-white border-[#e8edf2] text-heading hover:border-orange-primary/40',
+              'relative w-14 h-14 rounded-full bg-white border border-[#e8edf2] shadow-[0_8px_24px_rgba(0,0,0,0.18)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.22)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none pointer-events-auto',
+              isOpen && 'ring-2 ring-[#EB4501]/30',
             )}
-            title="Filters & Search"
+            aria-label="Open filters"
+            title="Filters"
           >
-            <div className="flex items-center gap-2">
-              <SlidersHorizontal
-                size={15}
-                className={cn(
-                  'transition-colors',
-                  isOpen ? 'text-orange-primary' : 'text-[#8a9bb0] group-hover:text-orange-primary',
-                )}
-              />
-              <span className="text-[10px] font-black uppercase tracking-wider">Filters & Search</span>
-            </div>
-            <ChevronRight
-              size={14}
+            <SlidersHorizontal
+              size={22}
+              strokeWidth={2}
               className={cn(
-                'transition-transform duration-300',
-                isOpen ? 'text-orange-primary rotate-90' : 'text-[#8a9bb0] group-hover:text-orange-primary group-hover:translate-x-1',
+                'transition-colors shrink-0',
+                isOpen ? 'text-[#EB4501]' : 'text-[#8a9bb0] group-hover:text-[#CF4400]',
               )}
             />
           </motion.button>

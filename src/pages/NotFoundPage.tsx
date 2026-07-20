@@ -1,76 +1,111 @@
-import React, { useRef, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Home, Search } from 'lucide-react';
+import React, { useMemo } from 'react';
+import { Link } from 'react-router-dom';
+import { EmiAiLogo } from '../components/EmiAiLogo';
+import { useGlobalState } from '../context/GlobalStateContext';
+import { CATEGORIES_LIST } from '../data/categoriesData';
+import { buildPagePopularSearchTerms } from '../utils/pagePopularSearches';
+
+type NotFoundChip = {
+  label: string;
+  to: string;
+};
 
 export default function NotFoundPage() {
-  const navigate = useNavigate();
-  const heroRef = useRef<HTMLDivElement>(null);
-  const [query, setQuery] = useState('');
+  const { allCategories, allCatalogProducts, siteConfig } = useGlobalState();
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmed = query.trim();
-    if (!trimmed) return;
-    navigate(`/search?q=${encodeURIComponent(trimmed)}`);
-  };
+  const chips = useMemo((): NotFoundChip[] => {
+    const categoryNames = (
+      allCategories.length
+        ? [...allCategories]
+            .filter((c) => c.enabled !== false)
+            .sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0))
+            .map((c) => c.name)
+        : CATEGORIES_LIST.map((c) => c.name)
+    ).filter(Boolean);
+
+    const categoryChips: NotFoundChip[] = categoryNames.slice(0, 12).map((name) => ({
+      label: name,
+      to: `/categories?category=${encodeURIComponent(name)}`,
+    }));
+
+    categoryChips.push({ label: 'More', to: '/categories' });
+
+    const categoryKeys = new Set(categoryNames.map((n) => n.toLowerCase()));
+    const keywordChips = buildPagePopularSearchTerms({
+      cmsTerms: siteConfig?.popularSearches,
+      products: allCatalogProducts,
+      categoryNames,
+      limit: 16,
+    })
+      .filter((term) => !categoryKeys.has(term.toLowerCase()))
+      .slice(0, 8)
+      .map((term) => ({
+        label: term,
+        to: `/search?q=${encodeURIComponent(term)}`,
+      }));
+
+    return [...categoryChips, ...keywordChips];
+  }, [allCategories, allCatalogProducts, siteConfig?.popularSearches]);
 
   return (
-    <div
-      ref={heroRef}
-      className="min-h-[calc(100vh-5rem)] bg-[#000435] flex flex-col items-center justify-center p-8 text-center relative"
+    <section
+      className="w-full min-h-[calc(100vh-5rem)] font-sans flex flex-col"
+      style={{
+        background: 'linear-gradient(180deg, #fff 0%, #fff 48%, #000435 82%, #000435 100%)',
+      }}
+      aria-labelledby="not-found-heading"
     >
-      <div className="max-w-xl relative z-10 flex-1 flex flex-col items-center justify-center">
-        <h1 className="text-[100px] sm:text-[140px] font-extrabold text-white/10 leading-none mb-[-28px] tracking-tight">
+      {/* Top: centered 404 + message + Emi */}
+      <div className="flex-1 flex flex-col items-center justify-center text-center px-5 pt-10 pb-8 sm:pt-14 sm:pb-10">
+        <h1
+          id="not-found-heading"
+          className="text-[100px] sm:text-[150px] font-extrabold leading-none tracking-tight text-[#000435]"
+        >
           404
         </h1>
 
-        <div className="space-y-4">
-          <h2 className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight leading-tight">
-            Page not found
-          </h2>
+        <p className="mt-3 sm:mt-4 text-[15px] sm:text-base font-medium text-[#6B7280]">
+          Oops! We couldn&apos;t find that page.
+        </p>
 
-          <p className="text-white/55 text-[13px] font-medium max-w-sm mx-auto leading-relaxed">
-            The page you&apos;re looking for moved or never existed. Try searching or head back home.
-          </p>
+        <p className="mt-2 text-[15px] sm:text-base font-medium text-[#6B7280]">
+          Return{' '}
+          <Link
+            to="/"
+            className="text-[#FF5B00] font-semibold underline underline-offset-2 hover:opacity-90"
+          >
+            Home
+          </Link>
+        </p>
 
-          <div className="pt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <button
-              type="button"
-              onClick={() => navigate(-1)}
-              className="w-full sm:w-auto px-6 py-3 bg-white/8 border border-white/15 text-white rounded-lg text-[12.5px] font-bold flex items-center justify-center gap-2 hover:bg-white/12 transition-colors cursor-pointer"
-            >
-              <ArrowLeft size={16} /> Go back
-            </button>
-            <button
-              type="button"
-              onClick={() => navigate('/')}
-              className="w-full sm:w-auto px-6 py-3 bg-[#EB4501] text-white rounded-lg text-[12.5px] font-bold flex items-center justify-center gap-2 hover:bg-[#CF4400] transition-colors cursor-pointer border-0"
-            >
-              <Home size={16} /> Return home
-            </button>
-          </div>
-        </div>
-
-        <div id="not-found-search" className="mt-14 pt-8 border-t border-white/10 w-full">
-          <p className="text-[11px] font-semibold text-white/40 mb-4">Try searching instead</p>
-          <form onSubmit={handleSearch} className="relative max-w-md mx-auto">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-white/35 pointer-events-none" size={18} />
-            <input
-              type="search"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search products, brands, or deals..."
-              className="w-full h-12 bg-white/8 border border-white/15 rounded-xl pl-12 pr-5 text-white text-[13px] font-semibold placeholder:text-white/30 focus:outline-none focus:border-[#EB4501]/50 transition-colors"
-            />
-          </form>
-          <p className="mt-4 text-[12px] text-white/35">
-            Or browse{' '}
-            <Link to="/products" className="text-[#EB4501] font-semibold hover:underline">
-              products
-            </Link>
-          </p>
+        <div className="mt-8 sm:mt-10 w-[200px] h-[200px] sm:w-[260px] sm:h-[260px] flex items-center justify-center">
+          <EmiAiLogo size={260} title="Emi AI" className="w-full h-full" />
         </div>
       </div>
-    </div>
+
+      {/* Bottom: full-bleed category / keyword chips */}
+      <div className="w-full bg-[#000435] px-5 sm:px-8 lg:px-10 pt-6 pb-12 sm:pb-16">
+        <p className="text-center text-[13px] sm:text-sm font-medium text-white/55 mb-5 sm:mb-6">
+          Why not check out our top categories instead?
+        </p>
+
+        <div className="flex flex-wrap gap-2.5 sm:gap-3 justify-start w-full">
+          {chips.map((chip) => (
+            <Link
+              key={`${chip.to}-${chip.label}`}
+              to={chip.to}
+              className="inline-flex items-center text-white text-[12px] sm:text-[13px] font-semibold hover:bg-white/20 transition-colors"
+              style={{
+                background: 'rgba(255,255,255,0.1)',
+                borderRadius: 20,
+                padding: '9px 18px',
+              }}
+            >
+              {chip.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }

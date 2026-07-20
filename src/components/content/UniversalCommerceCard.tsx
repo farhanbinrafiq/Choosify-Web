@@ -1,6 +1,6 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Bookmark, Package } from 'lucide-react';
+import { Heart, Package } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { PLACEHOLDER_IMAGE } from '../../constants';
 import type {
@@ -56,6 +56,7 @@ interface CommerceCardMediaProps {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   onImageError: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void;
   onBookmarkClick: (e: React.MouseEvent) => void;
+  isSaved?: boolean;
 }
 
 /** Choosify.dc.html — Viral Today / Discover media chrome */
@@ -74,6 +75,7 @@ function CommerceCardMedia({
   videoRef,
   onImageError,
   onBookmarkClick,
+  isSaved = false,
 }: CommerceCardMediaProps) {
   const isReel = variant === 'portrait-reel';
   const isBlog = variant === 'blog' || variant === 'guide';
@@ -81,7 +83,7 @@ function CommerceCardMedia({
   const showPlay = variant === 'landscape-video' || variant === 'image' || (hasVideo && !isReel);
 
   const badgeText = isBlog
-    ? (readTime ?? badgeLabel)
+    ? (badgeLabel || readTime || 'GUIDE')
     : isLive
       ? 'LIVE'
       : isReel
@@ -175,13 +177,19 @@ function CommerceCardMedia({
       <button
         type="button"
         className={cn(
-          'absolute top-2 right-2 z-10 rounded-full bg-black/40 flex items-center justify-center text-white border-0 cursor-pointer',
+          'absolute top-2 right-2 z-10 rounded-full bg-white shadow-sm flex items-center justify-center border-0 cursor-pointer',
           isReel ? 'w-[22px] h-[22px]' : 'w-6 h-6',
         )}
         onClick={onBookmarkClick}
-        aria-label="Save"
+        aria-label={isSaved ? 'Unsave' : 'Save'}
+        aria-pressed={isSaved}
       >
-        <Bookmark size={isReel ? 10 : 11} strokeWidth={1.8} />
+        <Heart
+          size={isReel ? 10 : 11}
+          className="text-[#EB4501]"
+          strokeWidth={2}
+          fill={isSaved ? '#EB4501' : 'none'}
+        />
       </button>
 
       {duration && !isLive && (
@@ -272,9 +280,11 @@ export function UniversalCommerceCard({
   showPublisherHeader = false,
   onNavigate,
   className,
+  compactMedia = false,
 }: UniversalCommerceCardProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isHovering, setIsHovering] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const isReel = variant === 'portrait-reel';
   const isBlog = variant === 'blog' || variant === 'guide';
   const isLive = variant === 'live';
@@ -310,12 +320,70 @@ export function UniversalCommerceCard({
   const stopBookmark = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    setIsSaved((prev) => !prev);
   };
+
+  /** Discover Blog Stories — horizontal 40% square | 60% text */
+  if (compactMedia && isBlog) {
+    const guideBadge = model.badgeLabel || 'GUIDE';
+    return (
+      <Link
+        to={model.href}
+        onClick={onNavigate}
+        className={cn(
+          'group cursor-pointer flex flex-row items-start gap-3 w-full min-w-0 text-left no-underline',
+          className,
+        )}
+        aria-label={model.title}
+      >
+        <div className="relative w-[40%] shrink-0 aspect-square rounded-[10px] overflow-hidden bg-[#F4F7F9]">
+          <img
+            src={model.image || PLACEHOLDER_IMAGE}
+            loading="lazy"
+            onError={handleImageError}
+            className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-[1.02] transition-transform duration-500"
+            alt=""
+          />
+          <div className="absolute top-1.5 left-1.5 z-10">
+            <div className="px-1.5 py-0.5 rounded bg-[#F59E0B] text-[#1A1A2E] text-[8px] font-extrabold w-max pointer-events-none">
+              {guideBadge}
+            </div>
+          </div>
+          <button
+            type="button"
+            className="absolute top-1.5 right-1.5 z-10 w-6 h-6 rounded-full bg-white shadow-sm flex items-center justify-center border-0 cursor-pointer"
+            onClick={stopBookmark}
+            aria-label={isSaved ? 'Unsave' : 'Save'}
+            aria-pressed={isSaved}
+          >
+            <Heart
+              size={11}
+              className="text-[#EB4501]"
+              strokeWidth={2}
+              fill={isSaved ? '#EB4501' : 'none'}
+            />
+          </button>
+        </div>
+        <div className="w-[60%] min-w-0 flex flex-col justify-center gap-1 py-0.5 self-stretch">
+          <div className="text-[12px] font-bold text-[#1A1A2E] leading-snug line-clamp-3 group-hover:text-[#CF4400] transition-colors">
+            {model.title}
+          </div>
+          <div className="text-[10.5px] text-[#9AA0AC]">
+            By {channelName} <span className="text-[#2323FF]">✓</span>
+            {model.readTime ? ` · ${model.readTime}` : ''}
+          </div>
+        </div>
+      </Link>
+    );
+  }
 
   const cardShell = cn(
     'group cursor-pointer block flex flex-col h-full w-full text-left min-w-0',
     isBlog || isLive
-      ? 'bg-white rounded-[10px] border border-[#E8EDF2] overflow-hidden'
+      ? cn(
+          'bg-white rounded-[10px] overflow-hidden',
+          mode === 'commerce' && 'border border-[#E8EDF2]',
+        )
       : 'bg-transparent',
     isReel ? 'max-w-[150px]' : '',
     className,
@@ -481,6 +549,7 @@ export function UniversalCommerceCard({
           videoRef={videoRef}
           onImageError={handleImageError}
           onBookmarkClick={stopBookmark}
+          isSaved={isSaved}
         />
       </div>
 

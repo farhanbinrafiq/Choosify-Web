@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Search, ShoppingBag, User, PlusCircle, ChevronRight, LogIn, 
+  ShoppingCart, User, PlusCircle, ChevronRight, LogIn, 
   LayoutDashboard, Heart, MessageSquare, Settings, Briefcase, Package, ShieldCheck, 
   FileCheck2, Building2, HelpCircle, ArrowLeftRight, CheckSquare, Menu, X, MapPin
 } from 'lucide-react';
@@ -264,12 +264,12 @@ export function Navbar() {
             <button
               type="button"
               onClick={openCartPreview}
-              className="sm:hidden relative w-10 h-10 shrink-0 flex items-center justify-center rounded-full border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white transition-colors"
+              className="sm:hidden relative w-10 h-10 shrink-0 flex items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#EB4501] hover:bg-white/10 transition-colors"
               aria-label="Shopping cart"
               aria-expanded={isCartOpen}
               title="Shopping Cart"
             >
-              <ShoppingBag size={20} />
+              <ShoppingCart size={20} strokeWidth={2} className="text-[#EB4501]" />
               {activeCartCount > 0 && (
                 <span className="absolute -top-1 -right-1 w-4 h-4 text-white text-[8px] font-black bg-orange-primary rounded-full flex items-center justify-center border-2 border-[#0A0A1F]">
                   {activeCartCount > 9 ? '9+' : activeCartCount}
@@ -286,12 +286,12 @@ export function Navbar() {
             <button 
               type="button"
               onClick={openCartPreview}
-              className="relative text-white/85 hover:text-white transition-colors"
+              className="relative text-[#EB4501] hover:opacity-90 transition-opacity"
               aria-label="Shopping cart"
               aria-expanded={isCartOpen}
               title="Shopping Cart"
             >
-              <ShoppingBag size={19} className="transition-colors" />
+              <ShoppingCart size={19} strokeWidth={2} className="text-[#EB4501] transition-colors" />
               {activeCartCount > 0 && (
                 <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 text-white text-[9px] font-bold bg-[#EB4501] rounded-lg flex items-center justify-center leading-none">
                   {activeCartCount > 99 ? '99+' : activeCartCount}
@@ -386,7 +386,7 @@ export function Navbar() {
               <button
                 type="button"
                 onClick={() => goToLogin('sign-in')}
-                className="h-8 xl:h-9 px-2.5 xl:px-4 bg-white text-[8px] xl:text-[9px] uppercase font-black rounded-full tracking-wider xl:tracking-widest transition-all flex items-center gap-1 italic hover:brightness-110 whitespace-nowrap border-0"
+                className="h-8 xl:h-9 px-2.5 xl:px-4 !bg-white text-[8px] xl:text-[9px] uppercase font-black rounded-full tracking-wider xl:tracking-widest transition-all flex items-center justify-center gap-1 italic hover:brightness-110 whitespace-nowrap border-0 shadow-sm shrink-0"
               >
                 <span className="choosify-emi-gradient-text">Sign In</span>
               </button>

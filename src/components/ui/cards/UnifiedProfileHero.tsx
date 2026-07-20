@@ -1,24 +1,12 @@
 import React from 'react';
 import { 
   Check, CheckCircle2, Globe, Heart, Share2, MessageSquare, 
-  MoreHorizontal, Info, Star, Users, Facebook, Instagram, 
-  Linkedin, Youtube, MapPin, Calendar, HelpCircle, ArrowUpRight
+  MoreHorizontal, Info, Star, Users,
+  MapPin, Calendar, HelpCircle, ArrowUpRight
 } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import { Button } from '../buttons/Button';
-
-// Inline TikTok icon SVG for high fidelity
-function TikTokIcon({ className = "w-5 h-5" }: { className?: string }) {
-  return (
-    <svg 
-      className={className}
-      viewBox="0 0 24 24" 
-      fill="currentColor"
-    >
-      <path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.02 1.73 4.1 1.12 1.09 2.62 1.7 4.18 1.8v3.91c-1.85-.01-3.61-.68-5.07-1.82V14.5c.04 3.39-2.14 6.55-5.4 7.63-3.25 1.08-6.9-.32-8.56-3.32C1.65 15.82 2.45 11.9 5.31 9.87c1.78-1.27 4.14-1.55 6.16-.72.01-.16.02-.32.02-.48V4.83c-1.41-.35-2.88-.16-4.16.54-2.1 1.15-3.35 3.51-3.14 5.92.21 2.42 2.01 4.54 4.38 5.17 2.37.64 4.96-.2 6.09-2.26.47-.86.7-1.84.66-2.82V.02Z" />
-    </svg>
-  );
-}
+import { socialIconSrc } from '../../icons/brandIcons';
 
 // Inline X icon SVG for high fidelity
 function XIcon({ className = "w-4 h-4" }: { className?: string }) {
@@ -127,7 +115,7 @@ export const UnifiedProfileHero: React.FC<UnifiedProfileHeroProps> = ({
     return (
       <div 
         className={cn(
-          "bg-slate-950/75 backdrop-blur-xl border border-white/15 rounded-3xl p-5 text-white shadow-2xl relative overflow-hidden flex flex-col justify-between select-none text-left",
+          "bg-slate-950/75 backdrop-blur-xl border border-white/15 rounded-none p-5 text-white shadow-2xl relative overflow-hidden flex flex-col justify-between select-none text-left",
           isMobile 
             ? "w-full" 
             : "absolute top-5 right-5 bottom-5 w-[330px] hidden lg:flex"
@@ -219,7 +207,7 @@ export const UnifiedProfileHero: React.FC<UnifiedProfileHeroProps> = ({
       <div className="max-w-[1600px] mx-auto px-4 sm:px-6 md:px-8 pt-6">
         
         {/* Campaign Banner Wrapper */}
-        <div className="relative w-full aspect-[4/1] min-h-[160px] sm:min-h-[220px] md:min-h-[260px] lg:min-h-[300px] rounded-3xl overflow-hidden shadow-md">
+        <div className="relative w-full aspect-[4/1] min-h-[160px] sm:min-h-[220px] md:min-h-[260px] lg:min-h-[300px] rounded-none overflow-hidden shadow-md">
           {bannerImage ? (
             <img 
               src={bannerImage} 
@@ -263,7 +251,7 @@ export const UnifiedProfileHero: React.FC<UnifiedProfileHeroProps> = ({
         </div>
 
         {/* Content area below Banner */}
-        <div className="bg-white border border-slate-100 rounded-b-3xl shadow-sm px-6 pb-6 pt-16 sm:pt-20 lg:pt-12 relative z-10 -mt-2">
+        <div className="bg-white border border-slate-100 rounded-none shadow-sm px-6 pb-6 pt-16 sm:pt-20 lg:pt-12 relative z-10 -mt-2">
           
           {/* Main 3-Column Profile Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start lg:items-center">
@@ -340,29 +328,24 @@ export const UnifiedProfileHero: React.FC<UnifiedProfileHeroProps> = ({
               {hasSocials && (
                 <div className="flex flex-wrap items-center justify-center lg:justify-start gap-2 pt-1">
                   {activeSocials.map(({ platform, url }) => {
-                    let IconComponent = Globe;
-                    let label = platform;
-                    
-                    if (platform === 'fb' || platform === 'facebook') IconComponent = Facebook;
-                    else if (platform === 'ig' || platform === 'instagram') IconComponent = Instagram;
-                    else if (platform === 'linkedin') IconComponent = Linkedin;
-                    else if (platform === 'youtube' || platform === 'yt') IconComponent = Youtube;
-                    
+                    const iconSrc = socialIconSrc(platform);
+                    const isX = platform === 'x' || platform === 'twitter';
+
                     return (
                       <a 
                         key={platform}
                         href={url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        title={label.toUpperCase()}
-                        className="w-9 h-9 rounded-full bg-slate-100 hover:bg-[#CF4400] text-[#000435] hover:text-white flex items-center justify-center transition-all shadow-xs border border-slate-200/50"
+                        title={platform.toUpperCase()}
+                        className="w-9 h-9 rounded-full overflow-hidden bg-white flex items-center justify-center transition-all shadow-xs border border-slate-200/50 hover:opacity-90"
                       >
-                        {platform === 'tiktok' ? (
-                          <TikTokIcon className="w-4 h-4" />
-                        ) : platform === 'x' ? (
-                          <XIcon className="w-3.5 h-3.5" />
+                        {iconSrc ? (
+                          <img src={iconSrc} alt="" className="w-5 h-5 object-contain" draggable={false} />
+                        ) : isX ? (
+                          <span className="text-[#1A1A2E]"><XIcon className="w-3.5 h-3.5" /></span>
                         ) : (
-                          <IconComponent size={15} />
+                          <Globe size={15} className="text-[#1A1A2E]" />
                         )}
                       </a>
                     );
@@ -441,7 +424,7 @@ export const UnifiedProfileHero: React.FC<UnifiedProfileHeroProps> = ({
         {navigationItems && activeTabId && onTabClick && (
           <div className="sticky top-16 sm:top-20 z-40 bg-[#F5F8FD]/95 backdrop-blur-md py-3 transition-all border-b border-[#EEF2F7] mt-6">
             <div className="w-full">
-              <div className="flex h-full overflow-x-auto hide-scrollbar gap-1.5 sm:gap-2 bg-white/40 p-1 rounded-xl">
+              <div className="flex h-full overflow-x-auto hide-scrollbar gap-1.5 sm:gap-2 bg-white/40 p-1 rounded-none">
                 {navigationItems.map((item) => {
                   const isTabActive = activeTabId === item.id;
                   return (

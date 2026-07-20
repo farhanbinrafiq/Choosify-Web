@@ -6,7 +6,7 @@ import {
   Plus,
   Minus,
   Trash2,
-  ShoppingBag,
+  ShoppingCart,
   ArrowRight,
   ShieldCheck,
   Truck,
@@ -98,7 +98,7 @@ export function RetailCartPage() {
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
       <div className="w-full px-5 sm:px-10 pt-4">
-        <header className="max-w-[1100px] mx-auto choosify-dark-surface text-white px-5 sm:px-10 py-7 rounded-[14px] overflow-hidden">
+        <header className="max-w-[1100px] mx-auto choosify-dark-surface text-white px-5 sm:px-10 py-7 rounded-none overflow-hidden">
           <nav className="text-xs text-white/45 mb-3" aria-label="Breadcrumb">
             <Link to="/" className="hover:text-white/80">
               Home
@@ -119,7 +119,7 @@ export function RetailCartPage() {
         {retailCart.length === 0 ? (
           <div className="bg-white border border-[#E8EDF2] rounded-xl p-12 sm:p-16 text-center shadow-sm max-w-xl mx-auto flex flex-col items-center gap-5">
             <div className="w-20 h-20 bg-[#FFF3EA] rounded-full flex items-center justify-center text-[#EB4501]">
-              <ShoppingBag size={36} />
+              <ShoppingCart size={36} strokeWidth={2} />
             </div>
             <div>
               <h3 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-1.5">

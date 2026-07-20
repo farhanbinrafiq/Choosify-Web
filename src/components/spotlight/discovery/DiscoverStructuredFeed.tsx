@@ -35,6 +35,7 @@ interface DiscoverStructuredFeedProps {
   setFilters: (next: SpotlightDiscoverFilters) => void;
   activeTab: SpotlightContentTabId;
   onClearFilters?: () => void;
+  hasActiveFilters?: boolean;
   className?: string;
 }
 
@@ -92,12 +93,14 @@ function FeedCard({
   onNavigate,
   className,
   forceVariant,
+  compactMedia,
 }: {
   content: SpotlightContent;
   products: CatalogProduct[];
   onNavigate: (content: SpotlightContent) => void;
   className?: string;
   forceVariant?: 'landscape-video' | 'portrait-reel' | 'live' | 'guide' | 'blog';
+  compactMedia?: boolean;
 }) {
   const product = primaryProductForContent(content, products);
   const model = spotlightToContentCardModel(content, product);
@@ -111,6 +114,7 @@ function FeedCard({
       model={model}
       onNavigate={() => onNavigate(content)}
       className={className}
+      compactMedia={compactMedia}
     />
   );
 }
@@ -124,6 +128,7 @@ export function DiscoverStructuredFeed({
   setFilters,
   activeTab,
   onClearFilters,
+  hasActiveFilters = false,
   className,
 }: DiscoverStructuredFeedProps) {
   const navigate = useNavigate();
@@ -250,13 +255,24 @@ export function DiscoverStructuredFeed({
             );
           })}
         </div>
-        <button
-          type="button"
-          onClick={onAiDiscover}
-          className="choosify-emi-gradient text-white text-[11.5px] font-bold px-4 py-2 rounded-[20px] cursor-pointer border-0 min-h-[36px] shrink-0 hover:brightness-110 transition-all"
-        >
-          ✦ AI Discover
-        </button>
+        <div className="flex items-center gap-2.5 shrink-0">
+          {hasActiveFilters && onClearFilters ? (
+            <button
+              type="button"
+              onClick={onClearFilters}
+              className="bg-white text-[#EB4501] text-[11.5px] font-bold px-4 py-2 rounded-[20px] cursor-pointer border border-[#EB4501]/40 min-h-[36px] hover:bg-[#EB4501]/5 transition-colors"
+            >
+              Clear Filters
+            </button>
+          ) : null}
+          <button
+            type="button"
+            onClick={onAiDiscover}
+            className="choosify-emi-gradient text-white text-[11.5px] font-bold px-4 py-2 rounded-[20px] cursor-pointer border-0 min-h-[36px] hover:brightness-110 transition-all"
+          >
+            ✦ AI Discover
+          </button>
+        </div>
       </div>
 
       {items.length === 0 || !hasAnyLane ? (
@@ -371,6 +387,7 @@ export function DiscoverStructuredFeed({
                     products={products}
                     onNavigate={onNavigateCard}
                     forceVariant="guide"
+                    compactMedia
                     className="!bg-transparent !border-0 !rounded-none !overflow-visible"
                   />
                 </div>

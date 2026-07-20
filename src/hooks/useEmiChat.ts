@@ -4,6 +4,7 @@ import { sendEmiMessage, type EmiChatMessage } from '../services/emiApi';
 import { searchEmiCatalog } from '../lib/emiCatalogSearch';
 import { useGlobalState } from '../context/GlobalStateContext';
 import toast from 'react-hot-toast';
+import { notifyEmiUnread } from '../hooks/useEmiUnread';
 
 const STORAGE_KEY = 'choosify_emi_chat_v1';
 
@@ -80,6 +81,7 @@ export function useEmiChat() {
           createdAt: new Date().toISOString(),
         };
         setMessages((prev) => [...prev, assistantMsg]);
+        notifyEmiUnread();
       } catch (err) {
         const localPicks = searchEmiCatalog(trimmed, {
           products: allProducts,
@@ -101,6 +103,7 @@ export function useEmiChat() {
             createdAt: new Date().toISOString(),
           },
         ]);
+        notifyEmiUnread();
         toast.error(err instanceof Error ? err.message : 'Emi is unavailable');
       } finally {
         setIsLoading(false);
@@ -112,6 +115,7 @@ export function useEmiChat() {
   const clearChat = useCallback(() => {
     setMessages([WELCOME]);
     localStorage.removeItem(STORAGE_KEY);
+    notifyEmiUnread();
   }, []);
 
   return { messages, isLoading, sendMessage, clearChat };

@@ -1,6 +1,6 @@
 import React, { memo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { CheckCircle, Bookmark, Play, Clock, Eye, LayoutGrid, Calendar, Share2, Star } from 'lucide-react';
+import { CheckCircle, Heart, Play, Clock, Eye, LayoutGrid, Calendar, Share2, Star } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { toast } from 'react-hot-toast';
 import { Badge } from './ui/badges/Badge';
@@ -161,10 +161,15 @@ export const SpotlightCard = memo(function SpotlightCard({
               </Badge>
               <button
                 onClick={handleBookmark}
-                className="w-9 h-9 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-[#CF4400] hover:bg-slate-100 transition-all border border-transparent"
-                aria-label="Bookmark"
+                className="w-9 h-9 rounded-full bg-white shadow-sm flex items-center justify-center text-[#EB4501] hover:bg-white transition-all border border-transparent"
+                aria-label="Save"
               >
-                <Bookmark size={15} className={cn("transition-colors", isSaved ? "fill-[#EB4501] text-[#EB4501]" : "")} />
+                <Heart
+                  size={15}
+                  className="text-[#EB4501]"
+                  fill={isSaved ? '#EB4501' : 'none'}
+                  strokeWidth={2}
+                />
               </button>
             </div>
 
@@ -244,9 +249,14 @@ export const SpotlightCard = memo(function SpotlightCard({
           </div>
           <button
             onClick={handleBookmark}
-            className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-white/90 backdrop-blur-xs flex items-center justify-center text-slate-500 hover:text-[#CF4400] hover:bg-white transition-all shadow-sm border border-transparent"
+            className="absolute top-4 right-4 z-10 w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center text-[#EB4501] hover:bg-white transition-all border border-transparent"
           >
-            <Bookmark size={13} className={cn("transition-colors", isSaved ? "fill-[#EB4501] text-[#EB4501]" : "")} />
+            <Heart
+              size={13}
+              className="text-[#EB4501]"
+              fill={isSaved ? '#EB4501' : 'none'}
+              strokeWidth={2}
+            />
           </button>
         </div>
 
@@ -499,9 +509,14 @@ export const SpotlightCard = memo(function SpotlightCard({
           {isSaved !== undefined && (
             <button
               onClick={handleBookmark}
-              className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white/95 backdrop-blur-xs flex items-center justify-center text-slate-500 hover:text-[#CF4400] hover:bg-white transition-all shadow-sm border border-transparent"
+              className="absolute top-3 right-3 z-10 w-8 h-8 rounded-full bg-white shadow-sm flex items-center justify-center text-[#EB4501] hover:bg-white transition-all border border-transparent"
             >
-              <Bookmark size={13} className={cn("transition-colors", isSaved ? "fill-[#EB4501] text-[#EB4501]" : "")} />
+              <Heart
+                size={13}
+                className="text-[#EB4501]"
+                fill={isSaved ? '#EB4501' : 'none'}
+                strokeWidth={2}
+              />
             </button>
           )}
         </div>

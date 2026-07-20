@@ -95,10 +95,9 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({
       >
         <Heart
           size={11}
-          strokeWidth={1.6}
-          className={cn(
-            isSaved ? 'text-[#FF000D] fill-[#FF000D]' : 'text-[#CBD5E1]',
-          )}
+          strokeWidth={2}
+          className="text-[#EB4501]"
+          fill={isSaved ? '#EB4501' : 'none'}
         />
       </button>
 

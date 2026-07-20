@@ -178,7 +178,7 @@ export function CreatorReviewsTab({ community, latestProducts }: CreatorReviewsT
         <SectionHead title="What The Community Says" />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
           {community.map((cs) => (
-            <div key={cs.name} className="bg-white border border-[#E8EDF2] rounded-[14px] p-4">
+            <div key={cs.name} className="bg-white border border-[#E8EDF2] rounded-none p-4">
               <div className="flex items-center justify-between mb-2.5">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-[#EB4501] text-white flex items-center justify-center text-[11px] font-extrabold shrink-0">

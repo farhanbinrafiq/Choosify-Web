@@ -36,7 +36,7 @@ export function CompareHero({ className }: CompareHeroProps) {
 
   return (
     <div className={className}>
-      <div className="bg-white rounded-xl p-7 border border-[#E8EDF2]">
+      <div className="bg-white rounded-none p-7 border border-[#E8EDF2]">
         <div className="flex items-baseline justify-between gap-3 mb-1">
           <h2 className="text-[17px] font-extrabold text-[#1A1A2E]">Compare Anything</h2>
           <ViewAllLink href="/compare" label="VIEW ALL COMPARISONS ›" />
@@ -44,12 +44,12 @@ export function CompareHero({ className }: CompareHeroProps) {
         <p className="text-[12.5px] text-[#9AA0AC] m-0 mb-[18px]">
           Find the best by comparing side by side
         </p>
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 min-w-0">
           <input
             placeholder="Search for first product"
             value={queryA}
             onChange={(e) => setQueryA(e.target.value)}
-            className="flex-1 h-11 rounded-lg border border-[#E5E7EB] px-4 text-[13px] outline-none focus:border-[#EB4501]"
+            className="flex-1 min-w-0 sm:min-w-[140px] h-11 rounded-lg border border-[#E5E7EB] px-4 text-[13px] outline-none focus:border-[#EB4501]"
           />
           <div className="w-[34px] h-[34px] rounded-full choosify-emi-gradient text-white text-[11px] font-extrabold flex items-center justify-center shrink-0 self-center">
             VS
@@ -58,7 +58,7 @@ export function CompareHero({ className }: CompareHeroProps) {
             placeholder="Search for second product"
             value={queryB}
             onChange={(e) => setQueryB(e.target.value)}
-            className="flex-1 h-11 rounded-lg border border-[#E5E7EB] px-4 text-[13px] outline-none focus:border-[#EB4501]"
+            className="flex-1 min-w-0 sm:min-w-[140px] h-11 rounded-lg border border-[#E5E7EB] px-4 text-[13px] outline-none focus:border-[#EB4501]"
           />
           <button
             type="button"

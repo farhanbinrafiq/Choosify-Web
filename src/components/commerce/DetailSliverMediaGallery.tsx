@@ -199,7 +199,7 @@ export function DetailSliverMediaGallery({
 
         <div
           className={cn(
-            'relative overflow-hidden shrink-0 rounded-2xl md:rounded-[14px]',
+            'relative overflow-hidden shrink-0 rounded-2xl md:rounded-none',
             multi
               ? 'w-[min(52vw,760px)] sm:w-[min(50vw,720px)] md:w-[min(48vw,780px)] lg:w-[min(46vw,860px)] h-[280px] sm:h-[360px] md:h-[460px] lg:h-[580px]'
               : 'w-full max-w-[640px] h-[280px] sm:h-[360px] md:h-[420px] lg:h-[580px]',
@@ -281,7 +281,7 @@ export function DetailSliverMediaGallery({
           <button
             type="button"
             onClick={onAddVideo}
-            className="ml-2.5 bg-white/10 border border-white/25 text-white text-[10.5px] font-bold px-3 py-1 rounded-[14px] cursor-pointer"
+            className="ml-2.5 bg-white/10 border border-white/25 text-white text-[10.5px] font-bold px-3 py-1 rounded-none cursor-pointer"
           >
             + Add Video
           </button>

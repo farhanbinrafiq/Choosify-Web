@@ -174,11 +174,14 @@ export const DealCard = memo(function DealCard({
               }}
               className={`h-8 px-3 rounded-xl border flex items-center gap-1 text-[11px] font-bold transition-all cursor-pointer ${
                 isLiked 
-                  ? 'border-[#FF000D] text-[#FF000D] bg-white' 
-                  : 'border-[#E5E7EB] text-[#9AA0AC] bg-white hover:text-[#FF000D]'
+                  ? 'border-[#EB4501] text-[#EB4501] bg-white' 
+                  : 'border-[#E5E7EB] text-[#EB4501] bg-white hover:text-[#EB4501]'
               }`}
             >
-              <Heart className={`w-3.5 h-3.5 ${isLiked ? 'fill-current' : ''}`} />
+              <Heart
+                className={`w-3.5 h-3.5 text-[#EB4501] ${isLiked ? 'fill-[#EB4501]' : ''}`}
+                strokeWidth={2}
+              />
               <span>{product.likes + (isLiked ? 1 : 0)}</span>
             </button>
 

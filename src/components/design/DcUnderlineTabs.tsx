@@ -43,7 +43,7 @@ export function DcUnderlineTabs({
     >
       <div
         className={cn(
-          'w-full flex border border-[#E8EDF2] border-b-[#E8EDF2] rounded-t-xl bg-white overflow-x-auto',
+          'w-full flex border border-[#E8EDF2] border-b-[#E8EDF2] rounded-none bg-white overflow-x-auto',
         )}
       >
         {tabs.map((tab) => {

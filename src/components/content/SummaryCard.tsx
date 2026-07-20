@@ -4,11 +4,11 @@ import { Trophy, Star, Check, ArrowRight } from 'lucide-react';
 
 export const SummaryCard = ({ overallWinner }: { overallWinner: any }) => {
   return (
-    <div className="choosify-dark-surface rounded-[32px] p-8 md:p-10 flex flex-col lg:flex-row items-center gap-10 shadow-2xl mb-16 relative overflow-hidden ">
+    <div className="choosify-dark-surface rounded-none p-8 md:p-10 flex flex-col lg:flex-row items-center gap-10 shadow-2xl mb-16 relative overflow-hidden ">
       {/* Subtle Glow */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-600/10 rounded-full blur-[100px] pointer-events-none" />
       
-      <div className="w-full lg:w-[350px] shrink-0 bg-white/5 rounded-[24px] p-6  relative overflow-hidden flex flex-col">
+      <div className="w-full lg:w-[350px] shrink-0 bg-white/5 rounded-none p-6  relative overflow-hidden flex flex-col">
         <div className="absolute top-0 left-0 right-0 h-1/2 bg-gradient-to-b from-blue-500/20 to-transparent" />
         <img src={overallWinner.image} alt={overallWinner.product} className="w-full h-48 object-contain mb-4 drop-shadow-xl z-10" />
       </div>

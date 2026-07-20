@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight, Play, Bookmark, Share2, ShieldCheck, Plus, Check } from 'lucide-react';
+import { ChevronRight, Play, Heart, Share2, ShieldCheck, Plus, Check } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import toast from 'react-hot-toast';
 
@@ -87,7 +87,11 @@ export const HeroSection = ({ content, isSaved, isFollowing, handleSave, setIsFo
                   isSaved ? "bg-white text-[#000435]" : "bg-white/10 text-white hover:bg-white/20"
                 )}
               >
-                <Bookmark className={cn("w-5 h-5", isSaved && "fill-[#000435]")} /> 
+                <Heart
+                  className="w-5 h-5 text-[#EB4501]"
+                  strokeWidth={2}
+                  fill={isSaved ? '#EB4501' : 'none'}
+                />
                 {isSaved ? 'Saved' : 'Save'}
               </button>
               <button 
@@ -114,7 +118,7 @@ export const HeroSection = ({ content, isSaved, isFollowing, handleSave, setIsFo
 
           {/* Right Image/Video */}
           <div className="relative">
-            <div className="aspect-[4/3] md:aspect-video lg:aspect-[4/5] rounded-[32px] overflow-hidden shadow-2xl relative group bg-black">
+            <div className="aspect-[4/3] md:aspect-video lg:aspect-[4/5] rounded-none overflow-hidden shadow-2xl relative group bg-black">
               {isPlayingVideo && (content.videoUrl || content.duration) ? (
                 <video 
                   src={content.videoUrl || 'https://assets.mixkit.co/videos/preview/mixkit-taking-photos-with-a-smartphone-34356-large.mp4'} 

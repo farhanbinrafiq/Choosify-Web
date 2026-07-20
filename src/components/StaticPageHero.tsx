@@ -21,7 +21,7 @@ export function StaticPageHero({
       <section
         className={cn(
           maxWidthClass,
-          'mx-auto relative min-h-[160px] sm:min-h-[180px] flex items-center choosify-dark-surface text-white border border-white/5 rounded-[14px] overflow-hidden',
+          'mx-auto relative min-h-[160px] sm:min-h-[180px] flex items-center choosify-dark-surface text-white border border-white/5 rounded-none overflow-hidden',
         )}
       >
         {children}

@@ -1,32 +1,41 @@
 import React from 'react';
+import { BRAND_ICON } from '../icons/brandIcons';
 
 export interface ProfileSocialLink {
   name: string;
   href?: string;
-  bg: string;
-  layers: Array<{ color: string; dx: number; dy: number; glyph: string }>;
+  iconSrc?: string;
+  /** @deprecated Prefer iconSrc — kept for legacy glyph layers */
+  bg?: string;
+  layers?: Array<{ color: string; dx: number; dy: number; glyph: string }>;
 }
 
-/** Choosify.dc.html Brand Detail / Creator Profile social pills */
+/** Brand Detail / Creator Profile social pills — rounded icons from brand sprite */
 export const DEFAULT_PROFILE_SOCIAL_LINKS: ProfileSocialLink[] = [
   {
     name: 'Facebook',
-    bg: '#1877F2',
-    layers: [{ color: '#fff', dx: 0, dy: 0, glyph: 'f' }],
+    href: 'https://www.facebook.com/choosify.bd',
+    iconSrc: BRAND_ICON.facebook,
   },
   {
-    name: 'TikTok',
-    bg: '#000',
-    layers: [
-      { color: '#25F4EE', dx: -1, dy: -1, glyph: '♪' },
-      { color: '#FE2C55', dx: 1, dy: 1, glyph: '♪' },
-      { color: '#fff', dx: 0, dy: 0, glyph: '♪' },
-    ],
+    name: 'Instagram',
+    href: 'https://www.instagram.com/choosify.bd/',
+    iconSrc: BRAND_ICON.instagram,
   },
   {
     name: 'YouTube',
-    bg: '#FF0000',
-    layers: [{ color: '#fff', dx: 0, dy: 0, glyph: '▶' }],
+    href: 'https://www.youtube.com/@choosifybd',
+    iconSrc: BRAND_ICON.youtube,
+  },
+  {
+    name: 'LinkedIn',
+    href: 'https://www.linkedin.com/company/choosifybangladesh/',
+    iconSrc: BRAND_ICON.linkedin,
+  },
+  {
+    name: 'TikTok',
+    href: 'https://www.tiktok.com/@choosify.bd',
+    iconSrc: BRAND_ICON.tiktok,
   },
 ];
 
@@ -47,21 +56,33 @@ export function ProfileSocialPills({
         const inner = (
           <>
             <div
-              className="relative w-[26px] h-[26px] rounded-full flex items-center justify-center shrink-0"
-              style={{ background: sl.bg }}
+              className="relative w-[26px] h-[26px] rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white"
+              style={sl.iconSrc ? undefined : { background: sl.bg }}
             >
-              {sl.layers.map((ly, i) => (
-                <span
-                  key={`${sl.name}-${i}`}
-                  className="absolute text-[11px] font-extrabold leading-none"
-                  style={{
-                    color: ly.color,
-                    transform: `translate(${ly.dx}px, ${ly.dy}px)`,
-                  }}
-                >
-                  {ly.glyph}
-                </span>
-              ))}
+              {sl.iconSrc ? (
+                <img
+                  src={sl.iconSrc}
+                  alt=""
+                  width={20}
+                  height={20}
+                  className="w-5 h-5 object-contain"
+                  draggable={false}
+                  aria-hidden
+                />
+              ) : (
+                (sl.layers ?? []).map((ly, i) => (
+                  <span
+                    key={`${sl.name}-${i}`}
+                    className="absolute text-[11px] font-extrabold leading-none"
+                    style={{
+                      color: ly.color,
+                      transform: `translate(${ly.dx}px, ${ly.dy}px)`,
+                    }}
+                  >
+                    {ly.glyph}
+                  </span>
+                ))
+              )}
             </div>
             <span className="text-[11px] font-bold text-[#1A1A2E]">{sl.name}</span>
           </>

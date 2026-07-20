@@ -181,7 +181,7 @@ export function OrderTrackingPage() {
     <div className="flex flex-col min-h-screen bg-choosify-feed">
       {/* Compact navy header — constrained to feed silhouette */}
       <div className="w-full px-5 sm:px-10 pt-4">
-        <div className="max-w-[1100px] mx-auto choosify-dark-surface text-white px-5 sm:px-10 pt-6 pb-8 rounded-[14px] overflow-hidden">
+        <div className="max-w-[1100px] mx-auto choosify-dark-surface text-white px-5 sm:px-10 pt-6 pb-8 rounded-none overflow-hidden">
           <div className="text-[12px] text-white/45 mb-4">
             <Link to="/" className="hover:text-white/80 transition-colors">
               Home

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Bookmark, Heart, Share2 } from 'lucide-react';
+import { Heart, Share2 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import {
   useCardEngagement,
@@ -66,7 +66,7 @@ export function CardEngagementStrip({
                 : 'bg-white text-[#1A1A2E] border border-white hover:bg-white/95',
             )}
           >
-            <Heart size={13} className={cn(hasLoved && 'fill-current')} />
+            <Heart size={13} className={cn(hasLoved && 'fill-current')} fill={hasLoved ? 'currentColor' : 'none'} />
             {hasLoved ? 'Loved!' : 'Love React'}
           </button>
         </div>
@@ -74,7 +74,7 @@ export function CardEngagementStrip({
         <div className="hidden sm:block h-4 w-px bg-white/20 shrink-0" aria-hidden="true" />
 
         <div className="flex items-center gap-2 shrink-0 whitespace-nowrap">
-          <Bookmark size={14} className="text-[#EB4501]" />
+          <Heart size={14} className="text-[#EB4501]" strokeWidth={2} />
           <span>{saveCount.toLocaleString()} Saved</span>
           <button
             type="button"
@@ -86,7 +86,12 @@ export function CardEngagementStrip({
                 : 'bg-[#1A1D4E] text-white border-white/15 hover:bg-[#252a6e]',
             )}
           >
-            <Bookmark size={13} className={cn(isSaved && 'fill-current')} />
+            <Heart
+              size={13}
+              className="text-[#EB4501]"
+              strokeWidth={2}
+              fill={isSaved ? '#EB4501' : 'none'}
+            />
             {isSaved ? 'Saved' : 'Save'}
           </button>
         </div>
@@ -125,7 +130,7 @@ export function CardEngagementStrip({
             hasLoved ? 'text-[#FF000D]' : 'text-[#8a9bb0] hover:text-[#FF000D]',
           )}
         >
-          <Heart size={14} className={cn(hasLoved && 'fill-current')} />
+          <Heart size={14} className={cn(hasLoved && 'fill-current')} fill={hasLoved ? 'currentColor' : 'none'} />
           <span>{loveCount.toLocaleString()}</span>
         </button>
 
@@ -134,10 +139,15 @@ export function CardEngagementStrip({
           onClick={toggleSave}
           className={cn(
             'inline-flex items-center gap-1.5 min-h-8 px-1 text-[11px] font-bold uppercase tracking-wider transition-colors cursor-pointer border-0 bg-transparent',
-            isSaved ? 'text-[#FF000D]' : 'text-[#8a9bb0] hover:text-[#FF000D]',
+            isSaved ? 'text-[#EB4501]' : 'text-[#8a9bb0] hover:text-[#EB4501]',
           )}
         >
-          <Bookmark size={14} className={cn(isSaved && 'fill-current')} />
+          <Heart
+            size={14}
+            className="text-[#EB4501]"
+            strokeWidth={2}
+            fill={isSaved ? '#EB4501' : 'none'}
+          />
           <span>{saveCount.toLocaleString()}</span>
         </button>
 

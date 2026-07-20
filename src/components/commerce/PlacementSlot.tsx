@@ -4,6 +4,7 @@ import { SPONSORED_SURFACE_CONFIG } from '../../lib/commerce/sponsoredPlacementR
 import { useSponsoredPlacementsForSurface } from '../../hooks/useSponsoredPlacementsForSurface';
 import type { SponsoredPlacementSurface } from '../../types/commerce/sponsoredPlacement';
 import { ChoosifySponsoredCard } from './ChoosifySponsoredCard';
+import { SponsoredProductTile } from './AdvertiseHereCard';
 
 export interface PlacementSlotProps {
   /** Surface key — home, products, categories, brands, deals, search, spotlight, compare */
@@ -58,7 +59,7 @@ export function SponsoredCompareRail({ className }: { className?: string }) {
       </div>
       <div className="choosify-product-grid w-full">
         {items.map((item) => (
-          <ChoosifySponsoredCard key={item.id} item={item} />
+          <SponsoredProductTile key={item.id} item={item} />
         ))}
       </div>
     </section>

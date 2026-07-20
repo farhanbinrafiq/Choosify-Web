@@ -811,27 +811,6 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
         </div>
       )}
 
-      <div className={cn(DC_CONTENT_MAX, 'pt-7 pb-0 w-full')}>
-        <div className="text-xs text-[#9AA0AC] mb-3.5">
-          <Link to="/" className="hover:text-[#CF4400]">Home</Link>
-          {' '}&nbsp;›&nbsp;{' '}
-          <Link to="/products" className="hover:text-[#CF4400]">Products</Link>
-          {product.category && (
-            <>
-              {' '}&nbsp;›&nbsp;{' '}
-              <Link
-                to={`/products?category=${encodeURIComponent(product.category)}`}
-                className="hover:text-[#CF4400]"
-              >
-                {product.category}
-              </Link>
-            </>
-          )}
-          {' '}&nbsp;›&nbsp;{' '}
-          <span className="text-[#1A1A2E]">{product.title}</span>
-        </div>
-      </div>
-
       <div ref={productHeroRef} className="w-full relative choosify-dark-surface py-7 mb-6">
         <div className="w-full relative">
           <ProductMediaGallery
@@ -1053,7 +1032,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                   <form onSubmit={handleReviewSubmit} className="flex gap-3 items-start">
                     <div className="w-[38px] h-[38px] rounded-full bg-[#F4F7F9] shrink-0 overflow-hidden" />
                     <div className="flex-1 min-w-0">
-                      <div className="border border-[#E5E7EB] rounded-[14px] px-3.5 py-2.5">
+                      <div className="border border-[#E5E7EB] rounded-none px-3.5 py-2.5">
                         <textarea
                           rows={1}
                           required
@@ -1188,7 +1167,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
               </div>
 
               <div className="pt-1 space-y-2.5">
-                <div className="text-[11px] font-extrabold text-[#2323FF]"># BEST FOR TAGS</div>
+                <div className="text-[11px] font-extrabold text-[#8A00C4]"># BEST FOR TAGS</div>
                 <div className="flex flex-wrap gap-2">
                   {[
                     'premium lifestyle',
@@ -1201,7 +1180,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                   ].map((tag) => (
                     <span
                       key={tag}
-                      className="choosify-best-for-tag text-[11px] font-bold px-3.5 py-1.5 rounded-[14px]"
+                      className="choosify-best-for-tag text-[11px] font-bold px-3.5 py-1.5 rounded-none"
                     >
                       #{tag}
                     </span>
@@ -1258,7 +1237,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                   <div className="flex items-center justify-between px-1 py-3 mb-3.5">
                     <div className="text-left">
                       <div className="text-[12px] font-extrabold text-[#1A1A2E]">Best For</div>
-                      <div className="text-[11px] font-bold text-[#FF000D]">
+                      <div className="text-[11px] font-bold text-[#8A00C4]">
                         {product.category || 'Everyday'}
                       </div>
                     </div>

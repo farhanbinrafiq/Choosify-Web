@@ -230,6 +230,9 @@ export default defineConfig(({ mode }) => {
     },
 
     server: {
+      host: '0.0.0.0',
+      port: 5173,
+      strictPort: true,
       hmr: process.env.DISABLE_HMR !== 'true',
       watch:
         process.env.DISABLE_HMR === 'true'

@@ -31,7 +31,7 @@ const DEFAULT_SCORE_ROWS = [
 
 /**
  * Choosify.dc.html Brand Detail hero —
- * cover banner constrained to feed silhouette (max-w-[1440px], rounded, top padding),
+ * cover banner constrained to feed silhouette (max-w-[1440px], square corners, top padding),
  * circular logo overlap, light identity row, score/facts, info bar.
  */
 export function BrandDetailHero({
@@ -86,12 +86,12 @@ export function BrandDetailHero({
       {/* Cover — feed silhouette (not viewport edge-to-edge); matches Brand Detail max-w-[1440px] */}
       <div className="w-full px-5 sm:px-8 lg:px-10 pt-4">
         <div className="max-w-[1440px] mx-auto relative">
-          <div className="relative h-[220px] sm:h-[280px] md:h-[320px] overflow-hidden choosify-dark-surface rounded-[14px]">
+          <div className="relative h-[220px] sm:h-[280px] md:h-[320px] overflow-hidden choosify-dark-surface rounded-none">
             <img src={cover} alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-[14px]" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-none" />
           </div>
           <div className="absolute left-1/2 top-full -translate-x-1/2 -translate-y-[60px] w-[100px] h-[100px] md:w-[120px] md:h-[120px] z-[5]">
-            <div className="w-full h-full rounded-full bg-white border-[5px] border-white shadow-[0_16px_36px_rgba(0,0,0,0.28),0_0_0_4px_rgba(255,88,0,0.15)] overflow-hidden flex items-center justify-center">
+            <div className="w-full h-full rounded-full bg-white border-[5px] border-white shadow-[0_16px_36px_rgba(0,0,0,0.28),0_0_0_4px_rgba(35,35,255,0.18)] overflow-hidden flex items-center justify-center">
               {logoNode}
             </div>
           </div>
@@ -172,7 +172,7 @@ export function BrandDetailHero({
         </div>
 
         <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="bg-white border border-[#E8EDF2] rounded-[14px] p-5 md:w-[300px] shadow-[0_2px_10px_rgba(0,0,0,0.03)] shrink-0">
+          <div className="bg-white border border-[#E8EDF2] rounded-none p-5 md:w-[300px] shadow-[0_2px_10px_rgba(0,0,0,0.03)] shrink-0">
             <div className="text-[11px] font-extrabold text-[#9AA0AC] tracking-wide mb-2.5">BRAND SCORE</div>
             <div className="flex items-baseline gap-2 mb-4">
               <div className="text-[30px] font-extrabold text-[#1A1A2E]">{score}</div>
@@ -191,7 +191,7 @@ export function BrandDetailHero({
             ))}
           </div>
 
-          <div className="bg-white border border-[#E8EDF2] rounded-[14px] p-5 flex-1 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
+          <div className="bg-white border border-[#E8EDF2] rounded-none p-5 flex-1 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
             <div className="text-[11px] font-extrabold text-[#9AA0AC] tracking-wide mb-4">BRAND FACTS</div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-5">
               {brandFacts.map((f) => (
@@ -204,7 +204,7 @@ export function BrandDetailHero({
           </div>
         </div>
 
-        <div className="bg-white border border-[#E8EDF2] rounded-[14px] px-5 sm:px-7 py-[18px] flex flex-wrap items-center gap-x-8 gap-y-4 mb-2 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
+        <div className="bg-white border border-[#E8EDF2] rounded-none px-5 sm:px-7 py-[18px] flex flex-wrap items-center gap-x-8 gap-y-4 mb-2 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
           {bar.map((item) => (
             <div key={item.label}>
               <div className="text-base font-extrabold text-[#1A1A2E] flex items-center gap-1.5">

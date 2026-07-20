@@ -88,7 +88,7 @@ export function CompareEngine() {
   const emiHelpRef = useRef<HTMLDivElement | null>(null);
 
   const STICKY_PILL_BASE =
-    'shrink-0 px-4 py-2.5 sm:py-2 rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap touch-manipulation min-h-[40px] sm:min-h-0';
+    'shrink-0 px-4 py-2.5 sm:py-2 rounded-none text-[10px] font-bold uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap touch-manipulation min-h-[40px] sm:min-h-0';
   const STICKY_PILL_ACTIVE =
     'bg-[#EB4501] text-white border border-[#EB4501]';
   const STICKY_PILL_INACTIVE =
@@ -787,7 +787,7 @@ export function CompareEngine() {
                   <div key={p.id} className="relative">
                     <div
                       className={cn(
-                        'bg-white border rounded-xl p-5 text-left group transition-all duration-300 flex flex-col justify-between h-44 relative overflow-hidden',
+                        'bg-white rounded-xl p-5 text-left group transition-all duration-300 flex flex-col justify-between h-44 relative overflow-hidden border',
                         p.matchesCriteria
                           ? p.isWinner
                             ? 'border-[#EB4501] shadow-sm'
@@ -831,7 +831,7 @@ export function CompareEngine() {
 
           <nav
             aria-label="Compare decision profile"
-            className="choosify-sticky-section-nav sticky z-40 w-full bg-white border border-[#E8EDF2] rounded-xl mb-4"
+            className="choosify-sticky-section-nav sticky z-40 w-full bg-white border border-[#E8EDF2] rounded-none mb-4"
           >
             <div className="px-4 sm:px-5 py-3">
               <div className="flex flex-col gap-2.5 md:flex-row md:items-center md:justify-between min-w-0">

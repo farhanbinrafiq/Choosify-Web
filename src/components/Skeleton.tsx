@@ -254,7 +254,7 @@ export function RecommendationCardSkeleton({
 
 export function CategoryCardSkeleton() {
   return (
-    <div className="choosify-category-photo-card choosify-category-card bg-white border rounded-[5px] flex flex-col overflow-hidden w-full border-[#e8edf2] p-0">
+    <div className="choosify-category-photo-card choosify-category-card bg-white rounded-[5px] flex flex-col overflow-hidden w-full border border-[#e8edf2] p-0">
       <Skeleton className="w-full aspect-[4/3] rounded-none" />
       <div className="w-full px-3 py-3 border-t border-[#e8edf2] space-y-2">
         <Skeleton className="h-3 w-4/5 rounded-sm" />

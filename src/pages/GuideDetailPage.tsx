@@ -387,8 +387,20 @@ export function GuideDetailPage({
       ? allGuideProducts.slice(0, visibleCount)
       : PRODUCTS.slice(0, visibleCount);
 
-  const { savedProducts, setSavedProducts, addToCompare, comparedProducts } =
+  const { savedProducts, setSavedProducts, savedGuides, setSavedGuides, addToCompare, comparedProducts } =
     useDashboard();
+
+  const isGuideSaved = savedGuides.some((g: { id?: string | number }) => String(g?.id) === String(guide.id));
+
+  const toggleGuideSave = () => {
+    if (isGuideSaved) {
+      setSavedGuides((prev: any[]) => prev.filter((g: any) => String(g.id) !== String(guide.id)));
+      toast.success('Removed from saved guides');
+    } else {
+      setSavedGuides((prev: any[]) => [guide, ...prev]);
+      toast.success('Guide saved to your dashboard!');
+    }
+  };
 
   const relatedGuides = useMemo(() => {
     return allGuides
@@ -615,11 +627,22 @@ export function GuideDetailPage({
             <div className="flex gap-2.5 sm:ml-auto">
               <button
                 type="button"
-                onClick={() => toast.success("Guide saved to your dashboard!")}
-                className="inline-flex items-center gap-1.5 bg-[#F4F7F9] text-[#1A1A2E] border-0 px-[18px] py-[11px] rounded-lg text-xs font-bold cursor-pointer hover:bg-[#E8EDF2] transition-colors"
+                onClick={toggleGuideSave}
+                className={cn(
+                  'inline-flex items-center gap-1.5 border-0 px-[18px] py-[11px] rounded-lg text-xs font-bold cursor-pointer transition-colors',
+                  isGuideSaved
+                    ? 'bg-[#FFF3EA] text-[#EB4501]'
+                    : 'bg-[#F4F7F9] text-[#1A1A2E] hover:bg-[#E8EDF2]',
+                )}
+                aria-pressed={isGuideSaved}
               >
-                <Bookmark size={14} />
-                Save
+                <Heart
+                  size={14}
+                  className="text-[#EB4501]"
+                  strokeWidth={2}
+                  fill={isGuideSaved ? '#EB4501' : 'none'}
+                />
+                {isGuideSaved ? 'Saved' : 'Save'}
               </button>
               <button
                 type="button"
@@ -648,6 +671,8 @@ export function GuideDetailPage({
         onNavigate={scrollToSection}
         allLabel="Guide"
         profileLabel="Guide sections"
+        className="px-0 bg-choosify-feed/90"
+        contentClassName="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-10"
       />
       )}
 

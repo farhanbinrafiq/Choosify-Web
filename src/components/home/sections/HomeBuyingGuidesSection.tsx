@@ -51,7 +51,7 @@ export function HomeBuyingGuidesSection({ guideSlides }: HomeBuyingGuidesSection
             to={guideHref(guide)}
             className="cursor-pointer flex-[0_0_190px] snap-start"
           >
-            <div className="h-[130px] rounded-[10px] overflow-hidden mb-2.5 bg-white border border-[#E8EDF2]">
+            <div className="h-[130px] rounded-[10px] overflow-hidden mb-2.5 bg-white">
               <img
                 src={guide.image || PLACEHOLDER_IMAGE}
                 alt=""

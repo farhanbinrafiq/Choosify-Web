@@ -300,7 +300,7 @@ export default function App() {
                   fontWeight: '900',
                   textTransform: 'uppercase',
                   letterSpacing: '0.1em',
-                  fontStyle: 'italic',
+                  fontStyle: 'normal',
                   borderRadius: '12px',
                 },
               }} 

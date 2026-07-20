@@ -1,6 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import { Link } from 'react-router-dom';
-import { Share2, Bookmark, Trash2 } from 'lucide-react';
+import { Share2, Heart, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { LoadingFallback } from '../components/LoadingFallback';
 import { useDashboard } from '../context/DashboardContext';
@@ -72,7 +72,7 @@ export function ComparePage() {
               onClick={handleSave}
               className="inline-flex items-center gap-1.5 bg-white border border-[#E8EDF2] text-[#1A1A2E] px-4 py-2.5 rounded-lg text-xs font-bold cursor-pointer hover:border-[#D1D5DB] transition-colors"
             >
-              <Bookmark size={14} aria-hidden />
+              <Heart size={14} className="text-[#EB4501]" strokeWidth={2} aria-hidden />
               Save Comparison
             </button>
             <button

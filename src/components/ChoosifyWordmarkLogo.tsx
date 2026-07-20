@@ -74,7 +74,7 @@ export function ChoosifyWordmarkLogo({
           fill="#fff"
           transform="translate(2775.2195 365.0575)"
           style={{
-            fontFamily: 'system-ui, -apple-system, sans-serif',
+            fontFamily: 'Satoshi, Helvetica Neue, Arial, sans-serif',
             fontSize: '58.32px',
             fontWeight: 500,
           }}

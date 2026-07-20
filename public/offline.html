@@ -5,11 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Choosify — You're Offline</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    @font-face {
+      font-family: 'Satoshi';
+      src: url('/fonts/satoshi/Satoshi-Variable.woff2') format('woff2');
+      font-weight: 300 900;
+      font-style: normal;
+      font-display: swap;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-style: normal !important; }
     body {
       background: #000435;
       color: #ffffff;
-      font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+      font-family: 'Satoshi', 'Helvetica Neue', Arial, sans-serif;
       min-height: 100vh;
       display: flex;
       flex-direction: column;

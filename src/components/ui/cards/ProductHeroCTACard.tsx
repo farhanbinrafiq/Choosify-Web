@@ -49,16 +49,16 @@ export const ProductHeroCTACard: React.FC<ProductHeroCTACardProps> = ({
   const [selectedStorage, setSelectedStorage] = useState(storages?.[0]?.value || '');
 
   return (
-    <div className={cn("bg-white rounded-3xl p-6 md:p-8 flex flex-col md:flex-row gap-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100", className)}>
+    <div className={cn("bg-white rounded-none p-6 md:p-8 flex flex-col md:flex-row gap-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100", className)}>
       {/* Product Image Area */}
-      <div className="w-full md:w-1/2 flex items-center justify-center bg-slate-50 rounded-2xl p-8 relative min-h-[300px]">
+      <div className="w-full md:w-1/2 flex items-center justify-center bg-slate-50 rounded-none p-8 relative min-h-[300px]">
         {discountBadge && (
           <Badge variant="red" className="absolute top-4 left-4">
             {discountBadge}
           </Badge>
         )}
-        <button onClick={onWishlist} className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-slate-400 hover:text-red-500 transition-colors">
-          <Heart className="w-5 h-5" />
+        <button onClick={onWishlist} className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-[#EB4501] hover:text-[#CF4400] transition-colors">
+          <Heart className="w-5 h-5 text-[#EB4501]" strokeWidth={2} />
         </button>
         <img src={image} alt={title} className="max-w-full max-h-[400px] object-contain drop-shadow-2xl" />
       </div>
@@ -150,7 +150,7 @@ export const ProductHeroCTACard: React.FC<ProductHeroCTACardProps> = ({
 
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center gap-3 mt-auto">
-          <Button variant="outline" onClick={onWishlist} leftIcon={<Heart className="w-4 h-4" />}>
+          <Button variant="outline" onClick={onWishlist} leftIcon={<Heart className="w-4 h-4 text-[#EB4501]" strokeWidth={2} />}>
             Add to Wishlist
           </Button>
           <Button
