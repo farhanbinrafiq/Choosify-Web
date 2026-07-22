@@ -38,6 +38,7 @@ const DEFAULT_FOOTER_COLUMNS: SiteFooterColumn[] = [
       { label: 'Policy', url: '/about#privacy' },
       { label: 'Contact us', url: '/about#contact' },
       { label: 'About', url: '/about' },
+      { label: 'Careers', url: '/careers' },
     ],
   },
 ];

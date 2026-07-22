@@ -70,6 +70,7 @@ export const SITEMAP_STATIC_PATHS: Array<{
   { path: '/creators', changeFrequency: 'weekly', priority: 0.75 },
   { path: '/search', changeFrequency: 'weekly', priority: 0.5 },
   { path: '/about', changeFrequency: 'monthly', priority: 0.5 },
+  { path: '/careers', changeFrequency: 'weekly', priority: 0.55 },
   { path: '/contact', changeFrequency: 'monthly', priority: 0.5 },
   { path: '/faq', changeFrequency: 'monthly', priority: 0.55 },
   { path: '/terms', changeFrequency: 'yearly', priority: 0.3 },

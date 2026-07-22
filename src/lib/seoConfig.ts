@@ -138,6 +138,12 @@ export const STATIC_PAGE_SEO: Record<string, SeoMeta> = {
     title: formatPageTitle('About'),
     description: "Learn about Choosify — Bangladesh's smartest product discovery platform.",
   },
+  '/careers': {
+    title: formatPageTitle('Careers'),
+    description: 'Explore open roles at Choosify and join the team building verified product discovery in Bangladesh.',
+    ogCardType: 'default',
+    label: 'Careers',
+  },
   '/contact': {
     title: formatPageTitle('Contact Us'),
     description: 'Get in touch with the Choosify team for support, partnerships, and inquiries.',

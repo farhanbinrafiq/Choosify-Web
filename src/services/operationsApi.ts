@@ -120,4 +120,56 @@ export const operationsApi = {
     email: string,
   ): Promise<{ hasSellerAccount: boolean; dashboardPath?: string }> =>
     request(`/auth/seller-status?email=${encodeURIComponent(email)}`),
+
+  listPublicJobs: async (): Promise<PublicJobPosting[]> => {
+    const result = await request<{ data: PublicJobPosting[] }>('/operations/jobs/public');
+    return result.data;
+  },
+  getPublicJob: async (idOrSlug: string): Promise<PublicJobPosting> => {
+    const result = await request<{ data: PublicJobPosting }>(
+      `/operations/jobs/public/${encodeURIComponent(idOrSlug)}`,
+    );
+    return result.data;
+  },
+  uploadResume: async (payload: {
+    data: string;
+    mimeType: string;
+    fileName: string;
+  }): Promise<{ url: string; fileName?: string }> => {
+    const result = await request<{ success: boolean; url: string; fileName?: string }>(
+      '/operations/media/upload-resume',
+      'POST',
+      payload,
+    );
+    return { url: result.url, fileName: result.fileName };
+  },
+  submitJobApplication: async (payload: {
+    jobId: string;
+    name: string;
+    email: string;
+    phone?: string;
+    resumeUrl: string;
+    resumeFileName?: string;
+    coverLetter?: string;
+  }) => {
+    const result = await request<{ data: unknown }>('/operations/job-applications', 'POST', payload);
+    return result.data;
+  },
 };
+
+export type PublicJobEmploymentType = 'full_time' | 'part_time' | 'internship' | 'contract';
+
+export interface PublicJobPosting {
+  id: string;
+  slug: string;
+  title: string;
+  department: string;
+  location: string;
+  employmentType: PublicJobEmploymentType;
+  summary: string;
+  description: string;
+  responsibilities: string;
+  requirements: string;
+  status: 'open' | 'closed' | 'draft';
+  postedAt: string;
+}

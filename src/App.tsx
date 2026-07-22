@@ -31,7 +31,9 @@ const ComparePage = lazy(() => import('./pages/ComparePage').then(m => ({ defaul
 const GuidesPage = lazy(() => import('./pages/GuidesPage').then(m => ({ default: m.GuidesPage })));
 const GuideDetailPage = lazy(() => import('./pages/GuideDetailPage').then(m => ({ default: m.GuideDetailPage })));
 const GuideProductsPage = lazy(() => import('./pages/GuideProductsPage').then(m => ({ default: m.GuideProductsPage })));
-const LoginSignUpPage = lazy(() => import('./pages/LoginSignUpPage').then(m => ({ default: m.LoginSignUpPage })));
+// Eager Login: auth entry must not suspend under Suspense (even with
+// useTransitions={false}, a blank LoadingFallback on Sign In feels broken).
+import { LoginSignUpPage } from './pages/LoginSignUpPage';
 const PostOfferPage = lazy(() => import('./pages/PostOfferPage').then(m => ({ default: m.PostOfferPage })));
 const SearchPage = lazy(() => import('./pages/SearchPage').then(m => ({ default: m.SearchPage })));
 const CreatorsPage = lazy(() => import('./pages/CreatorsPage').then(m => ({ default: m.CreatorsPage })));
@@ -45,6 +47,8 @@ const PrivacyPage = lazy(() => import('./pages/PrivacyPage').then(m => ({ defaul
 const ContactPage = lazy(() => import('./pages/ContactPage').then(m => ({ default: m.ContactPage })));
 const AboutPage = lazy(() => import('./pages/AboutPage').then(m => ({ default: m.AboutPage })));
 const FAQPage = lazy(() => import('./pages/FAQPage').then(m => ({ default: m.FAQPage })));
+const CareersPage = lazy(() => import('./pages/CareersPage').then(m => ({ default: m.CareersPage })));
+const CareerDetailPage = lazy(() => import('./pages/CareerDetailPage').then(m => ({ default: m.CareerDetailPage })));
 
 const DashboardPage = lazy(() => import('./pages/DashboardPage').then(m => ({ default: m.DashboardPage })));
 const BrandDealsPage = lazy(() => import('./pages/BrandDealsPage').then(m => ({ default: m.BrandDealsPage })));
@@ -149,10 +153,22 @@ function LegacyRecommendationRedirect() {
   return <Navigate to={id ? `/spotlight/${encodeURIComponent(id)}` : '/spotlight?tab=recommendations'} replace />;
 }
 
+function readStoredLoginFlag(): boolean {
+  try {
+    return localStorage.getItem('choosify_is_logged_in') === 'true';
+  } catch {
+    return false;
+  }
+}
+
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { isLoggedIn } = useGlobalState();
   const location = useLocation();
-  if (!isLoggedIn) {
+  // Prefer React state, but also trust the sync localStorage write from setIsLoggedIn.
+  // Login does setIsLoggedIn(true) then navigate('/dashboard') in the same tick;
+  // without this, ProtectedRoute can still see isLoggedIn=false and bounce to /login.
+  const allowed = isLoggedIn || readStoredLoginFlag();
+  if (!allowed) {
     return <Navigate to="/login" state={{ from: location.pathname }} replace />;
   }
   return <>{children}</>;
@@ -174,11 +190,12 @@ function AppContent() {
       <MaintenanceGate>
         <Suspense fallback={<LoadingFallback />}>
           {/*
-            Key Routes by pathname so React remounts the matched page on every nav.
-            Do NOT wrap Routes in AnimatePresence mode="wait" — that pattern stalls
-            route transitions when a keyed child never exits (esp. with lazy+Suspense).
+            Plain <Routes> only. Do not key Routes by pathname or pass location={} —
+            that remounts the tree on every nav and fights Suspense. Do not wrap in
+            AnimatePresence mode="wait" (exit stalls with lazy pages).
+            BrowserRouter uses useTransitions={false} so URL and UI update together.
           */}
-          <Routes location={location} key={location.pathname}>
+          <Routes>
             <Route path="/" element={<PageWrapper><HomePage /></PageWrapper>} />
             <Route path="/products" element={<PageWrapper><AllProductsPage /></PageWrapper>} />
             <Route path="/products/:id" element={<PageWrapper><ProductDetailPage /></PageWrapper>} />
@@ -225,6 +242,8 @@ function AppContent() {
             <Route path="/contact" element={<PageWrapper><ContactPage /></PageWrapper>} />
             <Route path="/about" element={<PageWrapper><AboutPage /></PageWrapper>} />
             <Route path="/faq" element={<PageWrapper><FAQPage /></PageWrapper>} />
+            <Route path="/careers" element={<PageWrapper><CareersPage /></PageWrapper>} />
+            <Route path="/careers/:slug" element={<PageWrapper><CareerDetailPage /></PageWrapper>} />
 
             <Route path="/brand-deals" element={<FeatureFlagRoute flag="enable_brand_deals_page"><PageWrapper><BrandDealsPage /></PageWrapper></FeatureFlagRoute>} />
             <Route path="/cart/retail" element={<PageWrapper><RetailCartPage /></PageWrapper>} />
@@ -285,8 +304,11 @@ function AppContent() {
 }
 
 export default function App() {
+  // RR7 defaults useTransitions=true (startTransition on every nav). Combined with
+  // lazy routes + Suspense, React keeps painting the previous page while history
+  // already shows the new URL — the "URL changed, content stuck" SPA bug.
   return (
-    <BrowserRouter>
+    <BrowserRouter useTransitions={false}>
       <GlobalStateProvider>
         <ErrorBoundary>
           <OfflineFallbackBanner />

@@ -186,9 +186,12 @@ export function LoginSignUpPage() {
       return;
     }
 
+    // localStorage is written synchronously inside setIsLoggedIn; ProtectedRoute
+    // reads that flag so dashboard is allowed before React state has re-rendered.
     setIsLoggedIn(true);
     toast.success(activeTab === 'sign-up' ? 'Account created! Welcome to Choosify.' : 'Welcome back!');
-    navigate(location.state?.from || '/dashboard');
+    const dest = (location.state as { from?: string } | null)?.from || '/dashboard';
+    navigate(dest === '/login' ? '/dashboard' : dest, { replace: true });
   };
 
   const handleSocialLogin = (provider: 'Google' | 'Facebook' | 'Apple') => {
