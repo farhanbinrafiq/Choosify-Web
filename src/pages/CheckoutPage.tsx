@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { operationsApi } from '../services/operationsApi';
+import { usePageBreadcrumbs } from '../context/BreadcrumbContext';
 
 const KNOWN_PROMOS_FALLBACK = [
   { code: 'AARONG15', discount: 15, type: 'percentage' as const },
@@ -23,6 +24,7 @@ const KNOWN_PROMOS_FALLBACK = [
 ];
 
 export function CheckoutPage() {
+  usePageBreadcrumbs({ hidden: true });
   const {
     retailCart,
     orders,

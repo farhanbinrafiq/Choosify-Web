@@ -34,9 +34,7 @@ export function CategoryPremiumCard({
   const featuredInitial = featured.charAt(0).toUpperCase();
   const visible = expanded ? subcategories : subcategories.slice(0, SUBCAT_PREVIEW);
   const hasMore = subcategories.length > SUBCAT_PREVIEW;
-  const moreLabel = expanded
-    ? 'Show less'
-    : `Show all (${subcategories.length - SUBCAT_PREVIEW})`;
+  const moreLabel = expanded ? 'Show less' : 'Show All';
 
   const openCategory = () => {
     if (onClick) onClick();

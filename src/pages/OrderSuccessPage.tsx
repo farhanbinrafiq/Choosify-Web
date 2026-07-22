@@ -18,6 +18,7 @@ import toast from 'react-hot-toast';
 import { useGlobalState } from '../context/GlobalStateContext';
 import type { Order } from '../types/schemas';
 import { cn } from '../lib/utils';
+import { usePageBreadcrumbs } from '../context/BreadcrumbContext';
 
 const formatMoney = (amount: number) => `৳${amount.toLocaleString()}`;
 
@@ -36,6 +37,7 @@ const formatDateTime = (iso: string) => {
 };
 
 export function OrderSuccessPage() {
+  usePageBreadcrumbs({ hidden: true });
   const heroRef = useRef<HTMLDivElement>(null);
   const location = useLocation();
   const navigate = useNavigate();

@@ -240,7 +240,7 @@ export function ProductDetailBuyBox({
               className="mt-1 inline-flex items-center gap-2 text-white border-none px-5 py-3 rounded-lg text-[12.5px] font-bold cursor-pointer choosify-emi-gradient"
             >
               <span className="w-6 h-6 rounded-full bg-white flex items-center justify-center p-0.5 shrink-0">
-                <EmiAiLogo size={16} className="w-4 h-4" />
+                <EmiAiLogo size={16} />
               </span>
               Ask EMI about this product
             </button>

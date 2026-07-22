@@ -16,6 +16,7 @@ import { mockGuides } from '../data/mockGuides';
 import { ProductCard } from '../components/ProductCard';
 import { PRODUCT_CARD_GRID } from '../lib/pageLayout';
 import { catalogGuideHref } from '../lib/spotlight/content';
+import { usePageBreadcrumbs } from '../context/BreadcrumbContext';
 
 function WorkspacePlaceholder({ title, description }: { title: string; description: string }) {
   return (
@@ -27,6 +28,7 @@ function WorkspacePlaceholder({ title, description }: { title: string; descripti
 }
 
 export function ReviewDetailPage() {
+  usePageBreadcrumbs({ hidden: true });
   const { slug = '' } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const { allCatalogProducts, allCatalogGuides, allCreators } = useGlobalState();

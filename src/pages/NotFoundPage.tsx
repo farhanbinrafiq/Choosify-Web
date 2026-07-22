@@ -62,21 +62,18 @@ export default function NotFoundPage({
 
   return (
     <section
-      className="w-full min-h-[calc(100vh-5rem)] font-sans flex flex-col"
-      style={{
-        background: 'linear-gradient(180deg, #fff 0%, #fff 48%, #000435 82%, #000435 100%)',
-      }}
+      className="w-full min-h-[calc(100vh-5rem)] font-sans flex flex-col choosify-dark-surface text-white"
       aria-labelledby="not-found-heading"
     >
       <div className="flex-1 flex flex-col items-center justify-center text-center px-5 pt-10 pb-8 sm:pt-14 sm:pb-10">
         <h1
           id="not-found-heading"
-          className="text-[100px] sm:text-[150px] font-extrabold leading-none tracking-tight text-[#000435]"
+          className="text-[100px] sm:text-[150px] font-extrabold leading-none tracking-tight text-white"
         >
           {isError ? 'Oops' : '404'}
         </h1>
 
-        <p className="mt-3 sm:mt-4 text-[15px] sm:text-base font-medium text-[#6B7280]">
+        <p className="mt-3 sm:mt-4 text-[15px] sm:text-base font-medium text-white/65">
           {isError
             ? 'Something went wrong while loading this page.'
             : 'Oops! We couldn\u2019t find that page.'}
@@ -86,7 +83,7 @@ export default function NotFoundPage({
           <p className="mt-2 max-w-md text-[13px] font-medium text-[#FF5B00]/90">{errorMessage}</p>
         ) : null}
 
-        <p className="mt-2 text-[15px] sm:text-base font-medium text-[#6B7280]">
+        <p className="mt-2 text-[15px] sm:text-base font-medium text-white/65">
           {isError && onRetry ? (
             <>
               <button
@@ -109,12 +106,12 @@ export default function NotFoundPage({
           </Link>
         </p>
 
-        <div className="mt-8 sm:mt-10 w-[200px] h-[200px] sm:w-[260px] sm:h-[260px] flex items-center justify-center">
-          <EmiAiLogo size={260} title="Emi. A.I" className="w-full h-full" />
+        <div className="mt-8 sm:mt-10 flex items-center justify-center">
+          <EmiAiLogo size={260} title="Emi. A.I" />
         </div>
       </div>
 
-      <div className="w-full bg-[#000435] px-5 sm:px-8 lg:px-10 pt-6 pb-12 sm:pb-16">
+      <div className="w-full px-5 sm:px-8 lg:px-10 pt-6 pb-12 sm:pb-16 border-t border-white/10">
         <p className="text-center text-[13px] sm:text-sm font-medium text-white/55 mb-5 sm:mb-6">
           Why not check out our top categories instead?
         </p>

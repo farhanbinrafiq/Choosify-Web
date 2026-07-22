@@ -378,7 +378,7 @@ export function FloatingOverlays() {
               )}
               title="Ask Emi — Choosify Assistant"
             >
-              <EmiAiLogo size={32} className="w-8 h-8" />
+              <EmiAiLogo size={32} />
               {hasEmiUnread && activePanel !== 'emi' && (
                 <span className="absolute top-0.5 right-0.5 w-3 h-3 rounded-full bg-[#EB4501] border-2 border-white" />
               )}
@@ -696,7 +696,7 @@ export function FloatingOverlays() {
         aria-label="Ask Emi"
         title="Ask Emi"
       >
-        <EmiAiLogo size={36} className="w-9 h-9" />
+        <EmiAiLogo size={36} />
         {hasEmiUnread && activePanel !== 'emi' && (
           <span className="absolute top-1 right-1 w-3 h-3 rounded-full bg-[#EB4501] border-2 border-white" />
         )}

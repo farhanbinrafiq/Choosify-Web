@@ -15,9 +15,9 @@ export function EmiShoppingCoach({ options, className }: EmiShoppingCoachProps) 
   return (
     <div className={cn('bg-[#fafbfc] border border-[#e8edf2] rounded-[5px] p-4 space-y-3', className)}>
       <div className="flex items-center gap-2">
-        <span className="w-6 h-6 rounded-full choosify-emi-gradient flex items-center justify-center shrink-0 overflow-hidden p-[2px]">
-          <span className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
-            <EmiAiLogo size={18} className="w-[18px] h-[18px]" />
+        <span className="w-6 h-6 rounded-full choosify-emi-gradient flex items-center justify-center shrink-0 p-[2px]">
+          <span className="w-full h-full rounded-full bg-white flex items-center justify-center">
+            <EmiAiLogo size={18} />
           </span>
         </span>
         <p className="text-[10px] font-black uppercase tracking-widest choosify-emi-gradient-text">

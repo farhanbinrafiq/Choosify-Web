@@ -142,8 +142,8 @@ export function EmiChatPanel({ onClose, className, variant = 'panel', seedPrompt
     <div className={cn('flex flex-col min-h-0 h-full', className)}>
       <div className="px-4 sm:px-5 py-4 border-b border-white/10 flex items-center justify-between shrink-0 choosify-emi-gradient text-white gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 shadow-lg p-1 overflow-hidden">
-            <EmiAiLogo size={32} className="w-8 h-8" />
+          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 shadow-lg p-1">
+            <EmiAiLogo size={32} />
           </div>
           <div className="min-w-0 text-left">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white flex items-center gap-1">

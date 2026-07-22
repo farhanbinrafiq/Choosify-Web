@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useRef } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import {
   ArrowLeft,
   Share2,
@@ -72,6 +72,7 @@ import { ContentDetailWhatIsDiscussed } from "../components/contentDetail/Conten
 import { useSpotlightExperience } from "../hooks/useSpotlightExperience";
 import { openEmiPanel } from "../lib/emi";
 import { EmiAiLogo } from "../components/EmiAiLogo";
+import { usePageBreadcrumbs } from "../context/BreadcrumbContext";
 
 const evaluations = evaluationsData as EvaluationData[];
 
@@ -177,6 +178,7 @@ export function GuideDetailPage({
   const { id: routeId } = useParams();
   const id = guideIdOverride ?? routeId;
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const { allGuides, allBrands, addToCart, allCatalogProducts } = useGlobalState();
   const { allContent: spotlightAllContent } = useSpotlightExperience();
   const [relatedPlatformFilter, setRelatedPlatformFilter] = useState<string>('all');
@@ -188,6 +190,20 @@ export function GuideDetailPage({
     allGuides[0] ||
     BLOGS.find((b) => b.id === Number(id)) ||
     BLOGS[0];
+
+  usePageBreadcrumbs(
+    guide
+      ? {
+          replaceItems: [
+            { name: 'Home', path: '/' },
+            { name: 'Discover', path: '/spotlight' },
+            { name: 'Buying Guides', path: '/guides' },
+            { name: guide.title, path: pathname },
+          ],
+        }
+      : {},
+    [guide?.title, pathname],
+  );
 
   const guideId = guide?.id;
   const dynamicData = DYNAMIC_GUIDES[Number(guideId)] || {
@@ -544,15 +560,6 @@ export function GuideDetailPage({
             <ArrowLeft size={14} /> {backLabel}
           </Link>
         )}
-        <nav className="text-xs text-[#9AA0AC] mb-3.5" aria-label="Breadcrumb">
-          <Link to="/" className="hover:text-[#CF4400]">Home</Link>
-          {' '}&nbsp;›&nbsp;{' '}
-          <Link to="/spotlight" className="hover:text-[#CF4400]">Discover</Link>
-          {' '}&nbsp;›&nbsp;{' '}
-          <Link to="/guides" className="hover:text-[#CF4400]">Buying Guides</Link>
-          {' '}&nbsp;›&nbsp;{' '}
-          <span className="text-[#1A1A2E]">{guide.title}</span>
-        </nav>
       </div>
 
       {/* Media gallery — navy band only (no title on dark chrome) */}
@@ -681,7 +688,7 @@ export function GuideDetailPage({
               className="inline-flex items-center gap-1.5 bg-[linear-gradient(90deg,#6C4CFF,#EB4501)] text-white border-0 px-[18px] py-[11px] rounded-lg text-xs font-bold cursor-pointer hover:brightness-110 transition-all"
             >
               <span className="w-5 h-5 rounded-full bg-white flex items-center justify-center p-0.5 shrink-0">
-                <EmiAiLogo size={14} className="w-3.5 h-3.5" />
+                <EmiAiLogo size={14} />
               </span>
               Ask Emi about this Discovery
             </button>

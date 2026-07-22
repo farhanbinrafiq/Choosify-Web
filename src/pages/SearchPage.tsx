@@ -307,13 +307,6 @@ export function SearchPage() {
         <header
           className="max-w-[1280px] mx-auto px-6 sm:px-10 py-8 text-white rounded-none overflow-hidden choosify-dark-surface"
         >
-          <nav className="text-xs text-[#9AA0AC] mb-2.5" aria-label="Breadcrumb">
-            <Link to="/" className="hover:text-white/80 transition-colors">
-              Home
-            </Link>
-            <span className="mx-1.5">›</span>
-            <span className="text-white/70">Search Results</span>
-          </nav>
           <h1 className="text-2xl font-extrabold mb-1.5 tracking-tight">
             {rawQuery.trim() ? `Search results for "${rawQuery}"` : 'Search Results'}
           </h1>

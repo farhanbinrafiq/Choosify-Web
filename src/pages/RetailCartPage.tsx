@@ -14,9 +14,11 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { usePageBreadcrumbs } from '../context/BreadcrumbContext';
 
 /** Choosify.dc.html-aligned cart — compact navy header + light #F4F7F9 body (matches Checkout) */
 export function RetailCartPage() {
+  usePageBreadcrumbs({ hidden: true });
   const { retailCart, updateCartQuantity, removeFromCart, clearCart } = useGlobalState();
   const navigate = useNavigate();
 

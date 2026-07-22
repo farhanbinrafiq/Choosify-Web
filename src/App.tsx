@@ -327,6 +327,7 @@ export default function App() {
 }
 
 
+/** Shared page shell — breadcrumbs render here only (never duplicate in child pages). */
 function PageWrapper({ children }: { children: React.ReactNode }) {
   return (
     <motion.div

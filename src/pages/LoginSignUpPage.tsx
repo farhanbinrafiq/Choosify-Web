@@ -237,8 +237,8 @@ export function LoginSignUpPage() {
               to="/emi"
               className="flex items-center gap-1.5 choosify-emi-gradient rounded-full py-1.5 pl-1.5 pr-3.5 hover:brightness-110 transition-all border-0"
             >
-              <span className="w-[22px] h-[22px] rounded-full bg-white flex items-center justify-center overflow-hidden p-px">
-                <EmiAiLogo size={18} className="w-[18px] h-[18px]" />
+              <span className="w-[22px] h-[22px] rounded-full bg-white flex items-center justify-center p-0.5">
+                <EmiAiLogo size={18} />
               </span>
               <span className="text-xs font-bold text-white">Ask EMI</span>
             </Link>

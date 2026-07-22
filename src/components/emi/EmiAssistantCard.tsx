@@ -16,8 +16,8 @@ export function EmiAssistantCard({ title, description, recommendations, classNam
   return (
     <div className={cn('bg-white border border-[#e8edf2] rounded-[10px] p-4 space-y-3', className)}>
       <div className="flex items-center gap-2">
-        <span className="w-7 h-7 rounded-full bg-[#F4F7F9] border border-[#E8EDF2] flex items-center justify-center overflow-hidden p-0.5 shrink-0">
-          <EmiAiLogo size={22} className="w-[22px] h-[22px]" />
+        <span className="w-7 h-7 rounded-full bg-[#F4F7F9] border border-[#E8EDF2] flex items-center justify-center p-0.5 shrink-0">
+          <EmiAiLogo size={22} />
         </span>
         <h3 className="text-xs font-black uppercase tracking-widest text-navy">{title}</h3>
       </div>

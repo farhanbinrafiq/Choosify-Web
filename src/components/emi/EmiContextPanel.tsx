@@ -41,9 +41,9 @@ export function EmiContextPanel({
         className="w-full flex items-center justify-between gap-2 px-4 py-3 border-b border-[#e8edf2] bg-[#fafbfc] hover:bg-[#FFF0E8]/30 transition-colors"
       >
         <div className="flex items-center gap-2 min-w-0">
-          <span className="w-7 h-7 rounded-full choosify-emi-gradient flex items-center justify-center shrink-0 overflow-hidden p-[2px]">
-            <span className="w-full h-full rounded-full bg-white flex items-center justify-center overflow-hidden">
-              <EmiAiLogo size={22} className="w-[22px] h-[22px]" />
+          <span className="w-7 h-7 rounded-full choosify-emi-gradient flex items-center justify-center shrink-0 p-[2px]">
+            <span className="w-full h-full rounded-full bg-white flex items-center justify-center">
+              <EmiAiLogo size={22} />
             </span>
           </span>
           <div className="min-w-0 text-left">

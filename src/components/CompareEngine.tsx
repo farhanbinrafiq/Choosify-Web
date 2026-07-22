@@ -1202,8 +1202,8 @@ export function CompareEngine() {
                   onClick={handleAskEmi}
                   className="w-full text-white py-2.5 rounded-lg text-xs font-bold cursor-pointer border-none flex items-center justify-center gap-2 choosify-emi-gradient hover:brightness-110 transition-all"
                 >
-                  <span className="w-5 h-5 rounded-full bg-white flex items-center justify-center overflow-hidden p-px shrink-0">
-                    <EmiAiLogo size={16} className="w-4 h-4" />
+                  <span className="w-5 h-5 rounded-full bg-white flex items-center justify-center p-0.5 shrink-0">
+                    <EmiAiLogo size={16} />
                   </span>
                   Ask Emi. A.I
                 </button>

@@ -1,5 +1,4 @@
 import React, { lazy, Suspense } from 'react';
-import { Link } from 'react-router-dom';
 import { Share2, Heart, Trash2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { LoadingFallback } from '../components/LoadingFallback';
@@ -40,14 +39,6 @@ export function ComparePage() {
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
       <main className="w-full max-w-[1400px] mx-auto px-5 sm:px-10 py-6 pb-[60px]">
-        <nav className="text-xs text-[#9AA0AC] mb-3.5" aria-label="Breadcrumb">
-          <Link to="/" className="hover:text-[#CF4400] transition-colors">
-            Home
-          </Link>
-          <span className="mx-1.5">›</span>
-          <span className="text-[#1A1A2E]">Compare</span>
-        </nav>
-
         <div className="flex flex-wrap items-start justify-between gap-4 mb-6">
           <div>
             <h1 className="text-[28px] font-extrabold text-[#1A1A2E] mb-1.5 leading-tight">

@@ -4,7 +4,12 @@ import { mergeBreadcrumbItems, useBreadcrumbContext } from '../context/Breadcrum
 import { useBreadcrumbItems } from '../hooks/useBreadcrumbItems';
 import { cn } from '../lib/utils';
 
-/** Site-wide breadcrumb bar — mount once in PageWrapper */
+/**
+ * Site-wide breadcrumb bar — mounted once in `PageWrapper` (`App.tsx`).
+ * Do not add `<nav aria-label="Breadcrumb">` in page components; use `usePageBreadcrumbs()`
+ * for custom trails, or `usePageBreadcrumbs({ hidden: true })` when a page renders its own
+ * in-hero breadcrumb (e.g. checkout).
+ */
 export function PageBreadcrumbsBar({ className }: { className?: string }) {
   const { pathname } = useLocation();
   const { pageConfig } = useBreadcrumbContext();
