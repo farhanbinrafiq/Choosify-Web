@@ -46,6 +46,7 @@ import { BrandCardDesign, mapBrandToCardDesign } from '../components/BrandCardDe
 import { CreatorCardDesign } from '../components/CreatorCardDesign';
 import {
   PRODUCT_CARD_GRID,
+  DASHBOARD_PRODUCT_CARD_GRID,
   GUIDE_MEDIA_GRID,
   BRAND_CARD_GRID,
   CREATOR_CARD_GRID,
@@ -1119,7 +1120,7 @@ const RecentlyViewedSection = () => {
       </div>
 
       {recentlyViewed.length > 0 ? (
-        <div className={PRODUCT_CARD_GRID}>
+        <div className={DASHBOARD_PRODUCT_CARD_GRID}>
           {recentlyViewed.map((p) => (
             <div key={p.id} className="relative group">
               <ProductCard product={p} variant="grid" />

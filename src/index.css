@@ -606,6 +606,45 @@
   }
 }
 
+/* Dashboard product grids — cap at 4 per row (narrower column beside sidebar) */
+.choosify-dashboard-product-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  align-items: stretch;
+  justify-items: stretch;
+}
+
+@media (min-width: 520px) {
+  .choosify-dashboard-product-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 768px) {
+  .choosify-dashboard-product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1024px) {
+  .choosify-dashboard-product-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .choosify-dashboard-product-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+.choosify-dashboard-product-grid > * {
+  min-width: 0;
+  max-width: 100%;
+  width: 100%;
+}
+
 /* Category browse cards — 4-col cap matching Choosify.dc.html; fixed card footprint */
 .choosify-category-grid {
   display: grid;

@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import type { AddressType, CustomerAddressDraft } from '../../lib/address/addressTypes';
 import {
@@ -108,20 +109,20 @@ export function AddressFormDrawer({
 
   if (!open) return null;
 
-  return (
+  const modal = (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-6"
+      className="fixed inset-0 z-[300] flex items-center justify-center overflow-y-auto p-3 sm:p-6 pt-[max(5.5rem,calc(env(safe-area-inset-top,0px)+4.5rem))] pb-[max(1.5rem,env(safe-area-inset-bottom,0px))]"
       role="dialog"
       aria-modal="true"
       aria-labelledby="address-form-title"
     >
       <button
         type="button"
-        className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"
+        className="absolute inset-0 bg-black/45 backdrop-blur-[1px]"
         onClick={onClose}
         aria-label="Close address form"
       />
-      <div className="relative w-full max-w-3xl max-h-[calc(100dvh-1.5rem)] sm:max-h-[min(90dvh,820px)] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 z-[201]">
+      <div className="relative w-full max-w-3xl max-h-[min(90dvh,calc(100dvh-6.5rem))] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 z-[301] my-auto">
         <div className="flex items-center justify-between gap-4 border-b border-[#e8edf2] px-5 py-4 shrink-0">
           <div className="text-left">
             <h2 id="address-form-title" className="text-lg font-extrabold tracking-tight text-[#1A1A2E]">
@@ -333,4 +334,7 @@ export function AddressFormDrawer({
       </div>
     </div>
   );
+
+  if (typeof document === 'undefined') return null;
+  return createPortal(modal, document.body);
 }

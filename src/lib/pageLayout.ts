@@ -145,6 +145,9 @@ export const LISTING_FEED_GRID_5 = DETAIL_FEED_GRID_5;
 /** Product grids: 2 → 3 → 4 → 5 cols by breakpoint (see index.css) */
 export const PRODUCT_CARD_GRID = 'choosify-product-grid w-full';
 
+/** Dashboard main column — product grids cap at 4 cols (matches brand/creator lists) */
+export const DASHBOARD_PRODUCT_CARD_GRID = 'choosify-dashboard-product-grid w-full';
+
 /** Brand profile card grids: 1 → 2 → 3 → 4 cols max */
 export const BRAND_CARD_GRID = 'choosify-brand-grid w-full';
 
