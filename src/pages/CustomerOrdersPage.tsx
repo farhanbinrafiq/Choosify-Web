@@ -123,8 +123,7 @@ Thank you for shopping with Choosify.bd
             </div>
 
             <Link
-              to="/dashboard"
-              state={{ activeTab: 'messages' }}
+              to="/messages"
               className="inline-flex items-center gap-1.5 self-start sm:self-auto bg-white/10 hover:bg-white/15 border border-white/15 text-white font-bold text-[12px] px-4 py-2.5 rounded-lg transition-all"
             >
               <MessageSquare size={14} className="text-[#EB4501]" />

@@ -71,7 +71,7 @@ export const FEATURE_VISIBILITY: FeatureVisibility[] = [
   { id: 'buyer.compare', label: 'Compare', visibleTo: BUYER_ONLY, route: '/compare' },
   { id: 'buyer.saved-spotlight', label: 'Saved Items', visibleTo: BUYER_ONLY, dashboardTab: 'saved-items' },
   { id: 'buyer.following', label: 'Following', visibleTo: BUYER_ONLY, dashboardTab: 'following' },
-  { id: 'buyer.messages', label: 'Messages', visibleTo: [...BUYER_ONLY, ...SELLER, ...CREATOR], route: '/messages', dashboardTab: 'messages' },
+  { id: 'buyer.messages', label: 'Messages', visibleTo: [...BUYER_ONLY, ...SELLER, ...CREATOR], route: '/messages' },
   { id: 'buyer.reviews', label: 'My Reviews', visibleTo: BUYER_ONLY, dashboardTab: 'my-reviews' },
   { id: 'buyer.browsing-history', label: 'Recently Viewed', visibleTo: BUYER_ONLY, dashboardTab: 'recently-viewed' },
   { id: 'seller.products', label: 'My Products', visibleTo: SELLER, dashboardTab: 'seller-products' },

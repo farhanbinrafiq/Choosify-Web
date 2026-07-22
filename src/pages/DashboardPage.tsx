@@ -66,7 +66,6 @@ import toast from 'react-hot-toast';
 import { toPlatformRole } from '../lib/platform/roles';
 import { getDashboardNavForRole, isDashboardTabAllowed } from '../lib/platform/dashboardRegistry';
 import { SellerWorkspaceSection } from './ReviewDetailPage';
-import { MessagesPage } from './MessagesPage';
 import { CustomerOrdersPage } from './CustomerOrdersPage';
 import { DealsVerticalSponsoredCard } from '../components/deals/DealsLowerSections';
 import { UniversalCarousel } from '../components/design/UniversalCarousel';
@@ -76,7 +75,6 @@ const DASHBOARD_TABS_WITH_RIGHT_CONTENT = new Set([
   'overview',
   'following',
   'saved-items',
-  'messages',
   'addresses',
   'settings',
   'orders',
@@ -204,13 +202,18 @@ const COLLECTION_TAB_IDS = new Set([
 const ACTIVITY_TAB_IDS = new Set([
   'orders',
 ]);
-const COMMUNICATION_TAB_IDS = new Set(['messages', 'my-reviews', 'addresses']);
+const COMMUNICATION_TAB_IDS = new Set(['my-reviews', 'addresses']);
 const LEGACY_DASHBOARD_TAB_REDIRECTS: Record<string, 'saved-items' | 'following'> = {
   'saved-products': 'saved-items',
   'saved-brands': 'saved-items',
   'saved-recommendations': 'saved-items',
   'loved-brands': 'following',
   'followed-brands': 'following',
+};
+/** Former dashboard Messages tab — full inbox now lives at /messages */
+const EXTERNAL_DASHBOARD_TAB_REDIRECTS: Record<string, string> = {
+  messages: '/messages',
+  notifications: '/messages',
 };
 
 // --- SUB-COMPONENTS ---
@@ -1738,8 +1741,6 @@ export function DashboardPage() {
     lovedBrands, 
     followedBrands, 
     recentlyViewed,
-    messages,
-    threads,
   } = useDashboard();
   const location = useLocation();
   const navigate = useNavigate();
@@ -1764,7 +1765,6 @@ export function DashboardPage() {
     Users: MessageSquare,
     Flame,
     ShieldCheck: CheckCircle2,
-    MessageSquare,
     Star,
     Settings,
     MapPin,
@@ -1779,14 +1779,6 @@ export function DashboardPage() {
     return null;
   };
 
-  const getNavBadge = (id: string): number | string | null => {
-    if (id === 'messages') {
-      const unread = threads.filter((t) => t.unread).length;
-      return unread > 0 ? unread : null;
-    }
-    return null;
-  };
-
   const mapNavItems = (items: typeof dashboardNav.platform) =>
     items.map((item) => ({
       id: item.id,
@@ -1794,7 +1786,7 @@ export function DashboardPage() {
       icon: DASHBOARD_ICONS[item.icon] ?? LayoutDashboard,
       href: item.href,
       count: getNavCount(item.id),
-      badge: getNavBadge(item.id),
+      badge: null as number | string | null,
     }));
 
   const controlItems = mapNavItems(dashboardNav.platform);
@@ -1810,7 +1802,6 @@ export function DashboardPage() {
   const [activeTab, setActiveTab] = useState('overview');
   const [settingsSubTab, setSettingsSubTab] = useState<SettingsSubTab>('personal');
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
-  const [messagesThreadId, setMessagesThreadId] = useState<string | undefined>();
 
   useEffect(() => {
     // TODO: addToRecentlyViewed called from ProductDetailPage â€” see Prompt 6
@@ -1823,11 +1814,16 @@ export function DashboardPage() {
     'notifications',
     'cms-studios',
     'spotlight-campaigns',
+    'messages',
   ]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const queryTab = params.get('tab');
+    if (queryTab && EXTERNAL_DASHBOARD_TAB_REDIRECTS[queryTab]) {
+      navigate(EXTERNAL_DASHBOARD_TAB_REDIRECTS[queryTab], { replace: true });
+      return;
+    }
     const redirectedTab = queryTab ? LEGACY_DASHBOARD_TAB_REDIRECTS[queryTab] : undefined;
     if (redirectedTab) {
       params.set('tab', redirectedTab);
@@ -1848,6 +1844,10 @@ export function DashboardPage() {
 
     if (location.state?.activeTab) {
       const requestedTab = location.state.activeTab as string;
+      if (EXTERNAL_DASHBOARD_TAB_REDIRECTS[requestedTab]) {
+        navigate(EXTERNAL_DASHBOARD_TAB_REDIRECTS[requestedTab], { replace: true });
+        return;
+      }
       const tab = LEGACY_DASHBOARD_TAB_REDIRECTS[requestedTab] ?? requestedTab;
       if (tab !== requestedTab) {
         navigate(`/dashboard?tab=${tab}`, { replace: true });
@@ -1863,14 +1863,6 @@ export function DashboardPage() {
     }
   }, [location.state, location.search, platformRole, navigate]);
 
-  useEffect(() => {
-    const params = new URLSearchParams(location.search);
-    if (params.get('tab') === 'notifications' || activeTab === 'notifications') {
-      setActiveTab('messages');
-      navigate('/dashboard?tab=messages', { replace: true });
-    }
-  }, [location.search, activeTab, navigate]);
-
   const renderContent = () => {
     if (!isDashboardTabAllowed(activeTab, platformRole)) {
       return <OverviewSection onTabChange={setActiveTab} userName={currentUser.name} />;
@@ -1882,15 +1874,12 @@ export function DashboardPage() {
       case 'saved-items': return <SavedItemsSection />;
       case 'following': return <FollowedBrandsSection />;
       case 'recently-viewed': return <RecentlyViewedSection />;
-      case 'messages':
-        return <MessagesPage embedded initialThreadId={messagesThreadId} />;
       case 'orders':
         return (
           <CustomerOrdersPage
             embedded
             onOpenConversation={(threadId) => {
-              setMessagesThreadId(threadId);
-              setActiveTab('messages');
+              navigate(`/messages/${threadId}`);
             }}
           />
         );
@@ -1924,8 +1913,8 @@ export function DashboardPage() {
 
   const handleNavClick = (item: { id: string; href?: string }) => {
     setMobileNavOpen(false);
-    // Keep Orders / Messages inside the dashboard shell; only leave for true external workspace routes
-    if (item.href && item.id !== 'orders' && item.id !== 'messages') {
+    // Keep Orders inside the dashboard shell; only leave for true external workspace routes
+    if (item.href && item.id !== 'orders') {
       navigate(item.href);
     } else {
       setActiveTab(item.id);

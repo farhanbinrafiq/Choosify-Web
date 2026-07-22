@@ -28,7 +28,6 @@ export const DASHBOARD_NAV_REGISTRY: DashboardNavItem[] = [
   { id: 'mod-queues', label: 'Moderation Queues', icon: 'ShieldCheck', group: 'workspace', roles: ['moderator', 'admin'] },
   { id: 'mod-approvals', label: 'Approvals', icon: 'CheckCircle2', group: 'workspace', roles: ['moderator', 'admin'] },
   { id: 'admin-marketing', label: 'Marketing Admin', icon: 'Megaphone', group: 'workspace', roles: ['admin'], href: '/marketing/studio' },
-  { id: 'messages', label: 'Messages', icon: 'MessageSquare', group: 'account', roles: ['buyer', 'seller', 'brand', 'creator', 'moderator', 'admin'] },
   { id: 'my-reviews', label: 'My Reviews', icon: 'Star', group: 'account', roles: ['buyer'] },
   { id: 'addresses', label: 'Addresses', icon: 'MapPin', group: 'account', roles: ['buyer', 'seller', 'brand', 'creator', 'moderator', 'admin'] },
   { id: 'settings', label: 'Profile Settings', icon: 'Settings', group: 'account', roles: ['buyer', 'seller', 'brand', 'creator', 'moderator', 'admin'] },
