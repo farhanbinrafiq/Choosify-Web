@@ -149,7 +149,7 @@ export function CheckoutPage() {
           id: String(item.product.id),
           price: Number(getSlabPrice(item.product, item.quantity) || 0),
           category: item.product.category,
-          brand: item.product.brand,
+          brand: item.product?.brand || item.product?.brandName,
           quantity: item.quantity,
         })),
       });
@@ -255,7 +255,7 @@ export function CheckoutPage() {
     // Generate SubOrders structure
     const generatedSubOrders = sellerIds.map((sellerId, sIdx) => {
       const items = groupedCart[sellerId];
-      const sellerName = items[0].product.brand || 'Merchant partner';
+      const sellerName = items[0]?.product?.brand || items[0]?.product?.brandName || 'Merchant partner';
       const itemsListStr = items.map(it => {
         const up = getSlabPrice(it.product, it.quantity);
         return `• ${it.product.title} (${it.quantity} units @ ৳${up.toLocaleString()})`;
@@ -324,7 +324,7 @@ ORDER STATUS: PENDING_CONFIRMATION
           quantity: it.quantity,
           price: getSlabPrice(it.product, it.quantity),
           image: it.selectedVariant?.image || it.product.image,
-          brand: it.product.brand,
+          brand: it.product?.brand || it.product?.brandName,
           variantLabel: it.selectedVariant?.attributes
             ? Object.entries(it.selectedVariant.attributes)
                 .map(([key, value]) => `${key}: ${value}`)
@@ -531,7 +531,7 @@ ORDER STATUS: PENDING_CONFIRMATION
             <div className="space-y-4">
               {sellerIds.map((sellerId) => {
                 const items = groupedCart[sellerId];
-                const sellerName = items[0].product.brand || 'Regional Seller';
+                const sellerName = items[0]?.product?.brand || items[0]?.product?.brandName || 'Regional Seller';
                 return (
                   <div key={sellerId} className="border border-[#F1F1F3] rounded-[10px] p-4">
                     <div className="flex items-center justify-between mb-2.5">

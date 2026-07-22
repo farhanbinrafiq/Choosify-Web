@@ -470,7 +470,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
     setComparedProducts(prev => [...prev, product]);
-    toast.success(`${product.brand} added to compare`);
+    toast.success(`${product?.brand || product?.brandName || 'Product'} added to compare`);
   };
 
   const removeFromCompare = (id: number) => {

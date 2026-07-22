@@ -367,7 +367,7 @@ export const AuthPage: React.FC = () => {
                       <h4 className="text-xs font-extrabold text-white tracking-tight leading-tight truncate">
                         {product.title}
                       </h4>
-                      <p className="text-[9px] text-white/40 font-bold">{product.brand}</p>
+                      <p className="text-[9px] text-white/40 font-bold">{product?.brand || product?.brandName}</p>
                       
                       <div className="flex items-baseline justify-between mt-1">
                         <span className="text-xs font-black text-[#EB4501]">{product.price}</span>

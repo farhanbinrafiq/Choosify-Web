@@ -49,6 +49,7 @@ import { OptionalAddonsModule } from '../components/product/OptionalAddonsModule
 import { CreatorReviewsPreview } from "../components/creatorReviews/CreatorReviewsPreview";
 import { PublicReviewCard } from "../components/PublicReviewCard";
 import { FollowButton } from "../components/FollowButton";
+import NotFoundPage from "./NotFoundPage";
 import { useRegisterPageFilters } from "../components/FilterEngine";
 import { getBrandOfficialWebsite, normalizeExternalUrl } from "../utils/overviewRegistry";
 import { SizeGuideModal } from "../components/SizeGuideModal";
@@ -193,10 +194,12 @@ export function ProductDetailPage() {
   const baseProduct: any =
     productList.find((p: any) => p.id === Number(id)) ||
     productList.find((p: any) => String(p.catalogId) === String(id)) ||
+    productList.find((p: any) => String(p.slug) === String(id)) ||
     productList.find((p: any) => p.id === Number(id) + 1000) ||
-    productList[0];
+    null;
 
   const product = React.useMemo(() => {
+    if (!baseProduct) return null;
     const catalogKey = String(baseProduct?.catalogId || '');
     const detail = productDetailsById[catalogKey];
     if (!detail) return baseProduct;
@@ -234,6 +237,8 @@ export function ProductDetailPage() {
       location: (baseProduct as any)?.location,
       duration: (baseProduct as any)?.duration,
       specialty: (baseProduct as any)?.specialty,
+      brand: baseProduct.brand || baseProduct.brandName,
+      brandName: baseProduct.brandName || baseProduct.brand,
     };
   }, [baseProduct, productDetailsById]);
 
@@ -723,7 +728,7 @@ export function ProductDetailPage() {
 
   const productSpecs = [
     { label: "Material", value: "Premium Linen Wear" },
-    { label: "Category", value: product.category || "Lifestyle" },
+    { label: "Category", value: product?.category || "Lifestyle" },
     { label: "Fit", value: "Standard / Regular" },
     { label: "Occasion", value: "Festive Exclusive" },
     { label: "Warranty", value: "1 Year Brand Care" },
@@ -741,7 +746,7 @@ export function ProductDetailPage() {
         product?.stock === 0;
 
   const stockQuantity =
-    product.variants && product.variants.length > 0
+    product?.variants && product.variants.length > 0
       ? selectedVariant
         ? selectedVariant.stock
         : 0
@@ -750,7 +755,7 @@ export function ProductDetailPage() {
         : 58;
 
   const handleLoveBrand = () => {
-    toast.success(`You added ${product.brand} to your Favorite Brands!`);
+    toast.success(`You added ${product?.brand || product?.brandName || brandName} to your Favorite Brands!`);
   };
 
   const handleMessageOrder = () => {
@@ -867,20 +872,7 @@ export function ProductDetailPage() {
   };
 
   if (!product) {
-    return (
-      <div className="flex flex-col min-h-screen bg-choosify-feed items-center justify-center px-6 text-center">
-        <h1 className="text-lg font-extrabold text-[#1A1A2E]">Product not found</h1>
-        <p className="mt-2 text-sm text-[#6B7280]">
-          This product is unavailable right now. Try browsing the catalog again.
-        </p>
-        <Link
-          to="/products"
-          className="mt-5 inline-flex rounded-xl bg-[#EB4501] px-4 py-2 text-xs font-extrabold uppercase tracking-wide text-white"
-        >
-          Back to products
-        </Link>
-      </div>
-    );
+    return <NotFoundPage />;
   }
 
   return (

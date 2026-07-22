@@ -6,10 +6,12 @@ export const config = {
 
 const SITE_NAME = 'Choosify';
 const SITE_THEME_COLOR = '#000435';
-const SITE_BRAND_ORANGE = '#FF5B00';
+const SITE_BRAND_ORANGE = '#EB4501';
 const SITE_URL = 'https://www.choosify.bd';
 const OG_IMAGE_WIDTH = 1200;
 const OG_IMAGE_HEIGHT = 630;
+/** Real wordmark rasterized by `npm run generate:og` from public/choosify-logo-wordmark.svg */
+const WORDMARK_SRC = `${SITE_URL}/og/wordmark-light.png`;
 
 /** Minimal element factory — Vercel Edge /api routes do not transform JSX outside Next.js. */
 function h(type, props, ...children) {
@@ -74,39 +76,13 @@ export default async function handler(request) {
             height: '100%',
             display: 'flex',
             flexDirection: 'column',
-            background: `linear-gradient(135deg, ${SITE_THEME_COLOR} 0%, #0A0A2A 55%, #14142E 100%)`,
+            background: SITE_THEME_COLOR,
             color: '#FFFFFF',
-            fontFamily: 'Inter, system-ui, sans-serif',
+            fontFamily: 'Satoshi, Helvetica Neue, Arial, sans-serif',
             position: 'relative',
             overflow: 'hidden',
           },
         },
-        h('div', {
-          style: {
-            position: 'absolute',
-            right: -120,
-            top: -80,
-            width: 420,
-            height: 420,
-            borderRadius: 999,
-            background: SITE_BRAND_ORANGE,
-            opacity: 0.18,
-            display: 'flex',
-          },
-        }),
-        h('div', {
-          style: {
-            position: 'absolute',
-            left: -100,
-            bottom: -140,
-            width: 380,
-            height: 380,
-            borderRadius: 999,
-            background: '#2323FF',
-            opacity: 0.16,
-            display: 'flex',
-          },
-        }),
         h(
           'div',
           {
@@ -119,34 +95,13 @@ export default async function handler(request) {
           },
           h(
             'div',
-            { style: { display: 'flex', alignItems: 'center', gap: 14 } },
-            h(
-              'div',
-              {
-                style: {
-                  width: 48,
-                  height: 48,
-                  borderRadius: 12,
-                  background: SITE_BRAND_ORANGE,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: 26,
-                  fontWeight: 800,
-                },
-              },
-              'C',
-            ),
-            h(
-              'div',
-              { style: { display: 'flex', flexDirection: 'column' } },
-              h('div', { style: { fontSize: 28, fontWeight: 800, letterSpacing: -0.5 } }, SITE_NAME),
-              h(
-                'div',
-                { style: { fontSize: 16, color: 'rgba(255,255,255,0.55)', fontWeight: 600 } },
-                'buy ORIGINAL',
-              ),
-            ),
+            { style: { display: 'flex', alignItems: 'center' } },
+            h('img', {
+              src: WORDMARK_SRC,
+              width: 280,
+              height: 54,
+              style: { objectFit: 'contain' },
+            }),
           ),
           h(
             'div',
@@ -298,7 +253,7 @@ export default async function handler(request) {
                 display: 'flex',
               },
             },
-            'Verified discovery for Bangladesh',
+            'Bangladesh\'s Smartest Product Discovery Platform',
           ),
         ),
       ),

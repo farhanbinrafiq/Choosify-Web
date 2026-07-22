@@ -1,31 +1,20 @@
 /**
- * Local-only mock service listings for Hotels / Doctors / Beauty booking E2E tests.
+ * Local DEV mock service listings for Hotels / Doctors / Beauty booking E2E tests.
  *
- * Where: `src/data/mockServiceListings.ts` (merged in GlobalStateContext when enabled)
- * When:  Enabled in `import.meta.env.DEV` by default. Production builds never include these
- *        unless you force-enable (not recommended).
+ * Where: `src/data/mockServiceListings.ts`
+ * How:   Merged into `allProducts` / brands / sellers / product details in
+ *        GlobalStateContext whenever `import.meta.env.DEV` is true.
+ *        No UI toggle — listings appear like any other product on `/products`.
  *
- * Run:   `npm run dev` — listings appear on /products and via
- *        `/products?service=hotels|doctors|beauty`
- *
- * Identify: All titles are prefixed `[TEST]`. Brand = "[TEST] Choosify Services".
+ * Identify: Titles prefixed `[TEST]`. Brand = "[TEST] Choosify Services".
  *           Seller id = `seller-test-services`. Product ids = 9101–9106.
  *
- * Disable: localStorage.setItem('choosify_service_seed_disabled', '1') then reload
- *          (or use the DEV seed panel). Remove the key to re-enable.
- *
- * Reset booking threads/orders used while testing:
- *   localStorage.removeItem('choosify_threads')
- *   localStorage.removeItem('choosify_thread_messages')
- *   localStorage.removeItem('choosify_orders')
- *   localStorage.removeItem('choosify_notifications')
- *   then reload.
+ * Terminal: `npm run seed:services` — prints seed summary + how to clear
+ *           booking localStorage keys used while testing.
  */
 
-import type { Brand, CommerceProduct, Seller, User } from '../types/schemas';
+import type { Brand, CommerceProduct, Seller } from '../types/schemas';
 import type { CatalogProductDetail } from '../types/catalog';
-
-export const SERVICE_SEED_DISABLED_KEY = 'choosify_service_seed_disabled';
 
 /** High ids to avoid colliding with mock catalog (1–12) or typical API numeric ids. */
 export const TEST_SERVICE_BRAND_ID = 9001;
@@ -48,38 +37,9 @@ export type SeedCommerceProduct = CommerceProduct & {
   specialty?: string;
 };
 
+/** Seed is always on in local `npm run dev`; never in production builds. */
 export function isServiceSeedEnabled(): boolean {
-  if (!import.meta.env.DEV) return false;
-  try {
-    return localStorage.getItem(SERVICE_SEED_DISABLED_KEY) !== '1';
-  } catch {
-    return true;
-  }
-}
-
-export function setServiceSeedEnabled(enabled: boolean) {
-  try {
-    if (enabled) localStorage.removeItem(SERVICE_SEED_DISABLED_KEY);
-    else localStorage.setItem(SERVICE_SEED_DISABLED_KEY, '1');
-  } catch {
-    /* ignore */
-  }
-}
-
-export function resetServiceBookingTestStorage() {
-  const keys = [
-    'choosify_threads',
-    'choosify_thread_messages',
-    'choosify_orders',
-    'choosify_notifications',
-  ];
-  keys.forEach((key) => {
-    try {
-      localStorage.removeItem(key);
-    } catch {
-      /* ignore */
-    }
-  });
+  return Boolean(import.meta.env.DEV);
 }
 
 export const TEST_SERVICE_SELLER: Seller = {
@@ -110,24 +70,6 @@ export const TEST_SERVICE_BRAND: Brand = {
   featuredFlag: true,
   category: 'Services',
   claimStatus: 'verified',
-};
-
-/** Buyer stays default; switch to this user to exercise seller Accept / Decline / Modify. */
-export const TEST_SERVICE_SELLER_USER: User = {
-  id: TEST_SERVICE_USER_ID,
-  role: 'seller',
-  name: '[TEST] Services Seller',
-  username: 'test-services-seller',
-  phone: '+880 1700-000901',
-  email: 'test-services@choosify.local',
-  avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=Test%20Services',
-  address: 'Test HQ, Gulshan 2, Dhaka',
-  reputation_score: 99,
-  orderStats: { totalOrders: 42, completedOrders: 40, cancelledOrders: 2 },
-  verification: { verified: true, docType: 'NID', docUrl: '#' },
-  premiumStatus: true,
-  createdAt: '2026-01-01T00:00:00Z',
-  updatedAt: '2026-07-22T00:00:00Z',
 };
 
 const hotelImages = [

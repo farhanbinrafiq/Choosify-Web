@@ -1275,7 +1275,7 @@ export function CompareEngine() {
                   <div className="text-[9.5px] font-extrabold text-[#EB4501] tracking-[0.05em] mb-0.5">
                     BEST OVERALL
                   </div>
-                  <div className="text-[9.5px] font-bold text-white/60">{productWinner.brand}</div>
+                  <div className="text-[9.5px] font-bold text-white/60">{productWinner?.brand || productWinner?.brandName}</div>
                   <div className="text-[13px] font-extrabold mb-1.5">{productWinner.name}</div>
                   <Link to={`/products/${productWinner.id}`} className="text-[11px] font-bold text-[#FF9E5C] no-underline">
                     View product →

@@ -64,6 +64,7 @@ function resolveDcBadge(product: any): { label: string; bg: string } | null {
 }
 
 function resolveVariantLine(product: any): string {
+  if (!product) return 'Official Warranty';
   if (product.variant && typeof product.variant === 'string') return product.variant;
   if (Array.isArray(product.specs) && product.specs.length) {
     return product.specs
@@ -76,7 +77,7 @@ function resolveVariantLine(product: any): string {
   if (cat.includes('mobile') || cat.includes('phone')) return 'Official Warranty';
   if (cat.includes('audio') || cat.includes('headphone')) return 'Wireless, Bluetooth 5.3';
   if (cat.includes('laptop')) return '16GB RAM, 512GB SSD';
-  if (product.brand) return String(product.brand);
+  if (product.brand || product.brandName) return String(product.brand || product.brandName);
   return 'Official Warranty';
 }
 
@@ -101,8 +102,11 @@ function getProductCardImages(product: any): string[] {
 }
 
 function getRecommendationData(product: any) {
+  if (!product) {
+    return { tags: [] as string[], verdict: '' };
+  }
   const title = (product.title || '').toLowerCase();
-  const brand = (product.brand || '').toLowerCase();
+  const brand = (product.brand || product.brandName || '').toLowerCase();
   const cat = (product.category || '').toLowerCase();
 
   if (product.id === 1 || title.includes('s24') || title.includes('s25') || title.includes('s26')) {

@@ -1,38 +1,105 @@
+/**
+ * Generate static Open Graph + favicon assets from real brand files.
+ *
+ * Sources (do not invent graphics):
+ * - public/choosify-logo-wordmark.svg  (navbar / footer wordmark)
+ * - public/logo.png                    (oo mark, favicon source)
+ * - Brand navy #000435 (auth / footer / dark chrome)
+ *
+ * Output:
+ * - public/og/default.png          1200×630 default og:image
+ * - public/og/wordmark-light.png   wordmark on transparent (for /api/og)
+ * - public/favicon-16x16.png, favicon-32x32.png, apple-touch-icon.png
+ *
+ * Run: npm run generate:og
+ */
+import fs from 'fs';
 import sharp from 'sharp';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(__dirname, '../public');
+const ogDir = path.join(root, 'og');
 
-const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
-  <defs>
-    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#000435"/>
-      <stop offset="60%" stop-color="#0A0A2A"/>
-      <stop offset="100%" stop-color="#14142E"/>
-    </linearGradient>
-  </defs>
-  <rect width="1200" height="630" fill="url(#g)"/>
-  <circle cx="1080" cy="80" r="180" fill="#FF5B00" fill-opacity="0.18"/>
-  <circle cx="80" cy="560" r="160" fill="#2323FF" fill-opacity="0.16"/>
-  <rect x="56" y="52" width="48" height="48" rx="12" fill="#FF5B00"/>
-  <text x="80" y="86" text-anchor="middle" fill="#fff" font-family="Arial,sans-serif" font-size="26" font-weight="800">C</text>
-  <text x="120" y="75" fill="#fff" font-family="Arial,sans-serif" font-size="28" font-weight="800">Choosify</text>
-  <text x="120" y="98" fill="rgba(255,255,255,0.55)" font-family="Arial,sans-serif" font-size="14" font-weight="600">buy ORIGINAL</text>
-  <rect x="980" y="56" width="150" height="36" rx="18" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.12)"/>
-  <text x="1055" y="80" text-anchor="middle" fill="#FF5B00" font-family="Arial,sans-serif" font-size="14" font-weight="700">CHOOSIFY</text>
-  <text x="56" y="280" fill="#fff" font-family="Arial,sans-serif" font-size="54" font-weight="800">Bangladesh Smartest</text>
-  <text x="56" y="345" fill="#fff" font-family="Arial,sans-serif" font-size="54" font-weight="800">Product Discovery</text>
-  <text x="56" y="410" fill="rgba(255,255,255,0.72)" font-family="Arial,sans-serif" font-size="24" font-weight="500">Compare verified brands. Discover trusted products.</text>
-  <text x="56" y="560" fill="rgba(255,255,255,0.55)" font-family="Arial,sans-serif" font-size="20" font-weight="700">www.choosify.bd</text>
-  <text x="1144" y="560" text-anchor="end" fill="rgba(255,255,255,0.45)" font-family="Arial,sans-serif" font-size="16">Verified discovery for Bangladesh</text>
-</svg>`;
+const NAVY = '#000435';
+const TAGLINE = "Bangladesh's Smartest Product Discovery Platform";
+const SITE_HOST = 'www.choosify.bd';
 
-await sharp(Buffer.from(svg)).png().toFile(path.join(root, 'og/default.png'));
+await fs.promises.mkdir(ogDir, { recursive: true });
 
-const sourceIcon = path.join(root, 'logo.png');
-await sharp(sourceIcon).resize(16, 16).png().toFile(path.join(root, 'favicon-16x16.png'));
-await sharp(sourceIcon).resize(32, 32).png().toFile(path.join(root, 'favicon-32x32.png'));
-await sharp(sourceIcon).resize(180, 180).png().toFile(path.join(root, 'apple-touch-icon.png'));
-console.log('Generated og/default.png, favicon-16x16.png, favicon-32x32.png, apple-touch-icon.png');
+const wordmarkPath = path.join(root, 'choosify-logo-wordmark.svg');
+const logoMarkPath = path.join(root, 'logo.png');
+
+if (!fs.existsSync(wordmarkPath)) {
+  throw new Error(`Missing brand wordmark: ${wordmarkPath}`);
+}
+if (!fs.existsSync(logoMarkPath)) {
+  throw new Error(`Missing brand logo mark: ${logoMarkPath}`);
+}
+
+/** Official wordmark rendered for dark backgrounds (white + orange eyes). */
+const wordmarkBuffer = await sharp(wordmarkPath)
+  .resize({
+    width: 720,
+    height: 140,
+    fit: 'contain',
+    background: { r: 0, g: 0, b: 0, alpha: 0 },
+  })
+  .png()
+  .toBuffer();
+
+await sharp(wordmarkBuffer).toFile(path.join(ogDir, 'wordmark-light.png'));
+
+const wordmarkMeta = await sharp(wordmarkBuffer).metadata();
+const wordmarkW = wordmarkMeta.width || 720;
+const wordmarkH = wordmarkMeta.height || 140;
+const wordmarkLeft = Math.round((1200 - wordmarkW) / 2);
+const wordmarkTop = 210;
+
+const taglineSvg = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="80">
+  <text
+    x="600"
+    y="36"
+    text-anchor="middle"
+    fill="rgba(255,255,255,0.78)"
+    font-family="Satoshi, Helvetica Neue, Arial, sans-serif"
+    font-size="28"
+    font-weight="600"
+  >${TAGLINE.replace(/&/g, '&amp;').replace(/'/g, '&apos;')}</text>
+</svg>`);
+
+const hostSvg = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="40">
+  <text
+    x="600"
+    y="28"
+    text-anchor="middle"
+    fill="rgba(255,255,255,0.42)"
+    font-family="Satoshi, Helvetica Neue, Arial, sans-serif"
+    font-size="18"
+    font-weight="600"
+  >${SITE_HOST}</text>
+</svg>`);
+
+/** Clean navy field — same ink as navbar / footer / auth chrome. */
+const backgroundSvg = Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630">
+  <rect width="1200" height="630" fill="${NAVY}"/>
+</svg>`);
+
+await sharp(backgroundSvg)
+  .composite([
+    { input: wordmarkBuffer, left: wordmarkLeft, top: wordmarkTop },
+    { input: taglineSvg, left: 0, top: wordmarkTop + wordmarkH + 28 },
+    { input: hostSvg, left: 0, top: 560 },
+  ])
+  .png()
+  .toFile(path.join(ogDir, 'default.png'));
+
+await sharp(logoMarkPath).resize(16, 16).png().toFile(path.join(root, 'favicon-16x16.png'));
+await sharp(logoMarkPath).resize(32, 32).png().toFile(path.join(root, 'favicon-32x32.png'));
+await sharp(logoMarkPath).resize(180, 180).png().toFile(path.join(root, 'apple-touch-icon.png'));
+
+const out = await sharp(path.join(ogDir, 'default.png')).metadata();
+console.log(
+  `Generated og/default.png (${out.width}×${out.height}), og/wordmark-light.png, favicons from real brand assets.`,
+);

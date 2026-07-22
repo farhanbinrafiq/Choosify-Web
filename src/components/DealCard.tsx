@@ -116,7 +116,7 @@ export const DealCard = memo(function DealCard({
         <div className="p-4 flex-1 flex flex-col justify-between min-w-0">
           <div className="min-w-0">
             <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest block">
-              {product.brand}
+              {product?.brand || product?.brandName || 'Brand'}
             </span>
             <h4 className="font-bold text-[13px] text-[#050B2C] tracking-tight leading-snug group-hover:text-[#CF4400] transition-colors line-clamp-2 mt-1">
               {product.title}

@@ -573,7 +573,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       stock: typeof product.stock === 'number' ? product.stock : 0,
       sellerId: `seller-${(product.brandName || 'platform').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
       brandId: normalizedBrandId,
-      brand: product.brandName,
+      brand: product.brandName || 'Choosify',
       price: product.price || 0,
       description: product.description || '',
       category: product.categoryName || 'General',

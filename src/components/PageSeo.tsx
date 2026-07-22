@@ -115,6 +115,15 @@ function resolveMeta(
 
   if (section === 'products' && id) {
     const product = state.allProducts.find((p) => matchesRouteParam(p, id));
+    if (!product) {
+      return {
+        title: formatPageTitle('Product'),
+        description: 'View verified products and services on Choosify — Bangladesh.',
+        ogType: 'product',
+        ogCardType: 'product',
+        label: 'Product',
+      };
+    }
     const catalogId = (product as { catalogId?: string })?.catalogId;
     const detail = catalogId ? state.productDetailsById[catalogId] : undefined;
     const title =
@@ -129,8 +138,8 @@ function resolveMeta(
       (product as { description?: string })?.description ||
       `View ${title} on Choosify — verified product discovery for Bangladesh.`;
     const brandName =
-      (product as { brand?: string; brandName?: string }).brand ||
-      (product as { brandName?: string }).brandName;
+      (product as { brand?: string; brandName?: string })?.brand ||
+      (product as { brandName?: string })?.brandName;
     const entityImage = (product as { image?: string })?.image;
     return {
       title: formatPageTitle(title),
@@ -145,6 +154,15 @@ function resolveMeta(
 
   if (section === 'brands' && id) {
     const brand = state.allBrands.find((b) => matchesRouteParam(b, id));
+    if (!brand) {
+      return {
+        title: formatPageTitle('Brand'),
+        description: 'Explore verified brands on Choosify.',
+        ogType: 'website',
+        ogCardType: 'brand',
+        label: 'Brand',
+      };
+    }
     const name = brand?.name || 'Brand';
     const description =
       (brand as { description?: string })?.description ||

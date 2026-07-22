@@ -63,8 +63,10 @@ export function legacyMockProductToCatalog(
     slug: catalogId,
     title: product.title,
     description: product.description || '',
-    brandId: product.brand.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
-    brandName: product.brand,
+  brandId: String(product.brand || 'unknown')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-'),
+  brandName: product.brand || 'Unknown',
     categoryId: categoryName.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
     categoryName,
     image: product.image,

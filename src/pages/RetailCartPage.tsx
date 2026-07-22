@@ -141,7 +141,7 @@ export function RetailCartPage() {
             <div className="lg:col-span-2 space-y-5">
               {sellerIds.map((sellerId) => {
                 const items = groupedCart[sellerId];
-                const sellerName = items[0].product.brand || 'General Vendor';
+                const sellerName = items[0]?.product?.brand || items[0]?.product?.brandName || 'General Vendor';
                 const sellerSubtotal = calculateSellerSubtotal(items);
 
                 return (

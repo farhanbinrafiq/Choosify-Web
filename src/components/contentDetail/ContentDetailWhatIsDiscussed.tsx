@@ -53,7 +53,7 @@ export function ContentDetailWhatIsDiscussed({
                   {idx === 0 ? '👑' : idx + 1}
                 </div>
                 <span className="flex-1 text-[11.5px] font-bold text-[#1A1A2E] truncate">
-                  {p.brand} {p.title || p.name}
+                  {p?.brand || p?.brandName} {p.title || p.name}
                 </span>
                 <div className="w-10 h-[30px] rounded overflow-hidden shrink-0 bg-[#F4F7F9]">
                   <img src={p.image} className="w-full h-full object-contain" alt="" />

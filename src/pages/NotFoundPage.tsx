@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { RefreshCcw } from 'lucide-react';
 import { EmiAiLogo } from '../components/EmiAiLogo';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { CATEGORIES_LIST } from '../data/categoriesData';
@@ -10,8 +11,20 @@ type NotFoundChip = {
   to: string;
 };
 
-export default function NotFoundPage() {
+export type NotFoundPageProps = {
+  /** `not-found` = classic 404; `error` = runtime crash using the same layout */
+  variant?: 'not-found' | 'error';
+  errorMessage?: string;
+  onRetry?: () => void;
+};
+
+export default function NotFoundPage({
+  variant = 'not-found',
+  errorMessage,
+  onRetry,
+}: NotFoundPageProps = {}) {
   const { allCategories, allCatalogProducts, siteConfig } = useGlobalState();
+  const isError = variant === 'error';
 
   const chips = useMemo((): NotFoundChip[] => {
     const categoryNames = (
@@ -55,21 +68,39 @@ export default function NotFoundPage() {
       }}
       aria-labelledby="not-found-heading"
     >
-      {/* Top: centered 404 + message + Emi */}
       <div className="flex-1 flex flex-col items-center justify-center text-center px-5 pt-10 pb-8 sm:pt-14 sm:pb-10">
         <h1
           id="not-found-heading"
           className="text-[100px] sm:text-[150px] font-extrabold leading-none tracking-tight text-[#000435]"
         >
-          404
+          {isError ? 'Oops' : '404'}
         </h1>
 
         <p className="mt-3 sm:mt-4 text-[15px] sm:text-base font-medium text-[#6B7280]">
-          Oops! We couldn&apos;t find that page.
+          {isError
+            ? 'Something went wrong while loading this page.'
+            : 'Oops! We couldn\u2019t find that page.'}
         </p>
 
+        {isError && errorMessage ? (
+          <p className="mt-2 max-w-md text-[13px] font-medium text-[#FF5B00]/90">{errorMessage}</p>
+        ) : null}
+
         <p className="mt-2 text-[15px] sm:text-base font-medium text-[#6B7280]">
-          Return{' '}
+          {isError && onRetry ? (
+            <>
+              <button
+                type="button"
+                onClick={onRetry}
+                className="inline-flex items-center gap-1.5 text-[#FF5B00] font-semibold underline underline-offset-2 hover:opacity-90"
+              >
+                <RefreshCcw size={14} /> Refresh
+              </button>
+              {' or return '}
+            </>
+          ) : (
+            'Return '
+          )}
           <Link
             to="/"
             className="text-[#FF5B00] font-semibold underline underline-offset-2 hover:opacity-90"
@@ -83,7 +114,6 @@ export default function NotFoundPage() {
         </div>
       </div>
 
-      {/* Bottom: full-bleed category / keyword chips */}
       <div className="w-full bg-[#000435] px-5 sm:px-8 lg:px-10 pt-6 pb-12 sm:pb-16">
         <p className="text-center text-[13px] sm:text-sm font-medium text-white/55 mb-5 sm:mb-6">
           Why not check out our top categories instead?

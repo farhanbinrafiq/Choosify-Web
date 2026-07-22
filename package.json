@@ -8,7 +8,8 @@
     "build": "vite build",
     "preview": "vite preview",
     "lint": "tsc --noEmit",
-    "generate:og": "node scripts/generate-og-assets.mjs"
+    "generate:og": "node scripts/generate-og-assets.mjs",
+    "seed:services": "node scripts/seed-services.mjs"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",

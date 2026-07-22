@@ -11,7 +11,6 @@ import { BreadcrumbProvider } from './context/BreadcrumbContext';
 import { DashboardProvider } from './context/DashboardContext';
 import { GlobalStateProvider } from './context/GlobalStateContext';
 import { OfflineFallbackBanner } from './components/OfflineFallbackBanner';
-import { ServiceSeedDevBanner } from './components/ServiceSeedDevBanner';
 import { DrawerFilterProvider, FloatingFilterProvider } from './components/FilterEngine';
 import { StudioEditProvider } from './context/StudioEditContext';
 import { StudioEditPanel } from './components/studio/StudioEditPanel';
@@ -286,10 +285,9 @@ function AppContent() {
 export default function App() {
   return (
     <BrowserRouter>
-      <ErrorBoundary>
-        <GlobalStateProvider>
+      <GlobalStateProvider>
+        <ErrorBoundary>
           <OfflineFallbackBanner />
-          <ServiceSeedDevBanner />
           <DashboardProvider>
             <Toaster 
               position="top-center" 
@@ -322,8 +320,8 @@ export default function App() {
             </DrawerFilterProvider>
             <PWAInstallPrompt />
           </DashboardProvider>
-        </GlobalStateProvider>
-      </ErrorBoundary>
+        </ErrorBoundary>
+      </GlobalStateProvider>
     </BrowserRouter>
   )
 }
