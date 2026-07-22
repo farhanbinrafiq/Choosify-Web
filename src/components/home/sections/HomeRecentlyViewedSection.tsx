@@ -27,11 +27,11 @@ export function HomeRecentlyViewedSection({ products }: HomeRecentlyViewedSectio
             to={`/products/${product.slug ?? product.id}`}
             className="bg-white rounded-[10px] overflow-hidden border border-[#E8EDF2] hover:border-[#EB4501]/35 transition-colors"
           >
-            <div className="relative h-[150px] bg-[#F4F7F9]">
+            <div className="relative h-[150px] bg-[#F4F7F9] overflow-hidden">
               <img
                 src={product.image || PLACEHOLDER_IMAGE}
                 alt={product.title}
-                className="w-full h-full object-contain p-3"
+                className="w-full h-full object-cover object-center"
                 loading="lazy"
               />
               <span className="absolute top-2 right-2 w-[26px] h-[26px] rounded-full bg-white flex items-center justify-center text-[#EB4501] shadow-sm">

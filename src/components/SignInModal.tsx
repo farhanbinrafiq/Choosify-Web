@@ -111,17 +111,16 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
                 <button
                   type="submit"
                   disabled={isLoading}
-                  className="w-full h-12 bg-white border border-white/20 hover:brightness-105 rounded-xl text-[14px] font-bold tracking-tight flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed group mt-6 choosify-emi-gradient-text"
+                  className="w-full h-12 bg-white border border-white/20 hover:brightness-105 rounded-xl text-[14px] font-bold tracking-tight text-[#EB4501] flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed group mt-6"
                 >
                   {isLoading ? (
-                    <div className="w-5 h-5 border-2 border-[#ff0188]/20 border-t-[#ff0188] rounded-full animate-spin" />
+                    <div className="w-5 h-5 border-2 border-[#EB4501]/20 border-t-[#EB4501] rounded-full animate-spin" />
                   ) : (
                     <>
                       Sign in{' '}
                       <ArrowRight
                         size={16}
-                        stroke="url(#choosify-emi-icon-grad)"
-                        className="group-hover:translate-x-0.5 transition-transform"
+                        className="text-[#EB4501] group-hover:translate-x-0.5 transition-transform"
                       />
                     </>
                   )}

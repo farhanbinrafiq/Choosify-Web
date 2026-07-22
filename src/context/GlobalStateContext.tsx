@@ -15,6 +15,7 @@ import { catalogApi } from '../services/catalogApi';
 import { hydrateBrandPostsFromApi } from '../lib/brandPosts';
 import { FEATURE_FLAG_DEFAULTS, isFlagEnabled, normalizeFeatureFlags } from '../lib/featureFlags';
 import { operationsApi } from '../services/operationsApi';
+import { ensureDemoExpiryOrders } from '../lib/messaging/demoExpiryOrders';
 import type { CatalogBrand, CatalogCategory, CatalogCreator, CatalogDeal, CatalogGuide, CatalogPlacement, CatalogProduct, CatalogProductDetail, HomepageConfig, SiteConfig } from '../types/catalog';
 import { mapCatalogCreator, mapCatalogGuide } from '../utils/editorialMappers';
 import { commerceProductToCatalog, resolveCatalogProducts } from '../utils/productNormalize';
@@ -211,8 +212,13 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   });
 
   const [orders, setOrders] = useState<Order[]>(() => {
-    const saved = localStorage.getItem('choosify_orders');
-    return saved ? JSON.parse(saved) : [];
+    try {
+      const saved = localStorage.getItem('choosify_orders');
+      const parsed: Order[] = saved ? JSON.parse(saved) : [];
+      return ensureDemoExpiryOrders(Array.isArray(parsed) ? parsed : []);
+    } catch {
+      return ensureDemoExpiryOrders([]);
+    }
   });
 
   const [currentUser, setCurrentUser] = useState<User>(() => {

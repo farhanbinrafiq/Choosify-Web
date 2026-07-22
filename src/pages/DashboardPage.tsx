@@ -38,9 +38,25 @@ import {
   Banknote,
   Award,
   Gift,
+  Ban,
+  Camera,
+  Upload,
 } from 'lucide-react';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
+import { MyPaymentOptionsSection } from './dashboard/MyPaymentOptionsSection';
+import { MyCancellationsSection } from './dashboard/MyCancellationsSection';
+import { MyReturnsSection } from './dashboard/MyReturnsSection';
+import { ToPaySection } from './dashboard/ToPaySection';
+import {
+  getActiveReturns,
+  getAttentionPaymentMethods,
+  getPendingCancellationOrders,
+  getPendingToPayOrders,
+  loadPaymentMethods,
+  loadReturnRequests,
+  seedDefaultPaymentMethodsIfEmpty,
+} from '../lib/dashboard/pendingActions';
 import { ProductCard } from '../components/ProductCard';
 import { BrandCardDesign, mapBrandToCardDesign } from '../components/BrandCardDesign';
 import { CreatorCardDesign } from '../components/CreatorCardDesign';
@@ -81,6 +97,10 @@ const DASHBOARD_TABS_WITH_RIGHT_CONTENT = new Set([
   'settings',
   'orders',
   'my-reviews',
+  'to-pay',
+  'my-cancellations',
+  'my-returns',
+  'my-payment-options',
 ]);
 
 const OVERVIEW_TRUST = [
@@ -203,6 +223,10 @@ const COLLECTION_TAB_IDS = new Set([
 ]);
 const ACTIVITY_TAB_IDS = new Set([
   'orders',
+  'to-pay',
+  'my-cancellations',
+  'my-returns',
+  'my-payment-options',
 ]);
 const COMMUNICATION_TAB_IDS = new Set(['my-reviews', 'addresses']);
 const LEGACY_DASHBOARD_TAB_REDIRECTS: Record<string, 'saved-items' | 'following'> = {
@@ -277,6 +301,47 @@ const OverviewSection = ({
   const { savedProducts } = useDashboard();
   const { orders, currentUser } = useGlobalState();
   const displayName = userName?.trim() || 'there';
+
+  const pendingToPayCount = getPendingToPayOrders(orders).length;
+  const pendingCancellationsCount = getPendingCancellationOrders(orders).length;
+  const activeReturnsCount = getActiveReturns(loadReturnRequests()).length;
+  const paymentMethods =
+    loadPaymentMethods().length > 0
+      ? loadPaymentMethods()
+      : seedDefaultPaymentMethodsIfEmpty();
+  const paymentAttentionCount = getAttentionPaymentMethods(paymentMethods).length;
+
+  const quickAccessCards = [
+    pendingToPayCount > 0 && {
+      id: 'to-pay',
+      title: 'To Pay',
+      detail: `${pendingToPayCount} unpaid ${pendingToPayCount === 1 ? 'order' : 'orders'}`,
+      icon: Banknote,
+    },
+    pendingCancellationsCount > 0 && {
+      id: 'my-cancellations',
+      title: 'My Cancellations',
+      detail: `${pendingCancellationsCount} unreviewed ${pendingCancellationsCount === 1 ? 'cancellation' : 'cancellations'}`,
+      icon: Ban,
+    },
+    activeReturnsCount > 0 && {
+      id: 'my-returns',
+      title: 'My Returns',
+      detail: `${activeReturnsCount} active ${activeReturnsCount === 1 ? 'return' : 'returns'}`,
+      icon: RotateCcw,
+    },
+    paymentAttentionCount > 0 && {
+      id: 'my-payment-options',
+      title: 'My Payment Options',
+      detail: `${paymentAttentionCount} ${paymentAttentionCount === 1 ? 'method' : 'methods'} need attention`,
+      icon: CreditCard,
+    },
+  ].filter(Boolean) as Array<{
+    id: string;
+    title: string;
+    detail: string;
+    icon: typeof Banknote;
+  }>;
 
   const choosifyScore = Math.min(
     100,
@@ -384,6 +449,33 @@ const OverviewSection = ({
           Bangladesh&apos;s smartest product discovery platform.
         </p>
       </div>
+
+      {quickAccessCards.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0">
+          {quickAccessCards.map((card) => {
+            const Icon = card.icon;
+            return (
+              <button
+                key={card.id}
+                type="button"
+                onClick={() => onTabChange?.(card.id)}
+                className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 text-left hover:border-[#EB4501]/40 transition-colors cursor-pointer flex items-start gap-3"
+              >
+                <div className="w-10 h-10 rounded-xl bg-[#EB4501]/10 flex items-center justify-center shrink-0">
+                  <Icon size={18} className="text-[#EB4501]" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="text-[13px] font-extrabold text-[#1A1A2E]">{card.title}</div>
+                  <p className="text-[11.5px] text-[#6B7280] mt-0.5">{card.detail}</p>
+                  <span className="text-[11.5px] font-bold text-[#EB4501] mt-2 inline-block">
+                    Open →
+                  </span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_260px] gap-5 min-w-0 items-start">
         <div className="space-y-5 min-w-0 overflow-hidden">
@@ -1312,22 +1404,24 @@ const NotificationsSection = () => {
 const SETTINGS_TABS = [
   { id: 'personal', label: 'Personal Information' },
   { id: 'addresses', label: 'Addresses' },
-  { id: 'security', label: 'Security' },
-  { id: 'notifications', label: 'Notifications' },
-  { id: 'privacy', label: 'Privacy' },
 ] as const;
 
 type SettingsSubTab = (typeof SETTINGS_TABS)[number]['id'];
+
+const DEFAULT_AVATAR =
+  'https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png';
 
 const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: SettingsSubTab }) => {
   const { currentUser, setCurrentUser } = useGlobalState();
   const [name, setName] = useState(currentUser?.name || '');
   const [email, setEmail] = useState(currentUser?.email || '');
   const [phone, setPhone] = useState(currentUser?.phone || '');
+  const [avatar, setAvatar] = useState(currentUser?.avatar || DEFAULT_AVATAR);
   const [settingsSubTab, setSettingsSubTab] = useState<SettingsSubTab>(initialSubTab);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setSettingsSubTab(initialSubTab);
+    setSettingsSubTab(initialSubTab === 'addresses' ? 'addresses' : 'personal');
   }, [initialSubTab]);
 
   useEffect(() => {
@@ -1335,13 +1429,45 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
       setName(currentUser.name || '');
       setEmail(currentUser.email || '');
       setPhone(currentUser.phone || '');
+      setAvatar(currentUser.avatar || DEFAULT_AVATAR);
     }
   }, [currentUser]);
 
+  const persistProfile = (nextAvatar: string) => {
+    const next = { ...currentUser, name, email, phone, avatar: nextAvatar };
+    setCurrentUser(next);
+    localStorage.setItem('choosify_user_profile', JSON.stringify(next));
+  };
+
   const handleSave = () => {
-    setCurrentUser({ ...currentUser, name, email, phone });
-    localStorage.setItem('choosify_user_profile', JSON.stringify({ name, email, phone }));
+    persistProfile(avatar);
     toast.success('Profile settings updated successfully');
+  };
+
+  const handleUploadClick = () => fileInputRef.current?.click();
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please choose an image file.');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = String(reader.result || '');
+      setAvatar(dataUrl);
+      persistProfile(dataUrl);
+      toast.success('Profile photo updated.');
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleDeletePhoto = () => {
+    setAvatar(DEFAULT_AVATAR);
+    persistProfile(DEFAULT_AVATAR);
+    toast.success('Profile photo removed.');
   };
 
   return (
@@ -1352,7 +1478,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
             Profile Settings
           </h2>
           <p className="text-[#9AA0AC] text-[12.5px]">
-            Account center — personal info, addresses, security &amp; preferences
+            Account center — personal info and addresses
           </p>
         </div>
         {settingsSubTab === 'personal' && (
@@ -1388,18 +1514,49 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
           <div className="space-y-6">
             <div className="flex flex-col items-center p-8 bg-white border border-[#E8EDF2] rounded-[10px] relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-b from-[#EB4501]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-              <div className="relative w-28 h-28 mb-5 cursor-pointer group/avatar">
+              <div className="relative w-28 h-28 mb-4">
                 <img
-                  src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png"
-                  className="w-full h-full rounded-full object-cover border-4 border-[#EB4501]/25 transition-all group-hover/avatar:border-[#EB4501]/60"
+                  src={avatar || DEFAULT_AVATAR}
+                  className="w-full h-full rounded-full object-cover border-4 border-[#EB4501]/25"
                   alt="Profile"
                 />
-                <div className="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover/avatar:opacity-100 transition-opacity">
-                  <Plus className="text-white" size={28} />
-                </div>
+                <button
+                  type="button"
+                  onClick={handleUploadClick}
+                  aria-label="Upload new photo"
+                  className="absolute bottom-0 right-0 w-9 h-9 rounded-full bg-[#EB4501] text-white border-2 border-white flex items-center justify-center cursor-pointer shadow-sm hover:brightness-110"
+                >
+                  <Camera size={16} />
+                </button>
               </div>
-              <h4 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">{name}</h4>
-              <p className="text-[#9AA0AC] text-[12px] font-semibold">Premium Member</p>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              <div className="flex flex-wrap items-center justify-center gap-2 mb-4 relative z-[1]">
+                <button
+                  type="button"
+                  onClick={handleUploadClick}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-bold text-[#EB4501] bg-[#EB4501]/10 hover:bg-[#EB4501]/15 border border-[#EB4501]/25 rounded-lg cursor-pointer"
+                >
+                  <Upload size={14} />
+                  Upload new photo
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeletePhoto}
+                  disabled={!avatar || avatar === DEFAULT_AVATAR}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-100 rounded-lg cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <Trash2 size={14} />
+                  Delete photo
+                </button>
+              </div>
+              <h4 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-1 relative z-[1]">{name}</h4>
+              <p className="text-[#9AA0AC] text-[12px] font-semibold relative z-[1]">Premium Member</p>
             </div>
 
             <div className="space-y-5 bg-white border border-[#E8EDF2] rounded-[10px] p-6">
@@ -1461,65 +1618,6 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
       )}
 
       {settingsSubTab === 'addresses' && <AddressBookManager embedded />}
-
-      {settingsSubTab === 'security' && (
-        <div className="space-y-4 max-w-xl">
-          <h3 className="text-[13px] font-bold text-[#1A1A2E]">Security</h3>
-          <button className="w-full py-4 bg-white border border-[#E8EDF2] rounded-xl text-[13px] font-bold text-[#1A1A2E] hover:bg-[#F4F7F9] flex items-center justify-center gap-3 cursor-pointer min-h-[44px]">
-            <ShieldCheck size={16} className="text-[#EB4501]" /> Reset Multi-Factor Auth
-          </button>
-          <button className="w-full py-4 bg-rose-50 border border-rose-100 rounded-xl text-[13px] font-bold text-rose-600 hover:bg-rose-500 hover:text-white transition-all cursor-pointer min-h-[44px]">
-            Deactivate Account
-          </button>
-        </div>
-      )}
-
-      {settingsSubTab === 'notifications' && (
-        <div className="space-y-4 max-w-2xl">
-          <h3 className="text-[13px] font-bold text-[#1A1A2E]">Notifications</h3>
-          <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-6 space-y-5">
-            {[
-              { label: 'Sale Alerts', desc: 'When your saved product goes on flash sale', checked: true },
-              { label: 'Expert Tips', desc: 'Weekly curated guides for your categories', checked: true },
-              { label: 'Price Drops', desc: 'Whenever a brand lowers price beyond 20%', checked: false },
-              { label: 'Inbox Direct', desc: 'Direct messages from verified sellers', checked: true },
-            ].map((item) => (
-              <div key={item.label} className="flex items-center justify-between gap-6 group">
-                <div className="flex-1 text-left">
-                  <h5 className="text-[13px] font-bold text-[#1A1A2E] tracking-tight mb-0.5">
-                    {item.label}
-                  </h5>
-                  <p className="text-[12px] font-medium text-[#9AA0AC]">{item.desc}</p>
-                </div>
-                <button
-                  type="button"
-                  className={cn(
-                    'w-12 h-6 rounded-full transition-all relative p-1 min-h-[44px] min-w-[48px] flex items-center',
-                    item.checked ? 'bg-[#059669]' : 'bg-gray-200',
-                  )}
-                >
-                  <div
-                    className={cn(
-                      'w-4 h-4 rounded-full bg-white transition-all shadow-md',
-                      item.checked ? 'translate-x-6' : 'translate-x-0',
-                    )}
-                  />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {settingsSubTab === 'privacy' && (
-        <div className="max-w-2xl bg-white border border-[#E8EDF2] rounded-[10px] p-6 text-left">
-          <h3 className="text-[13px] font-extrabold tracking-tight text-[#1A1A2E] mb-2">Privacy</h3>
-          <p className="text-[12.5px] text-[#9AA0AC] leading-relaxed">
-            Control how your browsing activity and profile data are used across Choosify. Privacy controls
-            will expand in a future release.
-          </p>
-        </div>
-      )}
     </div>
   );
 };
@@ -1770,6 +1868,10 @@ export function DashboardPage() {
     Star,
     Settings,
     MapPin,
+    Banknote,
+    Ban,
+    RotateCcw,
+    CreditCard,
   };
 
   const formatNavLabel = (item: { id: string; label: string }) => item.label;
@@ -1837,7 +1939,7 @@ export function DashboardPage() {
       setActiveTab(queryTab);
       if (queryTab === 'settings') {
         const sub = params.get('section');
-        if (sub === 'addresses' || sub === 'personal' || sub === 'security' || sub === 'notifications' || sub === 'privacy') {
+        if (sub === 'addresses' || sub === 'personal') {
           setSettingsSubTab(sub);
         }
       }
@@ -1859,20 +1961,25 @@ export function DashboardPage() {
       } else {
         setActiveTab(tab);
       }
-      if (location.state?.settingsSubTab) {
-        setSettingsSubTab(location.state.settingsSubTab as SettingsSubTab);
+      if (location.state?.settingsSubTab === 'addresses' || location.state?.settingsSubTab === 'personal') {
+        setSettingsSubTab(location.state.settingsSubTab);
       }
     }
   }, [location.state, location.search, platformRole, navigate]);
 
+  const goToTab = (tab: string) => {
+    setActiveTab(tab);
+    navigate(`/dashboard?tab=${tab}`);
+  };
+
   const renderContent = () => {
     if (!isDashboardTabAllowed(activeTab, platformRole)) {
-      return <OverviewSection onTabChange={setActiveTab} userName={currentUser.name} />;
+      return <OverviewSection onTabChange={goToTab} userName={currentUser.name} />;
     }
 
     switch (activeTab) {
       // Retail Tabs
-      case 'overview': return <OverviewSection onTabChange={setActiveTab} userName={currentUser.name} />;
+      case 'overview': return <OverviewSection onTabChange={goToTab} userName={currentUser.name} />;
       case 'saved-items': return <SavedItemsSection />;
       case 'following': return <FollowedBrandsSection />;
       case 'recently-viewed': return <RecentlyViewedSection />;
@@ -1885,6 +1992,14 @@ export function DashboardPage() {
             }}
           />
         );
+      case 'to-pay':
+        return <ToPaySection />;
+      case 'my-cancellations':
+        return <MyCancellationsSection />;
+      case 'my-returns':
+        return <MyReturnsSection />;
+      case 'my-payment-options':
+        return <MyPaymentOptionsSection />;
       case 'seller-products':
       case 'seller-orders':
       case 'spotlight-requests':
@@ -1907,7 +2022,7 @@ export function DashboardPage() {
       case 'addresses':
         return <AddressBookManager />;
 
-      default: return <OverviewSection onTabChange={setActiveTab} userName={currentUser.name} />;
+      default: return <OverviewSection onTabChange={goToTab} userName={currentUser.name} />;
     }
   };
 

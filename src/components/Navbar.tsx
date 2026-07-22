@@ -189,12 +189,12 @@ export function Navbar() {
     const isDiscover = path === '/spotlight';
     if (isDiscover) {
       return cn(
-        'choosify-discover-pill whitespace-nowrap text-[11.5px] transition-opacity hover:opacity-90',
+        'choosify-discover-pill whitespace-nowrap text-[11.5px] transition-opacity hover:opacity-90 cursor-pointer',
         isActive ? 'font-bold' : 'font-medium',
       );
     }
     return cn(
-      'text-[11.5px] whitespace-nowrap transition-colors hover:text-[#CF4400]',
+      'text-[11.5px] whitespace-nowrap transition-colors hover:text-[#CF4400] cursor-pointer',
       isActive ? 'text-[#EB4501] font-bold' : 'text-white/80 font-medium',
     );
   };
@@ -247,7 +247,7 @@ export function Navbar() {
         <button
           type="button"
           onClick={openMobileNavMenu}
-          className="lg:hidden w-10 h-10 flex shrink-0 items-center justify-center text-white/70 hover:text-white hover:bg-white/5 rounded-full border border-white/10 bg-white/5 transition-all relative z-[60] hamburger"
+          className="lg:hidden w-10 h-10 flex shrink-0 items-center justify-center text-white/70 hover:text-white hover:bg-white/5 rounded-full border border-white/10 bg-white/5 transition-all relative z-[60] hamburger cursor-pointer"
           aria-label="Toggle navigation menu"
         >
           <Menu size={20} className={cn("transition-transform duration-300", isMobileMenuOpen && "rotate-90")} />
@@ -285,7 +285,7 @@ export function Navbar() {
             <button
               type="button"
               onClick={openCartPreview}
-              className="sm:hidden relative w-10 h-10 shrink-0 flex items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#EB4501] hover:bg-white/10 transition-colors"
+              className="sm:hidden relative w-10 h-10 shrink-0 flex items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#EB4501] hover:bg-white/10 transition-colors cursor-pointer"
               aria-label="Shopping cart"
               aria-expanded={isCartOpen}
               title="Shopping Cart"
@@ -300,14 +300,28 @@ export function Navbar() {
           </div>
         </div>
 
-        {/* ACTIONS — cart only */}
+        {/* ACTIONS — messages + cart (desktop / tablet) */}
         <div className="flex items-center gap-1 sm:gap-1.5 xl:gap-2 shrink-0 nav-actions relative z-[50]">
           
-          <div className="hidden sm:flex items-center border-r border-[#ffffff1a] pr-2 xl:pr-5 shrink-0">
+          <div className="hidden sm:flex items-center gap-3 border-r border-[#ffffff1a] pr-2 xl:pr-5 shrink-0">
+            <button
+              type="button"
+              onClick={() => navigate('/messages')}
+              className="relative text-[#EB4501] hover:opacity-90 transition-opacity cursor-pointer"
+              aria-label="Message inbox"
+              title="Messages"
+            >
+              <MessageSquare size={19} strokeWidth={2} className="text-[#EB4501] transition-colors" />
+              {unreadMsgCount > 0 && (
+                <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 text-white text-[9px] font-bold bg-[#EB4501] rounded-lg flex items-center justify-center leading-none">
+                  {unreadMsgCount > 99 ? '99+' : unreadMsgCount}
+                </span>
+              )}
+            </button>
             <button 
               type="button"
               onClick={openCartPreview}
-              className="relative text-[#EB4501] hover:opacity-90 transition-opacity"
+              className="relative text-[#EB4501] hover:opacity-90 transition-opacity cursor-pointer"
               aria-label="Shopping cart"
               aria-expanded={isCartOpen}
               title="Shopping Cart"
@@ -407,14 +421,14 @@ export function Navbar() {
               <button
                 type="button"
                 onClick={() => goToLogin('sign-in')}
-                className="h-8 xl:h-9 px-2.5 xl:px-4 !bg-white text-[8px] xl:text-[9px] uppercase font-black rounded-full tracking-wider xl:tracking-widest transition-all flex items-center justify-center gap-1 italic hover:brightness-110 whitespace-nowrap border-0 shadow-sm shrink-0"
+                className="h-8 xl:h-9 px-2.5 xl:px-4 !bg-white text-[#EB4501] text-[8px] xl:text-[9px] uppercase font-black rounded-full tracking-wider xl:tracking-widest transition-all flex items-center justify-center gap-1 italic hover:brightness-110 whitespace-nowrap border-0 shadow-sm shrink-0 cursor-pointer"
               >
-                <span className="choosify-emi-gradient-text">Sign In</span>
+                Sign In
               </button>
               <button
                 type="button"
                 onClick={() => goToLogin('sign-up')}
-                className="h-8 xl:h-9 px-2.5 xl:px-4 text-white text-[8px] xl:text-[9px] uppercase font-black rounded-full tracking-wider xl:tracking-widest transition-all flex items-center gap-1 italic choosify-emi-gradient hover:brightness-110 whitespace-nowrap border-0"
+                className="h-8 xl:h-9 px-2.5 xl:px-4 bg-[#EB4501] text-white text-[8px] xl:text-[9px] uppercase font-black rounded-full tracking-wider xl:tracking-widest transition-all flex items-center gap-1 italic hover:brightness-110 whitespace-nowrap border-0 cursor-pointer"
               >
                 Sign Up <LogIn size={12} className="xl:w-[13px] xl:h-[13px]" />
               </button>
@@ -505,6 +519,30 @@ export function Navbar() {
 
                 <div className="mx-4 h-px bg-[#F1F1F3]" />
 
+                <div className="flex flex-col gap-1 p-4">
+                  <span className="text-[10.5px] font-bold text-[#9AA0AC] tracking-[0.04em] mb-2 px-1">
+                    Inbox
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsMobileMenuOpen(false);
+                      navigate('/messages');
+                    }}
+                    className={cn(getMobileLinkClass('/messages'), 'w-full text-left cursor-pointer')}
+                  >
+                    <MessageSquare size={16} className="text-[#EB4501] shrink-0" />
+                    <span className="flex-1">Messages</span>
+                    {unreadMsgCount > 0 && (
+                      <span className="min-w-[16px] h-4 px-1 bg-[#EB4501] text-white text-[9px] font-bold rounded-lg flex items-center justify-center leading-none">
+                        {unreadMsgCount > 99 ? '99+' : unreadMsgCount}
+                      </span>
+                    )}
+                  </button>
+                </div>
+
+                <div className="mx-4 h-px bg-[#F1F1F3]" />
+
                 <div className="p-4">
                   <Link
                     to="/post-offer"
@@ -523,14 +561,24 @@ export function Navbar() {
                     <p className="text-[11px] font-medium text-[#9AA0AC] text-center">
                       Join Choosify Bangladesh
                     </p>
-                    <button
-                      type="button"
-                      onClick={() => goToLogin('sign-in')}
-                      className="w-full py-3.5 bg-white border border-[#E5E7EB] hover:border-[#D1D5DB] text-[13px] font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
-                    >
-                      <LogIn size={14} stroke="url(#choosify-emi-icon-grad)" />
-                      <span className="choosify-emi-gradient-text">Sign In / Register</span>
-                    </button>
+                    <div className="flex flex-col gap-2">
+                      <button
+                        type="button"
+                        onClick={() => goToLogin('sign-in')}
+                        className="w-full py-3.5 bg-white border border-[#E5E7EB] hover:border-[#D1D5DB] text-[#EB4501] text-[13px] font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2"
+                      >
+                        <LogIn size={14} className="text-[#EB4501]" />
+                        Sign In
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => goToLogin('sign-up')}
+                        className="w-full py-3.5 bg-[#EB4501] text-white text-[13px] font-bold rounded-xl transition-all cursor-pointer flex items-center justify-center gap-2 border-0 hover:brightness-110"
+                      >
+                        Sign Up
+                        <LogIn size={14} />
+                      </button>
+                    </div>
                   </>
                 )}
                 <div className="text-center pt-1">
@@ -627,6 +675,11 @@ export function Navbar() {
                     >
                       <item.icon size={14} className="text-[#9AA0AC] shrink-0" />
                       <span className="flex-1">{item.label}</span>
+                      {item.path === '/messages' && unreadMsgCount > 0 && (
+                        <span className="min-w-[16px] h-4 px-1 bg-[#EB4501] text-white text-[9px] font-bold rounded-lg flex items-center justify-center leading-none">
+                          {unreadMsgCount > 99 ? '99+' : unreadMsgCount}
+                        </span>
+                      )}
                     </button>
                   ))}
                 </div>

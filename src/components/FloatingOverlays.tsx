@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -429,12 +429,12 @@ export function FloatingOverlays() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={cn(
-                "relative w-12 h-12 rounded-full bg-[#000435] text-white shadow-[0_8px_20px_rgba(0,0,0,0.2)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none",
-                activePanel === 'messages' && "ring-2 ring-[#EB4501]/50 brightness-110",
+                "relative w-12 h-12 rounded-full bg-white text-[#EB4501] shadow-[0_8px_20px_rgba(0,0,0,0.2)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none",
+                activePanel === 'messages' && "ring-2 ring-[#EB4501]/50",
               )}
               title="Merchant Conversations"
             >
-              <MessageCircle size={20} strokeWidth={2} />
+              <MessageCircle size={22} strokeWidth={2.25} fill="currentColor" className="text-[#EB4501]" />
               <motion.span
                 animate={inboxBadgeBounce ? { scale: [1, 1.3, 0.9, 1.1, 1] } : { scale: 1 }}
                 transition={{ duration: 0.5 }}
@@ -686,7 +686,7 @@ export function FloatingOverlays() {
         onClick={() => setActivePanel(activePanel === 'emi' ? null : 'emi')}
         whileTap={{ scale: 0.95 }}
         className={cn(
-          'fixed z-[219] w-14 h-14 rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden p-2.5 bg-white',
+          'fixed z-[219] w-14 h-14 rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden p-2.5 bg-white cursor-pointer',
           activePanel === 'emi' && 'ring-2 ring-[#EB4501]/60 brightness-105',
         )}
         style={{
@@ -709,7 +709,7 @@ export function FloatingOverlays() {
         onClick={() => setActivePanel(activePanel === 'cart' ? null : 'cart')}
         whileTap={{ scale: 0.95 }}
         className={cn(
-          'fixed z-[218] w-14 h-14 rounded-full bg-white text-[#EB4501] shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden',
+          'fixed z-[218] w-14 h-14 rounded-full bg-white text-[#EB4501] shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden cursor-pointer',
           activePanel === 'cart' && 'ring-2 ring-[#EB4501]/50 brightness-110',
         )}
         style={{
@@ -734,7 +734,7 @@ export function FloatingOverlays() {
         onClick={openMobileFilters}
         whileTap={{ scale: 0.95 }}
         className={cn(
-          'fixed z-[220] w-14 h-14 rounded-full border border-[#e8edf2] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.18)] flex items-center justify-center transition-all pointer-events-auto sm:hidden',
+          'fixed z-[220] w-14 h-14 rounded-full border border-[#e8edf2] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.18)] flex items-center justify-center transition-all pointer-events-auto sm:hidden cursor-pointer',
           (filterOpen || drawerFilterOpen) && 'ring-2 ring-[#EB4501]/30',
         )}
         style={{

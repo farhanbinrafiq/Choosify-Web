@@ -10,11 +10,18 @@ export function PremiumCarousel({
   renderCard,
   itemWidth = 280,
   gap = 16,
+  paginationStyle = 'bar',
+  paginationAlign = 'between',
+  showArrows = true,
 }: {
   items: any[];
   renderCard: (item: any, index: number, isActive: boolean) => React.ReactNode;
   itemWidth?: number;
   gap?: number;
+  /** `bar` = pill indicators; `ring` = target-style active dot (Today's Deals) */
+  paginationStyle?: 'bar' | 'ring';
+  paginationAlign?: 'between' | 'center';
+  showArrows?: boolean;
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -47,11 +54,12 @@ export function PremiumCarousel({
 
   const goTo = useCallback(
     (index: number) => {
-      const clamped = Math.max(0, Math.min(index, maxIndex));
+      const upper = paginationStyle === 'ring' ? Math.max(0, totalItems - 1) : maxIndex;
+      const clamped = Math.max(0, Math.min(index, upper));
       setCurrentIndex(clamped);
-      animate(x, offsetForIndex(clamped), SNAP_SPRING);
+      animate(x, offsetForIndex(Math.min(clamped, maxIndex)), SNAP_SPRING);
     },
-    [maxIndex, offsetForIndex, x],
+    [maxIndex, offsetForIndex, paginationStyle, totalItems, x],
   );
 
   // Keep position valid when the container resizes
@@ -161,22 +169,50 @@ export function PremiumCarousel({
         </motion.div>
       </div>
 
-      <div className="flex items-center justify-between mt-2 select-none">
-        <div className="flex gap-1.5">
-          {items.slice(0, maxIndex + 1).map((_, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => goTo(i)}
-              className={cn(
-                "h-1.5 rounded-full transition-all duration-300",
-                i === currentIndex ? "w-5 bg-[#EB4501]" : "w-1.5 bg-gray-200 hover:bg-gray-300"
-              )}
-              title={`Go to slide ${i + 1}`}
-            />
-          ))}
+      <div
+        className={cn(
+          'flex items-center mt-3 select-none',
+          paginationAlign === 'center' ? 'justify-center' : 'justify-between',
+        )}
+      >
+        <div className={cn('flex items-center', paginationStyle === 'ring' ? 'gap-2.5' : 'gap-1.5')}>
+          {(paginationStyle === 'ring' ? items : items.slice(0, maxIndex + 1)).map((_, i) => {
+            const active = i === currentIndex;
+            if (paginationStyle === 'ring') {
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => goTo(i)}
+                  aria-label={`Go to slide ${i + 1}`}
+                  aria-current={active ? 'true' : undefined}
+                  className={cn(
+                    'rounded-full transition-all duration-300 cursor-pointer border-0 p-0 flex items-center justify-center',
+                    active
+                      ? 'w-3.5 h-3.5 border border-[#EB4501] bg-transparent'
+                      : 'w-2 h-2 bg-[#D1D5DB] hover:bg-[#9AA0AC]',
+                  )}
+                >
+                  {active ? <span className="w-1.5 h-1.5 rounded-full bg-[#EB4501]" /> : null}
+                </button>
+              );
+            }
+            return (
+              <button
+                key={i}
+                type="button"
+                onClick={() => goTo(i)}
+                className={cn(
+                  'h-1.5 rounded-full transition-all duration-300 cursor-pointer border-0',
+                  active ? 'w-5 bg-[#EB4501]' : 'w-1.5 bg-gray-200 hover:bg-gray-300',
+                )}
+                title={`Go to slide ${i + 1}`}
+              />
+            );
+          })}
         </div>
 
+        {showArrows && paginationAlign !== 'center' && (
         <div className="flex gap-2">
            <button
              type="button"
@@ -197,6 +233,7 @@ export function PremiumCarousel({
               <ChevronRight size={16} />
            </button>
         </div>
+        )}
       </div>
     </div>
   );

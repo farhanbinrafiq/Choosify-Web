@@ -7,6 +7,7 @@ import {
   CHOOSIFY_ANNOUNCEMENTS_AVATAR,
   CHOOSIFY_ANNOUNCEMENTS_WELCOME,
   formatAnnouncementBody,
+  type AnnouncementAssociatedEntity,
 } from '../lib/announcements';
 import {
   EMI_MESSAGES_THREAD_ID,
@@ -17,6 +18,8 @@ import {
 import type { CustomerAddress } from '../lib/address/addressTypes';
 import { ADDRESS_STORAGE_KEY, getDefaultAddress, normalizeDefaultAddress } from '../lib/address/addressUtils';
 import type { BookingOfferCard } from '../types/serviceBooking';
+
+export type { AnnouncementAssociatedEntity };
 
 export interface MessageThread {
   id: string;
@@ -38,6 +41,10 @@ export interface ThreadMessage {
   time: string;
   senderName: string;
   avatar?: string;
+  /** ISO timestamp for grouping dividers (optional for legacy messages). */
+  createdAt?: string;
+  /** Delivery status for the viewer's own messages. */
+  status?: 'sent' | 'delivered' | 'seen';
   productCard?: {
     image: string;
     name: string;
@@ -52,6 +59,11 @@ export interface ThreadMessage {
   };
   /** Negotiable service/product request rendered as a distinct card in this thread */
   bookingOffer?: BookingOfferCard;
+  /**
+   * For Choosify Announcements messages: the product/guide/campaign/etc.
+   * this announcement is about. Used by the announcements right rail.
+   */
+  associatedEntity?: AnnouncementAssociatedEntity;
 }
 
 export interface Campaign {
@@ -184,7 +196,42 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   // Threaded Messaging States with Localstorage persistence
   const [threads, setThreads] = useState<MessageThread[]>(() => {
     const saved = localStorage.getItem('choosify_threads');
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as MessageThread[];
+        if (!Array.isArray(parsed)) throw new Error('bad threads');
+        let next = parsed.map((t) => {
+          if (t.id === 'seller-apple' && !t.orderRef) {
+            return { ...t, orderRef: 'ORD-DEMO-PHYSICAL', type: t.type || 'retail' };
+          }
+          return t;
+        });
+        if (!next.some((t) => t.id === 'seller-panorama-hotel')) {
+          next = [
+            ...next,
+            {
+              id: 'seller-panorama-hotel',
+              title: 'Panorama Hotel Dhaka',
+              avatar: 'https://i.pravatar.cc/150?u=panorama-hotel',
+              lastMessage: 'Your room is reserved. Message us until checkout tonight.',
+              time: 'Yesterday',
+              type: 'retail',
+              unread: false,
+              orderRef: 'ORD-DEMO-SERVICE',
+            },
+          ];
+        } else {
+          next = next.map((t) =>
+            t.id === 'seller-panorama-hotel' && !t.orderRef
+              ? { ...t, orderRef: 'ORD-DEMO-SERVICE', type: t.type || 'retail' }
+              : t,
+          );
+        }
+        return next;
+      } catch {
+        // fall through to defaults
+      }
+    }
     const welcomeTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     return [
       {
@@ -207,7 +254,8 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
         unread: false,
       },
       { id: 'thread-general', title: 'Farhan Rafiq (Admin)', avatar: 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png', lastMessage: 'Absolutely! We can ship the S24 Ultra...', time: '10:30 AM', type: 'general', unread: true },
-      { id: 'seller-apple', title: 'Apple Retail BD', avatar: 'https://i.pravatar.cc/150?u=apple', lastMessage: 'Welcome to Apple Retail! Feel free to ask queries.', time: '2 days ago', type: 'retail', unread: false }
+      { id: 'seller-apple', title: 'Apple Retail BD', avatar: 'https://i.pravatar.cc/150?u=apple', lastMessage: 'Your iPhone order is confirmed — ask us anything before delivery.', time: '2 days ago', type: 'retail', unread: false, orderRef: 'ORD-DEMO-PHYSICAL' },
+      { id: 'seller-panorama-hotel', title: 'Panorama Hotel Dhaka', avatar: 'https://i.pravatar.cc/150?u=panorama-hotel', lastMessage: 'Your room is reserved. Message us until checkout tonight.', time: 'Yesterday', type: 'retail', unread: false, orderRef: 'ORD-DEMO-SERVICE' },
     ];
   });
 
@@ -224,6 +272,66 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
         senderName: CHOOSIFY_ANNOUNCEMENTS_TITLE,
         time: welcomeTime,
         avatar: CHOOSIFY_ANNOUNCEMENTS_AVATAR,
+      },
+      {
+        id: 102,
+        threadId: CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
+        text: formatAnnouncementBody(
+          'Samsung Galaxy S24 Ultra just dropped 5% — compare verified store prices before they sell out.',
+          'Price Drop Alert',
+        ),
+        sender: 'admin',
+        senderName: CHOOSIFY_ANNOUNCEMENTS_TITLE,
+        time: welcomeTime,
+        avatar: CHOOSIFY_ANNOUNCEMENTS_AVATAR,
+        associatedEntity: {
+          type: 'product',
+          id: '1',
+          title: 'Samsung Galaxy S24 Ultra',
+          subtitle: 'Price drop · Mobile & Phones',
+          href: '/products/1',
+          ctaLabel: 'View product',
+        },
+      },
+      {
+        id: 103,
+        threadId: CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
+        text: formatAnnouncementBody(
+          'The "Best Smartwatches 2026" guide has new entries and updated picks for Bangladesh buyers.',
+          'Guide Update',
+        ),
+        sender: 'admin',
+        senderName: CHOOSIFY_ANNOUNCEMENTS_TITLE,
+        time: welcomeTime,
+        avatar: CHOOSIFY_ANNOUNCEMENTS_AVATAR,
+        associatedEntity: {
+          type: 'guide',
+          id: '1',
+          title: 'Best Smartwatches 2026',
+          subtitle: 'Updated buying guide',
+          href: '/guides/1',
+          ctaLabel: 'Open guide',
+        },
+      },
+      {
+        id: 104,
+        threadId: CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
+        text: formatAnnouncementBody(
+          'Eid Mega Sale is live — early deal access for verified buyers this week.',
+          'Campaign Alert',
+        ),
+        sender: 'admin',
+        senderName: CHOOSIFY_ANNOUNCEMENTS_TITLE,
+        time: welcomeTime,
+        avatar: CHOOSIFY_ANNOUNCEMENTS_AVATAR,
+        associatedEntity: {
+          type: 'campaign',
+          id: 'camp-1',
+          title: 'Eid Mega Sale',
+          subtitle: 'Limited-time campaign',
+          href: '/deals',
+          ctaLabel: 'Browse deals',
+        },
       },
       {
         id: 101,
@@ -357,7 +465,11 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
 
 
 
-  const appendAnnouncementMessage = useCallback((text: string, markUnread = true) => {
+  const appendAnnouncementMessage = useCallback((
+    text: string,
+    markUnread = true,
+    associatedEntity?: AnnouncementAssociatedEntity,
+  ) => {
     const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     const preview = text.split('\n')[0].slice(0, 120);
 
@@ -371,6 +483,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
         senderName: CHOOSIFY_ANNOUNCEMENTS_TITLE,
         time: timeStr,
         avatar: CHOOSIFY_ANNOUNCEMENTS_AVATAR,
+        associatedEntity,
       },
     ]);
 
@@ -666,6 +779,82 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     }
   }, [appendAnnouncementMessage]);
 
+  // One-time: seed sample associatedEntity announcements for existing inboxes
+  useEffect(() => {
+    if (localStorage.getItem('choosify_announcement_entities_v1')) return;
+    setThreadMessages((prev) => {
+      const hasEntity = prev.some(
+        (m) => m.threadId === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID && m.associatedEntity,
+      );
+      if (hasEntity) return prev;
+      const welcomeTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const samples: ThreadMessage[] = [
+        {
+          id: Date.now() + 1,
+          threadId: CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
+          text: formatAnnouncementBody(
+            'Samsung Galaxy S24 Ultra just dropped 5% — compare verified store prices before they sell out.',
+            'Price Drop Alert',
+          ),
+          sender: 'admin',
+          senderName: CHOOSIFY_ANNOUNCEMENTS_TITLE,
+          time: welcomeTime,
+          avatar: CHOOSIFY_ANNOUNCEMENTS_AVATAR,
+          associatedEntity: {
+            type: 'product',
+            id: '1',
+            title: 'Samsung Galaxy S24 Ultra',
+            subtitle: 'Price drop · Mobile & Phones',
+            href: '/products/1',
+            ctaLabel: 'View product',
+          },
+        },
+        {
+          id: Date.now() + 2,
+          threadId: CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
+          text: formatAnnouncementBody(
+            'The "Best Smartwatches 2026" guide has new entries and updated picks for Bangladesh buyers.',
+            'Guide Update',
+          ),
+          sender: 'admin',
+          senderName: CHOOSIFY_ANNOUNCEMENTS_TITLE,
+          time: welcomeTime,
+          avatar: CHOOSIFY_ANNOUNCEMENTS_AVATAR,
+          associatedEntity: {
+            type: 'guide',
+            id: '1',
+            title: 'Best Smartwatches 2026',
+            subtitle: 'Updated buying guide',
+            href: '/guides/1',
+            ctaLabel: 'Open guide',
+          },
+        },
+        {
+          id: Date.now() + 3,
+          threadId: CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
+          text: formatAnnouncementBody(
+            'Eid Mega Sale is live — early deal access for verified buyers this week.',
+            'Campaign Alert',
+          ),
+          sender: 'admin',
+          senderName: CHOOSIFY_ANNOUNCEMENTS_TITLE,
+          time: welcomeTime,
+          avatar: CHOOSIFY_ANNOUNCEMENTS_AVATAR,
+          associatedEntity: {
+            type: 'campaign',
+            id: 'camp-1',
+            title: 'Eid Mega Sale',
+            subtitle: 'Limited-time campaign',
+            href: '/deals',
+            ctaLabel: 'Browse deals',
+          },
+        },
+      ];
+      return [...prev, ...samples];
+    });
+    localStorage.setItem('choosify_announcement_entities_v1', '1');
+  }, []);
+
   // Ensure Emi AI thread exists in the general Messages inbox (for returning users with older localStorage)
   useEffect(() => {
     setThreads((prev) => {
@@ -909,20 +1098,47 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       return;
     }
 
-    const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const createdAt = now.toISOString();
+    const isBuyerSide = sender === 'user';
+    const isSellerSide =
+      sender === 'seller' || sender === 'admin' || sender === 'creator';
+    const tracksDelivery = isBuyerSide || isSellerSide;
     const newMsg: ThreadMessage = {
       id: Date.now() + Math.floor(Math.random() * 100),
       threadId,
       text,
       sender,
       time: timeStr,
+      createdAt,
       senderName: senderName || (sender === 'user' ? 'Me' : 'Partner Representative'),
       avatar: sender === 'user' ? undefined : `https://i.pravatar.cc/150?u=${threadId}`,
+      status: tracksDelivery ? 'sent' : undefined,
       productCard,
       bookingOffer,
     };
 
-    setThreadMessages(prev => [...prev, newMsg]);
+    setThreadMessages(prev => {
+      let next = [...prev, newMsg];
+      // Peer reply ⇒ mark the other party's prior messages in this thread as seen
+      if (isBuyerSide) {
+        next = next.map((m) =>
+          m.threadId === threadId &&
+          (m.sender === 'seller' || m.sender === 'admin' || m.sender === 'creator') &&
+          m.status !== 'seen'
+            ? { ...m, status: 'seen' as const }
+            : m,
+        );
+      } else if (sender !== 'user') {
+        next = next.map((m) =>
+          m.threadId === threadId && m.sender === 'user' && m.status !== 'seen'
+            ? { ...m, status: 'seen' as const }
+            : m,
+        );
+      }
+      return next;
+    });
 
     // Update the thread metadata
     setThreads(prev => prev.map(t => {
@@ -936,6 +1152,17 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       }
       return t;
     }));
+
+    // Simulate carrier ack → Delivered for the sender's own message
+    if (tracksDelivery) {
+      window.setTimeout(() => {
+        setThreadMessages((prev) =>
+          prev.map((m) =>
+            m.id === newMsg.id && m.status === 'sent' ? { ...m, status: 'delivered' as const } : m,
+          ),
+        );
+      }, 900);
+    }
   };
 
   const createNewThread = (
@@ -951,7 +1178,16 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     setThreads(prev => {
       // Avoid duplicate thread registrations
       if (prev.some(t => t.id === id)) {
-        return prev.map(t => t.id === id ? { ...t, lastMessage, time: timeStr, orderRef } : t);
+        return prev.map(t =>
+          t.id === id
+            ? {
+                ...t,
+                lastMessage,
+                time: timeStr,
+                ...(orderRef !== undefined ? { orderRef: orderRef || t.orderRef } : {}),
+              }
+            : t,
+        );
       }
       return [
         {
@@ -987,7 +1223,10 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const markAllAsRead = () => {
-    setThreads(prev => prev.map(t => ({ ...t, unread: false })));
+    setThreads((prev) => {
+      if (!prev.some((t) => t.unread)) return prev;
+      return prev.map((t) => (t.unread ? { ...t, unread: false } : t));
+    });
   };
 
   return (

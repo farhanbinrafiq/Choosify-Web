@@ -1,8 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, MessageSquare, Send, X } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Clock, Lock, MessageSquare, Send, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useDashboard, type MessageThread } from '../context/DashboardContext';
+import { useGlobalState } from '../context/GlobalStateContext';
+import { evaluatePostOrderConversationExpiry, resolveOrderForMessageThread } from '../lib/messaging/conversationExpiry';
 import {
   floatingPanelDesktopClass,
   floatingPanelMobileClass,
@@ -21,6 +23,7 @@ type MessagesPreviewPanelProps = {
 export function MessagesPreviewPanel({ onClose, className }: MessagesPreviewPanelProps) {
   const navigate = useNavigate();
   const { threads, threadMessages, addThreadMessage, markAllAsRead, setThreads } = useDashboard();
+  const { orders } = useGlobalState();
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
   const chatRef = useRef<HTMLDivElement>(null);
@@ -32,6 +35,17 @@ export function MessagesPreviewPanel({ onClose, className }: MessagesPreviewPane
 
   const activeThread = sortedThreads.find((t) => t.id === activeThreadId) ?? sortedThreads[0] ?? null;
   const activeMessages = threadMessages.filter((m) => m.threadId === activeThread?.id);
+  const linkedOrder = useMemo(
+    () => resolveOrderForMessageThread(activeThread, orders),
+    [activeThread, orders],
+  );
+  const expiry = evaluatePostOrderConversationExpiry(linkedOrder);
+  const isClosed =
+    Boolean(activeThread?.readOnly) ||
+    activeThread?.type === 'announcement' ||
+    expiry.status === 'closed';
+  const showFreezeNotice = expiry.status === 'open' && Boolean(expiry.freezeNotice);
+  const showExpiryWarning = expiry.status === 'open' && Boolean(expiry.showWarning);
 
   useEffect(() => {
     if (!activeThreadId && sortedThreads[0]) {
@@ -54,7 +68,7 @@ export function MessagesPreviewPanel({ onClose, className }: MessagesPreviewPane
 
   const handleSend = () => {
     const text = draft.trim();
-    if (!text || !activeThread) return;
+    if (!text || !activeThread || isClosed) return;
     addThreadMessage(activeThread.id, text, 'user');
     setDraft('');
   };
@@ -148,6 +162,26 @@ export function MessagesPreviewPanel({ onClose, className }: MessagesPreviewPane
               </div>
 
               <div ref={chatRef} className="flex-1 overflow-y-auto px-4 py-3 space-y-2.5 no-scrollbar min-h-0 bg-[#F8FAFC]">
+                {showFreezeNotice && expiry.freezeNotice && (
+                  <div className="rounded-[10px] px-3 py-2 bg-white border border-[#E8EDF2] flex items-start gap-2">
+                    <Clock size={12} className="text-[#6B7280] shrink-0 mt-0.5" />
+                    <p className="text-[10px] font-medium text-[#4B5563] leading-snug">{expiry.freezeNotice}</p>
+                  </div>
+                )}
+                {showExpiryWarning && expiry.warningLabel && (
+                  <div className="rounded-[10px] px-3 py-2 bg-amber-50 border border-amber-200 flex items-start gap-2">
+                    <AlertTriangle size={12} className="text-amber-600 shrink-0 mt-0.5" />
+                    <p className="text-[10px] font-semibold text-amber-800 leading-snug">{expiry.warningLabel}</p>
+                  </div>
+                )}
+                {isClosed && (
+                  <div className="rounded-[10px] px-3 py-2 bg-[#F4F7F9] border border-[#E8EDF2] flex items-start gap-2">
+                    <Lock size={12} className="text-[#9AA0AC] shrink-0 mt-0.5" />
+                    <p className="text-[10px] font-semibold text-[#9AA0AC] leading-snug">
+                      {expiry.closedLabel || 'This conversation has ended'}
+                    </p>
+                  </div>
+                )}
                 {activeMessages.length === 0 ? (
                   <p className="text-[10px] text-[#8a9bb0] text-center py-8 uppercase tracking-wider font-bold">
                     No messages yet — say hello
@@ -169,8 +203,25 @@ export function MessagesPreviewPanel({ onClose, className }: MessagesPreviewPane
                 )}
               </div>
 
-              {!activeThread.readOnly && (
-                <div className="p-3 border-t border-[#e8edf2] bg-white shrink-0 flex gap-2">
+              {!isClosed ? (
+                <div className="p-3 border-t border-[#e8edf2] bg-white shrink-0 flex flex-col gap-2">
+                  {(showFreezeNotice || showExpiryWarning) && (
+                    <div className="space-y-1.5">
+                      {showExpiryWarning && expiry.warningLabel && (
+                        <p className="text-[9px] font-bold text-amber-800 flex items-center gap-1">
+                          <AlertTriangle size={10} />
+                          {expiry.warningLabel}
+                        </p>
+                      )}
+                      {showFreezeNotice && expiry.freezeNotice && (
+                        <p className="text-[9px] font-medium text-[#6B7280] flex items-center gap-1">
+                          <Clock size={10} />
+                          {expiry.freezeNotice}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                  <div className="flex gap-2">
                   <input
                     type="text"
                     value={draft}
@@ -188,6 +239,11 @@ export function MessagesPreviewPanel({ onClose, className }: MessagesPreviewPane
                   >
                     <Send size={14} />
                   </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="p-3 border-t border-[#e8edf2] bg-[#F4F7F9] shrink-0 text-center text-[10px] font-semibold text-[#9AA0AC]">
+                  {expiry.closedLabel || 'This conversation has ended'}
                 </div>
               )}
             </>

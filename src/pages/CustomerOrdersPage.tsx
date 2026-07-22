@@ -14,6 +14,11 @@ import {
 } from 'lucide-react';
 import { PRODUCTS, PLACEHOLDER_IMAGE } from '../constants';
 import { toast } from '../lib/notify';
+import type { ReturnRequest } from '../types/schemas';
+import {
+  loadReturnRequests,
+  saveReturnRequests,
+} from '../lib/dashboard/pendingActions';
 
 export function CustomerOrdersPage({
   embedded = false,
@@ -24,7 +29,7 @@ export function CustomerOrdersPage({
   onOpenConversation?: (threadId: string) => void;
 } = {}) {
   const navigate = useNavigate();
-  const { orders, cancelOrder } = useGlobalState();
+  const { orders, cancelOrder, updateOrder, currentUser } = useGlobalState();
   const { createNewThread, addNotification } = useDashboard();
 
   const [cancellingOrderId, setCancellingOrderId] = useState<string | null>(null);
@@ -33,7 +38,13 @@ export function CustomerOrdersPage({
   const [returningOrderId, setReturningOrderId] = useState<string | null>(null);
   const [returnReason, setReturnReason] = useState('Wrong Item');
   const [returnDesc, setReturnDesc] = useState('');
-  const [returnedOrderIds, setReturnedOrderIds] = useState<Set<string>>(new Set());
+  const [returnedOrderIds, setReturnedOrderIds] = useState<Set<string>>(() => {
+    const fromOrders = new Set(
+      orders.filter((o) => o.returnRequested).map((o) => o.orderId),
+    );
+    loadReturnRequests().forEach((r) => fromOrders.add(r.orderId));
+    return fromOrders;
+  });
 
   const handleOpenConversation = (subOrder: any, parentOrderId: string) => {
     const threadId = `thread-${subOrder.sellerId}`;
@@ -491,6 +502,25 @@ Thank you for shopping with Choosify.bd
                           <button
                             type="button"
                             onClick={() => {
+                              const createdAt = new Date().toISOString();
+                              const row: ReturnRequest = {
+                                id: `RET-${Date.now()}`,
+                                orderId: order.orderId,
+                                sellerId: order.subOrders[0]?.sellerId || 'unknown',
+                                buyerId: currentUser.id,
+                                reason: returnReason,
+                                description: returnDesc,
+                                status: 'pending',
+                                createdAt,
+                              };
+                              const nextReturns = [row, ...loadReturnRequests()];
+                              saveReturnRequests(nextReturns);
+                              window.dispatchEvent(new Event('choosify-returns-updated'));
+                              updateOrder(order.orderId, {
+                                returnRequested: true,
+                                returnReason,
+                                returnRequestedAt: createdAt,
+                              });
                               window.dispatchEvent(
                                 new CustomEvent('choosify-return-request', {
                                   detail: {

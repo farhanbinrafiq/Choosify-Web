@@ -724,9 +724,9 @@ export const AuthPage: React.FC = () => {
                       type="submit"
                       className={cn(
                         'w-full mt-5 h-13 text-xs uppercase tracking-wider flex items-center justify-center gap-2 rounded-xl font-black',
-                        authMode === 'register' && 'choosify-emi-gradient text-white',
+                        authMode === 'register' && 'bg-[#EB4501] text-white',
                         authMode === 'login' &&
-                          'bg-white border border-[#E5E7EB] choosify-emi-gradient-text',
+                          'bg-white border border-[#E5E7EB] text-[#EB4501]',
                         authMode !== 'login' &&
                           authMode !== 'register' &&
                           'btn-primary text-white',

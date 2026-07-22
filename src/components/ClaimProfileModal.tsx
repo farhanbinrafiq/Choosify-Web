@@ -369,10 +369,10 @@ export function ClaimProfileModal({
                       <button
                         type="button"
                         onClick={handleLogIn}
-                        className="w-full h-12 rounded-xl bg-white border border-[#E5E7EB] hover:border-[#D1D5DB] font-bold text-[13px] tracking-tight shadow-sm flex items-center justify-center gap-1.5 cursor-pointer transition-all choosify-emi-gradient-text"
+                        className="w-full h-12 rounded-xl bg-white border border-[#E5E7EB] hover:border-[#D1D5DB] font-bold text-[13px] tracking-tight text-[#EB4501] shadow-sm flex items-center justify-center gap-1.5 cursor-pointer transition-all"
                       >
                         Sign In as Representative{' '}
-                        <ArrowRight size={13} stroke="url(#choosify-emi-icon-grad)" />
+                        <ArrowRight size={13} className="text-[#EB4501]" />
                       </button>
                     </div>
                   ) : targetType === 'brand' && currentUser.role !== 'seller' ? (

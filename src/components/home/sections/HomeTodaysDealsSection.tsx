@@ -1,6 +1,10 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { DcHomeBlock } from '../DcHomePanel';
+import { PremiumCarousel } from '../PremiumCarousel';
+import { catalogApi } from '../../../services/catalogApi';
+import { resolveDealsBannerHref } from '../../../lib/home/dealsBannerUtils';
+import type { CatalogDealsBanner } from '../../../types/catalog';
 
 export interface HomePromoTile {
   id: string;
@@ -12,78 +16,148 @@ export interface HomePromoTile {
   image?: string;
 }
 
-const DEFAULT_DEALS = [
+export type HomeDealsBannerCard = CatalogDealsBanner & { href?: string };
+
+/** Fallback image banners when API has none yet (same card shell as before). */
+const FALLBACK_BANNERS: HomeDealsBannerCard[] = [
   {
-    kind: 'flash' as const,
-    tag: 'FLASH SALE',
-    title: 'Up to 60% Off Electronics',
-    cta: 'Shop Now',
+    id: 'fallback-1',
+    image: 'https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=800&h=320&fit=crop',
+    destinationType: 'custom-url',
+    destinationRef: '/deals',
+    order: 0,
+    isActive: true,
+    createdAt: '',
+    updatedAt: '',
     href: '/deals',
-    bg: 'linear-gradient(135deg,#EB4501,#CF4400)',
   },
   {
-    kind: 'bank' as const,
-    tag: 'BANK OFFER',
-    title: '20% Cashback on Cards',
-    cta: 'Claim Offer',
+    id: 'fallback-2',
+    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=320&fit=crop',
+    destinationType: 'custom-url',
+    destinationRef: '/deals',
+    order: 1,
+    isActive: true,
+    createdAt: '',
+    updatedAt: '',
     href: '/deals',
-    bg: 'linear-gradient(135deg,#2323FF,#000435)',
   },
   {
-    kind: 'coupon' as const,
-    tag: 'COUPON',
-    title: 'Extra 10% Off Sitewide',
-    cta: 'Grab Coupon',
-    href: '/deals',
-    bg: 'linear-gradient(135deg,#07A828,#059669)',
+    id: 'fallback-3',
+    image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&h=320&fit=crop',
+    destinationType: 'custom-url',
+    destinationRef: '/brands',
+    order: 2,
+    isActive: true,
+    createdAt: '',
+    updatedAt: '',
+    href: '/brands',
   },
   {
-    kind: 'sponsored' as const,
-    tag: 'SPONSORED',
-    title: 'Partner Mega Deals',
-    cta: 'Explore',
-    href: '/deals',
-    bg: 'linear-gradient(135deg,#7C3AED,#4F46E5)',
+    id: 'fallback-4',
+    image: 'https://images.unsplash.com/photo-1556740714-a8395b3bf30f?w=800&h=320&fit=crop',
+    destinationType: 'custom-url',
+    destinationRef: '/products',
+    order: 3,
+    isActive: true,
+    createdAt: '',
+    updatedAt: '',
+    href: '/products',
   },
 ];
 
 interface HomeTodaysDealsSectionProps {
+  /** @deprecated Text/product promo tiles — image banners come from deals-banners API */
   tiles?: HomePromoTile[];
+  banners?: HomeDealsBannerCard[];
 }
 
-/** Choosify.dc.html — 4 colored deal tiles on soft canvas */
-export function HomeTodaysDealsSection({ tiles = [] }: HomeTodaysDealsSectionProps) {
-  const deals = DEFAULT_DEALS.map((d, i) => {
-    const override = tiles[i];
-    return {
-      ...d,
-      title: override?.title || d.title,
-      href: override?.href || d.href,
-      tag: override?.badge || d.tag,
+function BannerCardLink({
+  href,
+  children,
+  className,
+}: {
+  href: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  const external = /^https?:\/\//i.test(href);
+  if (external) {
+    return (
+      <a href={href} className={className} target="_blank" rel="noopener noreferrer">
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link to={href} className={className}>
+      {children}
+    </Link>
+  );
+}
+
+/** Today's Deals — image-only carousel (card shell keeps prior min-h / rounded size). */
+export function HomeTodaysDealsSection({ banners: bannersProp }: HomeTodaysDealsSectionProps) {
+  const [fetched, setFetched] = useState<HomeDealsBannerCard[] | null>(
+    bannersProp && bannersProp.length > 0 ? bannersProp : null,
+  );
+
+  useEffect(() => {
+    if (bannersProp && bannersProp.length > 0) {
+      setFetched(bannersProp);
+      return;
+    }
+    let cancelled = false;
+    catalogApi
+      .listDealsBanners({ active: true })
+      .then((list) => {
+        if (cancelled) return;
+        setFetched(list.length > 0 ? list : FALLBACK_BANNERS);
+      })
+      .catch(() => {
+        if (!cancelled) setFetched(FALLBACK_BANNERS);
+      });
+    return () => {
+      cancelled = true;
     };
-  });
+  }, [bannersProp]);
+
+  const banners = useMemo(() => {
+    const source = fetched && fetched.length > 0 ? fetched : FALLBACK_BANNERS;
+    return source
+      .filter((b) => b.isActive !== false && Boolean(b.image))
+      .slice()
+      .sort((a, b) => a.order - b.order);
+  }, [fetched]);
 
   return (
     <DcHomeBlock id="section-deals">
       <h2 className="text-[19px] font-extrabold text-[#1A1A2E] mb-4">Today&apos;s Deals</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-2">
-        {deals.map((d) => (
-          <Link
-            key={d.kind}
-            to={d.href}
-            className="rounded-xl p-[22px] text-white min-h-[120px] flex flex-col justify-between"
-            style={{ background: d.bg }}
-          >
-            <div>
-              <span className="text-[9px] font-extrabold bg-white/22 inline-block px-2 py-0.5 rounded mb-2.5 tracking-wide">
-                {d.tag}
-              </span>
-              <div className="text-base font-extrabold leading-snug">{d.title}</div>
-            </div>
-            <div className="text-[11px] font-bold mt-3">{d.cta} ›</div>
-          </Link>
-        ))}
-      </div>
+      <PremiumCarousel
+        items={banners}
+        itemWidth={280}
+        gap={16}
+        paginationStyle="ring"
+        paginationAlign="center"
+        showArrows={false}
+        renderCard={(banner: HomeDealsBannerCard) => {
+          const href = resolveDealsBannerHref(banner);
+          return (
+            <BannerCardLink
+              href={href}
+              className="block w-full rounded-xl min-h-[120px] h-[120px] overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#EB4501]/50"
+            >
+              <img
+                src={banner.image}
+                alt=""
+                className="w-full h-full object-cover"
+                loading="lazy"
+                draggable={false}
+              />
+            </BannerCardLink>
+          );
+        }}
+      />
     </DcHomeBlock>
   );
 }

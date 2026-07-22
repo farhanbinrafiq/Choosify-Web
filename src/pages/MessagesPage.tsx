@@ -13,17 +13,19 @@ import {
 } from '../lib/emiThread';
 import {
   Search, ArrowLeft, Send, MoreVertical, CheckCircle,
-  Package, Truck, Clock, MessageSquare, ExternalLink, LayoutDashboard, CheckSquare,
-  X, Info, Sparkles, Plus, Megaphone, Lock,
+  Package, Truck, Clock, MessageSquare, LayoutDashboard, CheckSquare,
+  X, Sparkles, Plus, Megaphone, Lock, AlertTriangle, Flag,
 } from 'lucide-react';
 import { toast } from '../lib/notify';
 import { operationsApi } from '../services/operationsApi';
 import { notificationApi } from '../services/notificationApi';
 import { MessagesRightRail } from '../components/messages/MessagesRightRail';
-import { BookingOfferMessageCard } from '../components/booking/BookingOfferMessageCard';
+import { ReportConversationProblemModal } from '../components/messages/ReportConversationProblemModal';
+import { MessageThreadExchange } from '../components/messages/MessageThreadExchange';
 import { EmiChatPanel } from '../components/EmiChatPanel';
 import type { BookingOfferCard } from '../types/serviceBooking';
 import type { Order } from '../types/schemas';
+import { evaluatePostOrderConversationExpiry, resolveOrderForMessageThread } from '../lib/messaging/conversationExpiry';
 
 type ConversationTab = 'all' | 'orders' | 'support' | 'unread';
 
@@ -71,14 +73,10 @@ export function MessagesPage({
   };
 
   // Interactive Modal states
-  const [showSourcingModal, setShowSourcingModal] = useState(false);
-
-  // Sourcing Modal field states
-  const [modalProdIdx, setModalProdIdx] = useState(0);
-  const [modalColor, setModalColor] = useState('Sunset Orange');
-  const [modalVariant, setModalVariant] = useState('Standard Retail Unit');
-  const [modalQuantity, setModalQuantity] = useState(5);
-  const [modalNotes, setModalNotes] = useState('');
+  const [showReportModal, setShowReportModal] = useState(false);
+  const [expiryNow, setExpiryNow] = useState(() => Date.now());
+  const [focusedAnnouncementId, setFocusedAnnouncementId] = useState<number | null>(null);
+  const [announcementSearch, setAnnouncementSearch] = useState('');
 
   const sortedThreads = useMemo(() => {
     return [...threads].sort((a, b) => {
@@ -97,15 +95,15 @@ export function MessagesPage({
     activeThread?.readOnly === true;
   const isEmiThread = activeThread?.id === EMI_MESSAGES_THREAD_ID;
 
-  // Auto-mark active thread as read
+  // Auto-mark active thread as read (only when selection changes — not on every threads update)
   useEffect(() => {
-    if (activeThreadId) {
-      const active = threads.find(t => t.id === activeThreadId);
-      if (active && active.unread) {
-        setThreads(prev => prev.map(t => t.id === activeThreadId ? { ...t, unread: false } : t));
-      }
-    }
-  }, [activeThreadId, threads, setThreads]);
+    if (!activeThreadId) return;
+    setThreads((prev) => {
+      const active = prev.find((t) => t.id === activeThreadId);
+      if (!active?.unread) return prev;
+      return prev.map((t) => (t.id === activeThreadId ? { ...t, unread: false } : t));
+    });
+  }, [activeThreadId, setThreads]);
 
   // Filter threads by search query
   const searchedThreads = sortedThreads.filter(t =>
@@ -149,15 +147,111 @@ export function MessagesPage({
     viewport.scrollTop = viewport.scrollHeight;
   }, [activeMessages, activeThreadId]);
 
-  // Find linked order for active thread
-  const linkedOrder = orders.find(o => o.orderId === activeThread?.orderRef);
+  // Find linked order for active thread (orderRef, bookingRequestId, or seller thread match)
+  const linkedOrder = useMemo(
+    () => resolveOrderForMessageThread(activeThread, orders) as Order | null,
+    [activeThread, orders],
+  );
+
+  // Backfill orderRef on retail threads so inbox badges and deep-links stay consistent
+  useEffect(() => {
+    setThreads((prev) => {
+      let changed = false;
+      const next = prev.map((t) => {
+        if (t.orderRef || t.type === 'announcement' || t.id === EMI_MESSAGES_THREAD_ID) return t;
+        const order = resolveOrderForMessageThread(t, orders);
+        if (!order?.orderId) return t;
+        changed = true;
+        return { ...t, orderRef: order.orderId };
+      });
+      return changed ? next : prev;
+    });
+  }, [orders, setThreads]);
 
   // Find specific sub-order for active thread seller
   const linkedSubOrder = linkedOrder?.subOrders.find(sub => {
     // Check if thread ID contains seller ID
-    const sellerId = activeThreadId?.replace('thread-', '');
-    return sub.sellerId === sellerId;
+    const sellerId = activeThreadId?.replace(/^thread-/, '').replace(/^seller-/, '');
+    return sub.sellerId === sellerId || sub.sellerId === `seller-${sellerId}`;
   }) || linkedOrder?.subOrders[0];
+
+  const conversationExpiry = useMemo(
+    () => evaluatePostOrderConversationExpiry(linkedOrder, expiryNow),
+    [linkedOrder, expiryNow],
+  );
+  const isConversationClosed = conversationExpiry.status === 'closed';
+  const showFreezeNotice =
+    !isAnnouncementsThread &&
+    !isEmiThread &&
+    conversationExpiry.status === 'open' &&
+    Boolean(conversationExpiry.freezeNotice);
+  const showExpiryWarning =
+    !isAnnouncementsThread &&
+    !isEmiThread &&
+    conversationExpiry.status === 'open' &&
+    Boolean(conversationExpiry.showWarning);
+
+  const announcementMessages = useMemo(
+    () =>
+      isAnnouncementsThread
+        ? activeMessages.filter((m) => m.threadId === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID)
+        : [],
+    [isAnnouncementsThread, activeMessages],
+  );
+
+  const focusedAnnouncement = useMemo(() => {
+    if (!isAnnouncementsThread) return null;
+    if (focusedAnnouncementId != null) {
+      const selected = announcementMessages.find((m) => m.id === focusedAnnouncementId);
+      if (selected) return selected;
+    }
+    const withEntity = [...announcementMessages].reverse().find((m) => m.associatedEntity);
+    return withEntity || announcementMessages[announcementMessages.length - 1] || null;
+  }, [isAnnouncementsThread, focusedAnnouncementId, announcementMessages]);
+
+  useEffect(() => {
+    if (!isAnnouncementsThread) {
+      setFocusedAnnouncementId(null);
+      setAnnouncementSearch('');
+      return;
+    }
+    setFocusedAnnouncementId((current) => {
+      if (current != null && announcementMessages.some((m) => m.id === current)) return current;
+      const withEntity = [...announcementMessages].reverse().find((m) => m.associatedEntity);
+      return withEntity?.id ?? announcementMessages[announcementMessages.length - 1]?.id ?? null;
+    });
+  }, [isAnnouncementsThread, activeThreadId, announcementMessages]);
+
+  const announcementSearchQuery = announcementSearch.trim().toLowerCase();
+  const visibleMessages = useMemo(() => {
+    if (!isAnnouncementsThread || !announcementSearchQuery) return activeMessages;
+    return activeMessages.filter((m) => {
+      const haystack = [
+        m.text,
+        m.associatedEntity?.title,
+        m.associatedEntity?.subtitle,
+        m.associatedEntity?.type,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(announcementSearchQuery);
+    });
+  }, [isAnnouncementsThread, activeMessages, announcementSearchQuery]);
+
+  useEffect(() => {
+    if (!isAnnouncementsThread || !announcementSearchQuery || visibleMessages.length === 0) return;
+    const firstId = visibleMessages[0]?.id;
+    if (firstId == null) return;
+    setFocusedAnnouncementId(firstId);
+    const el = document.getElementById(`msg-${firstId}`);
+    el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [isAnnouncementsThread, announcementSearchQuery, visibleMessages]);
+  useEffect(() => {
+    if (!linkedOrder || isAnnouncementsThread || isEmiThread) return;
+    const timer = window.setInterval(() => setExpiryNow(Date.now()), 60_000);
+    return () => window.clearInterval(timer);
+  }, [linkedOrder, isAnnouncementsThread, isEmiThread]);
 
   // Helper function to find a product image or fallback
   const getProductImageByTitle = (title: string) => {
@@ -249,6 +343,13 @@ export function MessagesPage({
       paymentDueAt: buyerPayBy,
     };
     addOrder(order);
+    if (activeThreadId) {
+      setThreads((prev) =>
+        prev.map((t) =>
+          t.id === activeThreadId ? { ...t, orderRef: orderId, type: 'retail' as const } : t,
+        ),
+      );
+    }
     appendOfferState(
       offer,
       { status: 'buyer_accepted', buyerPayBy, orderId },
@@ -380,23 +481,52 @@ export function MessagesPage({
       .catch(() => {});
   };
 
-  const handleSendMessage = () => {
-    if (!inputText.trim() || !activeThreadId || isAnnouncementsThread) return;
+  const handleSendMessage = async () => {
+    if (!inputText.trim() || !activeThreadId || isAnnouncementsThread || isEmiThread) return;
+    if (isConversationClosed) {
+      toast.error(conversationExpiry.closedLabel || 'This conversation has ended');
+      return;
+    }
 
-    addThreadMessage(activeThreadId, inputText.trim(), 'user', 'Me');
     const userMsg = inputText.trim();
     setInputText('');
 
-    operationsApi
-      .submitPlatformMessage({
-        buyerId: 'user-standard',
-        userName: 'Me',
+    try {
+      await operationsApi.submitPlatformMessage({
+        buyerId: currentUser.id || 'user-standard',
+        userName: currentUser.name || 'Me',
         body: userMsg,
-        orderId: activeThread?.orderRef,
-      })
-      .catch(() => {});
+        orderId: linkedOrder?.orderId || activeThread?.orderRef,
+        conversationId: activeThreadId,
+        orderSnapshot: linkedOrder
+          ? {
+              orderId: linkedOrder.orderId,
+              status: linkedOrder.status,
+              cancelledAt: linkedOrder.cancelledAt,
+              subOrders: linkedOrder.subOrders?.map((sub) => ({
+                trackingStatus: sub.trackingStatus,
+                items: sub.items?.map((item) => ({
+                  productType: item.productType,
+                  serviceCategory: item.serviceCategory,
+                  serviceDetails: item.serviceDetails,
+                })),
+              })),
+            }
+          : undefined,
+      });
+    } catch (err) {
+      const code = (err as Error & { code?: string })?.code;
+      if (code === 'CONVERSATION_EXPIRED') {
+        toast.error((err as Error).message || 'This conversation has ended');
+        return;
+      }
+      // Soft-fail when API unreachable; local expiry gate already applied above.
+    }
+
+    addThreadMessage(activeThreadId, userMsg, 'user', 'Me');
 
     setTimeout(() => {
+      if (evaluatePostOrderConversationExpiry(linkedOrder).status === 'closed') return;
       let responseText = `Thank you for your message. Our sales representative has received your ping about order reference ${activeThread?.orderRef || 'general inquiry'}. We will review this and respond shortly!`;
 
       const lower = userMsg.toLowerCase();
@@ -415,60 +545,6 @@ export function MessagesPage({
     }, 1500);
   };
 
-  const handleCreateSourcingRequest = () => {
-    const selectedProd = PRODUCTS[modalProdIdx];
-    const unitPriceNum = parseFloat(String(selectedProd.price).replace(/,/g, ''));
-
-    const pCard = {
-      image: selectedProd.image || PLACEHOLDER_IMAGE,
-      name: selectedProd.title,
-      variant: modalVariant || "Standard Sourcing Config",
-      color: modalColor || "Midnight Slate",
-      quantity: modalQuantity,
-      notes: modalNotes || "Special protective transport carton requested.",
-      price: unitPriceNum,
-      link: `/products/${selectedProd.id}`,
-      status: "pending"
-    };
-
-    const threadId = activeThreadId || 'thread-general';
-    const orderRef = `CHOOSIFY-${Math.floor(1000000 + Math.random() * 9000000)}`;
-
-    const structuredMsg = `🛒 SPECIAL IN-CHAT SOURCING ORDER DISPATCH:
-📦 Item: ${selectedProd.title}
-🎨 Color: ${modalColor}
-⚙️ Variant: ${modalVariant}
-🔢 Quantity: ${modalQuantity}
-💵 Unit Price: BDT ${unitPriceNum.toLocaleString()}
-📝 Sourcing Memo: ${modalNotes || "No notes."}`;
-
-    // 1. Post shared card message
-    addThreadMessage(threadId, structuredMsg, 'user', 'Me', pCard);
-
-    // 2. Set thread meta order reference if missing
-    setThreads(prev => prev.map(t => {
-      if (t.id === threadId) {
-        return {
-          ...t,
-          orderRef: t.orderRef || orderRef
-        };
-      }
-      return t;
-    }));
-
-    setShowSourcingModal(false);
-    setModalNotes('');
-    toast.success('Custom product card shared inside current thread!');
-
-    // 3. Automated seller reply
-    setTimeout(() => {
-      const sellerResponse = `💬 SELLER SOURCING NOTIFICATION:
-Thank you for sending this custom parameter card! We have logged BDT ${(unitPriceNum * modalQuantity).toLocaleString()} in draft format. Let me review and approve it.`;
-      addThreadMessage(threadId, sellerResponse, 'seller', activeThread?.title || 'Merchant Partner');
-      toast.success('Reply received from supplier representative!');
-    }, 1200);
-  };
-
   const handleNewConversation = () => {
     const id = `thread-support-${Date.now()}`;
     createNewThread(
@@ -482,7 +558,15 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
     setConversationTab('support');
   };
 
-  const hasUnread = threads.some(t => t.unread);
+  const handleMarkAllAsRead = () => {
+    const hadUnread = threads.some((t) => t.unread === true);
+    markAllAsRead();
+    if (hadUnread) {
+      toast.success('All conversations marked as read');
+    } else {
+      toast.success('All conversations are already read');
+    }
+  };
 
   const tabs: { id: ConversationTab; label: string; count: number }[] = [
     { id: 'all', label: 'All', count: tabCounts.all },
@@ -532,18 +616,9 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
         <div className="flex items-center gap-2.5 flex-wrap">
           <button
             type="button"
-            onClick={() => {
-              if (hasUnread) {
-                markAllAsRead();
-                toast.success('All support chats marked as read!');
-              }
-            }}
-            disabled={!hasUnread}
-            className={`px-4 py-2.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1.5 border-none
-              ${hasUnread
-                ? 'bg-white/8 hover:bg-white/12 text-white cursor-pointer'
-                : 'bg-white/[0.04] text-white/40 cursor-not-allowed'}`}
-            title={hasUnread ? 'Mark all as read' : 'All messages are already read'}
+            onClick={handleMarkAllAsRead}
+            className="px-4 py-2.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1.5 border-none bg-white/8 hover:bg-white/12 text-white cursor-pointer"
+            title="Mark all conversations as read"
           >
             <CheckSquare size={12} />
             Mark all as read
@@ -577,17 +652,9 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
           </div>
           <button
             type="button"
-            onClick={() => {
-              if (hasUnread) {
-                markAllAsRead();
-                toast.success('All support chats marked as read!');
-              }
-            }}
-            disabled={!hasUnread}
-            className={`px-3 py-2 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1.5 border border-[#E8EDF2]
-              ${hasUnread
-                ? 'bg-[#F4F7F9] text-[#1A1A2E] cursor-pointer hover:border-[#EB4501]/40'
-                : 'bg-[#F4F7F9] text-[#9AA0AC] cursor-not-allowed'}`}
+            onClick={handleMarkAllAsRead}
+            className="px-3 py-2 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1.5 border border-[#E8EDF2] bg-[#F4F7F9] text-[#1A1A2E] cursor-pointer hover:border-[#EB4501]/40"
+            title="Mark all conversations as read"
           >
             <CheckSquare size={12} />
             Mark all as read
@@ -666,6 +733,15 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
             ) : (
               filteredThreads.map((t) => {
                 const isActive = t.id === activeThreadId;
+                const threadExpiry = evaluatePostOrderConversationExpiry(
+                  resolveOrderForMessageThread(t, orders),
+                  expiryNow,
+                );
+                const threadHasFreeze =
+                  threadExpiry.status === 'open' && Boolean(threadExpiry.freezeNotice);
+                const threadUrgent =
+                  threadExpiry.status === 'open' && Boolean(threadExpiry.showWarning);
+                const threadClosed = threadExpiry.status === 'closed';
                 return (
                   <button
                     key={t.id}
@@ -714,6 +790,24 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                         {t.orderRef && (
                           <span className="inline-flex text-[9px] font-bold bg-[#FFF3EC] text-[#EB4501] px-2 py-0.5 rounded-xl">
                             ORDER: {t.orderRef}
+                          </span>
+                        )}
+                        {threadUrgent && (
+                          <span className="inline-flex items-center gap-0.5 text-[9px] font-bold bg-amber-50 text-amber-800 px-2 py-0.5 rounded">
+                            <AlertTriangle size={9} />
+                            Closes soon
+                          </span>
+                        )}
+                        {!threadUrgent && threadHasFreeze && (
+                          <span className="inline-flex items-center gap-0.5 text-[9px] font-bold bg-[#F4F7F9] text-[#4B5563] px-2 py-0.5 rounded">
+                            <Clock size={9} />
+                            Has freeze
+                          </span>
+                        )}
+                        {threadClosed && (
+                          <span className="inline-flex items-center gap-0.5 text-[9px] font-bold bg-[#F1F1F3] text-[#9AA0AC] px-2 py-0.5 rounded">
+                            <Lock size={9} />
+                            Closed
                           </span>
                         )}
                         {!t.orderRef && t.type === 'general' && t.id !== EMI_MESSAGES_THREAD_ID && (
@@ -782,7 +876,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                     {isAnnouncementsThread ? (
                       <span className="text-[10.5px] font-medium text-[#4B5563] flex items-center gap-1">
                         <Megaphone size={10} className="text-[#EB4501]" />
-                        Read-only broadcast
+                        Platform updates
                       </span>
                     ) : isEmiThread ? (
                       <span className="text-[10.5px] font-medium text-[#4B5563] flex items-center gap-1">
@@ -802,6 +896,17 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                     <span className="hidden sm:inline-flex bg-[#FFF3EC] text-[#EB4501] text-[10px] font-bold px-2.5 py-1 rounded-xl">
                       ORDER: {activeThread.orderRef}
                     </span>
+                  )}
+                  {!isEmiThread && (
+                    <button
+                      type="button"
+                      onClick={() => setShowReportModal(true)}
+                      className="hidden sm:inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg bg-[#F4F7F9] border border-[#E8EDF2] text-[11px] font-bold text-[#4B5563] hover:text-[#EB4501] hover:border-[#EB4501]/30 cursor-pointer"
+                      title="Report to Support"
+                    >
+                      <Flag size={13} />
+                      Report to Support
+                    </button>
                   )}
                   <button
                     type="button"
@@ -824,12 +929,46 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                 ref={chatViewportRef}
                 className="flex-1 p-5 overflow-y-auto space-y-4 no-scrollbar relative min-h-0 bg-choosify-feed"
               >
-                {isAnnouncementsThread && (
-                  <div className="max-w-2xl mx-auto bg-white border border-[#E8EDF2] rounded-[10px] p-4 flex items-start gap-3">
-                    <Info size={16} className="text-[#EB4501] shrink-0 mt-0.5" />
-                    <p className="text-[11px] font-medium text-[#4B5563] leading-relaxed">
-                      {CHOOSIFY_ANNOUNCEMENTS_TITLE} is a read-only channel. Order updates, platform news, and campaign alerts appear here. Replies are not supported.
+                {showFreezeNotice && conversationExpiry.freezeNotice && (
+                  <div className="max-w-2xl mx-auto bg-[#F4F7F9] border border-[#E8EDF2] rounded-[10px] p-3.5 flex items-start gap-3">
+                    <Clock size={16} className="text-[#6B7280] shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-[12px] font-bold text-[#1A1A2E]">Conversation freeze</p>
+                      <p className="text-[11.5px] text-[#4B5563] mt-0.5 leading-snug">
+                        {conversationExpiry.freezeNotice}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {showExpiryWarning && conversationExpiry.warningLabel && (
+                  <div className="max-w-2xl mx-auto bg-amber-50 border border-amber-200 rounded-[10px] p-3.5 flex items-start gap-3">
+                    <AlertTriangle size={16} className="text-amber-600 shrink-0 mt-0.5" />
+                    <p className="text-[12px] font-semibold text-amber-800 leading-snug">
+                      {conversationExpiry.warningLabel}
                     </p>
+                  </div>
+                )}
+
+                {isConversationClosed && (
+                  <div className="max-w-2xl mx-auto bg-[#F4F7F9] border border-[#E8EDF2] rounded-[10px] p-3.5 flex items-start gap-3">
+                    <Lock size={16} className="text-[#9AA0AC] shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-[12.5px] font-bold text-[#1A1A2E]">
+                        {conversationExpiry.closedLabel || 'This conversation has ended'}
+                      </p>
+                      <p className="text-[11.5px] text-[#9AA0AC] mt-0.5 leading-snug">
+                        Message history stays available. New replies are closed
+                        {conversationExpiry.reason === 'delivered'
+                          ? ' because the order was delivered.'
+                          : conversationExpiry.reason === 'cancelled'
+                            ? ' because the order was cancelled.'
+                            : conversationExpiry.reason === 'service_date_passed'
+                              ? ' after the service date ended (11:59 PM Bangladesh time).'
+                              : '.'}{' '}
+                        Need help? Use Report to Support.
+                      </p>
+                    </div>
                   </div>
                 )}
 
@@ -908,237 +1047,104 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                   </div>
                 )}
 
-                {/* Messages */}
-                <div className="space-y-4">
-                  {activeMessages.map((m) => {
-                    const isOutgoing = m.sender === 'user';
-                    const isAnnouncementMessage = isAnnouncementsThread || m.sender === 'admin';
-                    const senderLabel = isOutgoing
-                      ? 'You'
-                      : isAnnouncementMessage
-                        ? CHOOSIFY_ANNOUNCEMENTS_TITLE
-                        : (m.senderName || activeThread?.title || 'Merchant');
-
-                    return (
-                      <div
-                        key={m.id}
-                        className={`flex flex-col max-w-[85%] sm:max-w-[75%] ${
-                          isOutgoing ? 'ml-auto items-end' : 'mr-auto items-start'
-                        }`}
-                      >
-                        {m.bookingOffer && (
-                          <div className="mb-2 w-full max-w-sm">
-                            <BookingOfferMessageCard
-                              offer={m.bookingOffer}
-                              onAccept={
-                                m.bookingOffer.status === 'countered' ||
-                                m.bookingOffer.status === 'accepted'
-                                  ? () => acceptBookingOffer(m.bookingOffer!)
-                                  : undefined
-                              }
-                              onDecline={
-                                m.bookingOffer.status === 'countered' ||
-                                m.bookingOffer.status === 'accepted'
-                                  ? () => declineBookingOffer(m.bookingOffer!)
-                                  : undefined
-                              }
-                            />
-                            {currentUser.role === 'seller' &&
-                              m.bookingOffer.status === 'pending' && (
-                                <div className="mt-2 flex flex-wrap justify-end gap-1.5">
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      sellerRespondToOffer(m.bookingOffer!, 'decline')
-                                    }
-                                    className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-[9px] font-bold text-red-600"
-                                  >
-                                    Decline
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      sellerRespondToOffer(m.bookingOffer!, 'counter')
-                                    }
-                                    className="rounded-lg border border-violet-200 bg-white px-3 py-1.5 text-[9px] font-bold text-violet-700"
-                                  >
-                                    Modify / Counter
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      sellerRespondToOffer(m.bookingOffer!, 'accept')
-                                    }
-                                    className="rounded-lg border-0 bg-emerald-600 px-3 py-1.5 text-[9px] font-bold text-white"
-                                  >
-                                    Accept
-                                  </button>
-                                </div>
-                              )}
-                          </div>
-                        )}
-                        {m.productCard && (
-                          <div className="w-full max-w-sm rounded-[10px] overflow-hidden border border-[#E8EDF2] mb-2 text-left bg-white shadow-sm">
-                            <div className="px-4 py-2 border-b border-[#E8EDF2] flex items-center justify-between bg-[#F4F7F9]">
-                              <span className="text-[9px] font-bold uppercase text-[#9AA0AC] tracking-wider flex items-center gap-1.5">
-                                <Package size={11} className="text-[#EB4501]" />
-                                Sourcing request
-                              </span>
-                              {(() => {
-                                const status = m.productCard.status || 'pending';
-                                if (status === 'pending') {
-                                  return (
-                                    <span className="px-2 py-0.5 text-[9px] font-bold bg-amber-500/10 text-amber-600 rounded-md border border-amber-500/20">
-                                      Draft
-                                    </span>
-                                  );
-                                }
-                                if (status === 'approved') {
-                                  return (
-                                    <span className="px-2 py-0.5 text-[9px] font-bold bg-green-500/10 text-green-600 rounded-md border border-green-500/20">
-                                      Approved
-                                    </span>
-                                  );
-                                }
-                                if (status === 'countered') {
-                                  return (
-                                    <span className="px-2 py-0.5 text-[9px] font-bold bg-blue-500/10 text-blue-600 rounded-md border border-blue-500/20">
-                                      Counter offer
-                                    </span>
-                                  );
-                                }
-                                return (
-                                  <span className="px-2 py-0.5 text-[9px] font-bold bg-gray-400/10 text-gray-500 rounded-md border border-gray-400/20">
-                                    Withdrawn
-                                  </span>
-                                );
-                              })()}
-                            </div>
-
-                            <div className="p-4 flex gap-3 items-start">
-                              <img
-                                src={m.productCard.image || PLACEHOLDER_IMAGE}
-                                className="w-16 h-16 rounded-lg object-cover shrink-0 border border-[#E8EDF2] bg-white"
-                                alt=""
-                                referrerPolicy="no-referrer"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <h4 className="text-xs font-bold text-[#1A1A2E] leading-tight mb-1 line-clamp-2">
-                                  {m.productCard.name}
-                                </h4>
-                                <div className="text-[10px] text-[#9AA0AC] font-medium space-y-0.5">
-                                  <p>Variant: <span className="text-[#1A1A2E] font-bold">{m.productCard.variant}</span></p>
-                                  <p>Color: <span className="text-[#1A1A2E] font-bold">{m.productCard.color}</span></p>
-                                  <p>Qty: <span className="text-[#EB4501] font-bold">{m.productCard.quantity}</span></p>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="px-4 py-3 bg-[#F4F7F9]/80 border-t border-[#E8EDF2] text-[10px]">
-                              {m.productCard.notes && (
-                                <div className="mb-2 bg-white border border-[#E8EDF2] rounded-lg p-2">
-                                  <span className="text-[9px] font-bold text-[#9AA0AC] block mb-0.5">Memo</span>
-                                  <p className="text-[#4B5563] font-medium">&ldquo;{m.productCard.notes}&rdquo;</p>
-                                </div>
-                              )}
-                              <div className="flex items-center justify-between pt-1 border-t border-dashed border-[#E5E7EB]">
-                                <span className="text-[#9AA0AC] font-medium text-[9px]">Estimated total</span>
-                                <div className="text-right">
-                                  {m.productCard.status === 'countered' && (
-                                    <span className="text-[9px] font-medium line-through text-[#9AA0AC] mr-2 block">
-                                      ৳{(m.productCard.price * m.productCard.quantity).toLocaleString()}
-                                    </span>
-                                  )}
-                                  <span className="text-xs font-extrabold text-[#EB4501] block">
-                                    ৳{((m.productCard.counterPrice || m.productCard.price) * m.productCard.quantity).toLocaleString()}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="p-3 bg-[#F4F7F9] border-t border-[#E8EDF2] flex flex-col gap-2">
-                              <div className="w-full flex flex-wrap gap-1.5 justify-end">
-                                {(m.productCard.status || 'pending') === 'pending' && (
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      updateProductCard(m.id, { status: 'canceled' });
-                                      addThreadMessage(activeThreadId, `🚫 Buyer has withdrawn the sourcing request for ${m.productCard.name}.`, 'user', 'Me');
-                                      toast.success('Sourcing request withdrawn!');
-                                    }}
-                                    className="px-3 py-1.5 bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 rounded-lg text-[9px] font-bold transition-all cursor-pointer"
-                                  >
-                                    Withdraw
-                                  </button>
-                                )}
-                                {m.productCard.status === 'countered' && (
-                                  <>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        updateProductCard(m.id, { status: 'approved', price: m.productCard.counterPrice });
-                                        addThreadMessage(activeThreadId, `✅ Buyer accepted the supplier counter offer of BDT ${m.productCard.counterPrice?.toLocaleString()} per unit! Sourcing transaction locked.`, 'user', 'Me');
-                                        toast.success('Supplier counter offer accepted! Sourcing order verified.');
-                                      }}
-                                      className="px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white rounded-lg text-[9px] font-bold transition-all cursor-pointer border-none"
-                                    >
-                                      Accept counter
-                                    </button>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        updateProductCard(m.id, { status: 'canceled' });
-                                        addThreadMessage(activeThreadId, `❌ Buyer declined the counter offer. Sourcing request cancelled.`, 'user', 'Me');
-                                        toast.error('Deal declined.');
-                                      }}
-                                      className="px-3 py-1.5 bg-white hover:bg-[#F4F7F9] text-[#4B5563] border border-[#E5E7EB] rounded-lg text-[9px] font-bold transition-all cursor-pointer"
-                                    >
-                                      Decline
-                                    </button>
-                                  </>
-                                )}
-                              </div>
-                              <div className="flex justify-end pt-1.5 border-t border-[#E8EDF2]">
-                                <Link
-                                  to={m.productCard.link}
-                                  className="px-3 py-1.5 bg-white hover:bg-[#FFF3EC] text-[#4B5563] hover:text-[#CF4400] border border-[#E5E7EB] text-[9px] font-bold rounded-lg transition-all flex items-center gap-1.5"
-                                >
-                                  View product <ExternalLink size={10} />
-                                </Link>
-                              </div>
-                            </div>
-                          </div>
-                        )}
-
-                        <div
-                          className={`text-[10.5px] font-medium mb-1 px-1 ${
-                            isOutgoing ? 'text-right' : 'text-left'
-                          }`}
-                        >
-                          <span className="text-[#1A1A2E] font-bold">{senderLabel}</span>{' '}
-                          <span className="text-[#9AA0AC] font-normal">{m.time}</span>
-                        </div>
-                        <div
-                          className={`px-4 py-3 rounded-[10px] text-[12.5px] font-medium leading-relaxed whitespace-pre-line border
-                          ${
-                            isOutgoing
-                              ? 'bg-white text-[#1A1A2E] border-[#EB4501]/25 shadow-sm'
-                              : isAnnouncementMessage
-                                ? 'bg-white text-[#1A1A2E] border-[#000435]/10'
-                                : 'bg-white text-[#1A1A2E] border-[#E8EDF2]'
-                          }
-                        `}
-                        >
-                          {m.text}
-                        </div>
-                      </div>
-                    );
-                  })}
+                {/* Messages — Messenger-style exchange */}
+                <div className="max-w-2xl mx-auto w-full">
+                  {isAnnouncementsThread && announcementSearchQuery && visibleMessages.length === 0 && (
+                    <div className="py-10 text-center text-[12.5px] font-medium text-[#9AA0AC]">
+                      No announcements match “{announcementSearch.trim()}”
+                    </div>
+                  )}
+                  <MessageThreadExchange
+                    messages={visibleMessages}
+                    isAnnouncementsThread={isAnnouncementsThread}
+                    focusedAnnouncementId={focusedAnnouncementId}
+                    onFocusAnnouncement={setFocusedAnnouncementId}
+                    currentUserAvatar={currentUser.avatar}
+                    peerAvatar={activeThread?.avatar}
+                    viewerIsSeller={currentUser.role === 'seller'}
+                    showSellerBookingActions={currentUser.role === 'seller'}
+                    onAcceptBookingOffer={acceptBookingOffer}
+                    onDeclineBookingOffer={declineBookingOffer}
+                    onSellerRespondToOffer={sellerRespondToOffer}
+                    onWithdrawProductCard={(m) => {
+                      if (!m.productCard || !activeThreadId) return;
+                      updateProductCard(m.id, { status: 'canceled' });
+                      addThreadMessage(
+                        activeThreadId,
+                        `🚫 Buyer has withdrawn the sourcing request for ${m.productCard.name}.`,
+                        'user',
+                        'Me',
+                      );
+                      toast.success('Sourcing request withdrawn!');
+                    }}
+                    onAcceptProductCounter={(m) => {
+                      if (!m.productCard || !activeThreadId) return;
+                      updateProductCard(m.id, {
+                        status: 'approved',
+                        price: m.productCard.counterPrice,
+                      });
+                      addThreadMessage(
+                        activeThreadId,
+                        `✅ Buyer accepted the supplier counter offer of BDT ${m.productCard.counterPrice?.toLocaleString()} per unit! Sourcing transaction locked.`,
+                        'user',
+                        'Me',
+                      );
+                      toast.success('Supplier counter offer accepted! Sourcing order verified.');
+                    }}
+                    onDeclineProductCounter={(m) => {
+                      if (!m.productCard || !activeThreadId) return;
+                      updateProductCard(m.id, { status: 'canceled' });
+                      addThreadMessage(
+                        activeThreadId,
+                        `❌ Buyer declined the counter offer. Sourcing request cancelled.`,
+                        'user',
+                        'Me',
+                      );
+                      toast.error('Deal declined.');
+                    }}
+                  />
                 </div>
               </div>
 
-              {/* Composer — active for normal threads; disabled strip for read-only broadcasts */}
+              {/* Composer — announcements search; closed chats locked; others reply */}
               {isAnnouncementsThread ? (
+                <div className="px-5 py-3.5 bg-[#EEF2F7] border-t border-[#E8EDF2] shrink-0">
+                  <div className="flex gap-2.5 items-center">
+                    <div className="relative flex-1">
+                      <Search
+                        size={15}
+                        className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#6B7280] pointer-events-none"
+                        aria-hidden
+                      />
+                      <input
+                        value={announcementSearch}
+                        onChange={(e) => setAnnouncementSearch(e.target.value)}
+                        className="w-full h-[42px] bg-[#E2E8F0] border border-[#CBD5E1] rounded-lg pl-10 pr-10 text-[12.5px] font-medium text-[#1A1A2E] placeholder:text-[#64748B] focus:outline-none focus:border-[#94A3B8] focus:bg-[#F1F5F9] transition-all"
+                        placeholder="Search announcements…"
+                        aria-label="Search announcements in this channel"
+                        type="search"
+                      />
+                      {announcementSearch ? (
+                        <button
+                          type="button"
+                          onClick={() => setAnnouncementSearch('')}
+                          className="absolute right-2.5 top-1/2 -translate-y-1/2 w-7 h-7 rounded-md flex items-center justify-center text-[#64748B] hover:text-[#1A1A2E] bg-transparent border-none cursor-pointer"
+                          aria-label="Clear search"
+                        >
+                          <X size={14} />
+                        </button>
+                      ) : null}
+                    </div>
+                    <span
+                      className="w-[42px] h-[42px] rounded-lg bg-[#CBD5E1] text-[#475569] flex items-center justify-center shrink-0"
+                      aria-hidden
+                      title="Search"
+                    >
+                      <Search size={15} />
+                    </span>
+                  </div>
+                </div>
+              ) : isConversationClosed ? (
                 <div className="px-5 py-3.5 bg-[#F4F7F9] border-t border-[#E8EDF2] shrink-0">
                   <div
                     className="flex items-center gap-3 h-[42px] px-3.5 rounded-lg bg-[#E8EDF2]/70 border border-[#E5E7EB] text-[#9AA0AC] select-none pointer-events-none"
@@ -1147,7 +1153,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                   >
                     <Lock size={14} className="shrink-0 text-[#9AA0AC]" aria-hidden />
                     <span className="flex-1 text-[12px] font-medium leading-snug">
-                      This is a broadcast channel — replies aren&apos;t supported
+                      {conversationExpiry.closedLabel || 'This conversation has ended'}
                     </span>
                     <span
                       className="w-[42px] h-[42px] -mr-1 rounded-lg bg-[#D1D5DB] text-white/80 flex items-center justify-center shrink-0"
@@ -1156,45 +1162,47 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                       <Send size={15} />
                     </span>
                   </div>
-                  <div className="mt-2 text-center text-[10px] text-[#9AA0AC] flex items-center justify-center gap-1">
-                    <Megaphone size={10} className="text-[#EB4501]" />
-                    Read-only broadcast
+                  <div className="mt-2 flex items-center justify-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowReportModal(true)}
+                      className="text-[11px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer inline-flex items-center gap-1"
+                    >
+                      <Flag size={11} />
+                      Report to Support
+                    </button>
                   </div>
                 </div>
               ) : (
                 <div className="px-5 py-3.5 bg-white border-t border-[#E8EDF2] flex flex-col gap-2.5 shrink-0">
+                  {(showFreezeNotice || showExpiryWarning) && (
+                    <div className="space-y-2" aria-live="polite">
+                      {showExpiryWarning && conversationExpiry.warningLabel && (
+                        <div className="bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 flex items-start gap-2">
+                          <AlertTriangle size={14} className="text-amber-600 shrink-0 mt-0.5" />
+                          <p className="text-[11.5px] font-semibold text-amber-800 leading-snug">
+                            {conversationExpiry.warningLabel}
+                          </p>
+                        </div>
+                      )}
+                      {showFreezeNotice && conversationExpiry.freezeNotice && (
+                        <div className="bg-[#F4F7F9] border border-[#E8EDF2] rounded-lg px-3 py-2 flex items-start gap-2">
+                          <Clock size={14} className="text-[#6B7280] shrink-0 mt-0.5" />
+                          <p className="text-[11.5px] font-medium text-[#4B5563] leading-snug">
+                            {conversationExpiry.freezeNotice}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   <div className="flex flex-wrap gap-2.5">
                     <button
                       type="button"
-                      onClick={() => {
-                        setModalProdIdx(0);
-                        setModalColor('Premium Titanium Silver');
-                        setModalVariant('Volumetric Bulk Cargo Container');
-                        setModalQuantity(25);
-                        setShowSourcingModal(true);
-                      }}
+                      onClick={() => setShowReportModal(true)}
                       className="px-3.5 py-1.5 bg-white hover:bg-[#F4F7F9] border border-[#E5E7EB] rounded-2xl text-[11px] font-semibold text-[#4B5563] transition-all flex items-center gap-1.5 cursor-pointer"
                     >
-                      <Plus size={12} className="text-[#EB4501]" />
-                      Share sourcing card
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setInputText('Hi! Do you have this specific product variant fully prepared for bulk dispatch?');
-                      }}
-                      className="px-3.5 py-1.5 bg-white hover:bg-[#F4F7F9] border border-[#E5E7EB] rounded-2xl text-[11px] font-semibold text-[#4B5563] transition-all cursor-pointer"
-                    >
-                      Check stock
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setInputText('Could we request premium safe wooden-box packaging for the entire lot?');
-                      }}
-                      className="px-3.5 py-1.5 bg-white hover:bg-[#F4F7F9] border border-[#E5E7EB] rounded-2xl text-[11px] font-semibold text-[#4B5563] transition-all cursor-pointer"
-                    >
-                      Packaging request
+                      <Flag size={12} className="text-[#EB4501]" />
+                      Report to Support
                     </button>
                   </div>
 
@@ -1202,13 +1210,13 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                     <input
                       value={inputText}
                       onChange={(e) => setInputText(e.target.value)}
-                      onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                      onKeyPress={(e) => e.key === 'Enter' && void handleSendMessage()}
                       className="flex-1 h-[42px] bg-white border border-[#E5E7EB] rounded-lg px-3.5 text-[12.5px] font-medium text-[#1A1A2E] placeholder:text-[#9AA0AC] focus:outline-none focus:border-[#EB4501] transition-all"
                       placeholder="Type your message..."
                     />
                     <button
                       type="button"
-                      onClick={handleSendMessage}
+                      onClick={() => void handleSendMessage()}
                       className="w-[42px] h-[42px] rounded-lg bg-[#EB4501] text-white flex items-center justify-center hover:bg-[#CF4400] transition-colors shrink-0 cursor-pointer border-none"
                       title="Send message"
                     >
@@ -1243,6 +1251,9 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
           linkedOrder={linkedOrder}
           linkedSubOrder={linkedSubOrder}
           isAnnouncementsThread={isAnnouncementsThread}
+          focusedAnnouncement={focusedAnnouncement}
+          conversationClosed={isConversationClosed}
+          onReportProblem={() => setShowReportModal(true)}
           onViewOrder={() => {
             if (linkedOrder) {
               navigate('/order-tracking', { state: { order: linkedOrder } });
@@ -1251,127 +1262,17 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
         />
       </div>
 
-      {/* Sourcing modal — logic unchanged */}
-      {showSourcingModal && (
-        <div className="fixed inset-0 z-50 overflow-y-auto flex items-center justify-center p-4 bg-gray-950/65 backdrop-blur-xs">
-          <div className="relative bg-white w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl border border-[#E8EDF2] p-6 md:p-8 animate-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between border-b border-[#E8EDF2] pb-4 mb-6">
-              <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-full bg-[#FFF3EC] flex items-center justify-center text-[#EB4501]">
-                  <Sparkles size={16} />
-                </div>
-                <div>
-                  <h3 className="text-xs font-extrabold text-[#1A1A2E] leading-none">Share sourcing config</h3>
-                  <span className="text-[9px] font-medium text-[#9AA0AC] block mt-0.5">Buyer order request card</span>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowSourcingModal(false)}
-                className="w-8 h-8 rounded-full bg-[#F4F7F9] hover:bg-[#E8EDF2] text-[#9AA0AC] hover:text-[#1A1A2E] flex items-center justify-center transition-colors border-none cursor-pointer"
-              >
-                <X size={16} />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <div>
-                <label className="text-[9px] font-bold text-[#9AA0AC] tracking-wider block mb-1.5">Product</label>
-                <select
-                  value={modalProdIdx}
-                  onChange={(e) => setModalProdIdx(Number(e.target.value))}
-                  className="w-full h-11 px-4 bg-[#F4F7F9] border border-[#E5E7EB] rounded-lg text-xs font-medium text-[#1A1A2E] focus:outline-none focus:border-[#EB4501]"
-                >
-                  {PRODUCTS.map((prod, pIdx) => (
-                    <option key={prod.id} value={pIdx}>
-                      {prod.title} (৳{parseFloat(String(prod.price).replace(/,/g, '')).toLocaleString()})
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-[9px] font-bold text-[#9AA0AC] tracking-wider block mb-1.5">Variant</label>
-                  <input
-                    type="text"
-                    value={modalVariant}
-                    onChange={(e) => setModalVariant(e.target.value)}
-                    className="w-full h-11 px-4 bg-[#F4F7F9] border border-[#E5E7EB] rounded-lg text-xs font-medium text-[#1A1A2E] focus:outline-none focus:border-[#EB4501]"
-                    placeholder="e.g. 256GB / 12GB RAM"
-                  />
-                </div>
-                <div>
-                  <label className="text-[9px] font-bold text-[#9AA0AC] tracking-wider block mb-1.5">Color</label>
-                  <input
-                    type="text"
-                    value={modalColor}
-                    onChange={(e) => setModalColor(e.target.value)}
-                    className="w-full h-11 px-4 bg-[#F4F7F9] border border-[#E5E7EB] rounded-lg text-xs font-medium text-[#1A1A2E] focus:outline-none focus:border-[#EB4501]"
-                    placeholder="e.g. Space Gray"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[9px] font-bold text-[#9AA0AC] tracking-wider block mb-1.5">Quantity</label>
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setModalQuantity(q => Math.max(1, q - 1))}
-                    className="w-10 h-10 rounded-lg bg-[#F4F7F9] hover:bg-[#E8EDF2] text-[#1A1A2E] font-bold flex items-center justify-center border-none cursor-pointer"
-                  >
-                    -
-                  </button>
-                  <span className="text-sm font-extrabold text-[#1A1A2E] w-12 text-center">{modalQuantity}</span>
-                  <button
-                    type="button"
-                    onClick={() => setModalQuantity(q => q + 1)}
-                    className="w-10 h-10 rounded-lg bg-[#F4F7F9] hover:bg-[#E8EDF2] text-[#1A1A2E] font-bold flex items-center justify-center border-none cursor-pointer"
-                  >
-                    +
-                  </button>
-                </div>
-              </div>
-
-              <div>
-                <label className="text-[9px] font-bold text-[#9AA0AC] tracking-wider block mb-1.5">Notes</label>
-                <textarea
-                  value={modalNotes}
-                  onChange={(e) => setModalNotes(e.target.value)}
-                  className="w-full p-4 bg-[#F4F7F9] border border-[#E5E7EB] rounded-lg text-xs font-medium text-[#1A1A2E] placeholder:text-[#9AA0AC] focus:outline-none focus:border-[#EB4501] h-20 resize-none"
-                  placeholder="e.g. Request fast dispatch with protective packaging..."
-                />
-              </div>
-
-              <div className="bg-[#FFF3EC] border border-[#EB4501]/15 rounded-xl p-4 flex justify-between items-center text-[11px] font-bold">
-                <span className="text-[#EB4501]">Sourcing estimate</span>
-                <span className="text-sm font-extrabold text-[#EB4501]">
-                  ৳{(parseFloat(String(PRODUCTS[modalProdIdx].price).replace(/,/g, '')) * modalQuantity).toLocaleString()}
-                </span>
-              </div>
-            </div>
-
-            <div className="mt-6 pt-4 border-t border-[#E8EDF2] flex gap-3 justify-end">
-              <button
-                type="button"
-                onClick={() => setShowSourcingModal(false)}
-                className="px-5 py-2.5 bg-[#F4F7F9] hover:bg-[#E8EDF2] rounded-lg text-[10px] font-bold text-[#4B5563] transition-all cursor-pointer border-none"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleCreateSourcingRequest}
-                className="px-5 py-2.5 bg-[#EB4501] hover:bg-[#CF4400] text-white rounded-lg text-[10px] font-bold transition-all cursor-pointer border-none flex items-center gap-1"
-              >
-                <Sparkles size={12} />
-                Confirm & share card
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ReportConversationProblemModal
+        open={showReportModal}
+        onClose={() => setShowReportModal(false)}
+        conversationId={activeThreadId || undefined}
+        orderId={linkedOrder?.orderId}
+        bookingRef={linkedOrder?.bookingRequestId || (!linkedOrder ? activeThread?.orderRef : undefined)}
+        sellerId={linkedSubOrder?.sellerId}
+        sellerName={linkedSubOrder?.sellerBusinessName || activeThread?.title}
+        buyerId={currentUser.id || 'user-standard'}
+        userName={currentUser.name || 'Buyer'}
+      />
     </div>
   );
 }

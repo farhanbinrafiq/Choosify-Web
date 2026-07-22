@@ -5,14 +5,14 @@ import { operationsApi, type TrackedShipment } from '../services/operationsApi';
 import {
   Truck,
   CheckCircle,
-  Clock,
   Package,
-  Settings,
   MapPin,
   ExternalLink,
   MessageSquare,
 } from 'lucide-react';
 import { toast } from '../lib/notify';
+import { ProductCard } from '../components/ProductCard';
+import { PRODUCT_CARD_GRID } from '../lib/pageLayout';
 
 type TrackingStatus = 'pending' | 'dispatched' | 'transit' | 'delivered';
 
@@ -66,7 +66,7 @@ function statusIndex(status: string) {
 export function OrderTrackingPage() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { orders, updateSubOrderStatus, allProducts } = useGlobalState();
+  const { orders, allProducts } = useGlobalState();
 
   // Load from location state OR retrieve latest order from localStorage database
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(() => {
@@ -104,28 +104,6 @@ export function OrderTrackingPage() {
       toast.error(`Ticket "${searchId.toUpperCase()}" not found.`);
       setSelectedOrderId(null);
     }
-  };
-
-  // Mock Progression Helper
-  const handleSimulateTransit = () => {
-    if (!order) return;
-
-    // Progression loop: pending -> dispatched -> transit -> delivered
-    const currentStatus = order.subOrders[0]?.trackingStatus || 'pending';
-    let nextStatus: TrackingStatus = 'dispatched';
-
-    if (currentStatus === 'pending') nextStatus = 'dispatched';
-    else if (currentStatus === 'dispatched') nextStatus = 'transit';
-    else if (currentStatus === 'transit') nextStatus = 'delivered';
-    else {
-      toast.success('This freight package is already marked as DELIVERED!');
-      return;
-    }
-
-    order.subOrders.forEach((sub: any) => {
-      updateSubOrderStatus(order.orderId, sub.sellerId, nextStatus);
-    });
-    toast.success(`Lot Milestone advanced: ${nextStatus.toUpperCase()}`);
   };
 
   const getStepActive = (status: string, milestone: string) => {
@@ -277,26 +255,6 @@ export function OrderTrackingPage() {
           )
         ) : (
           <div className="space-y-5">
-            {(import.meta as any).env?.DEV && (
-              <div className="bg-[#1A1A2E] p-4 rounded-xl text-white flex flex-col sm:flex-row items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <Clock size={18} className="text-[#EB4501] shrink-0" />
-                  <div>
-                    <h4 className="text-[12px] font-bold text-white/90">Delivery Simulator</h4>
-                    <p className="text-[11px] text-white/50">Advance status to preview timeline states</p>
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={handleSimulateTransit}
-                  className="bg-white/10 hover:bg-white/15 border border-white/10 text-white text-[11.5px] font-bold px-4 py-2 rounded-lg transition-colors flex items-center gap-2 shrink-0 cursor-pointer"
-                >
-                  <Settings size={12} className="text-[#EB4501]" />
-                  Advance Transit Step
-                </button>
-              </div>
-            )}
-
             {isCancelled && (
               <div className="bg-[#FEF2F2] border border-[#FCA5A5] text-[#991B1B] rounded-xl px-5 py-4 space-y-1">
                 <div className="flex items-center gap-2 font-bold text-[12px]">
@@ -545,32 +503,9 @@ export function OrderTrackingPage() {
                     View all recommendations →
                   </Link>
                 </div>
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3.5">
+                <div className={PRODUCT_CARD_GRID}>
                   {recommendations.map((p) => (
-                    <Link
-                      key={p.id}
-                      to={`/products/${p.id}`}
-                      className="cursor-pointer group"
-                    >
-                      <div className="h-[100px] rounded-lg overflow-hidden mb-2 bg-[#E8EDF2]">
-                        {p.image ? (
-                          <img
-                            src={p.image}
-                            alt={p.title}
-                            className="w-full h-full object-cover group-hover:scale-[1.03] transition-transform duration-300"
-                          />
-                        ) : null}
-                      </div>
-                      <div className="text-[11px] font-normal text-[#1A1A2E] mb-1 leading-snug line-clamp-2">
-                        {p.title}
-                      </div>
-                      <div className="text-[11.5px] font-extrabold text-[#EB4501]">
-                        {formatMoney(p.price)}
-                      </div>
-                      {p.rating != null && (
-                        <div className="text-[10px] text-[#9AA0AC]">★ {p.rating.toFixed(1)}</div>
-                      )}
-                    </Link>
+                    <ProductCard key={p.id} product={p} variant="grid" />
                   ))}
                 </div>
               </div>

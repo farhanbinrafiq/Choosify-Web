@@ -4,6 +4,7 @@ import type {
   CatalogCategory,
   CatalogCreator,
   CatalogDeal,
+  CatalogDealsBanner,
   CatalogGuide,
   CatalogPlacement,
   CatalogProduct,
@@ -48,6 +49,13 @@ export const catalogApi = {
   },
   listDeals: async (): Promise<CatalogDeal[]> => {
     const result = await request<{ data: CatalogDeal[] }>('/catalog/deals');
+    return result.data;
+  },
+  listDealsBanners: async (opts?: { active?: boolean }): Promise<Array<CatalogDealsBanner & { href?: string }>> => {
+    const active = opts?.active === false ? 'false' : 'true';
+    const result = await request<{ data: Array<CatalogDealsBanner & { href?: string }> }>(
+      `/catalog/deals-banners?active=${active}`,
+    );
     return result.data;
   },
   getHomepage: async (): Promise<{

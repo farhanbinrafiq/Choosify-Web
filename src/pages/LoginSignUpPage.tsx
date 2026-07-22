@@ -381,16 +381,12 @@ export function LoginSignUpPage() {
                 className={cn(
                   'w-full py-3.5 rounded-lg text-[13px] font-bold cursor-pointer active:scale-[0.99] transition-all flex items-center justify-center gap-2',
                   isSignUp
-                    ? 'choosify-emi-gradient text-white border-none hover:brightness-105'
-                    : 'bg-white border border-[#E5E7EB] choosify-emi-gradient-text hover:border-[#D1D5DB]',
+                    ? 'bg-[#EB4501] text-white border-none hover:brightness-105'
+                    : 'bg-white border border-[#E5E7EB] text-[#EB4501] hover:border-[#D1D5DB]',
                 )}
               >
                 {isSignUp ? 'Create account' : 'Sign in to Choosify'}
-                <ArrowRight
-                  size={16}
-                  strokeWidth={2.4}
-                  stroke={isSignUp ? 'currentColor' : 'url(#choosify-emi-icon-grad)'}
-                />
+                <ArrowRight size={16} strokeWidth={2.4} className="text-current" />
               </button>
             </form>
 

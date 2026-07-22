@@ -1133,7 +1133,7 @@ export function ProductDetailPage() {
                     <button
                       type="button"
                       onClick={() => navigate('/login', { state: { from: location.pathname } })}
-                      className="h-10 px-6 bg-white border border-[#E5E7EB] text-[13px] font-bold rounded-lg hover:border-[#D1D5DB] cursor-pointer choosify-emi-gradient-text"
+                      className="h-10 px-6 bg-white border border-[#E5E7EB] text-[#EB4501] text-[13px] font-bold rounded-lg hover:border-[#D1D5DB] cursor-pointer"
                     >
                       Sign in
                     </button>

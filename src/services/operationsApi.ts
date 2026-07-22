@@ -10,7 +10,19 @@ async function request<T>(path: string, method: HttpMethod = 'GET', body?: unkno
   });
   if (!response.ok) {
     const rawError = await response.text();
-    throw new Error(rawError || `Request failed with ${response.status}`);
+    let parsed: { error?: string; message?: string } | null = null;
+    try {
+      parsed = JSON.parse(rawError) as { error?: string; message?: string };
+    } catch {
+      /* plain text */
+    }
+    const err = new Error(parsed?.message || parsed?.error || rawError || `Request failed with ${response.status}`) as Error & {
+      code?: string;
+      status?: number;
+    };
+    err.code = parsed?.error;
+    err.status = response.status;
+    throw err;
   }
   return response.json() as Promise<T>;
 }
@@ -88,9 +100,31 @@ export const operationsApi = {
     body: string;
     orderId?: string;
     sellerId?: string;
+    conversationId?: string;
+    isComplaint?: boolean;
     bookingOffer?: unknown;
+    /** Used by server when ops store has no order row yet (close-only enforcement). */
+    orderSnapshot?: {
+      orderId?: string;
+      status?: string;
+      cancelledAt?: string;
+      subOrders?: Array<{
+        trackingStatus?: string;
+        items?: Array<{
+          productType?: 'physical' | 'service';
+          serviceCategory?: string;
+          serviceDetails?: Record<string, string | number>;
+        }>;
+      }>;
+    };
   }) => {
     const result = await request<{ data: unknown }>('/operations/platform-messages', 'POST', payload);
+    return result.data;
+  },
+  getConversationExpiry: async (orderId: string) => {
+    const result = await request<{ data: Record<string, unknown> }>(
+      `/operations/conversation-expiry?orderId=${encodeURIComponent(orderId)}`,
+    );
     return result.data;
   },
   submitSellerOffer: async (payload: {

@@ -38,11 +38,11 @@ export const RecentlyViewedCard = memo(function RecentlyViewedCard({ product, cl
       )}
     >
       {/* Product Image Area */}
-      <div className="w-full aspect-square bg-slate-50 rounded-xl overflow-hidden flex items-center justify-center shrink-0">
+      <div className="relative w-full aspect-square bg-slate-50 rounded-xl overflow-hidden shrink-0">
         <img 
           src={imageUrl} 
           alt={product.title}
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+          className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
           referrerPolicy="no-referrer"
         />
       </div>
