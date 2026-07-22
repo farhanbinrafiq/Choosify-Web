@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useGlobalState } from '../../context/GlobalStateContext';
 import { CMS_TEMPLATE_REGISTRY } from '../../lib/marketing/cmsTemplateRegistry';
 import { createEmptyContent, upsertMarketingContent } from '../../services/marketingCmsStorage';
-import toast from 'react-hot-toast';
+import { toast } from '../../lib/notify';
 
 export function MarketingTemplatesPage() {
   const navigate = useNavigate();

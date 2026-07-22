@@ -1,6 +1,6 @@
 import React from 'react';
 import { CheckCircle2, Users, HelpCircle, ShieldCheck } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import { useDashboard } from '../context/DashboardContext';
 
 interface OverviewData {

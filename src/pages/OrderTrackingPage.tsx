@@ -12,7 +12,7 @@ import {
   ExternalLink,
   MessageSquare,
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/notify';
 
 type TrackingStatus = 'pending' | 'dispatched' | 'transit' | 'delivered';
 

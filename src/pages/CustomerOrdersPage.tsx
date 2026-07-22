@@ -13,7 +13,7 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import { PRODUCTS, PLACEHOLDER_IMAGE } from '../constants';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/notify';
 
 export function CustomerOrdersPage({
   embedded = false,

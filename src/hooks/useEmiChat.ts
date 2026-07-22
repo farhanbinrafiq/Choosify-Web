@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { sendEmiMessage, type EmiChatMessage } from '../services/emiApi';
 import { searchEmiCatalog } from '../lib/emiCatalogSearch';
 import { useGlobalState } from '../context/GlobalStateContext';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import { notifyEmiUnread } from '../hooks/useEmiUnread';
 
 const STORAGE_KEY = 'choosify_emi_chat_v1';

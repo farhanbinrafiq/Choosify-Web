@@ -316,6 +316,15 @@
   box-shadow: 0 4px 20px rgba(0, 4, 53, 0.08);
 }
 
+/* Choosify toast host — strip react-hot-toast default chrome */
+.choosify-toaster > div {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+}
+
 /* Scrollbar styling for high-density look */
 ::-webkit-scrollbar {
   width: 6px;

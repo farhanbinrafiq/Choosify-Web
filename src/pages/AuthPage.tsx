@@ -7,7 +7,7 @@ import {
 } from 'lucide-react';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useNavigate, useLocation } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import { EmiAiLogo } from '../components/EmiAiLogo';
 import { cn } from '../lib/utils';
 import { IconBrandApple } from '@tabler/icons-react';

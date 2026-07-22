@@ -42,9 +42,11 @@ import { notificationApi } from "../services/notificationApi";
 import { useDashboard } from "../context/DashboardContext";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../lib/utils";
-import { toast } from "react-hot-toast";
+import { notify, toast } from "../lib/notify";
 import { ProductMediaGallery } from "../components/ProductMediaGallery";
 import { ProductDetailBuyBox } from "../components/product/ProductDetailBuyBox";
+import { ListingRelatedInfoPanel } from "../components/product/detail/ListingRelatedInfoPanel";
+import { resolveListingRelatedInfoSection } from "../utils/listingRelatedInfo";
 import { OptionalAddonsModule } from '../components/product/OptionalAddonsModule';
 import { CreatorReviewsPreview } from "../components/creatorReviews/CreatorReviewsPreview";
 import { PublicReviewCard } from "../components/PublicReviewCard";
@@ -211,6 +213,9 @@ export function ProductDetailPage() {
       cons: detail.cons,
       bestForTags: detail.bestForTags,
       storeComparisonList: detail.storeComparisonList,
+      priceAcrossStoresEnabled: detail.priceAcrossStoresEnabled ?? (baseProduct as any)?.priceAcrossStoresEnabled,
+      whatsNearby: detail.whatsNearby ?? (baseProduct as any)?.whatsNearby,
+      beforeYourVisit: detail.beforeYourVisit ?? (baseProduct as any)?.beforeYourVisit,
       physicalStores: detail.physicalStores,
       overviewBlocks: detail.overviewBlocks,
       creatorContent: detail.creatorContent,
@@ -249,6 +254,12 @@ export function ProductDetailPage() {
     ? serviceMessageCtaLabel(product?.serviceCategory)
     : 'Message Seller';
   const requestFields = useMemo(() => requestFieldsForListing(product), [product]);
+
+  const relatedInfoSection = useMemo(
+    () => resolveListingRelatedInfoSection(product),
+    [product],
+  );
+  const showRelatedInfoPanel = Boolean(relatedInfoSection);
 
   usePageBreadcrumbs(
     {
@@ -864,7 +875,7 @@ export function ProductDetailPage() {
       .catch(() => {});
 
     // Show toast and close
-    toast.success(`${isService ? 'Booking' : 'Product'} request sent to ${brandName}.`);
+    notify.bookingSent(brandName, isService);
     setShowOrderConfirm(false);
     
     // Redirect to Messages thread
@@ -930,7 +941,7 @@ export function ProductDetailPage() {
         onToggleWishlist={() => {
           setIsWishlisted((prev) => {
             const next = !prev;
-            toast.success(next ? 'Added to wishlist!' : 'Removed from wishlist');
+            notify.wishlistToggle(next, product.title);
             return next;
           });
         }}
@@ -941,13 +952,13 @@ export function ProductDetailPage() {
               `choosify_addons_${product.id}`,
               JSON.stringify(selectedAddons),
             );
-            toast.success(
-              `Added ${product.title} + ${selectedAddons.length} add-on${selectedAddons.length > 1 ? 's' : ''} to your cart!`,
-              { duration: 3500 },
-            );
-          } else {
-            toast.success(`Added ${product.title} to your cart!`);
           }
+          notify.cartAdded({
+            productId: product.id,
+            title: product.title,
+            quantity: cartQty,
+            addonCount: selectedAddons.length,
+          });
         }}
         onCompare={handleAddToCompare}
         onMessageSeller={handleMessageOrder}
@@ -1325,12 +1336,12 @@ export function ProductDetailPage() {
               </div>
             </StudioWrap>
 
-            {/* Provider card stays; Price Across Stores is physical-product-only */}
+            {/* Provider card + config-driven related-info sidebar */}
             <div
               id={isService ? 'service-provider-section' : 'where-to-buy-section'}
               className={cn(
                 'bg-white rounded-xl border border-[#E8EDF2] p-6 grid grid-cols-1 gap-3.5 w-full',
-                !isService && 'lg:grid-cols-[1fr_1.8fr]',
+                showRelatedInfoPanel && 'lg:grid-cols-[1fr_1.8fr]',
               )}
             >
               <div className="rounded-[10px] overflow-hidden border border-[#E8EDF2]">
@@ -1379,46 +1390,12 @@ export function ProductDetailPage() {
                 </div>
               </div>
 
-              {!isService && (
-              <div className="bg-[#F4F7F9] rounded-[10px] p-4 text-left">
-                <div className="text-[11px] font-extrabold text-[#1A1A2E] mb-3">PRICE ACROSS STORES</div>
-                {[
-                  { name: 'Daraz BD', delivery: '2–3 days', price: Math.round((product.price || 1500) * 0.96), color: '#EB4501' },
-                  { name: `${brandName} Store`, delivery: 'Official · 1–2 days', price: product.price || 1500, color: '#07A828' },
-                  { name: 'Pickaboo', delivery: 'Nationwide', price: Math.round((product.price || 1500) * 1.02), color: '#2323FF' },
-                  { name: 'Ryans', delivery: 'Express available', price: Math.round((product.price || 1500) * 0.99), color: '#1A1A2E' },
-                ].map((store) => (
-                  <div
-                    key={store.name}
-                    className="flex items-center gap-2.5 bg-white border border-[#E8EDF2] rounded-[10px] px-3 py-2.5 mb-2.5"
-                  >
-                    <div className="w-8 h-8 rounded-full bg-[#000435] text-white flex items-center justify-center text-[11px] font-extrabold shrink-0">
-                      {store.name.charAt(0)}
-                    </div>
-                    <div className="min-w-0 shrink-0 sm:w-[28%]">
-                      <div className="text-[11.5px] font-bold text-[#1A1A2E] truncate">{store.name}</div>
-                      <div className="text-[10px] text-[#9AA0AC] sm:hidden">🚚 {store.delivery}</div>
-                    </div>
-                    <div className="hidden sm:block flex-1 min-w-0 text-center text-[10px] text-[#9AA0AC] truncate">
-                      🚚 {store.delivery}
-                    </div>
-                    <div className="text-[12.5px] font-extrabold shrink-0 ml-auto sm:ml-0" style={{ color: store.color }}>
-                      ৳{store.price.toLocaleString()}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => toast.success(`Opening ${store.name}…`)}
-                      className="bg-[#EB4501] text-white border-0 px-3.5 py-1.5 rounded-2xl text-[10.5px] font-bold cursor-pointer shrink-0 whitespace-nowrap"
-                    >
-                      Shop Now
-                    </button>
-                  </div>
-                ))}
-                <Link to="/deals" className="text-[11px] font-bold text-[#EB4501] hover:underline">
-                  View more stores →
-                </Link>
-              </div>
-              )}
+              {showRelatedInfoPanel && product ? (
+                <ListingRelatedInfoPanel
+                  product={product}
+                  fallbackPrice={typeof product.price === 'number' ? product.price : undefined}
+                />
+              ) : null}
             </div>
 
             {/* Sponsored Advertisement */}

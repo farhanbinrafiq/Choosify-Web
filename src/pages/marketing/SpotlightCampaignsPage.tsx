@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LayoutGrid, List, Plus, Copy } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../../lib/notify';
 import { useSpotlightCampaigns } from '../../hooks/useSpotlightCampaigns';
 import { CampaignFolderSidebar } from '../../components/spotlight/cms/CampaignFolderSidebar';
 import { CampaignStatusBadge } from '../../components/spotlight/cms/CampaignStatusBadge';

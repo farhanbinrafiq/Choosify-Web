@@ -2,7 +2,7 @@ import React, { memo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { CheckCircle, Heart, Play, Clock, Eye, LayoutGrid, Calendar, Share2, Star } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { toast } from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import { Badge } from './ui/badges/Badge';
 
 // Unified Verified Icon to match what is used on the Home Page

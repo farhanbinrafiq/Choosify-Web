@@ -5,7 +5,7 @@ import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRig
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useGlobalState } from '../context/GlobalStateContext';
-import { toast } from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import type { Creator } from '../data/creators';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { CreatorCardDesign } from '../components/CreatorCardDesign';

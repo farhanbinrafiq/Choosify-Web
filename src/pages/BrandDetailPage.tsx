@@ -22,7 +22,7 @@ import { useNavigate, Link, useParams } from "react-router-dom";
 import { useCarousel } from "../hooks/useCarousel";
 import { ReportModal } from "../components/ReportModal";
 import { useGlobalState } from "../context/GlobalStateContext";
-import { toast } from "react-hot-toast";
+import { toast } from '../lib/notify';
 import { BrandOverviewSection } from "../components/BrandOverviewSection";
 import { FollowButton } from "../components/FollowButton";
 import { BrandDetailHero } from "../components/brand/BrandDetailHero";

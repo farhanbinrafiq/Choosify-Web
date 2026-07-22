@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState, type MouseEvent } from 'react';
 import { useDashboard } from '../context/DashboardContext';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/notify';
 
 export type EngagementEntityType =
   | 'product'

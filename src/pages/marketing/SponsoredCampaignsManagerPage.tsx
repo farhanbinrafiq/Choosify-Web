@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../../lib/notify';
 import {
   deleteSponsoredCampaign,
   listSponsoredCampaigns,

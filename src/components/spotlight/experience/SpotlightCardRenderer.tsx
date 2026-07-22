@@ -7,7 +7,7 @@ import {
   Share2,
   ShoppingBag,
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../../../lib/notify';
 import type { SpotlightContent } from '../../../types/spotlight/experience/content';
 import type { SpotlightImpressionCallbacks } from '../../../types/spotlight/homepage';
 import { SPOTLIGHT_CONTENT_TYPE_META } from '../../../types/spotlight/experience/contentTypes';

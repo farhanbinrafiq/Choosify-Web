@@ -12,7 +12,7 @@ import {
   ArrowRight,
   MessageSquare
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import { operationsApi } from '../services/operationsApi';
 import { usePageBreadcrumbs } from '../context/BreadcrumbContext';
 

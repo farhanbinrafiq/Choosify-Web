@@ -15,6 +15,7 @@
 
 import type { Brand, CommerceProduct, Seller } from '../types/schemas';
 import type { CatalogProductDetail } from '../types/catalog';
+import type { WhatsNearbyData, BeforeYourVisitData } from '../types/listingRelatedInfo';
 
 /** High ids to avoid colliding with mock catalog (1–12) or typical API numeric ids. */
 export const TEST_SERVICE_BRAND_ID = 9001;
@@ -35,6 +36,8 @@ export type SeedCommerceProduct = CommerceProduct & {
   location?: string;
   duration?: string;
   specialty?: string;
+  whatsNearby?: WhatsNearbyData;
+  beforeYourVisit?: BeforeYourVisitData;
 };
 
 /** Seed is always on in local `npm run dev`; never in production builds. */
@@ -138,6 +141,19 @@ export const TEST_SERVICE_PRODUCTS: SeedCommerceProduct[] = [
     ],
     featuredFlag: true,
     tags: ['hotel', 'suite', 'hospitality', 'stay', 'TEST'],
+    whatsNearby: {
+      restaurant_cafe: [
+        { name: 'Gulshan Society Cafe', distance: '350 m' },
+        { name: 'Spice Route Kitchen', distance: '600 m' },
+      ],
+      entertainment_attraction: [{ name: 'Gulshan Lake Park', distance: '500 m' }],
+      hospital_police: [{ name: 'United Hospital Emergency', distance: '1.2 km' }],
+      transport_airport: [{ name: 'Hazrat Shahjalal Airport', distance: '12 km' }],
+      shopping_atm: [
+        { name: 'Gulshan 1 Circle ATM', distance: '200 m' },
+        { name: 'Unimart Gulshan', distance: '450 m' },
+      ],
+    },
   },
   {
     id: 9102,
@@ -227,6 +243,13 @@ export const TEST_SERVICE_PRODUCTS: SeedCommerceProduct[] = [
     ],
     featuredFlag: true,
     tags: ['doctor', 'clinic', 'medical', 'health', 'TEST'],
+    beforeYourVisit: {
+      parkingAvailability: 'Basement parking at United Hospital (paid).',
+      cancellationPolicy: 'Free cancellation up to 4 hours before appointment.',
+      whatToBring: 'National ID, previous reports, insurance card if applicable.',
+      wheelchairAccess: 'Wheelchair-accessible lift to consulting wing.',
+      insuranceAccepted: 'Green Delta, Pragati Life, and major corporate panels.',
+    },
   },
   {
     id: 9104,
@@ -313,6 +336,12 @@ export const TEST_SERVICE_PRODUCTS: SeedCommerceProduct[] = [
     ],
     featuredFlag: true,
     tags: ['beauty', 'salon', 'bridal', 'makeup', 'TEST'],
+    beforeYourVisit: {
+      parkingAvailability: 'Street parking on Road 11; valet not available.',
+      cancellationPolicy: '50% fee if cancelled within 24 hours.',
+      whatToBring: 'Inspiration photos, skin allergy notes, appointment confirmation.',
+      wheelchairAccess: 'Ground-floor studio with step-free entry.',
+    },
   },
   {
     id: 9106,
@@ -354,6 +383,12 @@ export const TEST_SERVICE_PRODUCTS: SeedCommerceProduct[] = [
       { label: 'Provider', value: 'Gulshan Spa House' },
     ],
     tags: ['beauty', 'spa', 'skincare', 'grooming', 'TEST'],
+    beforeYourVisit: {
+      parkingAvailability: 'Shared lot behind Gulshan Spa House.',
+      cancellationPolicy: 'Reschedule once for free; late cancel incurs 30% fee.',
+      whatToBring: 'Comfortable clothing, allergy list if any.',
+      wheelchairAccess: 'Lift access to treatment rooms on level 2.',
+    },
   },
 ];
 
@@ -371,6 +406,8 @@ function detailFromProduct(product: SeedCommerceProduct): CatalogProductDetail {
     cons: [],
     bestForTags: product.tags?.filter((t) => t !== 'TEST') || [],
     storeComparisonList: [],
+    whatsNearby: product.whatsNearby,
+    beforeYourVisit: product.beforeYourVisit,
     physicalStores: product.location
       ? [
           {

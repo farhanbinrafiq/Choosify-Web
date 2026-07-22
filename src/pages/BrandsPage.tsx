@@ -4,7 +4,7 @@ import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useGlobalState } from '../context/GlobalStateContext';
-import { toast } from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { BrandCardDesign } from '../components/BrandCardDesign';
 import { DcListingStickyFilters } from '../components/design/DcListingStickyFilters';

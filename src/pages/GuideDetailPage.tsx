@@ -48,7 +48,7 @@ import { DYNAMIC_GUIDES, DEFAULT_DYNAMIC_GUIDE } from "../data/mockGuides";
 import { CATEGORY_SPEC_CONFIGS } from "../data/guideSpecConfigs";
 import { useDashboard } from "../context/DashboardContext";
 import { useGlobalState } from "../context/GlobalStateContext";
-import toast from "react-hot-toast";
+import { toast } from '../lib/notify';
 import { FollowButton } from "../components/FollowButton";
 import { useRegisterPageFilters } from "../components/FilterEngine";
 import type { CatalogGuide } from "../types/catalog";

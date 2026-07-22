@@ -1,6 +1,6 @@
 import React, { lazy, Suspense } from 'react';
 import { Share2, Heart, Trash2 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import { LoadingFallback } from '../components/LoadingFallback';
 import { useDashboard } from '../context/DashboardContext';
 

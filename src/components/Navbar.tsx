@@ -14,7 +14,7 @@ import { CartDrawer } from './CartDrawer';
 import { cn } from '../lib/utils';
 import { PRIMARY_NAV_ITEMS, resolveSiteNavigation } from '../lib/navigation';
 import { isNavPathEnabled } from '../lib/featureFlags';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import { ChoosifyWordmarkLogo } from './ChoosifyWordmarkLogo';
 
 export function Navbar() {

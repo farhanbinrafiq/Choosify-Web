@@ -13,7 +13,7 @@ import {
   Store,
   AlertCircle,
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import { usePageBreadcrumbs } from '../context/BreadcrumbContext';
 
 /** Choosify.dc.html-aligned cart — compact navy header + light #F4F7F9 body (matches Checkout) */

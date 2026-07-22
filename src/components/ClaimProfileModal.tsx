@@ -6,7 +6,7 @@ import {
   Video, Instagram, Rss, Facebook, Clock, Award
 } from 'lucide-react';
 import { useGlobalState } from '../context/GlobalStateContext';
-import { toast } from 'react-hot-toast';
+import { toast } from '../lib/notify';
 
 interface ClaimProfileModalProps {
   isOpen: boolean;

@@ -2,7 +2,7 @@ import React, { memo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { toast } from 'react-hot-toast';
+import { toast } from '../lib/notify';
 
 interface CategoryCardProps {
   id: number | string;

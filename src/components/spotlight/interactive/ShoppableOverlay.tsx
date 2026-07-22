@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GitCompare, Heart, Share2, ShoppingBag } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../../../lib/notify';
 import type { CatalogProduct } from '../../../types/catalog';
 import type { SpotlightInteractiveCommerceEvent } from '../../../types/spotlight/interactive/event';
 import type { SpotlightLiveTimelineChapter } from '../../../types/spotlight/interactive/timeline';

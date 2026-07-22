@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Trash2, ShoppingCart, ArrowRight, Plus, Minus } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import { cn } from '../lib/utils';
 import { useGlobalState, type CartItem } from '../context/GlobalStateContext';
 import {

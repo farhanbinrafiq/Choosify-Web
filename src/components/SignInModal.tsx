@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Mail, Lock, LogIn, Github, ArrowRight } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import { useGlobalState } from '../context/GlobalStateContext';
 
 interface SignInModalProps {

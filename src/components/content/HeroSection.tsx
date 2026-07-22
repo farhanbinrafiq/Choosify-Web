@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ChevronRight, Play, Heart, Share2, ShieldCheck, Plus, Check } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import toast from 'react-hot-toast';
+import { toast } from '../../lib/notify';
 
 interface HeroProps {
   content: any;

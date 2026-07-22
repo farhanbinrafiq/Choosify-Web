@@ -1,3 +1,14 @@
+/**
+ * Storefront booking field helpers.
+ *
+ * Canonical field dictionary lives in choosify-admin-4.0:
+ *   shared/booking/bookingFieldConfig.ts
+ * exposed at GET /api/v1/booking/field-config
+ *
+ * This module keeps a bootstrap fallback (must stay in sync with admin)
+ * and hydrates from the admin API when available so Product Studio and
+ * Message Seller share one config source.
+ */
 import type {
   BookingRequestField,
   ServiceCategory,
@@ -17,6 +28,7 @@ const CATEGORY_ALIASES: Record<string, ServiceCategory> = {
   salon: 'beauty',
   'real estate': 'real_estate',
   real_estate: 'real_estate',
+  'real-estate': 'real_estate',
   property: 'real_estate',
   transport: 'transport',
   transportation: 'transport',
@@ -33,6 +45,7 @@ export function normalizeServiceCategory(value?: string | null): ServiceCategory
     .trim()
     .toLowerCase()
     .replace(/[&/]+/g, ' ')
+    .replace(/-/g, ' ')
     .replace(/\s+/g, ' ');
   if (CATEGORY_ALIASES[normalized]) return CATEGORY_ALIASES[normalized];
   const match = Object.keys(CATEGORY_ALIASES).find((key) => normalized.includes(key));
@@ -57,7 +70,8 @@ const notes: BookingRequestField = {
   type: 'textarea',
 };
 
-export const SERVICE_BOOKING_FIELDS: Record<ServiceCategory, BookingRequestField[]> = {
+/** Bootstrap fallback — prefer hydrateServiceBookingFieldsFromApi() */
+export let SERVICE_BOOKING_FIELDS: Record<ServiceCategory, BookingRequestField[]> = {
   hotels: [
     { key: 'checkInDate', label: 'Check-in date', type: 'date', required: true },
     { key: 'checkInTime', label: 'Check-in time', type: 'time' },
@@ -122,6 +136,31 @@ export const SERVICE_BOOKING_FIELDS: Record<ServiceCategory, BookingRequestField
   ],
 };
 
+let hydrated = false;
+
+/** Pull canonical config from admin API (no-op if unreachable). */
+export async function hydrateServiceBookingFieldsFromApi(
+  apiBaseUrl = import.meta.env.VITE_API_BASE_URL || '',
+): Promise<boolean> {
+  if (hydrated) return true;
+  const base = String(apiBaseUrl || '').replace(/\/$/, '');
+  if (!base) return false;
+  try {
+    const res = await fetch(`${base}/api/v1/booking/field-config`);
+    if (!res.ok) return false;
+    const json = await res.json();
+    const fieldsByCategory = json?.data?.fieldsByCategory;
+    if (fieldsByCategory && typeof fieldsByCategory === 'object') {
+      SERVICE_BOOKING_FIELDS = fieldsByCategory as Record<ServiceCategory, BookingRequestField[]>;
+      hydrated = true;
+      return true;
+    }
+  } catch {
+    // keep bootstrap fallback
+  }
+  return false;
+}
+
 export function serviceBookingFields(serviceCategory?: string | null): BookingRequestField[] {
   return SERVICE_BOOKING_FIELDS[normalizeServiceCategory(serviceCategory)];
 }
@@ -172,9 +211,12 @@ export function productOptionFields(product: any): BookingRequestField[] {
 }
 
 export function requestFieldsForListing(product: any): BookingRequestField[] {
-  return isServiceListing(product)
-    ? serviceBookingFields(product?.serviceCategory)
-    : productOptionFields(product);
+  if (!isServiceListing(product)) return productOptionFields(product);
+  const all = serviceBookingFields(product?.serviceCategory);
+  const requiredKeys: string[] | undefined = product?.requiredBookingFieldKeys;
+  if (!Array.isArray(requiredKeys) || requiredKeys.length === 0) return all;
+  const filtered = all.filter((f) => requiredKeys.includes(f.key) || f.key === 'notes');
+  return filtered.length ? filtered : all;
 }
 
 export function listingSectionLabels(product: any) {

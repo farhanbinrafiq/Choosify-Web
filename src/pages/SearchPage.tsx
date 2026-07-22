@@ -12,7 +12,7 @@ import { getBrandOverviews, getProductOverviews, matchOverviewContent } from '..
 import { useRegisterPageFilters, UniversalFilterRenderer } from '../components/FilterEngine';
 import { catalogGuideHref } from '../lib/spotlight/content';
 import { cn } from '../lib/utils';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/notify';
 
 type SearchTab = 'all' | 'products' | 'brands' | 'guides' | 'deals' | 'creators';
 

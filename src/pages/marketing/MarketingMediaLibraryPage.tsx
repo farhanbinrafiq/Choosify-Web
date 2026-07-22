@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import toast from 'react-hot-toast';
+import { toast } from '../../lib/notify';
 import { Plus, Link as LinkIcon } from 'lucide-react';
 import type { UniversalMedia } from '../../components/media/types/mediaModel';
 import { classifyMedia } from '../../components/media/utils/classifyMedia';

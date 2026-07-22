@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { toast } from '../../lib/notify';
 import { ArrowLeft, Sparkles } from 'lucide-react';
 import { useGlobalState } from '../../context/GlobalStateContext';
 import { useSpotlightExperienceBuilder } from '../../hooks/useSpotlightExperienceBuilder';

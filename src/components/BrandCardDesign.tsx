@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import { useDashboard } from '../context/DashboardContext';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import { cn } from '../lib/utils';
 
 interface BrandCardDesignProps {

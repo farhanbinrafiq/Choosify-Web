@@ -1,6 +1,6 @@
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import type { StudioKind } from '../types/studio';
 import { getStudioSectionById } from '../data/studioSections';
 import { useGlobalState } from './GlobalStateContext';

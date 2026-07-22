@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
-import { toast } from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Heart, Send, FileText, CheckCircle2, 

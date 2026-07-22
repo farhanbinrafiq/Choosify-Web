@@ -12,7 +12,7 @@ import {
   Package, Truck, Clock, MessageSquare, ExternalLink, LayoutDashboard, CheckSquare,
   X, Info, Sparkles, Plus, Megaphone, Lock,
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import { operationsApi } from '../services/operationsApi';
 import { notificationApi } from '../services/notificationApi';
 import { MessagesRightRail } from '../components/messages/MessagesRightRail';

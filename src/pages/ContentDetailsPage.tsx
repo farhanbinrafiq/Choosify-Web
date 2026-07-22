@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import { Star } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { PRODUCTS } from '../constants';

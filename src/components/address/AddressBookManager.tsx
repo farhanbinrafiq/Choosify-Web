@@ -12,7 +12,7 @@ import {
   Truck,
   Users,
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../../lib/notify';
 import { useDashboard } from '../../context/DashboardContext';
 import type { AddressType, CustomerAddress, CustomerAddressDraft } from '../../lib/address/addressTypes';
 import {

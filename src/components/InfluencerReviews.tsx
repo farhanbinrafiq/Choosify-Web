@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Play, Eye, ThumbsUp, Clock, Youtube, Instagram, Facebook, Video, Plus, X, HelpCircle } from 'lucide-react';
-import { toast } from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import { useGlobalState } from '../context/GlobalStateContext';
 
 // Custom Minimal SVG for TikTok to pair perfectly with Lucide outline style

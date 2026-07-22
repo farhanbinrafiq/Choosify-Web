@@ -22,7 +22,7 @@ import { PLACEMENT_KEYS, INFEED_INTERVAL, INFEED_MAX_PER_PAGE } from '../lib/pla
 import { injectPlacementsIntoFeed } from '../utils/injectFeedPlacements';
 import { CardEngagementStrip } from '../components/CardEngagementStrip';
 import { useDashboard } from '../context/DashboardContext';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import { ReelCard, HorizontalMediaCard } from '../components/guide/GuideMediaCards';
 
 export function renderGuideMediaCard(guide: any) {

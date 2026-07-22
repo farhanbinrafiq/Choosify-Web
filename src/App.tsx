@@ -14,7 +14,7 @@ import { OfflineFallbackBanner } from './components/OfflineFallbackBanner';
 import { DrawerFilterProvider, FloatingFilterProvider } from './components/FilterEngine';
 import { StudioEditProvider } from './context/StudioEditContext';
 import { StudioEditPanel } from './components/studio/StudioEditPanel';
-import { Toaster } from 'react-hot-toast';
+import { ChoosifyToaster } from './components/ChoosifyToaster';
 import { AnimatePresence, motion } from 'motion/react';
 import ErrorBoundary from './components/ErrorBoundary';
 import { LoadingFallback } from './components/LoadingFallback';
@@ -289,22 +289,7 @@ export default function App() {
         <ErrorBoundary>
           <OfflineFallbackBanner />
           <DashboardProvider>
-            <Toaster 
-              position="top-center" 
-              toastOptions={{
-                style: {
-                  background: '#050514',
-                  color: '#fff',
-                  border: '1px solid rgba(255,255,255,0.1)',
-                  fontSize: '11px',
-                  fontWeight: '900',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.1em',
-                  fontStyle: 'normal',
-                  borderRadius: '12px',
-                },
-              }} 
-            />
+            <ChoosifyToaster />
             <ScrollToTop />
             <GoogleAnalyticsRouteTracker />
             <PageSeo />

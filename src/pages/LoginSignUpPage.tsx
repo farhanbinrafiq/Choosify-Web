@@ -12,7 +12,7 @@ import { IconBrandApple } from '@tabler/icons-react';
 
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useGlobalState } from '../context/GlobalStateContext';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import { cn } from '../lib/utils';
 import { EmiAiLogo } from '../components/EmiAiLogo';
 

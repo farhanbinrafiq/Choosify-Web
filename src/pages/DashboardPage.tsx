@@ -63,7 +63,7 @@ import { cn } from '../lib/utils';
 import { PLACEHOLDER_IMAGE } from '../constants';
 import { PublicReviewCard } from '../components/PublicReviewCard';
 import { AddressBookManager } from '../components/address/AddressBookManager';
-import toast from 'react-hot-toast';
+import { notify, toast } from '../lib/notify';
 import { toPlatformRole } from '../lib/platform/roles';
 import { getDashboardNavForRole, isDashboardTabAllowed } from '../lib/platform/dashboardRegistry';
 import { SellerWorkspaceSection } from './ReviewDetailPage';
@@ -737,7 +737,7 @@ const SavedProductsSection = () => {
               <button 
                 onClick={() => {
                   addToCart(p, 1);
-                  toast.success('Added to cart!');
+                  notify.cartAdded({ productId: p.id, title: p.title, quantity: 1 });
                 }}
                 className="absolute top-6 right-18 z-30 w-10 h-10 rounded-full bg-[#EB4501]/10 text-[#EB4501] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border border-[#EB4501]/20 hover:bg-[#CF4400] hover:text-white cursor-pointer"
                 title="Add to Cart"

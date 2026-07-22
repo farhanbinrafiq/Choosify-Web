@@ -407,6 +407,12 @@ export interface CatalogProductDetail {
     storeUrl?: string;
     storeLocation?: string;
   }>;
+  /** Seller toggle — Price Across Stores sidebar (physical products only). */
+  priceAcrossStoresEnabled?: boolean;
+  /** Service sidebar — five fixed nearby buckets keyed by NearbyCategoryKey. */
+  whatsNearby?: import('./listingRelatedInfo').WhatsNearbyData;
+  /** Service sidebar — before-visit text fields keyed by BeforeVisitFieldKey. */
+  beforeYourVisit?: import('./listingRelatedInfo').BeforeYourVisitData;
   physicalStores: Array<{
     id: string;
     storeName: string;

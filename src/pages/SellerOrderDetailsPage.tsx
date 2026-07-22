@@ -1,7 +1,7 @@
 import React from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { FileText, ArrowLeft, Mail, Phone, Calendar, MapPin, Printer, ShieldCheck, CreditCard, MessageSquare } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/notify';
 
 export function SellerOrderDetailsPage() {
   const location = useLocation();

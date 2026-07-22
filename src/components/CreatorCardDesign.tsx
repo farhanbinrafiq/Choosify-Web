@@ -1,7 +1,7 @@
 import React, { memo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import { cn } from '../lib/utils';
 
 interface CreatorCardDesignProps {

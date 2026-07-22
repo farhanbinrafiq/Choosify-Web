@@ -10,7 +10,7 @@ import {
 } from '../data/mockServiceListings';
 import { buildFallbackBrandsFromMock, buildMappedProductsFromMock } from '../utils/mockCatalogHydration';
 import { perfApiCall } from '../utils/performanceDev';
-import { toast } from 'react-hot-toast';
+import { notify, toast } from '../lib/notify';
 import { catalogApi } from '../services/catalogApi';
 import { hydrateBrandPostsFromApi } from '../lib/brandPosts';
 import { FEATURE_FLAG_DEFAULTS, isFlagEnabled, normalizeFeatureFlags } from '../lib/featureFlags';
@@ -626,12 +626,11 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       const uniqueCartItemId = Date.now() + Math.floor(Math.random() * 1000);
       return [...prev, { id: uniqueCartItemId, product, quantity, selectedVariant }];
     });
-    toast.success(`Added ${quantity} units to your cart`);
   };
 
   const removeFromCart = (productId: number) => {
     setRetailCart(prev => prev.filter(item => item.id !== productId));
-    toast.success('Removed from cart');
+    notify.success('Removed from cart', { id: 'cart-remove' });
   };
 
   const updateCartQuantity = (productId: number, quantity: number) => {

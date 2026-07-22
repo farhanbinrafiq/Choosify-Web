@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import type { MessageThread } from '../../context/DashboardContext';
 import type { Order, SubOrder } from '../../types/schemas';
 import { Package, User, Link2, Copy } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../../lib/notify';
 
 type MessagesRightRailProps = {
   activeThread?: MessageThread | null;

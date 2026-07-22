@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
 import { loadMockCatalog } from '../data/loadMockCatalog';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import {
   CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
   CHOOSIFY_ANNOUNCEMENTS_TITLE,

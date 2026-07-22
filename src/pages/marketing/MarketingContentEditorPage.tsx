@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { toast } from '../../lib/notify';
 import { ArrowLeft, Save, Eye } from 'lucide-react';
 import { useGlobalState } from '../../context/GlobalStateContext';
 import { CMS_CONTENT_TYPE_REGISTRY, getCmsContentType } from '../../lib/marketing/cmsContentTypeRegistry';

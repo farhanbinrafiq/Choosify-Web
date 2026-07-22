@@ -14,7 +14,7 @@ import { EmiComparePanel } from './emi/EmiComparePanel';
 import { EmiAiLogo } from './EmiAiLogo';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
-import { toast } from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import { Link, useNavigate } from 'react-router-dom';
 import { PRODUCTS } from '../constants';
 import { SponsoredCompareRail } from './commerce/PlacementSlot';

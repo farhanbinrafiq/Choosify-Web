@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import toast from 'react-hot-toast';
+import { toast } from '../../../lib/notify';
 import { ChevronUp, ChevronDown, Star, Trash2 } from 'lucide-react';
 import type { UniversalMedia } from '../../media/types/mediaModel';
 import { classifyMedia } from '../../media/utils/classifyMedia';

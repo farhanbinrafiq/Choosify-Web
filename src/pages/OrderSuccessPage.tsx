@@ -14,7 +14,7 @@ import {
   Home,
   X,
 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import { useGlobalState } from '../context/GlobalStateContext';
 import type { Order } from '../types/schemas';
 import { cn } from '../lib/utils';

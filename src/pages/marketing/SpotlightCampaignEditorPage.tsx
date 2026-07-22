@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import toast from 'react-hot-toast';
+import { toast } from '../../lib/notify';
 import { ChevronLeft, ChevronRight, Save } from 'lucide-react';
 import { useSpotlightCampaignWizard } from '../../hooks/useSpotlightCampaignWizard';
 import { MediaManagerPanel } from '../../components/spotlight/cms/MediaManagerPanel';

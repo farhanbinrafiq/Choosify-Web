@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { Check } from "lucide-react";
-import toast from "react-hot-toast";
+import { toast } from '../lib/notify';
 import { cn } from "../lib/utils";
 import { useDashboard } from "../context/DashboardContext";
 import { useGlobalState } from "../context/GlobalStateContext";

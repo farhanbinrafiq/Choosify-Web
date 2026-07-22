@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Camera, Plus, ChevronRight, Info, CheckCircle2 } from 'lucide-react';
-import toast from 'react-hot-toast';
+import { toast } from '../lib/notify';
 import { operationsApi } from '../services/operationsApi';
 import { cn } from '../lib/utils';
 

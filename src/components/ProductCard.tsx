@@ -17,7 +17,7 @@ import { PLACEHOLDER_IMAGE } from '../constants';
 import { resolveProductBadges } from '../utils/productBadges';
 import { CardEngagementStrip } from './CardEngagementStrip';
 import { ProductStatusBadge, ProductStatusBadgeStack, collectProductBadgeLabels } from './ProductStatusBadge';
-import toast from 'react-hot-toast';
+import { notify } from '../lib/notify';
 
 /** Choosify.dc.html product tile tokens */
 const DC = {
@@ -263,10 +263,10 @@ export const ProductCard = memo(function ProductCard({
     e.preventDefault();
     if (isSaved) {
       setSavedProducts((prev) => prev.filter((p) => p.id !== product.id));
-      toast.success('Removed from wishlist');
+      notify.wishlistToggle(false, product.title);
     } else {
       setSavedProducts((prev) => [...prev, product]);
-      toast.success('Added to wishlist');
+      notify.wishlistToggle(true, product.title);
     }
   };
 
@@ -284,7 +284,7 @@ export const ProductCard = memo(function ProductCard({
       return;
     }
     addToCart(product, 1);
-    toast.success(`Successfully added ${product.title} to your cart!`);
+    notify.cartAdded({ productId: product.id, title: product.title, quantity: 1 });
   };
 
   const openProduct = () => navigate(productHref);

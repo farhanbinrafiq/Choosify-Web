@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Clock, Sparkles } from 'lucide-react';
 import { useDashboard, Campaign } from '../context/DashboardContext';
 import { motion, AnimatePresence } from 'motion/react';
-import { toast } from 'react-hot-toast';
+import { toast } from '../lib/notify';
 
 export function CampaignBannerCarousel() {
   const { campaigns } = useDashboard();
