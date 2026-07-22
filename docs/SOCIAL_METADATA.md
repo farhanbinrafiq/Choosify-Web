@@ -10,7 +10,7 @@ Choosify is a **Vite + React SPA**, not Next.js. The Next.js App Router Metadata
 4. **`api/share.js`** — Server-rendered HTML with complete social meta for crawlers that do not execute SPA JavaScript.
 5. **`middleware.js`** — Detects Facebook, LinkedIn, X/Twitter, WhatsApp, Slack, Discord, Telegram, etc., and rewrites them to `/api/share`.
 6. **`lib/seoShared.ts`** — Shared constants (`SITE_URL`, theme color, OG size, `buildOgImageUrl`, crawler UA pattern).
-7. **`public/og/default.png`** — Static default share image (also used when Edge OG is cold or blocked).
+7. **`public/og/og-image-v2.png`** — Static default share image (also used when Edge OG is cold or blocked). Filename is versioned because Facebook caches `og:image` by URL indefinitely.
 
 ## Important limitation (SPA)
 
@@ -19,8 +19,8 @@ Client-updated meta tags alone **fail** Facebook Sharing Debugger / LinkedIn Pos
 ## Replacing the default OG image
 
 1. Export a **1200×630** PNG branded asset.
-2. Replace `public/og/default.png`.
-3. Optionally update `DEFAULT_OG_IMAGE_PATH` in `lib/seoShared.ts` if you change the filename.
+2. Replace `public/og/og-image-v2.png` **and bump the filename** (e.g. `og-image-v3.png`) so crawlers treat it as a new URL.
+3. Update `DEFAULT_OG_IMAGE_PATH` in `lib/seoShared.ts`, `index.html`, and `api/share.js` to the new path.
 4. Bump cache-busting query params on OG tags in `index.html` if CDNs cache aggressively.
 5. Re-run validators (Facebook / LinkedIn / X) after deploy.
 

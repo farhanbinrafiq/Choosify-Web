@@ -14,8 +14,11 @@ export const SITE_BRAND_ORANGE = '#FF5B00';
 export const OG_IMAGE_WIDTH = 1200;
 export const OG_IMAGE_HEIGHT = 630;
 
-/** Static fallback when the dynamic OG edge route is unavailable */
-export const DEFAULT_OG_IMAGE_PATH = '/og/default.png';
+/**
+ * Static fallback when the dynamic OG edge route is unavailable.
+ * Version the filename when replacing the graphic — Facebook caches og:image by URL indefinitely.
+ */
+export const DEFAULT_OG_IMAGE_PATH = '/og/og-image-v2.png';
 export const DEFAULT_OG_IMAGE = `${SITE_URL}${DEFAULT_OG_IMAGE_PATH}`;
 
 export const CATALOG_API_BASE_URL =

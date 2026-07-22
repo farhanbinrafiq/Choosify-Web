@@ -11,7 +11,7 @@ const SITE_LOCALE = 'en_BD';
 const SITE_TWITTER_HANDLE = '@choosifybd';
 const OG_IMAGE_WIDTH = 1200;
 const OG_IMAGE_HEIGHT = 630;
-const DEFAULT_OG_IMAGE = `${SITE_URL}/og/default.png`;
+const DEFAULT_OG_IMAGE = `${SITE_URL}/og/og-image-v2.png`;
 
 const NOINDEX_PREFIXES = [
   '/login',

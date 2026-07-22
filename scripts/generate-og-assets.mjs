@@ -7,7 +7,8 @@
  * - Brand navy #000435 (auth / footer / dark chrome)
  *
  * Output:
- * - public/og/default.png          1200×630 default og:image
+ * - public/og/og-image-v2.png      1200×630 default og:image (versioned for FB cache-bust)
+ * - public/og/default.png          legacy alias of the same asset
  * - public/og/wordmark-light.png   wordmark on transparent (for /api/og)
  * - public/favicon-16x16.png, favicon-32x32.png, apple-touch-icon.png
  *
@@ -93,13 +94,15 @@ await sharp(backgroundSvg)
     { input: hostSvg, left: 0, top: 560 },
   ])
   .png()
-  .toFile(path.join(ogDir, 'default.png'));
+  .toFile(path.join(ogDir, 'og-image-v2.png'));
+
+await fs.promises.copyFile(path.join(ogDir, 'og-image-v2.png'), path.join(ogDir, 'default.png'));
 
 await sharp(logoMarkPath).resize(16, 16).png().toFile(path.join(root, 'favicon-16x16.png'));
 await sharp(logoMarkPath).resize(32, 32).png().toFile(path.join(root, 'favicon-32x32.png'));
 await sharp(logoMarkPath).resize(180, 180).png().toFile(path.join(root, 'apple-touch-icon.png'));
 
-const out = await sharp(path.join(ogDir, 'default.png')).metadata();
+const out = await sharp(path.join(ogDir, 'og-image-v2.png')).metadata();
 console.log(
-  `Generated og/default.png (${out.width}×${out.height}), og/wordmark-light.png, favicons from real brand assets.`,
+  `Generated og/og-image-v2.png (${out.width}×${out.height}), og/default.png alias, og/wordmark-light.png, favicons from real brand assets.`,
 );

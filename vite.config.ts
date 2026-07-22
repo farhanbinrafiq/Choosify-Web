@@ -20,6 +20,7 @@ export default defineConfig(({ mode }) => {
           'favicon-32x32.png',
           'apple-touch-icon.png',
           'masked-icon.svg',
+          'og/og-image-v2.png',
           'og/default.png',
         ],
         manifest: {
@@ -182,17 +183,17 @@ export default defineConfig(({ mode }) => {
               }
             },
             {
-              // Network-first for all page navigations
-              // Falls back to cache if offline
-              urlPattern: /^https:\/\/choosify\.bd\/.*/i,
+              // Document navigations only — never cache hashed JS/CSS as "pages"
+              // (a broad domain NetworkFirst was serving stale shells after deploys).
+              urlPattern: ({ request }) => request.mode === 'navigate',
               handler: 'NetworkFirst',
               options: {
                 cacheName: 'pages-cache',
                 expiration: {
                   maxEntries: 50,
-                  maxAgeSeconds: 60 * 60 * 24 * 7 // 7 days
+                  maxAgeSeconds: 60 * 60 * 24 // 1 day
                 },
-                networkTimeoutSeconds: 5,
+                networkTimeoutSeconds: 3,
                 cacheableResponse: {
                   statuses: [0, 200]
                 }
@@ -203,10 +204,11 @@ export default defineConfig(({ mode }) => {
           // Skip waiting — activate new service worker immediately
           skipWaiting: true,
           clientsClaim: true,
+          cleanupOutdatedCaches: true,
 
-          // Offline fallback page
+          // Offline fallback page — never fall back for APIs or file extensions
           navigateFallback: '/index.html',
-          navigateFallbackDenylist: [/^\/api\//]
+          navigateFallbackDenylist: [/^\/api\//, /^\/assets\//, /\/[^/?]+\.[^/]+$/]
         },
         
         // Dev options — enable PWA in development for testing
