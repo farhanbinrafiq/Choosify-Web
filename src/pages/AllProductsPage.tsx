@@ -187,14 +187,14 @@ export function AllProductsPage() {
   }, [allCatalogProducts, allBrands, selectedBrand]);
 
   useRegisterPageFilters({
-    pageName: 'Products',
+    pageName: 'Browse',
     scrollTargetId: 'all-products-display',
     sectionNav: {
       items: sectionNavItems,
       activeId: activeSectionId,
       onNavigate: scrollToSection,
-      allLabel: 'Products',
-      profileLabel: 'Product catalog',
+      allLabel: 'Browse',
+      profileLabel: 'Browse Products & Services',
     },
     renderSearch: () => (
       <div className="relative">

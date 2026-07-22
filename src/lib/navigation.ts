@@ -15,7 +15,7 @@ export type PrimaryNavItem = {
 export const PRIMARY_NAV_ITEMS: PrimaryNavItem[] = [
   { id: 'home', path: '/', label: 'Home', heroTitle: 'Home' },
   { id: 'categories', path: '/categories', label: 'Categories', heroTitle: 'Categories' },
-  { id: 'products', path: '/products', label: 'Products', heroTitle: 'Products' },
+  { id: 'products', path: '/products', label: 'Browse', heroTitle: 'Browse Products & Services' },
   { id: 'brands', path: '/brands', label: 'Brands', heroTitle: 'Brands' },
   { id: 'spotlight', path: '/spotlight', label: 'Discover', heroTitle: 'Discover' },
   { id: 'creators', path: '/creators', label: 'Creators', heroTitle: 'Creators' },
@@ -23,7 +23,10 @@ export const PRIMARY_NAV_ITEMS: PrimaryNavItem[] = [
   { id: 'compare', path: '/compare', label: 'Compare', heroTitle: 'Compare' },
 ];
 
-const NAV_PATH_LABEL_OVERRIDES: Record<string, string> = {};
+/** Force storefront labels even when CMS nav still says "Products". */
+const NAV_PATH_LABEL_OVERRIDES: Record<string, string> = {
+  '/products': 'Browse',
+};
 
 /** Normalize nav labels from CMS. */
 export function getNavigationLabel(path: string, fallback: string): string {

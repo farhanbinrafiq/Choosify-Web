@@ -119,7 +119,7 @@ export function CartPreviewPanel({ onClose, className }: CartPreviewPanelProps) 
               }}
               className="text-[10px] font-bold uppercase tracking-widest text-[#EB4501] hover:underline cursor-pointer"
             >
-              Browse products
+              Browse
             </button>
           </div>
         ) : (

@@ -135,7 +135,7 @@ export function RetailCartPage() {
               to="/products"
               className="inline-flex items-center gap-2 bg-[#EB4501] hover:bg-[#CF4400] text-white text-xs font-bold px-6 py-3 rounded-lg transition-colors"
             >
-              Browse products <ArrowRight size={14} />
+              Browse Products & Services <ArrowRight size={14} />
             </Link>
           </div>
         ) : (

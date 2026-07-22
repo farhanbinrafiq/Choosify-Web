@@ -10,7 +10,7 @@ export function SpotlightEmptyState() {
         to="/products"
         className="inline-flex items-center gap-2 px-4 py-2 bg-navy text-white text-xs font-bold uppercase rounded"
       >
-        <ShoppingBag size={14} /> Browse Products
+        <ShoppingBag size={14} /> Browse Products & Services
       </Link>
     </div>
   );

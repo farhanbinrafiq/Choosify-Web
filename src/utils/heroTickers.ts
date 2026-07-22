@@ -34,7 +34,7 @@ const DEFAULT_TICKERS: Record<PageHeroBannerKey, SiteHeroTickerItem[]> = {
       isActive: true,
       segments: [
         { text: 'Browse ' },
-        { text: 'Verified Products', emphasis: true },
+        { text: 'Products & Services', emphasis: true },
         { text: ' from trusted Bangladeshi brands' },
       ],
     },

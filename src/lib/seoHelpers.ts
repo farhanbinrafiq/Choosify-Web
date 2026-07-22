@@ -87,7 +87,7 @@ export function resolveOgType(pathname: string): OgPageType {
 }
 
 const SECTION_LABELS: Record<string, string> = {
-  products: 'Products',
+  products: 'Browse',
   brands: 'Brands',
   categories: 'Categories',
   deals: 'Deals',

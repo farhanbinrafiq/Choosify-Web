@@ -1,6 +1,5 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ChevronRight } from 'lucide-react';
 import { ProductCard } from '../../../components/ProductCard';
 
 interface FeaturedProductsSectionProps {
@@ -19,7 +18,7 @@ export const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = (
           to="/products" 
           className="text-xs font-bold text-[#EB4501] uppercase tracking-wider flex items-center gap-1 hover:text-[#CF4400]"
         >
-          VIEW ALL PRODUCTS <ChevronRight size={14} />
+          VIEW ALL ›
         </Link>
       </div>
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">

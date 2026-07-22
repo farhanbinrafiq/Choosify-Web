@@ -54,7 +54,6 @@ const OrderSuccessPage = lazy(() => import('./pages/OrderSuccessPage').then(m =>
 const OrderTrackingPage = lazy(() => import('./pages/OrderTrackingPage').then(m => ({ default: m.OrderTrackingPage })));
 const MessagesPage = lazy(() => import('./pages/MessagesPage').then(m => ({ default: m.MessagesPage })));
 const CustomerOrdersPage = lazy(() => import('./pages/CustomerOrdersPage').then(m => ({ default: m.CustomerOrdersPage })));
-const EmiPage = lazy(() => import('./pages/EmiPage').then(m => ({ default: m.EmiPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
 const MarketingLayout = lazy(() => import('./pages/marketing/MarketingLayout').then(m => ({ default: m.MarketingLayout })));
 const SpotlightCampaignsPage = lazy(() => import('./pages/marketing/SpotlightCampaignsPage').then(m => ({ default: m.SpotlightCampaignsPage })));
@@ -210,7 +209,7 @@ function AppContent() {
             <Route path="/whats-on/:slug" element={<PageWrapper><LegacyWhatsOnContentRedirect /></PageWrapper>} />
             <Route path="/customer-favorite" element={<Navigate to="/products" replace />} />
             <Route path="/search" element={<PageWrapper><SearchPage /></PageWrapper>} />
-            <Route path="/emi" element={<FeatureFlagRoute flag="enable_emi_assistant"><PageWrapper><EmiPage /></PageWrapper></FeatureFlagRoute>} />
+            <Route path="/emi" element={<Navigate to="/messages/thread-emi-ai" replace />} />
             <Route path="/creators" element={<FeatureFlagRoute flag="creator_hub"><PageWrapper><CreatorsPage /></PageWrapper></FeatureFlagRoute>} />
             <Route path="/creators/:id" element={<FeatureFlagRoute flag="creator_hub"><PageWrapper><CreatorProfilePage /></PageWrapper></FeatureFlagRoute>} />
             

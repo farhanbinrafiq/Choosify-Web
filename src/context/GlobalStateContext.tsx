@@ -830,7 +830,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   const allProducts = mergeServiceSeedProducts(productSource);
   const sellersWithSeed = mergeServiceSeedSellers(INITIAL_SELLERS);
   const productDetailsWithSeed = mergeServiceSeedProductDetails(productDetailsById);
-  const allCatalogProducts = resolveCatalogProducts(catalogProducts, productSource);
+  const allCatalogProducts = resolveCatalogProducts(catalogProducts, allProducts);
   const allCatalogBrands = catalogBrands?.length
     ? catalogBrands
     : allBrands.map((brand, idx) => ({

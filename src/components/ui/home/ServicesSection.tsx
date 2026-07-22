@@ -44,7 +44,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onServiceClick
                 variant="outline" 
                 className="mt-1.5 text-[9px] font-semibold text-slate-400 bg-transparent py-0 px-1.5 normal-case border-slate-100"
               >
-                Browse products
+                Browse
               </Badge>
             </div>
           </Link>

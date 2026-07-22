@@ -16,7 +16,7 @@ export const ROUTE_REGISTRY: RouteDefinition[] = [
   { path: '/', kind: 'public', label: 'Home' },
   { path: '/categories', kind: 'public', label: 'Categories' },
   { path: '/spotlight', kind: 'public', label: 'Spotlight' },
-  { path: '/products', kind: 'public', label: 'Products' },
+  { path: '/products', kind: 'public', label: 'Browse' },
   { path: '/brands', kind: 'public', label: 'Brands' },
   { path: '/guides', kind: 'redirect', label: 'Spotlight (legacy guides)', notes: 'Redirects to /spotlight?tab=guides' },
   { path: '/spotlight/:slug', kind: 'public', label: 'Spotlight Content' },

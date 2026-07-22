@@ -45,7 +45,7 @@ export function HomeFeaturedProductsSection({ feed }: HomeFeaturedProductsSectio
         >
           Featured Products
         </h2>
-        <ViewAllLink href="/products" label="VIEW ALL PRODUCTS ›" />
+        <ViewAllLink href="/products" label="VIEW ALL ›" />
       </div>
       <p className="text-[12.5px] text-[#9AA0AC] m-0 mb-4">Handpicked deals you&apos;ll love</p>
       <div className="mb-6">

@@ -873,7 +873,7 @@ const SavedItemsSection = () => {
             Saved Products <span className="text-[#9AA0AC]">({savedProducts.length})</span>
           </h3>
           <Link to="/products" className="text-[11.5px] font-bold text-[#EB4501] hover:underline">
-            Browse products →
+            Browse →
           </Link>
         </div>
         {savedProducts.length > 0 ? (
@@ -1132,7 +1132,7 @@ const RecentlyViewedSection = () => {
           <Clock size={64} className="mb-8 text-[#EB4501]" />
           <p className="text-[13px] font-semibold text-[#1A1A2E] tracking-tight leading-relaxed">No recently viewed products</p>
           <p className="text-[10px] font-bold text-gray-405 uppercase mt-2 italic">Product views will automatically populate this section.</p>
-          <Link to="/products" className="mt-6 px-6 py-2.5 bg-[#EB4501] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Go to directory</Link>
+          <Link to="/products" className="mt-6 px-6 py-2.5 bg-[#EB4501] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Browse Products & Services</Link>
         </div>
       )}
     </div>

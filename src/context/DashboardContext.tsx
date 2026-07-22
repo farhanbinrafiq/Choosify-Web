@@ -8,6 +8,12 @@ import {
   CHOOSIFY_ANNOUNCEMENTS_WELCOME,
   formatAnnouncementBody,
 } from '../lib/announcements';
+import {
+  EMI_MESSAGES_THREAD_ID,
+  EMI_MESSAGES_THREAD_TITLE,
+  EMI_MESSAGES_THREAD_AVATAR,
+  EMI_MESSAGES_THREAD_WELCOME,
+} from '../lib/emiThread';
 import type { CustomerAddress } from '../lib/address/addressTypes';
 import { ADDRESS_STORAGE_KEY, getDefaultAddress, normalizeDefaultAddress } from '../lib/address/addressUtils';
 import type { BookingOfferCard } from '../types/serviceBooking';
@@ -191,6 +197,15 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
         unread: false,
         readOnly: true,
       },
+      {
+        id: EMI_MESSAGES_THREAD_ID,
+        title: EMI_MESSAGES_THREAD_TITLE,
+        avatar: EMI_MESSAGES_THREAD_AVATAR,
+        lastMessage: EMI_MESSAGES_THREAD_WELCOME,
+        time: welcomeTime,
+        type: 'general',
+        unread: false,
+      },
       { id: 'thread-general', title: 'Farhan Rafiq (Admin)', avatar: 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png', lastMessage: 'Absolutely! We can ship the S24 Ultra...', time: '10:30 AM', type: 'general', unread: true },
       { id: 'seller-apple', title: 'Apple Retail BD', avatar: 'https://i.pravatar.cc/150?u=apple', lastMessage: 'Welcome to Apple Retail! Feel free to ask queries.', time: '2 days ago', type: 'retail', unread: false }
     ];
@@ -209,6 +224,15 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
         senderName: CHOOSIFY_ANNOUNCEMENTS_TITLE,
         time: welcomeTime,
         avatar: CHOOSIFY_ANNOUNCEMENTS_AVATAR,
+      },
+      {
+        id: 101,
+        threadId: EMI_MESSAGES_THREAD_ID,
+        text: EMI_MESSAGES_THREAD_WELCOME,
+        sender: 'other',
+        senderName: EMI_MESSAGES_THREAD_TITLE,
+        time: welcomeTime,
+        avatar: EMI_MESSAGES_THREAD_AVATAR,
       },
       { id: 1, threadId: 'thread-general', text: 'Hello! I am interested in the Samsung S24 Ultra you posted. Is it still available?', sender: 'other', senderName: 'Rahat Hossain', time: '10:30 AM', avatar: 'https://i.pravatar.cc/150?u=1' },
       { id: 2, threadId: 'thread-general', text: 'Yes, it is still available. Would you like to know more about the warranty?', sender: 'user', senderName: 'Me', time: '10:35 AM' },
@@ -641,6 +665,42 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       localStorage.setItem('choosify_notifications_migrated', '1');
     }
   }, [appendAnnouncementMessage]);
+
+  // Ensure Emi AI thread exists in the general Messages inbox (for returning users with older localStorage)
+  useEffect(() => {
+    setThreads((prev) => {
+      if (prev.some((t) => t.id === EMI_MESSAGES_THREAD_ID)) {
+        return prev.map((t) =>
+          t.id === EMI_MESSAGES_THREAD_ID
+            ? {
+                ...t,
+                type: 'general',
+                title: EMI_MESSAGES_THREAD_TITLE,
+                avatar: EMI_MESSAGES_THREAD_AVATAR,
+              }
+            : t,
+        );
+      }
+      const welcomeTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const emiThread: MessageThread = {
+        id: EMI_MESSAGES_THREAD_ID,
+        title: EMI_MESSAGES_THREAD_TITLE,
+        avatar: EMI_MESSAGES_THREAD_AVATAR,
+        lastMessage: EMI_MESSAGES_THREAD_WELCOME,
+        time: welcomeTime,
+        type: 'general',
+        unread: false,
+      };
+      const announcementsIdx = prev.findIndex((t) => t.id === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID);
+      if (announcementsIdx === 0) {
+        return [prev[0], emiThread, ...prev.slice(1)];
+      }
+      if (announcementsIdx > 0) {
+        return [prev[announcementsIdx], emiThread, ...prev.filter((_, i) => i !== announcementsIdx)];
+      }
+      return [emiThread, ...prev];
+    });
+  }, []);
 
   // Expose to window to facilitate cross-context notifications without circular imports
   useEffect(() => {

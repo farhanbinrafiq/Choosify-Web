@@ -3,7 +3,7 @@ import { cn } from '../../../lib/utils';
 import { Check, ShieldCheck, Award, Lock, Globe, Headset, HelpCircle } from 'lucide-react';
 import { FAQAccordionCard } from '../faq/FAQAccordionCard';
 import { FAQPill } from '../faq/FAQPill';
-
+import { OverviewListItem } from '../../OverviewListIcon';
 
 export interface BrandOverviewCardProps {
   brand: any;
@@ -64,14 +64,18 @@ export const BrandOverviewCard: React.FC<BrandOverviewCardProps> = ({ brand, ove
             <Award size={16} className="text-[#FF9F00]" />
             <span>Key Achievements</span>
           </h3>
-          <ul className="space-y-3 relative z-10">
+          <div className="space-y-3 relative z-10">
             {(overviewDetails.awards || overviewDetails.achievements || []).map((ach: string, idx: number) => (
-              <li key={idx} className="flex items-start gap-2.5">
-                <div className="mt-1 w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: accentColor }} />
-                <span className="text-[11px] font-bold text-gray-300 leading-snug">{ach}</span>
-              </li>
+              <OverviewListItem
+                key={idx}
+                text={ach}
+                className="items-start"
+                iconClassName="text-[#FF9F00]"
+                textClassName="text-[11px] font-bold text-gray-300 leading-snug"
+                iconSize={12}
+              />
             ))}
-          </ul>
+          </div>
         </div>
         <div className="bg-white border border-[#EEF2F7] rounded-3xl p-6 shadow-sm">
           <h3 className="text-sm font-black text-[#050B2C] uppercase tracking-wider flex items-center gap-2 mb-4">

@@ -31,6 +31,8 @@ export function commerceProductToCatalog(product: CommerceProduct, index = 0): C
     isBestseller: Boolean(product.isBestseller),
     createdAt: product.publishedAt || new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    productType: product.productType,
+    serviceCategory: product.serviceCategory,
   };
 }
 
@@ -89,6 +91,11 @@ export function resolveCatalogProducts(
   apiProducts: CatalogProduct[] | null | undefined,
   commerceProducts: CommerceProduct[],
 ): CatalogProduct[] {
-  if (apiProducts?.length) return apiProducts;
-  return commerceProducts.map(commerceProductToCatalog);
+  const fromCommerce = commerceProducts.map(commerceProductToCatalog);
+  if (!apiProducts?.length) return fromCommerce;
+
+  // Keep API catalog as primary, but prepend any commerce-only rows (e.g. local service seeds)
+  const apiIds = new Set(apiProducts.map((p) => String(p.id)));
+  const extras = fromCommerce.filter((p) => !apiIds.has(String(p.id)));
+  return extras.length ? [...extras, ...apiProducts] : apiProducts;
 }

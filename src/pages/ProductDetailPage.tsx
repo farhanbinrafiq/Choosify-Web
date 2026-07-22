@@ -58,6 +58,7 @@ import { SizeGuideModal } from "../components/SizeGuideModal";
 import { DETAIL_SINGLE_FEED } from "../lib/pageLayout";
 import { DC_CONTENT_MAX } from "../lib/design/dcListingTokens";
 import { ProductSpecsOverview } from "../components/ProductSpecsOverview";
+import { OverviewListItem } from "../components/OverviewListIcon";
 import { DcUnderlineTabs } from "../components/design/DcUnderlineTabs";
 import { CardEngagementStrip } from "../components/CardEngagementStrip";
 import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
@@ -1243,7 +1244,7 @@ export function ProductDetailPage() {
                     </div>
                     <div className="space-y-2 text-[11.5px] text-[#4B5563] leading-relaxed">
                       {col.items.map((item) => (
-                        <div key={item}>• {item}</div>
+                        <OverviewListItem key={item} text={item} />
                       ))}
                     </div>
                   </div>
@@ -1269,7 +1270,7 @@ export function ProductDetailPage() {
                         </div>
                         <div className="space-y-2 text-[11.5px] text-[#4B5563] leading-relaxed">
                           {(Array.isArray(co.content) ? co.content : []).map((bullet, bIdx) => (
-                            <div key={bIdx}>• {bullet}</div>
+                            <OverviewListItem key={bIdx} text={String(bullet)} />
                           ))}
                         </div>
                       </div>
@@ -1312,9 +1313,12 @@ export function ProductDetailPage() {
                   ? boxContents
                   : ['Device', 'Charging cable', 'Documentation', 'Warranty card']
                 ).map((item, i) => (
-                  <div key={i} className="text-[11.5px] text-[#4B5563] mb-1.5">
-                    ✓ {item}
-                  </div>
+                  <OverviewListItem
+                    key={i}
+                    text={item}
+                    className="text-[11.5px] text-[#4B5563] mb-1.5"
+                    iconClassName="text-emerald-500"
+                  />
                 ))}
               </div>
               <div className="bg-[#F4F7F9] rounded-[10px] p-4 text-left">
@@ -1329,9 +1333,12 @@ export function ProductDetailPage() {
                       `Rating: ${product.rating || '4.8'} / 5`,
                     ]
                 ).map((item: string, i: number) => (
-                  <div key={i} className="text-[11.5px] text-[#4B5563] mb-1.5">
-                    ✓ {item}
-                  </div>
+                  <OverviewListItem
+                    key={i}
+                    text={item}
+                    className="text-[11.5px] text-[#4B5563] mb-1.5"
+                    iconClassName="text-emerald-500"
+                  />
                 ))}
               </div>
             </StudioWrap>

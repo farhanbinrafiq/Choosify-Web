@@ -1,7 +1,8 @@
 import React from 'react';
-import { CheckCircle2, Users, HelpCircle, ShieldCheck } from 'lucide-react';
+import { CheckCircle2 } from 'lucide-react';
 import { toast } from '../lib/notify';
 import { useDashboard } from '../context/DashboardContext';
+import { OverviewListItem } from './OverviewListIcon';
 
 interface OverviewData {
   address: string;
@@ -111,10 +112,12 @@ export function BrandOverviewSection({ brandName, overviewData, claimStatus }: B
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {overviewData.services.map((srv, idx) => (
-              <div key={idx} className="text-[10.5px] text-[#6B7280] font-semibold uppercase tracking-wide flex items-start gap-2">
-                <span className="text-[#EB4501] text-xs leading-none">•</span>
-                <span>{srv}</span>
-              </div>
+              <OverviewListItem
+                key={idx}
+                text={srv}
+                className="text-[10.5px] text-[#6B7280] font-semibold uppercase tracking-wide"
+                iconSize={12}
+              />
             ))}
           </div>
         </div>
@@ -150,10 +153,12 @@ export function BrandOverviewSection({ brandName, overviewData, claimStatus }: B
               </div>
               <div className="space-y-2.5">
                 {co.content.map((bullet, bIdx) => (
-                  <div key={bIdx} className="text-[10.5px] text-[#6B7280] font-semibold uppercase tracking-wide flex items-start gap-2">
-                    <span className="text-[#EB4501] text-xs leading-none">•</span>
-                    <span>{bullet}</span>
-                  </div>
+                  <OverviewListItem
+                    key={bIdx}
+                    text={bullet}
+                    className="text-[10.5px] text-[#6B7280] font-semibold uppercase tracking-wide"
+                    iconSize={12}
+                  />
                 ))}
               </div>
             </div>

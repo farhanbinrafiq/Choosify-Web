@@ -2,7 +2,6 @@ import React, { useState, memo } from 'react';
 import {
   Star,
   Heart,
-  ArrowRight,
   ChevronLeft,
   ChevronRight,
   ShieldCheck,
@@ -10,7 +9,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
-import { CartIconButton } from './commerce/CartIconButton';
+import { CartIconButton, ServiceViewIconButton } from './commerce/CartIconButton';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { PLACEHOLDER_IMAGE } from '../constants';
@@ -18,6 +17,7 @@ import { resolveProductBadges } from '../utils/productBadges';
 import { CardEngagementStrip } from './CardEngagementStrip';
 import { ProductStatusBadge, ProductStatusBadgeStack, collectProductBadgeLabels } from './ProductStatusBadge';
 import { notify } from '../lib/notify';
+import { isServiceListing } from '../utils/serviceBooking';
 
 /** Choosify.dc.html product tile tokens */
 const DC = {
@@ -255,6 +255,7 @@ export const ProductCard = memo(function ProductCard({
   const cashback = resolveCashbackLabel(priceNum);
   const rating = resolveRating(product);
   const isOfficial = product.official !== false && product.verified !== false;
+  const isService = isServiceListing(product);
   const productHref = `/products/${product.slug ?? product.id}`;
   const imageSrc = product.image || product.images?.[0] || PLACEHOLDER_IMAGE;
 
@@ -276,10 +277,10 @@ export const ProductCard = memo(function ProductCard({
     addToCompare(product);
   };
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const handlePrimaryAction = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
-    if (isGuideDetail) {
+    if (isGuideDetail || isService) {
       navigate(productHref);
       return;
     }
@@ -288,6 +289,19 @@ export const ProductCard = memo(function ProductCard({
   };
 
   const openProduct = () => navigate(productHref);
+
+  const renderPrimaryAction = (size: number) => {
+    if (isGuideDetail || isService) {
+      return (
+        <ServiceViewIconButton
+          size={size}
+          onClick={handlePrimaryAction}
+          label={isService ? 'View service' : 'Shop Now'}
+        />
+      );
+    }
+    return <CartIconButton size={size} onClick={handlePrimaryAction} />;
+  };
 
   /* ── Featured (wide) — keep business wiring, softer dc chrome ── */
   if (variant === 'featured') {
@@ -329,18 +343,7 @@ export const ProductCard = memo(function ProductCard({
           </h3>
           <div className="flex items-end justify-between gap-4 pt-4 border-t border-[#F1F1F3]">
             <span className="text-2xl font-extrabold text-[#1A1A2E] leading-none">{priceLabel}</span>
-            {isGuideDetail ? (
-              <button
-                type="button"
-                onClick={handleAddToCart}
-                className="w-10 h-10 rounded-full text-white bg-[#EB4501] cursor-pointer transition-all shrink-0 border-0 flex items-center justify-center hover:brightness-110"
-                aria-label="Shop Now"
-              >
-                <ArrowRight size={16} />
-              </button>
-            ) : (
-              <CartIconButton size={40} onClick={handleAddToCart} />
-            )}
+            {renderPrimaryAction(40)}
           </div>
           <CardEngagementStrip
             entityType={engagementType}
@@ -416,18 +419,7 @@ export const ProductCard = memo(function ProductCard({
                 />
               </button>
             </div>
-            {isGuideDetail ? (
-              <button
-                type="button"
-                onClick={handleAddToCart}
-                className="w-7 h-7 rounded-full bg-[#EB4501] text-white border-0 flex items-center justify-center cursor-pointer hover:brightness-110"
-                aria-label="Shop Now"
-              >
-                <ArrowRight size={13} />
-              </button>
-            ) : (
-              <CartIconButton size={28} onClick={handleAddToCart} />
-            )}
+            {renderPrimaryAction(28)}
           </div>
         </div>
       </div>
@@ -560,19 +552,7 @@ export const ProductCard = memo(function ProductCard({
             </button>
           </div>
 
-          {isGuideDetail ? (
-            <button
-              type="button"
-              onClick={handleAddToCart}
-              className="w-7 h-7 rounded-full bg-[#EB4501] text-white border-0 flex items-center justify-center cursor-pointer shrink-0 hover:brightness-110 active:scale-95 transition-all"
-              aria-label="Shop Now"
-              title="Shop Now"
-            >
-              <ArrowRight size={13} strokeWidth={2} />
-            </button>
-          ) : (
-            <CartIconButton size={28} onClick={handleAddToCart} />
-          )}
+          {renderPrimaryAction(28)}
         </div>
       </div>
     </div>

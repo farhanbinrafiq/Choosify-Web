@@ -161,7 +161,7 @@ Thank you for shopping with Choosify.bd
               to="/products"
               className="inline-flex items-center gap-2 px-6 py-3 bg-[#EB4501] hover:brightness-110 rounded-lg text-sm font-bold text-white transition-all"
             >
-              Browse products <ArrowRight size={14} />
+              Browse Products & Services <ArrowRight size={14} />
             </Link>
           </div>
         ) : (

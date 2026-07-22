@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingCart } from 'lucide-react';
+import { ArrowRight, ShoppingCart, type LucideIcon } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 interface CartIconButtonProps {
@@ -8,17 +8,23 @@ interface CartIconButtonProps {
   size?: number;
   className?: string;
   label?: string;
+  /** Override glyph — defaults to cart; services use ArrowRight */
+  icon?: LucideIcon;
+  /** Blue "+" badge (cart add affordance). Off for non-cart actions. */
+  showBadge?: boolean;
 }
 
 /**
- * Platform-standard product-card cart control: circular orange button with a
- * cart glyph and a small blue "+" badge in the corner (Flash Deal reference style).
+ * Platform-standard product-card action control: circular orange button.
+ * Physical products use cart + badge; service listings use arrow-forward (view/book).
  */
 export function CartIconButton({
   onClick,
   size = 28,
   className,
   label = 'Add to cart',
+  icon: Icon = ShoppingCart,
+  showBadge = true,
 }: CartIconButtonProps) {
   const iconSize = Math.max(12, Math.round(size * 0.48));
   const badgeSize = Math.min(16, Math.max(12, Math.round(size * 0.5)));
@@ -36,13 +42,34 @@ export function CartIconButton({
       aria-label={label}
       title={label}
     >
-      <ShoppingCart size={iconSize} strokeWidth={1.7} className="text-white" />
-      <span
-        className="absolute -top-1 -right-1 rounded-full bg-[#2323FF] text-white font-extrabold flex items-center justify-center leading-none pointer-events-none"
-        style={{ width: badgeSize, height: badgeSize, fontSize: badgeFont }}
-      >
-        +
-      </span>
+      <Icon size={iconSize} strokeWidth={1.7} className="text-white" />
+      {showBadge ? (
+        <span
+          className="absolute -top-1 -right-1 rounded-full bg-[#2323FF] text-white font-extrabold flex items-center justify-center leading-none pointer-events-none"
+          style={{ width: badgeSize, height: badgeSize, fontSize: badgeFont }}
+        >
+          +
+        </span>
+      ) : null}
     </button>
+  );
+}
+
+/** Same chrome as cart button; ArrowRight signals view / Message to Book for services. */
+export function ServiceViewIconButton({
+  onClick,
+  size = 28,
+  className,
+  label = 'View service',
+}: Omit<CartIconButtonProps, 'icon' | 'showBadge'>) {
+  return (
+    <CartIconButton
+      onClick={onClick}
+      size={size}
+      className={className}
+      label={label}
+      icon={ArrowRight}
+      showBadge={false}
+    />
   );
 }

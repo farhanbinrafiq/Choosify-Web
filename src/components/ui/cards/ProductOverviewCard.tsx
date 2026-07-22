@@ -1,5 +1,6 @@
 import React from 'react';
 import { cn } from '../../../lib/utils';
+import { OverviewListItem } from '../../OverviewListIcon';
 
 export interface OverviewSection {
   title?: string;
@@ -64,11 +65,11 @@ export const ProductOverviewCard: React.FC<ProductOverviewCardProps> = ({
               )}
               
               {section.features && section.features.length > 0 && (
-                <ul className="list-disc pl-5 space-y-2 text-sm font-medium text-slate-600">
+                <div className="space-y-2 text-sm font-medium text-slate-600">
                   {section.features.map((feature, fIdx) => (
-                    <li key={fIdx}>{feature}</li>
+                    <OverviewListItem key={fIdx} text={feature} />
                   ))}
-                </ul>
+                </div>
               )}
 
               {section.callout && (

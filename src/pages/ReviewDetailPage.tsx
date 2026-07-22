@@ -206,7 +206,7 @@ export function ReviewDetailPage() {
             to="/products"
             className="inline-flex items-center gap-1.5 bg-[#EB4501] text-white px-4 py-2.5 rounded-lg text-xs font-bold"
           >
-            <ShoppingBag size={14} /> Browse products
+            <ShoppingBag size={14} /> Browse Products & Services
           </Link>
           <Link
             to="/compare"

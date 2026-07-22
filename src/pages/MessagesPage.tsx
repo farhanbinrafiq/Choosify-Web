@@ -8,6 +8,10 @@ import {
   CHOOSIFY_ANNOUNCEMENTS_TITLE,
 } from '../lib/announcements';
 import {
+  EMI_MESSAGES_THREAD_ID,
+  EMI_MESSAGES_THREAD_TITLE,
+} from '../lib/emiThread';
+import {
   Search, ArrowLeft, Send, MoreVertical, CheckCircle,
   Package, Truck, Clock, MessageSquare, ExternalLink, LayoutDashboard, CheckSquare,
   X, Info, Sparkles, Plus, Megaphone, Lock,
@@ -17,6 +21,7 @@ import { operationsApi } from '../services/operationsApi';
 import { notificationApi } from '../services/notificationApi';
 import { MessagesRightRail } from '../components/messages/MessagesRightRail';
 import { BookingOfferMessageCard } from '../components/booking/BookingOfferMessageCard';
+import { EmiChatPanel } from '../components/EmiChatPanel';
 import type { BookingOfferCard } from '../types/serviceBooking';
 import type { Order } from '../types/schemas';
 
@@ -90,6 +95,7 @@ export function MessagesPage({
     activeThread?.type === 'announcement' ||
     activeThread?.id === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID ||
     activeThread?.readOnly === true;
+  const isEmiThread = activeThread?.id === EMI_MESSAGES_THREAD_ID;
 
   // Auto-mark active thread as read
   useEffect(() => {
@@ -695,6 +701,11 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                         {t.lastMessage}
                       </p>
                       <div className="flex flex-wrap items-center gap-1">
+                        {t.id === EMI_MESSAGES_THREAD_ID && (
+                          <span className="inline-flex text-[9px] font-bold bg-[#FFF3EC] text-[#EB4501] px-2 py-0.5 rounded">
+                            Emi AI
+                          </span>
+                        )}
                         {t.type === 'announcement' && (
                           <span className="inline-flex text-[9px] font-bold bg-[#F1F1F3] text-[#4B5563] px-2 py-0.5 rounded">
                             Broadcast
@@ -705,7 +716,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                             ORDER: {t.orderRef}
                           </span>
                         )}
-                        {!t.orderRef && t.type === 'general' && (
+                        {!t.orderRef && t.type === 'general' && t.id !== EMI_MESSAGES_THREAD_ID && (
                           <span className="inline-flex text-[9px] font-bold bg-[#F1F1F3] text-[#4B5563] px-2 py-0.5 rounded">
                             Support
                           </span>
@@ -773,6 +784,11 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                         <Megaphone size={10} className="text-[#EB4501]" />
                         Read-only broadcast
                       </span>
+                    ) : isEmiThread ? (
+                      <span className="text-[10.5px] font-medium text-[#4B5563] flex items-center gap-1">
+                        <Sparkles size={10} className="text-[#EB4501]" />
+                        Shopping assistant
+                      </span>
                     ) : (
                       <span className="text-[10.5px] font-medium text-[#07DD05]">
                         ● Online
@@ -797,7 +813,13 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                 </div>
               </div>
 
-              {/* Chat viewport */}
+              {/* Chat viewport — Emi AI embeds the full assistant inside Messages */}
+              {isEmiThread ? (
+                <div className="flex-1 min-h-0 overflow-hidden flex flex-col bg-white">
+                  <EmiChatPanel variant="page" className="h-full border-0 rounded-none shadow-none" />
+                </div>
+              ) : (
+              <>
               <div
                 ref={chatViewportRef}
                 className="flex-1 p-5 overflow-y-auto space-y-4 no-scrollbar relative min-h-0 bg-choosify-feed"
@@ -1199,6 +1221,8 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                   </div>
                 </div>
               )}
+              </>
+              )}
             </>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center p-12 text-center max-w-lg mx-auto space-y-3">
@@ -1207,7 +1231,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
               </div>
               <h3 className="text-base font-extrabold text-[#1A1A2E]">No conversation selected</h3>
               <p className="text-[11.5px] text-[#9AA0AC] leading-relaxed font-medium">
-                Choose a thread from the list to chat with a seller or support.
+                Choose a thread from the list to chat with a seller or support — or open {EMI_MESSAGES_THREAD_TITLE} for shopping help.
               </p>
             </div>
           )}

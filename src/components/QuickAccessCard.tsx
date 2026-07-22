@@ -13,7 +13,7 @@ export function QuickAccessCard() {
   const links = [
     { to: '/', label: 'Home', icon: Home },
     { to: '/categories', label: 'Categories', icon: Grid },
-    { to: '/products', label: 'Products', icon: ShoppingBag },
+    { to: '/products', label: 'Browse', icon: ShoppingBag },
     { to: '/brands', label: 'Brands', icon: ShieldCheck },
     { to: '/guides', label: 'Discover', icon: Sparkles },
     { to: '/compare', label: 'Compare', icon: SlidersHorizontal },

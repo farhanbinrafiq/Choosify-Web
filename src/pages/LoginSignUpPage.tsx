@@ -203,9 +203,9 @@ export function LoginSignUpPage() {
 
   return (
     <div className="min-h-screen font-sans relative overflow-hidden choosify-dark-surface">
-      {/* Optional blurred product collage backdrop */}
+      {/* Optional blurred product collage backdrop — gap-x-0 avoids continuous vertical gutters that read as a center divider */}
       <div
-        className="absolute inset-0 grid grid-cols-5 gap-3.5 px-6 pt-[100px] pb-6 opacity-30 blur-[1px] pointer-events-none"
+        className="absolute inset-0 grid grid-cols-5 gap-x-0 gap-y-3.5 px-6 pt-[100px] pb-6 opacity-30 blur-[1px] pointer-events-none"
         aria-hidden
       >
         {BACKDROP_TILES.map((tile) => (
@@ -234,7 +234,7 @@ export function LoginSignUpPage() {
               Need help?
             </Link>
             <Link
-              to="/emi"
+              to="/messages/thread-emi-ai"
               className="flex items-center gap-1.5 choosify-emi-gradient rounded-full py-1.5 pl-1.5 pr-3.5 hover:brightness-110 transition-all border-0"
             >
               <span className="w-[22px] h-[22px] rounded-full bg-white flex items-center justify-center p-0.5">
@@ -245,10 +245,11 @@ export function LoginSignUpPage() {
           </div>
         </div>
 
-        {/* Two-column center */}
-        <div className="flex-1 flex items-center justify-center gap-10 lg:gap-[60px] px-6 sm:px-10 py-5 flex-wrap">
-          {/* Left marketing copy */}
-          <div className="max-w-[400px] w-full">
+        {/* Merged marketing + auth card — one shell, flush panels, outer radius only */}
+        <div className="flex-1 flex items-center justify-center px-6 sm:px-10 py-5">
+          <div className="flex flex-col lg:flex-row w-full max-w-[780px] rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
+          {/* Left marketing copy — dark surface gradient */}
+          <div className="flex-1 min-w-0 choosify-dark-surface p-7 sm:p-8">
             <div className="inline-block bg-[rgba(255,90,44,0.15)] text-[#EB4501] text-[11px] font-bold px-3.5 py-1.5 rounded-full mb-5">
               ✦ Join 100,000+ SHOPPERS
             </div>
@@ -278,11 +279,8 @@ export function LoginSignUpPage() {
             </ul>
           </div>
 
-          {/* Right auth card */}
-          <div
-            className="bg-white rounded-2xl p-8 sm:p-9 w-full max-w-[380px] shadow-[0_20px_60px_rgba(0,0,0,0.5)]"
-            style={{ width: 'min(100%, 380px)' }}
-          >
+          {/* Right auth panel — flat join on the left; outer radius from parent shell */}
+          <div className="bg-white p-8 sm:p-9 w-full lg:w-[380px] lg:shrink-0">
             <h2 className="text-[22px] font-extrabold text-[#1A1A2E] mb-1">
               {isSignUp ? 'Create your account' : 'Welcome back'}
             </h2>
@@ -439,6 +437,7 @@ export function LoginSignUpPage() {
                 {isSignUp ? 'Sign in' : 'Sign up'}
               </button>
             </p>
+          </div>
           </div>
         </div>
 

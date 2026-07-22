@@ -5,6 +5,7 @@ import { cn } from '../lib/utils';
 import { EmiAiLogo } from './EmiAiLogo';
 import { useEmiChat } from '../hooks/useEmiChat';
 import type { EmiCatalogPick } from '../lib/emiCatalogSearch';
+import { EMI_MESSAGES_PATH } from '../lib/emiThread';
 import {
   floatingPanelDesktopClass,
   floatingPanelMobileClass,
@@ -253,11 +254,11 @@ export function EmiChatPanel({ onClose, className, variant = 'panel', seedPrompt
       {variant === 'panel' ? (
         <div className="px-4 py-2.5 border-t border-[#e8edf2] bg-[#F8FAFC] shrink-0">
           <Link
-            to="/emi"
+            to={EMI_MESSAGES_PATH}
             onClick={onClose}
             className="text-[9px] font-black uppercase tracking-wider text-[#8a9bb0] hover:text-[#CF4400] flex items-center justify-center gap-1"
           >
-            <span className="choosify-emi-gradient-text">Open full Emi chat</span>
+            <span className="choosify-emi-gradient-text">Open full chat</span>
             <ArrowRight size={10} stroke="url(#choosify-emi-icon-grad)" />
           </Link>
         </div>

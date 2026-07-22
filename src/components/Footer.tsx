@@ -14,6 +14,7 @@ const DEFAULT_FOOTER_COLUMNS: SiteFooterColumn[] = [
     title: 'Discover',
     links: [
       { label: 'Top Brands', url: '/brands' },
+      { label: 'Browse', url: '/products' },
       { label: 'New Arrival', url: '/products?sort=new' },
       { label: 'Compare Tool', url: '/compare' },
       { label: 'Best Deals', url: '/deals' },
