@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, MessageCircle, Share2, ShieldCheck } from 'lucide-react';
+import { Check, MessageCircleMore, Share2, ShieldCheck } from 'lucide-react';
 import { FollowButton } from '../FollowButton';
 import { ProfileSocialPills } from '../design/ProfileSocialPills';
 
@@ -140,7 +140,7 @@ export function CreatorProfileHero({
                 onClick={onMessage}
                 className="inline-flex items-center gap-1.5 bg-white text-[#1A1A2E] border border-[#E5E7EB] px-[18px] py-2.5 rounded-lg text-xs font-semibold hover:bg-[#F4F7F9]"
               >
-                <MessageCircle size={13} /> Message
+                <MessageCircleMore size={13} className="text-[#EB4501]" /> Message
               </button>
             )}
             <button

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Check, Clock3, ExternalLink, MessageSquare, X } from 'lucide-react';
+import { Check, Clock3, ExternalLink, MessageCircleMore, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { BookingOfferCard } from '../../types/serviceBooking';
 
@@ -56,7 +56,7 @@ export function BookingOfferMessageCard({
     <div className="w-full max-w-sm overflow-hidden rounded-[10px] border border-[#E8EDF2] bg-white text-left shadow-sm">
       <div className="flex items-center justify-between gap-2 border-b border-[#E8EDF2] bg-[#F4F7F9] px-4 py-2.5">
         <span className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-[#9AA0AC]">
-          <MessageSquare size={11} className="text-[#EB4501]" />
+          <MessageCircleMore size={11} className="text-[#EB4501]" />
           {offer.isService ? 'Booking request' : 'Product request'} · v{offer.version}
         </span>
         <span

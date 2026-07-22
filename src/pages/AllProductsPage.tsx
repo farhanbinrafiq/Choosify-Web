@@ -7,7 +7,8 @@ import { ProductCard } from '../components/ProductCard';
 import { ProductCardSkeleton } from '../components/Skeleton';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, CategorySmartFilters, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
-import { DcListingStickyFilters } from '../components/design/DcListingStickyFilters';
+import { ListingBrowseControls } from '../components/design/ListingBrowseControls';
+import { ListingFeedHeader } from '../components/design/ListingFeedHeader';
 import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
 import { PaginationBar } from '../components/PaginationBar';
 import {PRODUCT_CARD_GRID, PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
@@ -584,81 +585,64 @@ export function AllProductsPage() {
     return entry.sponsored;
   }, [productFeed]);
 
+  const productsBrowseControls = (
+    <ListingBrowseControls
+      showSearch={false}
+      quickChips={['Smartphones', 'Laptops', 'AC', 'TV', 'Fashion', 'Beauty']}
+      onSearch={(q) => executeSearch(q)}
+      onChipClick={(q) => executeSearch(q)}
+      items={[
+        {
+          id: 'verified',
+          icon: '🛡',
+          name: 'Verified Products',
+          sub: 'Trusted only',
+          bg: '#FFF3EA',
+          active: availabilityFilter === 'in-stock',
+          onClick: () => setAvailabilityFilter(availabilityFilter === 'in-stock' ? 'all' : 'in-stock'),
+        },
+        {
+          id: 'reviews',
+          icon: '★',
+          name: 'Real Reviews',
+          sub: 'User verified',
+          bg: '#FFF3EA',
+          active: ratingFilter === 4.5,
+          onClick: () => setRatingFilter(ratingFilter === 4.5 ? null : 4.5),
+        },
+        {
+          id: 'deals',
+          icon: '🔥',
+          name: 'Top Deals & Offers',
+          sub: 'Save more',
+          bg: '#FDECEC',
+          active: activeTab === 'Flash Deals',
+          onClick: () => setActiveTab(activeTab === 'Flash Deals' ? 'All Products' : 'Flash Deals'),
+        },
+        {
+          id: 'new',
+          icon: '✨',
+          name: 'New Arrivals',
+          sub: 'Just launched',
+          bg: '#EFECFD',
+          active: activeTab === 'New Arrivals',
+          onClick: () => setActiveTab(activeTab === 'New Arrivals' ? 'All Products' : 'New Arrivals'),
+        },
+        {
+          id: 'popular',
+          icon: '⭐',
+          name: 'Popular Picks',
+          sub: 'Trending now',
+          bg: '#FEF3E2',
+          active: activeTab === 'Bestsellers',
+          onClick: () => setActiveTab(activeTab === 'Bestsellers' ? 'All Products' : 'Bestsellers'),
+        },
+      ]}
+    />
+  );
+
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
-      <DcListingStickyFilters
-        className="mt-5"
-        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
-        searchPlaceholder="Search products..."
-        quickChips={['Smartphones', 'Laptops', 'AC', 'TV', 'Fashion', 'Beauty']}
-        onSearch={(q) => executeSearch(q)}
-        onChipClick={(q) => executeSearch(q)}
-        items={[
-          {
-            id: 'verified',
-            icon: '🛡',
-            name: 'Verified Products',
-            sub: 'Trusted only',
-            bg: '#FFF3EA',
-            active: availabilityFilter === 'in-stock',
-            onClick: () => setAvailabilityFilter(availabilityFilter === 'in-stock' ? 'all' : 'in-stock'),
-          },
-          {
-            id: 'reviews',
-            icon: '★',
-            name: 'Real Reviews',
-            sub: 'User verified',
-            bg: '#FFF3EA',
-            active: ratingFilter === 4.5,
-            onClick: () => setRatingFilter(ratingFilter === 4.5 ? null : 4.5),
-          },
-          {
-            id: 'deals',
-            icon: '🔥',
-            name: 'Top Deals & Offers',
-            sub: 'Save more',
-            bg: '#FDECEC',
-            active: activeTab === 'Flash Deals',
-            onClick: () => setActiveTab(activeTab === 'Flash Deals' ? 'All Products' : 'Flash Deals'),
-          },
-          {
-            id: 'new',
-            icon: '✨',
-            name: 'New Arrivals',
-            sub: 'Just launched',
-            bg: '#EFECFD',
-            active: activeTab === 'New Arrivals',
-            onClick: () => setActiveTab(activeTab === 'New Arrivals' ? 'All Products' : 'New Arrivals'),
-          },
-          {
-            id: 'popular',
-            icon: '⭐',
-            name: 'Popular Picks',
-            sub: 'Trending now',
-            bg: '#FEF3E2',
-            active: activeTab === 'Bestsellers',
-            onClick: () => setActiveTab(activeTab === 'Bestsellers' ? 'All Products' : 'Bestsellers'),
-          },
-        ]}
-      />
-
-      {/* ACTIVE FILTER CHIPS ROW */}
-      <ActiveFilterChips
-        chips={[
-          selectedCategory ? { id: 'category', label: `Cat: ${selectedCategory}`, onRemove: () => setSelectedCategory(null) } : null,
-          selectedBrand ? { id: 'brand', label: `Brand: ${selectedBrand}`, onRemove: () => setSelectedBrand(null) } : null,
-          ratingFilter ? { id: 'rating', label: `Rating: ${ratingFilter}★ +`, onRemove: () => setRatingFilter(null) } : null,
-          availabilityFilter !== 'all' ? { id: 'availability', label: `Status: ${availabilityFilter}`, onRemove: () => setAvailabilityFilter('all') } : null,
-          (minPrice || maxPrice) ? { id: 'price', label: `Price: ৳${minPrice || '0'} - ${maxPrice || 'Any'}`, onRemove: () => { setMinPrice(''); setMaxPrice(''); } } : null,
-          (priceMin > 0 || priceMax < 999999) ? { id: 'priceRange', label: `Range: ৳${priceMin.toLocaleString()} - ৳${priceMax.toLocaleString()}`, onRemove: () => { setPriceMin(0); setPriceMax(999999); } } : null,
-          ...Object.entries(activeSpecs).map(([key, value]) => {
-            if (!value) return null;
-            return { id: `spec-${key}`, label: `${key.toUpperCase()}: ${value}`, onRemove: () => setActiveSpecs(prev => ({ ...prev, [key]: '' })) };
-          })
-        ].filter(Boolean) as any[]}
-        onClearAll={handleResetFilters}
-      />
-
       <div className={`${LISTING_PAGE_MAX_WIDTH} mx-auto px-4 sm:px-5 lg:px-6 py-6 md:py-10 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
         
         {/* Left Sidebar */}
@@ -687,6 +671,7 @@ export function AllProductsPage() {
               setSearchQuery={setSidebarSearch}
               onSearchSubmit={executeSearch}
               searchPlaceholder="Search products, brands or details..."
+              browseControls={productsBrowseControls}
               quickFilters={
                 <QuickFilterBar
                   title="Products Quick Specs"
@@ -901,6 +886,18 @@ export function AllProductsPage() {
 
         {/* Main Content Area */}
         <main id="all-products-display" className="choosify-middle-feed scroll-mt-36 min-w-0 pb-10">
+          <ListingFeedHeader
+            className="mb-6"
+            eyebrow="Catalog • Products"
+            title={
+              `${activeTab === 'All Products' ? 'All Products' : activeTab}` +
+              (selectedCategory ? ` · ${selectedCategory}` : '') +
+              (sidebarSearch ? ` · “${sidebarSearch}”` : '')
+            }
+            count={filteredProducts.length}
+            itemLabel="products"
+          />
+
           {/* Top Bar / Sorting */}
           <div className="flex flex-col gap-6 mb-8">
             <div className="flex flex-wrap items-center justify-between gap-4">

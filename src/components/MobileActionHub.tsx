@@ -6,7 +6,6 @@ import {
   SlidersHorizontal,
   User,
   ShoppingCart,
-  MessageSquare,
   ChevronRight,
   X,
 } from 'lucide-react';

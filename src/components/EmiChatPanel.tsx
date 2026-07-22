@@ -112,13 +112,38 @@ type EmiChatPanelProps = {
   className?: string;
   variant?: 'panel' | 'page';
   seedPrompt?: string;
+  /** Controlled focus for Messages page right rail (assistant message id). */
+  focusedMessageId?: string | null;
+  onFocusMessage?: (messageId: string) => void;
+  /** Fired when the focused / latest-with-picks assistant content changes. */
+  onActiveContentChange?: (payload: {
+    messageId: string;
+    picks: EmiCatalogPick[];
+    excerpt: string;
+  } | null) => void;
 };
 
-export function EmiChatPanel({ onClose, className, variant = 'panel', seedPrompt }: EmiChatPanelProps) {
+export function EmiChatPanel({
+  onClose,
+  className,
+  variant = 'panel',
+  seedPrompt,
+  focusedMessageId,
+  onFocusMessage,
+  onActiveContentChange,
+}: EmiChatPanelProps) {
   const { messages, isLoading, sendMessage, clearChat } = useEmiChat();
   const [draft, setDraft] = useState('');
+  const [internalFocusedId, setInternalFocusedId] = useState<string | null>(null);
   const chatRef = useRef<HTMLDivElement>(null);
   const seededRef = useRef<string | null>(null);
+
+  const activeFocusedId = focusedMessageId !== undefined ? focusedMessageId : internalFocusedId;
+
+  const setFocus = (messageId: string) => {
+    if (focusedMessageId === undefined) setInternalFocusedId(messageId);
+    onFocusMessage?.(messageId);
+  };
 
   useEffect(() => {
     if (!seedPrompt || seededRef.current === seedPrompt) return;
@@ -131,6 +156,33 @@ export function EmiChatPanel({ onClose, className, variant = 'panel', seedPrompt
     if (!el) return;
     el.scrollTop = el.scrollHeight;
   }, [messages, isLoading]);
+
+  // Default / refresh focus: latest assistant reply (panel reflects that message's picks)
+  useEffect(() => {
+    const latestAssistant = [...messages].reverse().find((m) => m.role === 'assistant');
+    const nextId = latestAssistant?.id ?? null;
+    if (!nextId || nextId === activeFocusedId) return;
+    setFocus(nextId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- re-focus when transcript changes
+  }, [messages]);
+
+  // Notify parent of focused content for the shared dynamic right rail
+  useEffect(() => {
+    if (!onActiveContentChange) return;
+    const focused =
+      (activeFocusedId && messages.find((m) => m.id === activeFocusedId)) ||
+      [...messages].reverse().find((m) => m.role === 'assistant' && m.picks?.length) ||
+      null;
+    if (!focused || focused.role !== 'assistant') {
+      onActiveContentChange(null);
+      return;
+    }
+    onActiveContentChange({
+      messageId: focused.id,
+      picks: focused.picks || [],
+      excerpt: focused.content,
+    });
+  }, [activeFocusedId, messages, onActiveContentChange]);
 
   const handleSend = () => {
     const text = draft.trim();
@@ -182,30 +234,48 @@ export function EmiChatPanel({ onClose, className, variant = 'panel', seedPrompt
       </div>
 
       <div ref={chatRef} className="flex-1 overflow-y-auto px-4 py-4 space-y-3 no-scrollbar min-h-0 bg-[#F8FAFC]">
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={cn('flex flex-col gap-2 max-w-[95%]', msg.role === 'user' ? 'ml-auto items-end' : 'mr-auto items-start')}
-          >
+        {messages.map((msg) => {
+          const isFocused = msg.role === 'assistant' && msg.id === activeFocusedId;
+          const canFocus = msg.role === 'assistant' && variant === 'page';
+          return (
             <div
+              key={msg.id}
               className={cn(
-                'rounded-[10px] px-3.5 py-2.5 text-[12px] leading-relaxed whitespace-pre-wrap',
-                msg.role === 'user'
-                  ? 'bg-[#EB4501] text-[#1A1A2E]'
-                  : 'bg-white border border-[#e8edf2] text-[#1A1A2E] shadow-sm',
+                'flex flex-col gap-2 max-w-[95%]',
+                msg.role === 'user' ? 'ml-auto items-end' : 'mr-auto items-start',
               )}
             >
-              {renderInlineMarkdown(msg.content)}
+              <button
+                type="button"
+                disabled={!canFocus}
+                onClick={() => canFocus && setFocus(msg.id)}
+                className={cn(
+                  'rounded-[10px] px-3.5 py-2.5 text-[12px] leading-relaxed whitespace-pre-wrap text-left',
+                  msg.role === 'user'
+                    ? 'bg-[#EB4501] text-[#1A1A2E] cursor-default border-0'
+                    : 'bg-white border border-[#e8edf2] text-[#1A1A2E] shadow-sm',
+                  canFocus && 'cursor-pointer hover:border-[#EB4501]/35',
+                  isFocused && 'ring-2 ring-[#EB4501]/35 border-[#EB4501]/40',
+                )}
+              >
+                {renderInlineMarkdown(msg.content)}
+              </button>
+              {msg.picks && msg.picks.length > 0 && msg.role === 'assistant' ? (
+                <div
+                  className={cn(
+                    'w-full max-w-[280px] space-y-1.5',
+                    /* Page layout: right rail owns cards on xl+; keep inline picks for mobile. */
+                    variant === 'page' && 'xl:hidden',
+                  )}
+                >
+                  {msg.picks.slice(0, 4).map((pick, idx) => (
+                    <PickCard key={`${pick.type}-${pick.id}-${idx}`} pick={pick} />
+                  ))}
+                </div>
+              ) : null}
             </div>
-            {msg.picks && msg.picks.length > 0 && msg.role === 'assistant' ? (
-              <div className="w-full max-w-[280px] space-y-1.5">
-                {msg.picks.slice(0, 4).map((pick, idx) => (
-                  <PickCard key={`${pick.type}-${pick.id}-${idx}`} pick={pick} />
-                ))}
-              </div>
-            ) : null}
-          </div>
-        ))}
+          );
+        })}
         {isLoading ? (
           <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[#8a9bb0]">
             <Loader2 size={14} className="animate-spin text-[#EB4501]" />

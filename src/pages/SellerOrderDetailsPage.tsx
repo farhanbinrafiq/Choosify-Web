@@ -1,6 +1,6 @@
 import React from 'react';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { FileText, ArrowLeft, Mail, Phone, Calendar, MapPin, Printer, ShieldCheck, CreditCard, MessageSquare } from 'lucide-react';
+import { FileText, ArrowLeft, Mail, Phone, Calendar, MapPin, Printer, ShieldCheck, CreditCard, MessageCircleMore } from 'lucide-react';
 import { toast } from '../lib/notify';
 
 export function SellerOrderDetailsPage() {
@@ -142,7 +142,7 @@ export function SellerOrderDetailsPage() {
               className="p-5 border border-dashed border-[#F96500]/30 hover:bg-[#F96500]/5 hover:border-[#F96500] rounded-[5px] flex gap-3.5 items-center justify-between text-left group transition-all"
             >
               <div className="flex gap-3.5 items-center">
-                <MessageSquare size={28} className="text-[#F96500] shrink-0" />
+                <MessageCircleMore size={28} className="text-[#EB4501] shrink-0" />
                 <div className="space-y-0.5">
                   <h4 className="text-[10px] font-black uppercase text-navy italic leading-none">Buyer Contact Channel</h4>
                   <p className="text-[8px] text-gray-400 font-medium leading-relaxed leading-normal">Interact directly with Kamal Uddin regarding custom logistics schedules.</p>

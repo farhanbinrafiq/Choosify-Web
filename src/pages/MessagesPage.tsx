@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
@@ -11,9 +11,11 @@ import {
   EMI_MESSAGES_THREAD_ID,
   EMI_MESSAGES_THREAD_TITLE,
 } from '../lib/emiThread';
+import { emiPicksToAssociatedEntities } from '../lib/emiCatalogSearch';
+import type { EmiCatalogPick } from '../lib/emiCatalogSearch';
 import {
   Search, ArrowLeft, Send, MoreVertical, CheckCircle,
-  Package, Truck, Clock, MessageSquare, LayoutDashboard, CheckSquare,
+  Package, Truck, Clock, MessageCircleMore, LayoutDashboard, CheckSquare,
   X, Sparkles, Plus, Megaphone, Lock, AlertTriangle, Flag,
 } from 'lucide-react';
 import { toast } from '../lib/notify';
@@ -77,6 +79,24 @@ export function MessagesPage({
   const [expiryNow, setExpiryNow] = useState(() => Date.now());
   const [focusedAnnouncementId, setFocusedAnnouncementId] = useState<number | null>(null);
   const [announcementSearch, setAnnouncementSearch] = useState('');
+  const [focusedEmiMessageId, setFocusedEmiMessageId] = useState<string | null>(null);
+  const [emiActiveContent, setEmiActiveContent] = useState<{
+    messageId: string;
+    picks: EmiCatalogPick[];
+    excerpt: string;
+  } | null>(null);
+
+  const handleEmiActiveContentChange = useCallback(
+    (payload: { messageId: string; picks: EmiCatalogPick[]; excerpt: string } | null) => {
+      setEmiActiveContent(payload);
+    },
+    [],
+  );
+
+  const emiRailEntities = useMemo(
+    () => emiPicksToAssociatedEntities(emiActiveContent?.picks),
+    [emiActiveContent?.picks],
+  );
 
   const sortedThreads = useMemo(() => {
     return [...threads].sort((a, b) => {
@@ -221,6 +241,13 @@ export function MessagesPage({
       return withEntity?.id ?? announcementMessages[announcementMessages.length - 1]?.id ?? null;
     });
   }, [isAnnouncementsThread, activeThreadId, announcementMessages]);
+
+  useEffect(() => {
+    if (!isEmiThread) {
+      setFocusedEmiMessageId(null);
+      setEmiActiveContent(null);
+    }
+  }, [isEmiThread, activeThreadId]);
 
   const announcementSearchQuery = announcementSearch.trim().toLowerCase();
   const visibleMessages = useMemo(() => {
@@ -606,7 +633,7 @@ export function MessagesPage({
               CUSTOMER SUPPORT CENTER
             </div>
             <h1 className="text-[19px] font-extrabold leading-tight flex items-center gap-2">
-              <MessageSquare size={18} className="text-[#EB4501] shrink-0" />
+              <MessageCircleMore size={18} className="text-[#EB4501] shrink-0" />
               Real-time support
             </h1>
             <p className="text-[11.5px] text-white/50 mt-0.5">We&apos;re here to help, 24/7</p>
@@ -921,7 +948,13 @@ export function MessagesPage({
               {/* Chat viewport — Emi AI embeds the full assistant inside Messages */}
               {isEmiThread ? (
                 <div className="flex-1 min-h-0 overflow-hidden flex flex-col bg-white">
-                  <EmiChatPanel variant="page" className="h-full border-0 rounded-none shadow-none" />
+                  <EmiChatPanel
+                    variant="page"
+                    className="h-full border-0 rounded-none shadow-none"
+                    focusedMessageId={focusedEmiMessageId}
+                    onFocusMessage={setFocusedEmiMessageId}
+                    onActiveContentChange={handleEmiActiveContentChange}
+                  />
                 </div>
               ) : (
               <>
@@ -1235,7 +1268,7 @@ export function MessagesPage({
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center p-12 text-center max-w-lg mx-auto space-y-3">
               <div className="w-16 h-16 bg-white rounded-full border border-[#E8EDF2] flex items-center justify-center text-[#9AA0AC] mb-2">
-                <MessageSquare size={28} />
+                <MessageCircleMore size={28} className="text-[#EB4501]" />
               </div>
               <h3 className="text-base font-extrabold text-[#1A1A2E]">No conversation selected</h3>
               <p className="text-[11.5px] text-[#9AA0AC] leading-relaxed font-medium">
@@ -1251,7 +1284,10 @@ export function MessagesPage({
           linkedOrder={linkedOrder}
           linkedSubOrder={linkedSubOrder}
           isAnnouncementsThread={isAnnouncementsThread}
+          isEmiThread={isEmiThread}
           focusedAnnouncement={focusedAnnouncement}
+          emiEntities={isEmiThread ? emiRailEntities : null}
+          emiExcerpt={isEmiThread ? emiActiveContent?.excerpt ?? null : null}
           conversationClosed={isConversationClosed}
           onReportProblem={() => setShowReportModal(true)}
           onViewOrder={() => {

@@ -7,7 +7,8 @@ import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { useGlobalState } from '../context/GlobalStateContext';
-import { DcListingStickyFilters } from '../components/design/DcListingStickyFilters';
+import { ListingBrowseControls } from '../components/design/ListingBrowseControls';
+import { ListingFeedHeader } from '../components/design/ListingFeedHeader';
 import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
 import { PaginationBar } from '../components/PaginationBar';
 import { PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
@@ -348,111 +349,96 @@ export function DealsPage() {
     },
   }, [searchQuery, activeTab, selectedCategory, minDiscount, activeSectionId, dealsSectionNavItems, scrollToSection]);
 
+  const dealsBrowseControls = (
+    <ListingBrowseControls
+      showSearch={false}
+      quickChips={['Flash Sale', 'Bank Offer', 'Cashback', 'Coupons', 'Weekend', 'Clearance']}
+      onSearch={(q) => setSearchQuery(q)}
+      onChipClick={(q) => setSearchQuery(q)}
+      items={[
+        {
+          id: 'flash',
+          icon: '⚡',
+          name: 'Flash Sale',
+          sub: 'Limited time',
+          bg: '#FFF3EA',
+          active: activeTab === 'Flash Deals',
+          onClick: () => handleTabChange(activeTab === 'Flash Deals' ? 'All Deals' : 'Flash Deals'),
+        },
+        {
+          id: 'coupons',
+          icon: '🎟',
+          name: 'Coupons',
+          sub: 'Promo codes',
+          bg: '#EFECFD',
+          active: activeTab === 'Promo Codes',
+          onClick: () => handleTabChange(activeTab === 'Promo Codes' ? 'All Deals' : 'Promo Codes'),
+        },
+        {
+          id: 'brand',
+          icon: '📷',
+          name: 'Brand Deals',
+          sub: 'Partner offers',
+          bg: '#FEF3E2',
+          active: activeTab === 'Brand Deals',
+          onClick: () => handleTabChange(activeTab === 'Brand Deals' ? 'All Deals' : 'Brand Deals'),
+        },
+        {
+          id: 'weekend',
+          icon: '🏷',
+          name: 'Weekend',
+          sub: 'Seasonal sales',
+          bg: '#E6F9EA',
+          active: activeTab === 'Seasonal Campaigns',
+          onClick: () => handleTabChange(activeTab === 'Seasonal Campaigns' ? 'All Deals' : 'Seasonal Campaigns'),
+        },
+        {
+          id: 'clearance',
+          icon: '🏬',
+          name: 'Clearance',
+          sub: 'Big savings',
+          bg: '#FDECEC',
+          active: activeTab === 'Expired Deals',
+          onClick: () => handleTabChange(activeTab === 'Expired Deals' ? 'All Deals' : 'Expired Deals'),
+        },
+        {
+          id: 'electronics',
+          icon: '📺',
+          name: 'Electronics',
+          sub: '350 deals',
+          bg: '#EAF1FD',
+          active: selectedCategory === 'Electronics',
+          onClick: () => setSelectedCategory(selectedCategory === 'Electronics' ? null : 'Electronics'),
+        },
+        {
+          id: 'fashion',
+          icon: '👗',
+          name: 'Fashion',
+          sub: '550 deals',
+          bg: '#FFF3EA',
+          active: selectedCategory === 'Fashion',
+          onClick: () => setSelectedCategory(selectedCategory === 'Fashion' ? null : 'Fashion'),
+        },
+        {
+          id: 'bank',
+          icon: '🏦',
+          name: 'Bank Offer',
+          sub: 'Card savings',
+          bg: '#F1F1F3',
+          active: activeTab === 'All Deals' && minDiscount === 25,
+          onClick: () => {
+            handleTabChange('All Deals');
+            setMinDiscount(minDiscount === 25 ? 0 : 25);
+          },
+        },
+      ]}
+    />
+  );
+
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
-      <DcListingStickyFilters
-        className="mt-5"
-        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
-        searchPlaceholder="Search deals..."
-        quickChips={['Flash Sale', 'Bank Offer', 'Cashback', 'Coupons', 'Weekend', 'Clearance']}
-        onSearch={(q) => setSearchQuery(q)}
-        onChipClick={(q) => setSearchQuery(q)}
-        items={[
-          {
-            id: 'flash',
-            icon: '⚡',
-            name: 'Flash Sale',
-            sub: 'Limited time',
-            bg: '#FFF3EA',
-            active: activeTab === 'Flash Deals',
-            onClick: () => handleTabChange(activeTab === 'Flash Deals' ? 'All Deals' : 'Flash Deals'),
-          },
-          {
-            id: 'coupons',
-            icon: '🎟',
-            name: 'Coupons',
-            sub: 'Promo codes',
-            bg: '#EFECFD',
-            active: activeTab === 'Promo Codes',
-            onClick: () => handleTabChange(activeTab === 'Promo Codes' ? 'All Deals' : 'Promo Codes'),
-          },
-          {
-            id: 'brand',
-            icon: '📷',
-            name: 'Brand Deals',
-            sub: 'Partner offers',
-            bg: '#FEF3E2',
-            active: activeTab === 'Brand Deals',
-            onClick: () => handleTabChange(activeTab === 'Brand Deals' ? 'All Deals' : 'Brand Deals'),
-          },
-          {
-            id: 'weekend',
-            icon: '🏷',
-            name: 'Weekend',
-            sub: 'Seasonal sales',
-            bg: '#E6F9EA',
-            active: activeTab === 'Seasonal Campaigns',
-            onClick: () => handleTabChange(activeTab === 'Seasonal Campaigns' ? 'All Deals' : 'Seasonal Campaigns'),
-          },
-          {
-            id: 'clearance',
-            icon: '🏬',
-            name: 'Clearance',
-            sub: 'Big savings',
-            bg: '#FDECEC',
-            active: activeTab === 'Expired Deals',
-            onClick: () => handleTabChange(activeTab === 'Expired Deals' ? 'All Deals' : 'Expired Deals'),
-          },
-          {
-            id: 'electronics',
-            icon: '📺',
-            name: 'Electronics',
-            sub: '350 deals',
-            bg: '#EAF1FD',
-            active: selectedCategory === 'Electronics',
-            onClick: () => setSelectedCategory(selectedCategory === 'Electronics' ? null : 'Electronics'),
-          },
-          {
-            id: 'fashion',
-            icon: '👗',
-            name: 'Fashion',
-            sub: '550 deals',
-            bg: '#FFF3EA',
-            active: selectedCategory === 'Fashion',
-            onClick: () => setSelectedCategory(selectedCategory === 'Fashion' ? null : 'Fashion'),
-          },
-          {
-            id: 'bank',
-            icon: '🏦',
-            name: 'Bank Offer',
-            sub: 'Card savings',
-            bg: '#F1F1F3',
-            active: activeTab === 'All Deals' && minDiscount === 25,
-            onClick: () => {
-              handleTabChange('All Deals');
-              setMinDiscount(minDiscount === 25 ? 0 : 25);
-            },
-          },
-        ]}
-      />
-
       <main className="w-full bg-[#F7F8FA] min-h-screen">
-
-        {/* ACTIVE FILTER CHIPS ROW */}
-        <ActiveFilterChips
-          chips={[
-            selectedCategory ? { id: 'category', label: `Category: ${selectedCategory}`, onRemove: () => setSelectedCategory(null) } : null,
-            minDiscount > 0 ? { id: 'discount_range', label: `Savings: ${minDiscount}%+`, onRemove: () => setMinDiscount(0) } : null
-          ].filter(Boolean) as any[]}
-          onClearAll={() => {
-            setSelectedCategory(null);
-            setMinDiscount(0);
-            setSearchQuery('');
-            setActiveTab('All Deals');
-          }}
-        />
-
-        {/* Master Flex Column Structure below sticky bar */}
+        {/* Master Flex Column Structure */}
         <div className={`${LISTING_PAGE_MAX_WIDTH} mx-auto px-4 sm:px-5 lg:px-6 py-10 md:py-12 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
           
           {/* Left Sidebar */}
@@ -478,6 +464,7 @@ export function DealsPage() {
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                   searchPlaceholder="Search active deals and promos..."
+                  browseControls={dealsBrowseControls}
                   quickFilters={
                     <QuickFilterBar
                       title="Deals Quick Specs"
@@ -610,7 +597,17 @@ export function DealsPage() {
 
           {/* LEFT MAIN AREA */}
           <div className="choosify-middle-feed scroll-mt-36 min-w-0 pb-10 flex flex-col gap-10">
-            
+            <ListingFeedHeader
+              eyebrow="Savings • Deals"
+              title={
+                `${activeTab === 'All Deals' ? 'All Deals' : activeTab}` +
+                (selectedCategory ? ` · ${selectedCategory}` : '') +
+                (searchQuery ? ` · “${searchQuery}”` : '')
+              }
+              count={filteredProducts.length}
+              itemLabel="deals"
+            />
+
             {/* FLASH DEALS + DEAL OF THE DAY — Choosify.dc.html */}
             <section className="w-full">
               <div className="grid grid-cols-1 lg:grid-cols-[2.6fr_1fr] gap-5 mb-9">

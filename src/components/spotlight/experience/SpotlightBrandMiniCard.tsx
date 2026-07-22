@@ -44,7 +44,7 @@ export function SpotlightBrandMiniCard({
           {profileHref && (
             <Link
               to={profileHref}
-              className="w-full py-2.5 rounded-lg bg-[#EB4501] hover:brightness-110 text-white text-[12px] font-bold tracking-tight inline-block text-center transition-all"
+              className="w-full py-2.5 rounded-lg choosify-dark-surface hover:brightness-110 text-white text-[12px] font-bold tracking-tight inline-block text-center transition-[filter]"
             >
               View brand profile
             </Link>

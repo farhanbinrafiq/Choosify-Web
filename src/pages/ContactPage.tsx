@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  ChevronRight, Mail, MessageCircle, Share2, Phone, MapPin, 
+  ChevronRight, Mail, MessageCircleMore, Share2, Phone, MapPin, 
   HelpCircle, ArrowRight, ShieldCheck, CheckCircle
 } from 'lucide-react';
 import { StaticPageHero } from '../components/StaticPageHero';
@@ -74,7 +74,7 @@ export function ContactPage() {
       desc: 'Response within 24 hours'
     },
     {
-      icon: <MessageCircle className="w-5 h-5 text-emerald-500" />,
+      icon: <MessageCircleMore className="w-5 h-5 text-[#EB4501]" />,
       label: 'Messenger Support',
       value: 'fb.com/choosify.bd',
       desc: 'Live chat during working hours'

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ChevronRight, Users, Handshake, Briefcase, Award, Zap, 
-  MessageSquare, ArrowRight, ShieldCheck, CheckCircle2
+  ArrowRight, ShieldCheck, CheckCircle2
 } from 'lucide-react';
 import { StaticPageHero } from '../components/StaticPageHero';
 import { operationsApi } from '../services/operationsApi';

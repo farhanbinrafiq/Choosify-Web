@@ -1,5 +1,6 @@
 import type { CommerceProduct, Brand } from '../types/schemas';
 import type { CatalogDeal } from '../types/catalog';
+import type { AnnouncementAssociatedEntity } from './announcements';
 
 export type EmiCatalogPick =
   | {
@@ -95,4 +96,41 @@ export function searchEmiCatalog(
     .sort((a, b) => (b as { _score: number })._score - (a as { _score: number })._score)
     .slice(0, limit)
     .map(({ _score, ...rest }) => rest as EmiCatalogPick);
+}
+
+/** Map Emi catalog picks → announcement-style entities for the shared Messages right rail. */
+export function emiPicksToAssociatedEntities(
+  picks: EmiCatalogPick[] | undefined | null,
+): AnnouncementAssociatedEntity[] {
+  if (!picks?.length) return [];
+  return picks.map((pick): AnnouncementAssociatedEntity => {
+    if (pick.type === 'product') {
+      return {
+        type: 'product',
+        id: String(pick.id),
+        title: pick.title,
+        subtitle: pick.brand,
+        href: pick.url,
+        ctaLabel: 'View product',
+      };
+    }
+    if (pick.type === 'brand') {
+      return {
+        type: 'brand',
+        id: String(pick.id),
+        title: pick.name,
+        subtitle: 'Brand',
+        href: pick.url,
+        ctaLabel: 'View brand',
+      };
+    }
+    return {
+      type: 'campaign',
+      id: String(pick.id),
+      title: pick.title,
+      subtitle: pick.brand || 'Deal',
+      href: pick.url || '/deals',
+      ctaLabel: 'View deal',
+    };
+  });
 }

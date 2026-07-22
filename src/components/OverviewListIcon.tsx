@@ -16,7 +16,7 @@ import {
   Layers,
   LayoutGrid,
   Lock,
-  MessageSquare,
+  MessageCircleMore,
   Package,
   PackageSearch,
   Percent,
@@ -64,7 +64,7 @@ const ICON_RULES: Array<{ test: RegExp; icon: LucideIcon }> = [
   { test: /plug|power|adapter/i, icon: Plug },
   { test: /categor/i, icon: LayoutGrid },
   { test: /^brand\b|brand:/i, icon: Award },
-  { test: /messag(e|ing)|chat/i, icon: MessageSquare },
+  { test: /messag(e|ing)|chat/i, icon: MessageCircleMore },
 ];
 
 export function resolveOverviewListIcon(text: string): LucideIcon {

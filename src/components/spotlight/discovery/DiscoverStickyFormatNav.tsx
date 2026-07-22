@@ -1,8 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { DcListingStickyFilters, type DcStickyFilterItem } from '../../design/DcListingStickyFilters';
-import { cn } from '../../../lib/utils';
-import { LISTING_PAGE_MAX_WIDTH } from '../../../lib/design/dcListingTokens';
+import type { DcStickyFilterItem } from '../../design/DcListingStickyFilters';
+import { ListingBrowseControls } from '../../design/ListingBrowseControls';
 import type { SpotlightDiscoverFilters } from '../../../types/spotlight/experience/filters';
 import type { SpotlightContentTabId } from '../../../types/spotlight/discovery/navigation';
 import type { DiscoverQuickFilter } from './DiscoverStructuredFeed';
@@ -37,24 +36,26 @@ const DISCOVER_CHIPS = [
   'Creator Reviews',
 ];
 
-interface DiscoverStickyFormatNavProps {
+interface DiscoverBrowseControlsProps {
   quickFilters: DiscoverQuickFilter[];
   filters: SpotlightDiscoverFilters;
   activeTab: SpotlightContentTabId;
-  className?: string;
   onQuerySubmit?: (query: string) => void;
+  /** Hide search when the host drawer already renders Page Search. */
+  showSearch?: boolean;
 }
 
 /**
- * Discover sticky format nav — merged dark search/chips + Deals-style icon tabs.
+ * Discover browse controls for the floating filter popup
+ * (search chips + format icon tabs formerly in the sticky bar).
  */
-export function DiscoverStickyFormatNav({
+export function DiscoverBrowseControls({
   quickFilters,
   filters,
   activeTab,
-  className,
   onQuerySubmit,
-}: DiscoverStickyFormatNavProps) {
+  showSearch = false,
+}: DiscoverBrowseControlsProps) {
   const navigate = useNavigate();
 
   const filterById = useMemo(() => {
@@ -103,9 +104,8 @@ export function DiscoverStickyFormatNav({
   );
 
   return (
-    <DcListingStickyFilters
-      maxWidthClass={LISTING_PAGE_MAX_WIDTH}
-      className={cn('mt-5', className)}
+    <ListingBrowseControls
+      showSearch={showSearch}
       searchPlaceholder="Search guides, videos, reviews..."
       quickChips={DISCOVER_CHIPS}
       onSearch={onQuerySubmit}
@@ -114,3 +114,6 @@ export function DiscoverStickyFormatNav({
     />
   );
 }
+
+/** @deprecated Prefer DiscoverBrowseControls inside the floating filter popup. */
+export const DiscoverStickyFormatNav = DiscoverBrowseControls;

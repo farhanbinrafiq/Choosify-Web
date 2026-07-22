@@ -1,6 +1,6 @@
 import React from 'react';
 import { 
-  Check, CheckCircle2, Globe, Heart, Share2, MessageSquare, 
+  Check, CheckCircle2, Globe, Heart, Share2, MessageCircleMore, 
   MoreHorizontal, Info, Star, Users,
   MapPin, Calendar, HelpCircle, ArrowUpRight
 } from 'lucide-react';
@@ -377,7 +377,7 @@ export const UnifiedProfileHero: React.FC<UnifiedProfileHeroProps> = ({
                   variant="outline"
                   className="px-5 py-2.5 rounded-xl text-xs font-black tracking-wider uppercase border-slate-200 text-[#000435] hover:bg-slate-50 flex items-center gap-1.5"
                 >
-                  <MessageSquare size={14} />
+                  <MessageCircleMore size={14} className="text-[#EB4501]" />
                   <span>Message</span>
                 </Button>
               )}

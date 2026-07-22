@@ -2,11 +2,11 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { ChevronRight } from 'lucide-react';
 import { PAGE_LISTING_SINGLE_SHELL, PAGE_MIDDLE_FEED } from '../lib/pageLayout';
+import { ListingFeedHeader } from '../components/design/ListingFeedHeader';
 import { useSpotlightExperience } from '../hooks/useSpotlightExperience';
 import { createSpotlightImpressionLogger } from '../hooks/useSpotlightImpression';
 import { useSpotlightHistory } from '../hooks/useSpotlightHistory';
 import { SpotlightEmptyState } from '../components/spotlight/homepage/SpotlightEmptyState';
-import { DiscoverStickyFormatNav } from '../components/spotlight/discovery/DiscoverStickyFormatNav';
 import { DiscoverStructuredFeed } from '../components/spotlight/discovery/DiscoverStructuredFeed';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { contentTypesForTab } from '../lib/spotlight/content/contentTypeRegistry';
@@ -149,17 +149,22 @@ export function SpotlightDiscoverPage() {
 
   return (
     <div id="spotlight-root" className="flex flex-col min-h-screen bg-choosify-feed">
-      <DiscoverStickyFormatNav
-        quickFilters={quickFilters}
-        filters={filters}
-        activeTab={activeTab}
-        onQuerySubmit={(q) => setFilters({ ...filters, query: q })}
-      />
-
       <main
-        className={`${LISTING_PAGE_MAX_WIDTH} mx-auto px-5 sm:px-8 lg:px-10 pb-[60px] w-full ${PAGE_LISTING_SINGLE_SHELL}`}
+        className={`${LISTING_PAGE_MAX_WIDTH} mx-auto px-5 sm:px-8 lg:px-10 pt-5 pb-[60px] w-full ${PAGE_LISTING_SINGLE_SHELL}`}
       >
         <div className={`${PAGE_MIDDLE_FEED} choosify-listing-single-feed`}>
+          <ListingFeedHeader
+            className="mb-6"
+            eyebrow="Spotlight • Discover"
+            title={
+              activeTab === 'featured'
+                ? 'Discover'
+                : activeTab.charAt(0).toUpperCase() + activeTab.slice(1)
+            }
+            count={feedItems.length}
+            itemLabel="posts"
+          />
+
           {!hasContent ? (
             <div className="pt-10">
               <SpotlightEmptyState />

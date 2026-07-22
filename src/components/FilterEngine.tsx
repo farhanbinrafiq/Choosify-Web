@@ -948,6 +948,7 @@ interface FullSidebarFilterPanelProps {
   setSearchQuery?: (q: string) => void;
   onSearchSubmit?: (q: string) => void;
   searchPlaceholder?: string;
+  browseControls?: React.ReactNode;
   quickFilters?: React.ReactNode;
   activeChips?: React.ReactNode;
   sorting?: React.ReactNode;
@@ -962,6 +963,7 @@ export function FullSidebarFilterPanel({
   setSearchQuery,
   onSearchSubmit,
   searchPlaceholder,
+  browseControls,
   quickFilters,
   activeChips,
   sorting
@@ -977,6 +979,7 @@ export function FullSidebarFilterPanel({
       setSearchQuery,
       onSearchSubmit,
       searchPlaceholder,
+      browseControls,
       quickFilters,
       activeChips,
       sorting,
@@ -1024,6 +1027,7 @@ export function FullSidebarFilterPanel({
     setSearchQuery,
     onSearchSubmit,
     searchPlaceholder,
+    browseControls,
     quickFilters,
     activeChips,
     sorting
@@ -1085,6 +1089,8 @@ export interface FloatingFilterData {
   setSearchQuery?: (q: string) => void;
   onSearchSubmit?: (q: string) => void;
   searchPlaceholder?: string;
+  /** Former sticky-bar browse chrome (keyword chips + icon/nav presets). */
+  browseControls?: React.ReactNode;
   sectionNav?: {
     items: SectionNavItem[];
     activeId: string;
@@ -1333,6 +1339,10 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                     </div>
                   )}
 
+                  {activeFiltersData.browseControls && (
+                    <div className="flex flex-col gap-2">{activeFiltersData.browseControls}</div>
+                  )}
+
                   {activeFiltersData.alphabetFilter && (
                     <AlphabetFilterStrip
                       activeLetter={activeFiltersData.alphabetFilter.activeLetter}
@@ -1497,9 +1507,21 @@ export function useOpenPageFilters() {
     }
   }, [hasDrawerFilters, hasLegacyFilters, setIsOpen]);
 
+  /** Same control as the floating filter FAB — toggles the shared popup. */
+  const toggleFilters = useCallback(() => {
+    if (hasDrawerFilters) {
+      setIsOpen(!drawerOpen);
+      return;
+    }
+    if (hasLegacyFilters) {
+      window.dispatchEvent(new CustomEvent('choosify:open-filters'));
+    }
+  }, [drawerOpen, hasDrawerFilters, hasLegacyFilters, setIsOpen]);
+
   return {
     canOpenFilters,
     openFilters,
+    toggleFilters,
     isFiltersOpen: drawerOpen,
     activeFilterCount,
   };
@@ -1511,6 +1533,7 @@ export function RegisterPageFilters({
   setSearchQuery,
   onSearchSubmit,
   searchPlaceholder,
+  browseControls,
   sectionNav,
   quickFilters,
   activeChips,
@@ -1526,6 +1549,7 @@ export function RegisterPageFilters({
       setSearchQuery,
       onSearchSubmit,
       searchPlaceholder,
+      browseControls,
       sectionNav,
       quickFilters,
       activeChips,
@@ -1533,7 +1557,7 @@ export function RegisterPageFilters({
       sorting,
       footerActions
     });
-  }, [id, searchQuery, setSearchQuery, onSearchSubmit, searchPlaceholder, sectionNav, quickFilters, activeChips, fullFilters, sorting, footerActions]);
+  }, [id, searchQuery, setSearchQuery, onSearchSubmit, searchPlaceholder, browseControls, sectionNav, quickFilters, activeChips, fullFilters, sorting, footerActions]);
 
   return null;
 }
@@ -1549,6 +1573,8 @@ export interface FloatingFilterConfig {
   renderFilters: (() => React.ReactNode) | null;
   // The page search bar — render prop
   renderSearch: (() => React.ReactNode) | null;
+  /** Former sticky-bar browse chrome (keyword chips + icon/nav presets). */
+  renderBrowseControls?: (() => React.ReactNode) | null;
   sectionNav?: {
     items: SectionNavItem[];
     activeId: string;
@@ -1574,6 +1600,7 @@ export interface FloatingFilterConfig {
 const defaultConfig: FloatingFilterConfig = {
   renderFilters: null,
   renderSearch: null,
+  renderBrowseControls: null,
   activeFilterCount: 0,
   quickFilters: [],
   pageName: '',

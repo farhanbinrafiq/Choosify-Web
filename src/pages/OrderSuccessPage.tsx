@@ -4,7 +4,7 @@ import {
   CheckCircle2,
   ShoppingBag,
   ArrowRight,
-  MessageSquare,
+  MessageCircleMore,
   MapPin,
   Phone,
   User,
@@ -429,7 +429,7 @@ export function OrderSuccessPage() {
               onClick={() => navigate('/messages')}
               className="flex items-center justify-center gap-2 h-11 rounded-lg bg-[#EB4501] hover:bg-[#CF4400] text-white text-[11px] font-bold uppercase tracking-wide transition-colors cursor-pointer border-0"
             >
-              <MessageSquare size={14} />
+              <MessageCircleMore size={14} className="text-[#EB4501]" />
               Message sellers
               <ArrowRight size={14} />
             </button>

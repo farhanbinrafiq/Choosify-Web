@@ -7,7 +7,8 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from '../lib/notify';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { BrandCardDesign } from '../components/BrandCardDesign';
-import { DcListingStickyFilters } from '../components/design/DcListingStickyFilters';
+import { ListingBrowseControls } from '../components/design/ListingBrowseControls';
+import { ListingFeedHeader } from '../components/design/ListingFeedHeader';
 import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
 import { useInfiniteListBatch } from '../hooks/useInfiniteListBatch';
 import { ListingAdRail } from '../components/ListingAdRail';
@@ -408,7 +409,6 @@ export function BrandsPage() {
     sentinelRef,
     hasMore,
     visibleCount,
-    totalCount,
   } = useInfiniteListBatch(brandFeed, {
     initial: 24,
     loadMore: 12,
@@ -551,91 +551,73 @@ export function BrandsPage() {
     },
   }, [selectedLetter, searchQuery, activeTab, selectedCategory, verificationFilter, popularityFilter, sectionNavItems, activeSectionId, scrollToSection]);
 
+  const brandsBrowseControls = (
+    <ListingBrowseControls
+      showSearch={false}
+      quickChips={['Fashion', 'Electronics', 'Beauty', 'Home', 'Sports', 'Food']}
+      onSearch={(q) => setSearchQuery(q)}
+      onChipClick={(q) => setSearchQuery(q)}
+      items={[
+        {
+          id: 'top-rated',
+          icon: '🏆',
+          name: 'Top Rated',
+          sub: '4.5+ stars',
+          bg: '#FFF3EA',
+          active: popularityFilter === 'top-rated',
+          onClick: () => setPopularityFilter(popularityFilter === 'top-rated' ? 'all' : 'top-rated'),
+        },
+        {
+          id: 'new-brands',
+          icon: '✨',
+          name: 'New Brands',
+          sub: 'This week',
+          bg: '#EFECFD',
+          active: activeTab === 'Trending Brands',
+          onClick: () => setActiveTab(activeTab === 'Trending Brands' ? 'All Brands' : 'Trending Brands'),
+        },
+        {
+          id: 'featured',
+          icon: '⭐',
+          name: 'Featured',
+          sub: 'Handpicked',
+          bg: '#FEF3E2',
+          active: popularityFilter === 'featured',
+          onClick: () => setPopularityFilter(popularityFilter === 'featured' ? 'all' : 'featured'),
+        },
+        {
+          id: 'most-reviewed',
+          icon: '💬',
+          name: 'Most Reviewed',
+          sub: '10K+ reviews',
+          bg: '#EAF1FD',
+          active: activeTab === 'Top Rated Brands',
+          onClick: () => setActiveTab(activeTab === 'Top Rated Brands' ? 'All Brands' : 'Top Rated Brands'),
+        },
+        {
+          id: 'budget',
+          icon: '💰',
+          name: 'Budget Friendly',
+          sub: 'Under ৳5K',
+          bg: '#E6F9EA',
+          active: activeTab === 'Hot Deals Brands',
+          onClick: () => setActiveTab(activeTab === 'Hot Deals Brands' ? 'All Brands' : 'Hot Deals Brands'),
+        },
+        {
+          id: 'premium',
+          icon: '👑',
+          name: 'Premium',
+          sub: 'Exclusive',
+          bg: '#FDECEC',
+          active: verificationFilter === 'verified',
+          onClick: () => setVerificationFilter(verificationFilter === 'verified' ? 'all' : 'verified'),
+        },
+      ]}
+    />
+  );
+
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
-      <DcListingStickyFilters
-        className="mt-5"
-        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
-        searchPlaceholder="Search brands..."
-        quickChips={['Fashion', 'Electronics', 'Beauty', 'Home', 'Sports', 'Food']}
-        onSearch={(q) => setSearchQuery(q)}
-        onChipClick={(q) => setSearchQuery(q)}
-        items={[
-          {
-            id: 'top-rated',
-            icon: '🏆',
-            name: 'Top Rated',
-            sub: '4.5+ stars',
-            bg: '#FFF3EA',
-            active: popularityFilter === 'top-rated',
-            onClick: () => setPopularityFilter(popularityFilter === 'top-rated' ? 'all' : 'top-rated'),
-          },
-          {
-            id: 'new-brands',
-            icon: '✨',
-            name: 'New Brands',
-            sub: 'This week',
-            bg: '#EFECFD',
-            active: activeTab === 'Trending Brands',
-            onClick: () => setActiveTab(activeTab === 'Trending Brands' ? 'All Brands' : 'Trending Brands'),
-          },
-          {
-            id: 'featured',
-            icon: '⭐',
-            name: 'Featured',
-            sub: 'Handpicked',
-            bg: '#FEF3E2',
-            active: popularityFilter === 'featured',
-            onClick: () => setPopularityFilter(popularityFilter === 'featured' ? 'all' : 'featured'),
-          },
-          {
-            id: 'most-reviewed',
-            icon: '💬',
-            name: 'Most Reviewed',
-            sub: '10K+ reviews',
-            bg: '#EAF1FD',
-            active: activeTab === 'Top Rated Brands',
-            onClick: () => setActiveTab(activeTab === 'Top Rated Brands' ? 'All Brands' : 'Top Rated Brands'),
-          },
-          {
-            id: 'budget',
-            icon: '💰',
-            name: 'Budget Friendly',
-            sub: 'Under ৳5K',
-            bg: '#E6F9EA',
-            active: activeTab === 'Hot Deals Brands',
-            onClick: () => setActiveTab(activeTab === 'Hot Deals Brands' ? 'All Brands' : 'Hot Deals Brands'),
-          },
-          {
-            id: 'premium',
-            icon: '👑',
-            name: 'Premium',
-            sub: 'Exclusive',
-            bg: '#FDECEC',
-            active: verificationFilter === 'verified',
-            onClick: () => setVerificationFilter(verificationFilter === 'verified' ? 'all' : 'verified'),
-          },
-        ]}
-      />
-
-      {/* ACTIVE FILTER CHIPS ROW */}
-      <ActiveFilterChips
-        chips={[
-          selectedCategory ? { id: 'category', label: `Category: ${selectedCategory}`, onRemove: () => setSelectedCategory(null) } : null,
-          selectedLetter ? { id: 'letter', label: `Starts with: ${selectedLetter}`, onRemove: () => setSelectedLetter(null) } : null,
-          verificationFilter !== 'all' ? { id: 'verification', label: `Verification: ${verificationFilter}`, onRemove: () => setVerificationFilter('all') } : null,
-          popularityFilter !== 'all' ? { id: 'popularity', label: `Status: ${popularityFilter}`, onRemove: () => setPopularityFilter('all') } : null
-        ].filter(Boolean) as any[]}
-        onClearAll={() => {
-          setSelectedLetter(null); 
-          setSearchQuery(''); 
-          setActiveTab('All Brands');
-          setSelectedCategory(null);
-          setVerificationFilter('all');
-          setPopularityFilter('all');
-        }}
-      />
-
       <div className={`${LISTING_PAGE_MAX_WIDTH} mx-auto px-4 sm:px-5 lg:px-6 xl:px-8 py-10 md:py-12 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
         
         {/* Left Sidebar */}
@@ -661,6 +643,7 @@ export function BrandsPage() {
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               searchPlaceholder="Search brands, category or best for..."
+              browseControls={brandsBrowseControls}
               quickFilters={
                 <QuickFilterBar
                   title="Brands Quick Specs"
@@ -836,36 +819,36 @@ export function BrandsPage() {
 
         {/* Main Content Area */}
         <main id="brands-main-display" className="choosify-middle-feed scroll-mt-36 min-w-0 pb-10 space-y-6">
-          {/* Header info bar (Unified with Brand Deals layout cohesion) */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#eef2f6] font-sans">
-            <div>
-              <h3 className="text-[10px] font-bold text-[#8a9bb0] uppercase tracking-[0.2em] leading-none">
-                Our partners • Brands
-              </h3>
-              <h2 className="text-xl font-black text-[#1A1D4E] tracking-tight mt-2 leading-none">
-                {activeTab === 'All Brands' ? 'All Brands' : activeTab}
-                {selectedLetter && ` · Starting with “${selectedLetter}”`}
-                {searchQuery && ` · “${searchQuery}”`}
-                <span className="text-[#8a9bb0] font-semibold"> ({filteredBrands.length})</span>
-              </h2>
-            </div>
-            
-            {(selectedLetter || searchQuery || activeTab !== 'All Brands' || selectedCategory || verificationFilter !== 'all' || popularityFilter !== 'all') && (
-              <button 
-                onClick={() => {
-                  setSelectedLetter(null); 
-                  setSearchQuery(''); 
-                  setActiveTab('All Brands');
-                  setSelectedCategory(null);
-                  setVerificationFilter('all');
-                  setPopularityFilter('all');
-                }}
-                className="text-[9.5px] font-black text-orange-primary uppercase tracking-widest hover:underline flex items-center gap-1.5 transition-all bg-white border border-[#eef2f6] px-3.5 py-2 rounded-2xl shadow-sm self-start sm:self-auto hover:text-[#CF4400] cursor-pointer"
-              >
-                Reset All Filters
-              </button>
-            )}
-          </div>
+          <ListingFeedHeader
+            eyebrow="Our partners • Brands"
+            title={
+              `${activeTab === 'All Brands' ? 'All Brands' : activeTab}` +
+              (selectedLetter ? ` · Starting with “${selectedLetter}”` : '') +
+              (searchQuery ? ` · “${searchQuery}”` : '')
+            }
+            count={filteredBrands.length}
+            showingFrom={filteredBrands.length > 0 ? 1 : 0}
+            showingTo={Math.min(visibleCount, filteredBrands.length)}
+            itemLabel="brands"
+            actions={
+              (selectedLetter || searchQuery || activeTab !== 'All Brands' || selectedCategory || verificationFilter !== 'all' || popularityFilter !== 'all') ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedLetter(null);
+                    setSearchQuery('');
+                    setActiveTab('All Brands');
+                    setSelectedCategory(null);
+                    setVerificationFilter('all');
+                    setPopularityFilter('all');
+                  }}
+                  className="text-[9.5px] font-black text-orange-primary uppercase tracking-widest hover:underline flex items-center gap-1.5 transition-all bg-white border border-[#eef2f6] px-3.5 py-2 rounded-2xl shadow-sm hover:text-[#CF4400] cursor-pointer"
+                >
+                  Reset All Filters
+                </button>
+              ) : null
+            }
+          />
 
           {/* Active Filter Chips */}
           {(selectedCategory || verificationFilter !== 'all' || popularityFilter !== 'all' || selectedLetter) && (
@@ -954,9 +937,6 @@ export function BrandsPage() {
 
           {filteredBrands.length > 0 ? (
             <>
-              <p className="text-[12.5px] text-[#9AA0AC] font-semibold mb-4">
-                Showing 1–{visibleCount} of {totalCount} brands
-              </p>
               <div className={cn(BRAND_CARD_GRID, 'mb-8')}>
                 {visibleBrandFeed.map((entry) =>
                   entry.kind === 'placement' ? (

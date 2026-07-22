@@ -6,12 +6,12 @@ import { cn } from '../lib/utils';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { CategoryCardSkeleton } from '../components/Skeleton';
 import { CategoryPremiumCard } from '../components/categories/CategoryPremiumCard';
-import { CategoriesQuickNav } from '../components/categories/CategoriesQuickNav';
+import { CategoriesBrowseControls } from '../components/categories/CategoriesQuickNav';
+import { ListingFeedHeader } from '../components/design/ListingFeedHeader';
 import { buildCategoryDisplayList, type CategoryDisplayItem } from '../utils/categoryDisplay';
 import { getCategoryStatBlock } from '../utils/categoryStats';
 import { ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { PAGE_LISTING_SINGLE_SHELL, CATEGORY_CARD_GRID } from "../lib/pageLayout";
-import { CATEGORY_CONTENT_MAX } from '../lib/design/categoryTokens';
 import { ListingAdRail } from '../components/ListingAdRail';
 import { PLACEMENT_KEYS } from '../lib/placements';
 import { SponsoredFeedInjector } from '../components/commerce/SponsoredFeedInjector';
@@ -166,6 +166,16 @@ export function CategoriesPage() {
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         searchPlaceholder="Search categories, subcategories..."
+        browseControls={
+          <CategoriesBrowseControls
+            activeId={quickNavId}
+            onSelect={handleQuickNavSelect}
+            onSearch={(q) => setSearchQuery(q)}
+            searchQuery={searchQuery}
+            onSearchQueryChange={setSearchQuery}
+            showSearch={false}
+          />
+        }
         activeChips={
           <ActiveFilterChips
             chips={[
@@ -603,26 +613,6 @@ export function CategoriesPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
-      <CategoriesQuickNav
-        activeId={quickNavId}
-        onSelect={handleQuickNavSelect}
-        onSearch={(q) => setSearchQuery(q)}
-      />
-
-      <div className={cn(CATEGORY_CONTENT_MAX, 'py-4')}>
-        <ActiveFilterChips
-          chips={[
-            selectedCategoryType ? { id: 'categoryType', label: `Type: ${selectedCategoryType}`, onRemove: () => { setSelectedCategoryType(null); setQuickNavId(''); } } : null,
-            selectedCategoryStatus ? { id: 'status', label: `Status: ${selectedCategoryStatus}`, onRemove: () => setSelectedCategoryStatus(null) } : null,
-            selectedAlphabetical ? { id: 'alphabetical', label: `Alphabetical: ${selectedAlphabetical}`, onRemove: () => setSelectedAlphabetical(null) } : null,
-            selectedAvailability ? { id: 'availability', label: `Availability: ${selectedAvailability}`, onRemove: () => setSelectedAvailability(null) } : null,
-            selectedContent ? { id: 'content', label: `Content: ${selectedContent}`, onRemove: () => setSelectedContent(null) } : null,
-            activeCategoryTab !== 'All Categories' ? { id: 'tab', label: `Tab: ${activeCategoryTab}`, onRemove: () => setActiveCategoryTab('All Categories') } : null,
-          ].filter(Boolean) as any[]}
-          onClearAll={handleClearAllFilters}
-        />
-      </div>
-
       <div className={`max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 py-5 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
         {/* LEFT COLUMN: FULL FILTER PANEL */}
         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-28 pb-10 pr-2 flex-shrink-0 animate-fade-in">
@@ -645,7 +635,18 @@ export function CategoriesPage() {
           </div>
         </aside>
 
-        <div id="categories-main-display" className="choosify-middle-feed scroll-mt-40 min-w-0 pb-10">
+        <div id="categories-main-display" className="choosify-middle-feed scroll-mt-40 min-w-0 pb-10 space-y-6">
+          <ListingFeedHeader
+            eyebrow="Shop by • Categories"
+            title={
+              activeCategoryTab === 'All Categories'
+                ? 'All Categories'
+                : activeCategoryTab
+            }
+            count={filteredCategoriesList.length}
+            itemLabel="categories"
+          />
+
           {isLoading ? (
             <div className={CATEGORY_CARD_GRID}>
               {Array.from({ length: 12 }).map((_, idx) => (

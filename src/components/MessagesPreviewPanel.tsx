@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertTriangle, ArrowRight, Clock, Lock, MessageSquare, Send, X } from 'lucide-react';
+import { AlertTriangle, ArrowRight, Clock, Lock, MessageCircleMore, Send, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useDashboard, type MessageThread } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
@@ -22,7 +22,7 @@ type MessagesPreviewPanelProps = {
 
 export function MessagesPreviewPanel({ onClose, className }: MessagesPreviewPanelProps) {
   const navigate = useNavigate();
-  const { threads, threadMessages, addThreadMessage, markAllAsRead, setThreads } = useDashboard();
+  const { threads, threadMessages, addThreadMessage, markAllAsRead } = useDashboard();
   const { orders } = useGlobalState();
   const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
   const [draft, setDraft] = useState('');
@@ -54,13 +54,6 @@ export function MessagesPreviewPanel({ onClose, className }: MessagesPreviewPane
   }, [activeThreadId, sortedThreads]);
 
   useEffect(() => {
-    if (!activeThread?.id || !activeThread.unread) return;
-    setThreads((prev) =>
-      prev.map((t) => (t.id === activeThread.id ? { ...t, unread: false } : t)),
-    );
-  }, [activeThread?.id, activeThread?.unread, setThreads]);
-
-  useEffect(() => {
     const el = chatRef.current;
     if (!el) return;
     el.scrollTop = el.scrollHeight;
@@ -83,7 +76,7 @@ export function MessagesPreviewPanel({ onClose, className }: MessagesPreviewPane
       <div className="px-4 sm:px-5 py-4 border-b border-[#e8edf2] flex items-center justify-between shrink-0 bg-white gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-9 h-9 rounded-full bg-[#EB4501]/10 flex items-center justify-center text-[#EB4501] shrink-0">
-            <MessageSquare size={16} />
+            <MessageCircleMore size={16} className="text-[#EB4501]" />
           </div>
           <div className="min-w-0 text-left">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#8a9bb0]">

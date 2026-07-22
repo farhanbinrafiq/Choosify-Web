@@ -150,7 +150,7 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({
         </div>
       </div>
 
-      <span className="block w-full bg-[#2323FF] hover:brightness-110 text-white text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-[filter]">
+      <span className="block w-full choosify-dark-surface hover:brightness-110 text-white text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-[filter]">
         View Profile
       </span>
     </Link>

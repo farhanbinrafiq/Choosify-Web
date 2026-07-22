@@ -9,7 +9,8 @@ import { toast } from '../lib/notify';
 import type { Creator } from '../data/creators';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { CreatorCardDesign } from '../components/CreatorCardDesign';
-import { DcListingStickyFilters } from '../components/design/DcListingStickyFilters';
+import { ListingBrowseControls } from '../components/design/ListingBrowseControls';
+import { ListingFeedHeader } from '../components/design/ListingFeedHeader';
 import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
 import { useInfiniteListBatch } from '../hooks/useInfiniteListBatch';
 import { ListingAdRail } from '../components/ListingAdRail';
@@ -195,6 +196,7 @@ export function CreatorsPage() {
     visibleItems: visibleCreatorFeed,
     sentinelRef,
     hasMore,
+    visibleCount,
   } = useInfiniteListBatch(creatorFeed, {
     initial: 24,
     loadMore: 12,
@@ -335,91 +337,73 @@ export function CreatorsPage() {
     },
   }, [selectedLetter, searchQuery, activeTab, selectedCategory, verificationFilter, popularityFilter, sectionNavItems, activeSectionId, scrollToSection]);
 
+  const creatorsBrowseControls = (
+    <ListingBrowseControls
+      showSearch={false}
+      quickChips={['Tech', 'Fashion', 'Beauty', 'Food', 'Lifestyle', 'Gaming']}
+      onSearch={(q) => setSearchQuery(q)}
+      onChipClick={(q) => setSearchQuery(q)}
+      items={[
+        {
+          id: 'tech',
+          icon: '💻',
+          name: 'Tech Reviewers',
+          sub: '320 creators',
+          bg: '#EAF1FD',
+          active: selectedCategory === 'Tech Reviewers',
+          onClick: () => setSelectedCategory(selectedCategory === 'Tech Reviewers' ? null : 'Tech Reviewers'),
+        },
+        {
+          id: 'beauty',
+          icon: '💄',
+          name: 'Beauty & Lifestyle',
+          sub: '210 creators',
+          bg: '#FDECEC',
+          active: selectedCategory === 'Beauty & Lifestyle',
+          onClick: () => setSelectedCategory(selectedCategory === 'Beauty & Lifestyle' ? null : 'Beauty & Lifestyle'),
+        },
+        {
+          id: 'fashion',
+          icon: '👗',
+          name: 'Fashion',
+          sub: '180 creators',
+          bg: '#EFECFD',
+          active: selectedCategory === 'Fashion',
+          onClick: () => setSelectedCategory(selectedCategory === 'Fashion' ? null : 'Fashion'),
+        },
+        {
+          id: 'fitness',
+          icon: '💪',
+          name: 'Fitness & Health',
+          sub: '140 creators',
+          bg: '#E6F9EA',
+          active: selectedCategory === 'Fitness & Health',
+          onClick: () => setSelectedCategory(selectedCategory === 'Fitness & Health' ? null : 'Fitness & Health'),
+        },
+        {
+          id: 'food',
+          icon: '🍳',
+          name: 'Food & Cooking',
+          sub: '95 creators',
+          bg: '#FEF3E2',
+          active: selectedCategory === 'Food & Cooking',
+          onClick: () => setSelectedCategory(selectedCategory === 'Food & Cooking' ? null : 'Food & Cooking'),
+        },
+        {
+          id: 'home',
+          icon: '🏠',
+          name: 'Home & Living',
+          sub: '110 creators',
+          bg: '#EAF1FD',
+          active: selectedCategory === 'Home & Living',
+          onClick: () => setSelectedCategory(selectedCategory === 'Home & Living' ? null : 'Home & Living'),
+        },
+      ]}
+    />
+  );
+
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
-      <DcListingStickyFilters
-        className="mt-5"
-        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
-        searchPlaceholder="Search creators..."
-        quickChips={['Tech', 'Fashion', 'Beauty', 'Food', 'Lifestyle', 'Gaming']}
-        onSearch={(q) => setSearchQuery(q)}
-        onChipClick={(q) => setSearchQuery(q)}
-        items={[
-          {
-            id: 'tech',
-            icon: '💻',
-            name: 'Tech Reviewers',
-            sub: '320 creators',
-            bg: '#EAF1FD',
-            active: selectedCategory === 'Tech Reviewers',
-            onClick: () => setSelectedCategory(selectedCategory === 'Tech Reviewers' ? null : 'Tech Reviewers'),
-          },
-          {
-            id: 'beauty',
-            icon: '💄',
-            name: 'Beauty & Lifestyle',
-            sub: '210 creators',
-            bg: '#FDECEC',
-            active: selectedCategory === 'Beauty & Lifestyle',
-            onClick: () => setSelectedCategory(selectedCategory === 'Beauty & Lifestyle' ? null : 'Beauty & Lifestyle'),
-          },
-          {
-            id: 'fashion',
-            icon: '👗',
-            name: 'Fashion',
-            sub: '180 creators',
-            bg: '#EFECFD',
-            active: selectedCategory === 'Fashion',
-            onClick: () => setSelectedCategory(selectedCategory === 'Fashion' ? null : 'Fashion'),
-          },
-          {
-            id: 'fitness',
-            icon: '💪',
-            name: 'Fitness & Health',
-            sub: '140 creators',
-            bg: '#E6F9EA',
-            active: selectedCategory === 'Fitness & Health',
-            onClick: () => setSelectedCategory(selectedCategory === 'Fitness & Health' ? null : 'Fitness & Health'),
-          },
-          {
-            id: 'food',
-            icon: '🍳',
-            name: 'Food & Cooking',
-            sub: '95 creators',
-            bg: '#FEF3E2',
-            active: selectedCategory === 'Food & Cooking',
-            onClick: () => setSelectedCategory(selectedCategory === 'Food & Cooking' ? null : 'Food & Cooking'),
-          },
-          {
-            id: 'home',
-            icon: '🏠',
-            name: 'Home & Living',
-            sub: '110 creators',
-            bg: '#EAF1FD',
-            active: selectedCategory === 'Home & Living',
-            onClick: () => setSelectedCategory(selectedCategory === 'Home & Living' ? null : 'Home & Living'),
-          },
-        ]}
-      />
-
-      {/* ACTIVE FILTER CHIPS ROW */}
-      <ActiveFilterChips
-        chips={[
-          selectedCategory ? { id: 'category', label: `Niche: ${selectedCategory}`, onRemove: () => setSelectedCategory(null) } : null,
-          selectedLetter ? { id: 'letter', label: `Starts with: ${selectedLetter}`, onRemove: () => setSelectedLetter(null) } : null,
-          verificationFilter !== 'all' ? { id: 'verification', label: `Verification: ${verificationFilter}`, onRemove: () => setVerificationFilter('all') } : null,
-          popularityFilter !== 'all' ? { id: 'engagement', label: `Engagement: ${popularityFilter}`, onRemove: () => setPopularityFilter('all') } : null
-        ].filter(Boolean) as any[]}
-        onClearAll={() => {
-          setSelectedLetter(null); 
-          setSearchQuery(''); 
-          setActiveTab('All Creators');
-          setSelectedCategory(null);
-          setVerificationFilter('all');
-          setPopularityFilter('all');
-        }}
-      />
-
       <div className={`${LISTING_PAGE_MAX_WIDTH} mx-auto px-4 sm:px-5 lg:px-6 xl:px-8 py-10 md:py-12 w-full ${PAGE_LISTING_SINGLE_SHELL}`}>
         
         {/* Left Sidebar */}
@@ -445,6 +429,7 @@ export function CreatorsPage() {
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               searchPlaceholder="Search creators, niche, handle or bio..."
+              browseControls={creatorsBrowseControls}
               activeChips={
                 <ActiveFilterChips
                   chips={[
@@ -605,36 +590,36 @@ export function CreatorsPage() {
 
         {/* Main Content Area */}
         <main id="creators-main-display" className="choosify-middle-feed scroll-mt-36 min-w-0 pb-10 space-y-6">
-          {/* Header info bar (Unified list view) */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#eef2f6] font-sans">
-            <div>
-              <h3 className="text-[10px] font-bold text-[#8a9bb0] uppercase tracking-[0.2em] leading-none">
-                Our partners • Creator directory
-              </h3>
-              <h2 className="text-xl font-black text-[#1A1D4E] tracking-tight mt-2 leading-none">
-                {activeTab === 'All Creators' ? 'All Creators' : activeTab}
-                {selectedLetter && ` · Starting with “${selectedLetter}”`}
-                {searchQuery && ` · “${searchQuery}”`}
-                <span className="text-[#8a9bb0] font-semibold"> ({filteredCreators.length})</span>
-              </h2>
-            </div>
-            
-            {(selectedLetter || searchQuery || activeTab !== 'All Creators' || selectedCategory || verificationFilter !== 'all' || popularityFilter !== 'all') && (
-              <button 
-                onClick={() => {
-                  setSelectedLetter(null); 
-                  setSearchQuery(''); 
-                  setActiveTab('All Creators');
-                  setSelectedCategory(null);
-                  setVerificationFilter('all');
-                  setPopularityFilter('all');
-                }}
-                className="text-[9.5px] font-black text-orange-primary uppercase tracking-widest hover:underline flex items-center gap-1.5 transition-all bg-white border border-[#eef2f6] px-3.5 py-2 rounded-2xl shadow-sm self-start sm:self-auto hover:text-[#CF4400] cursor-pointer"
-              >
-                Reset All Filters
-              </button>
-            )}
-          </div>
+          <ListingFeedHeader
+            eyebrow="Our partners • Creator directory"
+            title={
+              `${activeTab === 'All Creators' ? 'All Creators' : activeTab}` +
+              (selectedLetter ? ` · Starting with “${selectedLetter}”` : '') +
+              (searchQuery ? ` · “${searchQuery}”` : '')
+            }
+            count={filteredCreators.length}
+            showingFrom={filteredCreators.length > 0 ? 1 : 0}
+            showingTo={Math.min(visibleCount, filteredCreators.length)}
+            itemLabel="creators"
+            actions={
+              (selectedLetter || searchQuery || activeTab !== 'All Creators' || selectedCategory || verificationFilter !== 'all' || popularityFilter !== 'all') ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedLetter(null);
+                    setSearchQuery('');
+                    setActiveTab('All Creators');
+                    setSelectedCategory(null);
+                    setVerificationFilter('all');
+                    setPopularityFilter('all');
+                  }}
+                  className="text-[9.5px] font-black text-orange-primary uppercase tracking-widest hover:underline flex items-center gap-1.5 transition-all bg-white border border-[#eef2f6] px-3.5 py-2 rounded-2xl shadow-sm hover:text-[#CF4400] cursor-pointer"
+                >
+                  Reset All Filters
+                </button>
+              ) : null
+            }
+          />
 
           {/* Active Filter Chips */}
           {(selectedLetter || selectedCategory || verificationFilter !== 'all' || popularityFilter !== 'all') && (

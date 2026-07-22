@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  Sparkles, Check, ShieldCheck, Award, MessageSquare, 
+  Sparkles, Check, ShieldCheck, Award, 
   HelpCircle, ChevronDown, X, Send,
   Mail, Lock, User, Phone, Eye, EyeOff, ArrowRight, CheckCircle, RefreshCw, Star
 } from 'lucide-react';

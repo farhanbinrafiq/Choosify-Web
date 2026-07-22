@@ -9,7 +9,7 @@ import {
   Share2,
   Heart,
   CheckCircle2,
-  MessageSquare,
+  MessageCircleMore,
   Info,
   Facebook,
   Instagram,
@@ -30,7 +30,6 @@ import {
   ThumbsDown,
   ChevronLeft,
   ChevronRight,
-  MessageCircle,
   X,
   Tag,
   Check,
@@ -293,7 +292,7 @@ export function ProductDetailPage() {
   const productSectionNavItems = [
     { id: "product-specs-section", label: "Specs", icon: <Package size={13} /> },
     { id: "influencer-reviews-section", label: "Creator Reviews", icon: <Users size={13} /> },
-    { id: "public-reviews-section", label: "Public Reviews", icon: <MessageSquare size={13} /> },
+    { id: "public-reviews-section", label: "Public Reviews", icon: <MessageCircleMore size={13} className="text-[#EB4501]" /> },
     { id: "product-overview-section", label: sectionLabels.overview, icon: <Info size={13} /> },
     { id: "product-utility-section", label: "Buying Guide", icon: <ShoppingBag size={13} /> },
     ...(!isService
@@ -1390,7 +1389,7 @@ export function ProductDetailPage() {
                   />
                   <Link
                     to={`/brands/${brandId}`}
-                    className="block w-full bg-[#000435] hover:bg-[#CF4400] text-white text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-colors"
+                    className="block w-full choosify-dark-surface hover:brightness-110 text-white text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-[filter]"
                   >
                     View Brand
                   </Link>
@@ -1464,8 +1463,8 @@ export function ProductDetailPage() {
               </button>
 
               <div className="flex items-center gap-2 mb-4">
-                <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400">
-                  <MessageCircle size={16} />
+                <div className="w-8 h-8 rounded-full bg-[#EB4501]/10 flex items-center justify-center text-[#EB4501]">
+                  <MessageCircleMore size={16} />
                 </div>
                 <div>
                   <h3 className="text-base font-extrabold text-[#1A1A2E] tracking-tight">

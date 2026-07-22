@@ -10,7 +10,7 @@ import {
   Clock,
   Truck,
   ArrowLeft,
-  MessageSquare,
+  MessageCircleMore,
 } from 'lucide-react';
 import { PRODUCTS, PLACEHOLDER_IMAGE } from '../constants';
 import { toast } from '../lib/notify';
@@ -137,7 +137,7 @@ Thank you for shopping with Choosify.bd
               to="/messages"
               className="inline-flex items-center gap-1.5 self-start sm:self-auto bg-white/10 hover:bg-white/15 border border-white/15 text-white font-bold text-[12px] px-4 py-2.5 rounded-lg transition-all"
             >
-              <MessageSquare size={14} className="text-[#EB4501]" />
+              <MessageCircleMore size={14} className="text-[#EB4501]" />
               Chat support
             </Link>
           </div>
@@ -383,7 +383,7 @@ Thank you for shopping with Choosify.bd
                                   className="flex-1 sm:flex-none h-10 px-3.5 rounded-lg bg-white hover:bg-[#CF4400] hover:text-white text-[#1A1A2E] border border-[#E8EDF2] text-[12px] font-bold transition-all flex items-center justify-center gap-1.5"
                                   title="Message seller about this order"
                                 >
-                                  <MessageSquare size={13} />
+                                  <MessageCircleMore size={13} className="text-[#EB4501]" />
                                   <span>Message</span>
                                 </button>
 

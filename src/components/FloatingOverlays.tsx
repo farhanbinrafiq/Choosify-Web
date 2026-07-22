@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+﻿import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
-  ShoppingCart, MessageCircle, X, SlidersHorizontal, X as XIcon, RotateCcw, ChevronUp
+  ShoppingCart, MessageCircleMore, X, SlidersHorizontal, X as XIcon, RotateCcw, ChevronUp
 } from 'lucide-react';
 import { EmiAiLogo } from './EmiAiLogo';
 import { useGlobalState } from '../context/GlobalStateContext';
@@ -434,7 +434,7 @@ export function FloatingOverlays() {
               )}
               title="Merchant Conversations"
             >
-              <MessageCircle size={22} strokeWidth={2.25} fill="currentColor" className="text-[#EB4501]" />
+              <MessageCircleMore size={22} strokeWidth={2.25} className="text-[#EB4501]" />
               <motion.span
                 animate={inboxBadgeBounce ? { scale: [1, 1.3, 0.9, 1.1, 1] } : { scale: 1 }}
                 transition={{ duration: 0.5 }}
@@ -579,6 +579,12 @@ export function FloatingOverlays() {
                   </div>
                 )}
 
+                {filterConfig.renderBrowseControls && (
+                  <div className="px-5 pt-4 pb-3 border-b border-[#e8edf2]">
+                    {filterConfig.renderBrowseControls()}
+                  </div>
+                )}
+
                 {filterConfig.alphabetFilter && (
                   <div className="px-5 pt-4 pb-3 border-b border-[#e8edf2]">
                     <AlphabetFilterStrip
@@ -620,7 +626,7 @@ export function FloatingOverlays() {
                 )}
 
                 {/* Empty state */}
-                {!filterConfig.renderFilters && !filterConfig.renderSearch && (!filterConfig.quickFilters || filterConfig.quickFilters.length === 0) && (
+                {!filterConfig.renderFilters && !filterConfig.renderSearch && !filterConfig.renderBrowseControls && (!filterConfig.quickFilters || filterConfig.quickFilters.length === 0) && (
                   <div className="flex flex-col items-center justify-center py-16 text-center px-6">
                     <SlidersHorizontal size={28} className="text-gray-300 mb-3" />
                     <p className="text-[11px] font-bold text-gray-400">No filters available on this page</p>

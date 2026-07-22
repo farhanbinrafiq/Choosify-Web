@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useRegisterPageFilters } from '../components/FilterEngine';
+import { DiscoverBrowseControls } from '../components/spotlight/discovery/DiscoverStickyFormatNav';
 import type { SpotlightDiscoverFilters } from '../types/spotlight/experience/filters';
 import { contentTypesForTab } from '../lib/spotlight/content/contentTypeRegistry';
 import type { SpotlightContentTabId } from '../types/spotlight/discovery/navigation';
@@ -250,6 +251,15 @@ export function useSpotlightFloatingFilters({
             className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#EB4501]/50 transition-colors"
           />
         </div>
+      ),
+      renderBrowseControls: () => (
+        <DiscoverBrowseControls
+          quickFilters={quickFilters}
+          filters={filters}
+          activeTab={activeTab}
+          showSearch={false}
+          onQuerySubmit={(q) => setFilters({ ...filters, query: q })}
+        />
       ),
       renderFilters: () => (
         <div className="flex flex-col gap-4">

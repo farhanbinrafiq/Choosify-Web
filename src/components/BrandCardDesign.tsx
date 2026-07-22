@@ -205,7 +205,7 @@ export const BrandCardDesign = memo(function BrandCardDesign({
           </div>
         </div>
 
-        <span className="mt-auto block w-full bg-[#000435] hover:bg-[#CF4400] text-white text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-colors">
+        <span className="mt-auto block w-full choosify-dark-surface hover:brightness-110 text-white text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-[filter]">
           View Brand
         </span>
       </div>

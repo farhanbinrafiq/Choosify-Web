@@ -1,36 +1,40 @@
 import React from 'react';
-import { DcListingStickyFilters } from '../design/DcListingStickyFilters';
-import { cn } from '../../lib/utils';
+import { ListingBrowseControls } from '../design/ListingBrowseControls';
 import {
-  CATEGORY_LISTING_MAX_WIDTH,
   CATEGORY_QUICK_NAV_ITEMS,
 } from '../../lib/design/categoryTokens';
 
-interface CategoriesQuickNavProps {
+interface CategoriesBrowseControlsProps {
   activeId: string;
   onSelect: (id: string, filterType: string | null) => void;
-  className?: string;
   onSearch?: (query: string) => void;
   quickChips?: string[];
+  /** Hide search when the host drawer already renders Page Search. */
+  showSearch?: boolean;
+  searchQuery?: string;
+  onSearchQueryChange?: (value: string) => void;
 }
 
-/** Choosify.dc.html Categories sticky — merged search + letter quick nav */
-export function CategoriesQuickNav({
+/** Category browse controls for the floating filter popup. */
+export function CategoriesBrowseControls({
   activeId,
   onSelect,
-  className,
   onSearch,
   quickChips = ['Electronics', 'Fashion', 'Beauty', 'Home', 'Sports', 'Grocery'],
-}: CategoriesQuickNavProps) {
+  showSearch = false,
+  searchQuery,
+  onSearchQueryChange,
+}: CategoriesBrowseControlsProps) {
   const scrollToGrid = () => {
     document.getElementById('categories-main-display')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (
-    <DcListingStickyFilters
-      className={cn('mt-5', className)}
-      maxWidthClass={CATEGORY_LISTING_MAX_WIDTH}
+    <ListingBrowseControls
+      showSearch={showSearch}
       searchPlaceholder="Search categories..."
+      searchQuery={searchQuery}
+      onSearchQueryChange={onSearchQueryChange}
       quickChips={quickChips}
       onSearch={onSearch}
       onChipClick={onSearch}
@@ -49,3 +53,6 @@ export function CategoriesQuickNav({
     />
   );
 }
+
+/** @deprecated Prefer CategoriesBrowseControls inside the floating filter popup. */
+export const CategoriesQuickNav = CategoriesBrowseControls;

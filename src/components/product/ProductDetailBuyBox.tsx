@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, MessageCircle, Star } from 'lucide-react';
+import { Heart, MessageCircleMore, Star } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { EmiAiLogo } from '../EmiAiLogo';
 
@@ -288,7 +288,7 @@ export function ProductDetailBuyBox({
                 onClick={onMessageSeller}
                 className="w-full bg-[#EB4501] text-white border-none py-3.5 rounded-lg text-[13px] font-bold inline-flex items-center justify-center gap-2 hover:bg-[#CF4400]"
               >
-                <MessageCircle size={14} />
+                <MessageCircleMore size={14} />
                 {messageCtaLabel}
               </button>
             )}
@@ -326,7 +326,7 @@ export function ProductDetailBuyBox({
               onClick={onMessageSeller}
               className="w-full bg-[#000435] text-white border-none py-3 rounded-lg text-[12.5px] font-bold inline-flex items-center justify-center gap-2 hover:brightness-110"
             >
-              <MessageCircle size={14} />
+              <MessageCircleMore size={14} />
               {messageCtaLabel}
             </button>
             </>

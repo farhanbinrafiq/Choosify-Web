@@ -3,7 +3,7 @@ import {
   LayoutDashboard, 
   Heart, 
   Bookmark, 
-  MessageSquare, 
+  MessageCircleMore, 
   Star, 
   Settings, 
   Search, 
@@ -1379,7 +1379,7 @@ const NotificationsSection = () => {
                 n.type === 'reply' ? "bg-[#EB4501]/10 text-[#EB4501]" : 
                 "bg-[#EB4501]/15 text-[#EB4501]"
               )}>
-                {n.type === 'price' ? <TrendingUp size={24} /> : n.type === 'reply' ? <MessageSquare size={24} /> : <Bell size={24} />}
+                {n.type === 'price' ? <TrendingUp size={24} /> : n.type === 'reply' ? <MessageCircleMore size={24} className="text-[#EB4501]" /> : <Bell size={24} />}
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-2">
@@ -1862,7 +1862,7 @@ export function DashboardPage() {
     Megaphone,
     BarChart3,
     Sparkles: Star,
-    Users: MessageSquare,
+    Users: MessageCircleMore,
     Flame,
     ShieldCheck: CheckCircle2,
     Star,

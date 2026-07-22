@@ -8,7 +8,7 @@ import {
   Package,
   MapPin,
   ExternalLink,
-  MessageSquare,
+  MessageCircleMore,
 } from 'lucide-react';
 import { toast } from '../lib/notify';
 import { ProductCard } from '../components/ProductCard';
@@ -457,7 +457,7 @@ export function OrderTrackingPage() {
                   onClick={() => navigate('/messages')}
                   className="bg-white border border-[#FCA5A5] text-[#FF000D] py-2.5 rounded-lg text-[11.5px] font-bold cursor-pointer hover:bg-[#FEF2F2] transition-colors flex items-center justify-center gap-1.5"
                 >
-                  <MessageSquare size={13} />
+                  <MessageCircleMore size={13} className="text-[#EB4501]" />
                   Need help? Contact Support
                 </button>
               </div>

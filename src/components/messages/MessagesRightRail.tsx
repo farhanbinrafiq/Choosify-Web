@@ -1,22 +1,23 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import type { MessageThread, ThreadMessage } from '../../context/DashboardContext';
 import type { Order, SubOrder } from '../../types/schemas';
-import {
-  entityTypeLabel,
-  type AnnouncementAssociatedEntity,
-} from '../../lib/announcements';
-import { PRODUCTS, PLACEHOLDER_IMAGE } from '../../constants';
-import { Package, User, Link2, Copy, Flag, Megaphone, ExternalLink } from 'lucide-react';
+import type { AnnouncementAssociatedEntity } from '../../lib/announcements';
+import { Package, User, Link2, Copy, Flag } from 'lucide-react';
 import { toast } from '../../lib/notify';
+import { MessagesDynamicContentRail } from './MessagesDynamicContentRail';
 
 type MessagesRightRailProps = {
   activeThread?: MessageThread | null;
   linkedOrder?: Order | null;
   linkedSubOrder?: SubOrder | null;
   isAnnouncementsThread?: boolean;
+  isEmiThread?: boolean;
   /** Focused announcement message (or latest with entity) */
   focusedAnnouncement?: ThreadMessage | null;
+  /** Emi: entities from the focused / latest assistant reply with picks */
+  emiEntities?: AnnouncementAssociatedEntity[] | null;
+  emiExcerpt?: string | null;
   conversationClosed?: boolean;
   onViewOrder?: () => void;
   onReportProblem?: () => void;
@@ -57,169 +58,41 @@ const SHORTCUTS = [
   { label: 'Browse brands', to: '/brands' },
 ] as const;
 
-function resolveEntityDisplay(entity: AnnouncementAssociatedEntity) {
-  if (entity.type === 'product' || entity.type === 'service') {
-    const product = PRODUCTS.find((p) => String(p.id) === String(entity.id));
-    if (product) {
-      return {
-        title: entity.title || product.title,
-        subtitle:
-          entity.subtitle ||
-          [product.brand, product.category].filter(Boolean).join(' · ') ||
-          entityTypeLabel(entity.type),
-        image: entity.image || product.image || PLACEHOLDER_IMAGE,
-        href: entity.href || `/products/${product.id}`,
-        ctaLabel: entity.ctaLabel || 'View product',
-        meta:
-          product.price != null
-            ? `৳${String(product.price).replace(/^\৳/, '')}`
-            : undefined,
-      };
-    }
-  }
-
-  return {
-    title: entity.title || `${entityTypeLabel(entity.type)} ${entity.id}`,
-    subtitle: entity.subtitle || entityTypeLabel(entity.type),
-    image: entity.image || PLACEHOLDER_IMAGE,
-    href:
-      entity.href ||
-      (entity.type === 'guide'
-        ? `/guides/${entity.id}`
-        : entity.type === 'campaign'
-          ? '/deals'
-          : entity.type === 'brand'
-            ? `/brands/${entity.id}`
-            : entity.type === 'order'
-              ? '/order-tracking'
-              : '#'),
-    ctaLabel:
-      entity.ctaLabel ||
-      (entity.type === 'guide'
-        ? 'Open guide'
-        : entity.type === 'campaign'
-          ? 'View campaign'
-          : entity.type === 'brand'
-            ? 'View brand'
-            : entity.type === 'order'
-              ? 'Track order'
-              : 'Open'),
-    meta: undefined as string | undefined,
-  };
-}
-
-function AnnouncementsRightRail({
-  focusedAnnouncement,
-  onReportProblem,
-}: {
-  focusedAnnouncement?: ThreadMessage | null;
-  onReportProblem?: () => void;
-}) {
-  const entity = focusedAnnouncement?.associatedEntity;
-  const display = useMemo(
-    () => (entity ? resolveEntityDisplay(entity) : null),
-    [entity],
-  );
-
-  return (
-    <aside className="hidden xl:flex w-[260px] shrink-0 flex-col border-l border-[#E8EDF2] bg-white p-[18px] gap-5 overflow-y-auto min-h-0">
-      <div>
-        <div className="flex items-center gap-1.5 text-[11px] font-extrabold text-[#1A1A2E] mb-3">
-          <Megaphone size={12} className="text-[#EB4501]" />
-          Related to this announcement
-        </div>
-
-        {!entity || !display ? (
-          <div className="rounded-[10px] border border-dashed border-[#E8EDF2] bg-[#F4F7F9] p-4 text-[11.5px] text-[#9AA0AC] leading-relaxed">
-            Select an announcement in the thread to see the related product, guide, or campaign here.
-          </div>
-        ) : (
-          <div className="rounded-[10px] border border-[#E8EDF2] overflow-hidden bg-white">
-            <div className="aspect-[4/3] bg-[#F4F7F9] relative overflow-hidden">
-              <img
-                src={display.image}
-                alt=""
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  e.currentTarget.src = PLACEHOLDER_IMAGE;
-                }}
-              />
-              <span className="absolute top-2 left-2 text-[9px] font-extrabold uppercase tracking-wide px-2 py-0.5 rounded-md bg-white/95 text-[#EB4501] border border-[#EB4501]/20">
-                {entityTypeLabel(entity.type)}
-              </span>
-            </div>
-            <div className="p-3.5 space-y-2">
-              <div>
-                <h3 className="text-[13px] font-extrabold text-[#1A1A2E] leading-snug">
-                  {display.title}
-                </h3>
-                {display.subtitle ? (
-                  <p className="text-[11px] text-[#9AA0AC] mt-0.5">{display.subtitle}</p>
-                ) : null}
-              </div>
-              {display.meta ? (
-                <p className="text-[14px] font-extrabold text-[#EB4501] tabular-nums">
-                  {display.meta}
-                </p>
-              ) : null}
-              <Link
-                to={display.href}
-                className="inline-flex w-full items-center justify-center gap-1.5 min-h-[38px] px-3 rounded-lg bg-[#EB4501] text-white text-[11.5px] font-bold no-underline hover:brightness-110"
-              >
-                {display.ctaLabel}
-                <ExternalLink size={12} />
-              </Link>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {focusedAnnouncement?.text ? (
-        <div>
-          <div className="text-[11px] font-extrabold text-[#1A1A2E] mb-2">Announcement</div>
-          <p className="text-[11.5px] text-[#4B5563] leading-relaxed whitespace-pre-line line-clamp-8">
-            {focusedAnnouncement.text}
-          </p>
-        </div>
-      ) : null}
-
-      <div className="mt-auto pt-2 border-t border-[#E8EDF2] space-y-3">
-        {onReportProblem && (
-          <button
-            type="button"
-            onClick={onReportProblem}
-            className="w-full inline-flex items-center justify-center gap-1.5 min-h-[38px] px-3 rounded-lg border border-[#E8EDF2] bg-white text-[11.5px] font-bold text-[#1A1A2E] hover:border-[#EB4501] hover:text-[#CF4400] cursor-pointer"
-          >
-            <Flag size={12} className="text-[#EB4501]" />
-            Report to Support
-          </button>
-        )}
-        <p className="text-[10.5px] text-[#9AA0AC] leading-relaxed">
-          Click an announcement to update this panel with related content.
-        </p>
-      </div>
-    </aside>
-  );
-}
-
 /**
  * Buyer–seller: Transaction details + Support shortcuts.
- * Announcements: dynamic entity card for the focused announcement message.
+ * Announcements + Emi: shared dynamic content panel (products / brands / deals / guides).
  */
 export function MessagesRightRail({
   activeThread,
   linkedOrder,
   linkedSubOrder,
   isAnnouncementsThread,
+  isEmiThread,
   focusedAnnouncement,
+  emiEntities,
+  emiExcerpt,
   conversationClosed,
   onViewOrder,
   onReportProblem,
 }: MessagesRightRailProps) {
   if (isAnnouncementsThread) {
+    const entity = focusedAnnouncement?.associatedEntity;
     return (
-      <AnnouncementsRightRail
-        focusedAnnouncement={focusedAnnouncement}
+      <MessagesDynamicContentRail
+        mode="announcement"
+        entities={entity ? [entity] : []}
+        excerpt={focusedAnnouncement?.text}
+        onReportProblem={onReportProblem}
+      />
+    );
+  }
+
+  if (isEmiThread) {
+    return (
+      <MessagesDynamicContentRail
+        mode="emi"
+        entities={emiEntities}
+        excerpt={emiExcerpt}
         onReportProblem={onReportProblem}
       />
     );

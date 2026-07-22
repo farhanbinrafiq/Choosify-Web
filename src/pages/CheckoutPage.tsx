@@ -10,7 +10,7 @@ import {
   Truck, 
   ShieldCheck, 
   ArrowRight,
-  MessageSquare
+  MessageCircleMore
 } from 'lucide-react';
 import { toast } from '../lib/notify';
 import { operationsApi } from '../services/operationsApi';
@@ -565,7 +565,7 @@ ORDER STATUS: PENDING_CONFIRMATION
           {/* Order notes — notes already wired to deliveryNotes above as landmark; keep optional notes section visual */}
           <div className="bg-white border border-[#E8EDF2] rounded-xl p-5 sm:p-6">
             <h2 className="text-[12.5px] font-extrabold text-[#1A1A2E] mb-3 flex items-center gap-1.5">
-              <MessageSquare size={14} className="text-[#EB4501]" />
+              <MessageCircleMore size={14} className="text-[#EB4501]" />
               ORDER NOTES (OPTIONAL)
             </h2>
             <textarea

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useNavigate, Link } from 'react-router-dom';
-import { Store, ArrowRight, Eye, Tag, FileText, CheckCircle, Package, ArrowLeft, RefreshCw, MessageSquare } from 'lucide-react';
+import { Store, ArrowRight, Eye, Tag, FileText, CheckCircle, Package, ArrowLeft, RefreshCw } from 'lucide-react';
 import { toast } from '../lib/notify';
 
 export function SellerIncomingOrdersPage() {

@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { IconBrandApple } from '@tabler/icons-react';
 
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from '../lib/notify';
 import { cn } from '../lib/utils';
@@ -156,7 +156,6 @@ export function LoginSignUpPage() {
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const { setIsLoggedIn } = useGlobalState();
-  const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
@@ -186,12 +185,18 @@ export function LoginSignUpPage() {
       return;
     }
 
-    // localStorage is written synchronously inside setIsLoggedIn; ProtectedRoute
-    // reads that flag so dashboard is allowed before React state has re-rendered.
+    // Demo auth: no Firebase/network call — persistence is localStorage only.
+    // Write the flag synchronously, then hard-navigate so a stale service-worker
+    // shell cannot keep painting /login after history changes (same class of bug
+    // as “URL changed, content stuck”). Default destination is homepage `/`.
     setIsLoggedIn(true);
     toast.success(activeTab === 'sign-up' ? 'Account created! Welcome to Choosify.' : 'Welcome back!');
-    const dest = (location.state as { from?: string } | null)?.from || '/dashboard';
-    navigate(dest === '/login' ? '/dashboard' : dest, { replace: true });
+    const from = (location.state as { from?: string } | null)?.from;
+    const dest =
+      from && from !== '/login' && !from.startsWith('/login/')
+        ? from
+        : '/';
+    window.location.assign(dest);
   };
 
   const handleSocialLogin = (provider: 'Google' | 'Facebook' | 'Apple') => {

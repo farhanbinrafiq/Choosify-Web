@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   ShoppingCart, User, PlusCircle, ChevronRight, LogIn, 
-  LayoutDashboard, Heart, MessageSquare, Settings, Briefcase, Package, ShieldCheck, 
+  LayoutDashboard, Heart, MessageCircleMore, Settings, Briefcase, Package, ShieldCheck, 
   FileCheck2, Building2, HelpCircle, ArrowLeftRight, CheckSquare, Menu, X, MapPin
 } from 'lucide-react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
@@ -166,7 +166,7 @@ export function Navbar() {
     { label: 'My Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { label: 'My Orders', path: '/profile/orders', icon: Package },
     { label: 'Saved Items', path: '/dashboard', tab: 'saved-items', icon: Heart },
-    { label: 'Messages', path: '/messages', icon: MessageSquare },
+    { label: 'Messages', path: '/messages', icon: MessageCircleMore },
   ];
 
   const navigateProfileItem = (item: (typeof dashboardMiniMenu)[number]) => {
@@ -311,7 +311,7 @@ export function Navbar() {
               aria-label="Message inbox"
               title="Messages"
             >
-              <MessageSquare size={19} strokeWidth={2} className="text-[#EB4501] transition-colors" />
+              <MessageCircleMore size={19} strokeWidth={2} className="text-[#EB4501] transition-colors" />
               {unreadMsgCount > 0 && (
                 <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 text-white text-[9px] font-bold bg-[#EB4501] rounded-lg flex items-center justify-center leading-none">
                   {unreadMsgCount > 99 ? '99+' : unreadMsgCount}
@@ -391,7 +391,7 @@ export function Navbar() {
                           >
                             <item.icon size={14} className="text-[#9AA0AC]" />
                             <span>{item.label}</span>
-                            {item.icon === MessageSquare && unreadMsgCount > 0 && (
+                            {item.icon === MessageCircleMore && unreadMsgCount > 0 && (
                               <span className="ml-auto min-w-[16px] h-4 px-1 bg-[#EB4501] text-white text-[9px] font-bold rounded-lg flex items-center justify-center">
                                 {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
                               </span>
@@ -531,7 +531,7 @@ export function Navbar() {
                     }}
                     className={cn(getMobileLinkClass('/messages'), 'w-full text-left cursor-pointer')}
                   >
-                    <MessageSquare size={16} className="text-[#EB4501] shrink-0" />
+                    <MessageCircleMore size={16} className="text-[#EB4501] shrink-0" />
                     <span className="flex-1">Messages</span>
                     {unreadMsgCount > 0 && (
                       <span className="min-w-[16px] h-4 px-1 bg-[#EB4501] text-white text-[9px] font-bold rounded-lg flex items-center justify-center leading-none">
@@ -656,7 +656,7 @@ export function Navbar() {
                     >
                       <item.icon size={14} className="text-[#9AA0AC] shrink-0" />
                       <span className="flex-1">{item.label}</span>
-                      {item.icon === MessageSquare && unreadMsgCount > 0 && (
+                      {item.icon === MessageCircleMore && unreadMsgCount > 0 && (
                         <span className="min-w-[16px] h-4 px-1 bg-[#EB4501] text-white text-[9px] font-bold rounded-lg flex items-center justify-center">
                           {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
                         </span>
