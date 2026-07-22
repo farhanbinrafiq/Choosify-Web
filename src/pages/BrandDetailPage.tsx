@@ -38,10 +38,15 @@ import {
 import { PaginationBar } from "../components/PaginationBar";
 import { PublicReviewCard } from "../components/PublicReviewCard";
 import { TikTokIcon } from "../components/brand/TikTokIcon";
-import { BrandInfluencerReviewsSection } from "../components/brand/BrandInfluencerReviewsSection";
 import { BrandCouponsSection, buildBrandCoupons } from "../components/brand/BrandCouponsSection";
 import { BrandWhereToBuySection } from "../components/brand/BrandWhereToBuySection";
 import { BrandFaqSection } from "../components/brand/BrandFaqSection";
+import { BrandStorySection } from "../components/brand/BrandStorySection";
+import {
+  rankBrandCatalogProducts,
+  rankCompetitorBrands,
+} from "../utils/listingRanking";
+import { usePriorityClockMs } from "../hooks/usePriorityClockMs";
 
 const BRAND_FEED_GRID = PRODUCT_CARD_GRID;
 
@@ -109,6 +114,7 @@ export function BrandDetailPage() {
 
   // Sort State
   const [sortOption, setSortOption] = useState<string>("default");
+  const priorityNowMs = usePriorityClockMs();
 
   // Smart filters specs State
   const [smartSpecs, setSmartSpecs] = useState<Record<string, string>>({});
@@ -201,10 +207,6 @@ export function BrandDetailPage() {
         hidden: !previewShowProductCatalogSection,
       },
       {
-        id: "creator-reviews-section",
-        label: "Creators Review",
-      },
-      {
         id: "public-reviews-section",
         label: "Public Review",
       },
@@ -219,6 +221,10 @@ export function BrandDetailPage() {
       {
         id: "faq-section",
         label: "FAQ",
+      },
+      {
+        id: "brand-story-section",
+        label: "Brand Story",
       },
     ],
     [previewShowProductCatalogSection],
@@ -797,7 +803,7 @@ export function BrandDetailPage() {
     localClaimStatus,
   ]);
 
-  // Dynamic Sorting Engine
+  // Dynamic Sorting Engine — default uses shared brand-catalog ranking
   const sortedProducts = useMemo(() => {
     const list = [...filteredProducts] as any[];
     if (sortOption === "price-asc") {
@@ -831,13 +837,53 @@ export function BrandDetailPage() {
     }
     if (sortOption === "discount-desc") {
       return list.sort((a, b) => {
-        const discA = a.discount || 0;
-        const discB = b.discount || 0;
+        const discA = a.discount || a.discountPercent || 0;
+        const discB = b.discount || b.discountPercent || 0;
         return discB - discA;
       });
     }
-    return list;
-  }, [filteredProducts, sortOption]);
+    return rankBrandCatalogProducts(list, priorityNowMs);
+  }, [filteredProducts, sortOption, priorityNowMs]);
+
+  const compareCompetitorRows = useMemo(() => {
+    const primaryCategory =
+      (brand as { category?: string }).category ||
+      brandProducts[0]?.category ||
+      null;
+    const brandId = String(brand.id);
+    const brandName = String(brand.name || '').toLowerCase();
+    const others = (allBrands || []).filter((b: any) => {
+      const id = String(b.id);
+      const name = String(b.name || '').toLowerCase();
+      return id !== brandId && name !== brandName;
+    });
+    const ranked = rankCompetitorBrands(others, primaryCategory, priorityNowMs).slice(0, 3);
+    const selfRating = Number((brand as any).ratings ?? (brand as any).rating ?? 4.3);
+    const selfRow = {
+      name: brand.name,
+      logo: brand.name.slice(0, 1).toUpperCase(),
+      logoBg: '#1A1A2E',
+      overall: `${selfRating.toFixed(1)}/5`,
+      quality: `${Math.min(5, selfRating + 0.2).toFixed(1)}/5`,
+      value: `${Math.max(3.5, selfRating - 0.2).toFixed(1)}/5`,
+      support: `${Math.max(3.5, selfRating - 0.3).toFixed(1)}/5`,
+      products: `+${Math.min(99, brandProducts.length || 12)}`,
+    };
+    const competitorRows = ranked.map((b: any) => {
+      const rating = Number(b.ratings ?? b.rating ?? 4.0);
+      return {
+        name: b.name,
+        logo: String(b.name || '?').slice(0, 1).toUpperCase(),
+        logoBg: '#4B5563',
+        overall: `${rating.toFixed(1)}/5`,
+        quality: `${Math.min(5, rating + 0.1).toFixed(1)}/5`,
+        value: `${Math.max(3.4, rating - 0.1).toFixed(1)}/5`,
+        support: `${Math.max(3.4, rating - 0.2).toFixed(1)}/5`,
+        products: `+${Math.min(99, Math.round((b.followers || 0) / 1000) || 10)}`,
+      };
+    });
+    return [selfRow, ...competitorRows];
+  }, [allBrands, brand, brandProducts, priorityNowMs]);
 
   const totalPages = Math.ceil(sortedProducts.length / productsPerPage);
   const paginatedProducts = sortedProducts.slice(
@@ -1771,30 +1817,7 @@ export function BrandDetailPage() {
               </StudioWrap>
             )}
 
-            {/* Creator reviews */}
-          <div id="creator-reviews-section" className="scroll-mt-36 w-full">
-            {localClaimStatus !== "verified" ? (
-              <div className="bg-white rounded-[10px] p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-sm border border-[#E8EDF2] py-12">
-                <div className="w-12 h-12 rounded-full bg-[#EB4501]/10 flex items-center justify-center text-[#EB4501]">
-                  <Lock className="w-5 h-5" />
-                </div>
-                <h3 className="text-sm font-bold text-[#1A1A2E] tracking-tight">
-                  Creator Collaborations Locked
-                </h3>
-                <p className="text-xs text-gray-500 font-medium max-w-sm mb-1">
-                  Professional influencer reviews and creator campaign
-                  collaborations are locked until ownership is verified.
-                </p>
-              </div>
-            ) : (
-              <BrandInfluencerReviewsSection
-                brandName={brand.name}
-                brandId={brand.id}
-                brandLogo={brand.logo}
-                fullWidth
-              />
-            )}
-          </div>
+            {/* Creator reviews retired — replaced by Brand Story below FAQ */}
 
           {brandWhatsOnPosts.length > 0 && (
             <div id="campaigns-section" className="scroll-mt-36 w-full">
@@ -1877,6 +1900,8 @@ export function BrandDetailPage() {
 
             <BrandFaqSection brandName={brand.name} />
 
+            <BrandStorySection brandId={brand.id} brandName={brand.name} />
+
           {/* Compare — softened DC-style */}
           <div className="w-full">
             <h3 className="text-[15px] font-extrabold text-[#1A1A2E] mb-3.5">
@@ -1891,71 +1916,54 @@ export function BrandDetailPage() {
                 <div>SUPPORT</div>
                 <div>POPULAR PRODUCTS</div>
               </div>
-              {[
-                {
-                  name: brand.name,
-                  logo: brand.name.slice(0, 1).toUpperCase(),
-                  logoBg: "#1A1A2E",
-                  overall: "4.3/5",
-                  quality: "4.5/5",
-                  value: "4.1/5",
-                  support: "4.0/5",
-                  products: "+12",
-                },
-                {
-                  name: "Samsung",
-                  logo: "S",
-                  logoBg: "#1428A0",
-                  overall: "4.1/5",
-                  quality: "4.2/5",
-                  value: "4.0/5",
-                  support: "3.9/5",
-                  products: "+18",
-                },
-                {
-                  name: "Sony",
-                  logo: "S",
-                  logoBg: "#000000",
-                  overall: "4.0/5",
-                  quality: "4.1/5",
-                  value: "3.8/5",
-                  support: "4.2/5",
-                  products: "+15",
-                },
-                {
-                  name: "Xiaomi",
-                  logo: "X",
-                  logoBg: "#FF6900",
-                  overall: "3.9/5",
-                  quality: "3.9/5",
-                  value: "4.2/5",
-                  support: "3.6/5",
-                  products: "+20",
-                },
-              ].map((row) => (
+              {compareCompetitorRows.map((row) => (
                 <div
                   key={row.name}
-                  className="grid grid-cols-1 sm:grid-cols-[1.4fr_1fr_0.8fr_0.8fr_0.8fr_1.2fr] gap-2.5 px-5 py-3.5 border-t border-[#F1F1F3] items-center"
+                  className="px-4 sm:px-5 py-3.5 border-t border-[#F1F1F3] sm:grid sm:grid-cols-[1.4fr_1fr_0.8fr_0.8fr_0.8fr_1.2fr] sm:gap-2.5 sm:items-center"
                 >
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="w-6 h-6 rounded-md text-white text-[10px] font-extrabold flex items-center justify-center shrink-0"
-                      style={{ background: row.logoBg }}
-                    >
-                      {row.logo}
+                  {/* Mobile: brand + overall on one line, labeled stats fill the row below */}
+                  <div className="flex items-center justify-between gap-2 sm:justify-start">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div
+                        className="w-6 h-6 rounded-md text-white text-[10px] font-extrabold flex items-center justify-center shrink-0"
+                        style={{ background: row.logoBg }}
+                      >
+                        {row.logo}
+                      </div>
+                      <span className="text-[12px] font-bold text-[#1A1A2E] truncate">
+                        {row.name}
+                      </span>
                     </div>
-                    <span className="text-[12px] font-bold text-[#1A1A2E]">
-                      {row.name}
-                    </span>
+                    <div className="text-[11.5px] text-[#1A1A2E] whitespace-nowrap sm:hidden">
+                      {row.overall}{" "}
+                      <span className="text-[#FBBF24]">★★★★</span>
+                    </div>
                   </div>
-                  <div className="text-[11.5px] text-[#1A1A2E] whitespace-nowrap">
+                  <div className="hidden sm:block text-[11.5px] text-[#1A1A2E] whitespace-nowrap">
                     {row.overall}{" "}
                     <span className="text-[#FBBF24]">★★★★</span>
                   </div>
-                  <div className="text-[11.5px] text-[#4B5563] whitespace-nowrap">{row.quality}</div>
-                  <div className="text-[11.5px] text-[#4B5563] whitespace-nowrap">{row.value}</div>
-                  <div className="text-[11.5px] text-[#4B5563] whitespace-nowrap">{row.support}</div>
-                  <div className="text-[11px] text-[#9AA0AC]">{row.products}</div>
+                  <div className="mt-2.5 grid grid-cols-4 gap-2 sm:hidden">
+                    {[
+                      { label: "Quality", value: row.quality },
+                      { label: "Value", value: row.value },
+                      { label: "Support", value: row.support },
+                      { label: "Products", value: row.products },
+                    ].map((stat) => (
+                      <div key={stat.label} className="min-w-0">
+                        <div className="text-[9px] font-extrabold uppercase tracking-wide text-[#9AA0AC]">
+                          {stat.label}
+                        </div>
+                        <div className="text-[11.5px] text-[#4B5563] whitespace-nowrap">
+                          {stat.value}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className="hidden sm:block text-[11.5px] text-[#4B5563] whitespace-nowrap">{row.quality}</div>
+                  <div className="hidden sm:block text-[11.5px] text-[#4B5563] whitespace-nowrap">{row.value}</div>
+                  <div className="hidden sm:block text-[11.5px] text-[#4B5563] whitespace-nowrap">{row.support}</div>
+                  <div className="hidden sm:block text-[11px] text-[#9AA0AC]">{row.products}</div>
                 </div>
               ))}
             </div>

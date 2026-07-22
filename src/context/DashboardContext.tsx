@@ -10,6 +10,7 @@ import {
 } from '../lib/announcements';
 import type { CustomerAddress } from '../lib/address/addressTypes';
 import { ADDRESS_STORAGE_KEY, getDefaultAddress, normalizeDefaultAddress } from '../lib/address/addressUtils';
+import type { BookingOfferCard } from '../types/serviceBooking';
 
 export interface MessageThread {
   id: string;
@@ -43,6 +44,8 @@ export interface ThreadMessage {
     status?: string;
     counterPrice?: number;
   };
+  /** Negotiable service/product request rendered as a distinct card in this thread */
+  bookingOffer?: BookingOfferCard;
 }
 
 export interface Campaign {
@@ -112,7 +115,14 @@ interface DashboardContextType {
   addToCompare: (product: any) => void;
   removeFromCompare: (id: number) => void;
   addMessage: (text: string, sender: 'user' | 'other' | 'admin' | 'seller' | 'creator') => void;
-  addThreadMessage: (threadId: string, text: string, sender: 'user' | 'other' | 'admin' | 'seller' | 'creator', senderName?: string, productCard?: any) => void;
+  addThreadMessage: (
+    threadId: string,
+    text: string,
+    sender: 'user' | 'other' | 'admin' | 'seller' | 'creator',
+    senderName?: string,
+    productCard?: any,
+    bookingOffer?: BookingOfferCard,
+  ) => void;
   createNewThread: (id: string, title: string, avatar: string, type: 'retail' | 'general' | 'announcement', lastMessage: string, orderRef?: string) => void;
   markAllAsRead: () => void;
   addToRecentlyViewed: (product: any) => void;
@@ -641,6 +651,30 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   }, [addNotification]);
 
   useEffect(() => {
+    const onBookingPaid = (event: Event) => {
+      const detail = (event as CustomEvent).detail || {};
+      setThreadMessages((previous) =>
+        previous.map((message) =>
+          message.bookingOffer?.requestId === detail.requestId
+            ? {
+                ...message,
+                bookingOffer: {
+                  ...message.bookingOffer,
+                  status: 'paid' as const,
+                  orderId: detail.orderId,
+                },
+              }
+            : message,
+        ),
+      );
+    };
+    window.addEventListener('choosify-booking-paid', onBookingPaid);
+    return () => {
+      window.removeEventListener('choosify-booking-paid', onBookingPaid);
+    };
+  }, []);
+
+  useEffect(() => {
     const handleOrderPlaced = (e: CustomEvent) => {
       const orderId = e.detail?.orderId || 'unknown';
       addNotification(`Your order ${orderId} was placed successfully!`, 'order');
@@ -689,6 +723,103 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     localStorage.setItem('choosify_thread_messages', JSON.stringify(threadMessages));
   }, [threadMessages]);
 
+  // Booking deadlines run at the dashboard provider level, not only while Messages is open.
+  React.useEffect(() => {
+    const expireLatestOffers = () => {
+      const now = Date.now();
+      const latestByRequest = new Map<string, { id: number; version: number }>();
+      for (const message of threadMessages) {
+        const offer = message.bookingOffer;
+        if (!offer) continue;
+        const current = latestByRequest.get(offer.requestId);
+        if (!current || offer.version > current.version) {
+          latestByRequest.set(offer.requestId, {
+            id: message.id,
+            version: offer.version,
+          });
+        }
+      }
+
+      const notifiedSet = new Set<string>(
+        readStoredArray('choosify_booking_expiry_notified').map(String),
+      );
+      let changed = false;
+      const responseExpired: string[] = [];
+      const paymentExpired: Array<{ requestId: string; orderId?: string }> = [];
+      const nextMessages = threadMessages.map((message) => {
+          const offer = message.bookingOffer;
+          if (!offer || latestByRequest.get(offer.requestId)?.id !== message.id) {
+            return message;
+          }
+          if (
+            offer.status === 'pending' &&
+            new Date(offer.sellerRespondBy).getTime() <= now
+          ) {
+            changed = true;
+            const key = `${offer.requestId}:response`;
+            if (!notifiedSet.has(key)) {
+              notifiedSet.add(key);
+              responseExpired.push(offer.requestId);
+            }
+            return {
+              ...message,
+              bookingOffer: { ...offer, status: 'expired' as const },
+            };
+          }
+          if (
+            (offer.status === 'accepted' || offer.status === 'buyer_accepted') &&
+            offer.buyerPayBy &&
+            new Date(offer.buyerPayBy).getTime() <= now
+          ) {
+            changed = true;
+            const key = `${offer.requestId}:payment`;
+            if (!notifiedSet.has(key)) {
+              notifiedSet.add(key);
+              paymentExpired.push({
+                requestId: offer.requestId,
+                orderId: offer.orderId,
+              });
+            }
+            return {
+              ...message,
+              bookingOffer: { ...offer, status: 'payment_expired' as const },
+            };
+          }
+          return message;
+      });
+      if (changed) {
+        setThreadMessages(nextMessages);
+        responseExpired.forEach((requestId) =>
+          addNotification(
+            `Request ${requestId} expired without a seller response.`,
+            'message',
+          ),
+        );
+        paymentExpired.forEach(({ requestId, orderId }) => {
+          addNotification(
+            `Payment window expired for request ${requestId}.`,
+            'order',
+          );
+          if (orderId) {
+            window.dispatchEvent(
+              new CustomEvent('choosify-booking-payment-expired', {
+                detail: { orderId, requestId },
+              }),
+            );
+          }
+        });
+        localStorage.setItem(
+          'choosify_booking_expiry_notified',
+          JSON.stringify([...notifiedSet]),
+        );
+      }
+    };
+
+    expireLatestOffers();
+    const timer = window.setInterval(expireLatestOffers, 60_000);
+    return () => window.clearInterval(timer);
+  }, [threadMessages, addNotification]);
+
   const addMessage = (text: string, sender: 'user' | 'other' | 'admin' | 'seller' | 'creator' = 'user') => {
     const newMessage = {
       id: Date.now(),
@@ -711,7 +842,8 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     text: string, 
     sender: 'user' | 'other' | 'admin' | 'seller' | 'creator', 
     senderName?: string,
-    productCard?: any
+    productCard?: any,
+    bookingOffer?: BookingOfferCard,
   ) => {
     if (threadId === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID && sender === 'user') {
       return;
@@ -726,7 +858,8 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       time: timeStr,
       senderName: senderName || (sender === 'user' ? 'Me' : 'Partner Representative'),
       avatar: sender === 'user' ? undefined : `https://i.pravatar.cc/150?u=${threadId}`,
-      productCard
+      productCard,
+      bookingOffer,
     };
 
     setThreadMessages(prev => [...prev, newMsg]);

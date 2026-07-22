@@ -2,6 +2,7 @@ import { MOCK_BRAND_POSTS } from '../data/mockBrandPosts';
 import { catalogApi } from '../services/catalogApi';
 import type { CatalogBrandPost } from '../types/catalog';
 import type { BrandPost, BrandPostKind } from '../types/brandPost';
+import { rankBrandStories } from '../utils/listingRanking';
 
 const now = () => Date.now();
 
@@ -61,13 +62,9 @@ export function getBrandPostBySlug(slug: string): BrandPost | undefined {
 }
 
 export function getBrandPostsByBrandId(brandId: number): BrandPost[] {
-  return getAllBrandPosts()
-    .filter((post) => post.brandId === brandId)
-    .sort((a, b) => {
-      const aTime = a.startDate ? new Date(a.startDate).getTime() : 0;
-      const bTime = b.startDate ? new Date(b.startDate).getTime() : 0;
-      return aTime - bTime;
-    });
+  return rankBrandStories(
+    getAllBrandPosts().filter((post) => post.brandId === brandId),
+  );
 }
 
 export function filterBrandPosts(options?: {

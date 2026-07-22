@@ -12,6 +12,7 @@ import type { SpotlightCommerceOverlay } from './commerceOverlay';
 import type { SpotlightLiveConfig } from './live';
 import type { SpotlightDiscoveryScore } from '../discovery/discoveryScore';
 import type { SpotlightPageSectionConfig } from './pageSections';
+import type { ContentDetailSectionConfig } from './contentDetailSections';
 
 export interface SpotlightContent {
   contentId: string;
@@ -19,6 +20,12 @@ export interface SpotlightContent {
   contentType: SpotlightContentType;
   sourceKind: SpotlightContentSourceKind;
   sourceId: string;
+
+  /**
+   * Vertical taxonomy (Tech & Electronics, Travel & Hospitality, …).
+   * Drives section *labels* via categorySectionLabels — not which sections exist.
+   */
+  category?: string;
 
   publisher: SpotlightPublisher;
   collaborators?: SpotlightCollaborator[];
@@ -51,7 +58,13 @@ export interface SpotlightContent {
   extraProductCount?: number;
   seasonalTheme?: string;
 
-  /** CMS section manifest — controls which page blocks render (UX-08) */
+  /**
+   * Per-item optional sections (ordered + enabled + data) from creator admin.
+   * Preferred over pageSections for the universal Content Detail renderer.
+   */
+  sections?: ContentDetailSectionConfig[];
+
+  /** @deprecated Prefer `sections` — legacy CMS visibility list (still supported) */
   pageSections?: SpotlightPageSectionConfig[];
 }
 

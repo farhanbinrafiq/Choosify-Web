@@ -80,7 +80,11 @@ export function HomeSpotlightPreviewSection({ items }: HomeSpotlightPreviewSecti
                   loading="lazy"
                 />
                 <span className="absolute top-2 left-2 bg-[#FF000D] text-white text-[8.5px] font-extrabold px-2 py-0.5 rounded pointer-events-none">
-                  YOUTUBE
+                  {card.priorityTier === 'active_live'
+                    ? 'LIVE'
+                    : card.priorityTier === 'live_grace'
+                      ? 'REPLAY'
+                      : 'YOUTUBE'}
                 </span>
                 <ViralSaveButton size={11} className="absolute top-2 right-2 w-6 h-6" />
                 {card.duration && (

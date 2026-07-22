@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '../../lib/utils';
 import { PAYMENT_ICON, type PaymentIconKey } from './brandIcons';
 
 export type PaymentMethodId = PaymentIconKey;
@@ -64,29 +65,38 @@ export function PaymentMethodsGrid({
   className?: string;
   layout?: 'grid' | 'row';
 }) {
+  if (layout === 'row') {
+    // Uniform auto-fill grid keeps every icon cell the same size and evenly
+    // spaced regardless of viewport width (mobile + desktop).
+    return (
+      <div
+        className={cn(
+          'grid grid-cols-[repeat(auto-fill,minmax(52px,1fr))] gap-2 max-w-[440px]',
+          className,
+        )}
+      >
+        {PAYMENT_METHODS.map((method) => (
+          <PaymentMethodBadge
+            key={method.id}
+            id={method.id}
+            className="inline-flex items-center justify-center h-9 w-full px-1.5 rounded-md overflow-hidden bg-white"
+          />
+        ))}
+      </div>
+    );
+  }
+
   const [topRow, bottomRow] = splitPaymentRows(PAYMENT_METHODS);
 
   return (
     <div className={className ?? 'flex flex-col gap-2'}>
-      <div
-        className={
-          layout === 'row'
-            ? 'flex flex-wrap items-center gap-2'
-            : 'grid grid-cols-2 gap-2'
-        }
-      >
+      <div className="grid grid-cols-2 gap-2">
         {topRow.map((method) => (
           <PaymentMethodBadge key={method.id} id={method.id} />
         ))}
       </div>
       {bottomRow.length > 0 && (
-        <div
-          className={
-            layout === 'row'
-              ? 'flex flex-wrap items-center gap-2'
-              : 'grid grid-cols-2 gap-2'
-          }
-        >
+        <div className="grid grid-cols-2 gap-2">
           {bottomRow.map((method) => (
             <PaymentMethodBadge key={method.id} id={method.id} />
           ))}

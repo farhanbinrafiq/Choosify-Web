@@ -7,17 +7,18 @@ import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { useGlobalState } from '../context/GlobalStateContext';
-import { DcListingHero } from '../components/design/DcListingHero';
 import { DcListingStickyFilters } from '../components/design/DcListingStickyFilters';
 import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
 import { PaginationBar } from '../components/PaginationBar';
-import {PRODUCT_CARD_GRID, PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
+import { PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 import { ListingAdRail } from '../components/ListingAdRail';
 import { AdSenseSlot } from '../components/AdSenseSlot';
 import { usePlacements } from '../hooks/usePlacements';
 import { PLACEMENT_KEYS, INFEED_INTERVAL, INFEED_MAX_PER_PAGE } from '../lib/placements';
 import { injectPlacementsIntoFeed } from '../utils/injectFeedPlacements';
+import { rankDeals, dealDiscountPercent } from '../utils/listingRanking';
+import { usePriorityClockMs } from '../hooks/usePriorityClockMs';
 import { ProductsSponsoredBanner, AdvertiseHereCard } from '../components/commerce/AdvertiseHereCard';
 import {
   DealsAuthenticationStrip,
@@ -100,6 +101,7 @@ export function DealsPage() {
   const [activeTab, setActiveTab] = useState(getInitialTab);
   const [minDiscount, setMinDiscount] = useState<number>(0);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
+  const priorityNowMs = usePriorityClockMs();
   const productSource: any[] = allProducts.length > 0 ? allProducts : PRODUCTS;
   const brandSource: any[] =
     allBrands.length > 0
@@ -199,10 +201,7 @@ export function DealsPage() {
     }
 
     if (minDiscount > 0) {
-      result = result.filter(p => {
-        const pct = (p.id % 4) * 15 + 10;
-        return pct >= minDiscount;
-      });
+      result = result.filter((p) => dealDiscountPercent(p) >= minDiscount);
     }
 
     if (searchQuery.trim()) {
@@ -214,8 +213,8 @@ export function DealsPage() {
         (p.description || '').toLowerCase().includes(q)
       );
     }
-    return result;
-  }, [searchQuery, activeTab, selectedCategory, minDiscount, productSource]);
+    return rankDeals(result, priorityNowMs);
+  }, [searchQuery, activeTab, selectedCategory, minDiscount, productSource, priorityNowMs]);
 
   const infeedPlacements = usePlacements(PLACEMENT_KEYS.INFEED_DEAL, {
     limit: INFEED_MAX_PER_PAGE,
@@ -351,19 +350,13 @@ export function DealsPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
-      <DcListingHero
-        titleBefore="Grab Today's Best"
-        titleHighlight="Deals"
+      <DcListingStickyFilters
+        className="mt-5"
+        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
         searchPlaceholder="Search deals..."
         quickChips={['Flash Sale', 'Bank Offer', 'Cashback', 'Coupons', 'Weekend', 'Clearance']}
         onSearch={(q) => setSearchQuery(q)}
         onChipClick={(q) => setSearchQuery(q)}
-        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
-      />
-
-      <DcListingStickyFilters
-        overlapHero
-        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
         items={[
           {
             id: 'flash',
@@ -631,9 +624,9 @@ export function DealsPage() {
                       <FlashDealCountdown />
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5 mb-3.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 mb-3.5">
                     {(filteredProducts.length > 0 ? filteredProducts : productSource)
-                      .slice(0, 3)
+                      .slice(0, 4)
                       .map((product: any, idx: number) => {
                         const orig =
                           typeof product.originalPrice === 'number'
@@ -732,7 +725,8 @@ export function DealsPage() {
                     </span>
                   </div>
 
-                  <div className={cn(PRODUCT_CARD_GRID, 'text-left')}>
+                  {/* Top Deals — capped at 4 per row on desktop */}
+                  <div className="grid grid-cols-1 min-[520px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch text-left">
                     {activeTab === 'Promo Codes' ? (
                       promoCodes.map((promo) => (
                         <div

@@ -6,7 +6,6 @@ import { useSpotlightExperience } from '../hooks/useSpotlightExperience';
 import { createSpotlightImpressionLogger } from '../hooks/useSpotlightImpression';
 import { useSpotlightHistory } from '../hooks/useSpotlightHistory';
 import { SpotlightEmptyState } from '../components/spotlight/homepage/SpotlightEmptyState';
-import { DiscoverHero } from '../components/spotlight/discovery/DiscoverHero';
 import { DiscoverStickyFormatNav } from '../components/spotlight/discovery/DiscoverStickyFormatNav';
 import { DiscoverStructuredFeed } from '../components/spotlight/discovery/DiscoverStructuredFeed';
 import { useGlobalState } from '../context/GlobalStateContext';
@@ -15,6 +14,11 @@ import type { SpotlightContentTabId } from '../types/spotlight/discovery/navigat
 import { listFollows, listSaves } from '../utils/spotlightUserSignals';
 import { useSpotlightFloatingFilters } from '../hooks/useSpotlightFloatingFilters';
 import { filterSpotlightFeedItems, SPOTLIGHT_FEED_VISIBLE_KEY } from '../utils/spotlightMixedFeed';
+import {
+  hasActiveLiveContent,
+  prioritizeSpotlightContent,
+} from '../utils/contentPriority';
+import { usePriorityClockMs } from '../hooks/usePriorityClockMs';
 import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
 
 const FORMAT_FILTER_TABS = new Set<SpotlightContentTabId>([
@@ -83,6 +87,8 @@ export function SpotlightDiscoverPage() {
     }
   }, [filters, activeTab, replayOnly, upcomingOnly]);
 
+  const priorityNowMs = usePriorityClockMs();
+
   const feedItems = useMemo(() => {
     let base = filterSpotlightFeedItems(allContent, filters, {
       activeTab,
@@ -106,8 +112,14 @@ export function SpotlightDiscoverPage() {
     if (linkedBrandId) {
       base = base.filter((item) => item.connections?.brandIds?.some((id) => String(id) === linkedBrandId));
     }
-    return base;
-  }, [allContent, filters, activeTab, followedIds, savedIds, replayOnly, upcomingOnly, linkedProductId, linkedBrandId]);
+    // Shared priority: active LIVE → 24h grace → fresh 24h → standard fill
+    return prioritizeSpotlightContent(base, priorityNowMs);
+  }, [allContent, filters, activeTab, followedIds, savedIds, replayOnly, upcomingOnly, linkedProductId, linkedBrandId, priorityNowMs]);
+
+  const hasActiveLive = useMemo(
+    () => hasActiveLiveContent(feedItems, priorityNowMs) || hasActiveLiveContent(allContent, priorityNowMs),
+    [feedItems, allContent, priorityNowMs],
+  );
 
   const hasActiveFilters = useMemo(() => {
     if (activeFilterCount > 0) return true;
@@ -137,18 +149,12 @@ export function SpotlightDiscoverPage() {
 
   return (
     <div id="spotlight-root" className="flex flex-col min-h-screen bg-choosify-feed">
-      <DiscoverHero
-        query={filters.query ?? ''}
+      <DiscoverStickyFormatNav
+        quickFilters={quickFilters}
+        filters={filters}
+        activeTab={activeTab}
         onQuerySubmit={(q) => setFilters({ ...filters, query: q })}
       />
-
-      {hasContent && (
-        <DiscoverStickyFormatNav
-          quickFilters={quickFilters}
-          filters={filters}
-          activeTab={activeTab}
-        />
-      )}
 
       <main
         className={`${LISTING_PAGE_MAX_WIDTH} mx-auto px-5 sm:px-8 lg:px-10 pb-[60px] w-full ${PAGE_LISTING_SINGLE_SHELL}`}
@@ -169,6 +175,7 @@ export function SpotlightDiscoverPage() {
               activeTab={activeTab}
               onClearFilters={clearAllFilters}
               hasActiveFilters={hasActiveFilters}
+              hasActiveLive={hasActiveLive}
             />
           )}
 

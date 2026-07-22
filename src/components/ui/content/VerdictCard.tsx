@@ -22,7 +22,7 @@ export const VerdictCard: React.FC<VerdictCardProps> = ({
   className
 }) => {
   return (
-    <div className={cn("choosify-dark-surface rounded-none p-8 md:p-10 text-white relative overflow-hidden", className)}>
+    <div className={cn("choosify-dark-surface rounded-xl p-8 md:p-10 text-white relative overflow-hidden", className)}>
       <div className="absolute top-0 right-0 w-64 h-64 bg-[#EB4501]/10 rounded-full blur-3xl pointer-events-none" />
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
       

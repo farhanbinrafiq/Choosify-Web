@@ -172,7 +172,7 @@ export function BrandDetailHero({
         </div>
 
         <div className="flex flex-col md:flex-row gap-4 mb-6">
-          <div className="bg-white border border-[#E8EDF2] rounded-none p-5 md:w-[300px] shadow-[0_2px_10px_rgba(0,0,0,0.03)] shrink-0">
+          <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-5 md:w-[300px] shadow-[0_2px_10px_rgba(0,0,0,0.03)] shrink-0">
             <div className="text-[11px] font-extrabold text-[#9AA0AC] tracking-wide mb-2.5">BRAND SCORE</div>
             <div className="flex items-baseline gap-2 mb-4">
               <div className="text-[30px] font-extrabold text-[#1A1A2E]">{score}</div>
@@ -191,7 +191,7 @@ export function BrandDetailHero({
             ))}
           </div>
 
-          <div className="bg-white border border-[#E8EDF2] rounded-none p-5 flex-1 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
+          <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-5 flex-1 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
             <div className="text-[11px] font-extrabold text-[#9AA0AC] tracking-wide mb-4">BRAND FACTS</div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-x-4 gap-y-5">
               {brandFacts.map((f) => (
@@ -204,7 +204,7 @@ export function BrandDetailHero({
           </div>
         </div>
 
-        <div className="bg-white border border-[#E8EDF2] rounded-none px-5 sm:px-7 py-[18px] flex flex-wrap items-center gap-x-8 gap-y-4 mb-2 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
+        <div className="bg-white border border-[#E8EDF2] rounded-[10px] px-5 sm:px-7 py-[18px] flex flex-wrap items-center gap-x-8 gap-y-4 mb-2 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
           {bar.map((item) => (
             <div key={item.label}>
               <div className="text-base font-extrabold text-[#1A1A2E] flex items-center gap-1.5">

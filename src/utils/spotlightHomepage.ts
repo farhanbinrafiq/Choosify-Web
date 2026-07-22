@@ -13,6 +13,7 @@ import { getMediaById, listCampaignRecords } from '../services/spotlightCampaign
 import type { UniversalMedia } from '../components/media/types/mediaModel';
 
 const NOW = () => Date.now();
+const LIVE_GRACE_MS = 24 * 60 * 60 * 1000;
 
 function isCampaignActive(c: SpotlightCampaignRecord): boolean {
   if (c.status !== 'published' && c.status !== 'scheduled') return false;
@@ -24,8 +25,32 @@ function isCampaignActive(c: SpotlightCampaignRecord): boolean {
   return start <= now && end >= now;
 }
 
+/** Livestreams that ended within the last 24h (grace pin for Viral Today / Discover). */
+function isLivestreamInGracePeriod(c: SpotlightCampaignRecord, nowMs: number = NOW()): boolean {
+  if (c.campaignType !== 'livestream') return false;
+  if (c.status !== 'published' && c.status !== 'scheduled' && c.status !== 'expired') return false;
+  const surfaces = c.placementRules?.surfaces ?? [];
+  if (surfaces.length && !surfaces.includes('homepage') && !surfaces.includes('spotlight_feed')) return false;
+  const end = new Date(c.schedule.endAt).getTime();
+  if (!Number.isFinite(end) || end > nowMs) return false;
+  return nowMs - end <= LIVE_GRACE_MS;
+}
+
 export function listHomepageSpotlightCampaigns(): SpotlightCampaignRecord[] {
   return listCampaignRecords().filter(isCampaignActive);
+}
+
+/**
+ * Active homepage campaigns plus livestreams still inside the 24h post-end grace window.
+ * Used by Viral Today prioritization — does not change the main Spotlight carousel.
+ */
+export function listViralTodaySpotlightCampaigns(nowMs: number = NOW()): SpotlightCampaignRecord[] {
+  const records = listCampaignRecords();
+  const active = records.filter(isCampaignActive);
+  const grace = records.filter(
+    (c) => isLivestreamInGracePeriod(c, nowMs) && !active.some((a) => a.campaignId === c.campaignId),
+  );
+  return [...active, ...grace];
 }
 
 function matchesFilter(c: SpotlightCampaignRecord, filter: SpotlightHomepageFilter): boolean {

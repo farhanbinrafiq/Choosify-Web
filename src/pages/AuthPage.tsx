@@ -987,8 +987,8 @@ export const AuthPage: React.FC = () => {
             <a href="https://www.youtube.com/@choosifybd" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full overflow-hidden bg-white flex items-center justify-center hover:opacity-90 transition-opacity" aria-label="YouTube">
               <img src="/icons/youtube.svg" alt="" className="w-5 h-5 object-contain" draggable={false} />
             </a>
-            <a href="https://www.linkedin.com/company/choosifybangladesh/" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full overflow-hidden bg-black flex items-center justify-center hover:opacity-90 transition-opacity" aria-label="LinkedIn">
-              <img src="/icons/linkedin.png" alt="" className="w-full h-full object-cover" draggable={false} />
+            <a href="https://www.linkedin.com/company/choosifybangladesh/" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full overflow-hidden bg-white flex items-center justify-center hover:opacity-90 transition-opacity" aria-label="LinkedIn">
+              <img src="/icons/linkedin.svg" alt="" className="w-5 h-5 object-contain" draggable={false} />
             </a>
             <a href="https://www.tiktok.com/@choosify.bd" target="_blank" rel="noreferrer" className="w-8 h-8 rounded-full overflow-hidden bg-white flex items-center justify-center hover:opacity-90 transition-opacity" aria-label="TikTok">
               <img src="/icons/tiktok.svg" alt="" className="w-5 h-5 object-contain" draggable={false} />
@@ -1060,7 +1060,7 @@ export const AuthPage: React.FC = () => {
                     <EmiAiLogo size={28} className="w-7 h-7" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-black">Ask EMI AI Assistant</h4>
+                    <h4 className="text-sm font-black">Ask Emi. A.I Assistant</h4>
                     <span className="text-[10px] text-emerald-400 font-extrabold flex items-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-ping inline-block" />
                       Active & Ready

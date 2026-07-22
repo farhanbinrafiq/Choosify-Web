@@ -79,7 +79,7 @@ export default function NotFoundPage() {
         </p>
 
         <div className="mt-8 sm:mt-10 w-[200px] h-[200px] sm:w-[260px] sm:h-[260px] flex items-center justify-center">
-          <EmiAiLogo size={260} title="Emi AI" className="w-full h-full" />
+          <EmiAiLogo size={260} title="Emi. A.I" className="w-full h-full" />
         </div>
       </div>
 

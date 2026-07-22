@@ -14,7 +14,11 @@ import {
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { operationsApi } from '../services/operationsApi';
+import { notificationApi } from '../services/notificationApi';
 import { MessagesRightRail } from '../components/messages/MessagesRightRail';
+import { BookingOfferMessageCard } from '../components/booking/BookingOfferMessageCard';
+import type { BookingOfferCard } from '../types/serviceBooking';
+import type { Order } from '../types/schemas';
 
 type ConversationTab = 'all' | 'orders' | 'support' | 'unread';
 
@@ -28,8 +32,17 @@ export function MessagesPage({
 } = {}) {
   const { threadId: routeThreadId } = useParams<{ threadId?: string }>();
   const navigate = useNavigate();
-  const { threads, threadMessages, addThreadMessage, createNewThread, markAllAsRead, setThreads, setThreadMessages } = useDashboard();
-  const { orders } = useGlobalState();
+  const {
+    threads,
+    threadMessages,
+    addThreadMessage,
+    createNewThread,
+    markAllAsRead,
+    setThreads,
+    setThreadMessages,
+    addNotification,
+  } = useDashboard();
+  const { orders, addOrder, currentUser } = useGlobalState();
   const [inputText, setInputText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [conversationTab, setConversationTab] = useState<ConversationTab>('all');
@@ -166,6 +179,201 @@ export function MessagesPage({
     });
   };
 
+  const appendOfferState = (
+    offer: BookingOfferCard,
+    updates: Partial<BookingOfferCard>,
+    sender: 'user' | 'seller',
+    text: string,
+  ) => {
+    if (!activeThreadId) return;
+    const next: BookingOfferCard = {
+      ...offer,
+      ...updates,
+      version: offer.version + 1,
+      createdAt: new Date().toISOString(),
+    };
+    addThreadMessage(
+      activeThreadId,
+      text,
+      sender,
+      sender === 'user' ? 'Me' : offer.sellerName,
+      undefined,
+      next,
+    );
+  };
+
+  const acceptBookingOffer = (offer: BookingOfferCard) => {
+    if (offer.orderId || orders.some((order) => order.bookingRequestId === offer.requestId)) {
+      toast('A pending order already exists for this request.');
+      return;
+    }
+    const orderId = `BOOK-${Date.now()}`;
+    const buyerPayBy = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString();
+    const invoiceId = `INV-${Date.now()}`;
+    const quantity = offer.isService ? 1 : Number(offer.fields.quantity || 1);
+    const order: Order = {
+      orderId,
+      buyerId: currentUser.id,
+      isCOD: false,
+      isSplit: false,
+      overallTotal: offer.price,
+      subOrders: [
+        {
+          sellerId: offer.sellerId,
+          sellerBusinessName: offer.sellerName,
+          items: [
+            {
+              productId: Number(offer.listingId) || 0,
+              productTitle: offer.listingTitle,
+              quantity,
+              price: offer.price / Math.max(1, quantity),
+              productType: offer.isService ? 'service' : 'physical',
+              serviceCategory: offer.serviceCategory,
+              serviceDetails: offer.fields,
+            },
+          ],
+          deliveryFee: 0,
+          invoiceId,
+          trackingStatus: 'pending',
+        },
+      ],
+      createdAt: new Date().toISOString(),
+      status: 'pending_payment',
+      bookingRequestId: offer.requestId,
+      paymentDueAt: buyerPayBy,
+    };
+    addOrder(order);
+    appendOfferState(
+      offer,
+      { status: 'buyer_accepted', buyerPayBy, orderId },
+      'user',
+      `Offer accepted. Pending order ${orderId} was created; payment is due within 8 hours.`,
+    );
+    addNotification(
+      `You accepted ${offer.sellerName}'s offer. Complete payment for ${orderId} within 8 hours.`,
+      'order',
+    );
+    window.dispatchEvent(
+      new CustomEvent('choosify-booking-buyer-accepted', {
+        detail: { requestId: offer.requestId, orderId, sellerId: offer.sellerId },
+      }),
+    );
+    notificationApi
+      .createAndSend({
+        title: 'Buyer accepted your offer',
+        message: `Request ${offer.requestId} was accepted. Pending order ${orderId} was created.`,
+        type: 'order',
+        audience: `user:${offer.sellerId}`,
+        sendWeb: true,
+      })
+      .catch(() => {});
+    toast.success('Offer accepted. Pending payment order created.');
+  };
+
+  const declineBookingOffer = (offer: BookingOfferCard) => {
+    appendOfferState(
+      offer,
+      { status: 'buyer_declined' },
+      'user',
+      `Buyer declined offer version ${offer.version}.`,
+    );
+    toast.success('Offer declined.');
+  };
+
+  const sellerRespondToOffer = (
+    offer: BookingOfferCard,
+    action: 'accept' | 'decline' | 'counter',
+  ) => {
+    if (action === 'decline') {
+      const reason = window.prompt('Decline reason (required):')?.trim();
+      if (!reason) {
+        toast.error('A decline reason is required.');
+        return;
+      }
+      appendOfferState(
+        offer,
+        { status: 'declined', declineReason: reason },
+        'seller',
+        `Seller declined this request: ${reason}`,
+      );
+      addNotification(`${offer.sellerName} declined your request: ${reason}`, 'message');
+      notificationApi
+        .createAndSend({
+          title: 'Booking request declined',
+          message: `${offer.sellerName} declined request ${offer.requestId}: ${reason}`,
+          type: 'order',
+          audience: `user:${offer.buyerId}`,
+          sendWeb: true,
+        })
+        .catch(() => {});
+      return;
+    }
+
+    if (action === 'counter') {
+      const entered = window.prompt('Enter modified total price (BDT):', String(offer.price));
+      const price = Number(entered);
+      if (!Number.isFinite(price) || price <= 0) {
+        toast.error('Enter a valid counter-offer price.');
+        return;
+      }
+      const modifiedDetails = window
+        .prompt(
+          'Describe any modified booking details (optional):',
+          String(offer.fields.sellerModification || ''),
+        )
+        ?.trim();
+      appendOfferState(
+        offer,
+        {
+          status: 'countered',
+          originalPrice: offer.price,
+          price,
+          fields: modifiedDetails
+            ? { ...offer.fields, sellerModification: modifiedDetails }
+            : offer.fields,
+          buyerPayBy: undefined,
+        },
+        'seller',
+        `Seller sent a modified offer of BDT ${price.toLocaleString()}.`,
+      );
+      addNotification(
+        `${offer.sellerName} sent a counter-offer of BDT ${price.toLocaleString()}.`,
+        'message',
+      );
+      notificationApi
+        .createAndSend({
+          title: 'New counter-offer',
+          message: `${offer.sellerName} modified request ${offer.requestId} to BDT ${price.toLocaleString()}.`,
+          type: 'order',
+          audience: `user:${offer.buyerId}`,
+          sendWeb: true,
+        })
+        .catch(() => {});
+      return;
+    }
+
+    const buyerPayBy = new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString();
+    appendOfferState(
+      offer,
+      { status: 'accepted', buyerPayBy },
+      'seller',
+      'Seller accepted this request. Complete payment within 8 hours.',
+    );
+    addNotification(
+      `${offer.sellerName} accepted your request. You have 8 hours to complete payment.`,
+      'message',
+    );
+    notificationApi
+      .createAndSend({
+        title: 'Booking request accepted',
+        message: `${offer.sellerName} accepted request ${offer.requestId}. Complete payment within 8 hours.`,
+        type: 'order',
+        audience: `user:${offer.buyerId}`,
+        sendWeb: true,
+      })
+      .catch(() => {});
+  };
+
   const handleSendMessage = () => {
     if (!inputText.trim() || !activeThreadId || isAnnouncementsThread) return;
 
@@ -281,7 +489,7 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
     <div
       className={
         embedded
-          ? 'flex flex-col bg-transparent text-[#1A1A2E] h-[min(720px,calc(100dvh-10rem))] max-h-[calc(100dvh-10rem)] overflow-hidden rounded-none border border-[#E8EDF2] bg-white'
+          ? 'flex flex-col bg-transparent text-[#1A1A2E] h-[min(720px,calc(100dvh-10rem))] max-h-[calc(100dvh-10rem)] overflow-hidden rounded-[10px] border border-[#E8EDF2] bg-white'
           : 'flex flex-col bg-choosify-feed text-[#1A1A2E] h-[calc(100dvh-var(--choosify-navbar-height,4rem))] max-h-[calc(100dvh-var(--choosify-navbar-height,4rem))] overflow-hidden'
       }
     >
@@ -696,6 +904,57 @@ Thank you for sending this custom parameter card! We have logged BDT ${(unitPric
                           isOutgoing ? 'ml-auto items-end' : 'mr-auto items-start'
                         }`}
                       >
+                        {m.bookingOffer && (
+                          <div className="mb-2 w-full max-w-sm">
+                            <BookingOfferMessageCard
+                              offer={m.bookingOffer}
+                              onAccept={
+                                m.bookingOffer.status === 'countered' ||
+                                m.bookingOffer.status === 'accepted'
+                                  ? () => acceptBookingOffer(m.bookingOffer!)
+                                  : undefined
+                              }
+                              onDecline={
+                                m.bookingOffer.status === 'countered' ||
+                                m.bookingOffer.status === 'accepted'
+                                  ? () => declineBookingOffer(m.bookingOffer!)
+                                  : undefined
+                              }
+                            />
+                            {currentUser.role === 'seller' &&
+                              m.bookingOffer.status === 'pending' && (
+                                <div className="mt-2 flex flex-wrap justify-end gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      sellerRespondToOffer(m.bookingOffer!, 'decline')
+                                    }
+                                    className="rounded-lg border border-red-200 bg-white px-3 py-1.5 text-[9px] font-bold text-red-600"
+                                  >
+                                    Decline
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      sellerRespondToOffer(m.bookingOffer!, 'counter')
+                                    }
+                                    className="rounded-lg border border-violet-200 bg-white px-3 py-1.5 text-[9px] font-bold text-violet-700"
+                                  >
+                                    Modify / Counter
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      sellerRespondToOffer(m.bookingOffer!, 'accept')
+                                    }
+                                    className="rounded-lg border-0 bg-emerald-600 px-3 py-1.5 text-[9px] font-bold text-white"
+                                  >
+                                    Accept
+                                  </button>
+                                </div>
+                              )}
+                          </div>
+                        )}
                         {m.productCard && (
                           <div className="w-full max-w-sm rounded-[10px] overflow-hidden border border-[#E8EDF2] mb-2 text-left bg-white shadow-sm">
                             <div className="px-4 py-2 border-b border-[#E8EDF2] flex items-center justify-between bg-[#F4F7F9]">

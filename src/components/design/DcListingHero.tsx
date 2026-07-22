@@ -14,6 +14,11 @@ interface DcListingHeroProps {
   quickChips?: string[];
   onSearch?: (query: string) => void;
   onChipClick?: (chip: string) => void;
+  /**
+   * When false, render title-only hero — search/chips live in the merged
+   * sticky shell (`DcListingStickyFilters`) instead.
+   */
+  showSearch?: boolean;
   /** Match listing feed width (Home/Product/Guide detail stay full-bleed elsewhere) */
   maxWidthClass?: string;
   className?: string;
@@ -31,6 +36,7 @@ export function DcListingHero({
   quickChips = [],
   onSearch,
   onChipClick,
+  showSearch = true,
   maxWidthClass = LISTING_PAGE_MAX_WIDTH,
   className,
 }: DcListingHeroProps) {
@@ -46,7 +52,8 @@ export function DcListingHero({
       <div
         className={cn(
           maxWidthClass,
-          'mx-auto relative px-5 sm:px-10 pt-14 pb-14 text-center text-white overflow-hidden rounded-none choosify-dark-surface',
+          'mx-auto relative px-5 sm:px-10 pt-14 text-center text-white overflow-hidden rounded-none choosify-dark-surface',
+          showSearch ? 'pb-14' : 'pb-16',
         )}
         style={{ background: DC_LISTING_HERO_BG }}
       >
@@ -55,7 +62,12 @@ export function DcListingHero({
             {eyebrow}
           </div>
         )}
-        <h1 className="relative z-[1] text-3xl md:text-[36px] font-extrabold leading-tight mb-7">
+        <h1
+          className={cn(
+            'relative z-[1] text-3xl md:text-[36px] font-extrabold leading-tight',
+            showSearch ? 'mb-7' : 'mb-0',
+          )}
+        >
           {titleBefore}{' '}
           <span
             className={cn(
@@ -67,42 +79,46 @@ export function DcListingHero({
           </span>
         </h1>
 
-        <form
-          onSubmit={submit}
-          className="relative z-[1] max-w-[min(100%,400px)] mx-auto mb-6 bg-white/10 backdrop-blur-[14px] border border-white/22 rounded-full p-1 flex items-center gap-1 min-w-0"
-        >
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder={searchPlaceholder}
-            className="flex-1 min-w-0 h-8 border-none bg-transparent rounded-full px-3 sm:px-4 text-xs text-white placeholder:text-white/50 outline-none"
-          />
-          <button
-            type="submit"
-            className="bg-white/14 border border-white/25 text-white h-8 px-3 sm:px-4 rounded-full text-[10px] sm:text-[11px] font-bold inline-flex items-center gap-1 shrink-0 hover:bg-white/20 transition-colors whitespace-nowrap"
-          >
-            <Search size={12} aria-hidden />
-            Search
-          </button>
-        </form>
-
-        {quickChips.length > 0 && (
-          <div className="relative z-[1] flex justify-center gap-2.5 flex-wrap">
-            {quickChips.map((chip) => (
+        {showSearch && (
+          <>
+            <form
+              onSubmit={submit}
+              className="relative z-[1] max-w-[min(100%,400px)] mx-auto mb-6 bg-white/10 backdrop-blur-[14px] border border-white/22 rounded-full p-1 flex items-center gap-1 min-w-0"
+            >
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder={searchPlaceholder}
+                className="flex-1 min-w-0 h-8 border-none bg-transparent rounded-full px-3 sm:px-4 text-xs text-white placeholder:text-white/50 outline-none"
+              />
               <button
-                key={chip}
-                type="button"
-                onClick={() => {
-                  setQuery(chip);
-                  onChipClick?.(chip);
-                  onSearch?.(chip);
-                }}
-                className="bg-white/8 border border-white/16 text-white/85 text-[11px] font-semibold px-3.5 py-1.5 rounded-[14px] hover:bg-white/14 transition-colors"
+                type="submit"
+                className="bg-white/14 border border-white/25 text-white h-8 px-3 sm:px-4 rounded-full text-[10px] sm:text-[11px] font-bold inline-flex items-center gap-1 shrink-0 hover:bg-white/20 transition-colors whitespace-nowrap"
               >
-                🔍 {chip}
+                <Search size={12} aria-hidden />
+                Search
               </button>
-            ))}
-          </div>
+            </form>
+
+            {quickChips.length > 0 && (
+              <div className="relative z-[1] flex justify-center gap-2.5 flex-wrap">
+                {quickChips.map((chip) => (
+                  <button
+                    key={chip}
+                    type="button"
+                    onClick={() => {
+                      setQuery(chip);
+                      onChipClick?.(chip);
+                      onSearch?.(chip);
+                    }}
+                    className="bg-white/8 border border-white/16 text-white/85 text-[11px] font-semibold px-3.5 py-1.5 rounded-full hover:bg-white/14 transition-colors"
+                  >
+                    🔍 {chip}
+                  </button>
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

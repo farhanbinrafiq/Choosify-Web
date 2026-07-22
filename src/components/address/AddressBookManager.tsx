@@ -61,7 +61,7 @@ function AddressCard({
   const area = address.isCustomLocation && address.customArea ? address.customArea : address.area;
 
   return (
-    <article className="bg-white border border-[#E8EDF2] rounded-none p-5 hover:border-[#EB4501]/30 transition-all text-left h-full flex flex-col">
+    <article className="bg-white border border-[#E8EDF2] rounded-[10px] p-5 hover:border-[#EB4501]/30 transition-all text-left h-full flex flex-col">
       <div className="flex items-start justify-between gap-3">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-11 h-11 rounded-xl bg-[#FFF3EA] text-[#EB4501] flex items-center justify-center shrink-0">
@@ -164,7 +164,7 @@ function CheckoutPreviewCard({ address }: { address: CustomerAddress }) {
   const type = ADDRESS_TYPES.find((item) => item.id === address.type)?.label ?? 'Address';
 
   return (
-    <div className="rounded-none border border-[#E8EDF2] bg-white p-5 text-left">
+    <div className="rounded-[10px] border border-[#E8EDF2] bg-white p-5 text-left">
       <div className="flex items-center gap-2 mb-3">
         <Truck size={16} className="text-[#EB4501]" />
         <h4 className="text-[13px] font-bold tracking-tight text-[#1A1A2E]">
@@ -300,7 +300,7 @@ export function AddressBookManager({ embedded = false }: { embedded?: boolean })
       )}
 
       {customerAddresses.length === 0 ? (
-        <div className="py-16 border border-dashed border-[#E8EDF2] rounded-none bg-white text-center">
+        <div className="py-16 border border-dashed border-[#E8EDF2] rounded-[10px] bg-white text-center">
           <MapPin size={40} className="mx-auto text-[#EB4501] mb-4" />
           <h4 className="text-base font-extrabold tracking-tight text-[#1A1A2E]">
             No saved addresses yet

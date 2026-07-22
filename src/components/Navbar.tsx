@@ -165,7 +165,7 @@ export function Navbar() {
   const dashboardMiniMenu: Array<{ label: string; path: string; icon: any; tab?: string; dividerAbove?: boolean }> = [
     { label: 'My Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { label: 'My Orders', path: '/profile/orders', icon: Package },
-    { label: 'Wishlist', path: '/dashboard', tab: 'saved-products', icon: Heart },
+    { label: 'Saved Items', path: '/dashboard', tab: 'saved-items', icon: Heart },
     { label: 'Messages', path: '/messages', icon: MessageSquare },
   ];
 
@@ -173,7 +173,7 @@ export function Navbar() {
     setIsUserMenuOpen(false);
     setIsMobileProfileOpen(false);
     if (item.tab) {
-      navigate(item.path, { state: { activeTab: item.tab } });
+      navigate(`${item.path}?tab=${item.tab}`);
     } else {
       navigate(item.path);
     }

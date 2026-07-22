@@ -1240,9 +1240,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
             'fixed z-[219] flex flex-col-reverse items-start gap-3',
             isMobile
               ? 'inset-x-0 bottom-0 pointer-events-none'
-              : stickyFilterChromeCount > 0
-                ? 'bottom-6 left-6 lg:bottom-8 lg:left-8 pointer-events-none'
-                : 'bottom-6 left-6 lg:bottom-8 lg:left-8',
+              : 'bottom-6 left-6 lg:bottom-8 lg:left-8',
           )}
         >
           <AnimatePresence onExitComplete={handleFilterDrawerExitComplete}>
@@ -1436,7 +1434,9 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
             )}
           </AnimatePresence>
 
-          {!isMobile && stickyFilterChromeCount === 0 && (
+          {/* Always mounted on desktop — floats like the cart FAB even when a
+              sticky section nav also exposes a Filter shortcut */}
+          {!isMobile && (
           <motion.button
             id="floating-filters-launcher"
             type="button"

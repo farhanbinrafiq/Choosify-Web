@@ -267,14 +267,20 @@ const SERVICE_PUBLISHER_TYPES = new Set([
   'healthcare',
 ]);
 
+/** True when the content owner is a brand-side publisher (not a creator). */
+export function isBrandOwnedContent(content: SpotlightContent): boolean {
+  return BRAND_PUBLISHER_TYPES.has(content.publisher.publisherType);
+}
+
 /** Brand mini card — publisher is brand-side OR explicit brand connection */
 export function shouldShowBrandProfileCard(content: SpotlightContent): boolean {
-  if (BRAND_PUBLISHER_TYPES.has(content.publisher.publisherType)) return true;
+  if (isBrandOwnedContent(content)) return true;
   return content.connections.brandIds.length > 0;
 }
 
 /** Creator mini card — publisher is creator-side OR explicit creator connection */
 export function shouldShowCreatorProfileCard(content: SpotlightContent): boolean {
+  if (isBrandOwnedContent(content)) return false;
   if (CREATOR_PUBLISHER_TYPES.has(content.publisher.publisherType)) return true;
   return content.connections.creatorIds.length > 0;
 }
@@ -326,8 +332,20 @@ export function sectionHasData(content: SpotlightContent, sectionId: SpotlightPa
     case 'top_picks':
     case 'top_3':
     case 'top_5':
+    case 'items_mentioned':
     case 'products_reviewed':
     case 'related_products':
+      return content.connections.productIds.length > 0 || content.commerce.featuredProductIds.length > 0;
+    case 'brands_mentioned':
+    case 'related_brands':
+      return content.connections.brandIds.length > 0;
+    case 'how_review_was_made':
+      return (
+        content.contentType === 'product_review' ||
+        content.contentType === 'creator_review' ||
+        content.sourceKind === 'guide'
+      );
+    case 'what_is_discussed':
       return content.connections.productIds.length > 0 || content.commerce.featuredProductIds.length > 0;
     case 'associated_services':
     case 'related_services':
@@ -344,7 +362,6 @@ export function sectionHasData(content: SpotlightContent, sectionId: SpotlightPa
       return true;
     case 'related_spotlight':
       return true;
-    case 'related_brands':
     case 'announcements':
       return content.contentType === 'announcement';
     case 'winner':
@@ -379,11 +396,25 @@ export function sectionHasData(content: SpotlightContent, sectionId: SpotlightPa
 export function resolvePageSectionManifest(content: SpotlightContent): SpotlightPageSectionId[] {
   // Catalog guides (blog, video, reels, shorts) always use the Guide Detail shell
   // from Choosify.dc.html — same cards for every guide format.
-  const source = content.pageSections?.length
+  let source = content.pageSections?.length
     ? content.pageSections
     : content.sourceKind === 'guide'
       ? defaultSectionsForContentType('buying_guide')
       : defaultSectionsForContentType(content.contentType);
+
+  // Brand-owned content: swap creator profile slot → brand profile (same Guide Details shell).
+  if (isBrandOwnedContent(content)) {
+    const hasBrand = source.some((e) => e.id === 'brand_profile_card');
+    source = source.flatMap((entry) => {
+      if (entry.id === 'creator_profile_card') {
+        return hasBrand ? [] : [{ ...entry, id: 'brand_profile_card' as const }];
+      }
+      return [entry];
+    });
+    if (!source.some((e) => e.id === 'brand_profile_card') && shouldShowBrandProfileCard(content)) {
+      source = [...source, cfg('brand_profile_card')];
+    }
+  }
 
   const visible = source.filter((entry) => entry.visible && sectionHasData(content, entry.id));
 
@@ -410,6 +441,12 @@ export function isGuideNavSectionVisible(
   manifest: SpotlightPageSectionId[] | undefined,
   navId: string,
 ): boolean {
+  if (navId === 'reviewer-profile') {
+    return (
+      isPageSectionVisible(manifest, 'creator_profile_card') ||
+      isPageSectionVisible(manifest, 'brand_profile_card')
+    );
+  }
   const mapped = mapGuideNavIdToSection(navId);
   if (!mapped) return true;
   return isPageSectionVisible(manifest, mapped);

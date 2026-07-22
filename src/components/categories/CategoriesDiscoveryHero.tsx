@@ -10,21 +10,16 @@ interface CategoriesDiscoveryHeroProps {
   quickChips?: string[];
 }
 
-/** Choosify.dc.html Categories hero */
+/** Choosify.dc.html Categories hero — title only; search lives in sticky chrome */
 export function CategoriesDiscoveryHero({
   className,
-  onSearch,
-  quickChips = ['Electronics', 'Fashion', 'Beauty', 'Home', 'Sports', 'Grocery'],
 }: CategoriesDiscoveryHeroProps) {
   return (
     <DcListingHero
       className={className}
       titleBefore="Shop by"
       titleHighlight="Categories"
-      searchPlaceholder="Search categories..."
-      quickChips={quickChips}
-      onSearch={onSearch}
-      onChipClick={onSearch}
+      showSearch={false}
       maxWidthClass={CATEGORY_LISTING_MAX_WIDTH}
     />
   );

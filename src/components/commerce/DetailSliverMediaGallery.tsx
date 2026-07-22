@@ -1,8 +1,148 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import type { CommerceMediaItem } from './commerceMediaTypes';
 import { isVideoKind } from '../media/choosifyMediaTypes';
+
+const ZOOM_MAX = 4;
+const ZOOM_TAP_SCALE = 2.5;
+
+/**
+ * Touch-friendly fullscreen image: tap to toggle zoom, pinch to zoom, drag to pan.
+ * Pointer-events based so it works with mouse (click toggles, drag pans) too.
+ */
+function PinchZoomImage({ src, alt }: { src: string; alt: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [view, setView] = useState({ scale: 1, x: 0, y: 0 });
+  const [animate, setAnimate] = useState(true);
+
+  const pointers = useRef(new Map<number, { x: number; y: number }>());
+  const gesture = useRef({
+    startScale: 1,
+    startX: 0,
+    startY: 0,
+    startDist: 0,
+    startMid: { x: 0, y: 0 },
+    origin: { x: 0, y: 0 },
+    moved: false,
+    downAt: 0,
+  });
+
+  const clampView = useCallback((scale: number, x: number, y: number) => {
+    const el = containerRef.current;
+    const maxX = el ? ((scale - 1) * el.clientWidth) / 2 : 0;
+    const maxY = el ? ((scale - 1) * el.clientHeight) / 2 : 0;
+    return {
+      scale,
+      x: Math.max(-maxX, Math.min(maxX, x)),
+      y: Math.max(-maxY, Math.min(maxY, y)),
+    };
+  }, []);
+
+  const toLocal = (e: { clientX: number; clientY: number }) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return { x: 0, y: 0 };
+    return {
+      x: e.clientX - rect.left - rect.width / 2,
+      y: e.clientY - rect.top - rect.height / 2,
+    };
+  };
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const g = gesture.current;
+    if (pointers.current.size === 1) {
+      g.startScale = view.scale;
+      g.startX = view.x;
+      g.startY = view.y;
+      g.moved = false;
+      g.downAt = Date.now();
+      g.origin = { x: e.clientX, y: e.clientY };
+    } else if (pointers.current.size === 2) {
+      const [a, b] = [...pointers.current.values()];
+      g.startDist = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+      g.startScale = view.scale;
+      g.startX = view.x;
+      g.startY = view.y;
+      g.startMid = toLocal({ clientX: (a.x + b.x) / 2, clientY: (a.y + b.y) / 2 });
+      g.moved = true;
+    }
+    setAnimate(false);
+  };
+
+  const onPointerMove = (e: React.PointerEvent) => {
+    if (!pointers.current.has(e.pointerId)) return;
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    const g = gesture.current;
+
+    if (pointers.current.size === 2) {
+      const [a, b] = [...pointers.current.values()];
+      const dist = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+      const scale = Math.max(1, Math.min(ZOOM_MAX, (g.startScale * dist) / g.startDist));
+      const mid = toLocal({ clientX: (a.x + b.x) / 2, clientY: (a.y + b.y) / 2 });
+      const ratio = scale / g.startScale;
+      const x = mid.x - (g.startMid.x - g.startX) * ratio;
+      const y = mid.y - (g.startMid.y - g.startY) * ratio;
+      setView(clampView(scale, x, y));
+      return;
+    }
+
+    if (pointers.current.size === 1 && view.scale > 1) {
+      const dx = e.clientX - g.origin.x;
+      const dy = e.clientY - g.origin.y;
+      if (Math.abs(dx) + Math.abs(dy) > 6) g.moved = true;
+      setView(clampView(view.scale, g.startX + dx, g.startY + dy));
+    }
+  };
+
+  const onPointerUp = (e: React.PointerEvent) => {
+    pointers.current.delete(e.pointerId);
+    const g = gesture.current;
+    if (pointers.current.size > 0) return;
+
+    // Snap back to fit when pinch ends near 1x
+    if (view.scale < 1.05) {
+      setAnimate(true);
+      setView({ scale: 1, x: 0, y: 0 });
+    }
+
+    // Tap (no drag/pinch) toggles zoom around the tap point
+    if (!g.moved && Date.now() - g.downAt < 350) {
+      setAnimate(true);
+      if (view.scale > 1) {
+        setView({ scale: 1, x: 0, y: 0 });
+      } else {
+        const p = toLocal(e);
+        setView(clampView(ZOOM_TAP_SCALE, p.x * (1 - ZOOM_TAP_SCALE), p.y * (1 - ZOOM_TAP_SCALE)));
+      }
+    }
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative w-full h-full overflow-hidden select-none"
+      style={{ touchAction: 'none', cursor: view.scale > 1 ? 'zoom-out' : 'zoom-in' }}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp}
+      onPointerCancel={onPointerUp}
+    >
+      <img
+        src={src}
+        alt={alt}
+        draggable={false}
+        className="w-full h-full object-contain"
+        style={{
+          transform: `translate(${view.x}px, ${view.y}px) scale(${view.scale})`,
+          transition: animate ? 'transform 200ms ease-out' : 'none',
+          willChange: 'transform',
+        }}
+      />
+    </div>
+  );
+}
 
 export interface DetailSliverMediaGalleryProps {
   items: CommerceMediaItem[];
@@ -149,6 +289,16 @@ export function DetailSliverMediaGallery({
     return () => window.removeEventListener('keydown', onKey);
   }, [goNext, goPrev, zoomOpen]);
 
+  // Lock page scroll while the fullscreen viewer is open
+  useEffect(() => {
+    if (!zoomOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = previous;
+    };
+  }, [zoomOpen]);
+
   const multi = total > 1;
   /** Enough peeks to fill each side of a full-bleed hero without empty navy gaps */
   const peeksPerSide = useMemo(() => {
@@ -205,7 +355,14 @@ export function DetailSliverMediaGallery({
               : 'w-full max-w-[640px] h-[280px] sm:h-[360px] md:h-[420px] lg:h-[580px]',
           )}
         >
-          <SliverMedia item={current} playSize={48} />
+          <button
+            type="button"
+            onClick={() => setZoomOpen(true)}
+            className="block w-full h-full border-0 p-0 bg-transparent cursor-zoom-in"
+            aria-label="View media fullscreen"
+          >
+            <SliverMedia item={current} playSize={48} />
+          </button>
           <button
             type="button"
             onClick={() => setZoomOpen(true)}
@@ -281,7 +438,7 @@ export function DetailSliverMediaGallery({
           <button
             type="button"
             onClick={onAddVideo}
-            className="ml-2.5 bg-white/10 border border-white/25 text-white text-[10.5px] font-bold px-3 py-1 rounded-none cursor-pointer"
+            className="ml-2.5 bg-white/10 border border-white/25 text-white text-[10.5px] font-bold px-3 py-1 rounded-full cursor-pointer"
           >
             + Add Video
           </button>
@@ -290,22 +447,52 @@ export function DetailSliverMediaGallery({
 
       {zoomOpen && (
         <div
-          className="fixed inset-0 bg-black/86 z-[200] flex items-center justify-center"
+          className="fixed inset-0 bg-black/90 z-[200] flex items-center justify-center"
           onClick={() => setZoomOpen(false)}
           role="dialog"
           aria-modal="true"
           aria-label="Zoomed media"
         >
           <div
-            className="w-[80vw] h-[80vh] max-w-[900px]"
+            className="w-full h-full sm:w-[86vw] sm:h-[84vh] sm:max-w-[960px]"
             onClick={(e) => e.stopPropagation()}
           >
-            <SliverMedia item={current} playSize={64} />
+            {isVideoKind(current.kind) ? (
+              <SliverMedia item={current} playSize={64} />
+            ) : (
+              <PinchZoomImage src={current.url} alt={current.alt ?? ''} />
+            )}
           </div>
+          {total > 1 && (
+            <>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goPrev();
+                }}
+                className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/15 border-0 text-white cursor-pointer flex items-center justify-center z-10"
+                aria-label="Previous media"
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  goNext();
+                }}
+                className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/15 border-0 text-white cursor-pointer flex items-center justify-center z-10"
+                aria-label="Next media"
+              >
+                <ChevronRight size={20} />
+              </button>
+            </>
+          )}
           <button
             type="button"
             onClick={() => setZoomOpen(false)}
-            className="absolute top-6 right-8 w-10 h-10 rounded-full bg-white/15 border-0 text-white text-lg cursor-pointer flex items-center justify-center"
+            className="absolute top-[calc(1rem+env(safe-area-inset-top,0px))] right-4 sm:top-6 sm:right-8 w-10 h-10 rounded-full bg-white/15 border-0 text-white text-lg cursor-pointer flex items-center justify-center z-10"
             aria-label="Close zoom"
           >
             <X size={18} />

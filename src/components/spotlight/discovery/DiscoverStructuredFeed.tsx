@@ -36,6 +36,8 @@ interface DiscoverStructuredFeedProps {
   activeTab: SpotlightContentTabId;
   onClearFilters?: () => void;
   hasActiveFilters?: boolean;
+  /** When true, prepend a red LIVE filter pill (currently-active streams only) */
+  hasActiveLive?: boolean;
   className?: string;
 }
 
@@ -129,6 +131,7 @@ export function DiscoverStructuredFeed({
   activeTab,
   onClearFilters,
   hasActiveFilters = false,
+  hasActiveLive = false,
   className,
 }: DiscoverStructuredFeedProps) {
   const navigate = useNavigate();
@@ -225,7 +228,20 @@ export function DiscoverStructuredFeed({
   const lanes = useMemo(() => partitionDiscoverFeedLanes(items), [items]);
   const youtube = lanes.youtube.slice(0, LANE_LIMITS.youtube);
   const reels = lanes.reels.slice(0, LANE_LIMITS.reels);
-  const live = lanes.live.slice(0, LANE_LIMITS.live);
+  // Prefer currently-active / grace LIVE items that ranked to the front of `items`
+  const live = useMemo(() => {
+    const rankedLiveIds = new Set(
+      items
+        .filter((i) => i.isLive || i.contentType === 'live' || i.live?.status === 'live' || i.live?.status === 'ended' || i.live?.status === 'replay')
+        .map((i) => i.contentId),
+    );
+    const fromLane = lanes.live.filter((i) => rankedLiveIds.has(i.contentId));
+    const ordered = [
+      ...items.filter((i) => fromLane.some((l) => l.contentId === i.contentId)),
+      ...fromLane.filter((i) => !items.some((x) => x.contentId === i.contentId)),
+    ];
+    return ordered.slice(0, LANE_LIMITS.live);
+  }, [items, lanes.live]);
   const blogs = lanes.blogs.slice(0, LANE_LIMITS.blogs);
 
   const hasAnyLane =
@@ -236,6 +252,20 @@ export function DiscoverStructuredFeed({
       {/* Filter pills + AI Discover */}
       <div className="flex justify-between items-center py-4 pb-6 flex-wrap gap-2.5">
         <div className="flex gap-2.5 flex-wrap">
+          {hasActiveLive && (
+            <button
+              type="button"
+              onClick={() => triggerFilter('live')}
+              className={cn(
+                'px-3.5 py-2 rounded-[18px] text-[11.5px] font-bold cursor-pointer border transition-colors min-h-[36px]',
+                'bg-[#FF000D] text-white border-[#FF000D] hover:brightness-110',
+                activeTab === 'live' && 'ring-2 ring-offset-1 ring-[#FF000D]/40',
+              )}
+              aria-label="Filter to LIVE streams"
+            >
+              LIVE
+            </button>
+          )}
           {DISCOVER_SORT_PILLS.map((pill) => {
             const active = pill.id === 'filters' ? false : activeSortPill === pill.id;
             return (
@@ -294,14 +324,41 @@ export function DiscoverStructuredFeed({
           className="grid grid-cols-1 lg:grid-cols-[minmax(0,2.4fr)_minmax(0,1fr)] gap-6 mb-11"
         >
           <div className="min-w-0">
+            {live.length > 0 && (
+              <section
+                className="mb-9 bg-white border border-[#E8EDF2] rounded-[10px] p-4"
+                aria-label="Live Now"
+              >
+                <LaneHeader
+                  icon="◉"
+                  title="Live Now"
+                  onViewAll={() => triggerFilter('live')}
+                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {live.map((content) => (
+                    <FeedCard
+                      key={content.contentId}
+                      content={content}
+                      products={products}
+                      onNavigate={onNavigateCard}
+                      forceVariant="live"
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
+
             {youtube.length > 0 && (
-              <section className="mb-9" aria-label="YouTube Picks">
+              <section
+                className="mb-9 bg-white border border-[#E8EDF2] rounded-[10px] p-4"
+                aria-label="YouTube Picks"
+              >
                 <LaneHeader
                   icon="▶"
                   title="YouTube Picks"
                   onViewAll={() => triggerFilter('videos')}
                 />
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {youtube.map((content) => (
                     <FeedCard
                       key={content.contentId}
@@ -316,13 +373,16 @@ export function DiscoverStructuredFeed({
             )}
 
             {reels.length > 0 && (
-              <section className="mb-9" aria-label="Reels & Shorts">
+              <section
+                className="mb-9 bg-white border border-[#E8EDF2] rounded-[10px] p-4"
+                aria-label="Reels & Shorts"
+              >
                 <LaneHeader
                   icon="⏵"
                   title="Reels & Shorts"
                   onViewAll={() => triggerFilter('reels')}
                 />
-                <div className="flex flex-wrap gap-3.5">
+                <div className="grid grid-cols-2 min-[480px]:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3.5">
                   {reels.map((content) => (
                     <FeedCard
                       key={content.contentId}
@@ -330,28 +390,7 @@ export function DiscoverStructuredFeed({
                       products={products}
                       onNavigate={onNavigateCard}
                       forceVariant="portrait-reel"
-                      className="w-[150px]"
-                    />
-                  ))}
-                </div>
-              </section>
-            )}
-
-            {live.length > 0 && (
-              <section aria-label="Live Now">
-                <LaneHeader
-                  icon="◉"
-                  title="Live Now"
-                  onViewAll={() => triggerFilter('live')}
-                />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {live.map((content) => (
-                    <FeedCard
-                      key={content.contentId}
-                      content={content}
-                      products={products}
-                      onNavigate={onNavigateCard}
-                      forceVariant="live"
+                      className="w-full"
                     />
                   ))}
                 </div>

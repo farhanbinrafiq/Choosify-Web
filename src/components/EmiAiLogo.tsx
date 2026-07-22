@@ -11,7 +11,7 @@ type EmiAiLogoProps = {
  * Official Emi AI mascot (blue→pink gradient character + EMI wordmark).
  * Portrait asset — always object-contain inside padded square parents so sides aren't cropped.
  */
-export function EmiAiLogo({ className, size = 28, title = 'Emi AI' }: EmiAiLogoProps) {
+export function EmiAiLogo({ className, size = 28, title = 'Emi. A.I' }: EmiAiLogoProps) {
   return (
     <img
       src="/emi-ai-logo.svg"

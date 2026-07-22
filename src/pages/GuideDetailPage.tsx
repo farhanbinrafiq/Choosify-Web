@@ -37,7 +37,7 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { BLOGS, PRODUCTS, PLACEHOLDER_IMAGE } from "../constants";
 import { cn } from "../lib/utils";
-import { PRODUCT_CARD_GRID, DETAIL_SINGLE_FEED } from "../lib/pageLayout";
+import { DETAIL_SINGLE_FEED } from "../lib/pageLayout";
 import { StickySectionNav } from "../components/StickySectionNav";
 import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
 import { EvaluationData, ComparisonProduct } from "../types/evaluation";
@@ -46,8 +46,6 @@ import { RecommendationMediaGallery } from "../components/RecommendationMediaGal
 import { SpotlightContentHero, type SpotlightHeroVariant } from "../components/spotlight/feed/SpotlightContentHero";
 import { DYNAMIC_GUIDES, DEFAULT_DYNAMIC_GUIDE } from "../data/mockGuides";
 import { CATEGORY_SPEC_CONFIGS } from "../data/guideSpecConfigs";
-import { ProductCard } from "../components/ProductCard";
-import { GuideOverallWinnerCard } from "../components/guide/GuideOverallWinnerCard";
 import { useDashboard } from "../context/DashboardContext";
 import { useGlobalState } from "../context/GlobalStateContext";
 import toast from "react-hot-toast";
@@ -57,17 +55,20 @@ import type { CatalogGuide } from "../types/catalog";
 import type { SpotlightContent } from "../types/spotlight/experience/content";
 import type { SpotlightPageSectionId } from "../types/spotlight/experience/pageSections";
 import {
-  isGuideNavSectionVisible,
+  isBrandOwnedContent,
   isPageSectionVisible,
   shouldShowBrandProfileCard,
   shouldShowCreatorProfileCard,
 } from "../lib/spotlight/content/sectionManifestRegistry";
+import { resolveContentDetailOptionalSections } from "../lib/spotlight/content/resolveContentDetailSections";
 import { catalogGuideHref } from "../lib/spotlight/content";
 import { SpotlightLiveStatusSection } from "../components/spotlight/experience/SpotlightLiveStatusSection";
-import { SpotlightBrandMiniCard } from "../components/spotlight/experience/SpotlightBrandMiniCard";
+import { BrandCardDesign, mapBrandToCardDesign } from "../components/BrandCardDesign";
 import { SpotlightDetailsDescriptionSection } from "../components/spotlight/experience/SpotlightDetailsDescriptionSection";
 import { SpotlightDetailsServicesSection } from "../components/spotlight/experience/SpotlightDetailsServicesSection";
 import { SpotlightDetailsRelatedRail } from "../components/spotlight/experience/SpotlightDetailsRelatedRail";
+import { ContentDetailOptionalSections } from "../components/contentDetail/ContentDetailOptionalSections";
+import { ContentDetailWhatIsDiscussed } from "../components/contentDetail/ContentDetailWhatIsDiscussed";
 import { useSpotlightExperience } from "../hooks/useSpotlightExperience";
 import { openEmiPanel } from "../lib/emi";
 import { EmiAiLogo } from "../components/EmiAiLogo";
@@ -240,20 +241,74 @@ export function GuideDetailPage({
     CATEGORY_SPEC_CONFIGS[dynamicData.categorySpecType] ||
     CATEGORY_SPEC_CONFIGS.mobile;
 
-  const guideSectionNavItems = useMemo(
-    () =>
-      [
-        { id: "winner", label: "Winner", icon: <Award size={13} /> },
-        { id: "why-won", label: "Why It Won", icon: <CheckCircle2 size={13} /> },
-        { id: "quick-verdict", label: "Verdict", icon: <Zap size={13} /> },
-        { id: "takeaways", label: "Takeaways", icon: <Sparkles size={13} /> },
-        { id: "top-3", label: "Top 3", icon: <Star size={13} /> },
-        { id: "all-products", label: "Products", icon: <ShoppingBag size={13} /> },
-        { id: "review-context", label: "Reviewed", icon: <Package size={13} /> },
-        { id: "reviewer-profile", label: "Reviewer", icon: <User size={13} /> },
-      ].filter((item) => isGuideNavSectionVisible(sectionManifest, item.id)),
-    [sectionManifest],
+  const optionalSections = useMemo(
+    () => resolveContentDetailOptionalSections(spotlightContent ?? null),
+    [spotlightContent],
   );
+
+  const guideSectionNavItems = useMemo(() => {
+    const profileLabel =
+      spotlightContent && isBrandOwnedContent(spotlightContent) ? "Brand" : "Reviewer";
+    const iconFor = (id: string) => {
+      switch (id) {
+        case 'winner':
+          return <Award size={13} />;
+        case 'why-won':
+          return <CheckCircle2 size={13} />;
+        case 'quick-verdict':
+          return <Zap size={13} />;
+        case 'takeaways':
+          return <Sparkles size={13} />;
+        case 'items-mentioned':
+        case 'what-is-discussed':
+          return <ShoppingBag size={13} />;
+        case 'brands-mentioned':
+          return <Package size={13} />;
+        case 'how-review-was-made':
+          return <Info size={13} />;
+        case 'reviewer-profile':
+          return <User size={13} />;
+        default:
+          return <Star size={13} />;
+      }
+    };
+    const labelFor = (id: string, fallback: string) => {
+      const map: Record<string, string> = {
+        winner: 'Winner',
+        'why-won': 'Why It Won',
+        'quick-verdict': 'Verdict',
+        takeaways: 'Takeaways',
+        'items-mentioned': 'Items',
+        'brands-mentioned': 'Brands',
+        'how-review-was-made': 'Method',
+        'what-is-discussed': 'Discussed',
+        'reviewer-profile': profileLabel,
+      };
+      return map[id] ?? fallback;
+    };
+    const fromOptional = optionalSections.map((s) => {
+      const navId =
+        s.id === 'winner'
+          ? 'winner'
+          : s.id === 'why_it_won'
+            ? 'why-won'
+            : s.id === 'verdict'
+              ? 'quick-verdict'
+              : s.id === 'takeaways'
+                ? 'takeaways'
+                : s.id === 'items_mentioned'
+                  ? 'items-mentioned'
+                  : s.id === 'brands_mentioned'
+                    ? 'brands-mentioned'
+                    : 'how-review-was-made';
+      return { id: navId, label: labelFor(navId, s.id), icon: iconFor(navId) };
+    });
+    return [
+      { id: 'what-is-discussed', label: 'Discussed', icon: iconFor('what-is-discussed') },
+      ...fromOptional,
+      { id: 'reviewer-profile', label: profileLabel, icon: iconFor('reviewer-profile') },
+    ];
+  }, [optionalSections, spotlightContent]);
 
   const showSection = (sectionId: SpotlightPageSectionId) =>
     isPageSectionVisible(sectionManifest, sectionId);
@@ -278,14 +333,33 @@ export function GuideDetailPage({
 
   const showCreatorCard =
     Boolean(creator) &&
-    showSection('creator_profile_card') &&
     (!spotlightContent || shouldShowCreatorProfileCard(spotlightContent));
-  // Prefer the new creator author card — don't also show the brand mini on the same page.
+  // Brand-owned content (publisherType brand/retailer/…) shows brand profile, not creator.
+  // Profile is a fixed Content Detail section — always render when applicable.
   const showBrandCard =
     Boolean(spotlightContent) &&
-    showSection('brand_profile_card') &&
-    shouldShowBrandProfileCard(spotlightContent) &&
+    shouldShowBrandProfileCard(spotlightContent!) &&
     !showCreatorCard;
+
+  // Same directory tile as the Brands list page — resolved from the brand catalog,
+  // falling back to publisher info when the brand record isn't in state.
+  const brandCardModel = useMemo(() => {
+    if (!spotlightContent) return null;
+    const brandId = spotlightContent.connections.brandIds[0];
+    const publisherName = spotlightContent.publisher.name?.trim().toLowerCase();
+    const match = (allBrands ?? []).find(
+      (b: any) =>
+        (brandId != null &&
+          (String(b.id) === String(brandId) || String(b.id) === String(Number(brandId)))) ||
+        (publisherName && String(b.name || '').trim().toLowerCase() === publisherName),
+    );
+    if (match) return mapBrandToCardDesign(match);
+    return mapBrandToCardDesign({
+      id: brandId ?? spotlightContent.publisher.publisherId,
+      name: spotlightContent.publisher.name,
+      logo: spotlightContent.publisher.logoUrl,
+    });
+  }, [spotlightContent, allBrands]);
 
   const { activeId: activeSectionId, scrollToSection } =
     useSectionScrollSpy(guideSectionNavItems);
@@ -723,455 +797,31 @@ export function GuideDetailPage({
                 <SpotlightDetailsServicesSection content={spotlightContent} />
               )}
 
-              {/* SECTION 1: Overall Winner — Choosify.dc.html compact strip */}
-              {showSection('winner') && displayProducts.length > 0 && (
-              <div id="winner" className="scroll-mt-36">
-                {(() => {
-                  const winner = displayProducts[0] as any;
-                  const ratingNum = Number(winner?.rating ?? winner?.ratings ?? 4.8);
-                  const scoreNum = Math.min(10, Math.round((Number.isFinite(ratingNum) ? ratingNum : 4.8) * 2 * 10) / 10);
-                  const checksFromProduct = Array.isArray(winner?.highlights)
-                    ? winner.highlights
-                    : Array.isArray(winner?.tags)
-                      ? winner.tags
-                      : Array.isArray(winner?.pros)
-                        ? winner.pros
-                        : null;
-                  const reviewsRaw = winner?.reviewsCount ?? winner?.reviews ?? winner?.reviewCount ?? '13.4K';
-                  const reviewsLabel =
-                    typeof reviewsRaw === 'number'
-                      ? reviewsRaw >= 1000
-                        ? `${(reviewsRaw / 1000).toFixed(1).replace(/\.0$/, '')}K`
-                        : String(reviewsRaw)
-                      : String(reviewsRaw);
-                  return (
-                    <GuideOverallWinnerCard
-                      name={
-                        winner?.title
-                          ? `${winner.brand ? `${winner.brand} ` : ''}${winner.title}`.trim()
-                          : winner?.name || 'Overall winner'
-                      }
-                      image={winner?.image || PLACEHOLDER_IMAGE}
-                      badge={
-                        String(winner?.badge || winner?.category || guide?.category || 'BEST PICK')
-                          .toUpperCase()
-                      }
-                      rating={Number.isFinite(ratingNum) ? ratingNum.toFixed(1) : '4.8'}
-                      reviews={reviewsLabel}
-                      score={scoreNum.toFixed(1)}
-                      scoreLabel={scoreNum >= 9 ? 'EXCELLENT' : scoreNum >= 8 ? 'GREAT' : 'GOOD'}
-                      checks={
-                        checksFromProduct?.map(String).filter(Boolean).slice(0, 4) || [
-                          'Best Display Quality',
-                          'Top Tier Performance',
-                          'Excellent Camera System',
-                          'Long-term Software Support',
-                        ]
-                      }
-                      shopHref={`/products/${winner?.id ?? ''}`}
-                    />
-                  );
-                })()}
-              </div>
-              )}
+              {/* Fixed: What Is Discussed? */}
+              <ContentDetailWhatIsDiscussed
+                products={displayProducts}
+                activeIndex={activeProductIdx}
+                onSelect={setActiveProductIdx}
+              />
 
-              {/* SECTION 2: #1 WHY THIS WON */}
-              {showSection('why_it_won') && (
-              <div id="why-won" className="scroll-mt-36">
-                <div className="mb-4 text-left">
-                  <h2 className="text-2xl font-extrabold text-[#1A1A2E] mb-0.5">
-                    Why this won
-                  </h2>
-                  <p className="text-[13px] font-bold text-[#9AA0AC]">
-                    Crucial hardware & testing decision signals
-                  </p>
-                </div>
-                <div className="flex flex-wrap gap-2.5">
-                  {[
-                    {
-                      text: "Industry-Leading Reliability",
-                      icon: "✓",
-                      color:
-                        "bg-emerald-500/10 border-emerald-500/20 text-emerald-600",
-                    },
-                    {
-                      text: "Best-in-Class Hardware Specification",
-                      icon: "✦",
-                      color: "bg-blue-500/10 border-blue-500/20 text-blue-600",
-                    },
-                    {
-                      text: "Double-Inspected Sourcing Trust",
-                      icon: "🛡️",
-                      color:
-                        "bg-[#EB4501]/10 border-[#EB4501]/20 text-[#EB4501]",
-                    },
-                    {
-                      text: "Zero Interest Monthly EMI Approved",
-                      icon: "৳",
-                      color:
-                        "bg-purple-500/10 border-purple-500/20 text-purple-600",
-                    },
-                    {
-                      text: "Immediate Metro Shipping Certified",
-                      icon: "🗲",
-                      color:
-                        "bg-yellow-500/10 border-yellow-500/20 text-yellow-700 font-bold",
-                    },
-                    {
-                      text: "Longer Extended Manufacturer Support",
-                      icon: "⏳",
-                      color: "bg-teal-500/10 border-teal-500/20 text-teal-600",
-                    },
-                  ].map((chip, idx) => (
-                    <span
-                      key={idx}
-                      className={cn(
-                        "px-4 py-2 text-[11px] font-bold border rounded-xl flex items-center gap-1.5",
-                        chip.color,
-                      )}
-                    >
-                      <span>{chip.icon}</span> {chip.text}
-                    </span>
-                  ))}
-                </div>
-              </div>
-              )}
+              {/* Optional sections — order/visibility from content.sections config */}
+              <ContentDetailOptionalSections
+                sections={optionalSections}
+                ctx={{
+                  content: spotlightContent ?? null,
+                  category: spotlightContent?.category ?? guide?.category,
+                  products: displayProducts,
+                  hasMoreProducts: allGuideProducts.length > displayProducts.length,
+                  onLoadMoreProducts: () => setVisibleCount((prev) => prev + 4),
+                }}
+              />
 
-              {/* SECTION 3: RECOMMENDATION & QUICK VERDICT */}
-              {(showSection('verdict') || showSection('pros') || showSection('cons')) && (
-              <div id="quick-verdict" className="scroll-mt-36">
-                <div className="mb-4 text-left">
-                  <h2 className="text-2xl font-extrabold text-[#1A1A2E] mb-0.5">
-                    Recommendation & quick verdict
-                  </h2>
-                  <p className="text-[13px] font-bold text-[#9AA0AC]">
-                    High level, scannable advice
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Best for */}
-                  <div className="bg-white rounded-[5px] border border-gray-100 p-5 text-left shadow-sm">
-                    <span className="text-[11px] font-extrabold text-emerald-500 flex items-center gap-1.5 mb-2">
-                      <Check size={12} className="text-emerald-500" /> Best for
-                    </span>
-                    <ul className="space-y-1.5 pl-1.5 list-none">
-                      {[
-                        "High daily usage & professionals",
-                        "Premium display enthusiasts",
-                        "Zero hassle long-term support",
-                      ].map((item, i) => (
-                        <li
-                          key={i}
-                          className="text-[12px] font-bold text-[#1A1A2E]/70 flex items-center gap-1.5"
-                        >
-                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 shrink-0" />{" "}
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* Not For */}
-                  <div className="bg-white rounded-[5px] border border-gray-100 p-5 text-left shadow-sm">
-                    <span className="text-[11px] font-extrabold text-red-500 flex items-center gap-1.5 mb-2">
-                      <X size={12} className="text-red-500" /> Not for
-                    </span>
-                    <ul className="space-y-1.5 pl-1.5 list-none">
-                      {[
-                        "Ultra-tight budget buyers",
-                        "Compact pocket lovers",
-                        "Sourcing-indifferent shoppers",
-                      ].map((item, i) => (
-                        <li
-                          key={i}
-                          className="text-[12px] font-bold text-[#1A1A2E]/70 flex items-center gap-1.5"
-                        >
-                          <span className="w-1.5 h-1.5 rounded-full bg-red-400 shrink-0" />{" "}
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* What we like */}
-                  <div className="bg-white rounded-[5px] border border-gray-100 p-5 text-left shadow-sm">
-                    <span className="text-[11px] font-extrabold text-blue-500 flex items-center gap-1.5 mb-2">
-                      <Star size={12} className="text-blue-500" /> What we like
-                    </span>
-                    <ul className="space-y-1.5 pl-1.5 list-none">
-                      {[
-                        "Exquisite screen brightness",
-                        "Stunning camera outputs",
-                        "Superfast thermal cooling",
-                      ].map((item, i) => (
-                        <li
-                          key={i}
-                          className="text-[12px] font-bold text-[#1A1A2E]/70 flex items-center gap-1.5"
-                        >
-                          <span className="w-1.5 h-1.5 rounded-full bg-blue-500 shrink-0" />{" "}
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  {/* What to consider */}
-                  <div className="bg-white rounded-[5px] border border-gray-100 p-5 text-left shadow-sm">
-                    <span className="text-[11px] font-extrabold text-[#EB4501] flex items-center gap-1.5 mb-2">
-                      <Info size={12} className="text-[#EB4501]" /> What to
-                      consider
-                    </span>
-                    <ul className="space-y-1.5 pl-1.5 list-none">
-                      {[
-                        "High stock demand limits",
-                        "Explicit premium price bar",
-                        "Requires premium charger/accessories",
-                      ].map((item, i) => (
-                        <li
-                          key={i}
-                          className="text-[12px] font-bold text-[#1A1A2E]/70 flex items-center gap-1.5"
-                        >
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#EB4501]/50 shrink-0" />{" "}
-                          {item}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-
-              {/* GENERAL SCORING DETAILS — only when CMS enables specifications */}
-              {showSection('specifications') && (
-              <div className="bg-white border border-gray-100 rounded-[5px] p-6 shadow-sm text-left">
-                <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-100 last:border-0 text-left">
-                  <h3 className="text-xl font-extrabold text-[#1A1A2E] leading-none">
-                    Detail evaluation
-                  </h3>
-                  <div className="text-[10px] bg-gray-50 text-[#9AA0AC] px-3 py-1.5 rounded-full font-bold">
-                    Score matrix
-                  </div>
-                </div>
-
-                <div className="space-y-8">
-                  {((specConfig as any).criteria || []).map(
-                    (crt: any, i: number) => {
-                      const key = crt.name.toLowerCase();
-                      const score = evaluation
-                        ? (evaluation as any).detailedScores?.[key] || 9.2
-                        : 9.2;
-                      const detailText = evaluation
-                        ? (evaluation as any).details?.[key] ||
-                          "Verified as our high performing metric aspect of testing."
-                        : "Verified as our high performing metric aspect of testing.";
-
-                      return (
-                        <div
-                          key={i}
-                          className="flex flex-col gap-3 relative pb-6 border-b border-gray-50 last:border-0 last:pb-0 text-left"
-                        >
-                          <div className="flex items-center justify-between text-left">
-                            <div className="flex flex-col text-left">
-                              <span className="text-[10px] font-bold text-[#9AA0AC] mb-1">
-                                Criteria 0{i + 1}
-                              </span>
-                              <h4 className="text-sm font-extrabold text-[#1A1A2E] leading-none">
-                                {crt.name}
-                              </h4>
-                            </div>
-                            <div className="text-xl font-extrabold text-[#1B5CFF] leading-none">
-                              {score}{" "}
-                              <span className="text-[10px] text-[#9AA0AC]">
-                                /10
-                              </span>
-                            </div>
-                          </div>
-
-                          <div className="w-full bg-gray-50 h-1.5 rounded-full overflow-hidden">
-                            <div
-                              className="bg-[#1B5CFF] h-full"
-                              style={{ width: `${score * 10}%` }}
-                            />
-                          </div>
-                          <p className="text-[12px] font-semibold text-[#9AA0AC] leading-relaxed text-left">
-                            {detailText}
-                          </p>
-                        </div>
-                      );
-                    },
-                  )}
-                </div>
-              </div>
-              )}
-              </div>
-              )}
-
-              {/* SECTION 4: KEY TAKEAWAYS & FINAL RECOMMENDATION */}
-              {showSection('takeaways') && (
-              <div id="takeaways" className="scroll-mt-36">
-                <div className="mb-3.5 text-left">
-                  <h2 className="text-[13px] font-extrabold text-[#1A1A2E] tracking-wide uppercase">
-                    Key Takeaways
-                  </h2>
-                </div>
-                <div className="bg-white text-[#1A1A2E] rounded-[10px] p-6 text-left border border-[#E8EDF2]">
-                  <p className="text-[13px] font-extrabold text-[#EB4501] mb-2 leading-none">
-                    The verdict
-                  </p>
-                  <p className="text-[13px] font-bold text-[#4B5563] leading-relaxed max-w-2xl text-left">
-                    If you value pristine hardware stability, direct sourcing
-                    authenticity, and optimal value return on your premium
-                    hardware spend, the overall winner remains our absolute
-                    recommendation for this year. Do not settle for unverified
-                    alternatives.
-                  </p>
-                </div>
-              </div>
-              )}
-
-              {/* SECTION 5: OTHER PRODUCTS MENTIONED | TOP 3 */}
-              {showSection('top_3') && (
-              <div id="top-3" className="scroll-mt-36">
-                <div className="mb-3.5 text-left">
-                  <h2 className="text-[13px] font-extrabold text-[#1A1A2E] tracking-wide uppercase">
-                    Other Products Mentioned | Top 3
-                  </h2>
-                </div>
-                <div className={PRODUCT_CARD_GRID}>
-                  {displayProducts.slice(1, 4).map((product, idx) => (
-                    <div
-                      key={product.id}
-                      id={`prod-sec-${idx + 1}`}
-                      className="scroll-mt-36"
-                    >
-                      <ProductCard
-                        product={product}
-                        variant="grid"
-                        isGuideDetail={true}
-                      />
+                {showBrandCard && brandCardModel && (
+                  <div id="reviewer-profile" className="scroll-mt-36 mt-8 max-w-[280px] mx-auto">
+                    <div className="text-[11px] font-extrabold text-[#1A1A2E] tracking-wide mb-3.5 text-left">
+                      ABOUT THE BRAND
                     </div>
-                  ))}
-                </div>
-              </div>
-              )}
-
-              {/* SECTION 6: OTHER PRODUCTS MENTIONED */}
-              {(showSection('associated_products') ||
-                showSection('products_reviewed') ||
-                showSection('creator_profile_card') ||
-                showSection('brand_profile_card')) && (
-              <div id="all-products" className="scroll-mt-36">
-                <div className="mb-3.5 text-left">
-                  <h2 className="text-[13px] font-extrabold text-[#1A1A2E] tracking-wide uppercase">
-                    Other Products Mentioned
-                  </h2>
-                </div>
-
-                <div className={PRODUCT_CARD_GRID}>
-                  {showSection('associated_products') &&
-                  displayProducts.map((product) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      variant="grid"
-                      isGuideDetail={true}
-                    />
-                  ))}
-                </div>
-
-                {showSection('associated_products') &&
-                allGuideProducts.length > displayProducts.length && (
-                  <div className="text-center mt-8 font-bold">
-                    <button
-                      onClick={() => setVisibleCount((prev) => prev + 4)}
-                      className="px-8 py-3.5 border border-[#1A1A2E] hover:bg-[#1A1A2E] hover:text-white text-[#1A1A2E] font-bold text-[12px] rounded-full transition-all cursor-pointer bg-white"
-                    >
-                      Load More Products
-                    </button>
-                  </div>
-                )}
-
-                {/* HOW THIS REVIEW WAS MADE | WHAT IS DISCUSSED — Choosify.dc.html */}
-                {showSection('products_reviewed') && (
-                <div
-                  id="review-context"
-                  className="grid grid-cols-1 lg:grid-cols-2 gap-4 scroll-mt-36 mt-9 items-start"
-                >
-                  <div className="bg-white rounded-[10px] p-5 border border-[#E8EDF2] text-center">
-                    <div className="text-[13px] font-extrabold text-[#1A1A2E] mb-4">
-                      HOW <span className="text-[#EB4501]">THIS REVIEW</span> WAS MADE
-                    </div>
-                    <div className="h-px bg-[#F1F1F3] mb-4" />
-                    <div className="flex flex-col gap-3.5 text-left">
-                      {[
-                        'Tested for 30 days',
-                        `Compared with ${Math.max(displayProducts.length, 3)} competitors`,
-                        'Real world usage',
-                        'No sponsored placement',
-                      ].map((label) => (
-                        <div key={label} className="flex items-center gap-2.5">
-                          <span className="text-[#EB4501] text-base shrink-0">●</span>
-                          <span className="text-[13px] font-bold italic text-[#1A1A2E]">{label}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  <div className="bg-white rounded-[10px] p-5 border border-[#E8EDF2]">
-                    <div className="text-[13px] font-extrabold text-[#1A1A2E] text-center mb-4">
-                      WHAT IS <span className="text-[#EB4501]">DISCUSSED?</span>
-                    </div>
-                    <div className="h-px bg-[#F1F1F3] mb-2.5" />
-                    <div className="flex flex-col max-h-[360px] overflow-y-auto no-scrollbar">
-                      {displayProducts.map((p, idx) => {
-                        const isActive = activeProductIdx === idx;
-                        return (
-                          <button
-                            key={p.id}
-                            type="button"
-                            onClick={() => {
-                              const el = document.getElementById(`prod-sec-${idx}`);
-                              if (el) {
-                                const top =
-                                  el.getBoundingClientRect().top + window.pageYOffset - 200;
-                                window.scrollTo({ top: Math.max(0, top), behavior: "smooth" });
-                                setActiveProductIdx(idx);
-                              }
-                            }}
-                            className={cn(
-                              "w-full flex items-center gap-2.5 px-1.5 py-2.5 border-b border-[#F4F7F9] text-left cursor-pointer bg-transparent",
-                              isActive && "bg-[#FFF3EA]",
-                            )}
-                          >
-                            <div
-                              className={cn(
-                                "w-[22px] h-[22px] rounded-full shrink-0 flex items-center justify-center text-[11px] font-extrabold",
-                                idx === 0
-                                  ? "bg-[#EB4501] text-white"
-                                  : "bg-[#F4F7F9] text-[#9AA0AC]",
-                              )}
-                            >
-                              {idx === 0 ? '👑' : idx + 1}
-                            </div>
-                            <span className="flex-1 text-[11.5px] font-bold text-[#1A1A2E] truncate">
-                              {p.brand} {p.title}
-                            </span>
-                            <div className="w-10 h-[30px] rounded overflow-hidden shrink-0 bg-[#F4F7F9]">
-                              <img src={p.image} className="w-full h-full object-contain" alt="" />
-                            </div>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-                </div>
-                )}
-
-                {showBrandCard && (
-                  <div className="mt-8 max-w-sm mx-auto">
-                    <SpotlightBrandMiniCard
-                      publisher={spotlightContent!.publisher}
-                      brandId={spotlightContent!.connections.brandIds[0]}
-                    />
+                    <BrandCardDesign brand={brandCardModel} />
                   </div>
                 )}
 
@@ -1267,8 +917,6 @@ export function GuideDetailPage({
                   </div>
                 </div>
                 )}
-              </div>
-              )}
             </main>
           </div>
         </div>
@@ -1285,7 +933,7 @@ export function GuideDetailPage({
             viewAllLabel="Browse Spotlight"
           />
         ) : (
-        <section className="pt-20 border-t border-gray-100">
+        <section className="mt-20 bg-white border border-[#E8EDF2] rounded-[10px] p-4 sm:p-5">
           <div className="flex items-baseline justify-between gap-3 mb-3.5">
             <h3 className="text-[13px] font-extrabold text-[#1A1A2E] tracking-wide uppercase">
               You May Also Like

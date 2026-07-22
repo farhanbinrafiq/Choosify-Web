@@ -8,26 +8,15 @@ interface DiscoverHeroProps {
   onQuerySubmit?: (query: string) => void;
 }
 
-const DISCOVER_CHIPS = [
-  'iPhone vs Samsung',
-  'Best AC 2026',
-  'Eid Gift Guide',
-  'Budget Laptops',
-  'Creator Reviews',
-];
-
-/** Choosify.dc.html Discover hero — same listing silhouette as Deals */
-export function DiscoverHero({ className, onQuerySubmit }: DiscoverHeroProps) {
+/** Choosify.dc.html Discover hero — title only; search lives in sticky chrome */
+export function DiscoverHero({ className }: DiscoverHeroProps) {
   return (
     <DcListingHero
       className={className}
       eyebrow="DISCOVER."
       titleBefore="Simplify Your Shopping"
       titleHighlight="Discovery"
-      searchPlaceholder="Search guides, videos, reviews..."
-      quickChips={DISCOVER_CHIPS}
-      onSearch={(q) => onQuerySubmit?.(q)}
-      onChipClick={(chip) => onQuerySubmit?.(chip)}
+      showSearch={false}
       maxWidthClass={LISTING_PAGE_MAX_WIDTH}
     />
   );

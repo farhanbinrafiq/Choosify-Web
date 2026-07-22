@@ -17,6 +17,10 @@ export const mapCatalogCreator = (creator: CatalogCreator): Creator => ({
   videos: (creator.videos ?? []).map((item) => ({ ...item, associatedGuideId: undefined })),
   reels: creator.reels ?? [],
   blogs: creator.blogs ?? [],
+  featuredFlag: creator.featuredFlag,
+  verifiedStatus: creator.verifiedStatus,
+  createdAt: creator.createdAt,
+  updatedAt: creator.updatedAt,
 });
 
 export const mapCatalogGuide = (guide: CatalogGuide) => ({
@@ -25,6 +29,9 @@ export const mapCatalogGuide = (guide: CatalogGuide) => ({
   title: guide.title,
   author: guide.author,
   authorAvatar: guide.authorAvatar,
+  /** ISO publish timestamp — used by dynamic Viral Today / Discover priority */
+  publishedAt: guide.publishedAt,
+  status: guide.status,
   date: new Date(guide.publishedAt || Date.now()).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',

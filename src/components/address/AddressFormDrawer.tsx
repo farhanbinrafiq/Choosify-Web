@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { X } from 'lucide-react';
 import type { AddressType, CustomerAddressDraft } from '../../lib/address/addressTypes';
 import {
@@ -92,17 +92,36 @@ export function AddressFormDrawer({
     [draft.location.cityId],
   );
 
+  useEffect(() => {
+    if (!open) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [open, onClose]);
+
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[200] flex justify-end" role="dialog" aria-modal="true" aria-labelledby="address-form-title">
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center p-3 sm:p-6"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="address-form-title"
+    >
       <button
         type="button"
         className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"
         onClick={onClose}
         aria-label="Close address form"
       />
-      <div className="relative w-full max-w-xl h-full bg-white shadow-2xl flex flex-col animate-in slide-in-from-right duration-300 z-[201]">
+      <div className="relative w-full max-w-3xl max-h-[calc(100dvh-1.5rem)] sm:max-h-[min(90dvh,820px)] bg-white rounded-2xl shadow-2xl flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-200 z-[201]">
         <div className="flex items-center justify-between gap-4 border-b border-[#e8edf2] px-5 py-4 shrink-0">
           <div className="text-left">
             <h2 id="address-form-title" className="text-lg font-extrabold tracking-tight text-[#1A1A2E]">

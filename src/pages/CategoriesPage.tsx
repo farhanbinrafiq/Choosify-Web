@@ -6,10 +6,9 @@ import { cn } from '../lib/utils';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { CategoryCardSkeleton } from '../components/Skeleton';
 import { CategoryPremiumCard } from '../components/categories/CategoryPremiumCard';
-import { CategoriesDiscoveryHero } from '../components/categories/CategoriesDiscoveryHero';
 import { CategoriesQuickNav } from '../components/categories/CategoriesQuickNav';
 import { buildCategoryDisplayList, type CategoryDisplayItem } from '../utils/categoryDisplay';
-import { buildCategoriesPageStats, getCategoryStatBlock } from '../utils/categoryStats';
+import { getCategoryStatBlock } from '../utils/categoryStats';
 import { ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { PAGE_LISTING_SINGLE_SHELL, CATEGORY_CARD_GRID } from "../lib/pageLayout";
 import { CATEGORY_CONTENT_MAX } from '../lib/design/categoryTokens';
@@ -77,18 +76,6 @@ export function CategoriesPage() {
       setSelectedCategoryType(filterType);
     }
   };
-
-  const pageStats = useMemo(
-    () =>
-      buildCategoriesPageStats({
-        products: allCatalogProducts ?? [],
-        brands: allCatalogBrands.length ? allCatalogBrands : allBrands,
-        deals: allDeals,
-        guides: allGuides,
-        creators: allCreators,
-      }),
-    [allCatalogProducts, allCatalogBrands, allBrands, allDeals, allGuides, allCreators],
-  );
 
   const matchCategoryType = (catName: string, type: string) => {
     const name = catName.toLowerCase();
@@ -616,11 +603,11 @@ export function CategoriesPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
-      <CategoriesDiscoveryHero
-        stats={pageStats}
+      <CategoriesQuickNav
+        activeId={quickNavId}
+        onSelect={handleQuickNavSelect}
         onSearch={(q) => setSearchQuery(q)}
       />
-      <CategoriesQuickNav activeId={quickNavId} onSelect={handleQuickNavSelect} />
 
       <div className={cn(CATEGORY_CONTENT_MAX, 'py-4')}>
         <ActiveFilterChips

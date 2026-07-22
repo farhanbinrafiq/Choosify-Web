@@ -15,5 +15,5 @@ export const INSIGHT_REGISTRY: IntelligenceInsightDefinition[] = [
   { id: 'live_active', title: 'Live Active', description: 'Currently broadcasting events', drillDownSection: 'live' },
   { id: 'expiring_campaigns', title: 'Expiring Campaigns', description: 'Campaigns ending within 7 days', drillDownSection: 'campaigns' },
   { id: 'scheduled_7d', title: 'Scheduled (7 Days)', description: 'Publishing calendar next week', drillDownSection: 'overview' },
-  { id: 'ai_placeholder', title: 'AI Suggestions', description: 'Future Emi AI recommendations — architecture placeholder', drillDownSection: 'insights' },
+  { id: 'ai_placeholder', title: 'AI Suggestions', description: 'Future Emi. A.I recommendations — architecture placeholder', drillDownSection: 'insights' },
 ];

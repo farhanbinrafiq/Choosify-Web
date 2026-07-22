@@ -46,7 +46,7 @@ export function GuideOverallWinnerCard({
   return (
     <div
       className={cn(
-        'rounded-none px-[22px] py-[22px] sm:px-[26px] text-white mb-9',
+        'rounded-xl px-[22px] py-[22px] sm:px-[26px] text-white mb-9',
         'grid grid-cols-1 sm:grid-cols-[auto_1fr] lg:grid-cols-[auto_1fr_auto_auto]',
         'gap-5 lg:gap-[26px] items-center',
         className,

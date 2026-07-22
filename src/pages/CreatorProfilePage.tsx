@@ -32,10 +32,14 @@ type CreatorProfileTab =
 export function CreatorProfilePage() {
   const creatorHeroRef = useRef<HTMLDivElement>(null);
   const { id } = useParams<{ id: string }>();
-  const { openVideo, getCreatorClaimStatus, updateCreatorClaimStatus, creatorClaimStatuses } = useGlobalState();
+  const { openVideo, getCreatorClaimStatus, updateCreatorClaimStatus, creatorClaimStatuses, allCreators } = useGlobalState();
 
-  // Find creator or fallback safely to first creator
-  const creator = CREATORS.find(c => c.id === id) || CREATORS[0];
+  // Prefer catalog creators; fall back to mock CREATORS
+  const creator =
+    allCreators.find((c) => c.id === id) ||
+    CREATORS.find((c) => c.id === id) ||
+    allCreators[0] ||
+    CREATORS[0];
   const [profileTab, setProfileTab] = useState<CreatorProfileTab>('Overview');
 
   useRegisterPageFilters({

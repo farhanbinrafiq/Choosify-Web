@@ -11,12 +11,9 @@ export interface DashboardNavItem {
 
 export const DASHBOARD_NAV_REGISTRY: DashboardNavItem[] = [
   { id: 'overview', label: 'Overview', icon: 'LayoutDashboard', group: 'platform', roles: ['buyer', 'seller', 'brand', 'creator', 'moderator', 'admin'] },
-  { id: 'saved-products', label: 'Saved Products', icon: 'Heart', group: 'platform', roles: ['buyer'] },
-  { id: 'saved-brands', label: 'Saved Brands', icon: 'Store', group: 'platform', roles: ['buyer'] },
-  { id: 'loved-brands', label: 'Loved Brands', icon: 'Heart', group: 'platform', roles: ['buyer'] },
-  { id: 'followed-brands', label: 'Following', icon: 'CheckCircle2', group: 'platform', roles: ['buyer'] },
+  { id: 'saved-items', label: 'Saved Items', icon: 'Bookmark', group: 'platform', roles: ['buyer'] },
+  { id: 'following', label: 'Following', icon: 'CheckCircle2', group: 'platform', roles: ['buyer'] },
   { id: 'recently-viewed', label: 'Recently Viewed', icon: 'Clock', group: 'platform', roles: ['buyer'] },
-  { id: 'saved-recommendations', label: 'Saved Contents', icon: 'Bookmark', group: 'platform', roles: ['buyer'] },
   { id: 'orders', label: 'Orders', icon: 'ShoppingBag', group: 'platform', roles: ['buyer'] },
   { id: 'seller-products', label: 'My Products', icon: 'Package', group: 'workspace', roles: ['seller'] },
   { id: 'seller-orders', label: 'Orders', icon: 'ShoppingBag', group: 'workspace', roles: ['seller'] },

@@ -199,7 +199,7 @@ export function useSpotlightIntelligence(section: IntelligenceSectionId = 'missi
           value = `${missionControl.scheduledNext7.length} scheduled`;
           break;
         case 'ai_placeholder':
-          value = 'Emi AI — Phase 5.5';
+          value = 'Emi. A.I — Phase 5.5';
           break;
         default:
           break;

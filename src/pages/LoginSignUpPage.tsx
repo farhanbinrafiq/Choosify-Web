@@ -444,7 +444,7 @@ export function LoginSignUpPage() {
 
         {/* Bottom trust strip */}
         <div className="max-w-[1100px] mx-auto w-full px-6 sm:px-10 pb-10">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border border-white/12 rounded-none px-5 sm:px-[30px] py-[26px]">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border border-white/12 rounded-[10px] px-5 sm:px-[30px] py-[26px]">
             {TRUST_POINTS.map((point) => {
               const Icon = point.icon;
               return (

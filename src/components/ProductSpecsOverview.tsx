@@ -10,9 +10,16 @@ export interface ProductSpecItem {
 interface ProductSpecsOverviewProps {
   specs: ProductSpecItem[];
   productTitle?: string;
+  title?: string;
+  subtitle?: string;
 }
 
-export function ProductSpecsOverview({ specs, productTitle }: ProductSpecsOverviewProps) {
+export function ProductSpecsOverview({
+  specs,
+  productTitle,
+  title = 'Product Specifications',
+  subtitle,
+}: ProductSpecsOverviewProps) {
   return (
     <section
       id="product-specs-section"
@@ -20,10 +27,11 @@ export function ProductSpecsOverview({ specs, productTitle }: ProductSpecsOvervi
     >
       <div className="text-center mb-8 border-b border-gray-100 pb-5">
         <h3 className="text-2xl font-black text-[#1A1D4E] tracking-tight uppercase mb-1">
-          Product Specifications
+          {title}
         </h3>
         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest italic font-mono bg-gray-50 border border-gray-100 rounded-full px-4 py-1.5 w-fit mx-auto">
-          {productTitle ? `Technical details for ${productTitle}` : 'Technical product details'}
+          {subtitle ??
+            (productTitle ? `Technical details for ${productTitle}` : 'Technical product details')}
         </p>
       </div>
 

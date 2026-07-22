@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { 
   MapPin, 
@@ -23,12 +23,45 @@ const KNOWN_PROMOS_FALLBACK = [
 ];
 
 export function CheckoutPage() {
-  const { retailCart, addOrder, currentUser, buyerReputations, isFeatureEnabled } = useGlobalState();
-  const { createNewThread } = useDashboard();
+  const {
+    retailCart,
+    orders,
+    addOrder,
+    updateOrder,
+    currentUser,
+    buyerReputations,
+    isFeatureEnabled,
+  } = useGlobalState();
+  const { createNewThread, addNotification } = useDashboard();
   
   const navigate = useNavigate();
+  const location = useLocation();
+  const pendingOrderId =
+    new URLSearchParams(location.search).get('orderId') ||
+    (location.state as { pendingOrderId?: string } | null)?.pendingOrderId;
+  const pendingOrder = orders.find(
+    (order) =>
+      order.orderId === pendingOrderId && order.status === 'pending_payment',
+  );
 
-  const activeCart = retailCart;
+  const activeCart: typeof retailCart = pendingOrder
+    ? (pendingOrder.subOrders.flatMap((subOrder) =>
+        subOrder.items.map((item) => ({
+          product: {
+            id: item.productId,
+            title: item.productTitle,
+            image: item.image,
+            brand: subOrder.sellerBusinessName,
+            sellerId: subOrder.sellerId,
+            price: item.price,
+            productType: item.productType,
+            serviceCategory: item.serviceCategory,
+          },
+          quantity: item.quantity,
+          selectedVariant: undefined,
+        })),
+      ) as typeof retailCart)
+    : retailCart;
 
   // Contact States
   const [fullName, setFullName] = useState('Kamal Uddin');
@@ -36,7 +69,9 @@ export function CheckoutPage() {
   const [address, setAddress] = useState('House 42, Road 11, Banani, Dhaka');
   const [region, setRegion] = useState('Dhaka');
   const [deliveryNotes, setDeliveryNotes] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'credit'>('cod');
+  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'credit'>(
+    pendingOrder ? 'credit' : 'cod',
+  );
 
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<{ code: string; discount: number; type: 'flat' | 'percentage' } | null>(null);
@@ -56,11 +91,11 @@ export function CheckoutPage() {
   // If cart is empty, redirect — unless we just placed an order (cart clears before navigate)
   React.useEffect(() => {
     if (orderPlacedRef.current) return;
-    if (activeCart.length === 0) {
+    if (!pendingOrder && activeCart.length === 0) {
       toast.error('No items in checkout buffer!');
       navigate('/');
     }
-  }, [activeCart, navigate]);
+  }, [activeCart, navigate, pendingOrder]);
 
   // Group items by seller
   const groupedCart = activeCart.reduce((acc: { [key: string]: typeof activeCart }, item) => {
@@ -82,7 +117,7 @@ export function CheckoutPage() {
     }, 0);
   };
 
-  const DELIVERY_FEE_PER_SELLER = 120;
+  const DELIVERY_FEE_PER_SELLER = pendingOrder ? 0 : 120;
   const deliveryTotal = sellerIds.length * DELIVERY_FEE_PER_SELLER;
 
   const subtotal = activeCart.reduce((sum, item) => {
@@ -148,6 +183,68 @@ export function CheckoutPage() {
   const handlePlaceOrder = () => {
     if (!fullName.trim() || !phone.trim() || !address.trim()) {
       toast.error('Please deliver all shipping credentials!');
+      return;
+    }
+
+    // Accepted booking/product offers pay directly from their pending order.
+    // This reuses checkout/payment UI and never touches the cart.
+    if (pendingOrder) {
+      if (
+        pendingOrder.paymentDueAt &&
+        new Date(pendingOrder.paymentDueAt).getTime() <= Date.now()
+      ) {
+        updateOrder(pendingOrder.orderId, { status: 'cancelled' });
+        addNotification(
+          `Payment window expired for ${pendingOrder.orderId}.`,
+          'order',
+        );
+        toast.error('The 8-hour payment window has expired.');
+        navigate('/dashboard', { state: { activeTab: 'orders' } });
+        return;
+      }
+
+      const confirmedOrder = {
+        ...pendingOrder,
+        status: 'confirmed' as const,
+        isCOD: false,
+        paidAt: new Date().toISOString(),
+        invoiceGeneratedAt: new Date().toISOString(),
+        paymentMethod: 'credit' as const,
+        shipping: {
+          fullName: fullName.trim(),
+          phone: phone.trim(),
+          address: address.trim(),
+          region,
+          deliveryNotes: deliveryNotes.trim() || undefined,
+        },
+      };
+      updateOrder(pendingOrder.orderId, confirmedOrder);
+      operationsApi
+        .createOrder(confirmedOrder as unknown as Record<string, unknown>)
+        .catch(() => {});
+      sessionStorage.setItem('choosify_last_order_id', pendingOrder.orderId);
+      sessionStorage.setItem(
+        'choosify_last_order_snapshot',
+        JSON.stringify(confirmedOrder),
+      );
+      orderPlacedRef.current = true;
+      addNotification(
+        `Payment successful. Booking order ${pendingOrder.orderId} is confirmed and your invoice is ready.`,
+        'order',
+      );
+      window.dispatchEvent(
+        new CustomEvent('choosify-booking-paid', {
+          detail: {
+            orderId: pendingOrder.orderId,
+            requestId: pendingOrder.bookingRequestId,
+          },
+        }),
+      );
+      toast.success('Payment successful. Booking confirmed.');
+      navigate(`/order-success/${pendingOrder.orderId}`, {
+        replace: true,
+        state: { order: confirmedOrder },
+      });
       return;
     }
 

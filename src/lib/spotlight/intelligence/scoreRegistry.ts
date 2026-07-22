@@ -12,7 +12,7 @@ export const SCORE_REGISTRY: IntelligenceScoreDefinition[] = [
   { id: 'engagement', title: 'Engagement Score', description: 'Watch time, completion, shares', formula: 'engagement event weights', source: 'ES-008', maxValue: 100 },
   { id: 'quality', title: 'Quality Score', description: 'Content, media, and SEO quality', formula: 'quality factors composite', source: 'computed', maxValue: 100 },
   { id: 'readiness', title: 'Readiness Score', description: 'Publishing pipeline readiness', formula: 'blocks + merchandising + metadata', source: 'computed', maxValue: 100 },
-  { id: 'ai', title: 'AI Readiness Score', description: 'Future Emi AI integration readiness', formula: 'placeholder — metadata completeness', source: 'computed', maxValue: 100 },
+  { id: 'ai', title: 'AI Readiness Score', description: 'Future Emi. A.I integration readiness', formula: 'placeholder — metadata completeness', source: 'computed', maxValue: 100 },
 ];
 
 export function getScoreDefinition(kind: ScoreKind): IntelligenceScoreDefinition {

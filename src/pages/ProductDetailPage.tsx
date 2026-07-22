@@ -38,6 +38,7 @@ import {
 import { PRODUCTS, BRANDS, PLACEHOLDER_IMAGE } from "../constants";
 import { useGlobalState } from "../context/GlobalStateContext";
 import { operationsApi } from "../services/operationsApi";
+import { notificationApi } from "../services/notificationApi";
 import { useDashboard } from "../context/DashboardContext";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../lib/utils";
@@ -65,6 +66,15 @@ import { useHasRole } from "../components/auth/RequireRole";
 import { CreateSpotlightCampaignButton } from "../components/spotlight/cms/CreateSpotlightCampaignButton";
 import type { CatalogProductSizeGuide } from "../types/catalog";
 import { openEmiPanel } from "../lib/emi";
+import { BookingRequestFields } from "../components/booking/BookingRequestFields";
+import type { BookingOfferCard } from "../types/serviceBooking";
+import {
+  isServiceListing,
+  listingSectionLabels,
+  normalizeServiceCategory,
+  requestFieldsForListing,
+  serviceMessageCtaLabel,
+} from "../utils/serviceBooking";
 
 function hasActiveSizeGuide(sizeGuide?: CatalogProductSizeGuide | null): boolean {
   if (!sizeGuide?.enabled) return false;
@@ -205,8 +215,35 @@ export function ProductDetailPage() {
       seoDescription: detail.seoDescription,
       seoKeywords: detail.seoKeywords,
       sizeGuide: detail.sizeGuide ?? baseProduct?.sizeGuide,
+      optionGroups: detail.optionGroups?.length
+        ? detail.optionGroups
+        : baseProduct?.optionGroups,
+      variants: detail.productVariants?.length
+        ? detail.productVariants.map((variant) => ({
+            ...variant,
+            attributes: variant.options,
+          }))
+        : baseProduct?.variants,
+      productType: (detail as any).productType ?? baseProduct?.productType,
+      serviceCategory: (detail as any).serviceCategory ?? baseProduct?.serviceCategory,
+      complimentaryFeatures:
+        (baseProduct as any)?.complimentaryFeatures ||
+        detail.overviewBlocks?.[0]?.bullets,
+      propertySpecs: (baseProduct as any)?.propertySpecs,
+      images: (baseProduct as any)?.images,
+      location: (baseProduct as any)?.location,
+      duration: (baseProduct as any)?.duration,
+      specialty: (baseProduct as any)?.specialty,
     };
   }, [baseProduct, productDetailsById]);
+
+  const isService = isServiceListing(product);
+  const serviceCategory = normalizeServiceCategory(product?.serviceCategory);
+  const sectionLabels = listingSectionLabels(product);
+  const messageCtaLabel = isService
+    ? serviceMessageCtaLabel(product?.serviceCategory)
+    : 'Message Seller';
+  const requestFields = useMemo(() => requestFieldsForListing(product), [product]);
 
   usePageBreadcrumbs(
     {
@@ -240,8 +277,11 @@ export function ProductDetailPage() {
     { id: "product-specs-section", label: "Specs", icon: <Package size={13} /> },
     { id: "influencer-reviews-section", label: "Creator Reviews", icon: <Users size={13} /> },
     { id: "public-reviews-section", label: "Public Reviews", icon: <MessageSquare size={13} /> },
-    { id: "product-overview-section", label: "Product Overview", icon: <Info size={13} /> },
+    { id: "product-overview-section", label: sectionLabels.overview, icon: <Info size={13} /> },
     { id: "product-utility-section", label: "Buying Guide", icon: <ShoppingBag size={13} /> },
+    ...(!isService
+      ? [{ id: "where-to-buy-section", label: "Where to Buy", icon: <Tag size={13} /> }]
+      : []),
   ];
 
   const { activeId: activeSectionId, scrollToSection } = useSectionScrollSpy(
@@ -443,6 +483,7 @@ export function ProductDetailPage() {
   const [orderColor, setOrderColor] = useState("");
   const [orderSize, setOrderSize] = useState("");
   const [orderNotes, setOrderNotes] = useState("");
+  const [requestValues, setRequestValues] = useState<Record<string, string | number>>({});
   const [showOrderConfirm, setShowOrderConfirm] = useState(false);
 
   // Sync state options when product changes
@@ -489,7 +530,10 @@ export function ProductDetailPage() {
 
   const getBoxContents = () => {
     if (!product) return [];
-    
+
+    const fromProduct = (product as any).complimentaryFeatures;
+    if (Array.isArray(fromProduct) && fromProduct.length) return fromProduct;
+
     const title = (product.title || "").toLowerCase();
     const category = (product.category || "").toLowerCase();
 
@@ -714,42 +758,51 @@ export function ProductDetailPage() {
     setOrderColor(selectedColor || (product?.colors && product.colors[0]) || "Sunset Orange");
     setOrderSize(selectedSize || selectedRam || selectedStorage || (product?.sizes && product.sizes[0]) || "Standard");
     setOrderNotes("");
+    const initialValues: Record<string, string | number> = {};
+    requestFields.forEach((field) => {
+      if (field.key === 'quantity') initialValues[field.key] = 1;
+      else if (field.key === 'color') initialValues[field.key] = selectedColor || '';
+      else if (field.key === 'size') initialValues[field.key] = selectedSize || '';
+      else if (field.key === 'variant') initialValues[field.key] = selectedRam || selectedStorage || '';
+      else initialValues[field.key] = '';
+    });
+    setRequestValues(initialValues);
     setShowOrderConfig(true);
   };
 
   const handleConfirmAndSend = () => {
     const threadId = `thread-brand-${brandId}`;
-    const orderRef = `CHOOSIFY-${Math.floor(1000000 + Math.random() * 9000000)}`;
-    const structuredMsg = `🛒 SPECIAL INBOUND ORDER:
-📦 Item: ${product.title}
-🏢 Brand: ${brandName} (ID: ${brandId})
-🎨 Options:
-  • Color: ${orderColor}
-  • Variant: ${orderSize}
-🔢 Quantity: ${orderQty}
-📝 Custom Memo: ${orderNotes || "No notes."}
-${selectedAddons.length > 0
-  ? `🛍️ Optional Add-ons Selected:\n${selectedAddons.map(a => `  • ${a.title} (+৳${a.price.toLocaleString()})`).join('\n')}\n💰 Add-ons Subtotal: BDT ${addonTotal.toLocaleString()}\n💵 Total Value (incl. add-ons): BDT ${(orderQty * product.price + addonTotal).toLocaleString()}`
-  : `💵 Total Value: BDT ${(orderQty * product.price).toLocaleString()}`
-}
-Ref Link: /products/${product.id}
-
-Hello, I'd like to purchase this product config! Please approve shipping.`;
-
-    const sellerResponse = `💬 SELLER ACCEPTANCE AUTO-CONFIRMATION:
-🟢 Your order request has been APPROVED by the automatic gateway!
-📋 Tracking reference: #${orderRef}
-🚚 Dispatch logistics team will contact you shortly to coordinate receipt.`;
-
-    const pCard = {
-      image: product.image || PLACEHOLDER_IMAGE,
-      name: product.title,
-      variant: orderSize,
-      color: orderColor,
-      quantity: orderQty,
-      notes: orderNotes || "No custom parameter notes.",
-      price: product.price,
-      link: `/products/${product.id}`
+    const requestId = `REQ-${Date.now()}`;
+    const notesValue = String(requestValues.notes || orderNotes || '');
+    const cleanFields = Object.fromEntries(
+      Object.entries(requestValues).filter(([key, value]) => key !== 'notes' && value !== ''),
+    );
+    const quantity = Number(cleanFields.quantity || orderQty || 1);
+    const estimatedPrice = Number(product.price || 0) * quantity + addonTotal;
+    const structuredMsg = isService
+      ? `Booking request sent for ${product.title}. The seller has 24 hours to respond.`
+      : `Product request sent for ${product.title}. The seller has 24 hours to respond.`;
+    const now = Date.now();
+    const bookingOffer: BookingOfferCard = {
+      kind: 'booking_offer',
+      requestId,
+      version: 1,
+      listingId: String(product.id),
+      listingTitle: product.title,
+      listingImage: product.image || PLACEHOLDER_IMAGE,
+      listingHref: `/products/${product.id}`,
+      sellerId: String(product.sellerId || brandId),
+      sellerName: brandName,
+      buyerId: String(currentUser.id),
+      serviceCategory: isService ? serviceCategory : undefined,
+      isService,
+      fields: cleanFields,
+      notes: notesValue,
+      price: estimatedPrice,
+      currency: 'BDT',
+      status: 'pending',
+      createdAt: new Date(now).toISOString(),
+      sellerRespondBy: new Date(now + 24 * 60 * 60 * 1000).toISOString(),
     };
 
     // 1. Create message thread
@@ -759,19 +812,54 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
       brandObj?.logo || "https://i.pravatar.cc/150?u=brand",
       'retail',
       structuredMsg,
-      orderRef
+      requestId
     );
 
     // 2. Add structural msg
-    addThreadMessage(threadId, structuredMsg, "user", "Me", pCard);
-
-    // 3. Add Seller response message
-    setTimeout(() => {
-      addThreadMessage(threadId, sellerResponse, "seller", brandName);
-    }, 450);
+    addThreadMessage(
+      threadId,
+      structuredMsg,
+      "user",
+      "Me",
+      undefined,
+      bookingOffer,
+    );
+    addNotification(
+      `New ${isService ? 'booking' : 'product'} request ${requestId} sent to ${brandName}.`,
+      'message',
+    );
+    operationsApi
+      .submitPlatformMessage({
+        buyerId: String(currentUser.id),
+        userName: currentUser.name || 'Buyer',
+        body: structuredMsg,
+        orderId: requestId,
+        sellerId: bookingOffer.sellerId,
+        bookingOffer,
+      })
+      .catch(() => {});
+    window.dispatchEvent(
+      new CustomEvent('choosify-booking-request-created', {
+        detail: {
+          requestId,
+          sellerId: bookingOffer.sellerId,
+          sellerName: brandName,
+          listingTitle: product.title,
+        },
+      }),
+    );
+    notificationApi
+      .createAndSend({
+        title: isService ? 'New booking request' : 'New product request',
+        message: `${currentUser.name} sent request ${requestId} for ${product.title}.`,
+        type: 'order',
+        audience: `user:${bookingOffer.sellerId}`,
+        sendWeb: true,
+      })
+      .catch(() => {});
 
     // Show toast and close
-    toast.success("Order request dispatched! Syncing to messaging workspace.");
+    toast.success(`${isService ? 'Booking' : 'Product'} request sent to ${brandName}.`);
     setShowOrderConfirm(false);
     
     // Redirect to Messages thread
@@ -824,6 +912,8 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
       <div className={cn(DC_CONTENT_MAX, 'w-full')}>
       <ProductDetailBuyBox
         product={product}
+        isService={isService}
+        messageCtaLabel={messageCtaLabel}
         brandName={brandName}
         isOutOfStock={!!isOutOfStock}
         stockQuantity={stockQuantity}
@@ -873,7 +963,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
           openEmiPanel(`Tell me more about ${product.title} and alternatives`);
         }}
         addonsSlot={
-          hasAddons ? (
+          !isService && hasAddons ? (
             <OptionalAddonsModule
               addons={resolvedAddons}
               selectedIds={selectedAddonIds}
@@ -888,10 +978,13 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
       <DcUnderlineTabs
         flush
         tabs={[
-          { id: 'product-specs-section', label: 'Product Specifications', icon: '⚏' },
+          { id: 'product-specs-section', label: sectionLabels.specifications, icon: '⚏' },
           { id: 'influencer-reviews-section', label: 'Creator Reviews', icon: '📖' },
           { id: 'public-reviews-section', label: 'Public Reviews', icon: '🛡' },
-          { id: 'product-overview-section', label: 'Product Overview', icon: '👁' },
+          { id: 'product-overview-section', label: sectionLabels.overview, icon: '👁' },
+          ...(!isService
+            ? [{ id: 'where-to-buy-section', label: 'Where to Buy', icon: '🏷' }]
+            : []),
         ]}
         activeId={activeSectionId === 'all' ? 'product-specs-section' : activeSectionId}
         onNavigate={scrollToSection}
@@ -902,16 +995,29 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
             <StudioWrap sectionId="product-specs">
             <ProductSpecsOverview
               productTitle={product.title}
-              specs={[
-                { label: 'Brand', value: brandObj?.name || product.brand || 'Sailor' },
-                { label: 'Category', value: product.category || 'Lifestyle' },
-                { label: 'Material', value: 'Premium Grade Build' },
-                { label: 'Origin', value: 'Local Production / Auth' },
-                { label: 'Warranty', value: '1 Year Care Warranty' },
-                { label: 'Model', value: product.title?.substring(0, 16) || 'Classic' },
-                { label: 'Rating', value: `${product.rating || '4.8'} / 5` },
-                { label: 'Status', value: isOutOfStock ? 'Out of Stock' : 'In Stock' },
-              ]}
+              title={sectionLabels.specifications}
+              subtitle={
+                isService
+                  ? `Service details for ${product.title}`
+                  : undefined
+              }
+              specs={
+                Array.isArray(product.specs) && product.specs.length
+                  ? product.specs.map((row: any) => ({
+                      label: String(row.label || row.key || ''),
+                      value: String(row.value || ''),
+                    }))
+                  : [
+                      { label: 'Brand', value: brandObj?.name || product.brand || 'Sailor' },
+                      { label: 'Category', value: product.category || 'Lifestyle' },
+                      { label: 'Material', value: 'Premium Grade Build' },
+                      { label: 'Origin', value: 'Local Production / Auth' },
+                      { label: 'Warranty', value: '1 Year Care Warranty' },
+                      { label: 'Model', value: product.title?.substring(0, 16) || 'Classic' },
+                      { label: 'Rating', value: `${product.rating || '4.8'} / 5` },
+                      { label: 'Status', value: isOutOfStock ? 'Out of Stock' : 'In Stock' },
+                    ]
+              }
             />
             </StudioWrap>
 
@@ -1032,7 +1138,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                   <form onSubmit={handleReviewSubmit} className="flex gap-3 items-start">
                     <div className="w-[38px] h-[38px] rounded-full bg-[#F4F7F9] shrink-0 overflow-hidden" />
                     <div className="flex-1 min-w-0">
-                      <div className="border border-[#E5E7EB] rounded-none px-3.5 py-2.5">
+                      <div className="border border-[#E5E7EB] rounded-[10px] px-3.5 py-2.5">
                         <textarea
                           rows={1}
                           required
@@ -1076,7 +1182,8 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
             >
               <div>
                 <h3 className="text-[14px] font-extrabold text-[#1A1A2E] tracking-tight">
-                  Product <span className="text-[#EB4501]">Overview</span>
+                  {isService ? 'Service' : 'Product'}{' '}
+                  <span className="text-[#EB4501]">Overview</span>
                 </h3>
                 <p className="text-[10px] font-bold text-[#9AA0AC] tracking-wide mt-1 uppercase">
                   Benefits, quality structure & trust
@@ -1180,7 +1287,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                   ].map((tag) => (
                     <span
                       key={tag}
-                      className="choosify-best-for-tag text-[11px] font-bold px-3.5 py-1.5 rounded-none"
+                      className="choosify-best-for-tag text-[11px] font-bold px-3.5 py-1.5 rounded-full"
                     >
                       #{tag}
                     </span>
@@ -1195,7 +1302,9 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
               className="scroll-mt-36 bg-white rounded-xl border border-[#E8EDF2] p-6 grid grid-cols-1 md:grid-cols-2 gap-3.5 w-full"
             >
               <div className="bg-[#F4F7F9] rounded-[10px] p-4 text-left">
-                <div className="text-[11px] font-extrabold text-[#1A1A2E] mb-2.5">BOX CONTENT</div>
+                <div className="text-[11px] font-extrabold text-[#1A1A2E] mb-2.5">
+                  {sectionLabels.boxContent.toUpperCase()}
+                </div>
                 {(boxContents?.length
                   ? boxContents
                   : ['Device', 'Charging cable', 'Documentation', 'Warranty card']
@@ -1206,12 +1315,17 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                 ))}
               </div>
               <div className="bg-[#F4F7F9] rounded-[10px] p-4 text-left">
-                <div className="text-[11px] font-extrabold text-[#1A1A2E] mb-2.5">PHYSICAL SPECS</div>
-                {[
-                  `Category: ${product.category || 'General'}`,
-                  `Brand: ${brandName}`,
-                  `Rating: ${product.rating || '4.8'} / 5`,
-                ].map((item, i) => (
+                <div className="text-[11px] font-extrabold text-[#1A1A2E] mb-2.5">
+                  {sectionLabels.physicalSpecs.toUpperCase()}
+                </div>
+                {(Array.isArray((product as any).propertySpecs) && (product as any).propertySpecs.length
+                  ? (product as any).propertySpecs
+                  : [
+                      `Category: ${product.category || 'General'}`,
+                      `Brand: ${brandName}`,
+                      `Rating: ${product.rating || '4.8'} / 5`,
+                    ]
+                ).map((item: string, i: number) => (
                   <div key={i} className="text-[11.5px] text-[#4B5563] mb-1.5">
                     ✓ {item}
                   </div>
@@ -1219,8 +1333,14 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
               </div>
             </StudioWrap>
 
-            {/* Brand mini + Price Across Stores — Choosify.dc.html 1fr / 1.8fr */}
-            <div className="bg-white rounded-xl border border-[#E8EDF2] p-6 grid grid-cols-1 lg:grid-cols-[1fr_1.8fr] gap-3.5 w-full">
+            {/* Provider card stays; Price Across Stores is physical-product-only */}
+            <div
+              id={isService ? 'service-provider-section' : 'where-to-buy-section'}
+              className={cn(
+                'bg-white rounded-xl border border-[#E8EDF2] p-6 grid grid-cols-1 gap-3.5 w-full',
+                !isService && 'lg:grid-cols-[1fr_1.8fr]',
+              )}
+            >
               <div className="rounded-[10px] overflow-hidden border border-[#E8EDF2]">
                 <div className="h-[90px] bg-[#14161f] flex items-center justify-center">
                   <div className="text-lg font-extrabold text-white tracking-wide uppercase">
@@ -1267,6 +1387,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                 </div>
               </div>
 
+              {!isService && (
               <div className="bg-[#F4F7F9] rounded-[10px] p-4 text-left">
                 <div className="text-[11px] font-extrabold text-[#1A1A2E] mb-3">PRICE ACROSS STORES</div>
                 {[
@@ -1282,11 +1403,14 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                     <div className="w-8 h-8 rounded-full bg-[#000435] text-white flex items-center justify-center text-[11px] font-extrabold shrink-0">
                       {store.name.charAt(0)}
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[11.5px] font-bold text-[#1A1A2E]">{store.name}</div>
-                      <div className="text-[10px] text-[#9AA0AC]">🚚 {store.delivery}</div>
+                    <div className="min-w-0 shrink-0 sm:w-[28%]">
+                      <div className="text-[11.5px] font-bold text-[#1A1A2E] truncate">{store.name}</div>
+                      <div className="text-[10px] text-[#9AA0AC] sm:hidden">🚚 {store.delivery}</div>
                     </div>
-                    <div className="text-[12.5px] font-extrabold shrink-0" style={{ color: store.color }}>
+                    <div className="hidden sm:block flex-1 min-w-0 text-center text-[10px] text-[#9AA0AC] truncate">
+                      🚚 {store.delivery}
+                    </div>
+                    <div className="text-[12.5px] font-extrabold shrink-0 ml-auto sm:ml-0" style={{ color: store.color }}>
                       ৳{store.price.toLocaleString()}
                     </div>
                     <button
@@ -1302,6 +1426,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                   View more stores →
                 </Link>
               </div>
+              )}
             </div>
 
             {/* Sponsored Advertisement */}
@@ -1353,11 +1478,11 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-[#0D0E25] border border-white/10 rounded-2xl p-6 max-w-md w-full relative text-left"
+              className="bg-white border border-[#E8EDF2] rounded-2xl p-6 max-w-md w-full relative text-left shadow-2xl"
             >
               <button
                 onClick={() => setShowOrderConfig(false)}
-                className="absolute top-4 right-4 text-white/50 hover:text-white cursor-pointer bg-transparent border-none"
+                className="absolute top-4 right-4 text-[#9AA0AC] hover:text-[#1A1A2E] cursor-pointer bg-transparent border-none"
               >
                 <X size={18} />
               </button>
@@ -1367,25 +1492,25 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                   <MessageCircle size={16} />
                 </div>
                 <div>
-                  <h3 className="text-base font-extrabold text-white tracking-tight">
-                    Message to Order
+                  <h3 className="text-base font-extrabold text-[#1A1A2E] tracking-tight">
+                    {isService ? messageCtaLabel : 'Message Seller'}
                   </h3>
-                  <p className="text-[10px] text-white/40 uppercase tracking-widest font-mono">
-                    Step 1: Configure Sourcing Parameters
+                  <p className="text-[10px] text-[#9AA0AC] uppercase tracking-widest font-mono">
+                    Step 1: Add request details
                   </p>
                 </div>
               </div>
 
               <div className="space-y-4">
                 {/* Product Meta */}
-                <div className="flex items-center gap-3 bg-white/5 rounded-xl p-3 border border-white/5">
+                <div className="flex items-center gap-3 bg-[#F4F7F9] rounded-xl p-3 border border-[#E8EDF2]">
                   <img
                     src={product.image || product.thumbnail || PLACEHOLDER_IMAGE}
                     alt={product.title}
                     className="w-12 h-12 rounded-[5px] object-cover shrink-0"
                   />
                   <div>
-                    <h4 className="text-xs font-bold text-white leading-tight truncate max-w-[220px]">
+                    <h4 className="text-xs font-bold text-[#1A1A2E] leading-tight truncate max-w-[220px]">
                       {product.title}
                     </h4>
                     <p className="text-[10px] text-[#EB4501] font-bold mt-0.5 font-mono">
@@ -1394,6 +1519,16 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                   </div>
                 </div>
 
+                <BookingRequestFields
+                  fields={requestFields}
+                  values={requestValues}
+                  onChange={(key, value) =>
+                    setRequestValues((previous) => ({ ...previous, [key]: value }))
+                  }
+                />
+
+                {false && (
+                <>
                 {/* Color Selection */}
                 {product.colors && product.colors.length > 0 && (
                   <div>
@@ -1485,17 +1620,29 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                     className="w-full bg-[#050514] border border-white/10 rounded-xl px-4 py-3 text-xs text-white outline-none focus:border-orange-primary transition-colors resize-none"
                   />
                 </div>
+                </>
+                )}
 
                 {/* Action CTA row */}
                 <div className="flex gap-3 pt-3">
                   <button
                     onClick={() => setShowOrderConfig(false)}
-                    className="flex-1 py-3 text-center border border-white/15 rounded-lg hover:bg-white/10 transition-all text-[13px] font-bold tracking-tight text-white cursor-pointer bg-transparent"
+                    className="flex-1 py-3 text-center border border-[#E5E7EB] rounded-lg hover:bg-[#F4F7F9] transition-all text-[13px] font-bold tracking-tight text-[#1A1A2E] cursor-pointer bg-white"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={() => {
+                      const missing = requestFields.find(
+                        (field) =>
+                          field.required &&
+                          (requestValues[field.key] === '' ||
+                            requestValues[field.key] === undefined),
+                      );
+                      if (missing) {
+                        toast.error(`${missing.label} is required.`);
+                        return;
+                      }
                       setShowOrderConfig(false);
                       setShowOrderConfirm(true);
                     }}
@@ -1516,11 +1663,11 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="bg-[#0D0E25] border border-white/10 rounded-2xl p-6 max-w-md w-full relative text-left"
+              className="bg-white border border-[#E8EDF2] rounded-2xl p-6 max-w-md w-full relative text-left shadow-2xl"
             >
               <button
                 onClick={() => setShowOrderConfirm(false)}
-                className="absolute top-4 right-4 text-white/50 hover:text-white cursor-pointer bg-transparent border-none"
+                className="absolute top-4 right-4 text-[#9AA0AC] hover:text-[#1A1A2E] cursor-pointer bg-transparent border-none"
               >
                 <X size={18} />
               </button>
@@ -1530,29 +1677,34 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                   <CheckCircle2 size={16} />
                 </div>
                 <div>
-                  <h3 className="text-base font-extrabold text-white tracking-tight">
-                    Confirm Broadcast Order
+                  <h3 className="text-base font-extrabold text-[#1A1A2E] tracking-tight">
+                    Confirm {isService ? 'Booking Request' : 'Product Request'}
                   </h3>
-                  <p className="text-[10px] text-white/40 uppercase tracking-widest font-mono">
-                    Step 2: Auto-send Structured Brief
+                  <p className="text-[10px] text-[#9AA0AC] uppercase tracking-widest font-mono">
+                    Step 2: Send structured brief
                   </p>
                 </div>
               </div>
 
               <div className="space-y-4">
                 {/* Structured Overview Block */}
-                <div className="bg-[#050514] border border-white/5 rounded-xl p-4 text-left">
+                <div className="bg-[#F4F7F9] border border-[#E8EDF2] rounded-xl p-4 text-left">
                   <span className="text-[11px] font-bold text-[#EB4501] tracking-tight block mb-2">
                     CONFIRM LIVE MESSAGE SUMMARY
                   </span>
                   
-                  <div className="space-y-1.5 text-xs text-white/80 font-mono">
-                    <p><span className="text-white/40 font-sans font-bold">Product:</span> {product.title}</p>
-                    <p><span className="text-white/40 font-sans font-bold">Brand Partner:</span> {brandName}</p>
-                    <p><span className="text-white/40 font-sans font-bold">Configuration:</span> {orderColor} / {orderSize}</p>
-                    <p><span className="text-white/40 font-sans font-bold">Quantity:</span> {orderQty} units</p>
-                    <p><span className="text-white/40 font-sans font-bold">Total Estimate:</span> BDT {(orderQty * product.price).toLocaleString()}</p>
-                    <p><span className="text-white/40 font-sans font-bold">Note Memo:</span> <span className="italic">"{orderNotes || 'None'}"</span></p>
+                  <div className="space-y-1.5 text-xs text-[#1A1A2E] font-mono">
+                    <p><span className="text-[#9AA0AC] font-sans font-bold">Listing:</span> {product.title}</p>
+                    <p><span className="text-[#9AA0AC] font-sans font-bold">Seller:</span> {brandName}</p>
+                    {Object.entries(requestValues).map(([key, value]) => (
+                      <p key={key}>
+                        <span className="text-[#9AA0AC] font-sans font-bold capitalize">
+                          {key.replace(/([A-Z])/g, ' $1')}:
+                        </span>{' '}
+                        {String(value || '—')}
+                      </p>
+                    ))}
+                    <p><span className="text-[#9AA0AC] font-sans font-bold">Estimate:</span> BDT {Number(product.price || 0).toLocaleString()}</p>
                   </div>
                 </div>
 
@@ -1560,7 +1712,8 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                 <div className="flex gap-2 items-start bg-blue-500/5 text-blue-400 p-3 rounded-xl border border-blue-500/10 text-[10px] leading-relaxed">
                   <Info size={12} className="shrink-0 mt-0.5" />
                   <p>
-                    Confirming this order request will create a new direct thread with the brand, send this order brief, and auto-confirm acceptance references from the merchant!
+                    This sends a request into your existing seller conversation. The seller may accept,
+                    decline with a reason, or send a modified offer. No cart is created.
                   </p>
                 </div>
 
@@ -1571,7 +1724,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                       setShowOrderConfirm(false);
                       setShowOrderConfig(true);
                     }}
-                    className="flex-1 py-3 text-center border border-white/15 rounded-lg hover:bg-white/10 transition-all text-[13px] font-bold tracking-tight text-white cursor-pointer bg-transparent"
+                    className="flex-1 py-3 text-center border border-[#E5E7EB] rounded-lg hover:bg-[#F4F7F9] transition-all text-[13px] font-bold tracking-tight text-[#1A1A2E] cursor-pointer bg-white"
                   >
                     Back
                   </button>
@@ -1579,7 +1732,7 @@ Hello, I'd like to purchase this product config! Please approve shipping.`;
                     onClick={handleConfirmAndSend}
                     className="flex-1 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-all text-[13px] font-bold tracking-tight shadow-sm cursor-pointer border-none"
                   >
-                    Send & Start Chat
+                    Send Request
                   </button>
                 </div>
               </div>

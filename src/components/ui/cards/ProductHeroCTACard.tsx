@@ -49,9 +49,9 @@ export const ProductHeroCTACard: React.FC<ProductHeroCTACardProps> = ({
   const [selectedStorage, setSelectedStorage] = useState(storages?.[0]?.value || '');
 
   return (
-    <div className={cn("bg-white rounded-none p-6 md:p-8 flex flex-col md:flex-row gap-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100", className)}>
+    <div className={cn("bg-white rounded-[10px] p-6 md:p-8 flex flex-col md:flex-row gap-8 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100", className)}>
       {/* Product Image Area */}
-      <div className="w-full md:w-1/2 flex items-center justify-center bg-slate-50 rounded-none p-8 relative min-h-[300px]">
+      <div className="w-full md:w-1/2 flex items-center justify-center bg-slate-50 rounded-[10px] p-8 relative min-h-[300px]">
         {discountBadge && (
           <Badge variant="red" className="absolute top-4 left-4">
             {discountBadge}

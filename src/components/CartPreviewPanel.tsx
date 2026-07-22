@@ -227,7 +227,7 @@ export function CartPreviewPanel({ onClose, className }: CartPreviewPanelProps) 
             <button
               type="button"
               onClick={handleClearCart}
-              className="py-2.5 px-3 rounded-lg border border-[#e8edf2] bg-white hover:bg-red-50 hover:border-red-200 hover:text-red-600 text-[10px] font-bold uppercase tracking-widest text-[#8a9bb0] transition-colors cursor-pointer"
+              className="py-2.5 px-3 rounded-lg border border-[#e8edf2] bg-white hover:bg-red-50 hover:border-red-200 hover:text-red-600 text-[10px] font-bold uppercase tracking-widest text-red-500 transition-colors cursor-pointer"
             >
               Clear cart
             </button>

@@ -67,10 +67,10 @@ const MOD_ADMIN: PlatformRole[] = ['moderator', 'admin'];
 export const FEATURE_VISIBILITY: FeatureVisibility[] = [
   { id: 'buyer.dashboard', label: 'Buyer Dashboard', visibleTo: BUYER_ONLY, route: '/dashboard' },
   { id: 'buyer.orders', label: 'Orders', visibleTo: BUYER_ONLY, route: '/profile/orders', dashboardTab: 'orders' },
-  { id: 'buyer.wishlist', label: 'Saved Products', visibleTo: BUYER_ONLY, dashboardTab: 'saved-products' },
+  { id: 'buyer.wishlist', label: 'Saved Items', visibleTo: BUYER_ONLY, dashboardTab: 'saved-items' },
   { id: 'buyer.compare', label: 'Compare', visibleTo: BUYER_ONLY, route: '/compare' },
-  { id: 'buyer.saved-spotlight', label: 'Saved Contents', visibleTo: BUYER_ONLY, dashboardTab: 'saved-recommendations' },
-  { id: 'buyer.following', label: 'Following', visibleTo: BUYER_ONLY, dashboardTab: 'followed-brands' },
+  { id: 'buyer.saved-spotlight', label: 'Saved Items', visibleTo: BUYER_ONLY, dashboardTab: 'saved-items' },
+  { id: 'buyer.following', label: 'Following', visibleTo: BUYER_ONLY, dashboardTab: 'following' },
   { id: 'buyer.messages', label: 'Messages', visibleTo: [...BUYER_ONLY, ...SELLER, ...CREATOR], route: '/messages', dashboardTab: 'messages' },
   { id: 'buyer.reviews', label: 'My Reviews', visibleTo: BUYER_ONLY, dashboardTab: 'my-reviews' },
   { id: 'buyer.browsing-history', label: 'Recently Viewed', visibleTo: BUYER_ONLY, dashboardTab: 'recently-viewed' },

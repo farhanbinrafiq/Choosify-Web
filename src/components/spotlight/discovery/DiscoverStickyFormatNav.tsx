@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DcListingStickyFilters, type DcStickyFilterItem } from '../../design/DcListingStickyFilters';
+import { cn } from '../../../lib/utils';
 import { LISTING_PAGE_MAX_WIDTH } from '../../../lib/design/dcListingTokens';
 import type { SpotlightDiscoverFilters } from '../../../types/spotlight/experience/filters';
 import type { SpotlightContentTabId } from '../../../types/spotlight/discovery/navigation';
@@ -28,22 +29,31 @@ const DISCOVER_FORMAT_TABS: Array<{
   { id: 'live', label: 'Live', filterId: 'live', icon: '◉', sub: 'Watch live', bg: '#FDECEC' },
 ];
 
+const DISCOVER_CHIPS = [
+  'iPhone vs Samsung',
+  'Best AC 2026',
+  'Eid Gift Guide',
+  'Budget Laptops',
+  'Creator Reviews',
+];
+
 interface DiscoverStickyFormatNavProps {
   quickFilters: DiscoverQuickFilter[];
   filters: SpotlightDiscoverFilters;
   activeTab: SpotlightContentTabId;
   className?: string;
+  onQuerySubmit?: (query: string) => void;
 }
 
 /**
- * Discover sticky format nav — same Deals `DcListingStickyFilters` items pattern
- * (icon circle + name + sub), not underline text tabs.
+ * Discover sticky format nav — merged dark search/chips + Deals-style icon tabs.
  */
 export function DiscoverStickyFormatNav({
   quickFilters,
   filters,
   activeTab,
   className,
+  onQuerySubmit,
 }: DiscoverStickyFormatNavProps) {
   const navigate = useNavigate();
 
@@ -94,9 +104,12 @@ export function DiscoverStickyFormatNav({
 
   return (
     <DcListingStickyFilters
-      overlapHero
       maxWidthClass={LISTING_PAGE_MAX_WIDTH}
-      className={className}
+      className={cn('mt-5', className)}
+      searchPlaceholder="Search guides, videos, reviews..."
+      quickChips={DISCOVER_CHIPS}
+      onSearch={onQuerySubmit}
+      onChipClick={onQuerySubmit}
       items={items}
     />
   );

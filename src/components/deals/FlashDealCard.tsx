@@ -1,8 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Heart, ShoppingCart } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { PLACEHOLDER_IMAGE } from '../../constants';
+import { CartIconButton } from '../commerce/CartIconButton';
 
 export interface FlashDealCardProps {
   id: string | number;
@@ -31,11 +31,8 @@ export function FlashDealCard({
   originalPrice,
   badge = `${Math.max(5, Math.round(((originalPrice ?? price * 1.2) - price) / (originalPrice ?? price * 1.2) * 100))}% OFF`,
   claimedPct = 62,
-  likes = '1.2K',
   href,
   onAddToCart,
-  onToggleWish,
-  wished = false,
   className,
 }: FlashDealCardProps) {
   const to = href ?? `/products/${id}`;
@@ -83,38 +80,14 @@ export function FlashDealCard({
             style={{ width: `${Math.min(100, Math.max(8, claimedPct))}%` }}
           />
         </div>
-        <div className="flex justify-between items-center">
-          <button
-            type="button"
-            onClick={(e) => {
-              e.preventDefault();
-              onToggleWish?.(e);
-            }}
-            className="flex items-center gap-1 text-[10.5px] text-[#9AA0AC] border-0 bg-transparent p-0 cursor-pointer"
-          >
-            <Heart
-              size={12}
-              strokeWidth={2}
-              className={cn(
-                wished ? 'text-[#EB4501] fill-[#EB4501]' : 'text-[#EB4501]',
-              )}
-            />
-            {likes}
-          </button>
-          <button
-            type="button"
+        <div className="flex justify-end items-center">
+          <CartIconButton
+            size={26}
             onClick={(e) => {
               e.preventDefault();
               onAddToCart?.(e);
             }}
-            className="relative w-[26px] h-[26px] rounded-full bg-[#EB4501] flex items-center justify-center border-0 cursor-pointer shrink-0"
-            aria-label="Add to cart"
-          >
-            <ShoppingCart size={13} className="text-white" strokeWidth={1.7} />
-            <span className="absolute -top-1 -right-1 w-[13px] h-[13px] rounded-full bg-[#1A1A2E] text-white text-[9px] font-extrabold flex items-center justify-center leading-none">
-              +
-            </span>
-          </button>
+          />
         </div>
       </div>
     </Link>
@@ -161,7 +134,7 @@ export function DealOfTheDayCard({
         </div>
         <div className="text-[9.5px] text-white/50">New deal in {refreshLabel}</div>
       </div>
-      <Link to={to} className="relative h-[185px] rounded-[10px] overflow-hidden mb-3 block">
+      <Link to={to} className="relative flex-1 min-h-[185px] rounded-[10px] overflow-hidden mb-3 block">
         <img
           src={image || PLACEHOLDER_IMAGE}
           alt=""

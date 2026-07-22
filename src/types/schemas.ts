@@ -56,6 +56,9 @@ export interface Brand {
   featuredFlag: boolean;
   category?: string;
   claimStatus?: 'community' | 'pending' | 'verified';
+  /** Original onboard timestamp — used by listing ranking (not updatedAt) */
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CommerceProduct {
@@ -83,8 +86,12 @@ export interface CommerceProduct {
   tags?: string[];
   featuredFlag?: boolean;
   publishedAt?: string;
+  createdAt?: string;
   isNewArrival?: boolean;
   isBestseller?: boolean;
+  /** Physical catalog item or message-booked service */
+  productType?: 'physical' | 'service';
+  serviceCategory?: string;
 }
 
 export interface SubOrderItem {
@@ -92,6 +99,9 @@ export interface SubOrderItem {
   productTitle: string;
   quantity: number;
   price: number;
+  productType?: 'physical' | 'service';
+  serviceCategory?: string;
+  serviceDetails?: Record<string, string | number>;
 }
 
 export interface SubOrder {
@@ -114,7 +124,12 @@ export interface Order {
   overallTotal: number;
   subOrders: SubOrder[];
   createdAt: string;
-  status?: 'active' | 'cancelled' | 'completed';
+  status?: 'pending_payment' | 'active' | 'confirmed' | 'cancelled' | 'completed';
+  /** Direct booking orders bypass cart and link to the accepted conversation offer. */
+  bookingRequestId?: string;
+  paymentDueAt?: string;
+  paidAt?: string;
+  invoiceGeneratedAt?: string;
   cancelledAt?: string;
   cancellationReason?: string;
   cancelledBy?: 'buyer' | 'seller' | 'admin';

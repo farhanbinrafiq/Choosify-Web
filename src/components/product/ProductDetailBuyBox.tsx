@@ -30,6 +30,8 @@ interface ProductDetailBuyBoxProps {
   onAddToCart: () => void;
   onCompare: () => void;
   onMessageSeller: () => void;
+  isService?: boolean;
+  messageCtaLabel?: string;
   onAskEmi?: () => void;
   /** Optional add-ons panel (rendered in right column) */
   addonsSlot?: React.ReactNode;
@@ -65,6 +67,8 @@ export function ProductDetailBuyBox({
   onAddToCart,
   onCompare,
   onMessageSeller,
+  isService = false,
+  messageCtaLabel = 'Message Seller',
   onAskEmi,
   addonsSlot,
   className,
@@ -155,7 +159,7 @@ export function ProductDetailBuyBox({
             Get up to ৳ cashback · EMI available on this product
           </div>
 
-          {uniqueColors.length > 0 && (
+          {!isService && uniqueColors.length > 0 && (
             <>
               <div className="text-[11.5px] font-bold text-[#1A1A2E] mb-2">
                 COLOR: {(selectedColor || uniqueColors[0] || '').toUpperCase()}
@@ -182,6 +186,8 @@ export function ProductDetailBuyBox({
             </>
           )}
 
+          {!isService && (
+          <>
           <div className="flex justify-between items-center mb-2">
             <div className="text-[11.5px] font-bold text-[#1A1A2E]">
               {uniqueSizes.length > 0 ? 'SIZE' : 'STORAGE'}:{' '}
@@ -224,6 +230,8 @@ export function ProductDetailBuyBox({
               );
             })}
           </div>
+          </>
+          )}
 
           {onAskEmi && (
             <button
@@ -242,6 +250,7 @@ export function ProductDetailBuyBox({
         {/* Right — commerce actions */}
         <div className="flex flex-col gap-3.5">
           <div className="flex flex-col gap-2.5">
+            {!isService && (
             <div className="flex items-center justify-between bg-[#F4F7F9] rounded-lg px-2.5 py-1.5">
               <span className="text-xs font-bold text-[#1A1A2E]">Quantity</span>
               <div className="flex items-center gap-3">
@@ -262,6 +271,8 @@ export function ProductDetailBuyBox({
                 </button>
               </div>
             </div>
+            )}
+            {!isService && (
             <button
               type="button"
               onClick={onAddToCart}
@@ -270,6 +281,19 @@ export function ProductDetailBuyBox({
             >
               ADD TO CART
             </button>
+            )}
+            {isService && (
+              <button
+                type="button"
+                onClick={onMessageSeller}
+                className="w-full bg-[#EB4501] text-white border-none py-3.5 rounded-lg text-[13px] font-bold inline-flex items-center justify-center gap-2 hover:bg-[#CF4400]"
+              >
+                <MessageCircle size={14} />
+                {messageCtaLabel}
+              </button>
+            )}
+            {!isService && (
+            <>
             <button
               type="button"
               onClick={onToggleWishlist}
@@ -303,8 +327,10 @@ export function ProductDetailBuyBox({
               className="w-full bg-[#000435] text-white border-none py-3 rounded-lg text-[12.5px] font-bold inline-flex items-center justify-center gap-2 hover:brightness-110"
             >
               <MessageCircle size={14} />
-              Message Seller to Buy
+              {messageCtaLabel}
             </button>
+            </>
+            )}
           </div>
 
           {addonsSlot && (

@@ -5,7 +5,7 @@ export const BRAND_ICON = {
   facebook: '/icons/facebook.svg',
   messenger: '/icons/messenger.png',
   instagram: '/icons/instagram.svg',
-  linkedin: '/icons/linkedin.png',
+  linkedin: '/icons/linkedin.svg',
   tiktok: '/icons/tiktok.svg',
   youtube: '/icons/youtube.svg',
   telegram: '/icons/telegram.png',

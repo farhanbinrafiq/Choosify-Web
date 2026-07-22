@@ -36,7 +36,7 @@ export function CompareHero({ className }: CompareHeroProps) {
 
   return (
     <div className={className}>
-      <div className="bg-white rounded-none p-7 border border-[#E8EDF2]">
+      <div className="bg-white rounded-[10px] p-7 border border-[#E8EDF2]">
         <div className="flex items-baseline justify-between gap-3 mb-1">
           <h2 className="text-[17px] font-extrabold text-[#1A1A2E]">Compare Anything</h2>
           <ViewAllLink href="/compare" label="VIEW ALL COMPARISONS ›" />

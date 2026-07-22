@@ -7,7 +7,6 @@ import { ProductCard } from '../components/ProductCard';
 import { ProductCardSkeleton } from '../components/Skeleton';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, CategorySmartFilters, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
-import { DcListingHero } from '../components/design/DcListingHero';
 import { DcListingStickyFilters } from '../components/design/DcListingStickyFilters';
 import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
 import { PaginationBar } from '../components/PaginationBar';
@@ -19,6 +18,8 @@ import { ProductsSponsoredBanner } from '../components/commerce/AdvertiseHereCar
 import { useSponsoredFeedEntries } from '../hooks/useSponsoredFeedEntries';
 import { PLACEMENT_KEYS } from '../lib/placements';
 import { resolveServiceKeywords } from '../lib/home/popularServices';
+import { rankProducts } from '../utils/listingRanking';
+import { usePriorityClockMs } from '../hooks/usePriorityClockMs';
 
 const SPONSORED_RECOMMENDATIONS = [
   {
@@ -80,6 +81,7 @@ export function AllProductsPage() {
   const [sortOption, setSortOption] = useState<'popular' | 'price-asc' | 'price-desc'>('popular');
   const [activeSpecs, setActiveSpecs] = useState<Record<string, string>>({});
   const [priceMin, setPriceMin] = useState<number>(0);
+  const priorityNowMs = usePriorityClockMs();
   const [priceMax, setPriceMax] = useState<number>(999999);
 
   // Restore state from sessionStorage on mount
@@ -447,7 +449,19 @@ export function AllProductsPage() {
       result = result.filter((p) => {
         const brandObj = allBrands.find(b => String(b.id) === String(p.brandId) || b.name === p.brandName);
         const bName = brandObj ? brandObj.name : p.brandName;
-        const haystack = `${p.title} ${p.description || ''} ${bName || ''} ${p.categoryName || ''} ${(p as any).tagline || ''}`.toLowerCase();
+        const serviceCategory = String((p as any).serviceCategory || '').toLowerCase();
+        const productType = String((p as any).productType || '').toLowerCase();
+        if (productType === 'service' && serviceCategory) {
+          const serviceParam = (searchParams.get('service') || '').toLowerCase();
+          if (
+            serviceCategory === serviceParam ||
+            serviceCategory.replace(/_/g, '-') === serviceParam ||
+            serviceCategory.replace(/-/g, '_') === serviceParam
+          ) {
+            return true;
+          }
+        }
+        const haystack = `${p.title} ${p.description || ''} ${bName || ''} ${p.categoryName || ''} ${(p as any).tagline || ''} ${serviceCategory} ${(p as any).tags?.join?.(' ') || ''}`.toLowerCase();
         return serviceKeywords.some((keyword) => haystack.includes(keyword));
       });
     } else if (textQuery) {
@@ -520,15 +534,26 @@ export function AllProductsPage() {
     // Price range filtering (Fix 2)
     result = result.filter(p => p.price >= priceMin && p.price <= priceMax);
 
-    // 6. Sorting logic
+    // 6. Explicit price sort OR default dynamic ranking
     if (sortOption === 'price-asc') {
       result.sort((a, b) => a.price - b.price);
     } else if (sortOption === 'price-desc') {
       result.sort((a, b) => b.price - a.price);
+    } else {
+      const brandFollowersById: Record<string, number> = {};
+      for (const b of allBrands) {
+        brandFollowersById[String(b.id)] = Number((b as { followers?: number }).followers) || 0;
+        if (b.name) brandFollowersById[b.name] = Number((b as { followers?: number }).followers) || 0;
+      }
+      result = rankProducts(result, {
+        nowMs: priorityNowMs,
+        brandFollowersById,
+        getBrandId: (p) => String(p.brandId || p.brandName || ''),
+      });
     }
 
     return result;
-  }, [allCatalogProducts, searchParams, selectedCategory, selectedBrand, ratingFilter, availabilityFilter, retailPriceLimit, minPrice, maxPrice, sortOption, activeTab, activeSpecs, priceMin, priceMax, allBrands]);
+  }, [allCatalogProducts, searchParams, selectedCategory, selectedBrand, ratingFilter, availabilityFilter, retailPriceLimit, minPrice, maxPrice, sortOption, activeTab, activeSpecs, priceMin, priceMax, allBrands, priorityNowMs]);
 
   function handleResetFilters() {
     setSelectedCategory(null);
@@ -561,19 +586,13 @@ export function AllProductsPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
-      <DcListingHero
-        titleBefore="Explore Every"
-        titleHighlight="Product"
+      <DcListingStickyFilters
+        className="mt-5"
+        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
         searchPlaceholder="Search products..."
         quickChips={['Smartphones', 'Laptops', 'AC', 'TV', 'Fashion', 'Beauty']}
         onSearch={(q) => executeSearch(q)}
         onChipClick={(q) => executeSearch(q)}
-        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
-      />
-
-      <DcListingStickyFilters
-        overlapHero
-        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
         items={[
           {
             id: 'verified',

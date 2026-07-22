@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Star, Heart, ShoppingCart, Truck, Shield } from 'lucide-react';
+import { ChevronRight, Star, Heart, Truck, Shield } from 'lucide-react';
+import { CartIconButton } from './commerce/CartIconButton';
 
 interface DealPromo {
   type?: 'flash' | 'coupon' | 'promo' | string;
@@ -185,15 +186,13 @@ export const DealCard = memo(function DealCard({
               <span>{product.likes + (isLiked ? 1 : 0)}</span>
             </button>
 
-            <button
+            <CartIconButton
+              size={32}
               onClick={(e) => {
                 e.stopPropagation();
                 if (onAddToCart) onAddToCart(product.title, e);
               }}
-              className="w-8 h-8 rounded-full bg-[#EB4501] hover:bg-[#E04F00] text-white flex items-center justify-center transition-all shadow-sm shadow-[#EB4501]/15 hover:scale-105 cursor-pointer border-0 p-0"
-            >
-              <ShoppingCart className="w-4 h-4 shrink-0" />
-            </button>
+            />
           </div>
         </div>
       </div>

@@ -58,7 +58,7 @@ export function BrandPostBannerGallery({
   return (
     <section
       className={cn(
-        'choosify-brand-post-banner relative w-full overflow-hidden bg-slate-900 select-none',
+        'choosify-brand-post-banner relative w-full overflow-hidden rounded-xl bg-slate-900 select-none',
         className,
       )}
       aria-label="Event banners"

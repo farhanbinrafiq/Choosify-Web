@@ -21,7 +21,7 @@ import { creatorReviewHref, resolveContentHref } from '../lib/platform/contentRe
 import { spotlightContentHref } from '../lib/spotlight/content';
 import {
   buildHomepageSpotlightCard,
-  listHomepageSpotlightCampaigns,
+  listViralTodaySpotlightCampaigns,
 } from './spotlightHomepage';
 import {
   publisherFromBrand,
@@ -38,6 +38,56 @@ import {
   getDemoSpotlightContentBySlug,
 } from '../data/spotlight/spotlightDemoFeedFactory';
 import type { SpotlightCollaborator } from '../types/spotlight/experience/collaboration';
+import type {
+  ContentDetailOptionalSectionId,
+  ContentDetailSectionConfig,
+} from '../types/spotlight/experience/contentDetailSections';
+import {
+  CONTENT_DETAIL_OPTIONAL_SECTION_IDS,
+} from '../types/spotlight/experience/contentDetailSections';
+import { DEFAULT_OPTIONAL_SECTIONS_BY_TYPE } from '../lib/spotlight/content/resolveContentDetailSections';
+
+function normalizeGuideSections(
+  guide: CatalogGuide,
+  contentType: SpotlightContentType,
+  productIds: string[],
+): ContentDetailSectionConfig[] | undefined {
+  const raw = guide.sections;
+  if (raw?.length) {
+    const allowed = new Set<string>(CONTENT_DETAIL_OPTIONAL_SECTION_IDS);
+    return raw
+      .filter((s) => allowed.has(s.id))
+      .map((s, order) => ({
+        id: s.id as ContentDetailOptionalSectionId,
+        enabled: s.enabled !== false,
+        order: typeof s.order === 'number' ? s.order : order,
+        data: (s.data as ContentDetailSectionConfig['data']) ?? {
+          itemIds: productIds,
+          topPickIds: productIds.slice(0, 3),
+          winnerIds: productIds.slice(0, 1),
+          whatWeLike: guide.whatWeLike,
+          whatToConsider: guide.whatToConsider,
+          takeawayBody: guide.verdict || guide.excerpt,
+        },
+      }));
+  }
+
+  const defaults = DEFAULT_OPTIONAL_SECTIONS_BY_TYPE[contentType];
+  if (!defaults?.length) return undefined;
+  return defaults.map((id, order) => ({
+    id,
+    enabled: true,
+    order,
+    data: {
+      itemIds: productIds,
+      topPickIds: productIds.slice(0, 3),
+      winnerIds: productIds.slice(0, 1),
+      whatWeLike: guide.whatWeLike,
+      whatToConsider: guide.whatToConsider,
+      takeawayBody: guide.verdict || guide.excerpt,
+    },
+  }));
+}
 import type { SpotlightCollaborationRole } from '../types/spotlight/collaboration/engine';
 import type { SpotlightCollaboratorRole } from '../types/spotlight/experience/collaboration';
 import type { SpotlightCollaborationMember } from '../types/spotlight/collaboration/engine';
@@ -137,6 +187,38 @@ function buildLiveFromGuide(guide: CatalogGuide): SpotlightLiveConfig | undefine
   };
 }
 
+/** Derive livestream status from campaign schedule window (not hardcoded upcoming). */
+function buildLiveFromCampaign(
+  campaign: SpotlightCampaignRecord,
+  linkedProductIds: string[],
+  nowMs: number = Date.now(),
+): SpotlightLiveConfig | undefined {
+  if (campaign.campaignType !== 'livestream') return undefined;
+  const startMs = Date.parse(campaign.schedule?.startAt ?? '');
+  const endMs = Date.parse(campaign.schedule?.endAt ?? '');
+  let status: SpotlightLiveConfig['status'] = 'upcoming';
+  if (Number.isFinite(startMs) && Number.isFinite(endMs)) {
+    if (nowMs < startMs) status = 'upcoming';
+    else if (nowMs <= endMs) status = 'live';
+    else status = 'ended';
+  } else if (campaign.status === 'published') {
+    status = 'live';
+  }
+
+  return {
+    status,
+    platform: 'youtube',
+    scheduledAt: campaign.schedule?.startAt,
+    endedAt: status === 'ended' ? campaign.schedule?.endAt : undefined,
+    productIds: linkedProductIds,
+    serviceIds: [],
+    pinnedProductIds: linkedProductIds.slice(0, 3),
+    pinnedOfferIds: [],
+    notifyMeEnabled: true,
+    timelinePlaceholder: true,
+  };
+}
+
 export function campaignToSpotlightContent(
   campaign: SpotlightCampaignRecord,
   catalog: CatalogProduct[],
@@ -154,19 +236,9 @@ export function campaignToSpotlightContent(
   const ownerPublisher = publisherFromCampaign(campaign, brandLogos, catalog);
   ownerPublisher.profileHref = `/publisher/${slugifyPublisher(campaign.brandName ?? ownerPublisher.name)}`;
 
-  const live: SpotlightLiveConfig | undefined =
-    campaign.campaignType === 'livestream'
-      ? {
-          status: 'upcoming',
-          platform: 'youtube',
-          productIds: linkedProductIds,
-          serviceIds: [],
-          pinnedProductIds: linkedProductIds.slice(0, 3),
-          pinnedOfferIds: [],
-          notifyMeEnabled: true,
-          timelinePlaceholder: true,
-        }
-      : undefined;
+  const live = buildLiveFromCampaign(campaign, linkedProductIds);
+  const liveStatus = live?.status;
+  const isActivelyLive = liveStatus === 'live';
 
   return {
     contentId: `campaign-${campaign.campaignId}`,
@@ -208,11 +280,18 @@ export function campaignToSpotlightContent(
     live,
     badges: card.badges,
     isSponsored: campaign.isSponsored,
-    isLive: campaign.campaignType === 'livestream',
+    /** True only while the stream window is currently open — not for upcoming/ended */
+    isLive: isActivelyLive,
     isVerified: true,
-    ctaLabel: campaign.campaignType === 'livestream' ? 'Watch Live' : (card.ctaLabel || getSpotlightContentCtaLabel(contentType)),
+    ctaLabel: isActivelyLive
+      ? 'Watch Live'
+      : live
+        ? liveStatus === 'upcoming'
+          ? 'Notify Me'
+          : 'Watch Replay'
+        : (card.ctaLabel || getSpotlightContentCtaLabel(contentType)),
     href: spotlightContentHref(campaign.campaignSlug),
-    publishedAt: campaign.createdAt,
+    publishedAt: campaign.schedule?.startAt || campaign.createdAt,
     endsAt: campaign.schedule?.endAt,
     popularityScore: campaign.campaignHealthScore ?? campaign.priority,
     aiScore: campaign.aiMetadata?.optimizationScore,
@@ -242,6 +321,7 @@ export function guideToSpotlightContent(guide: CatalogGuide, catalog: CatalogPro
     contentType,
     sourceKind: 'guide',
     sourceId: guide.id,
+    category: guide.category,
     publisher,
     headline: guide.title ?? '',
     description: guide.excerpt ?? '',
@@ -273,6 +353,7 @@ export function guideToSpotlightContent(guide: CatalogGuide, catalog: CatalogPro
     publishedAt: guide.publishedAt,
     popularityScore: Number.parseInt(viewsRaw.replace(/\D/g, ''), 10) || 0,
     extraProductCount: Math.max(0, products.length - 1),
+    sections: normalizeGuideSections(guide, contentType, productIds),
   };
 }
 
@@ -376,7 +457,8 @@ export interface SpotlightExperienceSources {
 export function resolveSpotlightExperience(sources: SpotlightExperienceSources): SpotlightContent[] {
   const demoFeed = buildDemoSpotlightFeed();
 
-  const campaigns = listHomepageSpotlightCampaigns();
+  // Include active campaigns + livestreams still in the 24h post-end grace window
+  const campaigns = listViralTodaySpotlightCampaigns();
   const campaignContent = campaigns.flatMap((c) => {
     try {
       return [campaignToSpotlightContent(c, sources.catalog, sources.brandLogos)];

@@ -2,6 +2,12 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { CommerceProduct, User, Seller, Brand, Order, SubOrder, SubOrderItem, Report, BuyerReputation } from '../types/schemas';
 import { CREATORS } from '../data/creators';
 import { loadMockCatalog } from '../data/loadMockCatalog';
+import {
+  mergeServiceSeedBrands,
+  mergeServiceSeedProductDetails,
+  mergeServiceSeedProducts,
+  mergeServiceSeedSellers,
+} from '../data/mockServiceListings';
 import { buildFallbackBrandsFromMock, buildMappedProductsFromMock } from '../utils/mockCatalogHydration';
 import { perfApiCall } from '../utils/performanceDev';
 import { toast } from 'react-hot-toast';
@@ -57,6 +63,7 @@ export interface GlobalStateContextType {
   createOrder: (isCOD: boolean) => Order | null;
   cancelOrder: (orderId: string, reason: string) => void;
   addOrder: (order: Order) => void;
+  updateOrder: (orderId: string, updates: Partial<Order>) => void;
   updateSubOrderStatus: (parentOrderId: string, sellerId: string, nextStatus: 'pending' | 'dispatched' | 'transit' | 'delivered') => void;
   reports: Report[];
   addReport: (type: 'seller' | 'product' | 'brand', targetId: string, reason: string, description: string, evidence?: string) => void;
@@ -396,6 +403,29 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     localStorage.setItem('choosify_orders', JSON.stringify(orders));
   }, [orders]);
 
+  useEffect(() => {
+    const handleBookingPaymentExpired = (event: Event) => {
+      const orderId = (event as CustomEvent).detail?.orderId;
+      if (!orderId) return;
+      setOrders((previous) =>
+        previous.map((order) =>
+          order.orderId === orderId && order.status === 'pending_payment'
+            ? { ...order, status: 'cancelled' }
+            : order,
+        ),
+      );
+    };
+    window.addEventListener(
+      'choosify-booking-payment-expired',
+      handleBookingPaymentExpired,
+    );
+    return () =>
+      window.removeEventListener(
+        'choosify-booking-payment-expired',
+        handleBookingPaymentExpired,
+      );
+  }, []);
+
   const [catalogBrands, setCatalogBrands] = useState<CatalogBrand[] | null>(null);
   const [catalogProducts, setCatalogProducts] = useState<CatalogProduct[] | null>(null);
   const [catalogCategories, setCatalogCategories] = useState<CatalogCategory[]>([]);
@@ -525,6 +555,8 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       featuredFlag: brand.featuredFlag,
       category: brand.category,
       claimStatus: status,
+      createdAt: brand.createdAt,
+      updatedAt: brand.updatedAt,
     };
   });
 
@@ -556,10 +588,16 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       featuredFlag: product.featuredFlag,
       isNewArrival: product.isNewArrival,
       isBestseller: product.isBestseller,
+      createdAt: product.createdAt,
+      publishedAt: product.createdAt,
+      productType: (product as { productType?: 'physical' | 'service' }).productType,
+      serviceCategory: (product as { serviceCategory?: string }).serviceCategory,
     };
   });
 
-  const allBrands: Brand[] = apiBrands.length > 0 ? apiBrands : mockFallbackBrands;
+  const allBrands: Brand[] = mergeServiceSeedBrands(
+    apiBrands.length > 0 ? apiBrands : mockFallbackBrands,
+  );
   const allCategories: CatalogCategory[] = catalogCategories;
   const allDeals: CatalogDeal[] = catalogDeals;
   const allCreators: Creator[] = catalogCreators.length > 0 ? catalogCreators.map(mapCatalogCreator) : CREATORS;
@@ -740,6 +778,14 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     operationsApi.createOrder(order as unknown as Record<string, unknown>).catch(() => {});
   };
 
+  const updateOrder = (orderId: string, updates: Partial<Order>) => {
+    setOrders((previous) =>
+      previous.map((order) =>
+        order.orderId === orderId ? { ...order, ...updates } : order,
+      ),
+    );
+  };
+
   const updateSubOrderStatus = (parentOrderId: string, sellerId: string, nextStatus: 'pending' | 'dispatched' | 'transit' | 'delivered') => {
     setOrders(prev => prev.map(o => {
       if (o.orderId === parentOrderId) {
@@ -782,7 +828,9 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   };
 
   const productSource = apiProducts.length > 0 ? apiProducts : mockMappedProducts;
-  const allProducts = productSource;
+  const allProducts = mergeServiceSeedProducts(productSource);
+  const sellersWithSeed = mergeServiceSeedSellers(INITIAL_SELLERS);
+  const productDetailsWithSeed = mergeServiceSeedProductDetails(productDetailsById);
   const allCatalogProducts = resolveCatalogProducts(catalogProducts, productSource);
   const allCatalogBrands = catalogBrands?.length
     ? catalogBrands
@@ -825,6 +873,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       createOrder,
       cancelOrder,
       addOrder,
+      updateOrder,
       updateSubOrderStatus,
       reports,
       addReport,
@@ -835,7 +884,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       setIsLoggedIn,
       logout,
       buyerReputations: INITIAL_BUYER_REPUTATIONS,
-      sellers: INITIAL_SELLERS,
+      sellers: sellersWithSeed,
       allBrands,
       allProducts,
       allCatalogProducts,
@@ -847,7 +896,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       allGuides,
       allCatalogGuides,
       allPlacements,
-      productDetailsById,
+      productDetailsById: productDetailsWithSeed,
       homepageConfig,
       siteConfig,
       activeVideo,

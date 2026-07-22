@@ -87,6 +87,8 @@ export const operationsApi = {
     userName: string;
     body: string;
     orderId?: string;
+    sellerId?: string;
+    bookingOffer?: unknown;
   }) => {
     const result = await request<{ data: unknown }>('/operations/platform-messages', 'POST', payload);
     return result.data;

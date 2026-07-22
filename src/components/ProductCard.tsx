@@ -5,12 +5,12 @@ import {
   ArrowRight,
   ChevronLeft,
   ChevronRight,
-  ShoppingCart,
   ShieldCheck,
   ArrowLeftRight,
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
+import { CartIconButton } from './commerce/CartIconButton';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { PLACEHOLDER_IMAGE } from '../constants';
@@ -56,7 +56,7 @@ function resolveDcBadge(product: any): { label: string; bg: string } | null {
   }
   if (product.isNewArrival) return { label: 'NEW', bg: DC.newGreen };
   if (product.isBestseller) return { label: 'BESTSELLER', bg: DC.orange };
-  if (product.featuredFlag) return { label: 'FEATURED', bg: DC.orange };
+  if (product.featuredFlag) return { label: 'Sponsored', bg: DC.orange };
   if (product.isDeal || product.dealType || product.tag === 'SALE') {
     return { label: 'BEST DEAL', bg: DC.dealAmber };
   }
@@ -325,14 +325,18 @@ export const ProductCard = memo(function ProductCard({
           </h3>
           <div className="flex items-end justify-between gap-4 pt-4 border-t border-[#F1F1F3]">
             <span className="text-2xl font-extrabold text-[#1A1A2E] leading-none">{priceLabel}</span>
-            <button
-              type="button"
-              onClick={handleAddToCart}
-              className="w-10 h-10 rounded-full text-white bg-[#EB4501] cursor-pointer transition-all shrink-0 border-0 flex items-center justify-center hover:brightness-110"
-              aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
-            >
-              {isGuideDetail ? <ArrowRight size={16} /> : <ShoppingCart size={16} />}
-            </button>
+            {isGuideDetail ? (
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                className="w-10 h-10 rounded-full text-white bg-[#EB4501] cursor-pointer transition-all shrink-0 border-0 flex items-center justify-center hover:brightness-110"
+                aria-label="Shop Now"
+              >
+                <ArrowRight size={16} />
+              </button>
+            ) : (
+              <CartIconButton size={40} onClick={handleAddToCart} />
+            )}
           </div>
           <CardEngagementStrip
             entityType={engagementType}
@@ -408,14 +412,18 @@ export const ProductCard = memo(function ProductCard({
                 />
               </button>
             </div>
-            <button
-              type="button"
-              onClick={handleAddToCart}
-              className="w-7 h-7 rounded-full bg-[#EB4501] text-white border-0 flex items-center justify-center cursor-pointer hover:brightness-110"
-              aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
-            >
-              {isGuideDetail ? <ArrowRight size={13} /> : <ShoppingCart size={13} />}
-            </button>
+            {isGuideDetail ? (
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                className="w-7 h-7 rounded-full bg-[#EB4501] text-white border-0 flex items-center justify-center cursor-pointer hover:brightness-110"
+                aria-label="Shop Now"
+              >
+                <ArrowRight size={13} />
+              </button>
+            ) : (
+              <CartIconButton size={28} onClick={handleAddToCart} />
+            )}
           </div>
         </div>
       </div>
@@ -548,19 +556,19 @@ export const ProductCard = memo(function ProductCard({
             </button>
           </div>
 
-          <button
-            type="button"
-            onClick={handleAddToCart}
-            className="w-7 h-7 rounded-full bg-[#EB4501] text-white border-0 flex items-center justify-center cursor-pointer shrink-0 hover:brightness-110 active:scale-95 transition-all"
-            aria-label={isGuideDetail ? 'Shop Now' : 'Add to cart'}
-            title={isGuideDetail ? 'Shop Now' : 'Add to cart'}
-          >
-            {isGuideDetail ? (
+          {isGuideDetail ? (
+            <button
+              type="button"
+              onClick={handleAddToCart}
+              className="w-7 h-7 rounded-full bg-[#EB4501] text-white border-0 flex items-center justify-center cursor-pointer shrink-0 hover:brightness-110 active:scale-95 transition-all"
+              aria-label="Shop Now"
+              title="Shop Now"
+            >
               <ArrowRight size={13} strokeWidth={2} />
-            ) : (
-              <ShoppingCart size={13} strokeWidth={1.7} />
-            )}
-          </button>
+            </button>
+          ) : (
+            <CartIconButton size={28} onClick={handleAddToCart} />
+          )}
         </div>
       </div>
     </div>

@@ -80,7 +80,7 @@ export function CampaignBannerCarousel() {
       onMouseEnter={() => setAutoplay(false)}
       onMouseLeave={() => setAutoplay(true)}
     >
-      <div className="relative w-full h-[320px] sm:h-[260px] md:h-[280px] rounded-[5px] lg:rounded-none overflow-hidden border border-[#e8edf2] lg:border-x-0 lg:border-t-0 shadow-sm lg:shadow-none bg-white text-[#1a1a2e]">
+      <div className="relative w-full h-[320px] sm:h-[260px] md:h-[280px] rounded-xl overflow-hidden border border-[#e8edf2] shadow-sm lg:shadow-none bg-white text-[#1a1a2e]">
         
         {/* Carousel slides with motion animation transition */}
         <AnimatePresence mode="wait">

@@ -10,6 +10,10 @@ export interface MediaItem {
   date?: string;
   url: string;
   associatedGuideId?: string | number;
+  /** Creator-pinned content for profile ranking */
+  pinned?: boolean;
+  /** Active LIVE stream on this piece of content */
+  isLive?: boolean;
 }
 
 export interface Creator {
@@ -28,6 +32,11 @@ export interface Creator {
   videos: MediaItem[];
   reels: MediaItem[];
   blogs: MediaItem[];
+  /** Catalog ranking fields — optional on mock data */
+  featuredFlag?: boolean;
+  verifiedStatus?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export const CREATORS: Creator[] = [

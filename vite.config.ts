@@ -238,8 +238,8 @@ export default defineConfig(({ mode }) => {
         process.env.DISABLE_HMR === 'true'
           ? undefined
           : {
-              // Large hero videos can lock on Windows and crash Vite's FS watcher.
-              ignored: ['**/public/hero/**/*.mp4'],
+              // Large hero videos / temp icon dumps can lock on Windows and crash Vite's FS watcher.
+              ignored: ['**/public/hero/**/*.mp4', '**/tmp-svg-icons/**'],
             },
     },
   };

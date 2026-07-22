@@ -39,7 +39,7 @@ export const AUDIT_REGISTRY: AuditRuleDefinition[] = [
   { id: 'localization.missing', label: 'Localization', auditType: 'health', description: 'Multi-language support' },
   { id: 'accessibility.alt', label: 'Accessibility', auditType: 'health', description: 'Alt text present' },
   { id: 'publishing.expiring', label: 'Expiring', auditType: 'publishing', description: 'Schedule ending soon' },
-  { id: 'ai.readiness', label: 'AI Readiness', auditType: 'publishing', description: 'Ready for Emi AI' },
+  { id: 'ai.readiness', label: 'AI Readiness', auditType: 'publishing', description: 'Ready for Emi. A.I' },
 ];
 
 export function auditsByType(type: AuditRuleDefinition['auditType']): AuditRuleDefinition[] {

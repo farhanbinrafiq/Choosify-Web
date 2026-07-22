@@ -10,6 +10,7 @@ import { isPlacementActive } from '../utils/editorialMappers';
 import { buildCategoryDisplayList } from '../utils/categoryDisplay';
 import { getHomeLivePulseItems } from '../lib/home/homepageLivePulse';
 import { buildHomeViralTodayItems } from '../utils/homeViralToday';
+import { usePriorityClockMs } from './usePriorityClockMs';
 import type { HomePromoTile } from '../components/home/sections/HomeTodaysDealsSection';
 
 type HomeGuideCarouselKind = 'youtube' | 'reels' | 'blog';
@@ -63,14 +64,16 @@ export function useHomePageData() {
     [allCategories, allCatalogProducts],
   );
 
-  const { cards: spotlightCards, hasCampaigns: hasSpotlight } = useHomepageSpotlight(
+  const { cards: spotlightCards, viralTodayCards, hasCampaigns: hasSpotlight } = useHomepageSpotlight(
     allCatalogProducts,
     BRAND_IMAGES,
   );
 
+  const priorityNowMs = usePriorityClockMs();
+
   const viralTodayItems = useMemo(
-    () => buildHomeViralTodayItems(spotlightCards, allGuides ?? [], allCatalogProducts),
-    [spotlightCards, allGuides, allCatalogProducts],
+    () => buildHomeViralTodayItems(viralTodayCards, allGuides ?? [], allCatalogProducts, priorityNowMs),
+    [viralTodayCards, allGuides, allCatalogProducts, priorityNowMs],
   );
 
   const featuredProducts = useMemo(() => {

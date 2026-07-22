@@ -402,7 +402,7 @@ function LeaderboardsSection({ intel }: { intel: IntelState }) {
 function InsightsSection({ intel }: { intel: IntelState }) {
   const { insights } = intel;
   return (
-    <SpotlightDashboardSection title="Insight Engine" description="Architecture for Phase 5.5 Emi AI">
+    <SpotlightDashboardSection title="Insight Engine" description="Architecture for Phase 5.5 Emi. A.I">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {insights.map((ins) => (
           <SpotlightInsightCard

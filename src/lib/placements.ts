@@ -14,12 +14,12 @@ export const PLACEMENT_KEYS = {
 
 export type PlacementKey = (typeof PLACEMENT_KEYS)[keyof typeof PLACEMENT_KEYS];
 
-/** Organic items between in-feed sponsored cards. */
+/** Organic items between in-feed sponsored cards (~1 sponsored : 5 organic). */
 export const INFEED_INTERVAL = {
-  product: 10,
-  brand: 12,
-  creator: 12,
-  deal: 10,
+  product: 5,
+  brand: 5,
+  creator: 5,
+  deal: 5,
   guide: 8,
 } as const;
 

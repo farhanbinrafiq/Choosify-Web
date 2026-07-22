@@ -28,7 +28,7 @@ export function CreatorContentCard({
 }: CreatorContentCardProps) {
   const body = (
     <>
-      <div className="relative h-[150px] rounded-[10px] overflow-hidden mb-2 bg-[#1A1A2E]">
+      <div className="relative aspect-[4/3] min-h-[170px] rounded-[10px] overflow-hidden mb-2 bg-[#1A1A2E]">
         {image ? (
           <img src={image} alt="" className="absolute inset-0 w-full h-full object-cover" />
         ) : (

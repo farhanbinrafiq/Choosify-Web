@@ -251,7 +251,7 @@ export const UnifiedProfileHero: React.FC<UnifiedProfileHeroProps> = ({
         </div>
 
         {/* Content area below Banner */}
-        <div className="bg-white border border-slate-100 rounded-none shadow-sm px-6 pb-6 pt-16 sm:pt-20 lg:pt-12 relative z-10 -mt-2">
+        <div className="bg-white border border-slate-100 rounded-[10px] shadow-sm px-6 pb-6 pt-16 sm:pt-20 lg:pt-12 relative z-10 -mt-2">
           
           {/* Main 3-Column Profile Grid */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start lg:items-center">

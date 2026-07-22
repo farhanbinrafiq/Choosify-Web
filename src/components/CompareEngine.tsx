@@ -1205,7 +1205,7 @@ export function CompareEngine() {
                   <span className="w-5 h-5 rounded-full bg-white flex items-center justify-center overflow-hidden p-px shrink-0">
                     <EmiAiLogo size={16} className="w-4 h-4" />
                   </span>
-                  Ask Emi AI
+                  Ask Emi. A.I
                 </button>
               </div>
             </aside>

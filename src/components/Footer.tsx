@@ -270,17 +270,17 @@ export function Footer() {
               <p className="text-white/45 text-xs mb-4 lg:max-w-md">
                 Download the app — or scan to open the store
               </p>
-              <div className="flex flex-wrap items-stretch gap-3 lg:justify-end">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full lg:w-auto lg:max-w-[520px]">
                 {APP_DOWNLOADS.map((app) => (
                   <div
                     key={app.id}
-                    className="flex items-center gap-3 rounded-2xl bg-white/[0.04] border border-white/10 p-2.5 pr-3 text-left"
+                    className="flex items-center gap-3 rounded-2xl bg-white/[0.04] border border-white/10 p-2.5 pr-3 text-left w-full"
                   >
                     <a
                       href={app.href}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2.5 min-w-0 hover:opacity-90 transition-opacity"
+                      className="flex items-center gap-2.5 flex-1 min-w-0 hover:opacity-90 transition-opacity"
                       aria-label={`Download Choosify on ${app.store}`}
                     >
                       <span className="w-10 h-10 rounded-xl bg-black flex items-center justify-center overflow-hidden shrink-0">
@@ -292,21 +292,21 @@ export function Footer() {
                         />
                       </span>
                       <span className="flex flex-col min-w-0">
-                        <span className="text-[10px] uppercase tracking-wide text-white/40 font-semibold">
+                        <span className="text-[10px] uppercase tracking-wide text-white/40 font-semibold truncate">
                           Get it on
                         </span>
-                        <span className="inline-flex items-center gap-1 text-[13px] font-semibold text-white/90">
+                        <span className="flex items-center gap-1 text-[13px] font-semibold text-white/90 min-w-0">
                           <img
                             src={app.platformIcon}
                             alt=""
                             className={
                               app.id === 'apple'
-                                ? 'w-3 h-3 object-contain invert'
-                                : 'w-3 h-3 object-contain'
+                                ? 'w-3 h-3 object-contain invert shrink-0'
+                                : 'w-3 h-3 object-contain shrink-0'
                             }
                             draggable={false}
                           />
-                          {app.platform}
+                          <span className="truncate">{app.platform}</span>
                         </span>
                       </span>
                     </a>
@@ -324,7 +324,7 @@ export function Footer() {
                         alt={`QR code for ${app.store}`}
                         width={64}
                         height={64}
-                        className="w-16 h-16 object-contain"
+                        className="w-14 h-14 min-[400px]:w-16 min-[400px]:h-16 object-contain"
                         loading="lazy"
                       />
                     </a>
@@ -362,11 +362,20 @@ export function Footer() {
               </div>
             ))}
 
-            <div>
-              <FooterHeading>DBID</FooterHeading>
-              <p className="text-[13px] font-medium text-white/70">
-                DBID No: —
-              </p>
+            <div className="flex flex-wrap gap-8 lg:gap-16 lg:ml-auto lg:text-right">
+              <div>
+                <FooterHeading>DBID</FooterHeading>
+                <p className="text-[13px] font-medium text-white/70">
+                  DBID No: —
+                </p>
+              </div>
+
+              <div>
+                <FooterHeading>Trade License Number</FooterHeading>
+                <p className="text-[13px] font-medium text-white/70">
+                  Trade License No: —
+                </p>
+              </div>
             </div>
           </div>
         </div>

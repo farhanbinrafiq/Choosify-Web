@@ -69,10 +69,13 @@ import { SellerWorkspaceSection } from './ReviewDetailPage';
 import { MessagesPage } from './MessagesPage';
 import { CustomerOrdersPage } from './CustomerOrdersPage';
 import { DealsVerticalSponsoredCard } from '../components/deals/DealsLowerSections';
+import { UniversalCarousel } from '../components/design/UniversalCarousel';
 
 /** Tabs with their own right column / dense forms — do not inject sponsored rail */
 const DASHBOARD_TABS_WITH_RIGHT_CONTENT = new Set([
   'overview',
+  'following',
+  'saved-items',
   'messages',
   'addresses',
   'settings',
@@ -194,17 +197,21 @@ function savedItemToCommerceModel(item: any) {
   return guideToContentCardModel(item);
 }
 const COLLECTION_TAB_IDS = new Set([
-  'saved-products',
-  'saved-brands',
-  'loved-brands',
-  'followed-brands',
+  'saved-items',
+  'following',
   'recently-viewed',
 ]);
 const ACTIVITY_TAB_IDS = new Set([
-  'saved-recommendations',
   'orders',
 ]);
 const COMMUNICATION_TAB_IDS = new Set(['messages', 'my-reviews', 'addresses']);
+const LEGACY_DASHBOARD_TAB_REDIRECTS: Record<string, 'saved-items' | 'following'> = {
+  'saved-products': 'saved-items',
+  'saved-brands': 'saved-items',
+  'saved-recommendations': 'saved-items',
+  'loved-brands': 'following',
+  'followed-brands': 'following',
+};
 
 // --- SUB-COMPONENTS ---
 
@@ -377,7 +384,7 @@ const OverviewSection = ({
         <div className="space-y-5 min-w-0 overflow-hidden">
           {/* 2×2 stats — middle column is too narrow for 4-up without overlap */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 min-w-0">
-            <div className="bg-white border border-[#E8EDF2] rounded-none p-4 flex flex-col gap-3 min-w-0 overflow-hidden">
+            <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 flex flex-col gap-3 min-w-0 overflow-hidden">
               <div className="flex gap-3 items-start min-w-0">
                 <ScoreRing score={choosifyScore} max={100} />
                 <div className="min-w-0 flex-1">
@@ -398,7 +405,7 @@ const OverviewSection = ({
               </p>
             </div>
 
-            <div className="bg-white border border-[#E8EDF2] rounded-none p-4 flex flex-col min-w-0 overflow-hidden">
+            <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 flex flex-col min-w-0 overflow-hidden">
               <div className="text-[11px] font-extrabold text-[#9AA0AC] tracking-wide uppercase mb-1">
                 Total Orders
               </div>
@@ -417,7 +424,7 @@ const OverviewSection = ({
               </button>
             </div>
 
-            <div className="bg-white border border-[#E8EDF2] rounded-none p-4 flex flex-col min-w-0 overflow-hidden">
+            <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 flex flex-col min-w-0 overflow-hidden">
               <div className="text-[11px] font-extrabold text-[#9AA0AC] tracking-wide uppercase mb-1">
                 Total Spent
               </div>
@@ -434,7 +441,7 @@ const OverviewSection = ({
               </button>
             </div>
 
-            <div className="bg-white border border-[#E8EDF2] rounded-none p-4 flex flex-col min-w-0 overflow-hidden">
+            <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 flex flex-col min-w-0 overflow-hidden">
               <div className="text-[11px] font-extrabold text-[#9AA0AC] tracking-wide uppercase mb-1">
                 Total Savings
               </div>
@@ -452,7 +459,7 @@ const OverviewSection = ({
             </div>
           </div>
 
-          <div className="bg-white border border-[#E8EDF2] rounded-none p-4 sm:p-5 min-w-0 overflow-hidden">
+          <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 sm:p-5 min-w-0 overflow-hidden">
             <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
               <h3 className="text-[14px] font-extrabold text-[#1A1A2E] flex items-center gap-2 min-w-0">
                 <Package className="text-[#EB4501] shrink-0" size={16} />
@@ -538,7 +545,7 @@ const OverviewSection = ({
             )}
           </div>
 
-          <div className="bg-white border border-[#E8EDF2] rounded-none p-4 sm:p-5 min-w-0 overflow-hidden">
+          <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 sm:p-5 min-w-0 overflow-hidden">
             <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
               <h3 className="text-[14px] font-extrabold text-[#1A1A2E] flex items-center gap-2 min-w-0">
                 <Gift className="text-[#EB4501] shrink-0" size={16} />
@@ -551,19 +558,18 @@ const OverviewSection = ({
                 Browse more →
               </Link>
             </div>
-            <div className="w-full max-w-full min-w-0 overflow-x-auto overflow-y-hidden no-scrollbar scroll-smooth">
-              <div className="flex gap-3 w-max max-w-none pb-1">
-                {recommendedFallback.map((p) => (
-                  <div key={p.id} className="w-[156px] sm:w-[168px] shrink-0">
-                    <ProductCard product={p} variant="compact" />
-                  </div>
-                ))}
-              </div>
-            </div>
+            <UniversalCarousel
+              items={recommendedFallback}
+              getKey={(product) => String(product.id)}
+              itemWidth={220}
+              gap={16}
+              renderItem={(product) => <ProductCard product={product} variant="grid" />}
+              className="min-w-0"
+            />
           </div>
 
           <div
-            className="bg-white rounded-none border border-[#E8EDF2] px-4 sm:px-5 py-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 min-w-0"
+            className="bg-white rounded-[10px] border border-[#E8EDF2] px-4 sm:px-5 py-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 min-w-0"
             aria-label="Choosify trust guarantees"
           >
             {OVERVIEW_TRUST.map(({ id, label, icon: Icon }) => (
@@ -596,7 +602,7 @@ const OverviewSection = ({
             </div>
           )}
 
-          <div className="bg-white border border-[#E8EDF2] rounded-none p-4 min-w-0 overflow-hidden">
+          <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 min-w-0 overflow-hidden">
             <h3 className="text-[13px] font-extrabold text-[#1A1A2E] mb-1 flex items-center gap-2">
               <Award className="text-[#EB4501] shrink-0" size={15} /> Your Score / Benefits
             </h3>
@@ -626,7 +632,7 @@ const OverviewSection = ({
             </ul>
           </div>
 
-          <div className="bg-white border border-[#E8EDF2] rounded-none p-4 min-w-0 overflow-hidden">
+          <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 min-w-0 overflow-hidden">
             <div className="flex items-center justify-between mb-3 gap-2">
               <h3 className="text-[13px] font-extrabold text-[#1A1A2E]">Badges</h3>
               <button
@@ -650,7 +656,7 @@ const OverviewSection = ({
             </div>
           </div>
 
-          <div className="bg-white border border-[#E8EDF2] rounded-none p-4 min-w-0 overflow-hidden">
+          <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 min-w-0 overflow-hidden">
             <div className="flex items-center justify-between mb-3 gap-2">
               <h3 className="text-[13px] font-extrabold text-[#1A1A2E] min-w-0 truncate">
                 Wishlist{' '}
@@ -658,7 +664,7 @@ const OverviewSection = ({
               </h3>
               <button
                 type="button"
-                onClick={() => onTabChange?.('saved-products')}
+                onClick={() => onTabChange?.('saved-items')}
                 className="text-[11px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer p-0 shrink-0"
               >
                 View All
@@ -670,7 +676,7 @@ const OverviewSection = ({
                   <button
                     key={p.id}
                     type="button"
-                    onClick={() => onTabChange?.('saved-products')}
+                    onClick={() => onTabChange?.('saved-items')}
                     className="aspect-square rounded-lg overflow-hidden border border-[#E8EDF2] bg-[#F4F7F9] p-0 cursor-pointer"
                   >
                     <img
@@ -841,6 +847,100 @@ const SavedBrandsSection = () => {
   );
 };
 
+const SavedItemsSection = () => {
+  const { savedProducts, savedBrands, savedGuides } = useDashboard();
+  const totalSaved = savedProducts.length + savedBrands.length + savedGuides.length;
+
+  return (
+    <div className="space-y-10 animate-in fade-in slide-in-from-bottom-5 duration-700">
+      <div className="text-left">
+        <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">
+          Saved Items{' '}
+          <span className="text-[#9AA0AC] text-lg font-bold">({totalSaved})</span>
+        </h2>
+        <p className="text-[#9AA0AC] text-[12.5px]">
+          Everything you saved, organized by type
+        </p>
+      </div>
+
+      <section className="space-y-4" aria-labelledby="saved-products-heading">
+        <div className="flex items-center justify-between gap-3">
+          <h3 id="saved-products-heading" className="text-[15px] font-extrabold text-[#1A1A2E]">
+            Saved Products <span className="text-[#9AA0AC]">({savedProducts.length})</span>
+          </h3>
+          <Link to="/products" className="text-[11.5px] font-bold text-[#EB4501] hover:underline">
+            Browse products →
+          </Link>
+        </div>
+        {savedProducts.length > 0 ? (
+          <div className={PRODUCT_CARD_GRID}>
+            {savedProducts.map((product) => (
+              <ProductCard key={product.id} product={product} variant="grid" />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-[10px] border border-dashed border-[#E8EDF2] bg-white py-10 text-center text-[12px] font-semibold text-[#9AA0AC]">
+            No saved products yet
+          </div>
+        )}
+      </section>
+
+      <section className="space-y-4" aria-labelledby="saved-brands-heading">
+        <div className="flex items-center justify-between gap-3">
+          <h3 id="saved-brands-heading" className="text-[15px] font-extrabold text-[#1A1A2E]">
+            Saved Brands <span className="text-[#9AA0AC]">({savedBrands.length})</span>
+          </h3>
+          <Link to="/brands" className="text-[11.5px] font-bold text-[#EB4501] hover:underline">
+            Browse brands →
+          </Link>
+        </div>
+        {savedBrands.length > 0 ? (
+          <div className={BRAND_CARD_GRID}>
+            {savedBrands.map((brand) => (
+              <BrandCardDesign key={brand.id} brand={mapBrandToCardDesign(brand)} />
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-[10px] border border-dashed border-[#E8EDF2] bg-white py-10 text-center text-[12px] font-semibold text-[#9AA0AC]">
+            No saved brands yet
+          </div>
+        )}
+      </section>
+
+      <section className="space-y-4" aria-labelledby="saved-guides-heading">
+        <div className="flex items-center justify-between gap-3">
+          <h3 id="saved-guides-heading" className="text-[15px] font-extrabold text-[#1A1A2E]">
+            Saved Guides &amp; Content{' '}
+            <span className="text-[#9AA0AC]">({savedGuides.length})</span>
+          </h3>
+          <Link to="/spotlight" className="text-[11.5px] font-bold text-[#EB4501] hover:underline">
+            Browse Spotlight →
+          </Link>
+        </div>
+        {savedGuides.length > 0 ? (
+          <div className={GUIDE_MEDIA_GRID}>
+            {savedGuides.map((item) => {
+              const model = savedItemToCommerceModel(item);
+              return (
+                <UniversalCommerceCard
+                  key={model.id || item.id}
+                  mode="editorial"
+                  variant={resolveCommerceCardVariant(model.layoutVariant, model.aspectRatio)}
+                  model={model}
+                />
+              );
+            })}
+          </div>
+        ) : (
+          <div className="rounded-[10px] border border-dashed border-[#E8EDF2] bg-white py-10 text-center text-[12px] font-semibold text-[#9AA0AC]">
+            No saved guides or content yet
+          </div>
+        )}
+      </section>
+    </div>
+  );
+};
+
 const LovedBrandsSection = () => {
   const { lovedBrands, toggleLoveBrand } = useDashboard();
 
@@ -882,87 +982,108 @@ const LovedBrandsSection = () => {
 };
 
 const FollowedBrandsSection = () => {
-  const { followedBrands, toggleFollowBrand } = useDashboard();
+  const { followedBrands, lovedBrands, toggleFollowBrand, toggleLoveBrand } = useDashboard();
   const { allCreators } = useGlobalState();
 
   const followedCreators = followedBrands.filter((item) => isFollowedCreatorEntity(item, allCreators));
   const followedBrandOnly = followedBrands.filter((item) => !isFollowedCreatorEntity(item, allCreators));
+  const brandRows = [
+    ...followedBrandOnly.map((item) => ({ item, source: 'followed' as const })),
+    ...lovedBrands
+      .filter(
+        (loved) =>
+          !followedBrandOnly.some(
+            (followed) =>
+              String(followed.id) === String(loved.id) ||
+              String(followed.name).toLowerCase() === String(loved.name).toLowerCase(),
+          ),
+      )
+      .map((item) => ({ item, source: 'loved' as const })),
+  ];
+  const totalFollowing = brandRows.length + followedCreators.length;
 
   return (
     <div className="space-y-12 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="text-left">
           <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">
-            Following <span className="text-[#9AA0AC] text-lg font-bold">({followedBrands.length})</span>
+            Following <span className="text-[#9AA0AC] text-lg font-bold">({totalFollowing})</span>
           </h2>
           <p className="text-[#9AA0AC] text-[12.5px]">Brands and creators you follow for updates</p>
         </div>
       </div>
 
-      {followedBrands.length > 0 ? (
-        <div className="space-y-10">
-          {followedBrandOnly.length > 0 && (
-            <div className="space-y-4">
-              {followedCreators.length > 0 && (
-                <h3 className="text-[13px] font-bold text-[#9AA0AC]">Brands</h3>
-              )}
-              <div className={BRAND_CARD_GRID}>
-                {followedBrandOnly.map((brand) => (
-                  <div key={brand.id} className="flex flex-col gap-2 min-w-0">
-                    <BrandCardDesign brand={mapBrandToCardDesign(brand)} />
-                    <button
-                      type="button"
-                      onClick={() => toggleFollowBrand(brand)}
-                      className="text-[12px] font-bold text-[#9AA0AC] hover:text-[#CF4400] bg-transparent border-none cursor-pointer self-center"
-                    >
-                      Unfollow
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {followedCreators.length > 0 && (
-            <div className="space-y-4">
-              {followedBrandOnly.length > 0 && (
-                <h3 className="text-[13px] font-bold text-[#9AA0AC]">Creators</h3>
-              )}
-              <div className={CREATOR_CARD_GRID}>
-                {followedCreators.map((creator) => {
-                  const catalog =
-                    allCreators.find(
-                      (c) =>
-                        String(c.id) === String(creator.id) ||
-                        c.name?.toLowerCase().trim() === String(creator.name || '').toLowerCase().trim(),
-                    ) || creator;
-                  return (
-                    <div key={creator.id} className="flex flex-col gap-2 min-w-0">
-                      <CreatorCardDesign creator={mapFollowedToCreatorCard(catalog)} />
-                      <button
-                        type="button"
-                        onClick={() => toggleFollowBrand(creator)}
-                        className="text-[12px] font-bold text-[#9AA0AC] hover:text-[#CF4400] bg-transparent border-none cursor-pointer self-center"
-                      >
-                        Unfollow
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+      <section className="space-y-4" aria-labelledby="following-brands-heading">
+        <div className="flex items-center justify-between gap-3">
+          <h3 id="following-brands-heading" className="text-[15px] font-extrabold text-[#1A1A2E]">
+            Brands <span className="text-[#9AA0AC]">({brandRows.length})</span>
+          </h3>
+          <Link to="/brands" className="text-[11.5px] font-bold text-[#EB4501] hover:underline">
+            Explore brands →
+          </Link>
         </div>
-      ) : (
-        <div className="py-32 flex flex-col items-center text-center opacity-80">
-          <Store size={64} className="mb-8 text-gray-300" />
-          <p className="text-[13px] font-semibold text-[#1A1A2E] tracking-tight leading-relaxed mb-4">Nothing followed yet</p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link to="/brands" className="px-6 py-2.5 bg-[#EB4501] text-white rounded-xl text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Explore brands</Link>
-            <Link to="/creators" className="px-6 py-2.5 bg-white border border-[#E8EDF2] text-[#1A1A2E] rounded-xl text-[13px] font-bold tracking-tight hover:border-[#EB4501]/40">Explore creators</Link>
+        {brandRows.length > 0 ? (
+          <div className={BRAND_CARD_GRID}>
+            {brandRows.map(({ item: brand, source }) => (
+              <div key={`${source}-${brand.id}`} className="flex flex-col gap-2 min-w-0">
+                <BrandCardDesign brand={mapBrandToCardDesign(brand)} />
+                <button
+                  type="button"
+                  onClick={() =>
+                    source === 'followed' ? toggleFollowBrand(brand) : toggleLoveBrand(brand)
+                  }
+                  className="text-[12px] font-bold text-[#9AA0AC] hover:text-[#CF4400] bg-transparent border-none cursor-pointer self-center"
+                >
+                  {source === 'followed' ? 'Unfollow' : 'Remove from Loved'}
+                </button>
+              </div>
+            ))}
           </div>
+        ) : (
+          <div className="rounded-[10px] border border-dashed border-[#E8EDF2] bg-white py-10 text-center text-[12px] font-semibold text-[#9AA0AC]">
+            No followed brands yet
+          </div>
+        )}
+      </section>
+
+      <section className="space-y-4" aria-labelledby="following-creators-heading">
+        <div className="flex items-center justify-between gap-3">
+          <h3 id="following-creators-heading" className="text-[15px] font-extrabold text-[#1A1A2E]">
+            Creators <span className="text-[#9AA0AC]">({followedCreators.length})</span>
+          </h3>
+          <Link to="/creators" className="text-[11.5px] font-bold text-[#EB4501] hover:underline">
+            Explore creators →
+          </Link>
         </div>
-      )}
+        {followedCreators.length > 0 ? (
+          <div className={CREATOR_CARD_GRID}>
+            {followedCreators.map((creator) => {
+              const catalog =
+                allCreators.find(
+                  (c) =>
+                    String(c.id) === String(creator.id) ||
+                    c.name?.toLowerCase().trim() === String(creator.name || '').toLowerCase().trim(),
+                ) || creator;
+              return (
+                <div key={creator.id} className="flex flex-col gap-2 min-w-0">
+                  <CreatorCardDesign creator={mapFollowedToCreatorCard(catalog)} />
+                  <button
+                    type="button"
+                    onClick={() => toggleFollowBrand(creator)}
+                    className="text-[12px] font-bold text-[#9AA0AC] hover:text-[#CF4400] bg-transparent border-none cursor-pointer self-center"
+                  >
+                    Unfollow
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="rounded-[10px] border border-dashed border-[#E8EDF2] bg-white py-10 text-center text-[12px] font-semibold text-[#9AA0AC]">
+            No followed creators yet
+          </div>
+        )}
+      </section>
     </div>
   );
 };
@@ -1260,7 +1381,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
       {settingsSubTab === 'personal' && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-6">
-            <div className="flex flex-col items-center p-8 bg-white border border-[#E8EDF2] rounded-none relative overflow-hidden group">
+            <div className="flex flex-col items-center p-8 bg-white border border-[#E8EDF2] rounded-[10px] relative overflow-hidden group">
               <div className="absolute inset-0 bg-gradient-to-b from-[#EB4501]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative w-28 h-28 mb-5 cursor-pointer group/avatar">
                 <img
@@ -1276,7 +1397,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
               <p className="text-[#9AA0AC] text-[12px] font-semibold">Premium Member</p>
             </div>
 
-            <div className="space-y-5 bg-white border border-[#E8EDF2] rounded-none p-6">
+            <div className="space-y-5 bg-white border border-[#E8EDF2] rounded-[10px] p-6">
               <h3 className="text-[13px] font-bold text-[#1A1A2E]">Profile</h3>
               <div className="space-y-4">
                 <div className="space-y-2">
@@ -1317,7 +1438,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
           </div>
 
           <div className="space-y-6">
-            <div className="bg-white border border-[#E8EDF2] rounded-none p-6 space-y-3 text-left">
+            <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-6 space-y-3 text-left">
               <h3 className="text-[13px] font-bold text-[#1A1A2E]">Quick links</h3>
               <p className="text-[13px] font-medium text-[#9AA0AC] leading-relaxed">
                 Manage delivery locations from the Addresses tab or sidebar menu.
@@ -1351,7 +1472,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
       {settingsSubTab === 'notifications' && (
         <div className="space-y-4 max-w-2xl">
           <h3 className="text-[13px] font-bold text-[#1A1A2E]">Notifications</h3>
-          <div className="bg-white border border-[#E8EDF2] rounded-none p-6 space-y-5">
+          <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-6 space-y-5">
             {[
               { label: 'Sale Alerts', desc: 'When your saved product goes on flash sale', checked: true },
               { label: 'Expert Tips', desc: 'Weekly curated guides for your categories', checked: true },
@@ -1386,7 +1507,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
       )}
 
       {settingsSubTab === 'privacy' && (
-        <div className="max-w-2xl bg-white border border-[#E8EDF2] rounded-none p-6 text-left">
+        <div className="max-w-2xl bg-white border border-[#E8EDF2] rounded-[10px] p-6 text-left">
           <h3 className="text-[13px] font-extrabold tracking-tight text-[#1A1A2E] mb-2">Privacy</h3>
           <p className="text-[12.5px] text-[#9AA0AC] leading-relaxed">
             Control how your browsing activity and profile data are used across Choosify. Privacy controls
@@ -1467,7 +1588,7 @@ function MyReviewsSection() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_240px] gap-5 items-start">
-        <div className="bg-white border border-[#E8EDF2] rounded-none p-5 flex flex-col sm:flex-row gap-5 items-start min-w-0">
+        <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-5 flex flex-col sm:flex-row gap-5 items-start min-w-0">
           <ScoreRing score={choosifyScore} max={100} />
           <div className="min-w-0 flex-1 text-left">
             <div className="text-[11px] font-extrabold text-[#9AA0AC] tracking-wide uppercase mb-1">
@@ -1505,7 +1626,7 @@ function MyReviewsSection() {
           {DEMO_SELLER_RATINGS.map((item) => (
             <article
               key={item.id}
-              className="bg-white border border-[#E8EDF2] rounded-none p-5 text-left"
+              className="bg-white border border-[#E8EDF2] rounded-[10px] p-5 text-left"
             >
               <div className="flex items-start justify-between gap-3 mb-3">
                 <div className="flex items-center gap-3 min-w-0">
@@ -1593,7 +1714,7 @@ function MyReviewsSection() {
               );
             })
           ) : (
-            <div className="py-16 border border-dashed border-[#E8EDF2] rounded-none flex flex-col items-center justify-center text-center bg-white w-full">
+            <div className="py-16 border border-dashed border-[#E8EDF2] rounded-[10px] flex flex-col items-center justify-center text-center bg-white w-full">
               <p className="text-[13px] font-medium text-[#9AA0AC] tracking-tight">
                 You haven&apos;t written any product reviews yet
               </p>
@@ -1652,12 +1773,9 @@ export function DashboardPage() {
   const formatNavLabel = (item: { id: string; label: string }) => item.label;
 
   const getNavCount = (id: string): number | string | null => {
-    if (id === 'saved-products') return savedProducts.length;
-    if (id === 'saved-brands') return savedBrands.length;
-    if (id === 'loved-brands') return lovedBrands.length;
-    if (id === 'followed-brands') return followedBrands.length;
+    if (id === 'saved-items') return savedProducts.length + savedBrands.length + savedGuides.length;
+    if (id === 'following') return followedBrands.length + lovedBrands.length;
     if (id === 'recently-viewed') return recentlyViewed.length;
-    if (id === 'saved-recommendations') return savedGuides.length;
     return null;
   };
 
@@ -1710,6 +1828,13 @@ export function DashboardPage() {
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     const queryTab = params.get('tab');
+    const redirectedTab = queryTab ? LEGACY_DASHBOARD_TAB_REDIRECTS[queryTab] : undefined;
+    if (redirectedTab) {
+      params.set('tab', redirectedTab);
+      navigate(`/dashboard?${params.toString()}`, { replace: true });
+      setActiveTab(redirectedTab);
+      return;
+    }
     if (queryTab && !REMOVED_TABS.has(queryTab) && isDashboardTabAllowed(queryTab, platformRole)) {
       setActiveTab(queryTab);
       if (queryTab === 'settings') {
@@ -1722,7 +1847,11 @@ export function DashboardPage() {
     }
 
     if (location.state?.activeTab) {
-      const tab = location.state.activeTab as string;
+      const requestedTab = location.state.activeTab as string;
+      const tab = LEGACY_DASHBOARD_TAB_REDIRECTS[requestedTab] ?? requestedTab;
+      if (tab !== requestedTab) {
+        navigate(`/dashboard?tab=${tab}`, { replace: true });
+      }
       if (REMOVED_TABS.has(tab) || !isDashboardTabAllowed(tab, platformRole)) {
         setActiveTab('overview');
       } else {
@@ -1732,7 +1861,7 @@ export function DashboardPage() {
         setSettingsSubTab(location.state.settingsSubTab as SettingsSubTab);
       }
     }
-  }, [location.state, location.search, platformRole]);
+  }, [location.state, location.search, platformRole, navigate]);
 
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -1750,12 +1879,9 @@ export function DashboardPage() {
     switch (activeTab) {
       // Retail Tabs
       case 'overview': return <OverviewSection onTabChange={setActiveTab} userName={currentUser.name} />;
-      case 'saved-products': return <SavedProductsSection />;
-      case 'saved-brands': return <SavedBrandsSection />;
-      case 'loved-brands': return <LovedBrandsSection />;
-      case 'followed-brands': return <FollowedBrandsSection />;
+      case 'saved-items': return <SavedItemsSection />;
+      case 'following': return <FollowedBrandsSection />;
       case 'recently-viewed': return <RecentlyViewedSection />;
-      case 'saved-recommendations': return <SavedGuidesSection />;
       case 'messages':
         return <MessagesPage embedded initialThreadId={messagesThreadId} />;
       case 'orders':
@@ -1803,6 +1929,7 @@ export function DashboardPage() {
       navigate(item.href);
     } else {
       setActiveTab(item.id);
+      navigate(`/dashboard?tab=${item.id}`);
     }
   };
 
@@ -1987,7 +2114,7 @@ export function DashboardPage() {
       <div className="flex flex-1 w-full max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-10 py-6 lg:py-7 gap-7 items-start">
         {/* Sidebar Desktop — light sticky */}
         <aside className="hidden lg:flex w-[240px] shrink-0 flex-col sticky top-[88px] max-h-[calc(100vh-100px)] overflow-y-auto no-scrollbar">
-          <div className="bg-white border border-[#E8EDF2] rounded-none p-3 flex flex-col min-h-0">
+          <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-3 flex flex-col min-h-0">
           {renderSidebarNav()}
           <div className="mt-2 pt-2 border-t border-[#E8EDF2]">
             {browseChoosifyLink}

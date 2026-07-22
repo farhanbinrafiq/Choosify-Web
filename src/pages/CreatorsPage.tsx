@@ -9,7 +9,6 @@ import { toast } from 'react-hot-toast';
 import type { Creator } from '../data/creators';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { CreatorCardDesign } from '../components/CreatorCardDesign';
-import { DcListingHero } from '../components/design/DcListingHero';
 import { DcListingStickyFilters } from '../components/design/DcListingStickyFilters';
 import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
 import { useInfiniteListBatch } from '../hooks/useInfiniteListBatch';
@@ -19,6 +18,8 @@ import { AdvertiseHereCard } from '../components/commerce/AdvertiseHereCard';
 import { usePlacements } from '../hooks/usePlacements';
 import { PLACEMENT_KEYS, INFEED_INTERVAL, INFEED_MAX_PER_PAGE } from '../lib/placements';
 import { injectPlacementsIntoFeed } from '../utils/injectFeedPlacements';
+import { rankCreators } from '../utils/listingRanking';
+import { usePriorityClockMs } from '../hooks/usePriorityClockMs';
 
 interface CreatorCollab {
   id: string;
@@ -91,8 +92,8 @@ export function CreatorsPage() {
     return allCreators.map(c => {
       let rating = 4.7;
       let reviews = 85;
-      let isHot = c.score >= 95;
-      let isFeatured = c.score >= 90;
+      let isHot = Boolean(c.featuredFlag) || c.score >= 95;
+      let isFeatured = Boolean(c.featuredFlag) || c.score >= 90;
 
       if (c.score >= 96) {
         rating = 4.9;
@@ -109,10 +110,14 @@ export function CreatorsPage() {
         rating,
         reviews,
         isHot,
-        isFeatured
+        isFeatured,
+        featuredFlag: c.featuredFlag ?? isFeatured,
+        verifiedStatus: c.verifiedStatus,
       };
     });
   }, [allCreators]);
+
+  const priorityNowMs = usePriorityClockMs();
 
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
@@ -166,8 +171,8 @@ export function CreatorsPage() {
       result = result.filter(c => c.rating < 4.8);
     }
 
-    return result;
-  }, [mappedCreators, searchQuery, selectedLetter, activeTab, selectedCategory, verificationFilter, popularityFilter]);
+    return rankCreators(result, priorityNowMs);
+  }, [mappedCreators, searchQuery, selectedLetter, activeTab, selectedCategory, verificationFilter, popularityFilter, priorityNowMs]);
 
   const infeedPlacements = usePlacements(PLACEMENT_KEYS.INFEED_CREATOR, {
     limit: INFEED_MAX_PER_PAGE,
@@ -332,19 +337,13 @@ export function CreatorsPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
-      <DcListingHero
-        titleBefore="Follow Trusted"
-        titleHighlight="Creators"
+      <DcListingStickyFilters
+        className="mt-5"
+        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
         searchPlaceholder="Search creators..."
         quickChips={['Tech', 'Fashion', 'Beauty', 'Food', 'Lifestyle', 'Gaming']}
         onSearch={(q) => setSearchQuery(q)}
         onChipClick={(q) => setSearchQuery(q)}
-        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
-      />
-
-      <DcListingStickyFilters
-        overlapHero
-        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
         items={[
           {
             id: 'tech',

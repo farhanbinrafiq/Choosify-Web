@@ -36,6 +36,23 @@ export {
   sectionHasData,
   shouldShowBrandProfileCard,
   shouldShowCreatorProfileCard,
+  isBrandOwnedContent,
   isServiceForwardContent,
 } from './sectionManifestRegistry';
+export {
+  resolveContentDetailOptionalSections,
+  contentDetailNavFromSections,
+  DEFAULT_OPTIONAL_SECTIONS_BY_TYPE,
+} from './resolveContentDetailSections';
+export {
+  getCategorySectionLabels,
+  resolveItemsMentionedTitle,
+  getBrandsMentionedTitle,
+  CATEGORY_SECTION_LABELS,
+} from './categorySectionLabels';
 export type { SpotlightPageSectionId, SpotlightPageSectionConfig } from '../../../types/spotlight/experience/pageSections';
+export type {
+  ContentDetailSectionConfig,
+  ContentDetailOptionalSectionId,
+  ContentDetailFixedSectionId,
+} from '../../../types/spotlight/experience/contentDetailSections';

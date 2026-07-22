@@ -213,8 +213,7 @@ export function ReviewDetailPage() {
             <Scale size={14} /> Compare
           </Link>
           <Link
-            to="/dashboard"
-            state={{ activeTab: 'saved-products' }}
+            to="/dashboard?tab=saved-items"
             className="inline-flex items-center gap-1.5 bg-white border border-[#E8EDF2] text-[#1A1A2E] px-4 py-2.5 rounded-lg text-xs font-bold"
           >
             <Heart size={14} /> Wishlist

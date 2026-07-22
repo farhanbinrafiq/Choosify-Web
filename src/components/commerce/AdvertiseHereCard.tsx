@@ -183,7 +183,7 @@ export function ProductsSponsoredBanner({
   return (
     <div
       className={cn(
-        'relative h-[190px] rounded-none overflow-hidden mb-6 choosify-dark-surface',
+        'relative h-[190px] rounded-xl overflow-hidden mb-6 choosify-dark-surface',
         className,
       )}
     >

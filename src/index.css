@@ -373,12 +373,7 @@
   top: var(--choosify-navbar-height, 6.5rem);
 }
 
-/* Heroes + sticky nav chrome — square corners */
-.choosify-sticky-section-nav,
-.choosify-sticky-section-nav > div,
-.choosify-sticky-section-nav > div > div {
-  border-radius: 0 !important;
-}
+/* Sticky listing chrome keeps its own rounded-[14px] card shell */
 
 .no-scrollbar::-webkit-scrollbar {
   display: none;
@@ -725,10 +720,9 @@
 }
 
 @media (min-width: 1280px) {
+  /* Brand + creator lists cap at 4 per row on desktop */
   .choosify-brand-grid,
-  .choosify-creator-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-  }
+  .choosify-creator-grid,
   .choosify-guide-media-grid {
     grid-template-columns: repeat(4, minmax(0, 1fr));
   }
@@ -736,15 +730,9 @@
 
 .choosify-spotlight-related-grid {
   display: grid;
-  grid-template-columns: repeat(1, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: clamp(0.75rem, 1.15vw, 1.25rem);
   align-items: start;
-}
-
-@media (min-width: 768px) {
-  .choosify-spotlight-related-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 @media (min-width: 1024px) {

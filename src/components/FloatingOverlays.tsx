@@ -44,8 +44,9 @@ export function FloatingOverlays() {
 
   const { hasUnread: hasEmiUnread } = useEmiUnread();
 
-  const showEmiFab =
-    isFeatureEnabled('enable_emi_assistant') && !onEmiPage && hasEmiUnread;
+  // Keep the FAB mounted regardless of unread state so the chat can always be
+  // reopened after closing; unread only drives the notification dot.
+  const showEmiFab = isFeatureEnabled('enable_emi_assistant') && !onEmiPage;
 
   // Active floating panel state: cart preview, messages preview, or Emi
   const [activePanel, setActivePanel] = useState<'cart' | 'messages' | 'emi' | null>(null);
@@ -59,12 +60,12 @@ export function FloatingOverlays() {
     activeFiltersData: drawerFiltersData,
     setIsOpen: setDrawerFilterOpen,
     isOpen: drawerFilterOpen,
-    stickyFilterChromeCount,
   } = useFloatingFilters();
   const hasFilters =
     !drawerFiltersData && typeof filterConfig.renderFilters === 'function';
   const showFiltersAction = !!drawerFiltersData || hasFilters;
-  const showDesktopLegacyFilterLauncher = hasFilters && stickyFilterChromeCount === 0;
+  // Float consistently like the cart FAB — never hidden by sticky section navs
+  const showDesktopLegacyFilterLauncher = hasFilters;
 
   // Tracking responsive media
   const [isMobile, setIsMobile] = useState(false);
@@ -372,12 +373,15 @@ export function FloatingOverlays() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
                 className={cn(
-                'w-[52px] h-[52px] rounded-full bg-white shadow-[0_8px_20px_rgba(0,0,0,0.28)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none p-2.5',
+                'relative w-[52px] h-[52px] rounded-full bg-white shadow-[0_8px_20px_rgba(0,0,0,0.28)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none p-2.5',
                 activePanel === 'emi' && 'ring-2 ring-[#EB4501]/60 brightness-105',
               )}
               title="Ask Emi — Choosify Assistant"
             >
               <EmiAiLogo size={32} className="w-8 h-8" />
+              {hasEmiUnread && activePanel !== 'emi' && (
+                <span className="absolute top-0.5 right-0.5 w-3 h-3 rounded-full bg-[#EB4501] border-2 border-white" />
+              )}
             </motion.button>
           )}
         </AnimatePresence>
@@ -557,7 +561,7 @@ export function FloatingOverlays() {
                     </button>
                   )}
                   <button
-                    onClick={closeFilterPanel}
+                    onClick={() => closeFilterPanel()}
                     className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-[#1A1A2E] transition-all border border-[#e8edf2] cursor-pointer"
                   >
                     <XIcon size={14} />
@@ -693,6 +697,9 @@ export function FloatingOverlays() {
         title="Ask Emi"
       >
         <EmiAiLogo size={36} className="w-9 h-9" />
+        {hasEmiUnread && activePanel !== 'emi' && (
+          <span className="absolute top-1 right-1 w-3 h-3 rounded-full bg-[#EB4501] border-2 border-white" />
+        )}
       </motion.button>
     )}
 
@@ -727,7 +734,7 @@ export function FloatingOverlays() {
         onClick={openMobileFilters}
         whileTap={{ scale: 0.95 }}
         className={cn(
-          'fixed z-[220] relative w-14 h-14 rounded-full border border-[#e8edf2] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.18)] flex items-center justify-center transition-all pointer-events-auto sm:hidden',
+          'fixed z-[220] w-14 h-14 rounded-full border border-[#e8edf2] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.18)] flex items-center justify-center transition-all pointer-events-auto sm:hidden',
           (filterOpen || drawerFilterOpen) && 'ring-2 ring-[#EB4501]/30',
         )}
         style={{

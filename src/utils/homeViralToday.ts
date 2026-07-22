@@ -3,6 +3,11 @@ import type { HomepageSpotlightCardModel } from '../types/spotlight/homepage';
 import { resolvePreviewImage } from '../components/media/types/mediaModel';
 import { catalogGuideHref } from '../lib/spotlight/content';
 import { PLACEHOLDER_IMAGE } from '../constants';
+import {
+  classifyContentPriority,
+  prioritizeContent,
+  type ContentPriorityInput,
+} from './contentPriority';
 
 /** Lightweight Viral Today tile — Choosify.dc.html Home */
 export interface ViralTodayItem {
@@ -16,7 +21,9 @@ export interface ViralTodayItem {
   time?: string;
   likes?: string;
   productCount: number;
-  kind: 'youtube' | 'reel';
+  kind: 'youtube' | 'reel' | 'live';
+  /** Priority tier for UI badges (optional) */
+  priorityTier?: 'active_live' | 'live_grace' | 'fresh' | 'standard';
 }
 
 /** Guides may come from CMS/catalog with partial fields */
@@ -32,13 +39,21 @@ type ViralGuideInput = {
   shares?: string;
   type?: string;
   productIds?: Array<string | number>;
+  publishedAt?: string;
+  status?: string;
+};
+
+type ViralCandidate = {
+  key: string;
+  item: ViralTodayItem;
+  priority: ContentPriorityInput;
 };
 
 function guideHref(guide: ViralGuideInput): string {
   return catalogGuideHref(guide);
 }
 
-function guideToViral(guide: ViralGuideInput): ViralTodayItem {
+function guideToViral(guide: ViralGuideInput, kind?: ViralTodayItem['kind']): ViralTodayItem {
   const isReel = guide.type === 'reels' || guide.type === 'shorts';
   return {
     id: String(guide.id),
@@ -51,12 +66,13 @@ function guideToViral(guide: ViralGuideInput): ViralTodayItem {
     time: guide.readTime,
     likes: guide.shares,
     productCount: guide.productIds?.length ?? 0,
-    kind: isReel ? 'reel' : 'youtube',
+    kind: kind ?? (isReel ? 'reel' : 'youtube'),
   };
 }
 
-function campaignToViral(card: HomepageSpotlightCardModel): ViralTodayItem {
+function campaignToViral(card: HomepageSpotlightCardModel, kind?: ViralTodayItem['kind']): ViralTodayItem {
   const t = card.campaign.campaignType;
+  const isLive = t === 'livestream';
   const isReel = t === 'creator_review' || t === 'single_product';
   const url = card.campaign.cta?.url;
   const href = url
@@ -77,42 +93,126 @@ function campaignToViral(card: HomepageSpotlightCardModel): ViralTodayItem {
     image,
     channel: card.campaign.brandName ?? card.primaryProduct?.brandName ?? 'Choosify',
     productCount: (card.primaryProduct ? 1 : 0) + (card.extraProductCount || 0),
-    kind: isReel ? 'reel' : 'youtube',
+    kind: kind ?? (isLive ? 'live' : isReel ? 'reel' : 'youtube'),
+  };
+}
+
+function campaignPriorityInput(card: HomepageSpotlightCardModel): ContentPriorityInput {
+  const c = card.campaign;
+  const isLiveType = c.campaignType === 'livestream';
+  return {
+    id: c.campaignId,
+    publishedAt: c.schedule?.startAt || c.createdAt,
+    endsAt: c.schedule?.endAt,
+    contentType: isLiveType ? 'live' : c.campaignType,
+    isLive: isLiveType,
+    live: isLiveType
+      ? {
+          scheduledAt: c.schedule?.startAt,
+          endedAt: c.schedule?.endAt,
+        }
+      : null,
+  };
+}
+
+function guidePriorityInput(guide: ViralGuideInput): ContentPriorityInput {
+  return {
+    id: String(guide.id),
+    publishedAt: guide.publishedAt,
+    contentType: guide.type,
+    isLive: false,
+    live: null,
   };
 }
 
 /**
  * Prefer live Spotlight homepage campaigns; fall back to catalog guides
  * so Viral Today always has content on Home (Choosify.dc.html).
+ *
+ * Ranking (shared with Discover via contentPriority.ts):
+ * 1. Active LIVE first
+ * 2. LIVE ended within 24h (grace)
+ * 3. Regular content published within 24h
+ * 4. Older content fills remaining lane slots
  */
 export function buildHomeViralTodayItems(
   campaignCards: HomepageSpotlightCardModel[],
   guides: ViralGuideInput[],
   _products?: CatalogProduct[],
+  nowMs: number = Date.now(),
 ): ViralTodayItem[] {
-  if (campaignCards.length > 0) {
-    return campaignCards.map(campaignToViral);
+  const candidates: ViralCandidate[] = [];
+
+  for (const card of campaignCards) {
+    const priority = campaignPriorityInput(card);
+    const tier = classifyContentPriority(priority, nowMs);
+    const kind: ViralTodayItem['kind'] =
+      tier === 'active_live' || tier === 'live_grace' || card.campaign.campaignType === 'livestream'
+        ? 'live'
+        : card.campaign.campaignType === 'creator_review' || card.campaign.campaignType === 'single_product'
+          ? 'reel'
+          : 'youtube';
+    candidates.push({
+      key: `campaign-${card.campaign.campaignId}`,
+      item: { ...campaignToViral(card, kind), priorityTier: tier },
+      priority,
+    });
   }
 
-  const videos = guides.filter((g) => g.type === 'video');
-  const reels = guides.filter((g) => g.type === 'reels' || g.type === 'shorts');
-  const blogs = guides.filter((g) => !g.type || g.type === 'article');
+  const seen = new Set(candidates.map((c) => c.key));
+  for (const guide of guides) {
+    if (guide.status === 'draft' || guide.status === 'archived') continue;
+    const key = `guide-${guide.id}`;
+    if (seen.has(key)) continue;
+    seen.add(key);
+    const priority = guidePriorityInput(guide);
+    const tier = classifyContentPriority(priority, nowMs);
+    candidates.push({
+      key,
+      item: { ...guideToViral(guide), priorityTier: tier },
+      priority,
+    });
+  }
+
+  if (!candidates.length) return [];
+
+  const ranked = prioritizeContent(candidates, (c) => c.priority, nowMs).map((r) => ({
+    ...r.item.item,
+    priorityTier: r.tier,
+  }));
+
+  // Keep lane limits: LIVE pins first (shown as youtube-size or dedicated), then youtube / reels
+  const live = ranked.filter((i) => i.kind === 'live' || i.priorityTier === 'active_live' || i.priorityTier === 'live_grace');
+  const youtube = ranked.filter((i) => i.kind === 'youtube' && !live.some((l) => l.id === i.id));
+  const reels = ranked.filter((i) => i.kind === 'reel' && !live.some((l) => l.id === i.id));
 
   const items: ViralTodayItem[] = [];
-  for (const g of videos.slice(0, 4)) items.push(guideToViral(g));
-  for (const g of reels.slice(0, 6)) items.push(guideToViral(g));
 
+  // LIVE always wins — pin at the front of the youtube lane (up to 2) so it appears first
+  for (const item of live.slice(0, 2)) {
+    items.push({ ...item, kind: 'youtube' });
+  }
+
+  for (const item of youtube.slice(0, Math.max(0, 4 - items.filter((i) => i.kind === 'youtube').length))) {
+    items.push(item);
+  }
+  for (const item of reels.slice(0, 6)) {
+    items.push(item);
+  }
+
+  // Pad lanes from remaining ranked content (option A: fill with older)
   if (items.filter((i) => i.kind === 'youtube').length < 2) {
-    for (const g of blogs.slice(0, 4)) {
-      if (items.length >= 10) break;
-      items.push({ ...guideToViral(g), kind: 'youtube', duration: undefined });
+    for (const item of ranked) {
+      if (items.filter((i) => i.kind === 'youtube').length >= 4) break;
+      if (items.some((i) => i.id === item.id && i.kind === 'youtube')) continue;
+      items.push({ ...item, kind: 'youtube', duration: item.kind === 'reel' ? undefined : item.duration });
     }
   }
   if (items.filter((i) => i.kind === 'reel').length < 2) {
-    for (const g of [...videos, ...blogs].slice(0, 6)) {
+    for (const item of ranked) {
       if (items.filter((i) => i.kind === 'reel').length >= 6) break;
-      if (items.some((i) => i.id === String(g.id) && i.kind === 'reel')) continue;
-      items.push({ ...guideToViral(g), kind: 'reel' });
+      if (items.some((i) => i.id === item.id && i.kind === 'reel')) continue;
+      items.push({ ...item, kind: 'reel' });
     }
   }
 

@@ -65,7 +65,14 @@ Seller: ${sub.sellerBusinessName}
 Payment: ${order.isCOD ? 'Cash on Delivery' : 'Online Payment'}
 
 ITEMS:
-${sub.items.map((it: any) => `- ${it.productTitle} x${it.quantity} @ ৳${it.price.toLocaleString()} = ৳${(it.price * it.quantity).toLocaleString()}`).join('\n')}
+${sub.items.map((it: any) => {
+  const base = `- ${it.productTitle} x${it.quantity} @ ৳${it.price.toLocaleString()} = ৳${(it.price * it.quantity).toLocaleString()}`;
+  if (it.productType !== 'service') return base;
+  const serviceDetails = Object.entries(it.serviceDetails || {})
+    .map(([label, value]) => `    ${label.replace(/([A-Z])/g, ' $1')}: ${value}`)
+    .join('\n');
+  return `${base}\n  Service Overview: ${it.serviceCategory || 'Service'}\n  Service Specifications:\n${serviceDetails || '    As agreed in seller conversation'}\n  Complimentary Features: See confirmed offer\n  Property Specs: See listing details`;
+}).join('\n')}
 
 Subtotal: ৳${sub.items.reduce((a: number, it: any) => a + it.price * it.quantity, 0).toLocaleString()}
 Delivery: ৳${sub.deliveryFee}
@@ -199,6 +206,16 @@ Thank you for shopping with Choosify.bd
                               Cancelled
                             </span>
                           )}
+                          {order.status === 'pending_payment' && (
+                            <span className="text-[10px] font-bold bg-amber-50 border border-amber-200 text-amber-700 px-2 py-0.5 rounded-md">
+                              Pending Payment
+                            </span>
+                          )}
+                          {order.status === 'confirmed' && (
+                            <span className="text-[10px] font-bold bg-emerald-50 border border-emerald-200 text-emerald-700 px-2 py-0.5 rounded-md">
+                              Confirmed
+                            </span>
+                          )}
                           <span className="text-[10px] font-bold bg-[#F4F7F9] border border-[#E8EDF2] text-[#1A1A2E] px-2 py-0.5 rounded-md">
                             {order.isCOD ? 'Cash on delivery' : 'Prepaid'}
                           </span>
@@ -301,6 +318,19 @@ Thank you for shopping with Choosify.bd
                               </div>
 
                               <div className="flex gap-2 flex-wrap sm:flex-nowrap w-full sm:w-auto items-center">
+                                {order.status === 'pending_payment' && (
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      navigate(`/checkout?orderId=${encodeURIComponent(order.orderId)}`, {
+                                        state: { pendingOrderId: order.orderId },
+                                      })
+                                    }
+                                    className="flex-1 sm:flex-none h-10 px-4 rounded-lg bg-[#EB4501] hover:bg-[#CF4400] text-white text-[12px] font-bold transition-all flex items-center justify-center gap-1.5"
+                                  >
+                                    Pay now
+                                  </button>
+                                )}
                                 {allPending && !isCancelled && (
                                   <button
                                     type="button"
@@ -347,6 +377,8 @@ Thank you for shopping with Choosify.bd
                                   <span>Message</span>
                                 </button>
 
+                                {order.status !== 'pending_payment' && (
+                                <>
                                 <button
                                   type="button"
                                   onClick={() =>
@@ -367,6 +399,8 @@ Thank you for shopping with Choosify.bd
                                 >
                                   <FileText size={14} />
                                 </button>
+                                </>
+                                )}
                               </div>
                             </div>
                           </div>

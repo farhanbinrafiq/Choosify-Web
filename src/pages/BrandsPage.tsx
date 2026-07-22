@@ -7,7 +7,6 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from 'react-hot-toast';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { BrandCardDesign } from '../components/BrandCardDesign';
-import { DcListingHero } from '../components/design/DcListingHero';
 import { DcListingStickyFilters } from '../components/design/DcListingStickyFilters';
 import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
 import { useInfiniteListBatch } from '../hooks/useInfiniteListBatch';
@@ -19,6 +18,8 @@ import { PLACEMENT_KEYS, INFEED_INTERVAL, INFEED_MAX_PER_PAGE } from '../lib/pla
 import { injectPlacementsIntoFeed } from '../utils/injectFeedPlacements';
 import {BRAND_CARD_GRID, PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
+import { rankBrands } from '../utils/listingRanking';
+import { usePriorityClockMs } from '../hooks/usePriorityClockMs';
 
 interface BrandDeal {
   id: string;
@@ -63,6 +64,12 @@ interface Brand {
   category: string;
   isHot?: boolean;
   isFeatured?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  verifiedStatus?: boolean;
+  followers?: number;
+  sponsoredFlag?: boolean;
+  featuredFlag?: boolean;
 }
 
 export function BrandsPage() {
@@ -74,6 +81,7 @@ export function BrandsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [verificationFilter, setVerificationFilter] = useState<'all' | 'verified' | 'unverified'>('all');
   const [popularityFilter, setPopularityFilter] = useState<'all' | 'hot' | 'featured' | 'top-rated'>('all');
+  const priorityNowMs = usePriorityClockMs();
 
   // Restore state from sessionStorage on mount
   useEffect(() => {
@@ -293,12 +301,18 @@ export function BrandsPage() {
         logo: typeof brand.logo === 'string' ? brand.logo : brand.name.slice(0, 2).toUpperCase(),
         rating: brand.ratings || 0,
         reviews: brand.followers || 0,
+        followers: brand.followers || 0,
         bestFor: brand.category || 'General',
         priceRange: '৳500',
         recommended: `${Math.min(99, Math.max(70, Math.round((brand.ratings || 4) * 20)))}%`,
         category: brand.category || 'General',
         isHot: brand.sponsoredFlag,
         isFeatured: brand.featuredFlag,
+        sponsoredFlag: brand.sponsoredFlag,
+        featuredFlag: brand.featuredFlag,
+        verifiedStatus: brand.verifiedStatus,
+        createdAt: brand.createdAt,
+        updatedAt: brand.updatedAt,
       }));
     }
     return fallbackBrands;
@@ -370,8 +384,8 @@ export function BrandsPage() {
       result = result.filter(b => b.rating >= 4.8);
     }
 
-    return result;
-  }, [brands, searchQuery, selectedLetter, activeTab, selectedCategory, verificationFilter, popularityFilter, getBrandClaimStatus]);
+    return rankBrands(result, priorityNowMs);
+  }, [brands, searchQuery, selectedLetter, activeTab, selectedCategory, verificationFilter, popularityFilter, getBrandClaimStatus, priorityNowMs]);
 
   const infeedPlacements = usePlacements(PLACEMENT_KEYS.INFEED_BRAND, {
     limit: INFEED_MAX_PER_PAGE,
@@ -539,19 +553,13 @@ export function BrandsPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
-      <DcListingHero
-        titleBefore="Discover Verified"
-        titleHighlight="Brands"
+      <DcListingStickyFilters
+        className="mt-5"
+        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
         searchPlaceholder="Search brands..."
         quickChips={['Fashion', 'Electronics', 'Beauty', 'Home', 'Sports', 'Food']}
         onSearch={(q) => setSearchQuery(q)}
         onChipClick={(q) => setSearchQuery(q)}
-        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
-      />
-
-      <DcListingStickyFilters
-        overlapHero
-        maxWidthClass={LISTING_PAGE_MAX_WIDTH}
         items={[
           {
             id: 'top-rated',

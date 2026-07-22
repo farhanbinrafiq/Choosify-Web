@@ -157,7 +157,7 @@ export default function SpotlightOpportunityCenterPage() {
       </SpotlightDashboardSection>
 
       <div className="text-[9px] text-gray-400 border-t border-[#e8edf2] pt-4">
-        {opportunitiesByCategory('content_quality').length}+ opportunity types · Emi AI Publisher Success Coach active
+        {opportunitiesByCategory('content_quality').length}+ opportunity types · Emi. A.I Publisher Success Coach active
       </div>
     </div>
   );

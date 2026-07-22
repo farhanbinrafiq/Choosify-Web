@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { Creator } from '../../data/creators';
 import { spotlightContentHref } from '../../lib/spotlight/content';
 import { cn } from '../../lib/utils';
 import { CreatorContentCard, CREATOR_FEED_GRID } from './CreatorContentCard';
+import { rankCreatorContent } from '../../utils/listingRanking';
+import { usePriorityClockMs } from '../../hooks/usePriorityClockMs';
 
 type CreatorOverviewFeedProps = {
   creator: Creator;
@@ -79,65 +81,57 @@ type FeaturedItem = {
   href?: string;
 };
 
-function buildFeatured(creator: Creator): FeaturedItem[] {
-  const items: FeaturedItem[] = [];
+function buildFeatured(creator: Creator, nowMs: number): FeaturedItem[] {
   const videos = creator.videos ?? [];
   const reels = creator.reels ?? [];
   const blogs = creator.blogs ?? [];
 
-  if (blogs[0]) {
-    items.push({
-      id: `blog-${blogs[0].id}`,
-      title: blogs[0].title,
-      tag: 'BUYING GUIDE',
-      tagBg: '#2323FF',
-      meta: blogs[0].readTime || '12 min read',
-      showPlay: false,
-      image: blogs[0].thumbnail,
-      href: spotlightContentHref(String(blogs[0].associatedGuideId || blogs[0].id)),
-    });
-  }
-  if (videos[0]) {
-    items.push({
-      id: `vid-${videos[0].id}`,
-      title: videos[0].title,
-      tag: 'CREATOR REVIEW',
-      tagBg: '#3B82F6',
-      meta: videos[0].views ? `${videos[0].views}` : 'Video review',
-      showPlay: true,
-      image: videos[0].thumbnail,
-      href: spotlightContentHref(String(videos[0].associatedGuideId || videos[0].id)),
-    });
-  }
-  if (reels[0]) {
-    items.push({
-      id: `reel-${reels[0].id}`,
-      title: reels[0].title,
-      tag: 'COLLECTION',
-      tagBg: '#16A34A',
-      meta: 'Short · Featured',
-      showPlay: true,
-      image: reels[0].thumbnail,
-      href: spotlightContentHref(String(reels[0].associatedGuideId || reels[0].id)),
-    });
-  }
-  if (blogs[1] || videos[1]) {
-    const b = blogs[1];
-    const v = videos[1];
-    const src = b || v;
-    if (src) {
-      items.push({
-        id: `extra-${src.id}`,
+  const ranked = rankCreatorContent(
+    [
+      ...blogs.map((b) => ({ ...b, _kind: 'blog' as const })),
+      ...videos.map((v) => ({ ...v, _kind: 'video' as const })),
+      ...reels.map((r) => ({ ...r, _kind: 'reel' as const })),
+    ],
+    nowMs,
+  );
+
+  const items: FeaturedItem[] = ranked.slice(0, 4).map((src) => {
+    const kind = (src as { _kind?: string })._kind;
+    if (kind === 'blog') {
+      return {
+        id: `blog-${src.id}`,
         title: src.title,
-        tag: 'BRAND STORY',
-        tagBg: '#EB4501',
-        meta: src.readTime || src.views || 'Featured',
-        showPlay: !b,
+        tag: src.isLive ? 'LIVE' : src.pinned ? 'PINNED' : 'BUYING GUIDE',
+        tagBg: src.isLive ? '#FF000D' : '#2323FF',
+        meta: src.readTime || '12 min read',
+        showPlay: false,
         image: src.thumbnail,
         href: spotlightContentHref(String(src.associatedGuideId || src.id)),
-      });
+      };
     }
-  }
+    if (kind === 'reel') {
+      return {
+        id: `reel-${src.id}`,
+        title: src.title,
+        tag: src.isLive ? 'LIVE' : src.pinned ? 'PINNED' : 'COLLECTION',
+        tagBg: src.isLive ? '#FF000D' : '#16A34A',
+        meta: src.views || 'Short · Featured',
+        showPlay: true,
+        image: src.thumbnail,
+        href: spotlightContentHref(String(src.associatedGuideId || src.id)),
+      };
+    }
+    return {
+      id: `vid-${src.id}`,
+      title: src.title,
+      tag: src.isLive ? 'LIVE' : src.pinned ? 'PINNED' : 'CREATOR REVIEW',
+      tagBg: src.isLive ? '#FF000D' : '#3B82F6',
+      meta: src.views ? `${src.views}` : 'Video review',
+      showPlay: true,
+      image: src.thumbnail,
+      href: spotlightContentHref(String(src.associatedGuideId || src.id)),
+    };
+  });
 
   while (items.length < 4) {
     const fallbacks = [
@@ -183,7 +177,8 @@ export function CreatorOverviewFeed({
   onViewAllContent,
   onViewAllReviews,
 }: CreatorOverviewFeedProps) {
-  const featured = buildFeatured(creator);
+  const nowMs = usePriorityClockMs();
+  const featured = useMemo(() => buildFeatured(creator, nowMs), [creator, nowMs]);
   const firstName = creator.name.split(' ')[0] || creator.name;
 
   const overviewBlocks = [
@@ -347,7 +342,7 @@ export function CreatorOverviewFeed({
             {COLLAB_TYPES.map((ct) => (
               <span
                 key={ct}
-                className="bg-[#F4F7F9] text-[10.5px] font-semibold text-[#4B5563] px-3 py-1.5 rounded-none"
+                className="bg-[#F4F7F9] text-[10.5px] font-semibold text-[#4B5563] px-3 py-1.5 rounded-full"
               >
                 {ct}
               </span>
@@ -382,7 +377,7 @@ export function CreatorOverviewFeed({
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
           {COMMUNITY.map((cs) => (
-            <div key={cs.name} className="bg-white border border-[#E8EDF2] rounded-none p-4">
+            <div key={cs.name} className="bg-white border border-[#E8EDF2] rounded-[10px] p-4">
               <div className="flex items-center justify-between mb-2.5">
                 <div className="flex items-center gap-2">
                   <div className="w-8 h-8 rounded-full bg-[#EB4501] text-white flex items-center justify-center text-[11px] font-extrabold shrink-0">

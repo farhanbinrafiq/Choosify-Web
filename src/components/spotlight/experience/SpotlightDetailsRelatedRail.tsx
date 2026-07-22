@@ -34,7 +34,7 @@ export function SpotlightDetailsRelatedRail({
 
   return (
     <section
-      className={cn('pt-8 border-t border-[#F1F1F3]', className)}
+      className={cn('mt-8 bg-white border border-[#E8EDF2] rounded-[10px] p-4 sm:p-5', className)}
       aria-labelledby="spotlight-related-heading"
     >
       <div className="flex items-baseline justify-between gap-3 mb-3.5">

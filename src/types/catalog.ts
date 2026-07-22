@@ -42,6 +42,8 @@ export interface CatalogProduct {
   image: string;
   gallery: string[];
   modeType?: 'retail';
+  productType?: 'physical' | 'service';
+  serviceCategory?: string;
   price: number;
   originalPrice?: number;
   stock: number;
@@ -271,6 +273,10 @@ export interface CatalogMediaItem {
   date?: string;
   url: string;
   associatedGuideId?: string;
+  /** Creator-pinned piece — surfaces first on profile tabs when set */
+  pinned?: boolean;
+  /** Active LIVE stream marker for profile ranking */
+  isLive?: boolean;
 }
 
 export interface CatalogCreator {
@@ -327,6 +333,18 @@ export interface CatalogGuide {
   status: 'draft' | 'live' | 'archived';
   publishedAt: string;
   updatedAt: string;
+  /** Creator-pinned guide — surfaces first on profile Guides tab when set */
+  pinned?: boolean;
+  /**
+   * Optional Content Detail sections (ordered toggles + data) from Guide Edit Studio.
+   * Shape matches ContentDetailSectionConfig on SpotlightContent.
+   */
+  sections?: Array<{
+    id: string;
+    enabled: boolean;
+    order: number;
+    data?: Record<string, unknown>;
+  }>;
 }
 
 export type CatalogPlacementSponsorType =
@@ -373,6 +391,8 @@ export interface CatalogProductSizeGuide {
 
 export interface CatalogProductDetail {
   productId: string;
+  productType?: 'physical' | 'service';
+  serviceCategory?: string;
   about?: string;
   specs: { key: string; value: string }[];
   pros: string[];
