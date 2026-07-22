@@ -1,12 +1,13 @@
-/**
- * UX-03 — mixed shopping feed utilities (frontend only)
- */
-
 import type { SpotlightContent } from '../types/spotlight/experience/content';
 import type { SpotlightDiscoverFilters } from '../types/spotlight/experience/filters';
 import type { CatalogGuide } from '../types/catalog';
 import type { CatalogProduct } from '../types/catalog';
 import { sortByDiscoveryScore } from './spotlightDiscoveryScore';
+import {
+  isLiveFeaturedSize,
+  isPreviouslyLive,
+  spotlightContentToPriorityInput,
+} from './contentPriority';
 
 export type SpotlightFeedCardVariant = 'reel' | 'landscape' | 'blog' | 'square' | 'live';
 
@@ -28,9 +29,24 @@ export const SPOTLIGHT_FEED_BATCH = { initial: INITIAL_BATCH, loadMore: LOAD_BAT
 export const SPOTLIGHT_FEED_SCROLL_KEY = 'choosify_spotlight_feed_scroll';
 export const SPOTLIGHT_FEED_VISIBLE_KEY = 'choosify_spotlight_feed_visible_count';
 
-export function resolveFeedCardVariant(content: SpotlightContent): SpotlightFeedCardVariant {
+/**
+ * Card media/layout variant.
+ * Pass `nowMs` so LIVE keeps featured size during the 24h grace window,
+ * then shrinks to landscape ("Previously LIVE") afterward.
+ */
+export function resolveFeedCardVariant(
+  content: SpotlightContent,
+  nowMs: number = Date.now(),
+): SpotlightFeedCardVariant {
+  const priority = spotlightContentToPriorityInput(content);
+  if (isLiveFeaturedSize(priority, nowMs)) return 'live';
+  if (isPreviouslyLive(priority, nowMs)) return 'landscape';
+
   const mediaType = content.media?.mediaType;
-  if (content.isLive || content.contentType === 'live') return 'live';
+  if (content.isLive || content.contentType === 'live') {
+    // Upcoming / unscheduled live-typed — treat as landscape until active
+    return 'landscape';
+  }
   if (mediaType === 'vertical_video' || mediaType === 'portrait_image') return 'reel';
   if (mediaType === 'square_video' || mediaType === 'square_image') return 'square';
   if (mediaType === 'landscape_video' || mediaType === 'livestream' || content.media?.videoUrl) {
@@ -53,14 +69,17 @@ export interface DiscoverFeedLanes {
   blogs: SpotlightContent[];
 }
 
-export function partitionDiscoverFeedLanes(items: SpotlightContent[]): DiscoverFeedLanes {
+export function partitionDiscoverFeedLanes(
+  items: SpotlightContent[],
+  nowMs: number = Date.now(),
+): DiscoverFeedLanes {
   const youtube: SpotlightContent[] = [];
   const reels: SpotlightContent[] = [];
   const live: SpotlightContent[] = [];
   const blogs: SpotlightContent[] = [];
 
   for (const item of items) {
-    const variant = resolveFeedCardVariant(item);
+    const variant = resolveFeedCardVariant(item, nowMs);
     if (variant === 'live') live.push(item);
     else if (variant === 'reel') reels.push(item);
     else if (variant === 'landscape' || variant === 'square') youtube.push(item);

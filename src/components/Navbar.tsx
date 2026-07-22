@@ -211,6 +211,27 @@ export function Navbar() {
     );
   };
 
+  /** Logo-only chrome on auth flows — hide search, nav links, cart, and Sign In/Up. */
+  const isAuthChrome = location.pathname === '/login' || location.pathname.startsWith('/login/');
+
+  if (isAuthChrome) {
+    return (
+      <header
+        className="w-full min-w-0 z-50 sticky top-0 shadow-2xl border-b border-white/[0.07]"
+        id="main-navbar"
+      >
+        <nav className="choosify-chrome-header text-white h-14 sm:h-16 flex items-center px-3 sm:px-4 lg:px-6 xl:px-8 relative z-[40]">
+          <Link to="/" className="flex items-center group" aria-label="Choosify Home">
+            <ChoosifyWordmarkLogo
+              fluid
+              className="h-[26px] sm:h-7 w-auto max-w-[min(168px,42vw)] group-hover:opacity-95 transition-opacity"
+            />
+          </Link>
+        </nav>
+      </header>
+    );
+  }
+
   return (
     <>
       {siteConfig?.announcementBarEnabled && siteConfig.announcementBarText?.trim() && (

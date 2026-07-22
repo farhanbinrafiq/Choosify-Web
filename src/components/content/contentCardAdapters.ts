@@ -7,6 +7,10 @@ import {
   resolveFeedCardVariant,
   type SpotlightFeedCardVariant,
 } from '../../utils/spotlightMixedFeed';
+import {
+  isPreviouslyLive,
+  spotlightContentToPriorityInput,
+} from '../../utils/contentPriority';
 import type {
   ContentCardAspectRatio,
   ContentCardLayoutVariant,
@@ -82,8 +86,9 @@ function formatPopularity(score?: number): string | undefined {
 export function spotlightToContentCardModel(
   content: SpotlightContent,
   product?: CatalogProduct,
+  nowMs: number = Date.now(),
 ): UniversalCommerceCardModel {
-  const variant = resolveFeedCardVariant(content);
+  const variant = resolveFeedCardVariant(content, nowMs);
   const thumb =
     content.media?.thumbnail ??
     content.media?.posterImage ??
@@ -91,6 +96,7 @@ export function spotlightToContentCardModel(
     product?.image ??
     content.publisher.logoUrl;
 
+  const previouslyLive = isPreviouslyLive(spotlightContentToPriorityInput(content), nowMs);
 
   return {
     id: content.contentId,
@@ -102,7 +108,9 @@ export function spotlightToContentCardModel(
     image: thumb,
     videoUrl: content.media?.videoUrl,
     liveEmbedUrl: variant === 'live' ? content.live?.embedUrl : undefined,
-    badgeLabel: badgeForVariant(variant),
+    badgeLabel: previouslyLive
+      ? 'Previously LIVE'
+      : badgeForVariant(variant),
     platform: platformForVariant(variant),
     platformLabel:
       variant === 'reel'

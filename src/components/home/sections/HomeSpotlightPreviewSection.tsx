@@ -39,19 +39,38 @@ function ViralSaveButton({ size, className }: { size: number; className?: string
   );
 }
 
-/** Choosify.dc.html — "Viral Today" YouTube grid + Reels strip */
+function youtubeBadge(card: ViralTodayItem): string {
+  if (card.kind === 'live' || card.priorityTier === 'active_live' || card.priorityTier === 'live_grace') {
+    return 'LIVE';
+  }
+  if (card.previouslyLive) return 'Previously LIVE';
+  return 'YOUTUBE';
+}
+
+/** Choosify.dc.html — "Viral Today" featured LIVE + YouTube grid + Reels strip */
 export function HomeSpotlightPreviewSection({ items }: HomeSpotlightPreviewSectionProps) {
-  const { youtube, reels } = useMemo(() => {
+  const { live, youtube, reels } = useMemo(() => {
+    const liveItems = items.filter((i) => i.kind === 'live').slice(0, 2);
     const yt = items.filter((i) => i.kind === 'youtube').slice(0, 4);
     const rl = items.filter((i) => i.kind === 'reel').slice(0, 6);
-    // If one lane is empty, borrow from the other so the section never looks broken
     return {
-      youtube: yt.length ? yt : items.slice(0, 4).map((i) => ({ ...i, kind: 'youtube' as const })),
-      reels: rl.length ? rl : items.slice(0, 6).map((i) => ({ ...i, kind: 'reel' as const })),
+      live: liveItems,
+      youtube: yt.length
+        ? yt
+        : items
+            .filter((i) => i.kind !== 'live')
+            .slice(0, 4)
+            .map((i) => ({ ...i, kind: 'youtube' as const })),
+      reels: rl.length
+        ? rl
+        : items
+            .filter((i) => i.kind !== 'live')
+            .slice(0, 6)
+            .map((i) => ({ ...i, kind: 'reel' as const })),
     };
   }, [items]);
 
-  if (!youtube.length && !reels.length) return null;
+  if (!live.length && !youtube.length && !reels.length) return null;
 
   return (
     <DcHomePanel id="section-spotlight-preview">
@@ -68,6 +87,43 @@ export function HomeSpotlightPreviewSection({ items }: HomeSpotlightPreviewSecti
         <ViewAllLink href="/spotlight" label="VIEW ALL ›" />
       </div>
 
+      {live.length > 0 && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          {live.map((card) => (
+            <Link key={`live-${card.id}`} to={card.href} className="min-w-0 group">
+              <div className="relative aspect-video rounded-[10px] overflow-hidden mb-2.5 bg-[#F4F7F9] border border-[#E8EDF2]">
+                <img
+                  src={card.image}
+                  alt=""
+                  className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                  loading="lazy"
+                />
+                <span className="absolute top-2 left-2 bg-[#FF000D] text-white text-[9px] font-extrabold px-2 py-0.5 rounded pointer-events-none">
+                  LIVE
+                </span>
+                <ViralSaveButton size={11} className="absolute top-2 right-2 w-6 h-6" />
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <div className="px-4 py-2 rounded-full bg-[#FF000D] text-white text-[11px] font-extrabold tracking-wide">
+                    WATCH LIVE
+                  </div>
+                </div>
+              </div>
+              <div className="text-[14px] font-extrabold text-[#1A1A2E] leading-snug line-clamp-2 mb-1">
+                {card.title}
+              </div>
+              <div className="text-[11.5px] text-[#4B5563] flex items-center gap-1">
+                {card.channel}
+                <span className="text-[#2323FF]">✓</span>
+              </div>
+              <div className="flex items-center gap-1.5 mt-2 text-[11px] font-bold text-[#4B5563]">
+                <Package size={12} />
+                {card.productCount} Products
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+
       {youtube.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {youtube.map((card, i) => (
@@ -80,11 +136,7 @@ export function HomeSpotlightPreviewSection({ items }: HomeSpotlightPreviewSecti
                   loading="lazy"
                 />
                 <span className="absolute top-2 left-2 bg-[#FF000D] text-white text-[8.5px] font-extrabold px-2 py-0.5 rounded pointer-events-none">
-                  {card.priorityTier === 'active_live'
-                    ? 'LIVE'
-                    : card.priorityTier === 'live_grace'
-                      ? 'REPLAY'
-                      : 'YOUTUBE'}
+                  {youtubeBadge(card)}
                 </span>
                 <ViralSaveButton size={11} className="absolute top-2 right-2 w-6 h-6" />
                 {card.duration && (

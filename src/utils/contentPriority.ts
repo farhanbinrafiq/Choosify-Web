@@ -205,6 +205,38 @@ export function spotlightContentToPriorityInput(
   };
 }
 
+/** True while stream is active OR within the 24h post-end grace window. */
+export function isLiveFeaturedSize(
+  input: ContentPriorityInput,
+  nowMs: number = Date.now(),
+): boolean {
+  const tier = classifyContentPriority(input, nowMs);
+  return tier === 'active_live' || tier === 'live_grace';
+}
+
+function isLiveTypedContent(input: ContentPriorityInput): boolean {
+  return (
+    input.contentType === 'live' ||
+    input.contentType === 'livestream_replay' ||
+    Boolean(input.live) ||
+    Boolean(input.isLive)
+  );
+}
+
+/**
+ * Livestream that has ended and is past the 24h grace window —
+ * render at regular YouTube size with a "Previously LIVE" badge.
+ */
+export function isPreviouslyLive(
+  input: ContentPriorityInput,
+  nowMs: number = Date.now(),
+): boolean {
+  if (!isLiveTypedContent(input)) return false;
+  if (isLiveFeaturedSize(input, nowMs)) return false;
+  const liveStatus = resolveLiveStatus(input, nowMs);
+  return liveStatus === 'ended' || liveStatus === 'replay' || input.contentType === 'livestream_replay';
+}
+
 export function prioritizeSpotlightContent(
   items: SpotlightContent[],
   nowMs: number = Date.now(),

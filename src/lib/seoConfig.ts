@@ -174,4 +174,4 @@ export const STATIC_PAGE_SEO: Record<string, SeoMeta> = {
     label: 'Deals',
   },
 };
-
+

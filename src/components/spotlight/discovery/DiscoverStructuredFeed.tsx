@@ -18,6 +18,7 @@ import {
 } from '../../content';
 import { useOpenPageFilters } from '../../FilterEngine';
 import { DiscoverLowerSections } from './DiscoverLowerSections';
+import { usePriorityClockMs } from '../../../hooks/usePriorityClockMs';
 
 export interface DiscoverQuickFilter {
   id: string;
@@ -96,6 +97,7 @@ function FeedCard({
   className,
   forceVariant,
   compactMedia,
+  nowMs,
 }: {
   content: SpotlightContent;
   products: CatalogProduct[];
@@ -103,9 +105,10 @@ function FeedCard({
   className?: string;
   forceVariant?: 'landscape-video' | 'portrait-reel' | 'live' | 'guide' | 'blog';
   compactMedia?: boolean;
+  nowMs?: number;
 }) {
   const product = primaryProductForContent(content, products);
-  const model = spotlightToContentCardModel(content, product);
+  const model = spotlightToContentCardModel(content, product, nowMs);
   const variant =
     forceVariant ?? resolveCommerceCardVariant(model.layoutVariant, model.aspectRatio);
 
@@ -136,6 +139,7 @@ export function DiscoverStructuredFeed({
 }: DiscoverStructuredFeedProps) {
   const navigate = useNavigate();
   const { canOpenFilters, openFilters } = useOpenPageFilters();
+  const nowMs = usePriorityClockMs();
 
   const filterById = useMemo(() => {
     const map = new Map(quickFilters.map((f) => [f.id, f]));
@@ -225,23 +229,11 @@ export function DiscoverStructuredFeed({
     [impressionCallbacks],
   );
 
-  const lanes = useMemo(() => partitionDiscoverFeedLanes(items), [items]);
+  const lanes = useMemo(() => partitionDiscoverFeedLanes(items, nowMs), [items, nowMs]);
   const youtube = lanes.youtube.slice(0, LANE_LIMITS.youtube);
   const reels = lanes.reels.slice(0, LANE_LIMITS.reels);
-  // Prefer currently-active / grace LIVE items that ranked to the front of `items`
-  const live = useMemo(() => {
-    const rankedLiveIds = new Set(
-      items
-        .filter((i) => i.isLive || i.contentType === 'live' || i.live?.status === 'live' || i.live?.status === 'ended' || i.live?.status === 'replay')
-        .map((i) => i.contentId),
-    );
-    const fromLane = lanes.live.filter((i) => rankedLiveIds.has(i.contentId));
-    const ordered = [
-      ...items.filter((i) => fromLane.some((l) => l.contentId === i.contentId)),
-      ...fromLane.filter((i) => !items.some((x) => x.contentId === i.contentId)),
-    ];
-    return ordered.slice(0, LANE_LIMITS.live);
-  }, [items, lanes.live]);
+  // Featured LIVE only (active + 24h grace) — already filtered by partition
+  const live = lanes.live.slice(0, LANE_LIMITS.live);
   const blogs = lanes.blogs.slice(0, LANE_LIMITS.blogs);
 
   const hasAnyLane =
@@ -342,6 +334,7 @@ export function DiscoverStructuredFeed({
                       products={products}
                       onNavigate={onNavigateCard}
                       forceVariant="live"
+                      nowMs={nowMs}
                     />
                   ))}
                 </div>
@@ -366,6 +359,7 @@ export function DiscoverStructuredFeed({
                       products={products}
                       onNavigate={onNavigateCard}
                       forceVariant="landscape-video"
+                      nowMs={nowMs}
                     />
                   ))}
                 </div>
@@ -391,6 +385,7 @@ export function DiscoverStructuredFeed({
                       onNavigate={onNavigateCard}
                       forceVariant="portrait-reel"
                       className="w-full"
+                      nowMs={nowMs}
                     />
                   ))}
                 </div>
@@ -427,6 +422,7 @@ export function DiscoverStructuredFeed({
                     onNavigate={onNavigateCard}
                     forceVariant="guide"
                     compactMedia
+                    nowMs={nowMs}
                     className="!bg-transparent !border-0 !rounded-none !overflow-visible"
                   />
                 </div>

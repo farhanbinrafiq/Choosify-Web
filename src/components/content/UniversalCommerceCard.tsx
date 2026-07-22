@@ -85,10 +85,12 @@ function CommerceCardMedia({
   const badgeText = isBlog
     ? (badgeLabel || readTime || 'GUIDE')
     : isLive
-      ? 'LIVE'
+      ? (badgeLabel || 'LIVE')
       : isReel
         ? `⏵ ${(badgeLabel || 'REELS').toUpperCase().replace(/^⏵\s*/, '')}`
-        : (badgeLabel || 'YOUTUBE').toUpperCase();
+        : /previously/i.test(badgeLabel || '')
+          ? badgeLabel || 'Previously LIVE'
+          : (badgeLabel || 'YOUTUBE').toUpperCase();
 
   return (
     <div

@@ -5,6 +5,7 @@ import { catalogGuideHref } from '../lib/spotlight/content';
 import { PLACEHOLDER_IMAGE } from '../constants';
 import {
   classifyContentPriority,
+  isPreviouslyLive,
   prioritizeContent,
   type ContentPriorityInput,
 } from './contentPriority';
@@ -24,6 +25,8 @@ export interface ViralTodayItem {
   kind: 'youtube' | 'reel' | 'live';
   /** Priority tier for UI badges (optional) */
   priorityTier?: 'active_live' | 'live_grace' | 'fresh' | 'standard';
+  /** Ended livestream past 24h grace — YouTube size + "Previously LIVE" badge */
+  previouslyLive?: boolean;
 }
 
 /** Guides may come from CMS/catalog with partial fields */
@@ -179,22 +182,38 @@ export function buildHomeViralTodayItems(
   const ranked = prioritizeContent(candidates, (c) => c.priority, nowMs).map((r) => ({
     ...r.item.item,
     priorityTier: r.tier,
+    previouslyLive: isPreviouslyLive(r.item.priority, nowMs),
   }));
 
-  // Keep lane limits: LIVE pins first (shown as youtube-size or dedicated), then youtube / reels
-  const live = ranked.filter((i) => i.kind === 'live' || i.priorityTier === 'active_live' || i.priorityTier === 'live_grace');
-  const youtube = ranked.filter((i) => i.kind === 'youtube' && !live.some((l) => l.id === i.id));
-  const reels = ranked.filter((i) => i.kind === 'reel' && !live.some((l) => l.id === i.id));
+  // Featured LIVE: active + 24h grace (large cards). Past-grace livestreams join YouTube lane.
+  const featuredLive = ranked.filter(
+    (i) => i.priorityTier === 'active_live' || i.priorityTier === 'live_grace',
+  );
+  const youtube = ranked.filter(
+    (i) =>
+      (i.kind === 'youtube' || i.previouslyLive || i.kind === 'live') &&
+      i.priorityTier !== 'active_live' &&
+      i.priorityTier !== 'live_grace',
+  );
+  const reels = ranked.filter(
+    (i) =>
+      i.kind === 'reel' &&
+      i.priorityTier !== 'active_live' &&
+      i.priorityTier !== 'live_grace',
+  );
 
   const items: ViralTodayItem[] = [];
 
-  // LIVE always wins — pin at the front of the youtube lane (up to 2) so it appears first
-  for (const item of live.slice(0, 2)) {
-    items.push({ ...item, kind: 'youtube' });
+  for (const item of featuredLive.slice(0, 2)) {
+    items.push({ ...item, kind: 'live', previouslyLive: false });
   }
 
-  for (const item of youtube.slice(0, Math.max(0, 4 - items.filter((i) => i.kind === 'youtube').length))) {
-    items.push(item);
+  for (const item of youtube.slice(0, 4)) {
+    items.push({
+      ...item,
+      kind: 'youtube',
+      previouslyLive: Boolean(item.previouslyLive || item.kind === 'live'),
+    });
   }
   for (const item of reels.slice(0, 6)) {
     items.push(item);
@@ -204,8 +223,13 @@ export function buildHomeViralTodayItems(
   if (items.filter((i) => i.kind === 'youtube').length < 2) {
     for (const item of ranked) {
       if (items.filter((i) => i.kind === 'youtube').length >= 4) break;
-      if (items.some((i) => i.id === item.id && i.kind === 'youtube')) continue;
-      items.push({ ...item, kind: 'youtube', duration: item.kind === 'reel' ? undefined : item.duration });
+      if (items.some((i) => i.id === item.id)) continue;
+      items.push({
+        ...item,
+        kind: 'youtube',
+        duration: item.kind === 'reel' ? undefined : item.duration,
+        previouslyLive: item.previouslyLive,
+      });
     }
   }
   if (items.filter((i) => i.kind === 'reel').length < 2) {

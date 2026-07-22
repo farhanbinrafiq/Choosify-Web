@@ -51,10 +51,11 @@ export function BrandWhereToBuySection({ brandName }: { brandName: string }) {
         WHERE TO BUY {brandName.toUpperCase()}
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-        <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-[18px]">
-          <div className="text-[11px] font-extrabold text-white bg-[#2323FF] mb-3 px-2.5 py-1.5 rounded-md">
+        <div className="bg-white border border-[#E8EDF2] rounded-[10px] overflow-hidden">
+          <div className="text-[11px] font-extrabold text-white bg-[#2323FF] px-2.5 py-1.5">
             AUTHORIZED STORES
           </div>
+          <div className="p-[18px] pt-3">
           {stores.map((row) => (
             <div
               key={row.name}
@@ -83,12 +84,14 @@ export function BrandWhereToBuySection({ brandName }: { brandName: string }) {
               </a>
             </div>
           ))}
+          </div>
         </div>
 
-        <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-[18px]">
-          <div className="text-[11px] font-extrabold text-white bg-[#2323FF] mb-3 px-2.5 py-1.5 rounded-md">
+        <div className="bg-white border border-[#E8EDF2] rounded-[10px] overflow-hidden">
+          <div className="text-[11px] font-extrabold text-white bg-[#2323FF] px-2.5 py-1.5">
             DISTRIBUTORS & RESELLERS
           </div>
+          <div className="p-[18px] pt-3">
           {distributors.map((row) => (
             <div
               key={row.name}
@@ -108,12 +111,14 @@ export function BrandWhereToBuySection({ brandName }: { brandName: string }) {
               </a>
             </div>
           ))}
+          </div>
         </div>
 
-        <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-[18px]">
-          <div className="text-[11px] font-extrabold text-white bg-[#2323FF] mb-3 px-2.5 py-1.5 rounded-md">
+        <div className="bg-white border border-[#E8EDF2] rounded-[10px] overflow-hidden">
+          <div className="text-[11px] font-extrabold text-white bg-[#2323FF] px-2.5 py-1.5">
             SERVICE CENTERS
           </div>
+          <div className="p-[18px] pt-3">
           {services.map((row) => (
             <div
               key={row.name}
@@ -128,6 +133,7 @@ export function BrandWhereToBuySection({ brandName }: { brandName: string }) {
               </span>
             </div>
           ))}
+          </div>
         </div>
       </div>
     </div>
