@@ -157,9 +157,9 @@ export function OrderTrackingPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
-      {/* Compact navy header — constrained to feed silhouette */}
-      <div className="w-full px-5 sm:px-10 pt-4">
-        <div className="max-w-[1100px] mx-auto choosify-dark-surface text-white px-5 sm:px-10 pt-6 pb-8 rounded-none overflow-hidden">
+      {/* Compact navy header — same max-width shell as content cards below */}
+      <div className="max-w-[1100px] mx-auto w-full px-5 sm:px-10 pt-4">
+        <div className="choosify-dark-surface text-white px-5 sm:px-10 pt-6 pb-8 rounded-none overflow-hidden">
           <div className="text-[12px] text-white/45 mb-4">
             <Link to="/" className="hover:text-white/80 transition-colors">
               Home
@@ -445,10 +445,10 @@ export function OrderTrackingPage() {
                         toast('Courier tracking link will open when available.', { icon: '🚚' });
                       }
                     }}
-                    className="w-full bg-[#1A1A2E] hover:bg-[#000435] text-white border-none py-2.5 rounded-lg text-[11.5px] font-bold cursor-pointer mt-3.5 flex items-center justify-center gap-1.5 transition-colors"
+                    className="w-full choosify-dark-surface hover:brightness-110 text-white border-none py-2.5 rounded-lg text-[11.5px] font-bold cursor-pointer mt-3.5 flex items-center justify-center gap-1.5 transition-[filter]"
                   >
                     TRACK ON COURIER SITE
-                    <ExternalLink size={12} />
+                    <ExternalLink size={12} className="text-white" />
                   </button>
                 </div>
 

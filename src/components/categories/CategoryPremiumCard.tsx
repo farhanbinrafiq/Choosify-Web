@@ -113,13 +113,13 @@ export function CategoryPremiumCard({
 
       <Link
         to={`/brands?q=${encodeURIComponent(featured)}`}
-        className="mt-auto bg-[#2323FF] text-white px-4 py-3 flex items-center gap-2.5 no-underline hover:brightness-110"
+        className="mt-auto choosify-dark-surface text-white px-4 py-3 flex items-center gap-2.5 no-underline hover:brightness-110"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-extrabold shrink-0">
           {featuredInitial}
         </div>
-        <div className="text-[11px] text-white/85 min-w-0">
+        <div className="text-[11px] text-white font-bold min-w-0">
           Featured Brand:{' '}
           <span className="text-white font-extrabold">{featured}</span>
         </div>
