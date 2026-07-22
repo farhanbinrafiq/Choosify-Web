@@ -2,9 +2,33 @@ import React, { useEffect, useState } from 'react';
 import { Store, ArrowUpRight, Loader2 } from 'lucide-react';
 import { operationsApi } from '../../services/operationsApi';
 
-const SELLER_DASHBOARD_ORIGIN =
-  ((import.meta as any).env?.VITE_SELLER_DASHBOARD_URL as string | undefined)?.replace(/\/$/, '') ||
-  'https://dashboard.choosify.bd';
+/** Local admin (`choosify-admin-4.0`) defaults to :3001 — see server.ts PORT. */
+const DEV_SELLER_DASHBOARD_ORIGIN = 'http://localhost:3001';
+const PROD_SELLER_DASHBOARD_ORIGIN = 'https://dashboard.choosify.bd';
+
+function resolveSellerDashboardOrigin(): string {
+  const fromEnv = ((import.meta as any).env?.VITE_SELLER_DASHBOARD_URL as string | undefined)?.replace(
+    /\/$/,
+    '',
+  );
+
+  // Local vite always targets the local admin app unless the env points at localhost.
+  // A production URL in .env.example would otherwise send Join Now to dashboard.choosify.bd
+  // (where /signup is not available until this change is deployed).
+  if (import.meta.env.DEV) {
+    if (fromEnv && /^(https?:\/\/)?(localhost|127\.0\.0\.1)(:\d+)?$/i.test(fromEnv.replace(/\/$/, ''))) {
+      return fromEnv;
+    }
+    if (fromEnv && /(localhost|127\.0\.0\.1)/i.test(fromEnv)) {
+      return fromEnv;
+    }
+    return DEV_SELLER_DASHBOARD_ORIGIN;
+  }
+
+  return fromEnv || PROD_SELLER_DASHBOARD_ORIGIN;
+}
+
+const SELLER_DASHBOARD_ORIGIN = resolveSellerDashboardOrigin();
 
 type SellerAccountSidebarCardProps = {
   email: string;
@@ -41,7 +65,8 @@ export function SellerAccountSidebarCard({ email, onNavigate }: SellerAccountSid
   }, [email]);
 
   const switchHref = `${SELLER_DASHBOARD_ORIGIN}/login?email=${encodeURIComponent(email)}&role=seller&next=${encodeURIComponent(dashboardPath)}`;
-  const joinHref = `${SELLER_DASHBOARD_ORIGIN}/login?email=${encodeURIComponent(email)}&intent=join&role=seller`;
+  // Non-sellers must create an account first — never send them to /login.
+  const joinHref = `${SELLER_DASHBOARD_ORIGIN}/signup?email=${encodeURIComponent(email)}`;
 
   if (status === 'loading') {
     return (
@@ -83,6 +108,7 @@ export function SellerAccountSidebarCard({ email, onNavigate }: SellerAccountSid
         target="_blank"
         rel="noopener noreferrer"
         onClick={onNavigate}
+        data-testid="seller-join-now"
         className="flex items-center justify-center w-full rounded-[8px] bg-orange-primary text-white text-[11px] font-black uppercase tracking-wider px-3 py-2.5 hover:opacity-90 transition-opacity"
       >
         Join Now
