@@ -116,4 +116,8 @@ export const operationsApi = {
     const result = await request<{ flags: Record<string, boolean> }>('/operations/feature-flags');
     return result.flags;
   },
+  getSellerStatus: async (
+    email: string,
+  ): Promise<{ hasSellerAccount: boolean; dashboardPath?: string }> =>
+    request(`/auth/seller-status?email=${encodeURIComponent(email)}`),
 };

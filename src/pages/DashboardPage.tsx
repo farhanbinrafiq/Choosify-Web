@@ -70,6 +70,7 @@ import { SellerWorkspaceSection } from './ReviewDetailPage';
 import { CustomerOrdersPage } from './CustomerOrdersPage';
 import { DealsVerticalSponsoredCard } from '../components/deals/DealsLowerSections';
 import { UniversalCarousel } from '../components/design/UniversalCarousel';
+import { SellerAccountSidebarCard } from '../components/dashboard/SellerAccountSidebarCard';
 
 /** Tabs with their own right column / dense forms — do not inject sponsored rail */
 const DASHBOARD_TABS_WITH_RIGHT_CONTENT = new Set([
@@ -2035,13 +2036,8 @@ export function DashboardPage() {
     </nav>
   );
 
-  const browseChoosifyLink = (
-    <Link
-      to="/"
-      className="flex items-center gap-2 border border-[#E8EDF2] rounded-[10px] px-3.5 py-2.5 text-[12px] font-semibold text-[#1A1A2E] hover:bg-[#F4F7F9] transition-colors bg-white"
-    >
-      Browse Choosify.bd
-    </Link>
+  const sellerAccountCard = (
+    <SellerAccountSidebarCard email={currentUser.email || ''} />
   );
 
   return (
@@ -2089,13 +2085,10 @@ export function DashboardPage() {
             </div>
             {renderSidebarNav(true)}
             <div className="p-4 mt-auto border-t border-[#E8EDF2]">
-              <Link
-                to="/"
-                onClick={() => setMobileNavOpen(false)}
-                className="flex items-center gap-2 border border-[#E8EDF2] rounded-[10px] px-3.5 py-2.5 text-[12px] font-semibold text-[#1A1A2E]"
-              >
-                Browse Choosify.bd
-              </Link>
+              <SellerAccountSidebarCard
+                email={currentUser.email || ''}
+                onNavigate={() => setMobileNavOpen(false)}
+              />
             </div>
           </div>
         </div>
@@ -2107,7 +2100,7 @@ export function DashboardPage() {
           <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-3 flex flex-col min-h-0">
           {renderSidebarNav()}
           <div className="mt-2 pt-2 border-t border-[#E8EDF2]">
-            {browseChoosifyLink}
+            {sellerAccountCard}
           </div>
           </div>
         </aside>

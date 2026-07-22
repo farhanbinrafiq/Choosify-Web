@@ -15,7 +15,7 @@ import { DrawerFilterProvider, FloatingFilterProvider } from './components/Filte
 import { StudioEditProvider } from './context/StudioEditContext';
 import { StudioEditPanel } from './components/studio/StudioEditPanel';
 import { ChoosifyToaster } from './components/ChoosifyToaster';
-import { AnimatePresence, motion } from 'motion/react';
+import { motion } from 'motion/react';
 import ErrorBoundary from './components/ErrorBoundary';
 import { LoadingFallback } from './components/LoadingFallback';
 
@@ -172,9 +172,13 @@ function AppContent() {
       {/* Navbar renders on the auth page too, so users can get back home via the logo */}
       <Navbar />
       <MaintenanceGate>
-      <AnimatePresence mode="wait">
         <Suspense fallback={<LoadingFallback />}>
-          <Routes location={location}>
+          {/*
+            Key Routes by pathname so React remounts the matched page on every nav.
+            Do NOT wrap Routes in AnimatePresence mode="wait" — that pattern stalls
+            route transitions when a keyed child never exits (esp. with lazy+Suspense).
+          */}
+          <Routes location={location} key={location.pathname}>
             <Route path="/" element={<PageWrapper><HomePage /></PageWrapper>} />
             <Route path="/products" element={<PageWrapper><AllProductsPage /></PageWrapper>} />
             <Route path="/products/:id" element={<PageWrapper><ProductDetailPage /></PageWrapper>} />
@@ -273,7 +277,6 @@ function AppContent() {
             <Route path="*" element={<PageWrapper><NotFoundPage /></PageWrapper>} />
           </Routes>
         </Suspense>
-      </AnimatePresence>
       </MaintenanceGate>
       {!isCompactShell && <FloatingOverlays />}
       {!isCompactShell && !isMessagesShell && <Footer />}
