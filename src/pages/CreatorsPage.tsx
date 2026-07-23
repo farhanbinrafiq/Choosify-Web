@@ -11,6 +11,7 @@ import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFil
 import { CreatorCardDesign } from '../components/CreatorCardDesign';
 import { ListingBrowseControls } from '../components/design/ListingBrowseControls';
 import { ListingFeedHeader } from '../components/design/ListingFeedHeader';
+import { ListingFilterPills } from '../components/design/ListingFilterPills';
 import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
 import { useInfiniteListBatch } from '../hooks/useInfiniteListBatch';
 import { ListingAdRail } from '../components/ListingAdRail';
@@ -337,13 +338,7 @@ export function CreatorsPage() {
     },
   }, [selectedLetter, searchQuery, activeTab, selectedCategory, verificationFilter, popularityFilter, sectionNavItems, activeSectionId, scrollToSection]);
 
-  const creatorsBrowseControls = (
-    <ListingBrowseControls
-      showSearch={false}
-      quickChips={['Tech', 'Fashion', 'Beauty', 'Food', 'Lifestyle', 'Gaming']}
-      onSearch={(q) => setSearchQuery(q)}
-      onChipClick={(q) => setSearchQuery(q)}
-      items={[
+  const creatorsBrowseItems = [
         {
           id: 'tech',
           icon: '💻',
@@ -398,7 +393,15 @@ export function CreatorsPage() {
           active: selectedCategory === 'Home & Living',
           onClick: () => setSelectedCategory(selectedCategory === 'Home & Living' ? null : 'Home & Living'),
         },
-      ]}
+      ];
+
+  const creatorsBrowseControls = (
+    <ListingBrowseControls
+      showSearch={false}
+      quickChips={['Tech', 'Fashion', 'Beauty', 'Food', 'Lifestyle', 'Gaming']}
+      onSearch={(q) => setSearchQuery(q)}
+      onChipClick={(q) => setSearchQuery(q)}
+      items={[]}
     />
   );
 
@@ -430,6 +433,7 @@ export function CreatorsPage() {
               setSearchQuery={setSearchQuery}
               searchPlaceholder="Search creators, niche, handle or bio..."
               browseControls={creatorsBrowseControls}
+              browseDockItems={creatorsBrowseItems}
               activeChips={
                 <ActiveFilterChips
                   chips={[
@@ -619,6 +623,32 @@ export function CreatorsPage() {
                 </button>
               ) : null
             }
+          />
+
+          <ListingFilterPills
+            pills={creatorsBrowseItems.map((item) => ({
+              id: item.id,
+              label: item.name,
+              active: Boolean(item.active),
+              onClick: () => item.onClick?.(),
+            }))}
+            hasActiveFilters={Boolean(
+              selectedLetter ||
+                searchQuery ||
+                activeTab !== 'All Creators' ||
+                selectedCategory ||
+                verificationFilter !== 'all' ||
+                popularityFilter !== 'all',
+            )}
+            onClearFilters={() => {
+              setSelectedLetter(null);
+              setSearchQuery('');
+              setActiveTab('All Creators');
+              setSelectedCategory(null);
+              setVerificationFilter('all');
+              setPopularityFilter('all');
+            }}
+            aiDiscoverPrompt="Help me find creators on Choosify"
           />
 
           {/* Active Filter Chips */}

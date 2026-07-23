@@ -1,5 +1,10 @@
 import React from 'react';
 import { cn } from '../../lib/utils';
+import {
+  MobileVerticalNavDock,
+  MobileDockStickySentinel,
+  inferSectionDockIcon,
+} from './MobileVerticalNavDock';
 
 export interface DcUnderlineTabItem {
   id: string;
@@ -31,41 +36,59 @@ export function DcUnderlineTabs({
 }: DcUnderlineTabsProps) {
   if (!tabs.length) return null;
 
+  const dockItems = tabs.map((tab) => ({
+    id: tab.id,
+    icon: tab.icon || inferSectionDockIcon(tab.id, tab.label),
+    label: tab.label,
+    active: tab.id === activeId || (activeId === 'all' && tab === tabs[0]),
+    onClick: () => onNavigate(tab.id),
+  }));
+
   return (
-    <div
-      className={cn(
-        'choosify-sticky-section-nav sticky z-40 w-full mb-4',
-        // Padding outside max-width made the tab bar wider than feed cards;
-        // keep gutters on the same box as max-width so edges match page content.
-        !flush && cn(maxWidthClass, 'mx-auto px-5 sm:px-8 lg:px-10'),
-        className,
-      )}
-    >
+    <>
+      <MobileDockStickySentinel />
+      <MobileVerticalNavDock
+        items={dockItems}
+        ariaLabel="Page sections"
+        preferenceKey="underline-tabs"
+      />
+
       <div
+        data-mobile-dock-trigger
         className={cn(
-          'w-full flex border border-[#E8EDF2] border-b-[#E8EDF2] rounded-none bg-white overflow-x-auto',
+          'choosify-sticky-section-nav sticky z-40 w-full mb-4 hidden sm:block',
+          // Padding outside max-width made the tab bar wider than feed cards;
+          // keep gutters on the same box as max-width so edges match page content.
+          !flush && cn(maxWidthClass, 'mx-auto px-5 sm:px-8 lg:px-10'),
+          className,
         )}
       >
-        {tabs.map((tab) => {
-          const active = tab.id === activeId || (activeId === 'all' && tab === tabs[0]);
-          return (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => onNavigate(tab.id)}
-              className={cn(
-                'shrink-0 px-4 sm:px-5 py-4 text-[12.5px] font-bold cursor-pointer whitespace-nowrap border-0 border-b-2 bg-transparent transition-colors',
-                active
-                  ? 'text-[#EB4501] border-[#EB4501]'
-                  : 'text-[#6B7280] border-transparent hover:text-[#1A1A2E]',
-              )}
-            >
-              {tab.icon ? `${tab.icon} ` : ''}
-              {tab.label}
-            </button>
-          );
-        })}
+        <div
+          className={cn(
+            'w-full flex border border-[#E8EDF2] border-b-[#E8EDF2] rounded-none bg-white overflow-x-auto',
+          )}
+        >
+          {tabs.map((tab) => {
+            const active = tab.id === activeId || (activeId === 'all' && tab === tabs[0]);
+            return (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => onNavigate(tab.id)}
+                className={cn(
+                  'shrink-0 px-4 sm:px-5 py-4 text-[12.5px] font-bold cursor-pointer whitespace-nowrap border-0 border-b-2 bg-transparent transition-colors',
+                  active
+                    ? 'text-[#EB4501] border-[#EB4501]'
+                    : 'text-[#6B7280] border-transparent hover:text-[#1A1A2E]',
+                )}
+              >
+                {tab.icon ? `${tab.icon} ` : ''}
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
       </div>
-    </div>
+    </>
   );
 }

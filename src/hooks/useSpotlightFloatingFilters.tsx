@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { useRegisterPageFilters } from '../components/FilterEngine';
-import { DiscoverBrowseControls } from '../components/spotlight/discovery/DiscoverStickyFormatNav';
+import { DiscoverBrowseControls, DISCOVER_FORMAT_TABS } from '../components/spotlight/discovery/DiscoverStickyFormatNav';
+import type { DcStickyFilterItem } from '../components/design/DcListingStickyFilters';
 import type { SpotlightDiscoverFilters } from '../types/spotlight/experience/filters';
 import { contentTypesForTab } from '../lib/spotlight/content/contentTypeRegistry';
 import type { SpotlightContentTabId } from '../types/spotlight/discovery/navigation';
@@ -227,12 +228,47 @@ export function useSpotlightFloatingFilters({
   // eslint-disable-next-line react-hooks/exhaustive-deps -- navigate stable
   }, [filters, activeTab, replayOnly, upcomingOnly]);
 
+  const browseDockItems = useMemo((): DcStickyFilterItem[] => {
+    const filterById = new Map(quickFilters.map((f) => [f.id, f]));
+    let activeFormatId = 'all';
+    for (const tab of DISCOVER_FORMAT_TABS) {
+      if (tab.id === 'all') continue;
+      if (filterById.get(tab.filterId)?.active) {
+        activeFormatId = tab.id;
+        break;
+      }
+    }
+    if (activeFormatId === 'all') {
+      if (!(activeTab === 'featured' && !filters.contentTypes.length)) {
+        activeFormatId = DISCOVER_FORMAT_TABS.find((t) => t.id === activeTab)?.id ?? 'all';
+      }
+    }
+
+    return DISCOVER_FORMAT_TABS.map((tab) => {
+      const active = tab.id === activeFormatId;
+      return {
+        id: tab.id,
+        icon: tab.icon,
+        name: tab.label,
+        sub: tab.sub,
+        bg: active ? '#FFF3EA' : tab.bg,
+        active,
+        onClick: () => {
+          const qf = filterById.get(tab.filterId);
+          if (qf) qf.onClick();
+          else navigate(`/spotlight?tab=${tab.filterId === 'all' ? 'featured' : tab.filterId}`);
+        },
+      };
+    });
+  }, [quickFilters, activeTab, filters.contentTypes.length, navigate]);
+
   useRegisterPageFilters(
     {
       pageName: 'Spotlight',
       scrollTargetId: 'spotlight-feed',
       activeFilterCount,
       onClearAll: clearFilters,
+      browseDockItems,
       renderSearch: () => (
         <div className="relative">
           <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -325,7 +361,7 @@ export function useSpotlightFloatingFilters({
       ),
       quickFilters,
     },
-    [filters, activeTab, activeFilterCount, replayOnly, upcomingOnly, quickFilters],
+    [filters, activeTab, activeFilterCount, replayOnly, upcomingOnly, quickFilters, browseDockItems],
   );
 
   return { quickFilters, activeFilterCount };

@@ -9,6 +9,7 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, CategorySmartFilters, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { ListingBrowseControls } from '../components/design/ListingBrowseControls';
 import { ListingFeedHeader } from '../components/design/ListingFeedHeader';
+import { ListingFilterPills } from '../components/design/ListingFilterPills';
 import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
 import { PaginationBar } from '../components/PaginationBar';
 import {PRODUCT_CARD_GRID, PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
@@ -585,13 +586,7 @@ export function AllProductsPage() {
     return entry.sponsored;
   }, [productFeed]);
 
-  const productsBrowseControls = (
-    <ListingBrowseControls
-      showSearch={false}
-      quickChips={['Smartphones', 'Laptops', 'AC', 'TV', 'Fashion', 'Beauty']}
-      onSearch={(q) => executeSearch(q)}
-      onChipClick={(q) => executeSearch(q)}
-      items={[
+  const productsBrowseItems = [
         {
           id: 'verified',
           icon: '🛡',
@@ -637,7 +632,15 @@ export function AllProductsPage() {
           active: activeTab === 'Bestsellers',
           onClick: () => setActiveTab(activeTab === 'Bestsellers' ? 'All Products' : 'Bestsellers'),
         },
-      ]}
+      ];
+
+  const productsBrowseControls = (
+    <ListingBrowseControls
+      showSearch={false}
+      quickChips={['Smartphones', 'Laptops', 'AC', 'TV', 'Fashion', 'Beauty']}
+      onSearch={(q) => executeSearch(q)}
+      onChipClick={(q) => executeSearch(q)}
+      items={[]}
     />
   );
 
@@ -672,6 +675,7 @@ export function AllProductsPage() {
               onSearchSubmit={executeSearch}
               searchPlaceholder="Search products, brands or details..."
               browseControls={productsBrowseControls}
+              browseDockItems={productsBrowseItems}
               quickFilters={
                 <QuickFilterBar
                   title="Products Quick Specs"
@@ -896,6 +900,33 @@ export function AllProductsPage() {
             }
             count={filteredProducts.length}
             itemLabel="products"
+          />
+
+          <ListingFilterPills
+            className="mb-6"
+            pills={productsBrowseItems.map((item) => ({
+              id: item.id,
+              label: item.name,
+              active: Boolean(item.active),
+              onClick: () => item.onClick?.(),
+            }))}
+            hasActiveFilters={Boolean(
+              selectedCategory ||
+                selectedBrand ||
+                sidebarSearch ||
+                activeTab !== 'All Products' ||
+                availabilityFilter !== 'all' ||
+                ratingFilter != null,
+            )}
+            onClearFilters={() => {
+              setSelectedCategory(null);
+              setSelectedBrand(null);
+              setSidebarSearch('');
+              setActiveTab('All Products');
+              setAvailabilityFilter('all');
+              setRatingFilter(null);
+            }}
+            aiDiscoverPrompt="Help me browse products on Choosify"
           />
 
           {/* Top Bar / Sorting */}

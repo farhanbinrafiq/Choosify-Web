@@ -16,9 +16,10 @@ import {
   spotlightToContentCardModel,
   resolveCommerceCardVariant,
 } from '../../content';
-import { useOpenPageFilters } from '../../FilterEngine';
 import { DiscoverLowerSections } from './DiscoverLowerSections';
 import { usePriorityClockMs } from '../../../hooks/usePriorityClockMs';
+import { ListingFilterPills, type ListingFilterPillItem } from '../../design/ListingFilterPills';
+import { DISCOVER_FORMAT_TABS } from './DiscoverStickyFormatNav';
 
 export interface DiscoverQuickFilter {
   id: string;
@@ -48,19 +49,6 @@ const LANE_LIMITS = {
   live: 2,
   blogs: 4,
 } as const;
-
-const DISCOVER_SORT_PILLS = [
-  { id: 'filters', label: 'Filters' },
-  { id: 'newest', label: 'Newest' },
-  { id: 'trending', label: 'Trending' },
-  { id: 'most_viewed', label: 'Most Viewed' },
-  { id: 'most_helpful', label: 'Most Helpful' },
-  { id: 'expert', label: 'Expert Picks' },
-  { id: 'official', label: 'Official' },
-  { id: 'verified', label: 'Verified' },
-] as const;
-
-type DiscoverSortPillId = (typeof DISCOVER_SORT_PILLS)[number]['id'];
 
 function LaneHeader({
   icon,
@@ -138,7 +126,6 @@ export function DiscoverStructuredFeed({
   className,
 }: DiscoverStructuredFeedProps) {
   const navigate = useNavigate();
-  const { canOpenFilters, openFilters } = useOpenPageFilters();
   const nowMs = usePriorityClockMs();
 
   const filterById = useMemo(() => {
@@ -158,64 +145,24 @@ export function DiscoverStructuredFeed({
     [filterById, navigate],
   );
 
-  const activeSortPill = useMemo((): DiscoverSortPillId => {
-    if (filters.trendingOnly) return 'trending';
-    if (filters.verifiedOnly) return 'verified';
-    if (filters.publisherTypes.includes('brand')) return 'official';
-    if (activeTab === 'recommendations') return 'expert';
-    return 'newest';
-  }, [filters.trendingOnly, filters.verifiedOnly, filters.publisherTypes, activeTab]);
+  const activeFormatId = useMemo(() => {
+    for (const tab of DISCOVER_FORMAT_TABS) {
+      if (tab.id === 'all') continue;
+      if (filterById.get(tab.filterId)?.active) return tab.id;
+    }
+    if (activeTab === 'featured' && !filters.contentTypes.length) return 'all';
+    return DISCOVER_FORMAT_TABS.find((t) => t.id === activeTab)?.id ?? 'all';
+  }, [filterById, activeTab, filters.contentTypes.length]);
 
-  const onSortPill = useCallback(
-    (id: DiscoverSortPillId) => {
-      switch (id) {
-        case 'filters':
-          if (canOpenFilters) openFilters();
-          break;
-        case 'newest':
-          setFilters({
-            ...filters,
-            trendingOnly: false,
-            verifiedOnly: false,
-            publisherTypes: [],
-          });
-          navigate('/spotlight?tab=featured');
-          break;
-        case 'trending':
-        case 'most_viewed':
-        case 'most_helpful': {
-          const trending = filterById.get('trending');
-          if (trending) trending.onClick();
-          else setFilters({ ...filters, trendingOnly: !filters.trendingOnly });
-          break;
-        }
-        case 'expert':
-          navigate('/spotlight?tab=recommendations');
-          break;
-        case 'official': {
-          const brands = filterById.get('brands');
-          if (brands) brands.onClick();
-          else {
-            setFilters({
-              ...filters,
-              publisherTypes: filters.publisherTypes.includes('brand') ? [] : ['brand'],
-            });
-          }
-          break;
-        }
-        case 'verified':
-          setFilters({ ...filters, verifiedOnly: !filters.verifiedOnly });
-          break;
-        default:
-          break;
-      }
-    },
-    [canOpenFilters, openFilters, setFilters, filters, navigate, filterById],
-  );
-
-  const onAiDiscover = useCallback(() => {
-    navigate('/spotlight/search');
-  }, [navigate]);
+  const headerPills = useMemo((): ListingFilterPillItem[] => {
+    return DISCOVER_FORMAT_TABS.map((tab) => ({
+      id: `browse-${tab.id}`,
+      label: tab.label,
+      active: tab.id === activeFormatId,
+      variant: tab.id === 'live' ? 'live' : 'default',
+      onClick: () => triggerFilter(tab.filterId),
+    }));
+  }, [activeFormatId, triggerFilter]);
 
   const onNavigateCard = useCallback(
     (content: SpotlightContent) => {
@@ -241,61 +188,12 @@ export function DiscoverStructuredFeed({
 
   return (
     <div className={cn('w-full', className)}>
-      {/* Filter pills + AI Discover */}
-      <div className="flex justify-between items-center py-4 pb-6 flex-wrap gap-2.5">
-        <div className="flex gap-2.5 flex-wrap">
-          {hasActiveLive && (
-            <button
-              type="button"
-              onClick={() => triggerFilter('live')}
-              className={cn(
-                'px-3.5 py-2 rounded-[18px] text-[11.5px] font-bold cursor-pointer border transition-colors min-h-[36px]',
-                'bg-[#FF000D] text-white border-[#FF000D] hover:brightness-110',
-                activeTab === 'live' && 'ring-2 ring-offset-1 ring-[#FF000D]/40',
-              )}
-              aria-label="Filter to LIVE streams"
-            >
-              LIVE
-            </button>
-          )}
-          {DISCOVER_SORT_PILLS.map((pill) => {
-            const active = pill.id === 'filters' ? false : activeSortPill === pill.id;
-            return (
-              <button
-                key={pill.id}
-                type="button"
-                onClick={() => onSortPill(pill.id)}
-                className={cn(
-                  'px-3.5 py-2 rounded-[18px] text-[11.5px] font-bold cursor-pointer border transition-colors min-h-[36px]',
-                  active
-                    ? 'bg-[#EB4501] text-white border-[#EB4501]'
-                    : 'bg-white text-[#1A1A2E] border-[#E5E7EB] hover:border-[#EB4501]/40',
-                )}
-              >
-                {pill.label}
-              </button>
-            );
-          })}
-        </div>
-        <div className="flex items-center gap-2.5 shrink-0">
-          {hasActiveFilters && onClearFilters ? (
-            <button
-              type="button"
-              onClick={onClearFilters}
-              className="bg-white text-[#EB4501] text-[11.5px] font-bold px-4 py-2 rounded-[20px] cursor-pointer border border-[#EB4501]/40 min-h-[36px] hover:bg-[#EB4501]/5 transition-colors"
-            >
-              Clear Filters
-            </button>
-          ) : null}
-          <button
-            type="button"
-            onClick={onAiDiscover}
-            className="choosify-emi-gradient text-white text-[11.5px] font-bold px-4 py-2 rounded-[20px] cursor-pointer border-0 min-h-[36px] hover:brightness-110 transition-all"
-          >
-            ✦ AI Discover
-          </button>
-        </div>
-      </div>
+      <ListingFilterPills
+        pills={headerPills}
+        hasActiveFilters={hasActiveFilters}
+        onClearFilters={onClearFilters}
+        aiDiscoverPrompt="Help me discover products, guides, and deals on Choosify"
+      />
 
       {items.length === 0 || !hasAnyLane ? (
         <div className="text-center py-16 border border-dashed border-[#e8edf2] rounded-lg bg-white">

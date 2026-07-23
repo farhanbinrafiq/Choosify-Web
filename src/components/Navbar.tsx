@@ -220,11 +220,11 @@ export function Navbar() {
         className="w-full min-w-0 z-50 sticky top-0 shadow-2xl border-b border-white/[0.07]"
         id="main-navbar"
       >
-        <nav className="choosify-chrome-header text-white h-14 sm:h-16 flex items-center px-3 sm:px-4 lg:px-6 xl:px-8 relative z-[40]">
+        <nav className="choosify-chrome-header text-white h-16 sm:h-[4.5rem] flex items-center px-3 sm:px-4 lg:px-6 xl:px-8 relative z-[40]">
           <Link to="/" className="flex items-center group" aria-label="Choosify Home">
             <ChoosifyWordmarkLogo
               fluid
-              className="h-[26px] sm:h-7 w-auto max-w-[min(168px,42vw)] group-hover:opacity-95 transition-opacity"
+              className="h-9 sm:h-[3.25rem] w-auto max-w-[min(148px,38vw)] sm:max-w-[min(300px,64vw)] group-hover:opacity-95 transition-opacity"
             />
           </Link>
         </nav>
@@ -241,7 +241,7 @@ export function Navbar() {
       )}
       <header className="w-full min-w-0 z-50 sticky top-0 shadow-2xl border-b border-white/[0.07]" id="main-navbar">
         {/* Row 1 — Logo, prominent search, account actions (Choosify 3.0) */}
-        <nav className="choosify-chrome-header text-white h-14 sm:h-16 flex items-center gap-2 sm:gap-3 px-3 sm:px-4 lg:px-6 xl:px-8 border-b border-white/5 lg:border-b-0 relative z-[40]">
+        <nav className="choosify-chrome-header text-white h-16 sm:h-[4.5rem] flex items-center gap-2 sm:gap-3 px-3 sm:px-4 lg:px-6 xl:px-8 border-b border-white/5 lg:border-b-0 relative z-[40]">
         
         {/* Mobile hamburger — left side */}
         <button
@@ -253,19 +253,19 @@ export function Navbar() {
           <Menu size={20} className={cn("transition-transform duration-300", isMobileMenuOpen && "rotate-90")} />
         </button>
 
-        {/* LOGO — official Choosify wordmark */}
-        <div className="flex items-center shrink-0">
-          <Link to="/" className="flex items-center group" aria-label="Choosify Home">
+        {/* LOGO — official Choosify wordmark (shrinks on narrow mobile so it never covers search) */}
+        <div className="flex items-center min-w-0 shrink max-w-[min(132px,34vw)] sm:max-w-[min(300px,64vw)] sm:shrink-0">
+          <Link to="/" className="flex min-w-0 items-center group" aria-label="Choosify Home">
             <ChoosifyWordmarkLogo
               fluid
-              className="h-[26px] sm:h-7 w-auto max-w-[min(168px,42vw)] group-hover:opacity-95 transition-opacity"
+              className="h-9 sm:h-[3.25rem] w-auto max-w-full group-hover:opacity-95 transition-opacity"
             />
           </Link>
         </div>
 
         {/* Search + mobile cart */}
         <div className="flex-1 min-w-0 flex items-center justify-end sm:justify-stretch px-1 sm:px-3 md:px-4 lg:px-5">
-          <div className="flex items-center gap-1.5 sm:flex-1 sm:min-w-0 sm:gap-0">
+          <div className="flex items-center gap-1.5 sm:flex-1 sm:min-w-0 sm:gap-0 shrink-0">
             <GlobalSearchBar
               initialValue={searchQuery}
               placeholder="Search Products, Brands, Reviews..."
@@ -276,7 +276,7 @@ export function Navbar() {
               variant="hero"
               layout="navbar-fluid"
               enableSuggestions
-              className="min-w-0 sm:w-full choosify-navbar-hero-search relative z-[55]"
+              className="w-auto sm:w-full min-w-0 choosify-navbar-hero-search relative z-[55]"
               submitLabel="DISCOVER"
               onMobileExpandedChange={(expanded) => {
                 if (expanded) closeAllMobileOverlays();

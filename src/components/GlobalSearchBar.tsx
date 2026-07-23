@@ -494,7 +494,14 @@ export function GlobalSearchBar({
   );
 
   return (
-    <div ref={containerRef} className={cn('relative w-full min-w-0', className)}>
+    <div
+      ref={containerRef}
+      className={cn(
+        'relative min-w-0',
+        isNavbarFluid ? 'w-auto sm:w-full' : 'w-full',
+        className,
+      )}
+    >
       {isNavbarFluid && (
         <button
           type="button"

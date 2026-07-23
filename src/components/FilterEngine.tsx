@@ -6,6 +6,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { getFloatingPanelClassName } from './FloatingPanelShell';
 import { AlphabetFilterStrip } from './AlphabetFilterStrip';
 import type { SectionNavItem } from '../hooks/useSectionScrollSpy';
+import type { DcStickyFilterItem } from './design/DcListingStickyFilters';
+import { MobileVerticalNavDock } from './design/MobileVerticalNavDock';
 
 // ==========================================
 // LAYER 1: FILTER ENGINE (GLOBAL DEFINITIONS)
@@ -50,6 +52,19 @@ export function scrollToFilterResultsTarget(targetId?: string | null, offset = 2
   const top = el.getBoundingClientRect().top + window.pageYOffset - offset;
   // Instant jump — smooth page scroll after the drawer made close feel unfinished/laggy
   window.scrollTo({ top: Math.max(0, top), behavior: 'auto' });
+}
+
+/** Keep page scroll locked while opening/closing the floating filter card. */
+export function preserveWindowScroll(run: () => void) {
+  const x = window.scrollX;
+  const y = window.scrollY;
+  run();
+  const restore = () => window.scrollTo(x, y);
+  restore();
+  requestAnimationFrame(() => {
+    restore();
+    requestAnimationFrame(restore);
+  });
 }
 
 /** Open/close tweens — short, ease-out close so floating panels don't feel sticky or laggy. */
@@ -949,6 +964,8 @@ interface FullSidebarFilterPanelProps {
   onSearchSubmit?: (q: string) => void;
   searchPlaceholder?: string;
   browseControls?: React.ReactNode;
+  /** Browse presets shown as mobile vertical dock (icons expand on press). */
+  browseDockItems?: DcStickyFilterItem[];
   quickFilters?: React.ReactNode;
   activeChips?: React.ReactNode;
   sorting?: React.ReactNode;
@@ -964,6 +981,7 @@ export function FullSidebarFilterPanel({
   onSearchSubmit,
   searchPlaceholder,
   browseControls,
+  browseDockItems,
   quickFilters,
   activeChips,
   sorting
@@ -980,6 +998,7 @@ export function FullSidebarFilterPanel({
       onSearchSubmit,
       searchPlaceholder,
       browseControls,
+      browseDockItems,
       quickFilters,
       activeChips,
       sorting,
@@ -1028,6 +1047,7 @@ export function FullSidebarFilterPanel({
     onSearchSubmit,
     searchPlaceholder,
     browseControls,
+    browseDockItems,
     quickFilters,
     activeChips,
     sorting
@@ -1091,6 +1111,11 @@ export interface FloatingFilterData {
   searchPlaceholder?: string;
   /** Former sticky-bar browse chrome (keyword chips + icon/nav presets). */
   browseControls?: React.ReactNode;
+  /** Browse presets for the mobile vertical dock. */
+  browseDockItems?: DcStickyFilterItem[];
+  /** Clear all page filters — shown on the mobile left dock when active. */
+  onClearFilters?: () => void;
+  hasActiveFilters?: boolean;
   sectionNav?: {
     items: SectionNavItem[];
     activeId: string;
@@ -1115,9 +1140,6 @@ interface DrawerFilterContextType {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
   closeDrawer: (options?: { scrollToResults?: boolean }) => void;
-  /** StickySectionNav already exposes Filter — hide duplicate left floating launchers */
-  stickyFilterChromeCount: number;
-  registerStickyFilterChrome: () => () => void;
 }
 
 const DrawerFilterContext = createContext<DrawerFilterContextType | undefined>(undefined);
@@ -1129,15 +1151,9 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
   const [isOpen, setIsOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [isTablet, setIsTablet] = useState(false);
-  const [stickyFilterChromeCount, setStickyFilterChromeCount] = useState(0);
   const filterDrawerRef = useRef<HTMLDivElement>(null);
   const filterContainerRef = useRef<HTMLDivElement>(null);
   const pendingScrollTargetRef = useRef<string | null>(null);
-
-  const registerStickyFilterChrome = useCallback(() => {
-    setStickyFilterChromeCount((n) => n + 1);
-    return () => setStickyFilterChromeCount((n) => Math.max(0, n - 1));
-  }, []);
 
   useEffect(() => {
     const mobileMedia = window.matchMedia('(max-width: 640px)');
@@ -1197,10 +1213,32 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
     setIsOpen(false);
   }, [location.pathname]);
 
+  // Opening the filter card must not jump the page (focus/layout can steal scroll).
+  useEffect(() => {
+    if (!isOpen) return;
+    const x = window.scrollX;
+    const y = window.scrollY;
+    const restore = () => window.scrollTo(x, y);
+    restore();
+    const raf = requestAnimationFrame(restore);
+    const t = window.setTimeout(restore, 80);
+    return () => {
+      cancelAnimationFrame(raf);
+      window.clearTimeout(t);
+    };
+  }, [isOpen]);
+
   useEffect(() => {
     const handleOutsideClick = (event: MouseEvent) => {
       if (!isOpen) return;
       const target = event.target as Node;
+      // Let the FAB toggle close itself — ignore mousedown on floating launchers.
+      if (
+        target instanceof Element &&
+        target.closest('[data-floating-fab], #floating-filters-launcher')
+      ) {
+        return;
+      }
       if (filterDrawerRef.current?.contains(target)) return;
       if (!isMobile && filterContainerRef.current?.contains(target)) return;
       closeDrawer();
@@ -1218,11 +1256,25 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
         isOpen,
         setIsOpen,
         closeDrawer,
-        stickyFilterChromeCount,
-        registerStickyFilterChrome,
       }}
     >
       {children}
+
+      {activeFiltersData?.browseDockItems && activeFiltersData.browseDockItems.length > 0 && (
+        <MobileVerticalNavDock
+          items={activeFiltersData.browseDockItems.map((item) => ({
+            id: item.id,
+            icon: item.icon,
+            label: item.name,
+            sub: item.sub,
+            bg: item.bg,
+            active: item.active,
+            onClick: () => item.onClick?.(),
+          }))}
+          ariaLabel="Browse"
+          preferenceKey={activePageId || 'browse'}
+        />
+      )}
 
       {activeFiltersData && (
         <>
@@ -1243,10 +1295,10 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
         <div
           ref={filterContainerRef}
           className={cn(
-            'fixed z-[219] flex flex-col-reverse items-start gap-3',
+            'fixed pointer-events-none',
             isMobile
-              ? 'inset-x-0 bottom-0 pointer-events-none'
-              : 'bottom-6 left-6 lg:bottom-8 lg:left-8',
+              ? cn('inset-x-0 bottom-0', isOpen ? 'z-[230]' : 'z-[219]')
+              : 'bottom-6 left-6 lg:bottom-8 lg:left-8 w-14 h-14 z-[219]',
           )}
         >
           <AnimatePresence onExitComplete={handleFilterDrawerExitComplete}>
@@ -1259,6 +1311,10 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                 style={{
                   willChange: 'transform, opacity',
                   transformOrigin: isTablet ? 'bottom center' : 'bottom left',
+                  // Desktop/tablet: sit above the fixed FAB — never reflow the button
+                  ...(!isMobile && !isTablet
+                    ? { bottom: 'calc(3.5rem + 0.75rem)', left: 0, position: 'absolute' as const }
+                    : undefined),
                 }}
                 drag={isMobile ? 'y' : false}
                 dragConstraints={isMobile ? { top: 0, bottom: 280 } : undefined}
@@ -1275,8 +1331,11 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                     isMobile,
                     isTablet,
                     textClass: 'text-[#1A1A2E]',
+                    // Keep panel fixed/absolute so opening it cannot move the FAB
+                    relativeDesktop: false,
                   }),
                   'transform-gpu backface-hidden',
+                  !isMobile && !isTablet && '!absolute',
                 )}
               >
                 {isMobile && (
@@ -1340,7 +1399,17 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                   )}
 
                   {activeFiltersData.browseControls && (
-                    <div className="flex flex-col gap-2">{activeFiltersData.browseControls}</div>
+                    <div
+                      className={cn(
+                        'flex flex-col gap-2',
+                        // Browse presets move to the mobile vertical dock
+                        activeFiltersData.browseDockItems?.length
+                          ? 'max-sm:[&_[data-browse-presets]]:hidden'
+                          : undefined,
+                      )}
+                    >
+                      {activeFiltersData.browseControls}
+                    </div>
                   )}
 
                   {activeFiltersData.alphabetFilter && (
@@ -1444,20 +1513,22 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
             )}
           </AnimatePresence>
 
-          {/* Always mounted on desktop — floats like the cart FAB even when a
-              sticky section nav also exposes a Filter shortcut */}
+          {/* Desktop floating filter FAB — pills open the same drawer */}
           {!isMobile && (
           <motion.button
             id="floating-filters-launcher"
             type="button"
-            onClick={() => setIsOpen(!isOpen)}
+            data-floating-fab="filters"
+            onClick={() => {
+              preserveWindowScroll(() => setIsOpen(!isOpen));
+            }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className={cn(
-              'relative w-14 h-14 rounded-full bg-white border border-[#e8edf2] shadow-[0_8px_24px_rgba(0,0,0,0.18)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.22)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none pointer-events-auto',
+              'absolute bottom-0 left-0 z-[1] w-14 h-14 rounded-full bg-white border border-[#e8edf2] shadow-[0_8px_24px_rgba(0,0,0,0.18)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.22)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none pointer-events-auto',
               isOpen && 'ring-2 ring-[#EB4501]/30',
             )}
-            aria-label="Open filters"
+            aria-label={isOpen ? 'Close filters' : 'Open filters'}
             title="Filters"
           >
             <SlidersHorizontal
@@ -1498,24 +1569,28 @@ export function useOpenPageFilters() {
   const activeFilterCount = config.activeFilterCount ?? 0;
 
   const openFilters = useCallback(() => {
-    if (hasDrawerFilters) {
-      setIsOpen(true);
-      return;
-    }
-    if (hasLegacyFilters) {
-      window.dispatchEvent(new CustomEvent('choosify:open-filters'));
-    }
+    preserveWindowScroll(() => {
+      if (hasDrawerFilters) {
+        setIsOpen(true);
+        return;
+      }
+      if (hasLegacyFilters) {
+        window.dispatchEvent(new CustomEvent('choosify:open-filters'));
+      }
+    });
   }, [hasDrawerFilters, hasLegacyFilters, setIsOpen]);
 
   /** Same control as the floating filter FAB — toggles the shared popup. */
   const toggleFilters = useCallback(() => {
-    if (hasDrawerFilters) {
-      setIsOpen(!drawerOpen);
-      return;
-    }
-    if (hasLegacyFilters) {
-      window.dispatchEvent(new CustomEvent('choosify:open-filters'));
-    }
+    preserveWindowScroll(() => {
+      if (hasDrawerFilters) {
+        setIsOpen(!drawerOpen);
+        return;
+      }
+      if (hasLegacyFilters) {
+        window.dispatchEvent(new CustomEvent('choosify:toggle-filters'));
+      }
+    });
   }, [drawerOpen, hasDrawerFilters, hasLegacyFilters, setIsOpen]);
 
   return {
@@ -1575,6 +1650,8 @@ export interface FloatingFilterConfig {
   renderSearch: (() => React.ReactNode) | null;
   /** Former sticky-bar browse chrome (keyword chips + icon/nav presets). */
   renderBrowseControls?: (() => React.ReactNode) | null;
+  /** Browse presets for the mobile vertical dock. */
+  browseDockItems?: DcStickyFilterItem[] | null;
   sectionNav?: {
     items: SectionNavItem[];
     activeId: string;
@@ -1601,6 +1678,7 @@ const defaultConfig: FloatingFilterConfig = {
   renderFilters: null,
   renderSearch: null,
   renderBrowseControls: null,
+  browseDockItems: null,
   activeFilterCount: 0,
   quickFilters: [],
   pageName: '',

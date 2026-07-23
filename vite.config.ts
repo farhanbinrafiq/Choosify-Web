@@ -20,6 +20,8 @@ export default defineConfig(({ mode }) => {
           'favicon-32x32.png',
           'apple-touch-icon.png',
           'masked-icon.svg',
+          'brand/choosify-logo-icon.svg',
+          'brand/choosify-logo-icon-app.png',
           'og/og-image-v2.png',
           'og/default.png',
         ],

@@ -21,11 +21,22 @@ import { cn } from '../../lib/utils';
 
 const BRAND_LOGOS: Record<string, string> = {};
 
-/** Initial visible rows; each Browse More click reveals this many more. */
-const INITIAL_VISIBLE_ROWS = 2;
-const BROWSE_MORE_STEP = 3;
-
 type StoryRowKind = 'live' | 'youtube' | 'reels' | 'blogs';
+
+/**
+ * Progressive reveal by visual grid rows (not type-section count).
+ * First paint: 2 visual rows → Browse More adds 3 more until the feed ends.
+ */
+const INITIAL_VISUAL_ROWS = 2;
+const BROWSE_MORE_VISUAL_ROWS = 3;
+
+/** Cards that fill one visual row for each type’s grid. */
+const CARDS_PER_VISUAL_ROW: Record<StoryRowKind, number> = {
+  live: 2, // sm:grid-cols-2
+  youtube: 4, // xl:grid-cols-4
+  reels: 5, // xl:grid-cols-5
+  blogs: 3, // lg:grid-cols-3
+};
 
 type StoryRow = {
   kind: StoryRowKind;
@@ -62,6 +73,46 @@ function isPinnedOrFeatured(content: SpotlightContent): boolean {
   return Boolean(content.badges?.some((b) => /pin|feature|sponsor/i.test(b)));
 }
 
+/** How many visual rows the given card counts occupy for a type. */
+function visualRowsForCardCount(kind: StoryRowKind, cardCount: number): number {
+  if (cardCount <= 0) return 0;
+  return Math.ceil(cardCount / CARDS_PER_VISUAL_ROW[kind]);
+}
+
+/**
+ * Walk type rows in order and take enough cards to fill `visualRowBudget` grid rows.
+ * Returns per-kind visible card counts.
+ */
+function takeCardsForVisualRows(
+  rows: StoryRow[],
+  visualRowBudget: number,
+): Map<StoryRowKind, number> {
+  const limits = new Map<StoryRowKind, number>();
+  let budget = visualRowBudget;
+
+  for (const row of rows) {
+    if (budget <= 0) {
+      limits.set(row.kind, 0);
+      continue;
+    }
+    const perRow = CARDS_PER_VISUAL_ROW[row.kind];
+    const maxCards = row.items.length;
+    const rowsAffordable = Math.min(budget, Math.ceil(maxCards / perRow) || 0);
+    const cards = Math.min(maxCards, rowsAffordable * perRow);
+    limits.set(row.kind, cards);
+    budget -= visualRowsForCardCount(row.kind, cards);
+  }
+
+  return limits;
+}
+
+function totalVisualRows(rows: StoryRow[]): number {
+  return rows.reduce(
+    (sum, row) => sum + visualRowsForCardCount(row.kind, row.items.length),
+    0,
+  );
+}
+
 /**
  * Brand Details — "Brand Story" grouped by type into rows with progressive reveal.
  * LIVE keeps featured size during active + 24h grace; then shrinks to YouTube row.
@@ -78,7 +129,7 @@ export function BrandStorySection({
   const navigate = useNavigate();
   const { allCatalogProducts, allCatalogGuides, allCreators } = useGlobalState();
   const nowMs = usePriorityClockMs();
-  const [visibleRowCount, setVisibleRowCount] = useState(INITIAL_VISIBLE_ROWS);
+  const [visibleVisualRows, setVisibleVisualRows] = useState(INITIAL_VISUAL_ROWS);
 
   const items = useMemo(() => {
     const brandPosts = getAllBrandPosts();
@@ -180,8 +231,24 @@ export function BrandStorySection({
     return next;
   }, [items, nowMs]);
 
-  const visibleRows = rows.slice(0, visibleRowCount);
-  const hasMoreRows = visibleRowCount < rows.length;
+  const feedVisualRows = useMemo(() => totalVisualRows(rows), [rows]);
+  const cardLimits = useMemo(
+    () => takeCardsForVisualRows(rows, visibleVisualRows),
+    [rows, visibleVisualRows],
+  );
+
+  const visibleRows = useMemo(
+    () =>
+      rows
+        .map((row) => ({
+          ...row,
+          items: row.items.slice(0, cardLimits.get(row.kind) ?? 0),
+        }))
+        .filter((row) => row.items.length > 0),
+    [rows, cardLimits],
+  );
+
+  const hasMore = visibleVisualRows < feedVisualRows;
 
   if (!items.length) {
     return (
@@ -245,12 +312,14 @@ export function BrandStorySection({
           </div>
         ))}
 
-        {hasMoreRows && (
+        {hasMore && (
           <div className="flex justify-center pt-1">
             <button
               type="button"
               onClick={() =>
-                setVisibleRowCount((n) => Math.min(n + BROWSE_MORE_STEP, rows.length))
+                setVisibleVisualRows((n) =>
+                  Math.min(n + BROWSE_MORE_VISUAL_ROWS, feedVisualRows),
+                )
               }
               className="text-[12.5px] font-bold text-[#EB4501] hover:text-[#CF4400] bg-transparent border border-[#E8EDF2] hover:border-[#EB4501]/40 rounded-lg px-5 py-2.5 cursor-pointer transition-colors min-h-[44px]"
             >

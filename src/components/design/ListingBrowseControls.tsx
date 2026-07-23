@@ -114,7 +114,7 @@ export function ListingBrowseControls({
       )}
 
       {hasNav && (
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2" data-browse-presets>
           <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] text-left">
             Browse
           </div>

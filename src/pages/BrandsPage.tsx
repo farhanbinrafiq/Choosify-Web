@@ -9,6 +9,7 @@ import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFil
 import { BrandCardDesign } from '../components/BrandCardDesign';
 import { ListingBrowseControls } from '../components/design/ListingBrowseControls';
 import { ListingFeedHeader } from '../components/design/ListingFeedHeader';
+import { ListingFilterPills } from '../components/design/ListingFilterPills';
 import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
 import { useInfiniteListBatch } from '../hooks/useInfiniteListBatch';
 import { ListingAdRail } from '../components/ListingAdRail';
@@ -551,13 +552,7 @@ export function BrandsPage() {
     },
   }, [selectedLetter, searchQuery, activeTab, selectedCategory, verificationFilter, popularityFilter, sectionNavItems, activeSectionId, scrollToSection]);
 
-  const brandsBrowseControls = (
-    <ListingBrowseControls
-      showSearch={false}
-      quickChips={['Fashion', 'Electronics', 'Beauty', 'Home', 'Sports', 'Food']}
-      onSearch={(q) => setSearchQuery(q)}
-      onChipClick={(q) => setSearchQuery(q)}
-      items={[
+  const brandsBrowseItems = [
         {
           id: 'top-rated',
           icon: '🏆',
@@ -612,7 +607,15 @@ export function BrandsPage() {
           active: verificationFilter === 'verified',
           onClick: () => setVerificationFilter(verificationFilter === 'verified' ? 'all' : 'verified'),
         },
-      ]}
+      ];
+
+  const brandsBrowseControls = (
+    <ListingBrowseControls
+      showSearch={false}
+      quickChips={['Fashion', 'Electronics', 'Beauty', 'Home', 'Sports', 'Food']}
+      onSearch={(q) => setSearchQuery(q)}
+      onChipClick={(q) => setSearchQuery(q)}
+      items={[]}
     />
   );
 
@@ -644,6 +647,7 @@ export function BrandsPage() {
               setSearchQuery={setSearchQuery}
               searchPlaceholder="Search brands, category or best for..."
               browseControls={brandsBrowseControls}
+              browseDockItems={brandsBrowseItems}
               quickFilters={
                 <QuickFilterBar
                   title="Brands Quick Specs"
@@ -848,6 +852,32 @@ export function BrandsPage() {
                 </button>
               ) : null
             }
+          />
+
+          <ListingFilterPills
+            pills={brandsBrowseItems.map((item) => ({
+              id: item.id,
+              label: item.name,
+              active: Boolean(item.active),
+              onClick: () => item.onClick?.(),
+            }))}
+            hasActiveFilters={Boolean(
+              selectedLetter ||
+                searchQuery ||
+                activeTab !== 'All Brands' ||
+                selectedCategory ||
+                verificationFilter !== 'all' ||
+                popularityFilter !== 'all',
+            )}
+            onClearFilters={() => {
+              setSelectedLetter(null);
+              setSearchQuery('');
+              setActiveTab('All Brands');
+              setSelectedCategory(null);
+              setVerificationFilter('all');
+              setPopularityFilter('all');
+            }}
+            aiDiscoverPrompt="Help me find brands on Choosify"
           />
 
           {/* Active Filter Chips */}

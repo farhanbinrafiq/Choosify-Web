@@ -1,8 +1,12 @@
 import React, { useEffect, useRef } from 'react';
-import { SlidersHorizontal } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { useOpenPageFilters, useDragScroll, useFloatingFilters } from './FilterEngine';
+import { useDragScroll } from './FilterEngine';
 import type { SectionNavItem } from '../hooks/useSectionScrollSpy';
+import {
+  MobileVerticalNavDock,
+  MobileDockStickySentinel,
+  inferSectionDockIcon,
+} from './design/MobileVerticalNavDock';
 
 interface StickySectionNavProps {
   sections: SectionNavItem[];
@@ -15,8 +19,6 @@ interface StickySectionNavProps {
   className?: string;
   /** Override inner max-width shell (e.g. match page feed column) */
   contentClassName?: string;
-  /** Override auto-detect; hide Filter shortcut when false */
-  showFilter?: boolean;
 }
 
 function NavButton({
@@ -24,14 +26,12 @@ function NavButton({
   onClick,
   icon,
   label,
-  badge,
   itemId,
 }: {
   active: boolean;
   onClick: () => void;
   icon?: React.ReactNode;
   label: string;
-  badge?: number;
   itemId?: string;
 }) {
   return (
@@ -48,16 +48,6 @@ function NavButton({
     >
       {icon}
       <span>{label}</span>
-      {badge != null && badge > 0 && (
-        <span
-          className={cn(
-            'min-w-[16px] h-4 px-1 rounded-full text-[8px] font-bold flex items-center justify-center leading-none',
-            active ? 'bg-[#EB4501] text-white' : 'bg-[#EB4501] text-white',
-          )}
-        >
-          {badge > 9 ? '9+' : badge}
-        </span>
-      )}
     </button>
   );
 }
@@ -72,19 +62,10 @@ export function StickySectionNav({
   profileLabel = 'On this page',
   className,
   contentClassName,
-  showFilter,
 }: StickySectionNavProps) {
   const items = sections.filter((s) => !s.hidden);
-  const { canOpenFilters, openFilters, isFiltersOpen, activeFilterCount } = useOpenPageFilters();
-  const { registerStickyFilterChrome } = useFloatingFilters();
-  const filterVisible = showFilter ?? canOpenFilters;
   const { ref: scrollTrackRef, props: scrollTrackProps } = useDragScroll({ grabCursor: false });
   const userScrollUntilRef = useRef(0);
-
-  useEffect(() => {
-    if (!filterVisible) return;
-    return registerStickyFilterChrome();
-  }, [filterVisible, registerStickyFilterChrome]);
 
   useEffect(() => {
     const track = scrollTrackRef.current;
@@ -105,77 +86,96 @@ export function StickySectionNav({
     track.scrollTo({ left: next, behavior: 'smooth' });
   }, [activeId, scrollTrackRef]);
 
-  if (items.length === 0 && !filterVisible) return null;
+  if (items.length === 0) return null;
 
   const markUserScroll = () => {
     userScrollUntilRef.current = Date.now() + 1500;
   };
 
-  return (
-    <nav
-      aria-label="Page sections"
-      className={cn(
-        'choosify-sticky-section-nav sticky z-40 w-full px-4 sm:px-5 lg:px-6 py-2 bg-[#F4F7F9]/90 backdrop-blur-sm',
-        className,
-      )}
-    >
-      <div className={cn('max-w-[1440px] mx-auto', contentClassName)}>
-        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between min-w-0 bg-white border border-[#E8EDF2] rounded-none px-3 sm:px-4 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
-          <div className="flex items-center gap-2 shrink-0 min-w-0 select-none">
-            <span className="text-[10.5px] font-extrabold uppercase tracking-wide text-[#9AA0AC] whitespace-nowrap truncate">
-              {profileLabel}
-            </span>
-          </div>
+  const dockItems = [
+    {
+      id: allId,
+      icon: inferSectionDockIcon(allId, allLabel),
+      label: allLabel,
+      active: activeId === allId,
+      onClick: () => onNavigate(allId),
+    },
+    ...items.map((section) => ({
+      id: section.id,
+      icon: section.icon ?? inferSectionDockIcon(section.id, section.label),
+      label: section.label,
+      active: activeId === section.id,
+      onClick: () => onNavigate(section.id),
+    })),
+  ];
 
-          <div className="relative min-w-0 w-full md:w-auto md:max-w-full">
-            <div
-              className="pointer-events-none absolute inset-y-0 left-0 w-5 bg-gradient-to-r from-white to-transparent z-10 md:hidden"
-              aria-hidden
-            />
-            <div
-              className="pointer-events-none absolute inset-y-0 right-0 w-5 bg-gradient-to-l from-white to-transparent z-10 md:hidden"
-              aria-hidden
-            />
-            <div
-              ref={scrollTrackRef}
-              {...scrollTrackProps}
-              onTouchStart={markUserScroll}
-              onTouchMove={markUserScroll}
-              onWheel={markUserScroll}
-              className="choosify-sticky-nav-track flex items-center gap-1 min-w-0 w-full md:w-auto"
-            >
-              <NavButton
-                active={activeId === allId}
-                onClick={() => onNavigate(allId)}
-                label={allLabel}
-                itemId={allId}
+  return (
+    <>
+      {items.length > 0 && (
+        <>
+          <MobileDockStickySentinel />
+          <MobileVerticalNavDock
+            items={dockItems}
+            ariaLabel="Page sections"
+            preferenceKey="section-nav"
+          />
+        </>
+      )}
+
+      <nav
+        aria-label="Page sections"
+        data-mobile-dock-trigger
+        className={cn(
+          'choosify-sticky-section-nav sticky z-40 w-full px-4 sm:px-5 lg:px-6 py-2 bg-[#F4F7F9]/90 backdrop-blur-sm hidden sm:block',
+          className,
+        )}
+      >
+        <div className={cn('max-w-[1440px] mx-auto', contentClassName)}>
+          <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between min-w-0 bg-white border border-[#E8EDF2] rounded-none px-3 sm:px-4 py-2 shadow-[0_8px_24px_rgba(0,0,0,0.06)]">
+            <div className="flex items-center gap-2 shrink-0 min-w-0 select-none">
+              <span className="text-[10.5px] font-extrabold uppercase tracking-wide text-[#9AA0AC] whitespace-nowrap truncate">
+                {profileLabel}
+              </span>
+            </div>
+
+            <div className="relative min-w-0 w-full md:w-auto md:max-w-full">
+              <div
+                className="pointer-events-none absolute inset-y-0 left-0 w-5 bg-gradient-to-r from-white to-transparent z-10 md:hidden"
+                aria-hidden
               />
-              {items.map((section) => (
+              <div
+                className="pointer-events-none absolute inset-y-0 right-0 w-5 bg-gradient-to-l from-white to-transparent z-10 md:hidden"
+                aria-hidden
+              />
+              <div
+                ref={scrollTrackRef}
+                {...scrollTrackProps}
+                onTouchStart={markUserScroll}
+                onTouchMove={markUserScroll}
+                onWheel={markUserScroll}
+                className="choosify-sticky-nav-track flex items-center gap-1 min-w-0 w-full md:w-auto"
+              >
                 <NavButton
-                  key={section.id}
-                  active={activeId === section.id}
-                  onClick={() => onNavigate(section.id)}
-                  icon={section.icon}
-                  label={section.label}
-                  itemId={section.id}
+                  active={activeId === allId}
+                  onClick={() => onNavigate(allId)}
+                  label={allLabel}
+                  itemId={allId}
                 />
-              ))}
-              {filterVisible && (
-                <>
-                  <div className="w-px h-6 bg-[#E8EDF2] shrink-0 mx-0.5" aria-hidden />
+                {items.map((section) => (
                   <NavButton
-                    active={isFiltersOpen}
-                    onClick={openFilters}
-                    icon={<SlidersHorizontal size={13} />}
-                    label="Filter"
-                    badge={activeFilterCount}
+                    key={section.id}
+                    active={activeId === section.id}
+                    onClick={() => onNavigate(section.id)}
+                    icon={section.icon}
+                    label={section.label}
+                    itemId={section.id}
                   />
-                </>
-              )}
+                ))}
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+    </>
   );
 }

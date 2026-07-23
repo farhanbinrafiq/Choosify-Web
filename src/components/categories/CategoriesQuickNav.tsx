@@ -1,8 +1,5 @@
 import React from 'react';
 import { ListingBrowseControls } from '../design/ListingBrowseControls';
-import {
-  CATEGORY_QUICK_NAV_ITEMS,
-} from '../../lib/design/categoryTokens';
 
 interface CategoriesBrowseControlsProps {
   activeId: string;
@@ -15,20 +12,17 @@ interface CategoriesBrowseControlsProps {
   onSearchQueryChange?: (value: string) => void;
 }
 
-/** Category browse controls for the floating filter popup. */
+/**
+ * Category browse controls for the floating filter popup.
+ * Category presets live under the page header as ListingFilterPills.
+ */
 export function CategoriesBrowseControls({
-  activeId,
-  onSelect,
   onSearch,
   quickChips = ['Electronics', 'Fashion', 'Beauty', 'Home', 'Sports', 'Grocery'],
   showSearch = false,
   searchQuery,
   onSearchQueryChange,
 }: CategoriesBrowseControlsProps) {
-  const scrollToGrid = () => {
-    document.getElementById('categories-main-display')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
-
   return (
     <ListingBrowseControls
       showSearch={showSearch}
@@ -38,18 +32,7 @@ export function CategoriesBrowseControls({
       quickChips={quickChips}
       onSearch={onSearch}
       onChipClick={onSearch}
-      items={CATEGORY_QUICK_NAV_ITEMS.map((item) => ({
-        id: item.id,
-        icon: item.letter,
-        name: item.label,
-        sub: item.sub,
-        bg: activeId === item.id ? '#FFF3EA' : item.bg,
-        active: activeId === item.id,
-        onClick: () => {
-          onSelect(item.id, item.filterType);
-          scrollToGrid();
-        },
-      }))}
+      items={[]}
     />
   );
 }

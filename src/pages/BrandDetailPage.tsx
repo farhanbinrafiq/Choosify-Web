@@ -1500,7 +1500,26 @@ export function BrandDetailPage() {
       <DcUnderlineTabs
         tabs={sectionNavItems
           .filter((s) => !s.hidden)
-          .map((s) => ({ id: s.id, label: s.label }))}
+          .map((s) => ({
+            id: s.id,
+            label: s.label,
+            icon:
+              s.id === 'deals-section'
+                ? '🏷'
+                : s.id === 'products-section'
+                  ? '📦'
+                  : s.id === 'public-reviews-section'
+                    ? '💬'
+                    : s.id === 'brand-overview-section'
+                      ? '◉'
+                      : s.id === 'store-location-section'
+                        ? '📍'
+                        : s.id === 'faq-section'
+                          ? '❓'
+                          : s.id === 'brand-story-section'
+                            ? '📖'
+                            : undefined,
+          }))}
         activeId={
           activeSectionId === "all"
             ? sectionNavItems.find((s) => !s.hidden)?.id || "deals-section"

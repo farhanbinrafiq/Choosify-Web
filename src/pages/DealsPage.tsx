@@ -9,6 +9,7 @@ import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFil
 import { useGlobalState } from '../context/GlobalStateContext';
 import { ListingBrowseControls } from '../components/design/ListingBrowseControls';
 import { ListingFeedHeader } from '../components/design/ListingFeedHeader';
+import { ListingFilterPills } from '../components/design/ListingFilterPills';
 import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
 import { PaginationBar } from '../components/PaginationBar';
 import { PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
@@ -349,13 +350,7 @@ export function DealsPage() {
     },
   }, [searchQuery, activeTab, selectedCategory, minDiscount, activeSectionId, dealsSectionNavItems, scrollToSection]);
 
-  const dealsBrowseControls = (
-    <ListingBrowseControls
-      showSearch={false}
-      quickChips={['Flash Sale', 'Bank Offer', 'Cashback', 'Coupons', 'Weekend', 'Clearance']}
-      onSearch={(q) => setSearchQuery(q)}
-      onChipClick={(q) => setSearchQuery(q)}
-      items={[
+  const dealsBrowseItems = [
         {
           id: 'flash',
           icon: '⚡',
@@ -431,7 +426,15 @@ export function DealsPage() {
             setMinDiscount(minDiscount === 25 ? 0 : 25);
           },
         },
-      ]}
+      ];
+
+  const dealsBrowseControls = (
+    <ListingBrowseControls
+      showSearch={false}
+      quickChips={['Flash Sale', 'Bank Offer', 'Cashback', 'Coupons', 'Weekend', 'Clearance']}
+      onSearch={(q) => setSearchQuery(q)}
+      onChipClick={(q) => setSearchQuery(q)}
+      items={[]}
     />
   );
 
@@ -465,6 +468,7 @@ export function DealsPage() {
                   setSearchQuery={setSearchQuery}
                   searchPlaceholder="Search active deals and promos..."
                   browseControls={dealsBrowseControls}
+                  browseDockItems={dealsBrowseItems}
                   quickFilters={
                     <QuickFilterBar
                       title="Deals Quick Specs"
@@ -606,6 +610,28 @@ export function DealsPage() {
               }
               count={filteredProducts.length}
               itemLabel="deals"
+            />
+
+            <ListingFilterPills
+              pills={dealsBrowseItems.map((item) => ({
+                id: item.id,
+                label: item.name,
+                active: Boolean(item.active),
+                onClick: () => item.onClick?.(),
+              }))}
+              hasActiveFilters={Boolean(
+                searchQuery ||
+                  activeTab !== 'All Deals' ||
+                  selectedCategory ||
+                  minDiscount > 0,
+              )}
+              onClearFilters={() => {
+                setSearchQuery('');
+                handleTabChange('All Deals');
+                setSelectedCategory(null);
+                setMinDiscount(0);
+              }}
+              aiDiscoverPrompt="Help me find the best deals on Choosify"
             />
 
             {/* FLASH DEALS + DEAL OF THE DAY — Choosify.dc.html */}

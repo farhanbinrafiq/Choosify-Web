@@ -8,7 +8,8 @@ import { EmiAiLogo } from './EmiAiLogo';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
 import { cn } from '../lib/utils';
-import { useFloatingFilter, useFloatingFilters, scrollToFilterResultsTarget, getFloatingPanelMotion } from './FilterEngine';
+import { useFloatingFilter, useFloatingFilters, scrollToFilterResultsTarget, getFloatingPanelMotion, preserveWindowScroll } from './FilterEngine';
+import { MobileVerticalNavDock } from './design/MobileVerticalNavDock';
 import { VideoLightbox } from './VideoLightbox';
 import {
   CartPreviewPanel,
@@ -133,10 +134,16 @@ export function FloatingOverlays() {
     setDrawerFilterOpen(false);
   };
 
-  const openMobileFilters = () => {
-    setActivePanel(null);
-    if (drawerFiltersData) setDrawerFilterOpen(true);
-    else setFilterOpen(true);
+  /** Toggle filter drawer/panel — click again while open closes it. */
+  const toggleMobileFilters = () => {
+    preserveWindowScroll(() => {
+      setActivePanel(null);
+      if (drawerFiltersData) {
+        setDrawerFilterOpen(!drawerFilterOpen);
+        return;
+      }
+      setFilterOpen((open) => !open);
+    });
   };
 
   // Close active panel upon route transition
@@ -147,12 +154,25 @@ export function FloatingOverlays() {
   // Sticky nav "Filter" shortcut opens the legacy floating filter panel
   useEffect(() => {
     const handleOpenFilters = () => {
-      setFilterOpen(true);
-      setActivePanel(null);
-      setDrawerFilterOpen(false);
+      preserveWindowScroll(() => {
+        setFilterOpen(true);
+        setActivePanel(null);
+        setDrawerFilterOpen(false);
+      });
+    };
+    const handleToggleFilters = () => {
+      preserveWindowScroll(() => {
+        setActivePanel(null);
+        setDrawerFilterOpen(false);
+        setFilterOpen((open) => !open);
+      });
     };
     window.addEventListener('choosify:open-filters', handleOpenFilters);
-    return () => window.removeEventListener('choosify:open-filters', handleOpenFilters);
+    window.addEventListener('choosify:toggle-filters', handleToggleFilters);
+    return () => {
+      window.removeEventListener('choosify:open-filters', handleOpenFilters);
+      window.removeEventListener('choosify:toggle-filters', handleToggleFilters);
+    };
   }, [setDrawerFilterOpen]);
 
   // Close auth-only panels when user logs out
@@ -178,7 +198,13 @@ export function FloatingOverlays() {
 
   // Close handler when clicking outside of any widget / triggers
   useEffect(() => {
+    const isFabTarget = (target: EventTarget | null) =>
+      target instanceof Element && Boolean(target.closest('[data-floating-fab]'));
+
     const handleOutsideClick = (event: MouseEvent) => {
+      // FAB click must toggle via its own onClick — don't close-then-reopen.
+      if (isFabTarget(event.target)) return;
+
       if (
         activePanel &&
         panelRef.current &&
@@ -264,6 +290,24 @@ export function FloatingOverlays() {
   return (
     <>
       <VideoLightbox video={activeVideo} onClose={closeVideo} />
+
+      {!drawerFiltersData &&
+        filterConfig.browseDockItems &&
+        filterConfig.browseDockItems.length > 0 && (
+          <MobileVerticalNavDock
+            items={filterConfig.browseDockItems.map((item) => ({
+              id: item.id,
+              icon: item.icon,
+              label: item.name,
+              sub: item.sub,
+              bg: item.bg,
+              active: item.active,
+              onClick: () => item.onClick?.(),
+            }))}
+            ariaLabel="Browse"
+            preferenceKey="spotlight-browse"
+          />
+        )}
 
       <div 
         ref={containerRef}
@@ -365,6 +409,7 @@ export function FloatingOverlays() {
           {showEmiFab && (
             <motion.button
               key="dock-emi-trigger"
+              data-floating-fab="emi"
               initial={{ scale: 0, opacity: 0, y: 15 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0, opacity: 0, y: 15 }}
@@ -391,6 +436,7 @@ export function FloatingOverlays() {
           {totalCartItems > 0 && (
             <motion.button
               key="dock-cart-trigger"
+              data-floating-fab="cart"
               initial={{ scale: 0, opacity: 0, y: 15 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0, opacity: 0, y: 15 }}
@@ -421,6 +467,7 @@ export function FloatingOverlays() {
           {showMessagesFab && (
             <motion.button
               key="dock-messages-trigger"
+              data-floating-fab="messages"
               initial={{ scale: 0, opacity: 0, y: 15 }}
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0, opacity: 0, y: 15 }}
@@ -496,12 +543,16 @@ export function FloatingOverlays() {
 
         <div
           className={cn(
-            'fixed z-[219] flex flex-col-reverse items-start gap-3',
+            'fixed flex flex-col-reverse items-start gap-3',
             isMobile
-              ? 'inset-x-0 bottom-0 pointer-events-none'
-              : showDesktopLegacyFilterLauncher
-                ? 'bottom-6 left-6 lg:bottom-8 lg:left-8'
-                : 'bottom-6 left-6 lg:bottom-8 lg:left-8 pointer-events-none',
+              ? cn(
+                  'inset-x-0 bottom-0 pointer-events-none',
+                  filterOpen ? 'z-[230]' : 'z-[219]',
+                )
+              : cn(
+                  'bottom-6 left-6 lg:bottom-8 lg:left-8 z-[219]',
+                  !showDesktopLegacyFilterLauncher && 'pointer-events-none',
+                ),
           )}
         >
         <AnimatePresence onExitComplete={handleLegacyFilterExitComplete}>
@@ -580,7 +631,14 @@ export function FloatingOverlays() {
                 )}
 
                 {filterConfig.renderBrowseControls && (
-                  <div className="px-5 pt-4 pb-3 border-b border-[#e8edf2]">
+                  <div
+                    className={cn(
+                      'px-5 pt-4 pb-3 border-b border-[#e8edf2]',
+                      filterConfig.browseDockItems?.length
+                        ? 'max-sm:[&_[data-browse-presets]]:hidden'
+                        : undefined,
+                    )}
+                  >
                     {filterConfig.renderBrowseControls()}
                   </div>
                 )}
@@ -654,9 +712,12 @@ export function FloatingOverlays() {
         {!isMobile && showDesktopLegacyFilterLauncher && (
         <motion.button
           type="button"
+          data-floating-fab="filters"
           onClick={() => {
-            setFilterOpen(!filterOpen);
-            if (!filterOpen) setActivePanel(null);
+            preserveWindowScroll(() => {
+              setFilterOpen(!filterOpen);
+              if (!filterOpen) setActivePanel(null);
+            });
           }}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
@@ -691,6 +752,7 @@ export function FloatingOverlays() {
         type="button"
         onClick={() => setActivePanel(activePanel === 'emi' ? null : 'emi')}
         whileTap={{ scale: 0.95 }}
+        data-floating-fab="emi"
         className={cn(
           'fixed z-[219] w-14 h-14 rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden p-2.5 bg-white cursor-pointer',
           activePanel === 'emi' && 'ring-2 ring-[#EB4501]/60 brightness-105',
@@ -714,6 +776,7 @@ export function FloatingOverlays() {
         type="button"
         onClick={() => setActivePanel(activePanel === 'cart' ? null : 'cart')}
         whileTap={{ scale: 0.95 }}
+        data-floating-fab="cart"
         className={cn(
           'fixed z-[218] w-14 h-14 rounded-full bg-white text-[#EB4501] shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden cursor-pointer',
           activePanel === 'cart' && 'ring-2 ring-[#EB4501]/50 brightness-110',
@@ -734,27 +797,20 @@ export function FloatingOverlays() {
       </motion.button>
     )}
 
-    {isMobile && showFiltersAction && (
+    {isMobile && showFiltersAction && !(filterOpen || drawerFilterOpen) && (
       <motion.button
         type="button"
-        onClick={openMobileFilters}
+        onClick={toggleMobileFilters}
         whileTap={{ scale: 0.95 }}
-        className={cn(
-          'fixed z-[220] w-14 h-14 rounded-full border border-[#e8edf2] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.18)] flex items-center justify-center transition-all pointer-events-auto sm:hidden cursor-pointer',
-          (filterOpen || drawerFilterOpen) && 'ring-2 ring-[#EB4501]/30',
-        )}
+        data-floating-fab="filters"
+        className="fixed z-[220] w-14 h-14 rounded-full border border-[#e8edf2] bg-white shadow-[0_8px_24px_rgba(0,0,0,0.18)] flex items-center justify-center transition-all pointer-events-auto sm:hidden cursor-pointer"
         style={{
           bottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))',
           left: 'max(1rem, env(safe-area-inset-left, 0px))',
         }}
         aria-label="Open filters"
       >
-        <SlidersHorizontal
-          size={22}
-          className={cn(
-            filterOpen || drawerFilterOpen ? 'text-[#EB4501]' : 'text-[#8a9bb0]',
-          )}
-        />
+        <SlidersHorizontal size={22} className="text-[#8a9bb0]" />
         {filterConfig.activeFilterCount > 0 && (
           <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-lg bg-[#EB4501] text-white text-[9px] font-bold flex items-center justify-center">
             {filterConfig.activeFilterCount > 9 ? '9+' : filterConfig.activeFilterCount}

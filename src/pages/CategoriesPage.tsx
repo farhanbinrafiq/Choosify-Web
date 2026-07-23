@@ -7,7 +7,9 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { CategoryCardSkeleton } from '../components/Skeleton';
 import { CategoryPremiumCard } from '../components/categories/CategoryPremiumCard';
 import { CategoriesBrowseControls } from '../components/categories/CategoriesQuickNav';
+import { CATEGORY_QUICK_NAV_ITEMS } from '../lib/design/categoryTokens';
 import { ListingFeedHeader } from '../components/design/ListingFeedHeader';
+import { ListingFilterPills } from '../components/design/ListingFilterPills';
 import { buildCategoryDisplayList, type CategoryDisplayItem } from '../utils/categoryDisplay';
 import { getCategoryStatBlock } from '../utils/categoryStats';
 import { ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
@@ -176,6 +178,15 @@ export function CategoriesPage() {
             showSearch={false}
           />
         }
+        browseDockItems={CATEGORY_QUICK_NAV_ITEMS.map((item) => ({
+          id: item.id,
+          icon: item.letter,
+          name: item.label,
+          sub: item.sub,
+          bg: quickNavId === item.id ? '#FFF3EA' : item.bg,
+          active: quickNavId === item.id,
+          onClick: () => handleQuickNavSelect(item.id, item.filterType),
+        }))}
         activeChips={
           <ActiveFilterChips
             chips={[
@@ -645,6 +656,27 @@ export function CategoriesPage() {
             }
             count={filteredCategoriesList.length}
             itemLabel="categories"
+          />
+
+          <ListingFilterPills
+            pills={CATEGORY_QUICK_NAV_ITEMS.map((item) => ({
+              id: item.id,
+              label: item.label,
+              active: quickNavId === item.id,
+              onClick: () => handleQuickNavSelect(item.id, item.filterType),
+            }))}
+            hasActiveFilters={Boolean(
+              selectedCategoryType ||
+                selectedCategoryStatus ||
+                selectedAlphabetical ||
+                selectedAvailability ||
+                selectedContent ||
+                activeCategoryTab !== 'All Categories' ||
+                searchQuery ||
+                quickNavId,
+            )}
+            onClearFilters={handleClearAllFilters}
+            aiDiscoverPrompt="Help me explore categories on Choosify"
           />
 
           {isLoading ? (

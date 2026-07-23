@@ -1,7 +1,5 @@
 import React from 'react';
-import { SlidersHorizontal } from 'lucide-react';
 import { cn } from '../../lib/utils';
-import { useOpenPageFilters } from '../FilterEngine';
 
 export type ListingFeedHeaderProps = {
   eyebrow: string;
@@ -14,14 +12,14 @@ export type ListingFeedHeaderProps = {
   showingTo?: number;
   /** Noun for the range line, e.g. "brands", "products". */
   itemLabel: string;
-  /** Optional controls beside the filter button (e.g. Reset). */
+  /** Optional trailing controls (e.g. Reset). Filters live in pills / floating FAB. */
   actions?: React.ReactNode;
   className?: string;
 };
 
 /**
- * Listing feed heading: eyebrow + title(count) + Showing X–Y of Z,
- * with a top-right filter control that opens the same floating filter popup as the FAB.
+ * Listing feed heading: eyebrow + title(count) + Showing X–Y of Z.
+ * Filter access is via ListingFilterPills / floating filter FAB — not duplicated here.
  */
 export function ListingFeedHeader({
   eyebrow,
@@ -33,8 +31,6 @@ export function ListingFeedHeader({
   actions,
   className,
 }: ListingFeedHeaderProps) {
-  const { canOpenFilters, toggleFilters, isFiltersOpen, activeFilterCount } = useOpenPageFilters();
-
   const from = count <= 0 ? 0 : showingFrom ?? 1;
   const to = count <= 0 ? 0 : showingTo ?? count;
 
@@ -60,35 +56,11 @@ export function ListingFeedHeader({
         </p>
       </div>
 
-      <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
-        {actions}
-        {canOpenFilters ? (
-          <button
-            type="button"
-            onClick={toggleFilters}
-            className={cn(
-              'relative w-11 h-11 rounded-full bg-white border border-[#e8edf2] shadow-[0_8px_24px_rgba(0,0,0,0.12)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.18)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none',
-              isFiltersOpen && 'ring-2 ring-[#EB4501]/30',
-            )}
-            aria-label="Open filters"
-            title="Filters"
-          >
-            <SlidersHorizontal
-              size={18}
-              strokeWidth={2}
-              className={cn(
-                'transition-colors shrink-0',
-                isFiltersOpen ? 'text-[#EB4501]' : 'text-[#8a9bb0]',
-              )}
-            />
-            {activeFilterCount > 0 && (
-              <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] px-1 rounded-lg bg-[#EB4501] text-white text-[8px] font-bold flex items-center justify-center leading-none">
-                {activeFilterCount > 9 ? '9+' : activeFilterCount}
-              </span>
-            )}
-          </button>
-        ) : null}
-      </div>
+      {actions ? (
+        <div className="flex items-center gap-2.5 shrink-0 self-start sm:self-auto">
+          {actions}
+        </div>
+      ) : null}
     </div>
   );
 }
