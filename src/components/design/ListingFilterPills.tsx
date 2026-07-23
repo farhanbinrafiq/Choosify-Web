@@ -1,4 +1,5 @@
 import React from 'react';
+import { SlidersHorizontal } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { openEmiPanel } from '../../lib/emi';
 import { useOpenPageFilters } from '../FilterEngine';
@@ -82,8 +83,12 @@ export function ListingFilterPills({
               <button
                 type="button"
                 onClick={toggleFilters}
-                className={cn(pillBase, pillSurface)}
+                className={cn(
+                  pillBase,
+                  'inline-flex items-center gap-1.5 bg-white text-[#1A1A2E] border-[#E5E7EB] hover:border-[#EB4501]/40',
+                )}
               >
+                <SlidersHorizontal size={14} strokeWidth={2.25} className="text-[#EB4501] shrink-0" />
                 Filters
               </button>
             )}
