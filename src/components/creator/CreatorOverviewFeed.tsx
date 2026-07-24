@@ -400,17 +400,27 @@ export function CreatorOverviewFeed({
             </p>
           </div>
           {recommendedProducts.length > 0 && (
-            <div className={cn(PRODUCT_CARD_GRID, 'mb-4')}>
-              {recommendedProducts.map((p: any) => (
-                <ProductCard key={p.id} product={p} variant="grid" />
-              ))}
+            <div className="mb-5">
+              <h3 className="text-[11px] font-extrabold text-[#9AA0AC] uppercase tracking-wide mb-2.5">
+                Products
+              </h3>
+              <div className={PRODUCT_CARD_GRID}>
+                {recommendedProducts.map((p: any) => (
+                  <ProductCard key={p.id} product={p} variant="grid" />
+                ))}
+              </div>
             </div>
           )}
           {recommendedBrands.length > 0 && (
-            <div className={BRAND_CARD_GRID}>
-              {recommendedBrands.map((b: any) => (
-                <BrandCardDesign key={b.id} brand={b} />
-              ))}
+            <div>
+              <h3 className="text-[11px] font-extrabold text-[#9AA0AC] uppercase tracking-wide mb-2.5">
+                Brands
+              </h3>
+              <div className={BRAND_CARD_GRID}>
+                {recommendedBrands.map((b: any) => (
+                  <BrandCardDesign key={b.id} brand={b} />
+                ))}
+              </div>
             </div>
           )}
         </section>
