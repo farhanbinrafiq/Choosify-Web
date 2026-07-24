@@ -52,7 +52,7 @@ export function BrandWhereToBuySection({ brandName }: { brandName: string }) {
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
         <div className="bg-white border border-[#E8EDF2] rounded-[10px] overflow-hidden">
-          <div className="text-[11px] font-extrabold text-white bg-[#2323FF] px-2.5 py-1.5">
+          <div className="text-[11px] font-extrabold text-white choosify-dark-surface px-2.5 py-1.5">
             AUTHORIZED STORES
           </div>
           <div className="p-[18px] pt-3">
@@ -78,7 +78,7 @@ export function BrandWhereToBuySection({ brandName }: { brandName: string }) {
                 href="https://www.google.com/maps"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="shrink-0 bg-[#000435] text-white border-0 px-3 py-1.5 rounded-md text-[10.5px] font-bold whitespace-nowrap no-underline"
+                className="shrink-0 bg-white text-[#000435] border border-[#E5E7EB] px-3 py-1.5 rounded-md text-[10.5px] font-bold whitespace-nowrap no-underline hover:border-[#000435]/30 transition-colors"
               >
                 View Map
               </a>
@@ -88,7 +88,7 @@ export function BrandWhereToBuySection({ brandName }: { brandName: string }) {
         </div>
 
         <div className="bg-white border border-[#E8EDF2] rounded-[10px] overflow-hidden">
-          <div className="text-[11px] font-extrabold text-white bg-[#2323FF] px-2.5 py-1.5">
+          <div className="text-[11px] font-extrabold text-white choosify-dark-surface px-2.5 py-1.5">
             DISTRIBUTORS & RESELLERS
           </div>
           <div className="p-[18px] pt-3">
@@ -105,7 +105,7 @@ export function BrandWhereToBuySection({ brandName }: { brandName: string }) {
               <a
                 href="#"
                 onClick={(e) => e.preventDefault()}
-                className="shrink-0 bg-[#000435] text-white border-0 px-3 py-1.5 rounded-md text-[10.5px] font-bold whitespace-nowrap no-underline"
+                className="shrink-0 bg-white text-[#000435] border border-[#E5E7EB] px-3 py-1.5 rounded-md text-[10.5px] font-bold whitespace-nowrap no-underline hover:border-[#000435]/30 transition-colors"
               >
                 Visit Website
               </a>
@@ -115,7 +115,7 @@ export function BrandWhereToBuySection({ brandName }: { brandName: string }) {
         </div>
 
         <div className="bg-white border border-[#E8EDF2] rounded-[10px] overflow-hidden">
-          <div className="text-[11px] font-extrabold text-white bg-[#2323FF] px-2.5 py-1.5">
+          <div className="text-[11px] font-extrabold text-white choosify-dark-surface px-2.5 py-1.5">
             SERVICE CENTERS
           </div>
           <div className="p-[18px] pt-3">
@@ -128,7 +128,7 @@ export function BrandWhereToBuySection({ brandName }: { brandName: string }) {
                 <div className="text-[11.5px] font-bold text-[#1A1A2E]">{row.name}</div>
                 <div className="text-[10px] text-[#9AA0AC]">{row.location}</div>
               </div>
-              <span className="shrink-0 bg-[#000435] text-white px-3 py-1.5 rounded-md text-[10.5px] font-bold whitespace-nowrap">
+              <span className="shrink-0 bg-white text-[#000435] border border-[#E5E7EB] px-3 py-1.5 rounded-md text-[10.5px] font-bold whitespace-nowrap">
                 {row.hours}
               </span>
             </div>
