@@ -6,14 +6,52 @@ import { cn } from '../../../lib/utils';
 export function SpotlightLiveStatusSection({
   content,
   className,
+  layout = 'bar',
 }: {
   content: SpotlightContent;
   className?: string;
+  /** 'bar' — full-width white bar (default). 'side' — compact dark card for beside the hero image. */
+  layout?: 'bar' | 'side';
 }) {
   const status = content.live?.status ?? (content.isLive ? 'live' : 'ended');
   const isLive = status === 'live';
   const isUpcoming = status === 'upcoming';
   const label = isLive ? 'Live Now' : isUpcoming ? 'Upcoming Live' : 'Live Replay';
+
+  if (layout === 'side') {
+    return (
+      <div
+        className={cn(
+          'flex flex-col gap-3 rounded-[10px] border border-white/10 bg-white/5 backdrop-blur-sm p-4',
+          className,
+        )}
+        aria-label="Live status"
+      >
+        <span
+          className={cn(
+            'inline-flex items-center gap-1.5 self-start px-2.5 py-1 rounded-md text-[11px] font-bold tracking-tight',
+            isLive ? 'bg-rose-500/15 text-rose-300 border border-rose-400/30' : 'bg-[#EB4501]/15 text-[#FF8A4C] border border-[#EB4501]/30',
+          )}
+        >
+          <Radio size={12} className={isLive ? 'animate-pulse' : undefined} />
+          {label}
+        </span>
+        {content.live?.scheduledAt && (
+          <span className="text-[12px] font-medium text-white/60 flex items-center gap-1">
+            <Clock size={12} /> {new Date(content.live.scheduledAt).toLocaleString()}
+          </span>
+        )}
+        {content.live?.embedUrl && (
+          <a
+            href="#spotlight-content-hero"
+            className="inline-flex items-center justify-center min-h-[44px] px-4 py-2 bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-wider rounded hover:bg-[#CF4400] no-underline"
+          >
+            {isLive ? 'Watch Live' : isUpcoming ? 'Notify Me' : 'Watch Replay'}
+          </a>
+        )}
+      </div>
+    );
+  }
 
   return (
     <section

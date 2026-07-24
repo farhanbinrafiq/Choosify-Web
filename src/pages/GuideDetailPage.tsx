@@ -37,7 +37,7 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import { BLOGS, PRODUCTS, PLACEHOLDER_IMAGE } from "../constants";
 import { cn } from "../lib/utils";
-import { DETAIL_SINGLE_FEED } from "../lib/pageLayout";
+import { BRAND_CARD_GRID, DETAIL_SINGLE_FEED } from "../lib/pageLayout";
 import { StickySectionNav } from "../components/StickySectionNav";
 import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
 import { EvaluationData, ComparisonProduct } from "../types/evaluation";
@@ -62,7 +62,6 @@ import {
 } from "../lib/spotlight/content/sectionManifestRegistry";
 import { resolveContentDetailOptionalSections } from "../lib/spotlight/content/resolveContentDetailSections";
 import { catalogGuideHref } from "../lib/spotlight/content";
-import { SpotlightLiveStatusSection } from "../components/spotlight/experience/SpotlightLiveStatusSection";
 import { BrandCardDesign, mapBrandToCardDesign } from "../components/BrandCardDesign";
 import { SpotlightDetailsDescriptionSection } from "../components/spotlight/experience/SpotlightDetailsDescriptionSection";
 import { SpotlightDetailsServicesSection } from "../components/spotlight/experience/SpotlightDetailsServicesSection";
@@ -578,6 +577,7 @@ export function GuideDetailPage({
               headline={spotlightContent?.headline}
               media={spotlightContent?.media ?? undefined}
               live={spotlightContent?.live}
+              showLiveBadge={showSection('live_status')}
             />
           ) : (
             <RecommendationMediaGallery guide={guide} />
@@ -741,10 +741,6 @@ export function GuideDetailPage({
         </div>
       </div>
 
-      {spotlightContent && showSection('live_status') && (
-        <SpotlightLiveStatusSection content={spotlightContent} className="-mt-2" />
-      )}
-
       {guideSectionNavItems.length > 0 && (
       <StickySectionNav
         sections={guideSectionNavItems}
@@ -824,12 +820,22 @@ export function GuideDetailPage({
               />
 
                 {showBrandCard && brandCardModel && (
-                  <div id="reviewer-profile" className="scroll-mt-36 mt-8 max-w-[280px] mx-auto">
-                    <div className="text-[11px] font-extrabold text-[#1A1A2E] tracking-wide mb-3.5 text-left">
+                  <section
+                    id="reviewer-profile"
+                    className="scroll-mt-36 mt-9 w-full text-left"
+                    aria-labelledby="about-the-brand-heading"
+                  >
+                    <div
+                      id="about-the-brand-heading"
+                      className="text-[11px] font-extrabold text-[#1A1A2E] tracking-wide mb-3.5"
+                    >
                       ABOUT THE BRAND
                     </div>
-                    <BrandCardDesign brand={brandCardModel} />
-                  </div>
+                    {/* Same Brands-list grid → one cell = standard card width/height */}
+                    <div className={BRAND_CARD_GRID}>
+                      <BrandCardDesign brand={brandCardModel} />
+                    </div>
+                  </section>
                 )}
 
                 {/* ABOUT THE AUTHOR | IN THIS GUIDE — Choosify.dc.html */}

@@ -657,12 +657,13 @@ export function ActiveFilterChips({ chips, onClearAll }: ActiveFilterChipsProps)
           {chips.map((chip, idx) => (
             <div
               key={`${chip.id}-${idx}`}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F4F8FA] border border-[#D9E6ED] rounded-[4px] text-[10px] font-black text-[#1A1D4E] uppercase tracking-wider shadow-2xs hover:border-[#EB4501]/30 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#EB4501] border-0 rounded-[4px] text-[10px] font-black text-white uppercase tracking-wider shadow-2xs transition-all"
             >
               <span>{chip.label}</span>
               <button
+                type="button"
                 onClick={chip.onRemove}
-                className="text-[#EB4501] hover:text-[#CF4400] transition-colors p-[1.5px] rounded-full hover:bg-red-500/10 cursor-pointer border-none bg-none flex items-center justify-center"
+                className="text-white/90 hover:text-white transition-colors p-[1.5px] rounded-full hover:bg-white/15 cursor-pointer border-none bg-transparent flex items-center justify-center"
                 aria-label={`Remove filter ${chip.label}`}
               >
                 <svg className="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -673,6 +674,7 @@ export function ActiveFilterChips({ chips, onClearAll }: ActiveFilterChipsProps)
           ))}
 
           <button
+            type="button"
             onClick={onClearAll}
             className="text-[10px] font-extrabold text-[#EB4501] uppercase tracking-widest hover:text-[#CF4400] ml-3 transition-colors cursor-pointer border-none bg-transparent hover:underline"
           >

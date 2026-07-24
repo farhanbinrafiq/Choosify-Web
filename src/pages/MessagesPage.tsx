@@ -16,12 +16,13 @@ import type { EmiCatalogPick } from '../lib/emiCatalogSearch';
 import {
   Search, ArrowLeft, Send, MoreVertical, CheckCircle,
   Package, Truck, Clock, MessageCircleMore, LayoutDashboard, CheckSquare,
-  X, Sparkles, Plus, Megaphone, Lock, AlertTriangle, Flag,
+  X, Sparkles, Plus, Megaphone, Lock, AlertTriangle, Flag, Info,
 } from 'lucide-react';
 import { toast } from '../lib/notify';
 import { operationsApi } from '../services/operationsApi';
 import { notificationApi } from '../services/notificationApi';
 import { MessagesRightRail } from '../components/messages/MessagesRightRail';
+import { MobileThreadInfoSheet } from '../components/messages/MobileThreadInfoSheet';
 import { ReportConversationProblemModal } from '../components/messages/ReportConversationProblemModal';
 import { MessageThreadExchange } from '../components/messages/MessageThreadExchange';
 import { EmiChatPanel } from '../components/EmiChatPanel';
@@ -76,6 +77,7 @@ export function MessagesPage({
 
   // Interactive Modal states
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showMobileInfo, setShowMobileInfo] = useState(false);
   const [expiryNow, setExpiryNow] = useState(() => Date.now());
   const [focusedAnnouncementId, setFocusedAnnouncementId] = useState<number | null>(null);
   const [announcementSearch, setAnnouncementSearch] = useState('');
@@ -159,6 +161,7 @@ export function MessagesPage({
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
+    setShowMobileInfo(false);
   }, [threadId]);
 
   useEffect(() => {
@@ -610,9 +613,9 @@ export function MessagesPage({
           : 'flex flex-col bg-choosify-feed text-[#1A1A2E] h-[calc(100dvh-var(--choosify-navbar-height,4rem))] max-h-[calc(100dvh-var(--choosify-navbar-height,4rem))] overflow-hidden'
       }
     >
-      {/* Messages Header bar — constrained to feed silhouette */}
+      {/* Messages Header bar — constrained to feed silhouette. Hidden on mobile once a thread is open (thread header takes over, WhatsApp-style). */}
       {!embedded && (
-      <div className="w-full px-5 sm:px-10 pt-3 shrink-0">
+      <div className={`w-full px-5 sm:px-10 pt-3 shrink-0 ${threadId ? 'hidden md:block' : ''}`}>
         <div className="max-w-[1400px] mx-auto w-full choosify-dark-surface text-white px-5 sm:px-10 py-5 flex items-center justify-between gap-3.5 flex-wrap rounded-none overflow-hidden">
         <div className="flex items-center gap-3 min-w-0">
           <button
@@ -874,23 +877,19 @@ export function MessagesPage({
             threadId ? 'flex' : 'hidden md:flex'
           }`}
         >
-          {threadId && (
-            <div className="md:hidden flex items-center gap-3 px-4 py-3 bg-white border-b border-[#E8EDF2] flex-shrink-0">
-              <button
-                type="button"
-                onClick={() => selectThread(undefined)}
-                className="flex items-center gap-2 text-[11px] font-bold text-[#4B5563] hover:text-[#000435] transition-colors bg-transparent border-none cursor-pointer p-0"
-              >
-                <ArrowLeft size={14} />
-                Back to messages
-              </button>
-            </div>
-          )}
           {activeThread ? (
             <>
-              {/* Thread header */}
-              <div className="px-5 py-3.5 border-b border-[#E8EDF2] bg-white flex items-center justify-between gap-3 shrink-0">
-                <div className="flex items-center gap-3 min-w-0">
+              {/* Thread header — clean, WhatsApp-style: back arrow + avatar + name on mobile, info icon opens bottom sheet */}
+              <div className="px-4 sm:px-5 py-3 sm:py-3.5 border-b border-[#E8EDF2] bg-white flex items-center justify-between gap-3 shrink-0">
+                <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
+                  <button
+                    type="button"
+                    onClick={() => selectThread(undefined)}
+                    className="md:hidden shrink-0 w-8 h-8 -ml-1 flex items-center justify-center text-[#1A1A2E] bg-transparent border-none cursor-pointer"
+                    aria-label="Back to messages"
+                  >
+                    <ArrowLeft size={19} />
+                  </button>
                   <img
                     src={activeThread.avatar}
                     className="w-[38px] h-[38px] rounded-full object-cover border border-[#E8EDF2] shrink-0"
@@ -935,9 +934,20 @@ export function MessagesPage({
                       Report to Support
                     </button>
                   )}
+                  {!isAnnouncementsThread && !isEmiThread && (
+                    <button
+                      type="button"
+                      onClick={() => setShowMobileInfo(true)}
+                      className="xl:hidden w-9 h-9 rounded-lg bg-[#F4F7F9] flex items-center justify-center text-[#9AA0AC] hover:text-[#1A1A2E] transition-colors border-none cursor-pointer"
+                      title="Conversation info"
+                      aria-label="Conversation info"
+                    >
+                      <Info size={16} />
+                    </button>
+                  )}
                   <button
                     type="button"
-                    className="w-9 h-9 rounded-lg bg-[#F4F7F9] flex items-center justify-center text-[#9AA0AC] hover:text-[#1A1A2E] transition-colors border-none cursor-pointer"
+                    className="hidden md:flex w-9 h-9 rounded-lg bg-[#F4F7F9] items-center justify-center text-[#9AA0AC] hover:text-[#1A1A2E] transition-colors border-none cursor-pointer"
                     title="Thread options"
                   >
                     <MoreVertical size={14} />
@@ -1297,6 +1307,26 @@ export function MessagesPage({
           }}
         />
       </div>
+
+      {activeThread && !isAnnouncementsThread && !isEmiThread && (
+        <MobileThreadInfoSheet
+          open={showMobileInfo}
+          onClose={() => setShowMobileInfo(false)}
+          activeThread={activeThread}
+          linkedOrder={linkedOrder}
+          linkedSubOrder={linkedSubOrder}
+          conversationClosed={isConversationClosed}
+          onReportProblem={() => {
+            setShowMobileInfo(false);
+            setShowReportModal(true);
+          }}
+          onViewOrder={() => {
+            if (linkedOrder) {
+              navigate('/order-tracking', { state: { order: linkedOrder } });
+            }
+          }}
+        />
+      )}
 
       <ReportConversationProblemModal
         open={showReportModal}

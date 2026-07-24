@@ -35,12 +35,13 @@ export interface ListingFilterPillsProps {
 const pillBase =
   'px-3.5 py-2 rounded-[18px] text-[11.5px] font-bold cursor-pointer border transition-all min-h-[36px]';
 
-/** Same dark surface as the site footer (.footer-brand-gradient). */
+/** Idle sticky filter pills */
 const pillSurface =
-  'footer-brand-gradient text-white border-white/15 hover:border-white/35 hover:brightness-110';
+  'bg-white text-[#1A1A2E] border-[#E5E7EB] hover:border-[#EB4501]/40';
 
+/** Selected — same dark surface as the site footer */
 const pillActive =
-  'footer-brand-gradient text-white border-[#EB4501] ring-1 ring-[#EB4501]/45 brightness-110';
+  'footer-brand-gradient text-white border-transparent hover:brightness-110';
 
 /**
  * Discover-style under-header filter pills — desktop/tablet only.
@@ -103,14 +104,8 @@ export function ListingFilterPills({
                   aria-pressed={active}
                   className={cn(
                     pillBase,
-                    isLive
-                      ? cn(
-                          'bg-[#FF000D] text-white border-[#FF000D] hover:brightness-110',
-                          active && 'ring-2 ring-offset-1 ring-[#FF000D]/40',
-                        )
-                      : active
-                        ? pillActive
-                        : pillSurface,
+                    active ? pillActive : pillSurface,
+                    isLive && !active && 'border-[#FF000D]/35',
                   )}
                 >
                   {pill.label}

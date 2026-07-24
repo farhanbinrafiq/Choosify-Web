@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  X, Check, ShieldCheck, Lock, Upload, FileText, Camera, AlertTriangle, 
+import {
+  X, Check, ShieldCheck, Lock, Upload, FileText, Camera, AlertTriangle,
   ArrowRight, Landmark, FileCheck, CheckCircle2, UserCheck, RefreshCw, Eye, HelpCircle,
   Video, Instagram, Rss, Facebook, Clock, Award
 } from 'lucide-react';

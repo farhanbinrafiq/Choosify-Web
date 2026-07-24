@@ -1,8 +1,16 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Radio, Clock, X } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import type { CommerceMediaItem } from './commerceMediaTypes';
 import { isVideoKind } from '../media/choosifyMediaTypes';
+
+export interface DetailSliverLiveBadge {
+  label: string;
+  isLive: boolean;
+  isUpcoming: boolean;
+  scheduledAt?: string;
+  ctaLabel?: string;
+}
 
 const ZOOM_MAX = 4;
 const ZOOM_TAP_SCALE = 2.5;
@@ -151,6 +159,8 @@ export interface DetailSliverMediaGalleryProps {
   showAddVideo?: boolean;
   onAddVideo?: () => void;
   className?: string;
+  /** LIVE NOW / Upcoming / Replay badge overlaid on the media card */
+  liveBadge?: DetailSliverLiveBadge;
 }
 
 function slideAt(items: CommerceMediaItem[], index: number, offset: number): CommerceMediaItem | null {
@@ -260,6 +270,7 @@ export function DetailSliverMediaGallery({
   showAddVideo = false,
   onAddVideo,
   className,
+  liveBadge,
 }: DetailSliverMediaGalleryProps) {
   const safeItems = items.length ? items : [];
   const [activeIndex, setActiveIndex] = useState(0);
@@ -350,9 +361,9 @@ export function DetailSliverMediaGallery({
         <div
           className={cn(
             'relative overflow-hidden shrink-0 rounded-2xl md:rounded-none',
-            multi
-              ? 'w-[min(52vw,760px)] sm:w-[min(50vw,720px)] md:w-[min(48vw,780px)] lg:w-[min(46vw,860px)] h-[280px] sm:h-[360px] md:h-[460px] lg:h-[580px]'
-              : 'w-full max-w-[640px] h-[280px] sm:h-[360px] md:h-[420px] lg:h-[580px]',
+            // Same center stage for 1 photo (LIVE) and multi carousels (product/guide)
+            'w-[min(52vw,760px)] sm:w-[min(50vw,720px)] md:w-[min(48vw,780px)] lg:w-[min(46vw,860px)]',
+            'h-[280px] sm:h-[360px] md:h-[460px] lg:h-[580px]',
           )}
         >
           <button
@@ -371,6 +382,36 @@ export function DetailSliverMediaGallery({
           >
             🔍
           </button>
+
+          {liveBadge && (
+            <div className="absolute top-3 left-3 sm:top-3.5 sm:left-3.5 z-10 flex flex-col items-start gap-2 max-w-[calc(100%-5rem)]">
+              <span
+                className={cn(
+                  'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold tracking-tight shadow-md backdrop-blur-sm',
+                  liveBadge.isLive
+                    ? 'bg-rose-600/90 text-white'
+                    : 'bg-black/60 text-white',
+                )}
+              >
+                <Radio size={12} className={liveBadge.isLive ? 'animate-pulse' : undefined} />
+                {liveBadge.label}
+              </span>
+              {liveBadge.scheduledAt && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-black/50 text-white text-[10px] font-medium backdrop-blur-sm">
+                  <Clock size={11} /> {new Date(liveBadge.scheduledAt).toLocaleString()}
+                </span>
+              )}
+              {liveBadge.ctaLabel && (
+                <a
+                  href="#spotlight-content-hero"
+                  onClick={(e) => e.stopPropagation()}
+                  className="inline-flex items-center justify-center min-h-[32px] px-3 py-1.5 bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-wider rounded hover:bg-[#CF4400] no-underline shadow-md"
+                >
+                  {liveBadge.ctaLabel}
+                </a>
+              )}
+            </div>
+          )}
         </div>
 
         {multi ? (

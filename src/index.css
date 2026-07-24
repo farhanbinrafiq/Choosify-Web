@@ -263,22 +263,6 @@
   -webkit-backdrop-filter: blur(14px);
 }
 
-.choosify-discover-pill {
-  /* Light badge behind Discover; gradient lives on the inner label */
-  display: inline-block;
-  padding: 2px 7px;
-  border-radius: 4px;
-  background: #ffffff;
-}
-
-.choosify-discover-pill-label {
-  background: var(--gradient-emi);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
-}
-
 /** Square flex shell for portrait Emi mascot — avoids side clipping in avatars/FABs */
 .choosify-emi-logo-slot {
   display: inline-flex;

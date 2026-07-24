@@ -25,14 +25,15 @@ export function HomePopularServicesSection({ services }: HomePopularServicesSect
         };
       })
     : POPULAR_SERVICE_TILES;
+  const display = items.slice(0, 6);
 
   return (
     <DcHomeBlock id="section-services">
       <h2 id="section-services-heading" className="text-[19px] font-extrabold text-[#1A1A2E] mb-4">
         Popular Services
       </h2>
-      <div className="grid grid-cols-4 md:grid-cols-8 gap-3 mb-2">
-        {items.map(({ id, label, letter, href, bg, fg, icon: Icon }) => (
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mb-2">
+        {display.map(({ id, label, letter, href, bg, fg, icon: Icon }) => (
           <Link
             key={id}
             to={href}

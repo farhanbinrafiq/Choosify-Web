@@ -9,6 +9,8 @@ export interface ReviewData {
   time?: string;
   date?: string;
   purchaseDate?: string;
+  /** 'COD' or 'Online Payment' — auto-detected from the linked order */
+  orderType?: string;
   comment?: string;
   content?: string;
   rating: number | string;
@@ -111,7 +113,15 @@ export function PublicReviewCard({
             )}
           </div>
         </div>
-        <div className="text-[11px] text-[#9AA0AC] whitespace-nowrap shrink-0">{displayDate}</div>
+        <div className="text-right shrink-0">
+          <div className="text-[11px] text-[#9AA0AC] whitespace-nowrap">Posted {displayDate}</div>
+          {review.purchaseDate && (
+            <div className="text-[10px] text-[#9AA0AC] whitespace-nowrap mt-0.5">
+              Purchased {review.purchaseDate}
+              {review.orderType ? ` · ${review.orderType}` : ''}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="flex items-center gap-1.5 mb-2.5">

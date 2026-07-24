@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '../../lib/utils';
+import { SponsoredVerticalAdCarousel } from '../commerce/SponsoredVerticalAdCarousel';
 
 const TOP_COUPONS = [
   { pct: '10%', code: 'CHOOSIFY10', min: 'Min. Spend BDT 5,000' },
@@ -228,32 +229,11 @@ export function DealsSubscribeBanner({ className }: { className?: string }) {
 /** Portrait / vertical sidebar advertise unit — Choosify.dc.html listing rails */
 export function DealsVerticalSponsoredCard({ className }: { className?: string }) {
   return (
-    <div
-      className={cn(
-        'bg-[#FFF6EF] rounded-[10px] overflow-hidden border-[1.5px] border-dashed border-[#EB4501] relative flex flex-col min-h-[320px]',
-        className,
-      )}
-    >
-      <div className="absolute top-2 left-2 bg-[#1A1A2E] text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-sm z-[1]">
-        SPONSORED
-      </div>
-      <div className="h-[160px] bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-end justify-center pb-3">
-        <span className="text-white text-[12px] font-extrabold text-center px-3">
-          PROMOTE YOUR DEAL
-        </span>
-      </div>
-      <div className="p-4 flex flex-col flex-1">
-        <div className="text-[10px] font-bold text-[#9AA0AC] tracking-wide mb-1">ADVERTISEMENT</div>
-        <div className="text-[13px] font-semibold text-[#1A1A2E] mb-3 leading-snug">
-          Reach 2M+ shoppers with a featured deal slot
-        </div>
-        <Link
-          to="/advertise"
-          className="mt-auto w-full bg-[#EB4501] text-white text-center border-none py-2.5 rounded-md text-[11.5px] font-extrabold hover:brightness-110 no-underline"
-        >
-          ADVERTISE HERE →
-        </Link>
-      </div>
-    </div>
+    <SponsoredVerticalAdCarousel
+      className={className}
+      includeAdvertisePlaceholder
+      autoplay
+      withDemoFallback
+    />
   );
 }

@@ -387,7 +387,6 @@ export function UniversalCommerceCard({
           mode === 'commerce' && 'border border-[#E8EDF2]',
         )
       : 'bg-transparent',
-    isReel ? 'max-w-[150px]' : '',
     className,
   );
 

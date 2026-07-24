@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -418,7 +418,7 @@ export function FloatingOverlays() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
                 className={cn(
-                'relative w-[52px] h-[52px] rounded-full bg-white shadow-[0_8px_20px_rgba(0,0,0,0.28)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none p-2.5',
+                'relative w-[52px] h-[52px] rounded-full bg-white shadow-[0_8px_20px_rgba(0,0,0,0.28)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none p-2',
                 activePanel === 'emi' && 'ring-2 ring-[#EB4501]/60 brightness-105',
               )}
               title="Ask Emi — Choosify Assistant"
@@ -754,7 +754,7 @@ export function FloatingOverlays() {
         whileTap={{ scale: 0.95 }}
         data-floating-fab="emi"
         className={cn(
-          'fixed z-[219] w-14 h-14 rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden p-2.5 bg-white cursor-pointer',
+          'fixed z-[219] w-14 h-14 rounded-full shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden p-2 bg-white cursor-pointer',
           activePanel === 'emi' && 'ring-2 ring-[#EB4501]/60 brightness-105',
         )}
         style={{
@@ -768,32 +768,6 @@ export function FloatingOverlays() {
         {hasEmiUnread && activePanel !== 'emi' && (
           <span className="absolute top-1 right-1 w-3 h-3 rounded-full bg-[#EB4501] border-2 border-white" />
         )}
-      </motion.button>
-    )}
-
-    {isMobile && totalCartItems > 0 && (
-      <motion.button
-        type="button"
-        onClick={() => setActivePanel(activePanel === 'cart' ? null : 'cart')}
-        whileTap={{ scale: 0.95 }}
-        data-floating-fab="cart"
-        className={cn(
-          'fixed z-[218] w-14 h-14 rounded-full bg-white text-[#EB4501] shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden cursor-pointer',
-          activePanel === 'cart' && 'ring-2 ring-[#EB4501]/50 brightness-110',
-        )}
-        style={{
-          bottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))',
-          right: showEmiFab
-            ? 'calc(4.5rem + max(1rem, env(safe-area-inset-right, 0px)))'
-            : 'max(1rem, env(safe-area-inset-right, 0px))',
-        }}
-        aria-label="Quick Cart Checklist"
-        title="Quick Cart Checklist"
-      >
-        <ShoppingCart size={22} strokeWidth={2} className="text-[#EB4501]" />
-        <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-lg bg-[#EB4501] text-white text-[9px] font-bold flex items-center justify-center leading-none">
-          {totalCartItems > 99 ? '99+' : totalCartItems}
-        </span>
       </motion.button>
     )}
 

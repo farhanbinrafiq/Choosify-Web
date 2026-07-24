@@ -119,10 +119,16 @@ export function CategoryPremiumCard({
         <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-extrabold shrink-0">
           {featuredInitial}
         </div>
-        <div className="text-[11px] text-white font-bold min-w-0">
+        <div className="text-[11px] text-white font-bold min-w-0 flex-1 truncate">
           Featured Brand:{' '}
           <span className="text-white font-extrabold">{featured}</span>
         </div>
+        <span
+          className="shrink-0 text-[9px] font-extrabold uppercase tracking-wide text-white/70 border border-white/25 rounded px-1.5 py-0.5"
+          title="Sponsored"
+        >
+          Ad
+        </span>
       </Link>
     </div>
   );

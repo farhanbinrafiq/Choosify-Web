@@ -195,18 +195,16 @@ export function EmiChatPanel({
     <div className={cn('flex flex-col min-h-0 h-full', className)}>
       <div className="px-4 sm:px-5 py-4 border-b border-white/10 flex items-center justify-between shrink-0 choosify-emi-gradient text-white gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 shadow-lg p-1">
+          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 shadow-lg p-0.5">
             <EmiAiLogo size={32} />
           </div>
           <div className="min-w-0 text-left">
-            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white flex items-center gap-1">
-              <Sparkles size={10} className="text-white" />
-              Choosify Assistant
+            <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/80 flex items-center gap-1 truncate">
+              <Sparkles size={10} className="text-white shrink-0" />
+              <span className="truncate">Enhance Marketplace Intelligence</span>
             </p>
-            <h3 className="text-sm font-black uppercase tracking-wide truncate m-0">
-              <span className="inline-block bg-white px-1.5 py-0.5 rounded choosify-emi-gradient-text">
-                Emi
-              </span>
+            <h3 className="text-sm font-black uppercase tracking-wide truncate m-0 text-white">
+              emi
             </h3>
           </div>
         </div>
@@ -252,7 +250,7 @@ export function EmiChatPanel({
                 className={cn(
                   'rounded-[10px] px-3.5 py-2.5 text-[12px] leading-relaxed whitespace-pre-wrap text-left',
                   msg.role === 'user'
-                    ? 'bg-[#EB4501] text-[#1A1A2E] cursor-default border-0'
+                    ? 'bg-white border border-[#e8edf2] text-[#1A1A2E] shadow-sm cursor-default'
                     : 'bg-white border border-[#e8edf2] text-[#1A1A2E] shadow-sm',
                   canFocus && 'cursor-pointer hover:border-[#EB4501]/35',
                   isFocused && 'ring-2 ring-[#EB4501]/35 border-[#EB4501]/40',

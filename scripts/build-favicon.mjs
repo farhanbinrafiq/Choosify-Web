@@ -5,19 +5,20 @@ import path from 'path';
 const web = 'C:/Users/User/Projects/Choosify-Web/public';
 const admin = 'C:/Users/User/Projects/choosify-admin-4.0/public';
 
-// Eyes art bounds
+// Eyes art bounds (source SVG coordinates)
 const bx = 261.18;
 const by = 1102.85;
 const bw = 3001.35;
 const bh = 1466.49;
 
 const canvas = 512;
-const margin = 28;
-const usable = canvas - margin * 2;
-const scale = usable / bw;
-const ox = margin;
-const oy = (canvas - bh * scale) / 2;
-const radius = 112;
+/** Rounded-square corners — not a circle (circle would be 256). */
+const cornerRadius = 56;
+/**
+ * Keep logo inside the maskable safe zone (~center 80%).
+ * 12% inset each side → content spans 76% of the canvas.
+ */
+const safeInset = 0.12;
 
 const eyesPathD = [
   'M3077.32,1913.39c0-153.52-124.56-277.91-278.07-277.91s-278.07,124.39-278.07,277.91,124.56,278.07,278.07,278.07c26.65,0,52.32-3.79,76.67-10.7-10.69-17.44-16.95-38.17-16.95-60.22,0-64,51.83-115.84,115.67-115.84,28.96,0,55.45,10.7,75.69,28.14,17.28-36.2,26.98-76.67,26.98-119.46Z',
@@ -26,11 +27,22 @@ const eyesPathD = [
   'M2615.38,2569.34c-110.57,0-217.88-21.67-318.95-64.42-97.58-41.27-185.19-100.34-260.41-175.56-75.22-75.22-134.28-162.83-175.56-260.41-42.75-101.07-64.42-208.38-64.42-318.95s21.68-217.88,64.42-318.95c41.27-97.58,100.34-185.19,175.56-260.41,75.22-75.22,162.83-134.28,260.41-175.56,101.07-42.75,208.38-64.42,318.95-64.42s217.88,21.67,318.95,64.42c97.58,41.27,185.19,100.34,260.41,175.56,75.22,75.22,134.28,162.83,175.56,260.41,42.75,101.07,64.42,208.38,64.42,318.95s-21.68,217.88-64.42,318.95c-41.27,97.58-100.34,185.19-175.56,260.41-75.22,75.22-162.83,134.28-260.41,175.56-101.07,42.75-208.38,64.42-318.95,64.42ZM2615.38,1102.85c-356.84,0-647.15,290.31-647.15,647.15s290.31,647.15,647.15,647.15,647.15-290.31,647.15-647.15-290.31-647.15-647.15-647.15Z',
 ];
 
-function buildFaviconSvg(bg, fg) {
+function layoutLogo() {
+  const usable = canvas * (1 - 2 * safeInset);
+  // Fit both axes so wide eyes are never side-cropped
+  const scale = Math.min(usable / bw, usable / bh);
+  const ox = (canvas - bw * scale) / 2;
+  const oy = (canvas - bh * scale) / 2;
+  return { scale, ox, oy };
+}
+
+function buildFaviconSvg(bg, fg, { rounded = true } = {}) {
+  const { scale, ox, oy } = layoutLogo();
+  const rx = rounded ? cornerRadius : 0;
   const paths = eyesPathD.map((d) => `    <path fill="${fg}" d="${d}"/>`).join('\n');
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${canvas} ${canvas}">
-  <rect width="${canvas}" height="${canvas}" rx="${radius}" ry="${radius}" fill="${bg}"/>
+  <rect width="${canvas}" height="${canvas}" rx="${rx}" ry="${rx}" fill="${bg}"/>
   <g transform="translate(${ox.toFixed(3)} ${oy.toFixed(3)}) scale(${scale.toFixed(8)}) translate(${(-bx).toFixed(3)} ${(-by).toFixed(3)})">
 ${paths}
   </g>
@@ -51,26 +63,38 @@ const sizes = {
 };
 const pwa = [48, 72, 96, 128, 144, 152, 192, 256, 384, 512];
 
-async function writeSet(root, svg) {
-  fs.writeFileSync(path.join(root, 'favicon.svg'), svg);
-  fs.writeFileSync(path.join(root, 'brand', 'choosify-favicon.svg'), svg);
+async function writeSet(root, roundedSvg, maskableSvg) {
+  fs.mkdirSync(path.join(root, 'brand'), { recursive: true });
+  fs.mkdirSync(path.join(root, 'icons'), { recursive: true });
+
+  fs.writeFileSync(path.join(root, 'favicon.svg'), roundedSvg);
+  fs.writeFileSync(path.join(root, 'brand', 'choosify-favicon.svg'), roundedSvg);
+
   for (const [rel, size] of Object.entries(sizes)) {
     const out = path.join(root, rel);
     fs.mkdirSync(path.dirname(out), { recursive: true });
-    fs.writeFileSync(out, renderPng(svg, size));
+    fs.writeFileSync(out, renderPng(roundedSvg, size));
     console.log(out, fs.statSync(out).size);
   }
+
   for (const s of pwa) {
-    fs.writeFileSync(path.join(root, 'icons', `icon-${s}x${s}.png`), renderPng(svg, s));
+    // `any` — rounded-square favicon / home-screen look
+    fs.writeFileSync(path.join(root, 'icons', `icon-${s}x${s}.png`), renderPng(roundedSvg, s));
+    // `maskable` — full-bleed square; OS applies its own mask; logo stays in safe zone
+    fs.writeFileSync(
+      path.join(root, 'icons', `icon-${s}x${s}-maskable.png`),
+      renderPng(maskableSvg, s),
+    );
   }
 }
 
-// Storefront: white bg + orange eyes
-const storeSvg = buildFaviconSvg('#FFFFFF', '#EB4501');
-// Admin: navy bg + white eyes
-const adminSvg = buildFaviconSvg('#000435', '#FFFFFF');
-await writeSet(web, storeSvg);
-await writeSet(admin, adminSvg);
+const storeRounded = buildFaviconSvg('#FFFFFF', '#EB4501', { rounded: true });
+const storeMaskable = buildFaviconSvg('#FFFFFF', '#EB4501', { rounded: false });
+const adminRounded = buildFaviconSvg('#000435', '#FFFFFF', { rounded: true });
+const adminMaskable = buildFaviconSvg('#000435', '#FFFFFF', { rounded: false });
+
+await writeSet(web, storeRounded, storeMaskable);
+await writeSet(admin, adminRounded, adminMaskable);
 
 const { default: pngToIco } = await import('png-to-ico');
 for (const root of [web, admin]) {
@@ -82,5 +106,6 @@ for (const root of [web, admin]) {
   console.log('ico', root, buf.length);
 }
 
+console.log('rounded corners rx=', cornerRadius, '/512; safe inset', safeInset);
 console.log('storefront: bg #FFFFFF / eyes #EB4501');
 console.log('admin: bg #000435 / eyes #FFFFFF');

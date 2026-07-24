@@ -58,6 +58,59 @@ const SHORTCUTS = [
   { label: 'Browse brands', to: '/brands' },
 ] as const;
 
+/** Derives the buyer-seller info fields shared by the desktop rail and mobile info sheet. */
+export function resolveBuyerSellerInfo(
+  activeThread?: MessageThread | null,
+  linkedOrder?: Order | null,
+  linkedSubOrder?: SubOrder | null,
+) {
+  const orderId = linkedOrder?.orderId || activeThread?.orderRef || '—';
+  const invoiceId = linkedSubOrder?.invoiceId || '—';
+  const orderDate = formatDate(linkedOrder?.createdAt);
+  const paymentMethod = linkedOrder
+    ? linkedOrder.isCOD || linkedOrder.paymentMethod === 'cod'
+      ? 'Cash on Delivery (COD)'
+      : 'Card / Credit'
+    : '—';
+  const orderStatus = linkedSubOrder?.trackingStatus
+    ? formatStatus(linkedSubOrder.trackingStatus)
+    : linkedOrder?.status
+      ? formatStatus(linkedOrder.status)
+      : activeThread?.orderRef
+        ? 'IN PROGRESS'
+        : '—';
+  const totalAmount = linkedOrder
+    ? `৳${(linkedOrder.overallTotal ?? 0).toLocaleString()}`
+    : linkedSubOrder
+    ? `৳${(
+        linkedSubOrder.items.reduce(
+          (acc, x) => acc + (x.price ?? 0) * (x.quantity ?? 0),
+          0,
+        ) + (linkedSubOrder.deliveryFee ?? 0)
+      ).toLocaleString()}`
+    : '—';
+
+  const sellerName = linkedSubOrder?.sellerBusinessName || activeThread?.title || 'Seller';
+  const sellerInitials =
+    sellerName
+      .split(/\s+/)
+      .filter(Boolean)
+      .slice(0, 2)
+      .map((w) => w[0]?.toUpperCase() ?? '')
+      .join('') || 'S';
+
+  return {
+    orderId,
+    invoiceId,
+    orderDate,
+    paymentMethod,
+    orderStatus,
+    totalAmount,
+    sellerName,
+    sellerInitials,
+  };
+}
+
 /**
  * Buyer–seller: Transaction details + Support shortcuts.
  * Announcements + Emi: shared dynamic content panel (products / brands / deals / guides).
@@ -98,42 +151,16 @@ export function MessagesRightRail({
     );
   }
 
-  const orderId = linkedOrder?.orderId || activeThread?.orderRef || '—';
-  const invoiceId = linkedSubOrder?.invoiceId || '—';
-  const orderDate = formatDate(linkedOrder?.createdAt);
-  const paymentMethod = linkedOrder
-    ? linkedOrder.isCOD || linkedOrder.paymentMethod === 'cod'
-      ? 'Cash on Delivery (COD)'
-      : 'Card / Credit'
-    : '—';
-  const orderStatus = linkedSubOrder?.trackingStatus
-    ? formatStatus(linkedSubOrder.trackingStatus)
-    : linkedOrder?.status
-      ? formatStatus(linkedOrder.status)
-      : activeThread?.orderRef
-        ? 'IN PROGRESS'
-        : '—';
-  const totalAmount = linkedOrder
-    ? `৳${(linkedOrder.overallTotal ?? 0).toLocaleString()}`
-    : linkedSubOrder
-    ? `৳${(
-        linkedSubOrder.items.reduce(
-          (acc, x) => acc + (x.price ?? 0) * (x.quantity ?? 0),
-          0,
-        ) + (linkedSubOrder.deliveryFee ?? 0)
-      ).toLocaleString()}`
-    : '—';
-
-  const sellerName =
-    linkedSubOrder?.sellerBusinessName ||
-    activeThread?.title ||
-    'Seller';
-  const sellerInitials = sellerName
-    .split(/\s+/)
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((w) => w[0]?.toUpperCase() ?? '')
-    .join('') || 'S';
+  const {
+    orderId,
+    invoiceId,
+    orderDate,
+    paymentMethod,
+    orderStatus,
+    totalAmount,
+    sellerName,
+    sellerInitials,
+  } = resolveBuyerSellerInfo(activeThread, linkedOrder, linkedSubOrder);
 
   if (!activeThread) {
     return (
@@ -147,6 +174,57 @@ export function MessagesRightRail({
 
   return (
     <aside className="hidden xl:flex w-[260px] shrink-0 flex-col border-l border-[#E8EDF2] bg-white p-[18px] gap-5 overflow-y-auto min-h-0">
+      <BuyerSellerInfoPanel
+        activeThread={activeThread}
+        linkedOrder={linkedOrder}
+        orderId={orderId}
+        invoiceId={invoiceId}
+        orderDate={orderDate}
+        paymentMethod={paymentMethod}
+        orderStatus={orderStatus}
+        totalAmount={totalAmount}
+        sellerName={sellerName}
+        sellerInitials={sellerInitials}
+        conversationClosed={conversationClosed}
+        onViewOrder={onViewOrder}
+        onReportProblem={onReportProblem}
+      />
+    </aside>
+  );
+}
+
+/** Shared buyer-seller info content — desktop rail + mobile bottom sheet. */
+export function BuyerSellerInfoPanel({
+  activeThread,
+  linkedOrder,
+  orderId,
+  invoiceId,
+  orderDate,
+  paymentMethod,
+  orderStatus,
+  totalAmount,
+  sellerName,
+  sellerInitials,
+  conversationClosed,
+  onViewOrder,
+  onReportProblem,
+}: {
+  activeThread: MessageThread;
+  linkedOrder?: Order | null;
+  orderId: string;
+  invoiceId: string;
+  orderDate: string;
+  paymentMethod: string;
+  orderStatus: string;
+  totalAmount: string;
+  sellerName: string;
+  sellerInitials: string;
+  conversationClosed?: boolean;
+  onViewOrder?: () => void;
+  onReportProblem?: () => void;
+}) {
+  return (
+    <>
       {/* Transaction details */}
       <div>
         <div className="flex items-center gap-1.5 text-[11px] font-extrabold text-[#1A1A2E] mb-3">
@@ -268,7 +346,7 @@ export function MessagesRightRail({
           ))}
         </div>
       </div>
-    </aside>
+    </>
   );
 }
 

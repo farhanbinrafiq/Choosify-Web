@@ -131,6 +131,16 @@ export function GlobalSearchBar({
     }
   };
 
+  const handleClearAllRecent = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      setRecentSearches([]);
+      localStorage.setItem('choosify_recent_searches', JSON.stringify([]));
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
   // Close suggestions dropdown on click outside (input + portaled panel)
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -176,8 +186,8 @@ export function GlobalSearchBar({
       const rect = anchor.getBoundingClientRect();
       const viewportWidth = window.innerWidth;
       const isMobileOverlay = isNavbarFluid && mobileExpanded && viewportWidth < 640;
-      const minWidth = isMobileOverlay ? viewportWidth - 24 : 300;
-      const maxWidth = isMobileOverlay ? viewportWidth - 24 : Math.min(420, viewportWidth - 16);
+      const minWidth = isMobileOverlay ? viewportWidth - 24 : 340;
+      const maxWidth = isMobileOverlay ? viewportWidth - 24 : Math.min(620, viewportWidth - 16);
       const width = Math.min(Math.max(rect.width, minWidth), maxWidth);
       let left = isMobileOverlay ? 12 : rect.left;
       if (!isMobileOverlay && left + width > viewportWidth - 8) {
@@ -623,14 +633,25 @@ export function GlobalSearchBar({
         >
           {/* A. BEFORE TYPING STATE */}
           {!queryValue.trim() ? (
-            <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-6 divide-y md:divide-y-0 md:divide-x divide-gray-100">
+            <div className="p-5 grid grid-cols-1 md:grid-cols-3 gap-x-7 gap-y-6 divide-y md:divide-y-0 md:divide-x divide-gray-100">
               
               {/* Recent Searches */}
               <div className="flex flex-col text-left space-y-2">
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1">
-                  <Clock size={12} className="text-gray-400" />
-                  Recent Searches
-                </span>
+                <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+                  <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-1 shrink-0">
+                    <Clock size={12} className="text-gray-400" />
+                    Recent Searches
+                  </span>
+                  {suggestionsGrouped.recent.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={handleClearAllRecent}
+                      className="text-[9.5px] font-bold text-[#EB4501] hover:text-[#CF4400] hover:underline bg-transparent border-0 cursor-pointer p-0 shrink-0 whitespace-nowrap"
+                    >
+                      Clear search history
+                    </button>
+                  )}
+                </div>
                 {suggestionsGrouped.recent.length === 0 ? (
                   <p className="text-[11px] text-gray-400 italic">No recent searches</p>
                 ) : (

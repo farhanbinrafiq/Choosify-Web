@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   Search,
   CheckCircle2,
-  Gift,
   X,
   Lock,
   ShieldCheck,
@@ -19,7 +18,6 @@ import { StudioWrap } from "../components/studio/StudioWrap";
 import { BrandPostCarouselSection } from "../components/BrandPostCarouselSection";
 import { getBrandPostsByBrandId } from "../lib/brandPosts";
 import { useNavigate, Link, useParams } from "react-router-dom";
-import { useCarousel } from "../hooks/useCarousel";
 import { ReportModal } from "../components/ReportModal";
 import { useGlobalState } from "../context/GlobalStateContext";
 import { toast } from '../lib/notify';
@@ -28,17 +26,17 @@ import { FollowButton } from "../components/FollowButton";
 import { BrandDetailHero } from "../components/brand/BrandDetailHero";
 import { ClaimProfileModal } from "../components/ClaimProfileModal";
 import {
-  DragScrollContainer,
   UniversalFilterRenderer,
   ActiveFilterChips,
   FilterProfile,
   CategorySmartFilters,
   useRegisterPageFilters,
 } from "../components/FilterEngine";
+import { UniversalCarousel } from "../components/design/UniversalCarousel";
 import { PaginationBar } from "../components/PaginationBar";
 import { PublicReviewCard } from "../components/PublicReviewCard";
 import { TikTokIcon } from "../components/brand/TikTokIcon";
-import { BrandCouponsSection, buildBrandCoupons } from "../components/brand/BrandCouponsSection";
+import { BrandCouponsSection, BrandCouponCarouselCard, buildBrandCoupons } from "../components/brand/BrandCouponsSection";
 import { BrandWhereToBuySection } from "../components/brand/BrandWhereToBuySection";
 import { BrandFaqSection } from "../components/brand/BrandFaqSection";
 import { BrandStorySection } from "../components/brand/BrandStorySection";
@@ -1108,27 +1106,6 @@ export function BrandDetailPage() {
     };
   };
 
-  const brandPromos = [
-    {
-      title: "First Order Gift",
-      discount: "BDT 500 FLAT",
-      code: `${brand.name.toUpperCase()}500`,
-      expiry: "Valid till June 30",
-    },
-    {
-      title: "Eid Celebration Offer",
-      discount: "BDT 1,000 FLAT",
-      code: "EID26",
-      expiry: "Minimum purchase BDT 4,000",
-    },
-    {
-      title: "Limited VIP Discount",
-      discount: "20% FLAT OFF",
-      code: `${brand.name.toUpperCase()}20`,
-      expiry: "For New Registries",
-    },
-  ];
-
   const brandCoupons = buildBrandCoupons(brand.name);
 
   const overviewData = getBrandOverviews(brand.name);
@@ -1678,61 +1655,29 @@ export function BrandDetailPage() {
                     )}
                   </div>
                 ) : (
-                  <DragScrollContainer className="flex gap-3.5 overflow-x-auto pb-2 no-scrollbar snap-x snap-mandatory items-stretch">
-                    {finalDeals.map((product: any, i: number) => (
-                      <div
-                        key={product.id || i}
-                        className="w-[200px] sm:w-[220px] shrink-0 snap-start h-full"
-                      >
-                        <ProductCard
-                          product={product}
-                          variant="grid"
-                        />
-                      </div>
-                    ))}
-                    {brandPromos.map((promo, idx) => (
-                      <div
-                        key={`promo-${idx}`}
-                        className="w-[200px] sm:w-[220px] shrink-0 snap-start bg-white border border-[#E8EDF2] p-3.5 rounded-[10px] flex flex-col items-center text-center relative overflow-hidden group hover:border-[#EB4501]/30 transition-all h-full min-h-[220px]"
-                      >
-                        <div className="w-7 h-7 rounded-lg bg-[#FFF3EA] text-[#EB4501] flex items-center justify-center mb-2 shadow-sm shrink-0">
-                          <Gift size={14} />
-                        </div>
-                        <h4 className="text-xs font-semibold text-[#1A1A2E] mb-0.5">
-                          {promo.title}
-                        </h4>
-                        <div className="text-sm font-semibold text-[#EB4501] mb-3 leading-none">
-                          {promo.discount}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            navigator.clipboard.writeText(promo.code);
-                            toast.success(
-                              `Promo Code "${promo.code}" copied to clipboard!`,
-                            );
-                          }}
-                          className="w-full mt-auto py-2 bg-white rounded-lg border border-dashed border-[#E8EDF2] hover:border-[#EB4501] font-mono text-xs font-semibold text-[#1A1A2E] tracking-wider uppercase transition-colors flex flex-col items-center justify-center cursor-pointer"
-                        >
-                          <span className="text-[8px] text-gray-400 font-sans tracking-wide uppercase font-semibold">
-                            PROMO CODE
-                          </span>
-                          <span>{promo.code}</span>
-                        </button>
-                        <span className="text-[8px] font-bold text-gray-400 uppercase tracking-widest mt-2 block">
-                          {promo.expiry}
-                        </span>
-                      </div>
-                    ))}
-                  </DragScrollContainer>
-                )}
-
-                <div className="mt-9">
-                  <BrandCouponsSection
-                    brandName={brand.name}
-                    coupons={brandCoupons}
+                  <UniversalCarousel
+                    items={[
+                      ...finalDeals.map((product: any) => ({ kind: "deal" as const, product })),
+                      ...brandCoupons
+                        .slice(0, 3)
+                        .map((coupon) => ({ kind: "coupon" as const, coupon })),
+                    ]}
+                    getKey={(entry, i) =>
+                      entry.kind === "deal" ? String(entry.product.id ?? i) : entry.coupon.code
+                    }
+                    itemWidth={220}
+                    gap={14}
+                    className="pr-1"
+                    autoPlay
+                    renderItem={(entry) =>
+                      entry.kind === "deal" ? (
+                        <ProductCard product={entry.product} variant="grid" />
+                      ) : (
+                        <BrandCouponCarouselCard coupon={entry.coupon} />
+                      )
+                    }
                   />
-                </div>
+                )}
               </StudioWrap>
             )}
 

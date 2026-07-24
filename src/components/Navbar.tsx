@@ -97,29 +97,14 @@ export function Navbar() {
         .filter((item) => isNavPathEnabled(item.path, featureFlags))
         .map((item) => (
         <Link key={item.id} to={item.path} className={linkClass(item.path)}>
-          {item.path === '/spotlight' ? (
-            <span className="choosify-discover-pill-label">{item.label}</span>
-          ) : (
-            item.label
-          )}
+          {item.label}
         </Link>
       ))
     ) : (
       <>
         {PRIMARY_NAV_ITEMS.filter((item) => isNavPathEnabled(item.path, featureFlags)).map((item) => (
           <Link key={item.id} to={item.path} className={linkClass(item.path)}>
-            {item.path === '/spotlight' ? (
-              <span className="choosify-discover-pill-label">
-                {item.labelWide ? (
-                  <>
-                    <span className="2xl:hidden">{item.label}</span>
-                    <span className="hidden 2xl:inline">{item.labelWide}</span>
-                  </>
-                ) : (
-                  item.label
-                )}
-              </span>
-            ) : item.labelWide ? (
+            {item.labelWide ? (
               <>
                 <span className="2xl:hidden">{item.label}</span>
                 <span className="hidden 2xl:inline">{item.labelWide}</span>
@@ -186,13 +171,6 @@ export function Navbar() {
     const isActive = path === '/'
       ? location.pathname === '/'
       : location.pathname.startsWith(path);
-    const isDiscover = path === '/spotlight';
-    if (isDiscover) {
-      return cn(
-        'choosify-discover-pill whitespace-nowrap text-[11.5px] transition-opacity hover:opacity-90 cursor-pointer',
-        isActive ? 'font-bold' : 'font-medium',
-      );
-    }
     return cn(
       'text-[11.5px] whitespace-nowrap transition-colors hover:text-[#CF4400] cursor-pointer',
       isActive ? 'text-[#EB4501] font-bold' : 'text-white/80 font-medium',
@@ -303,30 +281,30 @@ export function Navbar() {
         {/* ACTIONS — messages + cart (desktop / tablet) */}
         <div className="flex items-center gap-1 sm:gap-1.5 xl:gap-2 shrink-0 nav-actions relative z-[50]">
           
-          <div className="hidden sm:flex items-center gap-3 border-r border-[#ffffff1a] pr-2 xl:pr-5 shrink-0">
+          <div className="hidden sm:flex items-center gap-5 border-r border-[#ffffff1a] pr-2 xl:pr-5 shrink-0">
             <button
               type="button"
               onClick={() => navigate('/messages')}
-              className="relative text-[#EB4501] hover:opacity-90 transition-opacity cursor-pointer"
+              className="relative text-white hover:opacity-90 transition-opacity cursor-pointer"
               aria-label="Message inbox"
               title="Messages"
             >
-              <MessageCircleMore size={19} strokeWidth={2} className="text-[#EB4501] transition-colors" />
+              <MessageCircleMore size={19} strokeWidth={2} className="text-white transition-colors" />
               {unreadMsgCount > 0 && (
                 <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 text-white text-[9px] font-bold bg-[#EB4501] rounded-lg flex items-center justify-center leading-none">
                   {unreadMsgCount > 99 ? '99+' : unreadMsgCount}
                 </span>
               )}
             </button>
-            <button 
+            <button
               type="button"
               onClick={openCartPreview}
-              className="relative text-[#EB4501] hover:opacity-90 transition-opacity cursor-pointer"
+              className="relative text-white hover:opacity-90 transition-opacity cursor-pointer"
               aria-label="Shopping cart"
               aria-expanded={isCartOpen}
               title="Shopping Cart"
             >
-              <ShoppingCart size={19} strokeWidth={2} className="text-[#EB4501] transition-colors" />
+              <ShoppingCart size={19} strokeWidth={2} className="text-white transition-colors" />
               {activeCartCount > 0 && (
                 <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 text-white text-[9px] font-bold bg-[#EB4501] rounded-lg flex items-center justify-center leading-none">
                   {activeCartCount > 99 ? '99+' : activeCartCount}

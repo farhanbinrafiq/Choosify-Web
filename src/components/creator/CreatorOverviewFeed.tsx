@@ -1,10 +1,17 @@
 import React, { useMemo } from 'react';
-import type { Creator } from '../../data/creators';
-import { spotlightContentHref } from '../../lib/spotlight/content';
+import { useNavigate } from 'react-router-dom';
+import { CheckCircle2 } from 'lucide-react';
+import type { Creator, MediaItem } from '../../data/creators';
 import { cn } from '../../lib/utils';
-import { CreatorContentCard, CREATOR_FEED_GRID } from './CreatorContentCard';
 import { rankCreatorContent } from '../../utils/listingRanking';
 import { usePriorityClockMs } from '../../hooks/usePriorityClockMs';
+import { useGlobalState } from '../../context/GlobalStateContext';
+import { ProductCard } from '../ProductCard';
+import { BrandCardDesign } from '../BrandCardDesign';
+import { PRODUCT_CARD_GRID, BRAND_CARD_GRID } from '../../lib/pageLayout';
+import { UniversalCommerceCard } from '../content';
+import { resolveCommerceCardVariant } from '../content/universalCommerceCardTypes';
+import { buildCreatorContentModel, type CreatorContentKind } from '../../utils/creatorContentCardModel';
 
 type CreatorOverviewFeedProps = {
   creator: Creator;
@@ -70,18 +77,12 @@ const COMMUNITY = [
   },
 ];
 
-type FeaturedItem = {
-  id: string;
-  title: string;
-  tag: string;
-  tagBg: string;
-  meta: string;
-  showPlay: boolean;
-  image?: string;
-  href?: string;
+type FeaturedEntry = {
+  kind: CreatorContentKind;
+  item: MediaItem;
 };
 
-function buildFeatured(creator: Creator, nowMs: number): FeaturedItem[] {
+function rankFeatured(creator: Creator, nowMs: number): FeaturedEntry[] {
   const videos = creator.videos ?? [];
   const reels = creator.reels ?? [];
   const blogs = creator.blogs ?? [];
@@ -95,81 +96,32 @@ function buildFeatured(creator: Creator, nowMs: number): FeaturedItem[] {
     nowMs,
   );
 
-  const items: FeaturedItem[] = ranked.slice(0, 4).map((src) => {
-    const kind = (src as { _kind?: string })._kind;
-    if (kind === 'blog') {
-      return {
-        id: `blog-${src.id}`,
-        title: src.title,
-        tag: src.isLive ? 'LIVE' : src.pinned ? 'PINNED' : 'BUYING GUIDE',
-        tagBg: src.isLive ? '#FF000D' : '#2323FF',
-        meta: src.readTime || '12 min read',
-        showPlay: false,
-        image: src.thumbnail,
-        href: spotlightContentHref(String(src.associatedGuideId || src.id)),
-      };
-    }
-    if (kind === 'reel') {
-      return {
-        id: `reel-${src.id}`,
-        title: src.title,
-        tag: src.isLive ? 'LIVE' : src.pinned ? 'PINNED' : 'COLLECTION',
-        tagBg: src.isLive ? '#FF000D' : '#16A34A',
-        meta: src.views || 'Short · Featured',
-        showPlay: true,
-        image: src.thumbnail,
-        href: spotlightContentHref(String(src.associatedGuideId || src.id)),
-      };
-    }
-    return {
-      id: `vid-${src.id}`,
-      title: src.title,
-      tag: src.isLive ? 'LIVE' : src.pinned ? 'PINNED' : 'CREATOR REVIEW',
-      tagBg: src.isLive ? '#FF000D' : '#3B82F6',
-      meta: src.views ? `${src.views}` : 'Video review',
-      showPlay: true,
-      image: src.thumbnail,
-      href: spotlightContentHref(String(src.associatedGuideId || src.id)),
-    };
-  });
-
-  while (items.length < 4) {
-    const fallbacks = [
-      { title: 'Best Running Shoes for 2025', tag: 'BUYING GUIDE', tagBg: '#2323FF', meta: '12 min read', showPlay: false },
-      { title: '30 Day Review: Samsung S24 Ultra', tag: 'CREATOR REVIEW', tagBg: '#3B82F6', meta: '18 min video', showPlay: true },
-      { title: 'Minimal Desk Setup Ideas', tag: 'COLLECTION', tagBg: '#16A34A', meta: '8 items', showPlay: false },
-      { title: "Behind Aarong's Summer Collection", tag: 'BRAND STORY', tagBg: '#EB4501', meta: '10 min read', showPlay: false },
-    ];
-    const f = fallbacks[items.length];
-    items.push({ id: `demo-${items.length}`, ...f });
-  }
-
-  return items.slice(0, 4);
+  return ranked.slice(0, 4).map((src) => ({
+    kind: (src as { _kind: CreatorContentKind })._kind,
+    item: src,
+  }));
 }
 
-const LATEST_REVIEWS = [
-  {
-    name: 'Samsung Galaxy S24 Ultra',
-    date: 'May 5, 2025',
-    rating: '4.9',
-    rank: 1,
-    image: 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=100&h=100&fit=crop',
-  },
-  {
-    name: 'Sony WH-1000XM5 Headphones',
-    date: 'Apr 28, 2025',
-    rating: '4.8',
-    rank: 2,
-    image: 'https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=100&h=100&fit=crop',
-  },
-  {
-    name: 'Dell XPS 15 (2024)',
-    date: 'Apr 20, 2025',
-    rating: '4.7',
-    rank: 3,
-    image: 'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=100&h=100&fit=crop',
-  },
-];
+// items-start: mixed video (16:9) / reel (9:16) / blog (4:3) cards in one row must NOT
+// stretch to match the tallest sibling — each card keeps its own natural height.
+const CREATOR_FEED_GRID =
+  'grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5 items-start';
+
+function OverviewCardHeader({ title, accentColor }: { title: string; accentColor?: string }) {
+  return (
+    <div className="flex items-center gap-2.5 mb-4 border-b border-[#F1F1F3] pb-3">
+      <div className="w-8 h-8 rounded-lg bg-[#FFF3EA] text-[#EB4501] flex items-center justify-center shrink-0">
+        <CheckCircle2 size={16} fill="currentColor" className="text-[#EB4501] stroke-white" />
+      </div>
+      <h3
+        className="text-[11px] font-extrabold uppercase tracking-wider"
+        style={{ color: accentColor || '#1A1A2E' }}
+      >
+        {title}
+      </h3>
+    </div>
+  );
+}
 
 /** Choosify.dc.html Creator Profile — Overview tab feed */
 export function CreatorOverviewFeed({
@@ -177,8 +129,10 @@ export function CreatorOverviewFeed({
   onViewAllContent,
   onViewAllReviews,
 }: CreatorOverviewFeedProps) {
+  const navigate = useNavigate();
   const nowMs = usePriorityClockMs();
-  const featured = useMemo(() => buildFeatured(creator, nowMs), [creator, nowMs]);
+  const { allProducts, allBrands } = useGlobalState();
+  const featured = useMemo(() => rankFeatured(creator, nowMs), [creator, nowMs]);
   const firstName = creator.name.split(' ')[0] || creator.name;
 
   const overviewBlocks = [
@@ -211,10 +165,38 @@ export function CreatorOverviewFeed({
     { icon: '📍', label: 'Location', value: 'Dhaka, Bangladesh' },
   ];
 
+  const matchTags = (creator.bestForTags?.length ? creator.bestForTags : [creator.bestFor]).filter(Boolean);
+  const recommendedProducts = useMemo(
+    () =>
+      allProducts
+        .filter((p: any) =>
+          matchTags.some(
+            (tag) =>
+              String(p.category || '').toLowerCase().includes(String(tag).toLowerCase()) ||
+              String(tag).toLowerCase().includes(String(p.category || '').toLowerCase()),
+          ),
+        )
+        .slice(0, 4),
+    [allProducts, creator.id],
+  );
+  const recommendedBrands = useMemo(
+    () =>
+      allBrands
+        .filter((b: any) =>
+          matchTags.some(
+            (tag) =>
+              String(b.category || '').toLowerCase().includes(String(tag).toLowerCase()) ||
+              String(tag).toLowerCase().includes(String(b.category || '').toLowerCase()),
+          ),
+        )
+        .slice(0, 4),
+    [allBrands, creator.id],
+  );
+
   return (
     <div className="flex flex-col gap-8">
-      {/* Featured Content */}
-      <section>
+      {/* Featured Content — same universal content cards as Discover / Brand Story / Product Detail */}
+      <section className="bg-white border border-[#E8EDF2] rounded-[10px] p-5">
         <div className="flex justify-between items-baseline mb-3.5">
           <h2 className="text-sm font-extrabold text-[#1A1A2E]">Featured Content</h2>
           <button
@@ -226,18 +208,20 @@ export function CreatorOverviewFeed({
           </button>
         </div>
         <div className={CREATOR_FEED_GRID}>
-          {featured.map((cf) => (
-            <CreatorContentCard
-              key={cf.id}
-              title={cf.title}
-              tag={cf.tag}
-              tagBg={cf.tagBg}
-              meta={cf.meta}
-              image={cf.image}
-              showPlay={cf.showPlay}
-              href={cf.href}
-            />
-          ))}
+          {featured.map((entry) => {
+            const model = buildCreatorContentModel(entry.kind, entry.item, creator);
+            const variant = resolveCommerceCardVariant(model.layoutVariant, model.aspectRatio);
+            return (
+              <UniversalCommerceCard
+                key={model.id}
+                mode="commerce"
+                variant={variant}
+                model={model}
+                onNavigate={() => navigate(model.href)}
+                className="w-full h-auto"
+              />
+            );
+          })}
         </div>
       </section>
 
@@ -270,13 +254,14 @@ export function CreatorOverviewFeed({
               VIEW ALL REVIEWS →
             </button>
           </div>
-          {LATEST_REVIEWS.map((lr, i) => (
+          {[
+            { name: 'Samsung Galaxy S24 Ultra', date: 'May 5, 2025', rating: '4.9', rank: 1, image: 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=100&h=100&fit=crop' },
+            { name: 'Sony WH-1000XM5 Headphones', date: 'Apr 28, 2025', rating: '4.8', rank: 2, image: 'https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=100&h=100&fit=crop' },
+            { name: 'Dell XPS 15 (2024)', date: 'Apr 20, 2025', rating: '4.7', rank: 3, image: 'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=100&h=100&fit=crop' },
+          ].map((lr, i, arr) => (
             <div
               key={lr.name}
-              className={cn(
-                'flex items-center gap-2.5 py-2.5',
-                i < LATEST_REVIEWS.length - 1 && 'border-b border-[#F1F1F3]',
-              )}
+              className={cn('flex items-center gap-2.5 py-2.5', i < arr.length - 1 && 'border-b border-[#F1F1F3]')}
             >
               <div className="text-[11px] font-bold text-[#9AA0AC] w-3.5">{lr.rank}</div>
               <div className="w-[34px] h-[34px] rounded-md overflow-hidden shrink-0 bg-[#F4F7F9]">
@@ -310,10 +295,10 @@ export function CreatorOverviewFeed({
         </div>
       </section>
 
-      {/* Overview / Partners / Contact */}
-      <section className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-5">
-          <h3 className="text-[13px] font-extrabold text-[#1A1A2E] mb-3.5">Creator Overview</h3>
+      {/* Creator Overview + Contact & Reach — side by side, styled like Brand/Product Overview cards */}
+      <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-[18px]">
+          <OverviewCardHeader title="Creator Overview" />
           {overviewBlocks.map((ob) => (
             <div key={ob.title} className="mb-3.5 last:mb-0">
               <div className="text-[11.5px] font-bold text-[#1A1A2E] flex items-center gap-1.5 mb-1">
@@ -323,34 +308,8 @@ export function CreatorOverviewFeed({
             </div>
           ))}
         </div>
-        <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-5">
-          <h3 className="text-[13px] font-extrabold text-[#1A1A2E] mb-3.5">Partnerships & Collaborations</h3>
-          <div className="text-[10px] font-bold text-[#9AA0AC] mb-2">TOP BRAND PARTNERS</div>
-          <div className="grid grid-cols-3 gap-2 mb-4">
-            {BRAND_PARTNERS.map((bp) => (
-              <div
-                key={bp.name}
-                className="border border-[#E5E7EB] rounded-md p-2 text-center text-[10.5px] font-extrabold"
-                style={{ color: bp.color }}
-              >
-                {bp.name}
-              </div>
-            ))}
-          </div>
-          <div className="text-[10px] font-bold text-[#9AA0AC] mb-2">COLLABORATION TYPES</div>
-          <div className="flex flex-wrap gap-2">
-            {COLLAB_TYPES.map((ct) => (
-              <span
-                key={ct}
-                className="bg-[#F4F7F9] text-[10.5px] font-semibold text-[#4B5563] px-3 py-1.5 rounded-full"
-              >
-                {ct}
-              </span>
-            ))}
-          </div>
-        </div>
-        <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-5">
-          <h3 className="text-[13px] font-extrabold text-[#1A1A2E] mb-3.5">Contact & Reach</h3>
+        <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-[18px]">
+          <OverviewCardHeader title="Contact & Reach" />
           {contactRows.map((cr) => (
             <div key={cr.label} className="flex items-start gap-2 mb-3 last:mb-0">
               <div className="text-xs shrink-0">{cr.icon}</div>
@@ -359,6 +318,34 @@ export function CreatorOverviewFeed({
                 <div className="text-[11px] text-[#4B5563]">{cr.value}</div>
               </div>
             </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Partnerships & Collaborations — own wider section below */}
+      <section className="bg-white border border-[#E8EDF2] rounded-[10px] p-6">
+        <OverviewCardHeader title="Partnerships & Collaborations" />
+        <div className="text-[10px] font-bold text-[#9AA0AC] mb-2">TOP BRAND PARTNERS</div>
+        <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2.5 mb-5">
+          {BRAND_PARTNERS.map((bp) => (
+            <div
+              key={bp.name}
+              className="border border-[#E5E7EB] rounded-md p-3 text-center text-[11px] font-extrabold"
+              style={{ color: bp.color }}
+            >
+              {bp.name}
+            </div>
+          ))}
+        </div>
+        <div className="text-[10px] font-bold text-[#9AA0AC] mb-2">COLLABORATION TYPES</div>
+        <div className="flex flex-wrap gap-2">
+          {COLLAB_TYPES.map((ct) => (
+            <span
+              key={ct}
+              className="bg-[#F4F7F9] text-[10.5px] font-semibold text-[#4B5563] px-3 py-1.5 rounded-full"
+            >
+              {ct}
+            </span>
           ))}
         </div>
       </section>
@@ -402,6 +389,32 @@ export function CreatorOverviewFeed({
           ))}
         </div>
       </section>
+
+      {/* Recommendation From This Creator — products row, then brands row, both universal cards */}
+      {(recommendedProducts.length > 0 || recommendedBrands.length > 0) && (
+        <section>
+          <div className="mb-3.5">
+            <h2 className="text-sm font-extrabold text-[#1A1A2E]">Recommendation From This Creator</h2>
+            <p className="text-[11px] text-[#9AA0AC] mt-0.5">
+              Products and brands {firstName} recommends
+            </p>
+          </div>
+          {recommendedProducts.length > 0 && (
+            <div className={cn(PRODUCT_CARD_GRID, 'mb-4')}>
+              {recommendedProducts.map((p: any) => (
+                <ProductCard key={p.id} product={p} variant="grid" />
+              ))}
+            </div>
+          )}
+          {recommendedBrands.length > 0 && (
+            <div className={BRAND_CARD_GRID}>
+              {recommendedBrands.map((b: any) => (
+                <BrandCardDesign key={b.id} brand={b} />
+              ))}
+            </div>
+          )}
+        </section>
+      )}
     </div>
   );
 }

@@ -282,12 +282,13 @@ export function CreatorProfilePage() {
                  <CreatorVideosTab
                    videos={filteredVideos}
                    reels={filteredReels}
+                   creator={creator}
                    onOpenVideo={(url, title, isShort) => openVideo(url, title, isShort)}
                  />
                )}
 
                {profileTab === 'Guides' && (
-                 <CreatorGuidesTab blogs={filteredBlogs} />
+                 <CreatorGuidesTab blogs={filteredBlogs} creator={creator} />
                )}
 
                {profileTab === 'Reviews' && (

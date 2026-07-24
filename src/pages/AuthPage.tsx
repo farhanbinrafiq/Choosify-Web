@@ -379,8 +379,8 @@ export const AuthPage: React.FC = () => {
             className="choosify-emi-gradient px-5 py-2.5 rounded-full text-xs font-black flex items-center gap-2 border-0 text-white hover:brightness-110 hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer shadow-lg shadow-black/25"
           >
             {/* Mascot Avatar with little hat */}
-            <div className="relative w-5 h-5 flex items-center justify-center shrink-0">
-              <span className="w-5 h-5 rounded-full bg-white flex items-center justify-center p-0.5 shrink-0">
+            <div className="relative w-6 h-6 flex items-center justify-center shrink-0">
+              <span className="w-6 h-6 rounded-full bg-white flex items-center justify-center p-0.5 shrink-0">
                 <EmiAiLogo size={18} />
               </span>
               <span className="absolute -top-1 -right-1 flex h-2 w-2">

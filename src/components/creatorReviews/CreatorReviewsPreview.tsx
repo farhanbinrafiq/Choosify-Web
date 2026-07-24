@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useGlobalState } from '../../context/GlobalStateContext';
 import { getAllBrandPosts } from '../../lib/brandPosts';
 import { resolveSpotlightExperience } from '../../utils/spotlightContentResolver';
@@ -11,8 +11,15 @@ import {
   type LegacyCreatorContentItem,
 } from '../../utils/creatorReviewsPreview';
 import type { SpotlightContent } from '../../types/spotlight/experience/content';
-import { resolvePosterImage, resolvePreviewImage } from '../media/types/mediaModel';
+import {
+  UniversalCommerceCard,
+  spotlightToContentCardModel,
+  legacyCreatorContentToPreviewModel,
+} from '../content';
+import { primaryProductForContent } from '../../utils/spotlightMixedFeed';
+import { usePriorityClockMs } from '../../hooks/usePriorityClockMs';
 import { cn } from '../../lib/utils';
+import type { CatalogProduct } from '../../types/catalog';
 
 const BRAND_LOGOS: Record<string, string> = {
   Samsung: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80',
@@ -46,136 +53,34 @@ function isLegacyTall(item: LegacyCreatorContentItem): boolean {
   return platformKey.includes('insta') || platformKey.includes('tiktok');
 }
 
-function creatorBadge(content: SpotlightContent): { label: string; bg: string } {
-  if (content.isLive || content.contentType === 'live') return { label: 'LIVE', bg: '#FF000D' };
-  if (isTallCreatorItem(content)) return { label: 'REELS', bg: '#E1306C' };
-  if (content.contentType === 'creator_review' || content.contentType === 'product_review') {
-    return { label: 'YOUTUBE', bg: '#FF000D' };
-  }
-  return { label: 'CREATOR', bg: '#EB4501' };
-}
-
-function CreatorReviewTile({
+/** Same YouTube / Reels cards used on Discover & Brand Story — no custom tile. */
+function ReviewCard({
   content,
-  tall,
+  products,
+  forceVariant,
+  nowMs,
+  onNavigate,
 }: {
   content: SpotlightContent;
-  tall?: boolean;
+  products: CatalogProduct[];
+  forceVariant: 'landscape-video' | 'portrait-reel';
+  nowMs: number;
+  onNavigate: () => void;
 }) {
-  const badge = creatorBadge(content);
-  const showPlay = Boolean(
-    content.media?.videoUrl ||
-      content.isLive ||
-      content.contentType === 'live' ||
-      content.contentType === 'livestream_replay',
-  );
-  const thumb = content.media
-    ? resolvePosterImage(content.media) || resolvePreviewImage(content.media) || content.media.thumbnail
-    : '';
-  const creatorName = content.publisher?.name || 'Creator';
-  const meta = content.popularityScore
-    ? `${Math.round(content.popularityScore).toLocaleString()} score`
-    : undefined;
+  const product = primaryProductForContent(content, products);
+  const model = spotlightToContentCardModel(content, product, nowMs);
 
   return (
-    <Link to={content.href} className={cn('block min-w-0 group', tall && 'flex-[0_0_190px]')}>
-      <div
-        className={cn(
-          'relative rounded-[10px] overflow-hidden mb-2 bg-[#F4F7F9]',
-          tall ? 'h-[260px]' : 'h-[170px]',
-        )}
-      >
-        {thumb ? (
-          <img
-            src={thumb}
-            alt=""
-            className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
-            loading="lazy"
-          />
-        ) : null}
-        <div
-          className="absolute top-2 left-2 text-white text-[7.5px] font-extrabold px-1.5 py-0.5 rounded pointer-events-none"
-          style={{ background: badge.bg }}
-        >
-          {badge.label}
-        </div>
-        {showPlay && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="w-8 h-8 rounded-full bg-black/40 border-[1.5px] border-white/90 flex items-center justify-center">
-              <div
-                className="border-solid border-transparent border-l-white ml-px"
-                style={{ width: 0, height: 0, borderWidth: '5px 0 5px 8px' }}
-              />
-            </div>
-          </div>
-        )}
-      </div>
-      <div className="text-[11px] font-bold text-[#1A1A2E] leading-snug mb-1 line-clamp-2">
-        {content.headline || 'Creator review'}
-      </div>
-      <div className="text-[10px] text-[#4B5563] truncate">{creatorName}</div>
-      {meta ? <div className="text-[9.5px] text-[#9AA0AC] truncate">{meta}</div> : null}
-    </Link>
+    <UniversalCommerceCard
+      mode="commerce"
+      variant={forceVariant}
+      model={model}
+      onNavigate={onNavigate}
+      className="w-full"
+    />
   );
 }
 
-function LegacyCreatorTile({
-  item,
-  tall,
-}: {
-  item: LegacyCreatorContentItem;
-  tall?: boolean;
-}) {
-  const portrait = tall ?? isLegacyTall(item);
-  const badge = portrait
-    ? { label: 'REELS', bg: '#E1306C' }
-    : { label: 'YOUTUBE', bg: '#FF000D' };
-
-  return (
-    <a
-      href={item.videoUrl || '#'}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={cn('block min-w-0 group', portrait && 'flex-[0_0_190px]')}
-    >
-      <div
-        className={cn(
-          'relative rounded-[10px] overflow-hidden mb-2 bg-[#F4F7F9]',
-          portrait ? 'h-[260px]' : 'h-[170px]',
-        )}
-      >
-        {item.thumbnail ? (
-          <img src={item.thumbnail} alt="" className="w-full h-full object-cover" loading="lazy" />
-        ) : null}
-        <div
-          className="absolute top-2 left-2 text-white text-[7.5px] font-extrabold px-1.5 py-0.5 rounded pointer-events-none"
-          style={{ background: badge.bg }}
-        >
-          {badge.label}
-        </div>
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-8 h-8 rounded-full bg-black/40 border-[1.5px] border-white/90 flex items-center justify-center">
-            <div
-              className="border-solid border-transparent border-l-white ml-px"
-              style={{ width: 0, height: 0, borderWidth: '5px 0 5px 8px' }}
-            />
-          </div>
-        </div>
-      </div>
-      <div className="text-[11px] font-bold text-[#1A1A2E] leading-snug mb-1 line-clamp-2">
-        {item.title || 'Creator review'}
-      </div>
-      <div className="text-[10px] text-[#4B5563] truncate">
-        {item.creatorHandle?.replace('@', '') || 'Creator'}
-      </div>
-      {item.views ? (
-        <div className="text-[9.5px] text-[#9AA0AC] truncate">{item.views} views</div>
-      ) : null}
-    </a>
-  );
-}
-
-/** Compact Creator Reviews section — Choosify.dc.html wide + tall rows */
 export function CreatorReviewsPreview({
   context,
   productId,
@@ -189,6 +94,8 @@ export function CreatorReviewsPreview({
   subtitle,
   className,
 }: CreatorReviewsPreviewProps) {
+  const navigate = useNavigate();
+  const nowMs = usePriorityClockMs();
   const { allCatalogProducts, allCatalogGuides, allCreators } = useGlobalState();
 
   const allContent = useMemo(
@@ -268,18 +175,13 @@ export function CreatorReviewsPreview({
     );
   }
 
-  const wideSource = showLegacyOnly
-    ? legacyWide.length
-      ? legacyWide
-      : legacyFallback
-    : wideItems;
-  const tallSource = showLegacyOnly ? legacyTall : tallItems;
-  const wideCols = Math.min(Math.max(wideSource.length, 1), 3);
+  const youtubeSource = showLegacyOnly ? legacyWide : wideItems;
+  const reelsSource = showLegacyOnly ? legacyTall : tallItems;
 
   return (
     <section
       id="influencer-reviews-section"
-      className={cn('w-full rounded-xl border border-[#E8EDF2] bg-white p-6', className)}
+      className={cn('w-full rounded-xl border border-[#E8EDF2] bg-white p-4 sm:p-5', className)}
       aria-labelledby="creator-reviews-preview-heading"
     >
       <header className="mb-3.5 text-left">
@@ -310,29 +212,91 @@ export function CreatorReviewsPreview({
         ) : null}
       </header>
 
-      {wideSource.length > 0 && (
-        <div
-          className="grid gap-3.5 mb-4"
-          style={{ gridTemplateColumns: `repeat(${wideCols}, minmax(0, 1fr))` }}
-        >
+      {/* Same YouTube card size as Discover / Brand Story — flex-wrap (not grid) so a
+          partial row keeps each card at its normal size instead of stretching to fill. */}
+      {youtubeSource.length > 0 && (
+        <div className="flex flex-wrap gap-4 mb-4 last:mb-0">
           {showLegacyOnly
-            ? (legacyWide.length ? legacyWide : legacyFallback).map((item) => (
-                <LegacyCreatorTile key={item.id} item={item} />
-              ))
-            : wideItems.map((content) => (
-                <CreatorReviewTile key={content.contentId} content={content} />
+            ? youtubeSource.map((item) => {
+                const legacy = item as LegacyCreatorContentItem;
+                const model = legacyCreatorContentToPreviewModel(legacy, {
+                  brandName,
+                  productId,
+                });
+                return (
+                  <div
+                    key={legacy.id}
+                    className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.667rem)] xl:w-[calc(25%-0.75rem)] shrink-0 grow-0"
+                  >
+                    <UniversalCommerceCard
+                      mode="commerce"
+                      variant="landscape-video"
+                      model={model}
+                      onNavigate={() => {
+                        if (legacy.videoUrl) window.open(legacy.videoUrl, '_blank', 'noopener,noreferrer');
+                      }}
+                      className="w-full"
+                    />
+                  </div>
+                );
+              })
+            : (youtubeSource as SpotlightContent[]).map((content) => (
+                <div
+                  key={content.contentId}
+                  className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.667rem)] xl:w-[calc(25%-0.75rem)] shrink-0 grow-0"
+                >
+                  <ReviewCard
+                    content={content}
+                    products={allCatalogProducts}
+                    forceVariant="landscape-video"
+                    nowMs={nowMs}
+                    onNavigate={() => navigate(content.href)}
+                  />
+                </div>
               ))}
         </div>
       )}
 
-      {tallSource.length > 0 && (
-        <div className="flex gap-3.5 flex-wrap">
+      {/* Same Reels card size as Discover / Brand Story — flex-wrap so a partial row
+          doesn't stretch cards taller/wider than the standard reel tile. */}
+      {reelsSource.length > 0 && (
+        <div className="flex flex-wrap gap-3">
           {showLegacyOnly
-            ? legacyTall.map((item) => (
-                <LegacyCreatorTile key={`tall-${item.id}`} item={item} tall />
-              ))
-            : tallItems.map((content) => (
-                <CreatorReviewTile key={content.contentId} content={content} tall />
+            ? (reelsSource as LegacyCreatorContentItem[]).map((legacy) => {
+                const model = legacyCreatorContentToPreviewModel(legacy, {
+                  brandName,
+                  productId,
+                });
+                return (
+                  <div
+                    key={legacy.id}
+                    className="w-[calc(50%-0.375rem)] min-[480px]:w-[calc(33.333%-0.5rem)] md:w-[calc(25%-0.5625rem)] xl:w-[calc(20%-0.6rem)] shrink-0 grow-0"
+                  >
+                    <UniversalCommerceCard
+                      mode="commerce"
+                      variant="portrait-reel"
+                      model={model}
+                      onNavigate={() => {
+                        if (legacy.videoUrl) window.open(legacy.videoUrl, '_blank', 'noopener,noreferrer');
+                      }}
+                      className="w-full"
+                    />
+                  </div>
+                );
+              })
+            : (reelsSource as SpotlightContent[]).map((content) => (
+                <div
+                  key={content.contentId}
+                  className="w-[calc(50%-0.375rem)] min-[480px]:w-[calc(33.333%-0.5rem)] md:w-[calc(25%-0.5625rem)] xl:w-[calc(20%-0.6rem)] shrink-0 grow-0"
+                >
+                  <ReviewCard
+                    content={content}
+                    products={allCatalogProducts}
+                    forceVariant="portrait-reel"
+                    nowMs={nowMs}
+                    onNavigate={() => navigate(content.href)}
+                  />
+                </div>
               ))}
         </div>
       )}

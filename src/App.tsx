@@ -56,6 +56,7 @@ const RetailCartPage = lazy(() => import('./pages/RetailCartPage').then(m => ({ 
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage').then(m => ({ default: m.CheckoutPage })));
 const OrderSuccessPage = lazy(() => import('./pages/OrderSuccessPage').then(m => ({ default: m.OrderSuccessPage })));
 const OrderTrackingPage = lazy(() => import('./pages/OrderTrackingPage').then(m => ({ default: m.OrderTrackingPage })));
+const OrderConfirmPage = lazy(() => import('./pages/OrderConfirmPage').then(m => ({ default: m.OrderConfirmPage })));
 const MessagesPage = lazy(() => import('./pages/MessagesPage').then(m => ({ default: m.MessagesPage })));
 const CustomerOrdersPage = lazy(() => import('./pages/CustomerOrdersPage').then(m => ({ default: m.CustomerOrdersPage })));
 const NotFoundPage = lazy(() => import('./pages/NotFoundPage'));
@@ -251,6 +252,7 @@ function AppContent() {
             <Route path="/order-success/:orderId" element={<PageWrapper><OrderSuccessPage /></PageWrapper>} />
             <Route path="/order-success" element={<PageWrapper><OrderSuccessPage /></PageWrapper>} />
             <Route path="/order-tracking" element={<PageWrapper><OrderTrackingPage /></PageWrapper>} />
+            <Route path="/orders/confirm/:token" element={<PageWrapper><OrderConfirmPage /></PageWrapper>} />
             <Route path="/dashboard" element={<ProtectedRoute><PageWrapper><DashboardPage /></PageWrapper></ProtectedRoute>} />
             <Route
               path="/marketing"

@@ -16,8 +16,9 @@ import {PRODUCT_CARD_GRID, PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 import { ListingAdRail } from '../components/ListingAdRail';
 import { AdSenseSlot } from '../components/AdSenseSlot';
-import { ProductsSponsoredBanner } from '../components/commerce/AdvertiseHereCard';
+import { ProductsSponsoredBannerCarousel } from '../components/commerce/AdvertiseHereCard';
 import { useSponsoredFeedEntries } from '../hooks/useSponsoredFeedEntries';
+import { useSponsoredPlacementsForSurface } from '../hooks/useSponsoredPlacementsForSurface';
 import { PLACEMENT_KEYS } from '../lib/placements';
 import { resolveServiceKeywords } from '../lib/home/popularServices';
 import { rankProducts } from '../utils/listingRanking';
@@ -580,11 +581,9 @@ export function AllProductsPage() {
     { enabled: viewMode === 'grid' },
   );
 
-  const productsSponsoredBanner = useMemo(() => {
-    const entry = productFeed.find((e) => e.kind === 'sponsored');
-    if (!entry || entry.kind !== 'sponsored') return null;
-    return entry.sponsored;
-  }, [productFeed]);
+  const productsSponsoredBanners = useSponsoredPlacementsForSurface('products', {
+    limit: 4,
+  });
 
   const productsBrowseItems = [
         {
@@ -935,33 +934,33 @@ export function AllProductsPage() {
               {/* Active Chip Overviews */}
               <div className="flex flex-wrap items-center gap-3">
                 {selectedCategory && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-150 rounded-xl text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-[#EB4501] border-0 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
                     Cat: {selectedCategory} 
-                    <X size={12} className="text-orange-primary cursor-pointer" onClick={() => setSelectedCategory(null)} />
+                    <X size={12} className="text-white cursor-pointer" onClick={() => setSelectedCategory(null)} />
                   </div>
                 )}
                 {selectedBrand && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-150 rounded-xl text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-[#EB4501] border-0 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
                     Brand: {selectedBrand} 
-                    <X size={12} className="text-orange-primary cursor-pointer" onClick={() => setSelectedBrand(null)} />
+                    <X size={12} className="text-white cursor-pointer" onClick={() => setSelectedBrand(null)} />
                   </div>
                 )}
                 {retailPriceLimit < 30000 && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-150 rounded-xl text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-[#EB4501] border-0 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
                     Max Price: ৳{retailPriceLimit} 
-                    <X size={12} className="text-orange-primary cursor-pointer" onClick={() => setRetailPriceLimit(30000)} />
+                    <X size={12} className="text-white cursor-pointer" onClick={() => setRetailPriceLimit(30000)} />
                   </div>
                 )}
                 {ratingFilter !== null && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-150 rounded-xl text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-[#EB4501] border-0 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
                     Rating: {ratingFilter}.0+ Stars 
-                    <X size={12} className="text-orange-primary cursor-pointer" onClick={() => setRatingFilter(null)} />
+                    <X size={12} className="text-white cursor-pointer" onClick={() => setRatingFilter(null)} />
                   </div>
                 )}
                 {availabilityFilter !== 'all' && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-150 rounded-xl text-[10px] font-black text-navy uppercase tracking-widest shadow-sm">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-[#EB4501] border-0 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
                     Status: {availabilityFilter === 'in-stock' ? 'In Stock' : 'Out of Stock'} 
-                    <X size={12} className="text-orange-primary cursor-pointer" onClick={() => setAvailabilityFilter('all')} />
+                    <X size={12} className="text-white cursor-pointer" onClick={() => setAvailabilityFilter('all')} />
                   </div>
                 )}
               </div>
@@ -1003,18 +1002,12 @@ export function AllProductsPage() {
             </div>
           </div>
 
-          {/* Choosify.dc.html — full-width sponsored banner above grid */}
+          {/* Choosify.dc.html — full-width sponsored banner carousel above grid */}
           {!isLoading && filteredProducts.length > 0 && (
-            <ProductsSponsoredBanner
-              title={productsSponsoredBanner?.title || undefined}
-              subtitle={
-                productsSponsoredBanner?.subtitle ||
-                productsSponsoredBanner?.sponsorName ||
-                undefined
-              }
-              href={productsSponsoredBanner?.href || '/advertise'}
-              imageUrl={productsSponsoredBanner?.image || undefined}
-              ctaLabel={productsSponsoredBanner?.ctaLabel || 'Shop Now →'}
+            <ProductsSponsoredBannerCarousel
+              items={productsSponsoredBanners}
+              className="mb-6"
+              autoplay
             />
           )}
 

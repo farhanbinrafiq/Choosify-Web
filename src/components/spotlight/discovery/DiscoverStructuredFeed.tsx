@@ -274,7 +274,7 @@ export function DiscoverStructuredFeed({
                   title="Reels & Shorts"
                   onViewAll={() => triggerFilter('reels')}
                 />
-                <div className="grid grid-cols-2 min-[480px]:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3.5">
+                <div className="grid grid-cols-2 min-[480px]:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3">
                   {reels.map((content) => (
                     <FeedCard
                       key={content.contentId}

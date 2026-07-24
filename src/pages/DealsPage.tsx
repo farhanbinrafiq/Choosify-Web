@@ -21,7 +21,8 @@ import { PLACEMENT_KEYS, INFEED_INTERVAL, INFEED_MAX_PER_PAGE } from '../lib/pla
 import { injectPlacementsIntoFeed } from '../utils/injectFeedPlacements';
 import { rankDeals, dealDiscountPercent } from '../utils/listingRanking';
 import { usePriorityClockMs } from '../hooks/usePriorityClockMs';
-import { ProductsSponsoredBanner, AdvertiseHereCard } from '../components/commerce/AdvertiseHereCard';
+import { ProductsSponsoredBannerCarousel, AdvertiseHereCard } from '../components/commerce/AdvertiseHereCard';
+import { useSponsoredPlacementsForSurface } from '../hooks/useSponsoredPlacementsForSurface';
 import {
   DealsAuthenticationStrip,
   DealsBrandDealsCard,
@@ -104,6 +105,7 @@ export function DealsPage() {
   const [minDiscount, setMinDiscount] = useState<number>(0);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const priorityNowMs = usePriorityClockMs();
+  const dealsSponsoredBanners = useSponsoredPlacementsForSurface('deals', { limit: 4 });
   const productSource: any[] = allProducts.length > 0 ? allProducts : PRODUCTS;
   const brandSource: any[] =
     allBrands.length > 0
@@ -722,12 +724,11 @@ export function DealsPage() {
               </div>
             </section>
 
-            {/* Choosify.dc.html — horizontal sponsored banner */}
-            <ProductsSponsoredBanner
-              title="Xiaomi Mega Sale — Up to 40% off"
-              subtitle="Official Xiaomi store · Limited stock"
-              href="/advertise"
+            {/* Choosify.dc.html — horizontal sponsored banner carousel */}
+            <ProductsSponsoredBannerCarousel
+              items={dealsSponsoredBanners}
               className="mb-9"
+              autoplay
             />
 
             {/* TOP DEALS + TOP COUPONS */}

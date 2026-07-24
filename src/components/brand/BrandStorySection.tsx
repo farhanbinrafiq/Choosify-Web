@@ -213,7 +213,7 @@ export function BrandStorySection({
         items: reels,
         forceVariant: 'portrait-reel',
         gridClassName:
-          'grid grid-cols-2 min-[480px]:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3.5',
+          'grid grid-cols-2 min-[480px]:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3',
       });
     }
     if (blogs.length) {

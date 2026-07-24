@@ -26,7 +26,7 @@ export function HomeFeaturedBrandsSection({
   featuredBrands,
   brandFallback = [],
 }: HomeFeaturedBrandsSectionProps) {
-  const brands = (featuredBrands.length ? featuredBrands : brandFallback).slice(0, 8);
+  const brands = (featuredBrands.length ? featuredBrands : brandFallback).slice(0, 6);
   if (!brands.length) return null;
 
   return (
@@ -40,7 +40,7 @@ export function HomeFeaturedBrandsSection({
         </h2>
         <ViewAllLink href="/brands" label="VIEW ALL BRANDS ›" />
       </div>
-      <div className="grid grid-cols-4 md:grid-cols-8 gap-3 mb-2">
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mb-2">
         {brands.map((b: any, i: number) => {
           const name = b.name || b.brandName || 'Brand';
           const href = b.slug ? `/brands/${b.slug}` : b.id ? `/brands/${b.id}` : '/brands';

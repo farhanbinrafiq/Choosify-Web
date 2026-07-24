@@ -137,12 +137,29 @@ export const BrandCardDesign = memo(function BrandCardDesign({
       onClick={onClick}
       className="block w-full min-w-0 h-full bg-white rounded-[10px] border border-[#E8EDF2] overflow-hidden relative group select-none"
     >
-      {/* Color banner — Choosify.dc.html */}
+      {/* Cover — genuine uploaded brand logo when available, text banner as fallback */}
       <div
-        className="relative h-[100px] flex items-center justify-center px-3"
+        className="relative h-[100px] flex items-center justify-center px-3 overflow-hidden"
         style={{ background: bannerBg }}
       >
-        <div className="text-[22px] font-extrabold text-white text-center leading-tight line-clamp-2">
+        {brand.logo && /^(https?:|data:|\/)/.test(brand.logo) ? (
+          <img
+            src={brand.logo}
+            alt={brand.name}
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="lazy"
+            onError={(e) => {
+              e.currentTarget.style.display = 'none';
+              e.currentTarget.nextElementSibling?.classList.remove('hidden');
+            }}
+          />
+        ) : null}
+        <div
+          className={cn(
+            'text-[22px] font-extrabold text-white text-center leading-tight line-clamp-2 relative z-[1]',
+            brand.logo && /^(https?:|data:|\/)/.test(brand.logo) && 'hidden',
+          )}
+        >
           {brand.name}
         </div>
         <button

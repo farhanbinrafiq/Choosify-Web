@@ -47,7 +47,7 @@ interface HomeTopCategoriesSectionProps {
 export function HomeTopCategoriesSection({ categories }: HomeTopCategoriesSectionProps) {
   if (!categories.length) return null;
 
-  const display = categories.slice(0, 12);
+  const display = categories.slice(0, 6);
 
   return (
     <DcHomePanel id="section-categories" overlapHero>
@@ -60,7 +60,7 @@ export function HomeTopCategoriesSection({ categories }: HomeTopCategoriesSectio
         </h2>
         <ViewAllLink href="/categories" label="VIEW ALL CATEGORIES ›" className="text-xs font-bold" />
       </div>
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-3.5 mb-8">
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-3.5 mb-8">
         {display.map((cat, i) => {
           const chip = HOME_CATEGORY_CHIP_COLORS[i % HOME_CATEGORY_CHIP_COLORS.length];
           const icon = categoryIcon(cat.name);

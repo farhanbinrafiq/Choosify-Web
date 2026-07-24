@@ -9,7 +9,7 @@ import { PRODUCTS, PLACEHOLDER_IMAGE } from '../../constants';
 
 export type DynamicContentRailMode = 'announcement' | 'emi';
 
-function resolveEntityDisplay(entity: AnnouncementAssociatedEntity) {
+export function resolveEntityDisplay(entity: AnnouncementAssociatedEntity) {
   if (entity.type === 'product' || entity.type === 'service') {
     const product = PRODUCTS.find((p) => String(p.id) === String(entity.id));
     if (product) {
@@ -60,11 +60,17 @@ function resolveEntityDisplay(entity: AnnouncementAssociatedEntity) {
   };
 }
 
-function EntityCard({ entity }: { entity: AnnouncementAssociatedEntity }) {
+export function EntityCard({
+  entity,
+  className,
+}: {
+  entity: AnnouncementAssociatedEntity;
+  className?: string;
+}) {
   const display = resolveEntityDisplay(entity);
 
   return (
-    <div className="rounded-[10px] border border-[#E8EDF2] overflow-hidden bg-white">
+    <div className={`rounded-[10px] border border-[#E8EDF2] overflow-hidden bg-white ${className ?? ''}`}>
       <div className="aspect-[4/3] bg-[#F4F7F9] relative overflow-hidden">
         <img
           src={display.image}

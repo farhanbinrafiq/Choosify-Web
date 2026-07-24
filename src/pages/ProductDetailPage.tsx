@@ -47,14 +47,17 @@ import { ProductDetailBuyBox } from "../components/product/ProductDetailBuyBox";
 import { ListingRelatedInfoPanel } from "../components/product/detail/ListingRelatedInfoPanel";
 import { resolveListingRelatedInfoSection } from "../utils/listingRelatedInfo";
 import { OptionalAddonsModule } from '../components/product/OptionalAddonsModule';
+import { PrescriptionUploadModule } from '../components/product/PrescriptionUploadModule';
+import { PrescriptionDetailsModal, type PrescriptionData } from '../components/product/PrescriptionDetailsModal';
+import { formatReviewDate } from '../utils/formatReviewDate';
 import { CreatorReviewsPreview } from "../components/creatorReviews/CreatorReviewsPreview";
 import { PublicReviewCard } from "../components/PublicReviewCard";
-import { FollowButton } from "../components/FollowButton";
 import NotFoundPage from "./NotFoundPage";
 import { useRegisterPageFilters } from "../components/FilterEngine";
 import { getBrandOfficialWebsite, normalizeExternalUrl } from "../utils/overviewRegistry";
 import { SizeGuideModal } from "../components/SizeGuideModal";
-import { DETAIL_SINGLE_FEED } from "../lib/pageLayout";
+import { BrandCardDesign, mapBrandToCardDesign } from "../components/BrandCardDesign";
+import { BRAND_CARD_GRID, DETAIL_SINGLE_FEED } from "../lib/pageLayout";
 import { DC_CONTENT_MAX } from "../lib/design/dcListingTokens";
 import { ProductSpecsOverview } from "../components/ProductSpecsOverview";
 import { OverviewListItem } from "../components/OverviewListIcon";
@@ -96,6 +99,8 @@ export interface ProductAddon {
   image?: string;
   badge?: 'Popular' | 'Recommended' | 'Best Value';
   available: boolean;
+  /** Selecting this addon requires the buyer to submit lens power / a prescription document */
+  prescriptionLens?: boolean;
 }
 
 // Seeded mock add-ons per industry — keyed by product category
@@ -125,9 +130,12 @@ const ADDON_SEEDS: Record<string, ProductAddon[]> = {
     { id: 'ha4', title: 'Extended Warranty', description: '2-year extended coverage', price: 1800, available: true },
   ],
   'Eyewear': [
-    { id: 'ew1', title: 'Cleaning Kit', description: 'Microfiber cloth + cleaning spray', price: 180, badge: 'Popular', available: true },
+    { id: 'ew5', title: 'Single Vision Prescription Lenses', description: 'Standard prescription power in one field of vision', price: 900, badge: 'Popular', available: true, prescriptionLens: true },
+    { id: 'ew6', title: 'Progressive (Multifocal) Lenses', description: 'Seamless near, intermediate, and distance vision', price: 2400, badge: 'Recommended', available: true, prescriptionLens: true },
+    { id: 'ew7', title: 'Photochromic (Transition) Lenses', description: 'Auto-darkening prescription lenses for outdoor use', price: 1800, available: true, prescriptionLens: true },
+    { id: 'ew1', title: 'Cleaning Kit', description: 'Microfiber cloth + cleaning spray', price: 180, available: true },
     { id: 'ew2', title: 'Hard Case', description: 'Rigid protective carry case', price: 350, available: true },
-    { id: 'ew3', title: 'Anti-Reflective Coating', description: 'AR coating upgrade for lenses', price: 890, badge: 'Recommended', available: true },
+    { id: 'ew3', title: 'Anti-Reflective Coating', description: 'AR coating upgrade for lenses', price: 890, badge: 'Best Value', available: true },
     { id: 'ew4', title: 'Blue Light Filter', description: 'Digital screen protection upgrade', price: 750, available: true },
   ],
   'Furniture': [
@@ -186,7 +194,7 @@ export function ProductDetailPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const { allProducts, allBrands, productDetailsById, addToCart: globalAddToCart, isLoggedIn, currentUser } = useGlobalState();
+  const { allProducts, allBrands, productDetailsById, addToCart: globalAddToCart, isLoggedIn, currentUser, orders } = useGlobalState();
   const { editMode: studioEditMode } = useStudioEdit();
   const canUseProductStudio = useHasRole('brand', 'admin');
 
@@ -282,6 +290,18 @@ export function ProductDetailPage() {
   const resolvedAddons = useMemo(() => resolveAddons(product), [product?.id]);
   const hasAddons = resolvedAddons.length > 0;
 
+  // ── Prescription upload (Eyewear — required once a prescription lens addon is selected) ──
+  const [prescriptionData, setPrescriptionData] = useState<PrescriptionData | null>(null);
+  const [showPrescriptionModal, setShowPrescriptionModal] = useState(false);
+  const needsPrescription = useMemo(
+    () => resolvedAddons.some((a) => a.prescriptionLens && selectedAddonIds.has(a.id)),
+    [resolvedAddons, selectedAddonIds],
+  );
+
+  React.useEffect(() => {
+    if (!needsPrescription) setPrescriptionData(null);
+  }, [needsPrescription]);
+
   const jumpToProductSection = (id: string) => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -351,15 +371,19 @@ export function ProductDetailPage() {
   const addToCart = (prod: any, qty: number, variant?: any) => {
     const addonsToApply = resolveAddons(prod);
     const selected = addonsToApply.filter(addon => selectedAddonIds.has(addon.id) && addon.available);
+    const prescriptionSuffix = prescriptionData ? ' [Prescription attached]' : '';
     if (selected.length > 0) {
       const addOnPrice = selected.reduce((sum, item) => sum + item.price, 0);
       const addOnNames = selected.map(item => item.title).join(", ");
       const customizedProduct = {
         ...prod,
         price: prod.price + addOnPrice,
-        title: `${prod.title} (${addOnNames})`
+        title: `${prod.title} (${addOnNames})${prescriptionSuffix}`,
+        prescription: prescriptionData ?? undefined,
       };
       globalAddToCart(customizedProduct, qty, variant);
+    } else if (prescriptionData) {
+      globalAddToCart({ ...prod, title: `${prod.title}${prescriptionSuffix}`, prescription: prescriptionData }, qty, variant);
     } else {
       globalAddToCart(prod, qty, variant);
     }
@@ -411,9 +435,47 @@ export function ProductDetailPage() {
 
   const [selectedRating, setSelectedRating] = useState(5);
   const [reviewText, setReviewText] = useState("");
+  const [selectedReviewOrderId, setSelectedReviewOrderId] = useState("");
+
+  // Reviews may only be posted against a delivered order that contains this product —
+  // this is what lets sellers see the purchase date / order type on the posted review.
+  const reviewedOrderIds = useMemo(
+    () =>
+      new Set(
+        (Array.isArray(reviews) ? reviews : [])
+          .filter((r: any) => r.productId === product?.id && r.orderId)
+          .map((r: any) => r.orderId),
+      ),
+    [reviews, product?.id],
+  );
+
+  const reviewableOrders = useMemo(() => {
+    if (!product) return [];
+    return orders
+      .filter(
+        (o) =>
+          o.status !== 'cancelled' &&
+          o.subOrders.some(
+            (sub) =>
+              sub.trackingStatus === 'delivered' &&
+              sub.items.some((item) => item.productId === product.id),
+          ),
+      )
+      .filter((o) => !reviewedOrderIds.has(o.orderId))
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }, [orders, product, reviewedOrderIds]);
+
+  const selectedReviewOrder = reviewableOrders.find((o) => o.orderId === selectedReviewOrderId);
 
   const handleReviewSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!selectedReviewOrder) {
+      toast.error('Choose the order you purchased this product with before posting your review.');
+      return;
+    }
+    const orderType = selectedReviewOrder.isCOD ? 'COD' : 'Online Payment';
+    const purchaseDate = selectedReviewOrder.createdAt;
+    const postedAt = new Date().toISOString();
     const newReview = {
       id: Date.now().toString(),
       productId: product.id,
@@ -421,11 +483,15 @@ export function ProductDetailPage() {
       rating: selectedRating,
       text: reviewText,
       authorName: currentUser.name,
-      createdAt: new Date().toISOString()
+      createdAt: postedAt,
+      orderId: selectedReviewOrder.orderId,
+      orderType,
+      purchaseDate,
     };
     setReviews((prev: any[]) => [newReview, ...prev]);
     setSelectedRating(5);
     setReviewText("");
+    setSelectedReviewOrderId("");
     toast.success('Review submitted! It will appear after approval.');
     operationsApi
       .submitReview({
@@ -946,11 +1012,22 @@ export function ProductDetailPage() {
           });
         }}
         onAddToCart={() => {
+          if (needsPrescription && !prescriptionData) {
+            setShowPrescriptionModal(true);
+            toast.error('Add your lens power details or upload your prescription before adding to cart.');
+            return;
+          }
           addToCart(product, cartQty);
           if (selectedAddons.length > 0) {
             sessionStorage.setItem(
               `choosify_addons_${product.id}`,
               JSON.stringify(selectedAddons),
+            );
+          }
+          if (prescriptionData) {
+            sessionStorage.setItem(
+              `choosify_prescription_${product.id}`,
+              JSON.stringify({ ...prescriptionData, fileDataUrl: undefined }),
             );
           }
           notify.cartAdded({
@@ -967,13 +1044,22 @@ export function ProductDetailPage() {
         }}
         addonsSlot={
           !isService && hasAddons ? (
-            <OptionalAddonsModule
-              addons={resolvedAddons}
-              selectedIds={selectedAddonIds}
-              onToggle={toggleAddon}
-              basePrice={product.price}
-              addonTotal={addonTotal}
-            />
+            <>
+              <OptionalAddonsModule
+                addons={resolvedAddons}
+                selectedIds={selectedAddonIds}
+                onToggle={toggleAddon}
+                basePrice={product.price}
+                addonTotal={addonTotal}
+              />
+              {needsPrescription && (
+                <PrescriptionUploadModule
+                  data={prescriptionData}
+                  onOpenModal={() => setShowPrescriptionModal(true)}
+                  onClear={() => setPrescriptionData(null)}
+                />
+              )}
+            </>
           ) : undefined
         }
       />
@@ -1058,10 +1144,12 @@ export function ProductDetailPage() {
                     .map((r: any) => ({
                       name: r.authorName,
                       avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(r.authorName)}`,
-                      time: 'Just now',
+                      time: formatReviewDate(r.createdAt) || 'Just now',
                       rating: String(r.rating),
                       content: r.text,
-                      date: 'Just now',
+                      date: formatReviewDate(r.createdAt) || 'Just now',
+                      purchaseDate: formatReviewDate(r.purchaseDate) || undefined,
+                      orderType: r.orderType,
                       helpful: 0,
                       images: [] as string[],
                       verified: true,
@@ -1137,18 +1225,57 @@ export function ProductDetailPage() {
                       Sign in
                     </button>
                   </div>
+                ) : reviewableOrders.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-6 text-center space-y-2 bg-[#F4F7F9] border border-[#E8EDF2] rounded-xl p-6">
+                    <span className="text-sm font-bold text-[#1A1A2E]">
+                      No orders available to review
+                    </span>
+                    <p className="text-[13px] text-[#9AA0AC] max-w-sm leading-relaxed">
+                      You can only review a product after your order for it has been delivered, and
+                      each delivered order can be reviewed once.
+                    </p>
+                  </div>
                 ) : (
                   <form onSubmit={handleReviewSubmit} className="flex gap-3 items-start">
                     <div className="w-[38px] h-[38px] rounded-full bg-[#F4F7F9] shrink-0 overflow-hidden" />
                     <div className="flex-1 min-w-0">
-                      <div className="border border-[#E5E7EB] rounded-[10px] px-3.5 py-2.5">
+                      <label className="block text-[11px] font-bold text-[#1A1A2E] mb-1.5">
+                        Which order is this review for?
+                      </label>
+                      <select
+                        required
+                        value={selectedReviewOrderId}
+                        onChange={(e) => setSelectedReviewOrderId(e.target.value)}
+                        className="w-full h-10 mb-2.5 px-3 rounded-lg border border-[#E5E7EB] bg-white text-[12.5px] font-semibold text-[#1A1A2E] focus:outline-none focus:border-[#EB4501] transition-colors"
+                      >
+                        <option value="" disabled>
+                          Select your order…
+                        </option>
+                        {reviewableOrders.map((o) => (
+                          <option key={o.orderId} value={o.orderId}>
+                            Order #{o.orderId} · {formatReviewDate(o.createdAt)} · {o.isCOD ? 'COD' : 'Online Payment'}
+                          </option>
+                        ))}
+                      </select>
+
+                      <div
+                        className={cn(
+                          'border border-[#E5E7EB] rounded-[10px] px-3.5 py-2.5',
+                          !selectedReviewOrderId && 'opacity-50',
+                        )}
+                      >
                         <textarea
                           rows={1}
                           required
-                          placeholder="Share your experience with this product..."
+                          disabled={!selectedReviewOrderId}
+                          placeholder={
+                            selectedReviewOrderId
+                              ? 'Share your experience with this product...'
+                              : 'Select your order above to write a review'
+                          }
                           value={reviewText}
                           onChange={(e) => setReviewText(e.target.value)}
-                          className="w-full border-0 outline-none resize-none text-[13px] text-[#1A1A2E] bg-transparent min-h-[20px] leading-relaxed p-0"
+                          className="w-full border-0 outline-none resize-none text-[13px] text-[#1A1A2E] bg-transparent min-h-[20px] leading-relaxed p-0 disabled:cursor-not-allowed"
                         />
                       </div>
                       <div className="flex justify-between items-center mt-2.5">
@@ -1157,8 +1284,9 @@ export function ProductDetailPage() {
                             <button
                               key={star}
                               type="button"
+                              disabled={!selectedReviewOrderId}
                               onClick={() => setSelectedRating(star)}
-                              className="bg-transparent border-0 p-0 cursor-pointer text-[#FBBF24] text-base leading-none"
+                              className="bg-transparent border-0 p-0 cursor-pointer text-[#FBBF24] text-base leading-none disabled:cursor-not-allowed disabled:opacity-50"
                               aria-label={`Rate ${star}`}
                             >
                               {star <= selectedRating ? '★' : '☆'}
@@ -1167,7 +1295,8 @@ export function ProductDetailPage() {
                         </div>
                         <button
                           type="submit"
-                          className="bg-[#EB4501] text-white border-0 px-5 py-2 rounded-lg text-[11.5px] font-extrabold cursor-pointer"
+                          disabled={!selectedReviewOrderId}
+                          className="bg-[#EB4501] text-white border-0 px-5 py-2 rounded-lg text-[11.5px] font-extrabold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                           SUBMIT REVIEW
                         </button>
@@ -1342,58 +1471,23 @@ export function ProductDetailPage() {
               </div>
             </StudioWrap>
 
-            {/* Provider card + config-driven related-info sidebar */}
+            {/* Same Brands-list directory tile (standard grid cell size — not stretched) */}
             <div
               id={isService ? 'service-provider-section' : 'where-to-buy-section'}
-              className={cn(
-                'bg-white rounded-xl border border-[#E8EDF2] p-6 grid grid-cols-1 gap-3.5 w-full',
-                showRelatedInfoPanel && 'lg:grid-cols-[1fr_1.8fr]',
-              )}
+              className="w-full flex flex-col gap-6"
             >
-              <div className="rounded-[10px] overflow-hidden border border-[#E8EDF2]">
-                <div className="h-[90px] bg-[#14161f] flex items-center justify-center">
-                  <div className="text-lg font-extrabold text-white tracking-wide uppercase">
-                    {brandName}
-                  </div>
-                </div>
-                <div className="p-4 text-center">
-                  <div className="text-[14px] font-extrabold text-[#1A1A2E] flex items-center justify-center gap-1 mb-0.5">
-                    {brandName} <span className="text-[#2323FF]">✓</span>
-                  </div>
-                  <div className="text-[11px] text-[#9AA0AC] mb-3.5 flex items-center justify-center gap-1">
-                    <span className="text-[#2323FF]">✓</span> Verified Brand
-                  </div>
-                  <div className="flex items-center justify-between px-1 py-3 mb-3.5">
-                    <div className="text-left">
-                      <div className="text-[12px] font-extrabold text-[#1A1A2E]">Best For</div>
-                      <div className="text-[11px] font-bold text-[#8A00C4]">
-                        {product.category || 'Everyday'}
-                      </div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-[14px] font-extrabold text-[#2323FF]">
-                        ৳{Math.round((product.price || 25000) / 1000)}K
-                      </div>
-                      <div className="text-[9px] text-[#4B5563]">Price Range</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-[14px] font-extrabold text-[#1A1A2E]">98%</div>
-                      <div className="text-[8.5px] text-[#9AA0AC]">Success</div>
-                    </div>
-                  </div>
-                  <FollowButton
-                    id={String(brandId)}
-                    name={brandName}
-                    type="brand"
-                    className="w-full mb-2 h-9 rounded-lg text-[11.5px] font-bold"
-                  />
-                  <Link
-                    to={`/brands/${brandId}`}
-                    className="block w-full choosify-dark-surface hover:brightness-110 text-white text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-[filter]"
-                  >
-                    View Brand
-                  </Link>
-                </div>
+              <div className={BRAND_CARD_GRID}>
+                <BrandCardDesign
+                  brand={mapBrandToCardDesign(
+                    brandObj || {
+                      id: brandId,
+                      name: brandName,
+                      category: product?.category,
+                      rating: product?.rating,
+                    },
+                    brandObj,
+                  )}
+                />
               </div>
 
               {showRelatedInfoPanel && product ? (
@@ -1724,6 +1818,16 @@ export function ProductDetailPage() {
           sizeGuide={product.sizeGuide}
         />
       )}
+
+      <PrescriptionDetailsModal
+        open={needsPrescription && showPrescriptionModal}
+        initialData={prescriptionData}
+        onClose={() => setShowPrescriptionModal(false)}
+        onSave={(data) => {
+          setPrescriptionData(data);
+          setShowPrescriptionModal(false);
+        }}
+      />
     </div>
   );
 }

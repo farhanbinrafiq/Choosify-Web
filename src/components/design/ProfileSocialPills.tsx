@@ -56,7 +56,7 @@ export function ProfileSocialPills({
         const inner = (
           <>
             <div
-              className="relative w-[26px] h-[26px] rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white"
+              className="relative w-9 h-9 rounded-full flex items-center justify-center shrink-0 overflow-hidden bg-white"
               style={sl.iconSrc ? undefined : { background: sl.bg }}
             >
               {sl.iconSrc ? (

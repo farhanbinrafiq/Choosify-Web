@@ -189,7 +189,56 @@ export const operationsApi = {
     const result = await request<{ data: unknown }>('/operations/job-applications', 'POST', payload);
     return result.data;
   },
+  /** Manual order created by a seller from the Meta inbox — preview shown before sign-in. */
+  getOrderClaim: async (token: string): Promise<OrderClaimPreview> => {
+    const result = await request<{ data: OrderClaimPreview }>(
+      `/operations/orders/claim/${encodeURIComponent(token)}`,
+    );
+    return result.data;
+  },
+  confirmOrderClaim: async (
+    token: string,
+    payload: { buyerId: string; buyerName?: string },
+  ): Promise<Record<string, unknown>> => {
+    const result = await request<{ data: Record<string, unknown> }>(
+      `/operations/orders/claim/${encodeURIComponent(token)}/confirm`,
+      'POST',
+      payload,
+    );
+    return result.data;
+  },
 };
+
+export interface OrderClaimSubOrderItem {
+  productId: number;
+  productTitle: string;
+  quantity: number;
+  price: number;
+  productType?: 'physical' | 'service';
+}
+
+export interface OrderClaimSubOrder {
+  sellerId: string;
+  sellerBusinessName: string;
+  items: OrderClaimSubOrderItem[];
+  deliveryFee: number;
+  invoiceId: string;
+  trackingStatus: string;
+}
+
+export interface OrderClaimPreview {
+  orderId: string;
+  overallTotal: number;
+  subtotal?: number;
+  deliveryTotal?: number;
+  isCOD: boolean;
+  paymentMethod?: string;
+  platformSource?: 'WhatsApp' | 'Facebook' | 'Instagram' | 'Offline';
+  subOrders: OrderClaimSubOrder[];
+  createdAt: string;
+  claimed: boolean;
+  claimedByName?: string;
+}
 
 export type PublicJobEmploymentType = 'full_time' | 'part_time' | 'internship' | 'contract';
 

@@ -20,7 +20,7 @@ export function HomeRecentlyViewedSection({ products }: HomeRecentlyViewedSectio
       >
         Recently Viewed
       </h2>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5">
+      <div className="grid grid-cols-3 md:grid-cols-6 gap-3.5">
         {products.slice(0, 6).map((product) => (
           <Link
             key={product.id}

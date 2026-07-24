@@ -1,9 +1,49 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 import type { SponsoredPlacementItem } from '../../types/commerce/sponsoredPlacement';
+import { AdSlotCarousel } from './AdSlotCarousel';
 
 export type AdvertiseHereVariant = 'brand' | 'creator' | 'product-tile';
+
+export type SponsoredBannerSlide = {
+  id: string;
+  title?: string;
+  subtitle?: string;
+  ctaLabel?: string;
+  href?: string;
+  imageUrl?: string;
+  /** Small brand/sponsor mark shown in the pagination rail (falls back to initials) */
+  logo?: string;
+};
+
+/** Demo / fallback horizontal banners when CMS has fewer than 2 ads */
+export const DEMO_SPONSORED_BANNER_SLIDES: SponsoredBannerSlide[] = [
+  {
+    id: 'banner-samsung',
+    title: 'Samsung Galaxy Buds3 Pro — Pre-order now',
+    subtitle: 'Official Samsung store · Free case with pre-order',
+    href: '/advertise',
+    ctaLabel: 'Shop Now →',
+    imageUrl: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=1200&h=400&fit=crop',
+  },
+  {
+    id: 'banner-walton',
+    title: 'Walton WD Series — Now with 0% EMI',
+    subtitle: 'Official Walton store · Free nationwide delivery',
+    href: '/advertise',
+    ctaLabel: 'Shop Now →',
+    imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1200&h=400&fit=crop',
+  },
+  {
+    id: 'banner-xiaomi',
+    title: 'Xiaomi Mega Sale — Up to 40% off',
+    subtitle: 'Official Xiaomi store · Limited stock',
+    href: '/advertise',
+    ctaLabel: 'Shop Now →',
+    imageUrl: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&h=400&fit=crop',
+  },
+];
 
 const COPY: Record<
   AdvertiseHereVariant,
@@ -120,7 +160,7 @@ export function SponsoredProductTile({
   const ctaClass =
     'mt-auto w-full bg-[#EB4501] text-white text-center border-none rounded-md font-extrabold hover:brightness-110 transition-[filter] no-underline py-2 text-[10px]';
 
-  const inner = (
+  return (
     <div
       className={cn(
         'bg-[#FFF6EF] rounded-[10px] overflow-hidden border-[1.5px] border-dashed border-[#EB4501] relative flex flex-col min-h-full h-full',
@@ -153,8 +193,6 @@ export function SponsoredProductTile({
       </div>
     </div>
   );
-
-  return inner;
 }
 
 /**
@@ -193,6 +231,7 @@ export function ProductsSponsoredBanner({
           alt=""
           className="absolute inset-0 w-full h-full object-cover"
           loading="lazy"
+          draggable={false}
         />
       ) : null}
       <div className="absolute top-3.5 left-3.5 bg-[#EB4501] text-white text-[9px] font-extrabold tracking-[0.4px] px-2.5 py-1 rounded z-[1]">
@@ -218,5 +257,83 @@ export function ProductsSponsoredBanner({
         )}
       </div>
     </div>
+  );
+}
+
+function slidesFromPlacementItems(items: SponsoredPlacementItem[]): SponsoredBannerSlide[] {
+  return items.map((item) => ({
+    id: item.id,
+    title: item.title || item.sponsorName,
+    subtitle: item.subtitle || item.sponsoredLabel,
+    href: item.href,
+    imageUrl: item.image,
+    logo: item.sponsorLogoUrl || item.image,
+    ctaLabel: item.ctaLabel
+      ? `${item.ctaLabel}${item.ctaLabel.includes('→') ? '' : ' →'}`
+      : 'Shop Now →',
+  }));
+}
+
+/**
+ * Full-width sponsored banner carousel — same h-[190px] (or override) footprint,
+ * vertical auto-slide (bottom→top) with a brand-logo pagination rail on the right,
+ * supports multiple brand/sponsor ads.
+ */
+export function ProductsSponsoredBannerCarousel({
+  items,
+  className,
+  bannerClassName,
+  autoplay = true,
+  autoplayMs = 5500,
+  withDemoFallback = true,
+}: {
+  items?: SponsoredBannerSlide[] | SponsoredPlacementItem[];
+  className?: string;
+  /** Applied to each banner slide (e.g. home `mb-0 h-[200px]`) */
+  bannerClassName?: string;
+  autoplay?: boolean;
+  autoplayMs?: number;
+  withDemoFallback?: boolean;
+}) {
+  const slides = useMemo(() => {
+    const raw = items ?? [];
+    const normalized: SponsoredBannerSlide[] =
+      raw.length > 0 && 'sponsorName' in (raw[0] as SponsoredPlacementItem)
+        ? slidesFromPlacementItems(raw as SponsoredPlacementItem[])
+        : (raw as SponsoredBannerSlide[]);
+
+    if (normalized.length >= 2) return normalized;
+    if (!withDemoFallback) {
+      return normalized.length ? normalized : DEMO_SPONSORED_BANNER_SLIDES.slice(0, 1);
+    }
+    if (normalized.length === 1) {
+      const rest = DEMO_SPONSORED_BANNER_SLIDES.filter((d) => d.id !== normalized[0].id);
+      return [normalized[0], ...rest].slice(0, 4);
+    }
+    return DEMO_SPONSORED_BANNER_SLIDES;
+  }, [items, withDemoFallback]);
+
+  return (
+    <AdSlotCarousel
+      items={slides}
+      getKey={(slide) => slide.id}
+      axis="y"
+      paginationPosition="end"
+      autoplay={autoplay}
+      autoplayMs={autoplayMs}
+      className={className}
+      ariaLabel="Sponsored banner ads"
+      getIcon={(slide) => ({ label: slide.title || 'Sponsor', imageUrl: slide.logo })}
+      renderSlide={(slide) => (
+        <ProductsSponsoredBanner
+          title={slide.title}
+          subtitle={slide.subtitle}
+          href={slide.href}
+          imageUrl={slide.imageUrl}
+          ctaLabel={slide.ctaLabel}
+          className={cn('mb-0', bannerClassName)}
+        />
+      )}
+    />
   );
 }

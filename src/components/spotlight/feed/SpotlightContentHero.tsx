@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import { DetailSliverMediaGallery } from '../../commerce/DetailSliverMediaGallery';
 import { buildGuideGalleryItems, buildSpotlightContentGalleryItems } from '../../media/choosifyMediaAdapters';
+import type { SpotlightLiveConfig } from '../../../types/spotlight/experience/live';
 
 export type SpotlightHeroVariant = 'portrait' | 'landscape' | 'image' | 'carousel' | 'live' | 'replay';
 
@@ -12,9 +13,11 @@ interface SpotlightContentHeroProps {
   posterImage?: string;
   headline?: string;
   media?: Parameters<typeof buildSpotlightContentGalleryItems>[0]['media'];
-  live?: Parameters<typeof buildSpotlightContentGalleryItems>[0]['live'];
+  live?: SpotlightLiveConfig;
   showAddVideo?: boolean;
   onAddVideo?: () => void;
+  /** Show the LIVE NOW / Upcoming / Replay badge over the media card. */
+  showLiveBadge?: boolean;
 }
 
 /** Spotlight / Guide Detail hero — Choosify.dc.html sliver gallery */
@@ -29,6 +32,7 @@ export function SpotlightContentHero({
   live,
   showAddVideo,
   onAddVideo,
+  showLiveBadge,
 }: SpotlightContentHeroProps) {
   const items = useMemo(() => {
     const contentItems = buildSpotlightContentGalleryItems({
@@ -60,6 +64,20 @@ export function SpotlightContentHero({
     });
   }, [guide, variant, liveEmbedUrl, videoUrl, posterImage, headline, media, live]);
 
+  const liveBadge = useMemo(() => {
+    if (!showLiveBadge || !live) return undefined;
+    const status = live.status ?? 'ended';
+    const isLive = status === 'live';
+    const isUpcoming = status === 'upcoming';
+    return {
+      label: isLive ? 'Live Now' : isUpcoming ? 'Upcoming Live' : 'Live Replay',
+      isLive,
+      isUpcoming,
+      scheduledAt: live.scheduledAt,
+      ctaLabel: live.embedUrl ? (isLive ? 'Watch Live' : isUpcoming ? 'Notify Me' : 'Watch Replay') : undefined,
+    };
+  }, [showLiveBadge, live]);
+
   return (
     <div id="spotlight-content-hero">
       <DetailSliverMediaGallery
@@ -67,6 +85,7 @@ export function SpotlightContentHero({
         ariaLabel={`${headline ?? guide.title ?? 'Spotlight'} media gallery`}
         showAddVideo={showAddVideo}
         onAddVideo={onAddVideo}
+        liveBadge={liveBadge}
       />
     </div>
   );

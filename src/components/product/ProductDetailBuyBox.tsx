@@ -3,6 +3,17 @@ import { Heart, MessageCircleMore, Star } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { EmiAiLogo } from '../EmiAiLogo';
 
+/** Low stock (<15) → red urgency; mid stock (15–30) → blue; healthy stock (>30) → green. */
+function resolveStockDisplay(stockQuantity: number): { label: string; bgClass: string } {
+  if (stockQuantity < 15) {
+    return { label: `Only ${stockQuantity} Products Left`, bgClass: 'bg-[#FF000D]' };
+  }
+  if (stockQuantity <= 30) {
+    return { label: `${stockQuantity} Products in Stock`, bgClass: 'bg-[#2323FF]' };
+  }
+  return { label: `${stockQuantity} Products in Stock`, bgClass: 'bg-[#07DD05]' };
+}
+
 interface ProductDetailBuyBoxProps {
   product: any;
   brandName: string;
@@ -110,9 +121,18 @@ export function ProductDetailBuyBox({
         <div className="bg-white rounded-xl border border-[#E8EDF2] p-[26px]">
           <div className="flex gap-2 mb-3.5 flex-wrap">
             <span className="bg-[#EB4501] text-white text-[9px] font-extrabold px-2.5 py-1 rounded">FEATURED</span>
-            {!isOutOfStock && (
-              <span className="bg-[#07DD05] text-white text-[9px] font-extrabold px-2.5 py-1 rounded">
-                IN STOCK · {stockQuantity}
+            {isOutOfStock ? (
+              <span className="bg-[#FF000D] text-white text-[9px] font-extrabold px-2.5 py-1 rounded">
+                OUT OF STOCK
+              </span>
+            ) : (
+              <span
+                className={cn(
+                  'text-white text-[9px] font-extrabold px-2.5 py-1 rounded',
+                  resolveStockDisplay(stockQuantity).bgClass,
+                )}
+              >
+                {resolveStockDisplay(stockQuantity).label}
               </span>
             )}
           </div>
@@ -277,9 +297,14 @@ export function ProductDetailBuyBox({
               type="button"
               onClick={onAddToCart}
               disabled={isOutOfStock}
-              className="w-full bg-[#EB4501] text-white border-none py-3.5 rounded-lg text-[13px] font-bold hover:bg-[#CF4400] disabled:opacity-50"
+              className={cn(
+                'w-full border-none py-3.5 rounded-lg text-[13px] font-bold',
+                isOutOfStock
+                  ? 'bg-[#F1F1F3] text-[#9AA0AC] cursor-not-allowed'
+                  : 'bg-[#EB4501] text-white hover:bg-[#CF4400]',
+              )}
             >
-              ADD TO CART
+              {isOutOfStock ? 'OUT OF STOCK' : 'ADD TO CART'}
             </button>
             )}
             {isService && (

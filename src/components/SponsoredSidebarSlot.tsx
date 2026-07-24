@@ -1,7 +1,8 @@
 import React from 'react';
 import type { PlacementKey } from '../lib/placements';
-import { usePrimaryPlacement } from '../hooks/usePlacements';
-import { SponsoredPlacementCard, type SponsoredPlacementVariant } from './SponsoredPlacementCard';
+import { usePlacements } from '../hooks/usePlacements';
+import type { SponsoredPlacementVariant } from './SponsoredPlacementCard';
+import { SponsoredVerticalAdCarousel } from './commerce/SponsoredVerticalAdCarousel';
 
 type SponsoredSidebarSlotProps = {
   placementKey: PlacementKey | string;
@@ -10,25 +11,27 @@ type SponsoredSidebarSlotProps = {
   description?: string;
 };
 
+/** Portrait/landscape rail — multi-ad stacked carousel (autoplay + swipe). */
 export function SponsoredSidebarSlot({
   placementKey,
   variant = 'portrait',
   className,
   description,
 }: SponsoredSidebarSlotProps) {
-  const placement = usePrimaryPlacement(placementKey, {
+  const placements = usePlacements(placementKey, {
+    limit: 5,
     withFallback: true,
     fallbackVariant: variant === 'landscape' ? 'landscape' : 'portrait',
   });
 
-  if (!placement) return null;
-
   return (
-    <SponsoredPlacementCard
-      placement={placement}
+    <SponsoredVerticalAdCarousel
+      placements={placements}
       variant={variant}
       className={className}
       description={description}
+      autoplay
+      withDemoFallback
     />
   );
 }

@@ -64,6 +64,8 @@ export interface GlobalStateContextType {
   createOrder: (isCOD: boolean) => Order | null;
   cancelOrder: (orderId: string, reason: string) => void;
   addOrder: (order: Order) => void;
+  /** Insert an order that's already persisted server-side (e.g. a claimed manual order) without re-POSTing it. */
+  addClaimedOrder: (order: Order) => void;
   updateOrder: (orderId: string, updates: Partial<Order>) => void;
   updateSubOrderStatus: (parentOrderId: string, sellerId: string, nextStatus: 'pending' | 'dispatched' | 'transit' | 'delivered') => void;
   reports: Report[];
@@ -783,6 +785,10 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     operationsApi.createOrder(order as unknown as Record<string, unknown>).catch(() => {});
   };
 
+  const addClaimedOrder = (order: Order) => {
+    setOrders(prev => (prev.some(o => o.orderId === order.orderId) ? prev : [order, ...prev]));
+  };
+
   const updateOrder = (orderId: string, updates: Partial<Order>) => {
     setOrders((previous) =>
       previous.map((order) =>
@@ -878,6 +884,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       createOrder,
       cancelOrder,
       addOrder,
+      addClaimedOrder,
       updateOrder,
       updateSubOrderStatus,
       reports,

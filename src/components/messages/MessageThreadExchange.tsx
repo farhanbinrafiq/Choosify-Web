@@ -4,6 +4,7 @@ import { Check, CheckCheck, ExternalLink, Package } from 'lucide-react';
 import { BookingOfferMessageCard } from '../booking/BookingOfferMessageCard';
 import { PLACEHOLDER_IMAGE } from '../../constants';
 import { CHOOSIFY_ANNOUNCEMENTS_TITLE } from '../../lib/announcements';
+import { EntityCard } from './MessagesDynamicContentRail';
 import type { ThreadMessage } from '../../context/DashboardContext';
 import type { BookingOfferCard } from '../../types/serviceBooking';
 import { cn } from '../../lib/utils';
@@ -374,6 +375,12 @@ export function MessageThreadExchange({
                     {m.text}
                   </div>
                 ) : null}
+
+                {isAnnouncementMessage && m.associatedEntity && (
+                  <div className="xl:hidden w-full max-w-sm mt-2" onClick={(e) => e.stopPropagation()}>
+                    <EntityCard entity={m.associatedEntity} />
+                  </div>
+                )}
 
                 {showStatus && status ? (
                   <div className="mt-1 px-1">

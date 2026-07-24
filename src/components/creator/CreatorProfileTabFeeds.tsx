@@ -1,47 +1,44 @@
 import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import type { Creator, MediaItem } from '../../data/creators';
-import { spotlightContentHref } from '../../lib/spotlight/content';
-import { CreatorContentCard, CREATOR_FEED_GRID } from './CreatorContentCard';
 import { cn } from '../../lib/utils';
 import { rankCreatorContent, rankProducts } from '../../utils/listingRanking';
 import { usePriorityClockMs } from '../../hooks/usePriorityClockMs';
+import { UniversalCommerceCard } from '../content';
+import { resolveCommerceCardVariant } from '../content/universalCommerceCardTypes';
+import { buildCreatorContentModel } from '../../utils/creatorContentCardModel';
+
+// items-start: mixed video (16:9) / reel (9:16) / blog (4:3) cards in one row must NOT
+// stretch to match the tallest sibling — each card keeps its own natural height.
+const CREATOR_FEED_GRID =
+  'grid grid-cols-1 min-[480px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5 items-start';
 
 type CreatorVideosTabProps = {
   videos: MediaItem[];
   reels: MediaItem[];
+  creator: Creator;
   onOpenVideo: (url: string, title: string, isShort: boolean) => void;
 };
 
-export function CreatorVideosTab({ videos, reels, onOpenVideo }: CreatorVideosTabProps) {
+export function CreatorVideosTab({ videos, reels, creator, onOpenVideo }: CreatorVideosTabProps) {
+  const navigate = useNavigate();
   const nowMs = usePriorityClockMs();
   const items = useMemo(() => {
     const rankedVideos = rankCreatorContent(videos, nowMs);
     const rankedReels = rankCreatorContent(reels, nowMs);
     return [
       ...rankedVideos.map((v) => ({
-        key: `v-${v.id}`,
-        title: v.title,
-        tag: v.isLive ? 'LIVE' : v.pinned ? 'PINNED' : v.associatedGuideId ? 'FULL GUIDE' : 'VIDEO',
-        tagBg: v.isLive ? '#FF000D' : v.associatedGuideId ? '#EB4501' : '#3B82F6',
-        meta: [v.views, v.duration].filter(Boolean).join(' · ') || 'Video',
-        image: v.thumbnail,
-        showPlay: true as boolean,
-        href: v.associatedGuideId ? spotlightContentHref(String(v.associatedGuideId)) : undefined,
-        onClick: v.associatedGuideId ? undefined : () => onOpenVideo(v.url, v.title, false),
+        model: buildCreatorContentModel('video', v, creator),
+        item: v,
+        isShort: false as const,
       })),
       ...rankedReels.map((r) => ({
-        key: `r-${r.id}`,
-        title: r.title,
-        tag: r.isLive ? 'LIVE' : r.pinned ? 'PINNED' : 'REEL',
-        tagBg: r.isLive ? '#FF000D' : '#16A34A',
-        meta: [r.views, r.likes ? `♥ ${r.likes}` : ''].filter(Boolean).join(' · ') || 'Short',
-        image: r.thumbnail,
-        showPlay: true as boolean,
-        href: r.associatedGuideId ? spotlightContentHref(String(r.associatedGuideId)) : undefined,
-        onClick: r.associatedGuideId ? undefined : () => onOpenVideo(r.url, r.title, true),
+        model: buildCreatorContentModel('reel', r, creator),
+        item: r,
+        isShort: true as const,
       })),
     ];
-  }, [videos, reels, nowMs, onOpenVideo]);
+  }, [videos, reels, creator, nowMs]);
 
   if (!items.length) {
     return <EmptyState message="No videos or reels yet." />;
@@ -51,19 +48,23 @@ export function CreatorVideosTab({ videos, reels, onOpenVideo }: CreatorVideosTa
     <section className="text-left">
       <SectionHead title="Videos & Reels" count={items.length} />
       <div className={CREATOR_FEED_GRID}>
-        {items.map((item) => (
-          <CreatorContentCard
-            key={item.key}
-            title={item.title}
-            tag={item.tag}
-            tagBg={item.tagBg}
-            meta={item.meta}
-            image={item.image}
-            showPlay={item.showPlay}
-            href={item.href}
-            onClick={item.onClick}
-          />
-        ))}
+        {items.map(({ model, item, isShort }) => {
+          const variant = resolveCommerceCardVariant(model.layoutVariant, model.aspectRatio);
+          return (
+            <UniversalCommerceCard
+              key={model.id}
+              mode="commerce"
+              variant={variant}
+              model={model}
+              onNavigate={() =>
+                item.associatedGuideId
+                  ? navigate(model.href)
+                  : onOpenVideo(item.url, item.title, isShort)
+              }
+              className="w-full h-auto"
+            />
+          );
+        })}
       </div>
     </section>
   );
@@ -71,9 +72,11 @@ export function CreatorVideosTab({ videos, reels, onOpenVideo }: CreatorVideosTa
 
 type CreatorGuidesTabProps = {
   blogs: MediaItem[];
+  creator: Creator;
 };
 
-export function CreatorGuidesTab({ blogs }: CreatorGuidesTabProps) {
+export function CreatorGuidesTab({ blogs, creator }: CreatorGuidesTabProps) {
+  const navigate = useNavigate();
   const nowMs = usePriorityClockMs();
   const rankedBlogs = useMemo(() => rankCreatorContent(blogs, nowMs), [blogs, nowMs]);
 
@@ -85,62 +88,25 @@ export function CreatorGuidesTab({ blogs }: CreatorGuidesTabProps) {
     <section className="text-left">
       <SectionHead title="Guides & Articles" count={rankedBlogs.length} />
       <div className={CREATOR_FEED_GRID}>
-        {rankedBlogs.map((blog, i) => {
+        {rankedBlogs.map((blog) => {
+          const model = buildCreatorContentModel('blog', blog, creator);
+          const variant = resolveCommerceCardVariant(model.layoutVariant, model.aspectRatio);
           const isGuide = !!blog.associatedGuideId;
-          const tag = blog.isLive
-            ? 'LIVE'
-            : blog.pinned
-              ? 'PINNED'
-              : isGuide
-                ? 'BUYING GUIDE'
-                : i % 2 === 0
-                  ? 'BRAND STORY'
-                  : 'ARTICLE';
-          const tagBg = blog.isLive
-            ? '#FF000D'
-            : isGuide
-              ? '#2323FF'
-              : i % 2 === 0
-                ? '#EB4501'
-                : '#6B7280';
-          const href = isGuide
-            ? spotlightContentHref(String(blog.associatedGuideId))
-            : undefined;
           const external = !isGuide && blog.url && blog.url !== '#' ? blog.url : undefined;
 
-          const card = (
-            <CreatorContentCard
-              title={blog.title}
-              tag={tag}
-              tagBg={tagBg}
-              meta={[blog.readTime, blog.date].filter(Boolean).join(' · ') || 'Guide'}
-              image={blog.thumbnail}
-              showPlay={false}
-              href={href}
+          return (
+            <UniversalCommerceCard
+              key={blog.id}
+              mode="commerce"
+              variant={variant}
+              model={model}
+              onNavigate={() => {
+                if (isGuide) navigate(model.href);
+                else if (external) window.open(external, '_blank', 'noopener,noreferrer');
+              }}
+              className="w-full h-auto"
             />
           );
-
-          if (external) {
-            return (
-              <a
-                key={blog.id}
-                href={external}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block no-underline"
-              >
-                <CreatorContentCard
-                  title={blog.title}
-                  tag={tag}
-                  tagBg={tagBg}
-                  meta={[blog.readTime, blog.date].filter(Boolean).join(' · ') || 'Guide'}
-                  image={blog.thumbnail}
-                />
-              </a>
-            );
-          }
-
-          return <React.Fragment key={blog.id}>{card}</React.Fragment>;
         })}
       </div>
     </section>
