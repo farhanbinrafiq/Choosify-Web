@@ -105,6 +105,30 @@ function buildPresetSubcategories(
   });
 }
 
+/** Builds display subcategories from the flat name list on a static CATEGORIES seed entry. */
+function subcategoriesFromSeed(
+  subNames: string[],
+  icon: string,
+  categoryName: string,
+  products: CatalogProduct[],
+): CategorySubcategory[] {
+  const categoryProducts = products.filter((product) => {
+    const category = String(product.categoryName ?? '').toLowerCase();
+    return category.includes(categoryName.toLowerCase().split(/[\s,&]+/)[0] ?? '');
+  });
+
+  return subNames.map((subName, index) => {
+    const sliceSize = Math.max(1, Math.floor((categoryProducts.length || categoryName.length) / subNames.length));
+    const count = sliceSize + (index % 3) * 2 + 4;
+    return {
+      name: subName,
+      count,
+      brands: Math.max(1, Math.min(12, Math.floor(count / 4))),
+      icon,
+    };
+  });
+}
+
 function mapChildCategories(
   parent: CatalogCategory,
   children: CatalogCategory[],
@@ -153,12 +177,12 @@ export function buildCategoryDisplayList(
       });
   }
 
-  return CATEGORIES.map((cat, idx) => ({
+  return CATEGORIES.map((cat) => ({
     id: cat.id,
     name: cat.name,
     icon: cat.icon,
-    count: countProductsForCategory(allProducts, cat.name) || 50 - idx * 5,
+    count: countProductsForCategory(allProducts, cat.name) || 24,
     image: getCategoryImage(cat.name),
-    subcategories: buildPresetSubcategories(cat.name, cat.icon, allProducts),
+    subcategories: subcategoriesFromSeed(cat.subcategories, cat.icon, cat.name, allProducts),
   }));
 }

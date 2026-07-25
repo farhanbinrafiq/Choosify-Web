@@ -6,6 +6,9 @@ import { cn } from '../lib/utils';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { CategoryCardSkeleton } from '../components/Skeleton';
 import { CategoryPremiumCard } from '../components/categories/CategoryPremiumCard';
+import { CategorySidebarNav } from '../components/categories/CategorySidebarNav';
+import { CategorySubgroupCard } from '../components/categories/CategorySubgroupCard';
+import { getTaxonomyGroups } from '../data/categoryTaxonomy';
 import { CategoriesBrowseControls } from '../components/categories/CategoriesQuickNav';
 import { CATEGORY_QUICK_NAV_ITEMS } from '../lib/design/categoryTokens';
 import { ListingFeedHeader } from '../components/design/ListingFeedHeader';
@@ -23,7 +26,6 @@ type CategoryItem = CategoryDisplayItem;
 
 export function CategoriesPage() {
   const {
-    allCategories,
     allCatalogProducts,
     allCatalogBrands,
     allBrands,
@@ -35,6 +37,7 @@ export function CategoriesPage() {
   const [activeCategoryTab, setActiveCategoryTab] = useState('All Categories');
   const [quickNavId, setQuickNavId] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedMainCategory, setSelectedMainCategory] = useState<string | null>(null);
 
   // V2 Discovery Filter States
   const [selectedCategoryType, setSelectedCategoryType] = useState<string | null>(null);
@@ -52,9 +55,9 @@ export function CategoriesPage() {
     }, 400);
     return () => clearTimeout(timer);
   }, [
-    searchQuery, activeCategoryTab, 
-    selectedCategoryType, selectedCategoryStatus, 
-    selectedAlphabetical, selectedAvailability, selectedContent
+    searchQuery, activeCategoryTab,
+    selectedCategoryType, selectedCategoryStatus,
+    selectedAlphabetical, selectedAvailability, selectedContent, selectedMainCategory
   ]);
 
   const handleClearAllFilters = () => {
@@ -66,6 +69,11 @@ export function CategoriesPage() {
     setSearchQuery('');
     setActiveCategoryTab('All Categories');
     setQuickNavId('');
+    setSelectedMainCategory(null);
+  };
+
+  const handleSidebarCategorySelect = (name: string) => {
+    setSelectedMainCategory((prev) => (prev === name ? null : name));
   };
 
   const handleQuickNavSelect = (id: string, filterType: string | null) => {
@@ -336,10 +344,20 @@ export function CategoriesPage() {
     );
   };
 
+  // Categories page renders the full 25-category static taxonomy (src/data/categories.ts)
+  // regardless of live backend categories — real per-category product/brand counts
+  // still come from allCatalogProducts, only the category list itself is static for now.
   const categoriesList = React.useMemo(
-    () => buildCategoryDisplayList(allCategories ?? [], allCatalogProducts ?? []),
-    [allCategories, allCatalogProducts],
+    () => buildCategoryDisplayList([], allCatalogProducts ?? []),
+    [allCatalogProducts],
   );
+
+  // When a sidebar category is selected, the grid swaps to that category's
+  // Level-2 subgroup breakdown instead of the all-categories view.
+  const selectedCategoryEntry = selectedMainCategory
+    ? categoriesList.find((cat) => cat.name === selectedMainCategory)
+    : undefined;
+  const selectedSubgroups = selectedCategoryEntry ? getTaxonomyGroups(selectedCategoryEntry.id) : [];
 
   // Dynamic filter supporting the page search system and discovery state criteria
   const filteredCategoriesList = React.useMemo(() => {
@@ -406,7 +424,7 @@ export function CategoriesPage() {
     }
 
     return result;
-  }, [searchQuery, activeCategoryTab, selectedCategoryType, selectedCategoryStatus, selectedAvailability, selectedContent, selectedAlphabetical, categoriesList]);
+  }, [searchQuery, activeCategoryTab, selectedCategoryType, selectedCategoryStatus, selectedAvailability, selectedContent, selectedAlphabetical, selectedMainCategory, categoriesList]);
 
   useRegisterPageFilters({
     pageName: 'Categories',
@@ -610,6 +628,7 @@ export function CategoriesPage() {
       (selectedAvailability ? 1 : 0) +
       (selectedContent ? 1 : 0) +
       (activeCategoryTab !== 'All Categories' ? 1 : 0) +
+      (selectedMainCategory ? 1 : 0) +
       (searchQuery ? 1 : 0),
     onClearAll: handleClearAllFilters,
   }, [
@@ -620,6 +639,7 @@ export function CategoriesPage() {
     selectedAlphabetical,
     selectedAvailability,
     selectedContent,
+    selectedMainCategory,
   ]);
 
   return (
@@ -650,12 +670,25 @@ export function CategoriesPage() {
           <ListingFeedHeader
             eyebrow="Shop by • Categories"
             title={
-              activeCategoryTab === 'All Categories'
-                ? 'All Categories'
-                : activeCategoryTab
+              selectedMainCategory
+                ? selectedMainCategory
+                : activeCategoryTab === 'All Categories'
+                  ? 'All Categories'
+                  : activeCategoryTab
             }
-            count={filteredCategoriesList.length}
-            itemLabel="categories"
+            count={selectedMainCategory ? selectedSubgroups.length : filteredCategoriesList.length}
+            itemLabel={selectedMainCategory ? 'subcategories' : 'categories'}
+            actions={
+              selectedMainCategory ? (
+                <button
+                  type="button"
+                  onClick={() => setSelectedMainCategory(null)}
+                  className="inline-flex items-center gap-1.5 text-[11px] font-bold text-orange-primary uppercase tracking-wide cursor-pointer hover:underline"
+                >
+                  <X size={12} /> Clear filter
+                </button>
+              ) : undefined
+            }
           />
 
           <ListingFilterPills
@@ -672,6 +705,7 @@ export function CategoriesPage() {
                 selectedAvailability ||
                 selectedContent ||
                 activeCategoryTab !== 'All Categories' ||
+                selectedMainCategory ||
                 searchQuery ||
                 quickNavId,
             )}
@@ -679,51 +713,71 @@ export function CategoriesPage() {
             aiDiscoverPrompt="Help me explore categories on Choosify"
           />
 
-          {isLoading ? (
-            <div className={CATEGORY_CARD_GRID}>
-              {Array.from({ length: 12 }).map((_, idx) => (
-                <CategoryCardSkeleton key={idx} />
-              ))}
-            </div>
-          ) : (
-            <div className={CATEGORY_CARD_GRID}>
-            <SponsoredFeedInjector
-              surface="categories"
-              items={filteredCategoriesList}
-              getItemKey={(cat) => cat.name}
-            >
-              {(entries) =>
-                entries.map((entry) => {
-                  if (entry.kind === 'sponsored') {
-                    return <ChoosifySponsoredCard key={entry.key} item={entry.sponsored} />;
-                  }
+          <div className="flex items-start gap-6">
+            <CategorySidebarNav
+              categories={categoriesList}
+              activeCategory={selectedMainCategory}
+              onSelect={handleSidebarCategorySelect}
+            />
 
-                  const cat = entry.item;
-
-                  return (
-                    <CategoryPremiumCard
-                      key={entry.key}
-                      name={cat.name}
-                      stats={getCategoryStatBlock(cat, allCatalogProducts ?? [])}
-                      icon={cat.icon}
-                      image={cat.image}
-                      subcategories={cat.subcategories}
-                      featuredBrand={
-                        (allCatalogProducts ?? []).find(
-                          (p) =>
-                            String(p.categoryName ?? '')
-                              .toLowerCase()
-                              .includes(cat.name.toLowerCase().split(/\s+/)[0] ?? '') &&
-                            p.brandName,
-                        )?.brandName
-                      }
+            <div className="flex-1 min-w-0">
+              {isLoading ? (
+                <div className={CATEGORY_CARD_GRID}>
+                  {Array.from({ length: 12 }).map((_, idx) => (
+                    <CategoryCardSkeleton key={idx} />
+                  ))}
+                </div>
+              ) : selectedMainCategory && selectedCategoryEntry ? (
+                <div className={CATEGORY_CARD_GRID}>
+                  {selectedSubgroups.map((group) => (
+                    <CategorySubgroupCard
+                      key={group.name}
+                      categoryName={selectedCategoryEntry.name}
+                      group={group}
                     />
-                  );
-                })
-              }
-            </SponsoredFeedInjector>
+                  ))}
+                </div>
+              ) : (
+                <div className={CATEGORY_CARD_GRID}>
+                <SponsoredFeedInjector
+                  surface="categories"
+                  items={filteredCategoriesList}
+                  getItemKey={(cat) => cat.name}
+                >
+                  {(entries) =>
+                    entries.map((entry) => {
+                      if (entry.kind === 'sponsored') {
+                        return <ChoosifySponsoredCard key={entry.key} item={entry.sponsored} />;
+                      }
+
+                      const cat = entry.item;
+
+                      return (
+                        <CategoryPremiumCard
+                          key={entry.key}
+                          name={cat.name}
+                          stats={getCategoryStatBlock(cat, allCatalogProducts ?? [])}
+                          icon={cat.icon}
+                          image={cat.image}
+                          subcategories={cat.subcategories}
+                          featuredBrand={
+                            (allCatalogProducts ?? []).find(
+                              (p) =>
+                                String(p.categoryName ?? '')
+                                  .toLowerCase()
+                                  .includes(cat.name.toLowerCase().split(/\s+/)[0] ?? '') &&
+                                p.brandName,
+                            )?.brandName
+                          }
+                        />
+                      );
+                    })
+                  }
+                </SponsoredFeedInjector>
+                </div>
+              )}
             </div>
-          )}
+          </div>
         </div>
 
         {/* RIGHT COLUMN: FOR BUSINESS & SELLERS CARD & SPONSORED AD */}
