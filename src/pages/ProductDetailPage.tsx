@@ -106,28 +106,25 @@ export interface ProductAddon {
 // Seeded mock add-ons per industry — keyed by product category
 // In future backend integration, these will come from the product API response
 const ADDON_SEEDS: Record<string, ProductAddon[]> = {
-  'Mobile & Gadgets': [
+  'Electronics': [
     { id: 'ag1', title: 'Extended Warranty', description: '12-month extended coverage beyond standard warranty', price: 890, badge: 'Popular', available: true },
     { id: 'ag2', title: 'Screen Protector', description: 'Premium tempered glass, 9H hardness, anti-glare', price: 350, badge: 'Recommended', available: true },
     { id: 'ag3', title: 'Installation Service', description: 'Professional setup and data transfer at home', price: 550, available: true },
     { id: 'ag4', title: 'Premium Case', description: 'Genuine leather protective case', price: 690, available: true },
   ],
-  'Fashion & Clothing': [
+  'Fashion & Lifestyle': [
     { id: 'fc1', title: 'Gift Wrap', description: 'Premium branded gift wrapping with ribbon', price: 100, badge: 'Popular', available: true },
     { id: 'fc2', title: 'Greeting Card', description: 'Personalised printed message card', price: 60, available: true },
     { id: 'fc3', title: 'Express Ironing', description: 'Garment pressed and ready to wear', price: 150, badge: 'Recommended', available: true },
+    { id: 'ff1', title: 'Cleaning Kit', description: 'Professional-grade shoe/accessory care kit', price: 290, badge: 'Best Value', available: true },
     { id: 'fc4', title: 'Monogramming', description: 'Initials embroidered on the item', price: 350, available: false },
   ],
-  'Fashion & Footwear': [
-    { id: 'ff1', title: 'Cleaning Kit', description: 'Professional-grade shoe care kit', price: 290, badge: 'Best Value', available: true },
-    { id: 'ff2', title: 'Hard Carry Case', description: 'Rigid protective box for travel', price: 450, available: true },
-    { id: 'ff3', title: 'Gift Wrap', description: 'Luxury box and ribbon', price: 100, badge: 'Popular', available: true },
-  ],
-  'Home Appliances': [
+  'Home, Furniture & Appliances': [
     { id: 'ha1', title: 'Professional Installation', description: 'Certified technician installs at your location', price: 1200, badge: 'Recommended', available: true },
     { id: 'ha2', title: 'Old Appliance Removal', description: 'We collect and dispose your old unit', price: 600, available: true },
-    { id: 'ha3', title: 'Annual Maintenance Contract', description: '1 year AMC with 2 free service visits', price: 2500, badge: 'Best Value', available: true },
-    { id: 'ha4', title: 'Extended Warranty', description: '2-year extended coverage', price: 1800, available: true },
+    { id: 'fur1', title: 'Assembly Service', description: 'Expert team assembles at your home', price: 800, badge: 'Popular', available: true },
+    { id: 'fur2', title: 'Premium Delivery', description: 'White-glove delivery + room placement', price: 1200, available: true },
+    { id: 'ha4', title: 'Extended Warranty', description: '2-year extended coverage', price: 1800, badge: 'Best Value', available: true },
   ],
   'Eyewear': [
     { id: 'ew5', title: 'Single Vision Prescription Lenses', description: 'Standard prescription power in one field of vision', price: 900, badge: 'Popular', available: true, prescriptionLens: true },
@@ -138,27 +135,57 @@ const ADDON_SEEDS: Record<string, ProductAddon[]> = {
     { id: 'ew3', title: 'Anti-Reflective Coating', description: 'AR coating upgrade for lenses', price: 890, badge: 'Best Value', available: true },
     { id: 'ew4', title: 'Blue Light Filter', description: 'Digital screen protection upgrade', price: 750, available: true },
   ],
-  'Furniture': [
-    { id: 'fur1', title: 'Assembly Service', description: 'Expert team assembles at your home', price: 800, badge: 'Popular', available: true },
-    { id: 'fur2', title: 'Premium Delivery', description: 'White-glove delivery + room placement', price: 1200, badge: 'Recommended', available: true },
-    { id: 'fur3', title: 'Floor Protection', description: 'Rubber pads and floor protectors included', price: 350, available: true },
-    { id: 'fur4', title: '5-Year Warranty Extension', description: 'Extended structural warranty', price: 2200, badge: 'Best Value', available: true },
-  ],
-  'Beauty & Grooming': [
+  'Beauty, Health & Pharmacy': [
     { id: 'bg1', title: 'Gift Box', description: 'Premium branded gift packaging', price: 200, badge: 'Popular', available: true },
     { id: 'bg2', title: 'Sample Kit', description: 'Complementary brand sample collection', price: 350, badge: 'Recommended', available: true },
     { id: 'bg3', title: 'Premium Packaging', description: 'Luxury presentation box with bow', price: 290, available: true },
   ],
-  'Hotels & Travel': [
-    { id: 'ht1', title: 'Airport Pickup', description: 'Private car from airport to hotel', price: 1800, badge: 'Popular', available: true },
-    { id: 'ht2', title: 'Daily Breakfast', description: 'Full breakfast buffet per person', price: 950, badge: 'Recommended', available: true },
-    { id: 'ht3', title: 'Late Check-out', description: 'Check-out extended to 4:00 PM', price: 1200, available: true },
-    { id: 'ht4', title: 'Spa Package', description: 'Full day spa access + 60 min massage', price: 4500, badge: 'Best Value', available: true },
-  ],
-  'Food & Grocery': [
+  'Grocery & Food': [
     { id: 'fg1', title: 'Gift Wrap', description: 'Hamper-style gift wrapping', price: 150, badge: 'Popular', available: true },
     { id: 'fg2', title: 'Greeting Card', description: 'Personalised message card', price: 60, available: true },
     { id: 'fg3', title: 'Cold Chain Delivery', description: 'Temperature-controlled express delivery', price: 250, badge: 'Recommended', available: true },
+  ],
+};
+
+/**
+ * Add-ons for service/booking listings — keyed by `serviceCategory` (a stable enum),
+ * not the free-text `category` label, since booking-style listings vary their display
+ * category per product. Only categories where a bolt-on upsell genuinely makes sense
+ * get an entry (hotels, tours/travel, events, restaurant reservations, appointments,
+ * beauty/spa) — one-off services like real estate, passport help, recruitment, B2B
+ * sourcing, equipment rental, and donations intentionally have none.
+ */
+const SERVICE_ADDON_SEEDS: Record<string, ProductAddon[]> = {
+  hotels: [
+    { id: 'svc-ht1', title: 'Extra Bed', description: 'Additional bed set up in the room', price: 1000, badge: 'Popular', available: true },
+    { id: 'svc-ht2', title: 'Extra Person', description: 'Additional guest beyond standard occupancy', price: 1500, available: true },
+    { id: 'svc-ht3', title: 'Airport Pickup / Drop-off', description: 'Private transfer to/from the airport', price: 1800, badge: 'Recommended', available: true },
+    { id: 'svc-ht4', title: 'Additional Meal', description: 'Extra breakfast, lunch, or dinner per person', price: 650, available: true },
+    { id: 'svc-ht5', title: 'Late Check-out', description: 'Check-out extended to 4:00 PM', price: 1200, available: true },
+  ],
+  travel: [
+    { id: 'svc-tr1', title: 'Extra Person', description: 'Add another traveler to the package', price: 6500, badge: 'Popular', available: true },
+    { id: 'svc-tr2', title: 'Airport Pickup / Drop-off', description: 'Private transfer to/from the airport', price: 1800, badge: 'Recommended', available: true },
+    { id: 'svc-tr3', title: 'Additional Meal', description: 'Extra meal per person per day', price: 650, available: true },
+    { id: 'svc-tr4', title: 'Private Room Upgrade', description: 'Upgrade from shared to private room', price: 3200, badge: 'Best Value', available: true },
+  ],
+  events: [
+    { id: 'svc-ev1', title: 'Extra Hour of Coverage', description: 'Extend photography/videography by 1 hour', price: 5000, badge: 'Popular', available: true },
+    { id: 'svc-ev2', title: 'Additional Photographer', description: 'Second shooter for wider event coverage', price: 12000, badge: 'Recommended', available: true },
+    { id: 'svc-ev3', title: 'Drone Coverage', description: 'Aerial shots and video for the event', price: 8000, available: true },
+  ],
+  reservation: [
+    { id: 'svc-rv1', title: 'Extra Guest', description: 'Add a seat beyond the reserved table size', price: 0, available: true },
+    { id: 'svc-rv2', title: 'Birthday / Occasion Setup', description: 'Table decoration for a special occasion', price: 800, badge: 'Popular', available: true },
+    { id: 'svc-rv3', title: 'Private Dining Room', description: 'Upgrade to a private room if available', price: 2500, badge: 'Recommended', available: true },
+  ],
+  appointments: [
+    { id: 'svc-ap1', title: 'Extend Session (+30 min)', description: 'Add half an hour to your appointment', price: 1200, badge: 'Popular', available: true },
+    { id: 'svc-ap2', title: 'Home Visit', description: 'Provider comes to your location instead', price: 1500, badge: 'Recommended', available: true },
+  ],
+  beauty: [
+    { id: 'svc-bt1', title: 'Extend Session (+30 min)', description: 'Add half an hour to your treatment', price: 1200, available: true },
+    { id: 'svc-bt2', title: 'Aromatherapy Upgrade', description: 'Add essential oils to your session', price: 500, badge: 'Popular', available: true },
   ],
 };
 
@@ -172,6 +199,20 @@ const FALLBACK_ADDONS: ProductAddon[] = [
 
 function resolveAddons(product: any): ProductAddon[] {
   if (!product) return FALLBACK_ADDONS;
+
+  // Service/booking listings: match on the stable `serviceCategory` enum, not the
+  // free-text display category. No entry = no addons (e.g. real estate, passport
+  // help, recruitment, B2B sourcing, equipment rental, donations).
+  if (product.productType === 'service') {
+    return SERVICE_ADDON_SEEDS[product.serviceCategory] || [];
+  }
+
+  // Tag-based match first — lets a product surface a specialised addon set (e.g.
+  // prescription lenses for sunglasses tagged "eyewear") independent of its top-level category.
+  const tags: string[] = Array.isArray(product.tags) ? product.tags.map((t: string) => String(t).toLowerCase()) : [];
+  const tagMatchKey = Object.keys(ADDON_SEEDS).find((k) => tags.includes(k.toLowerCase()));
+  if (tagMatchKey) return ADDON_SEEDS[tagMatchKey];
+
   const category = product.category || product.type || '';
   if (ADDON_SEEDS[category]) return ADDON_SEEDS[category];
   const matchKey = Object.keys(ADDON_SEEDS).find(k =>
@@ -1043,7 +1084,7 @@ export function ProductDetailPage() {
           openEmiPanel(`Tell me more about ${product.title} and alternatives`);
         }}
         addonsSlot={
-          !isService && hasAddons ? (
+          hasAddons ? (
             <>
               <OptionalAddonsModule
                 addons={resolvedAddons}

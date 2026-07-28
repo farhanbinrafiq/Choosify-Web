@@ -15,15 +15,15 @@ const cartAddAccumulator = new Map<
   { title: string; quantity: number; addonCount: number; timer?: ReturnType<typeof setTimeout> }
 >();
 
-function trimVisibleQueue() {
-  const visible = toastLib
-    .getToasts()
-    .filter((item) => item.visible && item.type !== 'loading')
-    .sort((a, b) => a.createdAt - b.createdAt);
+// react-hot-toast@2.x has no imperative "list current toasts" API (getToasts only
+// exists on the useToasterStore() hook), so we track visible toast ids ourselves
+// to cap how many are shown at once.
+const visibleToastIds: string[] = [];
 
-  while (visible.length > MAX_VISIBLE) {
-    const oldest = visible.shift();
-    if (oldest) toastLib.dismiss(oldest.id);
+function trimVisibleQueue() {
+  while (visibleToastIds.length > MAX_VISIBLE) {
+    const oldest = visibleToastIds.shift();
+    if (oldest) toastLib.dismiss(oldest);
   }
 }
 
@@ -32,14 +32,25 @@ function push(
   type: 'success' | 'error' | 'loading' | 'blank',
   options: NotifyOptions = {},
 ) {
-  trimVisibleQueue();
   const duration = type === 'loading' ? Infinity : TOAST_DURATION_MS;
   const opts = { duration, ...options };
 
-  if (type === 'error') return toastLib.error(message, opts);
-  if (type === 'loading') return toastLib.loading(message, opts);
-  if (type === 'success') return toastLib.success(message, opts);
-  return toastLib(message, opts);
+  let id: string;
+  if (type === 'error') id = toastLib.error(message, opts);
+  else if (type === 'loading') id = toastLib.loading(message, opts);
+  else if (type === 'success') id = toastLib.success(message, opts);
+  else id = toastLib(message, opts);
+
+  if (type !== 'loading') {
+    if (!visibleToastIds.includes(id)) visibleToastIds.push(id);
+    trimVisibleQueue();
+    setTimeout(() => {
+      const idx = visibleToastIds.indexOf(id);
+      if (idx !== -1) visibleToastIds.splice(idx, 1);
+    }, duration);
+  }
+
+  return id;
 }
 
 function cartDetail(title: string, quantity: number, addonCount: number) {
@@ -110,7 +121,6 @@ export const notify = {
   remove: toastLib.remove,
   promise: toastLib.promise,
   custom: toastLib.custom,
-  getToasts: toastLib.getToasts,
 };
 
 type ToastApi = typeof notify & ((message: string, options?: NotifyOptions) => string);

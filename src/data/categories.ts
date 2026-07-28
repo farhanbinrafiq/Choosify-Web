@@ -258,4 +258,13 @@ export const CATEGORIES: CategorySeed[] = [
     brandCount: 0,
     featuredBrand: null,
   },
+  {
+    id: 'bookings-appointments',
+    name: 'Bookings & Appointments',
+    icon: 'CalendarCheck',
+    subcategories: ['Restaurant Reservation', "Doctor's Appointment", 'Massage Appointment', 'Therapy Appointment', 'Gym Membership'],
+    productCount: 0,
+    brandCount: 0,
+    featuredBrand: null,
+  },
 ] as const;

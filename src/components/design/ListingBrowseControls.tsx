@@ -104,7 +104,7 @@ export function ListingBrowseControls({
                   onChipClick?.(chip);
                   onSearch?.(chip);
                 }}
-                className="bg-[#FFF3EA] border border-[#FFD8B8] text-[#CF4400] text-[11px] font-semibold px-3 py-1.5 rounded-full hover:bg-[#FFE8D6] transition-colors cursor-pointer"
+                className="bg-white border border-[#E5E7EB] text-[#1A1A2E] text-[11px] font-semibold px-3 py-1.5 rounded-full hover:border-[#EB4501]/40 transition-colors cursor-pointer"
               >
                 {chip}
               </button>

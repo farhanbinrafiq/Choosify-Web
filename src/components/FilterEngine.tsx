@@ -1344,16 +1344,16 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                   <div className="w-12 h-1 rounded-full bg-gray-200 mx-auto mt-3 shrink-0" />
                 )}
 
-                <div className="p-5 border-b border-[#e8edf2] bg-gradient-to-br from-[#FFF8F5]/85 to-[#FFF0E8]/50 flex items-center justify-between shrink-0">
+                <div className="footer-brand-gradient p-5 flex items-center justify-between shrink-0">
                   <div className="flex items-center gap-3 text-left">
-                    <div className="w-11 h-11 rounded-full bg-orange-primary/10 flex items-center justify-center border border-[#e8edf2] shrink-0">
+                    <div className="w-11 h-11 rounded-full bg-white/10 flex items-center justify-center border border-white/15 shrink-0">
                       <SlidersHorizontal size={18} className="text-orange-primary" />
                     </div>
                     <div>
                       <div className="text-[9px] font-black uppercase tracking-[0.15em] text-orange-primary">
                         Consolidated Discovery
                       </div>
-                      <h3 className="text-xs font-black text-heading leading-tight uppercase">
+                      <h3 className="text-xs font-black text-white leading-tight uppercase">
                         Filters & Search
                       </h3>
                     </div>
@@ -1361,7 +1361,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                   <button
                     type="button"
                     onClick={() => closeDrawer()}
-                    className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-heading transition-all border border-[#e8edf2] cursor-pointer"
+                    className="w-8 h-8 rounded-full bg-white hover:bg-gray-100 flex items-center justify-center text-gray-400 hover:text-heading transition-all border border-white/20 cursor-pointer"
                   >
                     <X size={14} />
                   </button>

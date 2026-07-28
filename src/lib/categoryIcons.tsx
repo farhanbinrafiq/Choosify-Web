@@ -5,6 +5,7 @@ import {
   Boxes,
   Briefcase,
   Building2,
+  CalendarCheck,
   Car,
   Cpu,
   Download,
@@ -33,12 +34,13 @@ import {
   Wrench,
 } from 'lucide-react';
 
-const CATEGORY_ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+const CATEGORY_ICON_MAP: Record<string, React.ComponentType<{ className?: string; color?: string }>> = {
   Baby,
   BookOpen,
   Boxes,
   Briefcase,
   Building2,
+  CalendarCheck,
   Car,
   Cpu,
   Download,
@@ -67,23 +69,29 @@ const CATEGORY_ICON_MAP: Record<string, React.ComponentType<{ className?: string
   Wrench,
 };
 
-export function getCategoryIconComponent(catName: string, iconName: string) {
+/** Gradient id referenced by every category icon's stroke — keep in sync with <CategoryIconGradientDefs>. */
+export const CATEGORY_ICON_GRADIENT_ID = 'choosify-category-icon-gradient';
+
+/** Mount once per page — defines the shared stroke gradient (matches footer-brand-gradient's warm-to-dark tone). */
+export function CategoryIconGradientDefs() {
+  return (
+    <svg width="0" height="0" className="absolute" aria-hidden focusable="false">
+      <defs>
+        <linearGradient id={CATEGORY_ICON_GRADIENT_ID} x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#EB4501" />
+          <stop offset="55%" stopColor="#CF4400" />
+          <stop offset="100%" stopColor="#1A1D4E" />
+        </linearGradient>
+      </defs>
+    </svg>
+  );
+}
+
+/**
+ * All category icons share the same gradient stroke — no per-category colors, stays outline/stroke style.
+ * Pass `colorOverride` (e.g. "#fff") when the icon sits on a surface already using the gradient as a background.
+ */
+export function getCategoryIconComponent(_catName: string, iconName: string, colorOverride?: string) {
   const IconComponent = CATEGORY_ICON_MAP[iconName] || Package;
-  const name = catName.toLowerCase();
-
-  let colorClass = 'text-gray-500';
-  if (name.includes('fashion')) colorClass = 'text-blue-600';
-  else if (name.includes('tech') || name.includes('electronics')) colorClass = 'text-[#1A73E8]';
-  else if (name.includes('family') || name.includes('kids') || name.includes('baby')) colorClass = 'text-blue-500';
-  else if (name.includes('jewelry') || name.includes('accessories')) colorClass = 'text-yellow-500';
-  else if (name.includes('hobby') || name.includes('creativity') || name.includes('hobbies') || name.includes('gaming')) colorClass = 'text-orange-500';
-  else if (name.includes('travel') || name.includes('hospitality')) colorClass = 'text-rose-500';
-  else if (name.includes('beauty') || name.includes('personal care')) colorClass = 'text-pink-500';
-  else if (name.includes('mobile') || name.includes('phone')) colorClass = 'text-indigo-600';
-  else if (name.includes('food')) colorClass = 'text-red-500';
-  else if (name.includes('home') || name.includes('living')) colorClass = 'text-emerald-600';
-  else if (name.includes('sport')) colorClass = 'text-green-600';
-  else if (name.includes('appliance') || name.includes('tv')) colorClass = 'text-violet-600';
-
-  return <IconComponent className={`w-5 h-5 ${colorClass}`} />;
+  return <IconComponent className="w-full h-full" color={colorOverride ?? `url(#${CATEGORY_ICON_GRADIENT_ID})`} />;
 }

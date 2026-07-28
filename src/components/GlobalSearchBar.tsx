@@ -517,7 +517,7 @@ export function GlobalSearchBar({
           type="button"
           aria-label="Open search"
           onClick={openMobileSearch}
-          className="sm:hidden flex w-10 h-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[#EB4501] hover:bg-white/10 transition-colors"
+          className="sm:hidden flex w-10 h-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-white hover:bg-white/10 transition-colors"
         >
           <SearchCheck size={20} strokeWidth={2} />
         </button>

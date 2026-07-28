@@ -9,6 +9,7 @@ type LegacyMockProduct = {
   image: string;
   description?: string;
   category?: string;
+  tags?: string[];
 };
 
 type LegacyMockBrand = {
@@ -177,9 +178,17 @@ function getVariantsForProduct(productId: number, basePrice: number, baseImage: 
   return undefined;
 }
 
-export function buildMappedProductsFromMock(products: LegacyMockProduct[]): CommerceProduct[] {
+export function buildMappedProductsFromMock(
+  products: LegacyMockProduct[],
+  brands: LegacyMockBrand[] = [],
+): CommerceProduct[] {
   return products.map((p) => {
     const cleanPrice = parseFloat(p.price.replace(/,/g, '')) || 5000;
+    const matchedBrand = brands.find((b) => b.name.toLowerCase() === p.brand.toLowerCase());
+    const brandId = matchedBrand?.id ?? 0;
+    const sellerId = matchedBrand
+      ? `seller-${matchedBrand.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
+      : 'seller-general';
     return {
       id: p.id,
       title: p.title,
@@ -187,20 +196,14 @@ export function buildMappedProductsFromMock(products: LegacyMockProduct[]): Comm
       brand: p.brand,
       codSupport: p.id !== 1,
       stock: p.id === 3 ? 0 : p.id === 5 ? 3 : 58,
-      sellerId:
-        p.brand === 'Samsung'
-          ? 'seller-samsung'
-          : p.brand === 'Apple'
-            ? 'seller-apple'
-            : p.brand === 'Apex'
-              ? 'seller-apex'
-              : 'seller-general',
-      brandId: p.brand === 'Samsung' ? 1 : p.brand === 'Apple' ? 2 : p.brand === 'Apex' ? 3 : 4,
+      sellerId,
+      brandId,
       price: cleanPrice,
       description:
         p.description ||
         `Full verified ${p.title} with complete manufacturer accessory bundle and native local warranty coverage.`,
       category: p.category,
+      tags: p.tags,
       variants: getVariantsForProduct(p.id, cleanPrice, p.image),
     };
   });

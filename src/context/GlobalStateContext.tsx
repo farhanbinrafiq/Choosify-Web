@@ -9,6 +9,7 @@ import {
   mergeServiceSeedSellers,
 } from '../data/mockServiceListings';
 import { buildFallbackBrandsFromMock, buildMappedProductsFromMock } from '../utils/mockCatalogHydration';
+import { MOCK_CATALOG_GUIDES } from '../data/mockCatalogGuides';
 import { perfApiCall } from '../utils/performanceDev';
 import { notify, toast } from '../lib/notify';
 import { catalogApi } from '../services/catalogApi';
@@ -459,7 +460,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     loadMockCatalog().then(({ products, brands, blogs }) => {
       if (cancelled) return;
       mockBrandsRef.current = brands;
-      setMockMappedProducts(buildMappedProductsFromMock(products));
+      setMockMappedProducts(buildMappedProductsFromMock(products, brands));
       setMockFallbackBrands(buildFallbackBrandsFromMock(brands, getBrandClaimStatus));
       setMockGuideFallback(blogs as unknown as ReturnType<typeof mapCatalogGuide>[]);
     });
@@ -521,6 +522,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       } catch (error) {
         console.warn('[GlobalStateContext] Catalog API unavailable, using static fallback.', error);
         setIsUsingFallbackData(true);
+        setCatalogGuides((prev) => (prev.length ? prev : MOCK_CATALOG_GUIDES));
       }
     }
 

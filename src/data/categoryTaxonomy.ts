@@ -275,6 +275,16 @@ export const CATEGORY_TAXONOMY: TaxonomyLevel1[] = [
       { name: 'Educational Sponsorship', items: ['Child Sponsorship', 'School Supplies Donation', 'Scholarship Programs', 'Underprivileged Student Support'] },
     ],
   },
+  {
+    categoryId: 'bookings-appointments',
+    groups: [
+      { name: 'Restaurant Reservation', items: ['Fine Dining', 'Casual Dining', 'Buffet Reservation', 'Private Dining'] },
+      { name: "Doctor's Appointment", items: ['General Physician', 'Specialist Consultation', 'Dental Checkup', 'Diagnostic Tests'] },
+      { name: 'Massage Appointment', items: ['Full Body Massage', 'Spa Package', 'Foot Reflexology', 'Couples Massage'] },
+      { name: 'Therapy Appointment', items: ['Physiotherapy', 'Mental Health Counseling', 'Speech Therapy', 'Occupational Therapy'] },
+      { name: 'Gym Membership', items: ['Monthly Membership', 'Annual Membership', 'Personal Training', 'Group Classes'] },
+    ],
+  },
 ];
 
 export function getTaxonomyGroups(categoryId: string): TaxonomyLevel2[] {

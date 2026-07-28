@@ -20,7 +20,7 @@ import { PAGE_LISTING_SINGLE_SHELL, CATEGORY_CARD_GRID } from "../lib/pageLayout
 import { ListingAdRail } from '../components/ListingAdRail';
 import { PLACEMENT_KEYS } from '../lib/placements';
 import { SponsoredFeedInjector } from '../components/commerce/SponsoredFeedInjector';
-import { ChoosifySponsoredCard } from '../components/commerce/ChoosifySponsoredCard';
+import { CategorySponsoredAdCard } from '../components/categories/CategorySponsoredAdCard';
 
 type CategoryItem = CategoryDisplayItem;
 
@@ -42,7 +42,6 @@ export function CategoriesPage() {
   // V2 Discovery Filter States
   const [selectedCategoryType, setSelectedCategoryType] = useState<string | null>(null);
   const [selectedCategoryStatus, setSelectedCategoryStatus] = useState<string | null>(null);
-  const [selectedAlphabetical, setSelectedAlphabetical] = useState<string | null>(null);
   const [selectedAvailability, setSelectedAvailability] = useState<string | null>(null);
   const [selectedContent, setSelectedContent] = useState<string | null>(null);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
@@ -57,13 +56,12 @@ export function CategoriesPage() {
   }, [
     searchQuery, activeCategoryTab,
     selectedCategoryType, selectedCategoryStatus,
-    selectedAlphabetical, selectedAvailability, selectedContent, selectedMainCategory
+    selectedAvailability, selectedContent, selectedMainCategory
   ]);
 
   const handleClearAllFilters = () => {
     setSelectedCategoryType(null);
     setSelectedCategoryStatus(null);
-    setSelectedAlphabetical(null);
     setSelectedAvailability(null);
     setSelectedContent(null);
     setSearchQuery('');
@@ -200,7 +198,6 @@ export function CategoriesPage() {
             chips={[
               selectedCategoryType ? { id: 'categoryType', label: `Type: ${selectedCategoryType}`, onRemove: () => setSelectedCategoryType(null) } : null,
               selectedCategoryStatus ? { id: 'status', label: `Status: ${selectedCategoryStatus}`, onRemove: () => setSelectedCategoryStatus(null) } : null,
-              selectedAlphabetical ? { id: 'alphabetical', label: `Alphabetical: ${selectedAlphabetical}`, onRemove: () => setSelectedAlphabetical(null) } : null,
               selectedAvailability ? { id: 'availability', label: `Availability: ${selectedAvailability}`, onRemove: () => setSelectedAvailability(null) } : null,
               selectedContent ? { id: 'content', label: `Content: ${selectedContent}`, onRemove: () => setSelectedContent(null) } : null,
               activeCategoryTab !== 'All Categories' ? { id: 'tab', label: `Tab: ${activeCategoryTab}`, onRemove: () => setActiveCategoryTab('All Categories') } : null,
@@ -260,82 +257,20 @@ export function CategoriesPage() {
         }
       >
         <div className="bg-white border border-[#eef2f6] rounded-2xl p-4.5 shadow-sm text-left">
-          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#eef2f6] mb-3">Category Type</h3>
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#eef2f6] mb-3">Categories</h3>
           <div className="space-y-1 max-h-56 overflow-y-auto no-scrollbar">
-            {[
-              { value: 'Electronics', label: 'Electronics Catalog' },
-              { value: 'Fashion', label: 'Fashion & Apparel' },
-              { value: 'Beauty', label: 'Beauty & Skincare' },
-              { value: 'Home & Living', label: 'Home & Living' },
-              { value: 'Grocery', label: 'Grocery & Essentials' },
-              { value: 'Sports', label: 'Sports & Activewear' },
-              { value: 'Automotive', label: 'Vehicles & Motoring' },
-              { value: 'Books', label: 'Books & Education' },
-              { value: 'Kids', label: 'Kids & Family' },
-              { value: 'Health', label: 'Health & Wellness' },
-              { value: 'Lifestyle', label: 'Travel & Lifestyle' },
-              { value: 'Services', label: 'Learning & Services' }
-            ].map(opt => (
+            {categoriesList.map(cat => (
               <button
-                key={opt.value}
+                key={cat.id}
                 type="button"
-                onClick={() => setSelectedCategoryType(selectedCategoryType === opt.value ? null : opt.value)}
+                onClick={() => handleSidebarCategorySelect(cat.name)}
                 className={cn(
                   "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
-                  selectedCategoryType === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                  selectedMainCategory === cat.name ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
                 )}
               >
-                <span>{opt.label}</span>
-                {selectedCategoryType === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-white border border-[#eef2f6] rounded-2xl p-4.5 shadow-sm text-left">
-          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#eef2f6] mb-3">Category Status</h3>
-          <div className="space-y-1">
-            {[
-              { value: 'featured', label: 'Featured Categories' },
-              { value: 'trending', label: 'Trending Categories' },
-              { value: 'editors-picks', label: "Editor's Picks" },
-              { value: 'newly-added', label: 'Newly Added' },
-              { value: 'popular', label: 'Popular' }
-            ].map(opt => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setSelectedCategoryStatus(selectedCategoryStatus === opt.value ? null : opt.value)}
-                className={cn(
-                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
-                  selectedCategoryStatus === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
-                )}
-              >
-                <span>{opt.label}</span>
-                {selectedCategoryStatus === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className="bg-white border border-[#eef2f6] rounded-2xl p-4.5 shadow-sm text-left">
-          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#eef2f6] mb-3">Alphabetical</h3>
-          <div className="space-y-1">
-            {[
-              { value: 'a-z', label: 'Alphabetical: A–Z' },
-              { value: 'z-a', label: 'Alphabetical: Z–A' }
-            ].map(opt => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setSelectedAlphabetical(selectedAlphabetical === opt.value ? null : opt.value)}
-                className={cn(
-                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
-                  selectedAlphabetical === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
-                )}
-              >
-                <span>{opt.label}</span>
-                {selectedAlphabetical === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
+                <span>{cat.name}</span>
+                {selectedMainCategory === cat.name && <Check size={11} className="text-orange-primary shrink-0" />}
               </button>
             ))}
           </div>
@@ -416,15 +351,8 @@ export function CategoriesPage() {
       });
     }
 
-    // 7. Alphabetical sorting
-    if (selectedAlphabetical === 'a-z' || selectedAlphabetical === 'A–Z') {
-      result.sort((a, b) => a.name.localeCompare(b.name));
-    } else if (selectedAlphabetical === 'z-a' || selectedAlphabetical === 'Z–A') {
-      result.sort((a, b) => b.name.localeCompare(a.name));
-    }
-
     return result;
-  }, [searchQuery, activeCategoryTab, selectedCategoryType, selectedCategoryStatus, selectedAvailability, selectedContent, selectedAlphabetical, selectedMainCategory, categoriesList]);
+  }, [searchQuery, activeCategoryTab, selectedCategoryType, selectedCategoryStatus, selectedAvailability, selectedContent, selectedMainCategory, categoriesList]);
 
   useRegisterPageFilters({
     pageName: 'Categories',
@@ -447,7 +375,7 @@ export function CategoriesPage() {
       {
         id: 'all-categories',
         label: 'All Categories',
-        active: !selectedCategoryStatus && !selectedCategoryType && !selectedAlphabetical && activeCategoryTab === 'All Categories',
+        active: !selectedCategoryStatus && !selectedCategoryType && activeCategoryTab === 'All Categories',
         onClick: handleClearAllFilters
       },
       {
@@ -536,86 +464,22 @@ export function CategoriesPage() {
           </div>
         </div>
 
-        {/* Category Type */}
+        {/* Categories */}
         <div className="bg-white border border-[#eef2f6] rounded-2xl p-4.5 shadow-sm text-left">
-          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#eef2f6] mb-3">Category Type</h3>
+          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#eef2f6] mb-3">Categories</h3>
           <div className="space-y-1 max-h-56 overflow-y-auto no-scrollbar">
-            {[
-              { value: 'Electronics', label: 'Electronics Catalog' },
-              { value: 'Fashion', label: 'Fashion & Apparel' },
-              { value: 'Beauty', label: 'Beauty & Skincare' },
-              { value: 'Home & Living', label: 'Home & Living' },
-              { value: 'Grocery', label: 'Grocery & Essentials' },
-              { value: 'Sports', label: 'Sports & Activewear' },
-              { value: 'Automotive', label: 'Vehicles & Motoring' },
-              { value: 'Books', label: 'Books & Education' },
-              { value: 'Kids', label: 'Kids & Family' },
-              { value: 'Health', label: 'Health & Wellness' },
-              { value: 'Lifestyle', label: 'Travel & Lifestyle' },
-              { value: 'Services', label: 'Learning & Services' }
-            ].map(opt => (
+            {categoriesList.map(cat => (
               <button
-                key={opt.value}
+                key={cat.id}
                 type="button"
-                onClick={() => setSelectedCategoryType(selectedCategoryType === opt.value ? null : opt.value)}
+                onClick={() => handleSidebarCategorySelect(cat.name)}
                 className={cn(
                   "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
-                  selectedCategoryType === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
+                  selectedMainCategory === cat.name ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
                 )}
               >
-                <span>{opt.label}</span>
-                {selectedCategoryType === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Category Status */}
-        <div className="bg-white border border-[#eef2f6] rounded-2xl p-4.5 shadow-sm text-left">
-          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#eef2f6] mb-3">Category Status</h3>
-          <div className="space-y-1">
-            {[
-              { value: 'featured', label: 'Featured Categories' },
-              { value: 'trending', label: 'Trending Categories' },
-              { value: 'editors-picks', label: "Editor's Picks" },
-              { value: 'newly-added', label: 'Newly Added' },
-              { value: 'popular', label: 'Popular' }
-            ].map(opt => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setSelectedCategoryStatus(selectedCategoryStatus === opt.value ? null : opt.value)}
-                className={cn(
-                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
-                  selectedCategoryStatus === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
-                )}
-              >
-                <span>{opt.label}</span>
-                {selectedCategoryStatus === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Alphabetical */}
-        <div className="bg-white border border-[#eef2f6] rounded-2xl p-4.5 shadow-sm text-left">
-          <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#eef2f6] mb-3">Alphabetical</h3>
-          <div className="space-y-1">
-            {[
-              { value: 'a-z', label: 'Alphabetical: A–Z' },
-              { value: 'z-a', label: 'Alphabetical: Z–A' }
-            ].map(opt => (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setSelectedAlphabetical(selectedAlphabetical === opt.value ? null : opt.value)}
-                className={cn(
-                  "w-full flex items-center justify-between text-left px-2 py-1 rounded-[4px] transition-colors text-xs font-semibold cursor-pointer",
-                  selectedAlphabetical === opt.value ? "bg-[#FFF0E8] text-orange-primary font-bold" : "text-gray-500 hover:bg-gray-50 hover:text-[#1A1D4E]"
-                )}
-              >
-                <span>{opt.label}</span>
-                {selectedAlphabetical === opt.value && <Check size={11} className="text-orange-primary shrink-0" />}
+                <span>{cat.name}</span>
+                {selectedMainCategory === cat.name && <Check size={11} className="text-orange-primary shrink-0" />}
               </button>
             ))}
           </div>
@@ -624,7 +488,6 @@ export function CategoriesPage() {
     ),
     activeFilterCount: (selectedCategoryType ? 1 : 0) +
       (selectedCategoryStatus ? 1 : 0) +
-      (selectedAlphabetical ? 1 : 0) +
       (selectedAvailability ? 1 : 0) +
       (selectedContent ? 1 : 0) +
       (activeCategoryTab !== 'All Categories' ? 1 : 0) +
@@ -636,7 +499,6 @@ export function CategoriesPage() {
     activeCategoryTab,
     selectedCategoryType,
     selectedCategoryStatus,
-    selectedAlphabetical,
     selectedAvailability,
     selectedContent,
     selectedMainCategory,
@@ -701,7 +563,6 @@ export function CategoriesPage() {
             hasActiveFilters={Boolean(
               selectedCategoryType ||
                 selectedCategoryStatus ||
-                selectedAlphabetical ||
                 selectedAvailability ||
                 selectedContent ||
                 activeCategoryTab !== 'All Categories' ||
@@ -713,7 +574,7 @@ export function CategoriesPage() {
             aiDiscoverPrompt="Help me explore categories on Choosify"
           />
 
-          <div className="flex items-start gap-6">
+          <div className="flex flex-col lg:flex-row lg:items-start gap-4 lg:gap-6">
             <CategorySidebarNav
               categories={categoriesList}
               activeCategory={selectedMainCategory}
@@ -747,7 +608,7 @@ export function CategoriesPage() {
                   {(entries) =>
                     entries.map((entry) => {
                       if (entry.kind === 'sponsored') {
-                        return <ChoosifySponsoredCard key={entry.key} item={entry.sponsored} />;
+                        return <CategorySponsoredAdCard key={entry.key} item={entry.sponsored} />;
                       }
 
                       const cat = entry.item;
