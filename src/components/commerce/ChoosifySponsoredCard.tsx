@@ -1,6 +1,6 @@
 import React, { Suspense, lazy } from 'react';
 import { Link } from 'react-router-dom';
-import { BadgeCheck, ArrowRight } from 'lucide-react';
+import { BadgeCheck } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useGlobalState } from '../../context/GlobalStateContext';
 import type { SponsoredPlacementItem } from '../../types/commerce/sponsoredPlacement';
@@ -69,8 +69,8 @@ function SponsoredPublisherStrip({
 
 function SponsoredCompactCard({ item }: { item: SponsoredPlacementItem }) {
   const inner = (
-    <div className="group block bg-white rounded-[5px] border border-[#e8edf2] hover:scale-[1.01] transition-all duration-300 flex flex-col h-full w-full overflow-hidden text-left">
-      <div className="aspect-[16/10] overflow-hidden bg-gray-50 relative">
+    <div className="group block choosify-dark-surface rounded-[5px] hover:scale-[1.01] transition-all duration-300 flex flex-col h-full min-h-[260px] w-full overflow-hidden text-left">
+      <div className="flex-[7] min-h-0 overflow-hidden bg-black/20 relative">
         <img
           src={item.image ?? PLACEHOLDER_IMAGE}
           alt=""
@@ -78,19 +78,19 @@ function SponsoredCompactCard({ item }: { item: SponsoredPlacementItem }) {
           loading="lazy"
         />
       </div>
-      <div className="p-3 flex flex-col flex-1 min-w-0">
+      <div className="p-3 flex flex-col flex-[3] min-h-0 justify-center min-w-0">
+        <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#EB4501] mb-1 flex items-center gap-1">
+          🏷️ Sponsored Ad
+        </span>
         {item.title && (
-          <h3 className="text-xs font-semibold uppercase text-[#1a1a2e] line-clamp-2 mb-1">{item.title}</h3>
+          <h3 className="text-xs font-bold uppercase text-white line-clamp-2 mb-1">{item.title}</h3>
         )}
         {item.subtitle && (
-          <p className="text-[10px] text-gray-400 line-clamp-1 mb-2">{item.subtitle}</p>
+          <p className="text-[10px] text-white/50 line-clamp-1 mb-2">{item.subtitle}</p>
         )}
-        <div className="mt-auto flex items-center justify-between gap-2 pt-2 border-t border-gray-100">
-          <span className="text-[9px] font-semibold uppercase tracking-wider text-gray-400 group-hover:text-[#CF4400]">
-            {item.ctaLabel}
-          </span>
-          <span className="w-6 h-6 rounded-full bg-gray-50 flex items-center justify-center text-gray-500 group-hover:bg-[#CF4400] group-hover:text-white transition-colors">
-            <ArrowRight size={11} />
+        <div className="mt-auto">
+          <span className="block w-full text-center bg-[#EB4501] text-white py-2 rounded-lg text-[10px] font-bold group-hover:brightness-110 transition-[filter]">
+            {item.ctaLabel || 'Shop Now'}
           </span>
         </div>
       </div>

@@ -17,7 +17,7 @@ export function BeforeYourVisitCard({ data, fields, className }: BeforeYourVisit
   return (
     <div className={cn('bg-[#F4F7F9] rounded-[10px] p-4 text-left', className)}>
       <div className="text-[11px] font-extrabold text-[#1A1A2E] mb-3">BEFORE YOUR VISIT</div>
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-3">
         {fieldDefs.map((field) => {
           const value = String(data?.[field.key] || '').trim();
           return (

@@ -77,6 +77,21 @@ export function CheckoutPage() {
 
   const [promoCode, setPromoCode] = useState('');
   const [appliedPromo, setAppliedPromo] = useState<{ code: string; discount: number; type: 'flat' | 'percentage' } | null>(null);
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  /** Deposit-now/rest-at-delivery choice for online payment. Scoped to single-item carts to
+   *  avoid ambiguity over mixed per-product deposit rates in a multi-item order. */
+  const [productPaymentType, setProductPaymentType] = useState<'full' | 'partial'>('full');
+
+  const singleItem = !pendingOrder && activeCart.length === 1 ? activeCart[0] : null;
+  const productPartialEligible =
+    paymentMethod === 'credit' &&
+    !!singleItem?.product?.partialPaymentEnabled &&
+    !!singleItem?.product?.depositPercent;
+  const productDepositPercent = singleItem?.product?.depositPercent ?? 0;
+
+  React.useEffect(() => {
+    if (!productPartialEligible) setProductPaymentType('full');
+  }, [productPartialEligible]);
 
   const userRep = buyerReputations?.find(rep => rep.userId === currentUser?.id);
   const codTrustScore = userRep ? userRep.codTrustScore : 100;
@@ -182,12 +197,24 @@ export function CheckoutPage() {
 
   const isCODEligible = aggregateTotal < 150000 && !isCODRestricted;
 
-  const handlePlaceOrder = () => {
+  /** Mock payment step (no real gateway wired) — brief delay so the UI reads as a real charge. */
+  const simulatePayment = () => new Promise((resolve) => setTimeout(resolve, 900));
+
+  const handlePlaceOrder = async () => {
     if (!fullName.trim() || !phone.trim() || !address.trim()) {
       toast.error('Please deliver all shipping credentials!');
       return;
     }
+    if (isProcessingPayment) return;
+    setIsProcessingPayment(true);
+    try {
+      await placeOrder();
+    } finally {
+      setIsProcessingPayment(false);
+    }
+  };
 
+  const placeOrder = async () => {
     // Accepted booking/product offers pay directly from their pending order.
     // This reuses checkout/payment UI and never touches the cart.
     if (pendingOrder) {
@@ -204,6 +231,8 @@ export function CheckoutPage() {
         navigate('/dashboard', { state: { activeTab: 'orders' } });
         return;
       }
+
+      await simulatePayment();
 
       const confirmedOrder = {
         ...pendingOrder,
@@ -341,10 +370,20 @@ ORDER STATUS: PENDING_CONFIRMATION
       };
     });
 
+    const isCod = paymentMethod === 'cod';
+    const isPartial = !isCod && productPartialEligible && productPaymentType === 'partial';
+    const depositAmount = isPartial ? Math.round((finalTotal * productDepositPercent) / 100) : 0;
+    // COD: buyer prepays only the delivery fee now; product amount stays due at the doorstep.
+    // Partial (online, deposit): buyer pays a deposit now, rest due at delivery.
+    // Full online: buyer pays the full amount now, nothing remains due.
+    const payingNow = isCod ? deliveryTotal : isPartial ? depositAmount : finalTotal;
+    await simulatePayment();
+    const paidAt = new Date().toISOString();
+
     const fullOrderObject = {
       orderId: tempOrderId,
       buyerId: 'user-standard',
-      isCOD: paymentMethod === 'cod',
+      isCOD: isCod,
       isSplit: splitCount > 1,
       overallTotal: finalTotal,
       subtotal,
@@ -355,6 +394,16 @@ ORDER STATUS: PENDING_CONFIRMATION
       promoDiscount: promoDiscount,
       promoType: appliedPromo?.type,
       paymentMethod,
+      status: 'confirmed' as const,
+      paidAt,
+      invoiceGeneratedAt: paidAt,
+      codDeliveryFeePaid: isCod ? true : undefined,
+      codDeliveryFeePaidAt: isCod ? paidAt : undefined,
+      codRemainingAmount: isCod ? Math.max(0, finalTotal - deliveryTotal) : undefined,
+      isPartialPayment: isPartial ? true : undefined,
+      depositPercent: isPartial ? productDepositPercent : undefined,
+      depositAmount: isPartial ? depositAmount : undefined,
+      remainingAmount: isPartial ? Math.max(0, finalTotal - depositAmount) : undefined,
       shipping: {
         fullName: fullName.trim(),
         phone: phone.trim(),
@@ -376,8 +425,14 @@ ORDER STATUS: PENDING_CONFIRMATION
     operationsApi.createOrder(fullOrderObject as Record<string, unknown>).catch(() => {});
 
     orderPlacedRef.current = true;
-    toast.success('Order placed successfully! Live support thread generated.');
-    
+    toast.success(
+      isCod
+        ? `Delivery fee ৳${payingNow.toLocaleString()} paid — order confirmed! ৳${fullOrderObject.codRemainingAmount!.toLocaleString()} payable at your doorstep.`
+        : isPartial
+          ? `Deposit ৳${payingNow.toLocaleString()} paid — order confirmed! ৳${fullOrderObject.remainingAmount!.toLocaleString()} due at delivery.`
+          : `Payment of ৳${payingNow.toLocaleString()} successful — order confirmed!`,
+    );
+
     // Navigate before cart clears so the empty-cart guard does not bounce to home
     navigate(`/order-success/${tempOrderId}`, { replace: true, state: { order: fullOrderObject } });
   };
@@ -692,15 +747,96 @@ ORDER STATUS: PENDING_CONFIRMATION
                 <span className="text-xs font-bold text-[#1A1A2E]">Total ({activeCart.length} Item{activeCart.length === 1 ? '' : 's'})</span>
                 <span className="text-lg font-extrabold text-[#EB4501]">৳{finalTotal.toLocaleString()}</span>
               </div>
+
+              {!pendingOrder && paymentMethod === 'cod' && (
+                <div className="rounded-lg border border-[#EB4501]/25 bg-[#EB4501]/5 p-3 space-y-1.5">
+                  <div className="flex justify-between items-center text-[11px]">
+                    <span className="font-semibold text-[#4B5563]">Pay now (delivery fee)</span>
+                    <span className="font-extrabold text-[#EB4501]">৳{deliveryTotal.toLocaleString()}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[11px]">
+                    <span className="font-semibold text-[#4B5563]">Payable at your doorstep</span>
+                    <span className="font-extrabold text-[#1A1A2E]">
+                      ৳{Math.max(0, finalTotal - deliveryTotal).toLocaleString()}
+                    </span>
+                  </div>
+                </div>
+              )}
+
+              {productPartialEligible && (
+                <div className="space-y-2 pt-1">
+                  <span className="text-[10px] font-bold text-[#9AA0AC] uppercase tracking-wide">
+                    Payment option
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setProductPaymentType('full')}
+                    className={cn(
+                      'w-full flex items-center justify-between gap-3 rounded-lg border px-3.5 py-2.5 text-left transition-colors cursor-pointer',
+                      productPaymentType === 'full' ? 'border-[#EB4501] bg-[#EB4501]/5' : 'border-[#E8EDF2] bg-white',
+                    )}
+                  >
+                    <span className="text-[11.5px] font-bold text-[#1A1A2E]">Pay in full</span>
+                    <span className="text-[12.5px] font-extrabold text-[#EB4501]">৳{finalTotal.toLocaleString()}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setProductPaymentType('partial')}
+                    className={cn(
+                      'w-full flex items-center justify-between gap-3 rounded-lg border px-3.5 py-2.5 text-left transition-colors cursor-pointer',
+                      productPaymentType === 'partial' ? 'border-[#EB4501] bg-[#EB4501]/5' : 'border-[#E8EDF2] bg-white',
+                    )}
+                  >
+                    <span className="min-w-0">
+                      <span className="block text-[11.5px] font-bold text-[#1A1A2E]">
+                        Pay {productDepositPercent}% deposit now
+                      </span>
+                      <span className="block text-[9.5px] text-[#9AA0AC]">
+                        Rest due at delivery
+                      </span>
+                    </span>
+                    <span className="text-[12.5px] font-extrabold text-[#EB4501] shrink-0">
+                      ৳{Math.round((finalTotal * productDepositPercent) / 100).toLocaleString()}
+                    </span>
+                  </button>
+                  {productPaymentType === 'partial' && (
+                    <div className="rounded-lg border border-[#EB4501]/25 bg-[#EB4501]/5 p-3 space-y-1.5">
+                      <div className="flex justify-between items-center text-[11px]">
+                        <span className="font-semibold text-[#4B5563]">Deposit due now</span>
+                        <span className="font-extrabold text-[#EB4501]">
+                          ৳{Math.round((finalTotal * productDepositPercent) / 100).toLocaleString()}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center text-[11px]">
+                        <span className="font-semibold text-[#4B5563]">Due at delivery</span>
+                        <span className="font-extrabold text-[#1A1A2E]">
+                          ৳{Math.max(0, finalTotal - Math.round((finalTotal * productDepositPercent) / 100)).toLocaleString()}
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Action check button */}
             <button
               onClick={handlePlaceOrder}
-              className="w-full px-6 py-3.5 bg-[#EB4501] hover:bg-[#CF4400] text-white text-[12.5px] font-extrabold rounded-lg transition-colors cursor-pointer border-0 flex items-center justify-center gap-1.5"
+              disabled={isProcessingPayment}
+              className="w-full px-6 py-3.5 bg-[#EB4501] hover:bg-[#CF4400] disabled:opacity-60 text-white text-[12.5px] font-extrabold rounded-lg transition-colors cursor-pointer border-0 flex items-center justify-center gap-1.5"
             >
-              <span>PROCEED TO PAYMENT</span>
-              <ArrowRight size={16} />
+              {isProcessingPayment ? (
+                <span>PROCESSING PAYMENT…</span>
+              ) : !pendingOrder && paymentMethod === 'cod' ? (
+                <span>PAY DELIVERY FEE ৳{deliveryTotal.toLocaleString()} &amp; CONFIRM</span>
+              ) : productPartialEligible && productPaymentType === 'partial' ? (
+                <span>
+                  PAY DEPOSIT ৳{Math.round((finalTotal * productDepositPercent) / 100).toLocaleString()} &amp; CONFIRM
+                </span>
+              ) : (
+                <span>PAY ৳{finalTotal.toLocaleString()} &amp; CONFIRM</span>
+              )}
+              {!isProcessingPayment && <ArrowRight size={16} />}
             </button>
             <p className="text-center text-[10.5px] text-[#9AA0AC]">Your payment details are 100% secure</p>
           </div>

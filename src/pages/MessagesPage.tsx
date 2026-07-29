@@ -16,7 +16,7 @@ import type { EmiCatalogPick } from '../lib/emiCatalogSearch';
 import {
   Search, ArrowLeft, Send, MoreVertical, CheckCircle,
   Package, Truck, Clock, MessageCircleMore, LayoutDashboard, CheckSquare,
-  X, Sparkles, Plus, Megaphone, Lock, AlertTriangle, Flag, Info,
+  X, Sparkles, Megaphone, Lock, AlertTriangle, Flag, Info,
 } from 'lucide-react';
 import { toast } from '../lib/notify';
 import { operationsApi } from '../services/operationsApi';
@@ -708,10 +708,11 @@ export function MessagesPage({
               <button
                 type="button"
                 onClick={handleNewConversation}
-                className="w-[22px] h-[22px] rounded-full bg-[#EB4501] text-white flex items-center justify-center text-[13px] border-none cursor-pointer hover:bg-[#CF4400] transition-colors"
-                title="New support conversation"
+                className="px-3 py-1.5 rounded-full bg-[#EB4501] text-white flex items-center gap-1.5 text-[10.5px] font-bold border-none cursor-pointer hover:bg-[#CF4400] transition-colors shrink-0"
+                title="Start a new conversation with Choosify Support"
               >
-                <Plus size={12} strokeWidth={3} />
+                <MessageCircleMore size={12} strokeWidth={2.5} />
+                Contact Support
               </button>
             </div>
             <div className="relative">

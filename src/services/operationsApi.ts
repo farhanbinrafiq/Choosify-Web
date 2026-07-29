@@ -127,6 +127,18 @@ export const operationsApi = {
     );
     return result.data;
   },
+  getBookingRequest: async (requestId: string) => {
+    const result = await request<{ data: unknown }>(`/booking/requests/${encodeURIComponent(requestId)}`);
+    return result.data;
+  },
+  payBookingRequest: async (requestId: string, orderId?: string, paymentType: 'full' | 'partial' = 'full') => {
+    const result = await request<{ data: unknown; request: unknown }>(
+      `/booking/requests/${encodeURIComponent(requestId)}/mark-paid`,
+      'POST',
+      { orderId, paymentType },
+    );
+    return result.data;
+  },
   submitSellerOffer: async (payload: {
     productName: string;
     category: string;

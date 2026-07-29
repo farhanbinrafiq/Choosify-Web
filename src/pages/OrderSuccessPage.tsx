@@ -368,10 +368,40 @@ export function OrderSuccessPage() {
                 )}
                 <div className="text-[10px] text-[#9AA0AC] pt-1">{paymentLabel}</div>
               </div>
-              <div className="flex justify-between items-baseline pt-3.5 border-t border-[#F1F1F3] mb-3.5">
-                <span className="text-xs font-bold text-[#1A1A2E]">TOTAL PAID</span>
-                <span className="text-lg font-extrabold text-[#EB4501]">{formatMoney(order.overallTotal)}</span>
-              </div>
+              {order.codDeliveryFeePaid ? (
+                <div className="space-y-2 mb-3.5">
+                  <div className="flex justify-between items-baseline pt-3.5 border-t border-[#F1F1F3]">
+                    <span className="text-xs font-bold text-[#1A1A2E]">PAID NOW (DELIVERY FEE)</span>
+                    <span className="text-lg font-extrabold text-[#EB4501]">{formatMoney(deliveryTotal)}</span>
+                  </div>
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-xs font-bold text-[#1A1A2E]">DUE AT YOUR DOORSTEP</span>
+                    <span className="text-base font-extrabold text-[#1A1A2E]">
+                      {formatMoney(order.codRemainingAmount ?? Math.max(0, order.overallTotal - deliveryTotal))}
+                    </span>
+                  </div>
+                </div>
+              ) : order.isPartialPayment ? (
+                <div className="space-y-2 mb-3.5">
+                  <div className="flex justify-between items-baseline pt-3.5 border-t border-[#F1F1F3]">
+                    <span className="text-xs font-bold text-[#1A1A2E]">PAID NOW (DEPOSIT)</span>
+                    <span className="text-lg font-extrabold text-[#EB4501]">
+                      {formatMoney(order.depositAmount ?? 0)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-xs font-bold text-[#1A1A2E]">DUE AT DELIVERY</span>
+                    <span className="text-base font-extrabold text-[#1A1A2E]">
+                      {formatMoney(order.remainingAmount ?? Math.max(0, order.overallTotal - (order.depositAmount ?? 0)))}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex justify-between items-baseline pt-3.5 border-t border-[#F1F1F3] mb-3.5">
+                  <span className="text-xs font-bold text-[#1A1A2E]">TOTAL PAID</span>
+                  <span className="text-lg font-extrabold text-[#EB4501]">{formatMoney(order.overallTotal)}</span>
+                </div>
+              )}
               <div className="bg-[#F0FDF4] rounded-lg px-3 py-2.5 flex items-center gap-2">
                 <div className="text-[#16A34A] text-sm">🛡</div>
                 <div>

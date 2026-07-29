@@ -64,6 +64,50 @@ const FALLBACK_BANNERS: HomeDealsBannerCard[] = [
     updatedAt: '',
     href: '/products',
   },
+  {
+    id: 'fallback-5',
+    image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=320&fit=crop',
+    destinationType: 'custom-url',
+    destinationRef: '/deals',
+    order: 4,
+    isActive: true,
+    createdAt: '',
+    updatedAt: '',
+    href: '/deals',
+  },
+  {
+    id: 'fallback-6',
+    image: 'https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=800&h=320&fit=crop',
+    destinationType: 'custom-url',
+    destinationRef: '/products',
+    order: 5,
+    isActive: true,
+    createdAt: '',
+    updatedAt: '',
+    href: '/products',
+  },
+  {
+    id: 'fallback-7',
+    image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&h=320&fit=crop',
+    destinationType: 'custom-url',
+    destinationRef: '/brands',
+    order: 6,
+    isActive: true,
+    createdAt: '',
+    updatedAt: '',
+    href: '/brands',
+  },
+  {
+    id: 'fallback-8',
+    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&h=320&fit=crop',
+    destinationType: 'custom-url',
+    destinationRef: '/deals',
+    order: 7,
+    isActive: true,
+    createdAt: '',
+    updatedAt: '',
+    href: '/deals',
+  },
 ];
 
 interface HomeTodaysDealsSectionProps {
@@ -140,6 +184,8 @@ export function HomeTodaysDealsSection({ banners: bannersProp }: HomeTodaysDeals
         paginationStyle="ring"
         paginationAlign="center"
         showArrows={false}
+        autoplay
+        autoplayMs={4000}
         renderCard={(banner: HomeDealsBannerCard) => {
           const href = resolveDealsBannerHref(banner);
           return (

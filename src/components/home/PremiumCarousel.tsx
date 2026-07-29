@@ -13,6 +13,8 @@ export function PremiumCarousel({
   paginationStyle = 'bar',
   paginationAlign = 'between',
   showArrows = true,
+  autoplay = false,
+  autoplayMs = 4000,
 }: {
   items: any[];
   renderCard: (item: any, index: number, isActive: boolean) => React.ReactNode;
@@ -22,6 +24,10 @@ export function PremiumCarousel({
   paginationStyle?: 'bar' | 'ring';
   paginationAlign?: 'between' | 'center';
   showArrows?: boolean;
+  /** Auto-advance slides on an interval. Pauses on hover, resumes on mouse-leave.
+   *  Clicking a pagination dot stops it for good (manual takeover). */
+  autoplay?: boolean;
+  autoplayMs?: number;
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -29,6 +35,8 @@ export function PremiumCarousel({
   const x = useMotionValue(0);
   const lastWheelTime = React.useRef(0);
   const isDragging = React.useRef(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [autoplayStopped, setAutoplayStopped] = useState(false);
 
   useEffect(() => {
     if (!containerRef.current) return;
@@ -70,6 +78,26 @@ export function PremiumCarousel({
 
   const next = () => goTo(currentIndex + 1);
   const prev = () => goTo(currentIndex - 1);
+
+  const goToPaginated = (index: number) => {
+    setAutoplayStopped(true);
+    goTo(index);
+  };
+
+  // Auto-advance: pauses on hover (resumes on mouse-leave), stops for good once the
+  // viewer manually picks a slide via the pagination dots.
+  useEffect(() => {
+    if (!autoplay || isHovered || autoplayStopped || totalItems <= 1) return;
+    const upper = paginationStyle === 'ring' ? Math.max(0, totalItems - 1) : maxIndex;
+    const timer = setInterval(() => {
+      setCurrentIndex((prevIndex) => {
+        const nextIndex = prevIndex >= upper ? 0 : prevIndex + 1;
+        animate(x, offsetForIndex(Math.min(nextIndex, maxIndex)), SNAP_SPRING);
+        return nextIndex;
+      });
+    }, autoplayMs);
+    return () => clearInterval(timer);
+  }, [autoplay, autoplayMs, isHovered, autoplayStopped, totalItems, maxIndex, paginationStyle, offsetForIndex, x]);
 
   const handleDragEnd = (
     _: unknown,
@@ -133,7 +161,12 @@ export function PremiumCarousel({
   }, [totalItems, currentIndex, maxIndex]);
 
   return (
-    <div className="relative w-full overflow-hidden select-none animate-fade-in" ref={containerRef}>
+    <div
+      className="relative w-full overflow-hidden select-none animate-fade-in"
+      ref={containerRef}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+    >
       <div onWheel={handleWheel} className="w-full overflow-hidden cursor-grab active:cursor-grabbing">
         <motion.div
           drag="x"
@@ -183,7 +216,7 @@ export function PremiumCarousel({
                 <button
                   key={i}
                   type="button"
-                  onClick={() => goTo(i)}
+                  onClick={() => goToPaginated(i)}
                   aria-label={`Go to slide ${i + 1}`}
                   aria-current={active ? 'true' : undefined}
                   className={cn(
@@ -201,7 +234,7 @@ export function PremiumCarousel({
               <button
                 key={i}
                 type="button"
-                onClick={() => goTo(i)}
+                onClick={() => goToPaginated(i)}
                 className={cn(
                   'h-1.5 rounded-full transition-all duration-300 cursor-pointer border-0',
                   active ? 'w-5 bg-[#EB4501]' : 'w-1.5 bg-gray-200 hover:bg-gray-300',

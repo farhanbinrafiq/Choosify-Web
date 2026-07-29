@@ -1,28 +1,39 @@
 import React from 'react';
-import { MapPin } from 'lucide-react';
+import { Hospital, MapPin, Plane, ShoppingBag, Ticket, Utensils } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { cn } from '../../../lib/utils';
 import {
   NEARBY_CATEGORY_DEFS,
   nearbyEntriesForCategory,
 } from '../../../utils/listingRelatedInfo';
-import type { WhatsNearbyData } from '../../../types/listingRelatedInfo';
+import type { NearbyCategoryKey, WhatsNearbyData } from '../../../types/listingRelatedInfo';
 
 export interface WhatsNearbyCardProps {
   data?: WhatsNearbyData;
   className?: string;
 }
 
+const NEARBY_CATEGORY_ICONS: Record<NearbyCategoryKey, LucideIcon> = {
+  restaurant_cafe: Utensils,
+  entertainment_attraction: Ticket,
+  hospital_police: Hospital,
+  transport_airport: Plane,
+  shopping_atm: ShoppingBag,
+};
+
 /** Sidebar "What's Nearby" — five fixed categories, CMS-driven entries per bucket. */
 export function WhatsNearbyCard({ data, className }: WhatsNearbyCardProps) {
   return (
     <div className={cn('bg-[#F4F7F9] rounded-[10px] p-4 text-left', className)}>
       <div className="text-[11px] font-extrabold text-[#1A1A2E] mb-3">WHAT&apos;S NEARBY</div>
-      <div className="space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-3">
         {NEARBY_CATEGORY_DEFS.map((category) => {
           const entries = nearbyEntriesForCategory(data, category.key);
+          const CategoryIcon = NEARBY_CATEGORY_ICONS[category.key];
           return (
             <div key={category.key}>
-              <div className="text-[10.5px] font-bold text-[#EB4501] uppercase tracking-wide mb-1.5">
+              <div className="flex items-center gap-1.5 text-[10.5px] font-bold text-[#EB4501] uppercase tracking-wide mb-1.5">
+                <CategoryIcon size={13} className="shrink-0" aria-hidden />
                 {category.label}
               </div>
               {entries.length > 0 ? (

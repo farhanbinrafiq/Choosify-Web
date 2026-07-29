@@ -10,6 +10,8 @@ type LegacyMockProduct = {
   description?: string;
   category?: string;
   tags?: string[];
+  partialPaymentEnabled?: boolean;
+  depositPercent?: number;
 };
 
 type LegacyMockBrand = {
@@ -204,6 +206,8 @@ export function buildMappedProductsFromMock(
         `Full verified ${p.title} with complete manufacturer accessory bundle and native local warranty coverage.`,
       category: p.category,
       tags: p.tags,
+      partialPaymentEnabled: p.partialPaymentEnabled,
+      depositPercent: p.depositPercent,
       variants: getVariantsForProduct(p.id, cleanPrice, p.image),
     };
   });

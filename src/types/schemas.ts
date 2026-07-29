@@ -92,6 +92,9 @@ export interface CommerceProduct {
   /** Physical catalog item or message-booked service */
   productType?: 'physical' | 'service';
   serviceCategory?: string;
+  /** Seller opt-in: buyer may pay a deposit online now, rest due at delivery. */
+  partialPaymentEnabled?: boolean;
+  depositPercent?: number;
 }
 
 export interface SubOrderItem {
@@ -122,6 +125,12 @@ export interface Order {
   isCOD: boolean;
   isSplit: boolean;
   overallTotal: number;
+  subtotal?: number;
+  deliveryTotal?: number;
+  promoCode?: string;
+  promoDiscount?: number;
+  promoType?: 'flat' | 'percentage' | string;
+  paymentMethod?: 'cod' | 'credit';
   subOrders: SubOrder[];
   createdAt: string;
   status?: 'pending_payment' | 'active' | 'confirmed' | 'cancelled' | 'completed';
@@ -137,6 +146,15 @@ export interface Order {
   returnReason?: string;
   returnRequestedAt?: string;
   disputeId?: string;
+  /** COD orders only — delivery fee prepaid online at checkout; product amount stays due at the doorstep. */
+  codDeliveryFeePaid?: boolean;
+  codDeliveryFeePaidAt?: string;
+  codRemainingAmount?: number;
+  /** Deposit-now/rest-at-delivery online payment (independent of COD). */
+  isPartialPayment?: boolean;
+  depositPercent?: number;
+  depositAmount?: number;
+  remainingAmount?: number;
 }
 
 export interface BuyerReputation {

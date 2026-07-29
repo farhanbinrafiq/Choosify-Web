@@ -170,7 +170,7 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   // without this, ProtectedRoute can still see isLoggedIn=false and bounce to /login.
   const allowed = isLoggedIn || readStoredLoginFlag();
   if (!allowed) {
-    return <Navigate to="/login" state={{ from: location.pathname }} replace />;
+    return <Navigate to="/login" state={{ from: location.pathname + location.search }} replace />;
   }
   return <>{children}</>;
 }

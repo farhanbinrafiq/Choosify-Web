@@ -7,7 +7,7 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { CategoryCardSkeleton } from '../components/Skeleton';
 import { CategoryPremiumCard } from '../components/categories/CategoryPremiumCard';
 import { CategorySidebarNav } from '../components/categories/CategorySidebarNav';
-import { CategorySubgroupCard } from '../components/categories/CategorySubgroupCard';
+import { CategorySubgroupCard, subgroupDockAnchorId } from '../components/categories/CategorySubgroupCard';
 import { getTaxonomyGroups } from '../data/categoryTaxonomy';
 import { CategoriesBrowseControls } from '../components/categories/CategoriesQuickNav';
 import { CATEGORY_QUICK_NAV_ITEMS } from '../lib/design/categoryTokens';
@@ -184,15 +184,29 @@ export function CategoriesPage() {
             showSearch={false}
           />
         }
-        browseDockItems={CATEGORY_QUICK_NAV_ITEMS.map((item) => ({
-          id: item.id,
-          icon: item.letter,
-          name: item.label,
-          sub: item.sub,
-          bg: quickNavId === item.id ? '#FFF3EA' : item.bg,
-          active: quickNavId === item.id,
-          onClick: () => handleQuickNavSelect(item.id, item.filterType),
-        }))}
+        browseDockItems={
+          selectedMainCategory && selectedSubgroups.length > 0
+            ? selectedSubgroups.map((group) => ({
+                id: `subgroup-${group.name}`,
+                icon: (group.name.charAt(0) || '#').toUpperCase(),
+                name: group.name,
+                sub: group.items.length > 0 ? `${group.items.length} types` : '',
+                onClick: () => {
+                  document
+                    .getElementById(subgroupDockAnchorId(group.name))
+                    ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                },
+              }))
+            : CATEGORY_QUICK_NAV_ITEMS.map((item) => ({
+                id: item.id,
+                icon: item.letter,
+                name: item.label,
+                sub: item.sub,
+                bg: quickNavId === item.id ? '#FFF3EA' : item.bg,
+                active: quickNavId === item.id,
+                onClick: () => handleQuickNavSelect(item.id, item.filterType),
+              }))
+        }
         activeChips={
           <ActiveFilterChips
             chips={[

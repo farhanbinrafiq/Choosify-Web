@@ -49,9 +49,9 @@ export function HomeBuyingGuidesSection({ guideSlides }: HomeBuyingGuidesSection
           <Link
             key={String(guide.id)}
             to={guideHref(guide)}
-            className="cursor-pointer flex-[0_0_190px] snap-start"
+            className="cursor-pointer flex-[0_0_190px] snap-start bg-white rounded-[10px] overflow-hidden border border-[#E8EDF2] hover:border-[#EB4501]/35 transition-colors"
           >
-            <div className="h-[130px] rounded-[10px] overflow-hidden mb-2.5 bg-white">
+            <div className="h-[130px] overflow-hidden bg-[#F4F7F9]">
               <img
                 src={guide.image || PLACEHOLDER_IMAGE}
                 alt=""
@@ -59,7 +59,7 @@ export function HomeBuyingGuidesSection({ guideSlides }: HomeBuyingGuidesSection
                 loading="lazy"
               />
             </div>
-            <div className="text-xs font-semibold text-[#1A1A2E] leading-snug line-clamp-2">
+            <div className="text-xs font-semibold text-[#1A1A2E] leading-snug line-clamp-2 px-3 py-2.5 pb-3.5">
               {guide.title || guide.name}
             </div>
           </Link>

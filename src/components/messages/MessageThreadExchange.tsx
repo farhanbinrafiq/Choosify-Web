@@ -23,6 +23,7 @@ type MessageThreadExchangeProps = {
   viewerIsSeller?: boolean;
   onAcceptBookingOffer?: (offer: BookingOfferCard) => void;
   onDeclineBookingOffer?: (offer: BookingOfferCard) => void;
+  onBookingOfferPaid?: (offer: BookingOfferCard) => void;
   onSellerRespondToOffer?: (offer: BookingOfferCard, action: 'accept' | 'decline' | 'counter') => void;
   showSellerBookingActions?: boolean;
   onWithdrawProductCard?: (message: ThreadMessage) => void;
@@ -96,6 +97,7 @@ export function MessageThreadExchange({
   viewerIsSeller = false,
   onAcceptBookingOffer,
   onDeclineBookingOffer,
+  onBookingOfferPaid,
   onSellerRespondToOffer,
   showSellerBookingActions = false,
   onWithdrawProductCard,
@@ -193,6 +195,7 @@ export function MessageThreadExchange({
                           ? () => onDeclineBookingOffer?.(m.bookingOffer!)
                           : undefined
                       }
+                      onPaid={() => onBookingOfferPaid?.(m.bookingOffer!)}
                     />
                     {showSellerBookingActions && m.bookingOffer.status === 'pending' && onSellerRespondToOffer && (
                       <div className="mt-2 flex flex-wrap justify-end gap-1.5">

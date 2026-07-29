@@ -239,6 +239,8 @@ export const PRODUCTS = [
     tag: 'SALE',
     stores: [{ name: 'Otobi Showroom', price: '42,000', delivery: '7-10 Days', rating: 4.4, link: '#' }],
     category: 'Home, Furniture & Appliances',
+    partialPaymentEnabled: true,
+    depositPercent: 30,
     description: 'Premium 3-seater fabric sofa with solid wood frame and high-density foam cushions.',
     pros: ['Solid wood frame', 'Stain-resistant fabric', '2-year warranty'],
     cons: ['Heavy — assembly required'],

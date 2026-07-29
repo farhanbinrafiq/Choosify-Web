@@ -84,17 +84,17 @@ export function AdvertiseHereCard({
   return (
     <div
       className={cn(
-        'bg-[#FFF6EF] rounded-[10px] overflow-hidden border-[1.5px] border-dashed border-[#EB4501] relative flex flex-col min-h-full',
+        'choosify-dark-surface rounded-[10px] overflow-hidden relative flex flex-col h-full min-h-[300px]',
         className,
       )}
     >
-      <div className="absolute top-1.5 left-1.5 bg-[#1A1A2E] text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-sm z-[1]">
-        {variant === 'product-tile' ? 'AD' : 'SPONSORED'}
+      <div className="absolute top-1.5 left-1.5 text-[8px] font-extrabold text-[#EB4501] uppercase tracking-wide z-[1] flex items-center gap-1">
+        🏷️ {variant === 'product-tile' ? 'Ad' : 'Sponsored Ad'}
       </div>
       <div
         className={cn(
-          'bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-center justify-center',
-          variant === 'product-tile' ? 'h-[170px]' : 'h-[100px] items-end pb-2.5',
+          'bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-center justify-center flex-[7] min-h-0',
+          variant !== 'product-tile' && 'items-end pb-2.5',
         )}
       >
         {copy.bannerLabel ? (
@@ -110,20 +110,20 @@ export function AdvertiseHereCard({
       </div>
       <div
         className={cn(
-          'flex-1 flex flex-col',
-          variant === 'creator' ? 'px-3.5 pt-7 pb-4' : variant === 'product-tile' ? 'px-3 pt-2.5 pb-3.5' : 'p-3.5',
+          'flex-[3] min-h-0 flex flex-col justify-center',
+          variant === 'creator' ? 'px-3.5 py-4' : variant === 'product-tile' ? 'px-3 py-2.5' : 'p-3.5',
         )}
       >
         <div
           className={cn(
-            'font-bold text-[#1A1A2E] leading-snug',
+            'font-bold text-white leading-snug',
             variant === 'product-tile' ? 'text-[11.5px] mb-2' : 'text-[13.5px] mb-1',
           )}
         >
           {copy.headline}
         </div>
         {copy.sub ? (
-          <div className="text-[11px] text-[#4B5563] mb-3 leading-snug">{copy.sub}</div>
+          <div className="text-[11px] text-white/60 mb-3 leading-snug">{copy.sub}</div>
         ) : variant === 'product-tile' ? null : (
           <div className="mb-3" />
         )}
@@ -163,14 +163,14 @@ export function SponsoredProductTile({
   return (
     <div
       className={cn(
-        'bg-[#FFF6EF] rounded-[10px] overflow-hidden border-[1.5px] border-dashed border-[#EB4501] relative flex flex-col min-h-full h-full',
+        'choosify-dark-surface rounded-[10px] overflow-hidden relative flex flex-col h-full min-h-[260px]',
         className,
       )}
     >
-      <div className="absolute top-1.5 left-1.5 bg-[#1A1A2E] text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-sm z-[1]">
-        SPONSORED
+      <div className="absolute top-1.5 left-1.5 text-[8px] font-extrabold text-[#EB4501] uppercase tracking-wide z-[1] flex items-center gap-1">
+        🏷️ Sponsored Ad
       </div>
-      <div className="h-[100px] bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-center justify-center overflow-hidden relative">
+      <div className="flex-[7] min-h-0 bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-center justify-center overflow-hidden relative">
         {imageUrl ? (
           <img src={imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover opacity-90" loading="lazy" />
         ) : (
@@ -179,8 +179,8 @@ export function SponsoredProductTile({
           </span>
         )}
       </div>
-      <div className="px-3 pt-2.5 pb-3.5 flex flex-col flex-1 min-h-0">
-        <div className="text-[11.5px] font-bold text-[#1A1A2E] leading-snug line-clamp-2 mb-2">{headline}</div>
+      <div className="px-3 pt-2.5 pb-3.5 flex flex-col flex-[3] min-h-0 justify-center">
+        <div className="text-[11.5px] font-bold text-white leading-snug line-clamp-2 mb-2">{headline}</div>
         {isExternal ? (
           <a href={href} target="_blank" rel="sponsored noopener noreferrer" className={ctaClass}>
             {item.ctaLabel ?? 'LEARN MORE'}

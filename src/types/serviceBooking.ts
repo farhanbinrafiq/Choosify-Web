@@ -6,7 +6,15 @@ export type ServiceCategory =
   | 'education'
   | 'beauty'
   | 'real_estate'
-  | 'transport';
+  | 'transport'
+  | 'events'
+  | 'tickets'
+  | 'home_services'
+  | 'gov_services'
+  | 'recruitment'
+  | 'b2b'
+  | 'rental'
+  | 'donation';
 
 export type BookingOfferStatus =
   | 'pending'
@@ -48,6 +56,12 @@ export interface BookingOfferCard {
   currency: 'BDT';
   status: BookingOfferStatus;
   createdAt: string;
+  /** True when the listing skipped manual seller acceptance — buyer can pay immediately. */
+  autoApproved?: boolean;
+  /** Listing allows paying a deposit now with the rest due at check-in/service, instead of full payment. */
+  partialPaymentEnabled?: boolean;
+  /** Seller's chosen deposit percent when partialPaymentEnabled. */
+  depositPercent?: number;
   sellerRespondBy: string;
   buyerPayBy?: string;
   declineReason?: string;

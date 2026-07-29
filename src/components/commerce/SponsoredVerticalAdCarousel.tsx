@@ -47,21 +47,21 @@ export function VerticalAdvertisePlaceholder({ className }: { className?: string
   return (
     <div
       className={cn(
-        'bg-[#FFF6EF] rounded-[10px] overflow-hidden border-[1.5px] border-dashed border-[#EB4501] relative flex flex-col min-h-[320px]',
+        'choosify-dark-surface rounded-[10px] overflow-hidden relative flex flex-col min-h-[320px]',
         className,
       )}
     >
-      <div className="absolute top-2 left-2 bg-[#1A1A2E] text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-sm z-[1]">
-        SPONSORED
+      <div className="absolute top-2 left-2 text-[8px] font-extrabold text-[#EB4501] uppercase tracking-wide z-[1] flex items-center gap-1">
+        🏷️ Sponsored Ad
       </div>
-      <div className="h-[160px] bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-end justify-center pb-3">
+      <div className="flex-[7] min-h-0 bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-end justify-center pb-3">
         <span className="text-white text-[12px] font-extrabold text-center px-3">
           PROMOTE YOUR DEAL
         </span>
       </div>
-      <div className="p-4 flex flex-col flex-1">
-        <div className="text-[10px] font-bold text-[#9AA0AC] tracking-wide mb-1">ADVERTISEMENT</div>
-        <div className="text-[13px] font-semibold text-[#1A1A2E] mb-3 leading-snug">
+      <div className="p-4 flex flex-col flex-[3] min-h-0 justify-center">
+        <div className="text-[10px] font-bold text-white/50 tracking-wide mb-1">ADVERTISEMENT</div>
+        <div className="text-[13px] font-semibold text-white mb-3 leading-snug">
           Reach 2M+ shoppers with a featured deal slot
         </div>
         <Link

@@ -57,7 +57,7 @@ import { useRegisterPageFilters } from "../components/FilterEngine";
 import { getBrandOfficialWebsite, normalizeExternalUrl } from "../utils/overviewRegistry";
 import { SizeGuideModal } from "../components/SizeGuideModal";
 import { BrandCardDesign, mapBrandToCardDesign } from "../components/BrandCardDesign";
-import { BRAND_CARD_GRID, DETAIL_SINGLE_FEED } from "../lib/pageLayout";
+import { DETAIL_SINGLE_FEED } from "../lib/pageLayout";
 import { DC_CONTENT_MAX } from "../lib/design/dcListingTokens";
 import { ProductSpecsOverview } from "../components/ProductSpecsOverview";
 import { OverviewListItem } from "../components/OverviewListIcon";
@@ -887,6 +887,8 @@ export function ProductDetailPage() {
       else if (field.key === 'color') initialValues[field.key] = selectedColor || '';
       else if (field.key === 'size') initialValues[field.key] = selectedSize || '';
       else if (field.key === 'variant') initialValues[field.key] = selectedRam || selectedStorage || '';
+      else if (field.key === 'destination' || field.key === 'eventLocation' || field.key === 'address')
+        initialValues[field.key] = product?.location || '';
       else initialValues[field.key] = '';
     });
     setRequestValues(initialValues);
@@ -1515,9 +1517,9 @@ export function ProductDetailPage() {
             {/* Same Brands-list directory tile (standard grid cell size — not stretched) */}
             <div
               id={isService ? 'service-provider-section' : 'where-to-buy-section'}
-              className="w-full flex flex-col gap-6"
+              className="w-full flex flex-col md:flex-row gap-6 items-stretch"
             >
-              <div className={BRAND_CARD_GRID}>
+              <div className="w-full md:w-[300px] lg:w-[340px] shrink-0">
                 <BrandCardDesign
                   brand={mapBrandToCardDesign(
                     brandObj || {
@@ -1533,6 +1535,7 @@ export function ProductDetailPage() {
 
               {showRelatedInfoPanel && product ? (
                 <ListingRelatedInfoPanel
+                  className="flex-1 min-w-0"
                   product={product}
                   fallbackPrice={typeof product.price === 'number' ? product.price : undefined}
                 />
@@ -1758,7 +1761,7 @@ export function ProductDetailPage() {
                     }}
                     className="flex-1 py-3 bg-[#EB4501] text-white rounded-lg hover:brightness-110 transition-all text-[13px] font-bold tracking-tight shadow-sm cursor-pointer border-none"
                   >
-                    Confirm Params
+                    Review Message
                   </button>
                 </div>
               </div>

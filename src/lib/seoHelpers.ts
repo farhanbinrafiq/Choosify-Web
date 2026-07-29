@@ -98,6 +98,7 @@ const SECTION_LABELS: Record<string, string> = {
   reviews: 'Review Details',
   creators: 'Creators',
   search: 'Discover',
+  spotlight: 'Discover',
   'whats-on': 'Events',
   'brand-deals': 'Brand Deals',
   about: 'About Us',

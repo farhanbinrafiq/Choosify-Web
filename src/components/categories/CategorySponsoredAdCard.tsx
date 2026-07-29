@@ -3,44 +3,42 @@ import { Link } from 'react-router-dom';
 import type { SponsoredPlacementItem } from '../../types/commerce/sponsoredPlacement';
 import { PLACEHOLDER_IMAGE } from '../../constants';
 
-/** Sponsored ad tile for the Categories grid — matches CategoryPremiumCard's exact footprint. */
+/** Sponsored ad tile for the Categories grid — dark gradient ad treatment (matches CategoryPremiumCard's footprint). */
 export function CategorySponsoredAdCard({ item }: { item: SponsoredPlacementItem }) {
   const inner = (
-    <div className="bg-white rounded-xl overflow-hidden border border-[#E8EDF2] flex flex-col h-full">
-      <div className="relative h-[120px] w-full overflow-hidden bg-[#F4F7F9]">
-        <img
-          src={item.image ?? PLACEHOLDER_IMAGE}
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-          loading="lazy"
-        />
-        <span className="absolute top-2 right-2 text-[8px] font-black uppercase tracking-wider bg-white/90 text-[#8a9bb0] px-1.5 py-0.5 rounded-full">
-          Ad
+    <div className="choosify-dark-surface rounded-xl overflow-hidden flex flex-col h-full p-4 min-h-[380px]">
+      <div className="flex items-center justify-between mb-3 shrink-0">
+        <span className="text-[10.5px] font-extrabold text-[#EB4501] uppercase tracking-wide flex items-center gap-1">
+          🏷️ Sponsored Ad
         </span>
-      </div>
-
-      <div className="px-4 pt-5 pb-4 flex-1 flex flex-col">
-        <span className="text-[14px] font-bold text-[#1A1A2E] mb-0.5 line-clamp-2">
-          {item.title || item.sponsorName}
-        </span>
-        {item.subtitle && (
-          <span className="text-[12px] text-[#4B5563] line-clamp-2">{item.subtitle}</span>
-        )}
-      </div>
-
-      <div className="mt-auto choosify-dark-surface text-white px-4 py-3 flex items-center gap-2.5">
-        <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-extrabold shrink-0 overflow-hidden">
+        <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-extrabold text-white shrink-0 overflow-hidden">
           {item.sponsorLogoUrl ? (
             <img src={item.sponsorLogoUrl} alt="" className="w-full h-full object-cover" />
           ) : (
             item.sponsorName.charAt(0).toUpperCase()
           )}
         </div>
-        <div className="text-[11px] text-white font-bold min-w-0 flex-1 truncate">
-          {item.ctaLabel || 'Sponsored'}
-        </div>
-        <span className="shrink-0 text-[9px] font-extrabold uppercase tracking-wide text-white/70 border border-white/25 rounded px-1.5 py-0.5">
-          Ad
+      </div>
+
+      <div className="relative w-full overflow-hidden rounded-lg bg-black/20 mb-3.5 flex-[7] min-h-0">
+        <img
+          src={item.image ?? PLACEHOLDER_IMAGE}
+          alt=""
+          className="absolute inset-0 w-full h-full object-cover"
+          loading="lazy"
+        />
+      </div>
+
+      <div className="flex-[3] min-h-0 shrink-0 flex flex-col justify-center">
+        <span className="text-[13px] font-bold text-white mb-0.5 line-clamp-2">
+          {item.title || item.sponsorName}
+        </span>
+        {item.subtitle && (
+          <span className="text-[11px] text-white/50 line-clamp-2 mb-3">{item.subtitle}</span>
+        )}
+
+        <span className="mt-auto block w-full text-center bg-[#EB4501] text-white py-2.5 rounded-lg text-[11.5px] font-bold hover:brightness-110 transition-[filter]">
+          {item.ctaLabel || 'Shop Now'}
         </span>
       </div>
     </div>

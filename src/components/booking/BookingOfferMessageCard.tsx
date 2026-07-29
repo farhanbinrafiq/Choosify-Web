@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Check, Clock3, ExternalLink, MessageCircleMore, X } from 'lucide-react';
+import { BadgeCheck, Check, Clock3, CreditCard, ExternalLink, MessageCircleMore, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import type { BookingOfferCard } from '../../types/serviceBooking';
+import { BookingPaymentModal } from './BookingPaymentModal';
 
 function formatRemaining(deadline?: string): string {
   if (!deadline) return '';
@@ -29,12 +30,17 @@ export function BookingOfferMessageCard({
   offer,
   onAccept,
   onDecline,
+  onPaid,
 }: {
   offer: BookingOfferCard;
   onAccept?: () => void;
   onDecline?: () => void;
+  /** Called after the buyer successfully pays via the Pay & Confirm modal. */
+  onPaid?: () => void;
 }) {
   const [, tick] = useState(0);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const [justPaid, setJustPaid] = useState(false);
   useEffect(() => {
     const timer = window.setInterval(() => tick((value) => value + 1), 60_000);
     return () => window.clearInterval(timer);
@@ -45,12 +51,15 @@ export function BookingOfferMessageCard({
       ? offer.buyerPayBy
       : offer.sellerRespondBy;
   const remaining = formatRemaining(deadline);
-  const statusText = offer.status.replace(/_/g, ' ');
+  const effectiveStatus = justPaid ? 'paid' : offer.status;
+  const statusText = effectiveStatus.replace(/_/g, ' ');
   const details = useMemo(
     () => Object.entries(offer.fields).filter(([key]) => key !== 'notes'),
     [offer.fields],
   );
-  const canRespond = offer.status === 'countered' || offer.status === 'accepted';
+  // Buyer only "accepts/declines" a seller counter-offer — once accepted, the action is Pay & Confirm.
+  const canRespondToCounter = offer.status === 'countered';
+  const canPay = !justPaid && (offer.status === 'accepted' || offer.status === 'buyer_accepted');
 
   return (
     <div className="w-full max-w-sm overflow-hidden rounded-[10px] border border-[#E8EDF2] bg-white text-left shadow-sm">
@@ -61,12 +70,22 @@ export function BookingOfferMessageCard({
         </span>
         <span
           className={`rounded-md border px-2 py-0.5 text-[9px] font-bold capitalize ${
-            STATUS_STYLE[offer.status] ?? STATUS_STYLE.pending
+            STATUS_STYLE[effectiveStatus] ?? STATUS_STYLE.pending
           }`}
         >
           {statusText}
         </span>
       </div>
+
+      {offer.autoApproved && offer.status === 'accepted' && !justPaid && (
+        <div className="flex items-start gap-2 border-b border-emerald-100 bg-emerald-50 px-4 py-2.5">
+          <BadgeCheck size={14} className="text-emerald-600 shrink-0 mt-0.5" />
+          <p className="text-[10px] font-semibold text-emerald-700 leading-relaxed">
+            {offer.sellerName} has pre-approved this booking instantly — no waiting needed.
+            Complete payment to confirm it.
+          </p>
+        </div>
+      )}
 
       <div className="flex gap-3 p-4">
         {offer.listingImage ? (
@@ -131,7 +150,7 @@ export function BookingOfferMessageCard({
       ) : null}
 
       <div className="flex flex-wrap justify-end gap-2 border-t border-[#E8EDF2] bg-[#F4F7F9] p-3">
-        {canRespond && onDecline ? (
+        {canRespondToCounter && onDecline ? (
           <button
             type="button"
             onClick={onDecline}
@@ -140,13 +159,22 @@ export function BookingOfferMessageCard({
             <X size={10} /> Decline
           </button>
         ) : null}
-        {canRespond && onAccept ? (
+        {canRespondToCounter && onAccept ? (
           <button
             type="button"
             onClick={onAccept}
             className="inline-flex items-center gap-1 rounded-lg border-0 bg-emerald-600 px-3 py-1.5 text-[9px] font-bold text-white"
           >
             <Check size={10} /> Accept offer
+          </button>
+        ) : null}
+        {canPay ? (
+          <button
+            type="button"
+            onClick={() => setShowPaymentModal(true)}
+            className="inline-flex items-center gap-1 rounded-lg border-0 bg-[#EB4501] hover:bg-[#CF4400] px-3 py-1.5 text-[9px] font-bold text-white transition-colors cursor-pointer"
+          >
+            <CreditCard size={10} /> Pay &amp; Confirm
           </button>
         ) : null}
         <Link
@@ -156,6 +184,18 @@ export function BookingOfferMessageCard({
           View listing <ExternalLink size={10} />
         </Link>
       </div>
+
+      {showPaymentModal && (
+        <BookingPaymentModal
+          offer={offer}
+          onClose={() => setShowPaymentModal(false)}
+          onPaid={() => {
+            setShowPaymentModal(false);
+            setJustPaid(true);
+            onPaid?.();
+          }}
+        />
+      )}
     </div>
   );
 }

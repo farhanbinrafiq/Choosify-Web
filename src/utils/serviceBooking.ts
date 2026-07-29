@@ -19,19 +19,48 @@ const CATEGORY_ALIASES: Record<string, ServiceCategory> = {
   hotels: 'hotels',
   restaurant: 'restaurants',
   restaurants: 'restaurants',
+  reservation: 'restaurants',
   travel: 'travel',
+  tour: 'travel',
+  tours: 'travel',
   doctor: 'doctors',
   doctors: 'doctors',
   healthcare: 'doctors',
   education: 'education',
   beauty: 'beauty',
   salon: 'beauty',
+  spa: 'beauty',
+  appointment: 'beauty',
+  appointments: 'beauty',
   'real estate': 'real_estate',
   real_estate: 'real_estate',
   'real-estate': 'real_estate',
   property: 'real_estate',
   transport: 'transport',
   transportation: 'transport',
+  event: 'events',
+  events: 'events',
+  wedding: 'events',
+  ticket: 'tickets',
+  tickets: 'tickets',
+  'home service': 'home_services',
+  'home services': 'home_services',
+  home_services: 'home_services',
+  cleaning: 'home_services',
+  'gov service': 'gov_services',
+  'gov services': 'gov_services',
+  gov_services: 'gov_services',
+  government: 'gov_services',
+  recruitment: 'recruitment',
+  hiring: 'recruitment',
+  jobs: 'recruitment',
+  b2b: 'b2b',
+  wholesale: 'b2b',
+  rental: 'rental',
+  rent: 'rental',
+  donation: 'donation',
+  donations: 'donation',
+  charity: 'donation',
 };
 
 export function isServiceListing(product: {
@@ -59,6 +88,22 @@ export function serviceMessageCtaLabel(serviceCategory?: string | null): string 
     case 'doctors':
     case 'beauty':
       return 'Message for Appointment';
+    case 'events':
+      return 'Message to Book Event';
+    case 'tickets':
+      return 'Message for Tickets';
+    case 'home_services':
+      return 'Message to Book Service';
+    case 'gov_services':
+      return 'Message for Assistance';
+    case 'recruitment':
+      return 'Message to Hire';
+    case 'b2b':
+      return 'Message for Quote';
+    case 'rental':
+      return 'Message to Rent';
+    case 'donation':
+      return 'Message to Donate';
     default:
       return 'Message to Book';
   }
@@ -132,6 +177,48 @@ export let SERVICE_BOOKING_FIELDS: Record<ServiceCategory, BookingRequestField[]
     { key: 'travelDate', label: 'Preferred travel date', type: 'date', required: true },
     { key: 'travellers', label: 'Travellers', type: 'number', required: true, min: 1 },
     { key: 'destination', label: 'Destination', type: 'text', required: true },
+    notes,
+  ],
+  events: [
+    { key: 'eventDate', label: 'Event date', type: 'date', required: true },
+    { key: 'eventLocation', label: 'Event location', type: 'text', required: true },
+    { key: 'guestCount', label: 'Guest count', type: 'number', min: 1 },
+    notes,
+  ],
+  tickets: [
+    { key: 'visitDate', label: 'Visit / event date', type: 'date', required: true },
+    { key: 'quantity', label: 'Number of tickets', type: 'number', required: true, min: 1 },
+    notes,
+  ],
+  home_services: [
+    { key: 'serviceDate', label: 'Preferred date', type: 'date', required: true },
+    { key: 'serviceTime', label: 'Preferred time', type: 'time' },
+    { key: 'address', label: 'Service address', type: 'text', required: true },
+    notes,
+  ],
+  gov_services: [
+    { key: 'preferredDate', label: 'Preferred date', type: 'date', required: true },
+    { key: 'applicantName', label: 'Applicant name', type: 'text', required: true },
+    notes,
+  ],
+  recruitment: [
+    { key: 'preferredStartDate', label: 'Preferred start date', type: 'date', required: true },
+    { key: 'rolesNeeded', label: 'Roles needed', type: 'number', required: true, min: 1 },
+    notes,
+  ],
+  b2b: [
+    { key: 'preferredDate', label: 'Preferred date', type: 'date', required: true },
+    { key: 'quantity', label: 'Order quantity', type: 'number', required: true, min: 1 },
+    notes,
+  ],
+  rental: [
+    { key: 'rentalStartDate', label: 'Rental start date', type: 'date', required: true },
+    { key: 'rentalEndDate', label: 'Rental end date', type: 'date', required: true },
+    { key: 'quantity', label: 'Quantity', type: 'number', required: true, min: 1 },
+    notes,
+  ],
+  donation: [
+    { key: 'amount', label: 'Donation amount', type: 'number', required: true, min: 1 },
     notes,
   ],
 };

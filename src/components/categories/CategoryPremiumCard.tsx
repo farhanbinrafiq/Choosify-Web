@@ -45,7 +45,7 @@ export function CategoryPremiumCard({
     e.preventDefault();
     e.stopPropagation();
     navigate(
-      `/products?category=${encodeURIComponent(name)}&subcategory=${encodeURIComponent(subName)}`,
+      `/products?category=${encodeURIComponent(name)}&subcategory=${encodeURIComponent(subName)}&q=${encodeURIComponent(subName)}`,
     );
   };
 
@@ -124,7 +124,7 @@ export function CategoryPremiumCard({
           <span className="text-white font-extrabold">{featured}</span>
         </div>
         <span
-          className="shrink-0 text-[9px] font-extrabold uppercase tracking-wide text-white/70 border border-white/25 rounded px-1.5 py-0.5"
+          className="shrink-0 text-[9px] font-extrabold uppercase tracking-wide text-white bg-[#EB4501] rounded px-1.5 py-0.5"
           title="Sponsored"
         >
           Ad
