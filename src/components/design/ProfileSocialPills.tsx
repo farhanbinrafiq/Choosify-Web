@@ -39,6 +39,33 @@ export const DEFAULT_PROFILE_SOCIAL_LINKS: ProfileSocialLink[] = [
   },
 ];
 
+const SOCIAL_ICON_BY_KEY: Record<string, string> = {
+  facebook: BRAND_ICON.facebook,
+  instagram: BRAND_ICON.instagram,
+  youtube: BRAND_ICON.youtube,
+  linkedin: BRAND_ICON.linkedin,
+  tiktok: BRAND_ICON.tiktok,
+};
+
+/** Map catalog `socialLinks` object → ProfileSocialPills links; falls back to defaults when empty. */
+export function profileSocialLinksFromCatalog(
+  socialLinks?: Record<string, string | undefined> | null,
+  fallback: ProfileSocialLink[] = DEFAULT_PROFILE_SOCIAL_LINKS,
+): ProfileSocialLink[] {
+  if (!socialLinks || typeof socialLinks !== 'object') return fallback;
+  const mapped: ProfileSocialLink[] = [];
+  (['facebook', 'instagram', 'youtube', 'linkedin', 'tiktok'] as const).forEach((key) => {
+    const href = socialLinks[key]?.trim();
+    if (!href) return;
+    mapped.push({
+      name: key.charAt(0).toUpperCase() + key.slice(1),
+      href,
+      iconSrc: SOCIAL_ICON_BY_KEY[key],
+    });
+  });
+  return mapped.length ? mapped : fallback;
+}
+
 interface ProfileSocialPillsProps {
   links?: ProfileSocialLink[];
   className?: string;

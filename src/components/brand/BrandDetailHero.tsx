@@ -1,7 +1,11 @@
 import React from 'react';
 import { Check, Globe, Share2, ShieldCheck } from 'lucide-react';
 import { FollowButton } from '../FollowButton';
-import { ProfileSocialPills } from '../design/ProfileSocialPills';
+import {
+  ProfileSocialPills,
+  profileSocialLinksFromCatalog,
+  type ProfileSocialLink,
+} from '../design/ProfileSocialPills';
 
 export interface BrandDetailHeroProps {
   brand: any;
@@ -19,6 +23,7 @@ export interface BrandDetailHeroProps {
   facts?: Array<{ label: string; value: string }>;
   infoBar?: Array<{ icon: string; value: string; label: string }>;
   coverImage?: string;
+  socialLinks?: ProfileSocialLink[];
 }
 
 const DEFAULT_SCORE_ROWS = [
@@ -50,6 +55,7 @@ export function BrandDetailHero({
   facts,
   infoBar,
   coverImage,
+  socialLinks,
 }: BrandDetailHeroProps) {
   const cover =
     coverImage ||
@@ -57,6 +63,10 @@ export function BrandDetailHero({
     brand.banner ||
     brand.heroImage ||
     'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1600&q=80';
+
+  const resolvedSocials =
+    socialLinks ||
+    profileSocialLinksFromCatalog(brand?.socialLinks);
 
   const brandFacts =
     facts ||
@@ -125,7 +135,10 @@ export function BrandDetailHero({
             {claimStatus === 'community' && (
               <div className="text-[10px] font-bold text-[#9AA0AC] mb-2">Community brand profile</div>
             )}
-            <ProfileSocialPills className="mt-2.5 justify-center lg:justify-start" />
+            <ProfileSocialPills
+              className="mt-2.5 justify-center lg:justify-start"
+              links={resolvedSocials}
+            />
           </div>
 
           <div className="flex gap-2.5 flex-wrap justify-center lg:justify-end lg:mt-[52px] shrink-0 w-full lg:w-auto">

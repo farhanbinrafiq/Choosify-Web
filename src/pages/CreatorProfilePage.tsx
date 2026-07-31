@@ -311,9 +311,49 @@ export function CreatorProfilePage() {
                )}
 
                {profileTab === 'About' && (
-                 <div className="text-[13px] text-[#4B5563] leading-relaxed space-y-3">
+                 <div className="text-[13px] text-[#4B5563] leading-relaxed space-y-4">
                    <p>{creator.bio}</p>
-                   <p>Based in Dhaka, Bangladesh. On Choosify since 2021 · Best for {creator.bestFor}.</p>
+                   <p>
+                     {(creator as { role?: string }).role || 'Creator'} ·{' '}
+                     {(creator as { location?: string }).location || 'Dhaka, Bangladesh'} · Best for{' '}
+                     {creator.bestFor}.
+                   </p>
+                   {Array.isArray((creator as { brandPartners?: string[] }).brandPartners) &&
+                     (creator as { brandPartners?: string[] }).brandPartners!.length > 0 && (
+                     <div>
+                       <div className="text-[11px] font-extrabold text-[#9AA0AC] tracking-wide mb-2">
+                         BRAND PARTNERS
+                       </div>
+                       <div className="flex flex-wrap gap-2">
+                         {(creator as { brandPartners: string[] }).brandPartners.map((p) => (
+                           <span
+                             key={p}
+                             className="bg-white border border-[#E8EDF2] rounded-md px-2.5 py-1 text-[11px] font-bold text-[#1A1A2E]"
+                           >
+                             {p}
+                           </span>
+                         ))}
+                       </div>
+                     </div>
+                   )}
+                   {Array.isArray((creator as { collabTypes?: string[] }).collabTypes) &&
+                     (creator as { collabTypes?: string[] }).collabTypes!.length > 0 && (
+                     <div>
+                       <div className="text-[11px] font-extrabold text-[#9AA0AC] tracking-wide mb-2">
+                         COLLABORATION TYPES
+                       </div>
+                       <div className="flex flex-wrap gap-2">
+                         {(creator as { collabTypes: string[] }).collabTypes.map((p) => (
+                           <span
+                             key={p}
+                             className="bg-[rgba(255,91,0,0.1)] text-[#C2410C] rounded-md px-2.5 py-1 text-[11px] font-bold"
+                           >
+                             {p}
+                           </span>
+                         ))}
+                       </div>
+                     </div>
+                   )}
                  </div>
                )}
 

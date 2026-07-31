@@ -1108,7 +1108,41 @@ export function BrandDetailPage() {
 
   const brandCoupons = buildBrandCoupons(brand.name);
 
-  const overviewData = getBrandOverviews(brand.name);
+  const fallbackOverview = getBrandOverviews(brand.name);
+  const catalogOverview = (brand as { overview?: {
+    address?: string;
+    email?: string;
+    phone?: string;
+    priceRange?: string;
+    ageFocus?: string;
+    audience?: string;
+    services?: string[];
+    tags?: string[];
+  } }).overview;
+  const overviewData = catalogOverview
+    ? {
+        address: catalogOverview.address || fallbackOverview.address,
+        website:
+          (brand as { website?: string }).website?.replace(/^https?:\/\//, '') ||
+          fallbackOverview.website,
+        map: fallbackOverview.map,
+        email: catalogOverview.email || fallbackOverview.email,
+        phone: catalogOverview.phone || fallbackOverview.phone,
+        priceRange: catalogOverview.priceRange || fallbackOverview.priceRange,
+        ageRange: catalogOverview.ageFocus
+          ? `AGE: ${catalogOverview.ageFocus}`
+          : fallbackOverview.ageRange,
+        audience: catalogOverview.audience || fallbackOverview.audience,
+        services:
+          catalogOverview.services && catalogOverview.services.length
+            ? catalogOverview.services
+            : fallbackOverview.services,
+        tags:
+          catalogOverview.tags && catalogOverview.tags.length
+            ? catalogOverview.tags
+            : fallbackOverview.tags,
+      }
+    : fallbackOverview;
 
   const getPopularCategoryPreviews = () => {
     const cat = (brand.category || "").toLowerCase();

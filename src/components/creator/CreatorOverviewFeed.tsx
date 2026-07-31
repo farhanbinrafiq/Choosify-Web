@@ -160,10 +160,15 @@ export function CreatorOverviewFeed({
 
   const contactRows = [
     { icon: '✉', label: 'Business Inquiries', value: creator.email || 'creator@choosify.bd' },
-    { icon: '⏱', label: 'Response Time', value: '24 - 48 hours' },
-    { icon: '✉', label: 'Preferred Contact', value: 'Email' },
-    { icon: '📍', label: 'Location', value: 'Dhaka, Bangladesh' },
+    { icon: '⏱', label: 'Response Time', value: creator.responseTime || '24 - 48 hours' },
+    { icon: '✉', label: 'Preferred Contact', value: creator.preferredContact || 'Email' },
+    { icon: '📍', label: 'Location', value: creator.location || 'Dhaka, Bangladesh' },
   ];
+
+  const brandPartners =
+    creator.brandPartners?.length ? creator.brandPartners : BRAND_PARTNERS;
+  const collabTypes =
+    creator.collabTypes?.length ? creator.collabTypes : COLLAB_TYPES;
 
   const matchTags = (creator.bestForTags?.length ? creator.bestForTags : [creator.bestFor]).filter(Boolean);
   const recommendedProducts = useMemo(
@@ -327,7 +332,7 @@ export function CreatorOverviewFeed({
         <OverviewCardHeader title="Partnerships & Collaborations" />
         <div className="text-[10px] font-bold text-[#9AA0AC] mb-2">TOP BRAND PARTNERS</div>
         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2.5 mb-5">
-          {BRAND_PARTNERS.map((bp) => (
+          {brandPartners.map((bp) => (
             <div
               key={bp.name}
               className="border border-[#E5E7EB] rounded-md p-3 text-center text-[11px] font-extrabold"
@@ -339,7 +344,7 @@ export function CreatorOverviewFeed({
         </div>
         <div className="text-[10px] font-bold text-[#9AA0AC] mb-2">COLLABORATION TYPES</div>
         <div className="flex flex-wrap gap-2">
-          {COLLAB_TYPES.map((ct) => (
+          {collabTypes.map((ct) => (
             <span
               key={ct}
               className="bg-[#F4F7F9] text-[10.5px] font-semibold text-[#4B5563] px-3 py-1.5 rounded-full"

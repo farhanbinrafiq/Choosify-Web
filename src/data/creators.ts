@@ -32,6 +32,20 @@ export interface Creator {
   videos: MediaItem[];
   reels: MediaItem[];
   blogs: MediaItem[];
+  /** Role / tagline under name (e.g. "Creator & Product Researcher") */
+  title?: string;
+  /** Display location (e.g. "Dhaka, Bangladesh") */
+  location?: string;
+  /** Profile cover / banner image URL */
+  coverImage?: string;
+  /** Business inquiry response window — defaults to "24 - 48 hours" in UI */
+  responseTime?: string;
+  /** Preferred contact channel — defaults to "Email" in UI */
+  preferredContact?: string;
+  /** Brand partnership chips on overview feed */
+  brandPartners?: { name: string; color?: string }[];
+  /** Collaboration type pills on overview feed */
+  collabTypes?: string[];
   /** Catalog ranking fields — optional on mock data */
   featuredFlag?: boolean;
   verifiedStatus?: boolean;

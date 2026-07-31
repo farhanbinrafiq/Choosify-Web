@@ -1,7 +1,11 @@
 import React from 'react';
 import { Check, MessageCircleMore, Share2, ShieldCheck } from 'lucide-react';
 import { FollowButton } from '../FollowButton';
-import { ProfileSocialPills } from '../design/ProfileSocialPills';
+import {
+  ProfileSocialPills,
+  profileSocialLinksFromCatalog,
+  type ProfileSocialLink,
+} from '../design/ProfileSocialPills';
 
 export interface CreatorProfileHeroProps {
   creator: any;
@@ -13,6 +17,7 @@ export interface CreatorProfileHeroProps {
   reviewCountLabel?: string;
   facts?: Array<{ icon: string; label: string; value: string }>;
   coverImage?: string;
+  socialLinks?: ProfileSocialLink[];
   /** Extra CTAs (Love, Ask For Branding, pending badge) preserved from page logic */
   extraActions?: React.ReactNode;
 }
@@ -36,6 +41,7 @@ export function CreatorProfileHero({
   reviewCountLabel = '12.4K+ reviews',
   facts,
   coverImage,
+  socialLinks,
   extraActions,
 }: CreatorProfileHeroProps) {
   const cover =
@@ -43,6 +49,10 @@ export function CreatorProfileHero({
     creator.coverImage ||
     creator.banner ||
     'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1600&q=80';
+
+  const resolvedSocials =
+    socialLinks ||
+    profileSocialLinksFromCatalog(creator?.socialLinks);
 
   const initial = String(creator.name || 'C')
     .split(/\s+/)
@@ -119,7 +129,10 @@ export function CreatorProfileHero({
             {claimStatus === 'community' && (
               <div className="text-[10px] font-bold text-[#9AA0AC] mb-2">Community creator profile</div>
             )}
-            <ProfileSocialPills className="mt-2.5 justify-center lg:justify-start" />
+            <ProfileSocialPills
+              className="mt-2.5 justify-center lg:justify-start"
+              links={resolvedSocials}
+            />
             {creator.bio && (
               <p className="text-[12.5px] text-[#4B5563] max-w-xl mx-auto lg:mx-0 leading-relaxed mt-3">
                 {creator.bio}
