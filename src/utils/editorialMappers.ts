@@ -21,6 +21,14 @@ export const mapCatalogCreator = (creator: CatalogCreator): Creator => ({
   verifiedStatus: creator.verifiedStatus,
   createdAt: creator.createdAt,
   updatedAt: creator.updatedAt,
+  title: creator.role,
+  location: creator.location,
+  coverImage: creator.coverImage,
+  responseTime: creator.responseTime,
+  preferredContact: creator.preferredContact,
+  brandPartners: creator.brandPartners,
+  collabTypes: creator.collabTypes,
+  socialLinks: creator.socialLinks,
 });
 
 export const mapCatalogGuide = (guide: CatalogGuide) => ({

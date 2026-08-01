@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import type { CatalogBrandFaq } from '../../types/catalog';
 
 export function buildBrandFaqs(brandName: string): { q: string; a: string }[] {
   return [
@@ -27,8 +28,14 @@ export function buildBrandFaqs(brandName: string): { q: string; a: string }[] {
   ];
 }
 
-export function BrandFaqSection({ brandName }: { brandName: string }) {
-  const faqs = buildBrandFaqs(brandName);
+export function BrandFaqSection({
+  brandName,
+  faq,
+}: {
+  brandName: string;
+  faq?: CatalogBrandFaq[];
+}) {
+  const faqs = faq && faq.length > 0 ? faq : buildBrandFaqs(brandName);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   return (

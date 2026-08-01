@@ -318,19 +318,20 @@ export function CreatorProfilePage() {
                      {(creator as { location?: string }).location || 'Dhaka, Bangladesh'} · Best for{' '}
                      {creator.bestFor}.
                    </p>
-                   {Array.isArray((creator as { brandPartners?: string[] }).brandPartners) &&
-                     (creator as { brandPartners?: string[] }).brandPartners!.length > 0 && (
+                   {Array.isArray((creator as { brandPartners?: { name: string; color?: string }[] }).brandPartners) &&
+                     (creator as { brandPartners?: { name: string; color?: string }[] }).brandPartners!.length > 0 && (
                      <div>
                        <div className="text-[11px] font-extrabold text-[#9AA0AC] tracking-wide mb-2">
                          BRAND PARTNERS
                        </div>
                        <div className="flex flex-wrap gap-2">
-                         {(creator as { brandPartners: string[] }).brandPartners.map((p) => (
+                         {(creator as { brandPartners: { name: string; color?: string }[] }).brandPartners.map((p) => (
                            <span
-                             key={p}
-                             className="bg-white border border-[#E8EDF2] rounded-md px-2.5 py-1 text-[11px] font-bold text-[#1A1A2E]"
+                             key={p.name}
+                             className="bg-white border border-[#E8EDF2] rounded-md px-2.5 py-1 text-[11px] font-bold"
+                             style={{ color: p.color }}
                            >
-                             {p}
+                             {p.name}
                            </span>
                          ))}
                        </div>

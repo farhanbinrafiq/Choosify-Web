@@ -7,6 +7,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { BRANDS, PRODUCTS } from "../constants";
+import type { CatalogBrandFaq, CatalogBrandStores } from "../types/catalog";
 import { ProductCard } from "../components/ProductCard";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../lib/utils";
@@ -1894,9 +1895,15 @@ export function BrandDetailPage() {
               claimStatus={'claimStatus' in brand ? brand.claimStatus : undefined}
             />
 
-            <BrandWhereToBuySection brandName={brand.name} />
+            <BrandWhereToBuySection
+              brandName={brand.name}
+              stores={(brand as { stores?: CatalogBrandStores }).stores}
+            />
 
-            <BrandFaqSection brandName={brand.name} />
+            <BrandFaqSection
+              brandName={brand.name}
+              faq={(brand as { faq?: CatalogBrandFaq[] }).faq}
+            />
 
             <BrandStorySection brandId={brand.id} brandName={brand.name} />
 

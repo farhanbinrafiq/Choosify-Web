@@ -137,6 +137,9 @@ const CAMPAIGN_TYPE_TO_CONTENT: Partial<Record<SpotlightCampaignType, SpotlightC
 };
 
 function mapGuideTypeToContent(guide: CatalogGuide): SpotlightContentType {
+  // Explicit editorial format from Guide Edit Studio takes priority over inference.
+  if (guide.format) return guide.format;
+
   const cat = (guide.category ?? '').toLowerCase();
   const tags = (guide.tags ?? []).map((t) => t.toLowerCase());
   if (tags.some((t) => t.includes('comparison')) || cat.includes('comparison')) return 'comparison';
@@ -170,10 +173,27 @@ function buildConnections(partial: Partial<SpotlightContentConnections>): Spotli
 }
 
 function buildLiveFromGuide(guide: CatalogGuide): SpotlightLiveConfig | undefined {
+  const productIds = (guide.productIds ?? []).map(String);
+
+  // Explicit admin-authored live config (Guide Format = Live) takes priority.
+  if (guide.live) {
+    return {
+      status: guide.live.status ?? 'upcoming',
+      platform: guide.live.platform ?? 'youtube',
+      embedUrl: guide.live.embedUrl,
+      replayUrl: guide.videoUrl,
+      scheduledAt: guide.live.scheduledAt,
+      productIds,
+      serviceIds: [],
+      pinnedProductIds: productIds.slice(0, 3),
+      pinnedOfferIds: [],
+      timelinePlaceholder: true,
+    };
+  }
+
   if (!guide.videoUrl) return undefined;
   const platform = detectEmbedPlatform(guide.videoUrl);
   if (!platform) return undefined;
-  const productIds = (guide.productIds ?? []).map(String);
   return {
     status: 'replay',
     platform,
@@ -314,6 +334,7 @@ export function guideToSpotlightContent(guide: CatalogGuide, catalog: CatalogPro
   const slug = guide.slug || guide.id;
   const href = resolveContentHref(contentType, String(slug));
   const viewsRaw = String(guide.views ?? '0');
+  const live = buildLiveFromGuide(guide);
 
   return {
     contentId: `guide-${guide.id}`,
@@ -343,12 +364,19 @@ export function guideToSpotlightContent(guide: CatalogGuide, catalog: CatalogPro
       featuredProductIds: productIds,
       primaryCta: { label: getSpotlightContentCtaLabel(contentType), href },
     },
-    live: buildLiveFromGuide(guide),
+    live,
     badges: [contentType.replace('_', ' ')],
     isSponsored: false,
-    isLive: false,
+    isLive: live?.status === 'live',
     isVerified: publisher.isVerified,
-    ctaLabel: getSpotlightContentCtaLabel(contentType),
+    ctaLabel:
+      live?.status === 'live'
+        ? 'Watch Live'
+        : live?.status === 'upcoming'
+          ? 'Notify Me'
+          : live?.status === 'replay'
+            ? 'Watch Replay'
+            : getSpotlightContentCtaLabel(contentType),
     href,
     publishedAt: guide.publishedAt,
     popularityScore: Number.parseInt(viewsRaw.replace(/\D/g, ''), 10) || 0,

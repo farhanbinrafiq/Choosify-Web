@@ -1,4 +1,5 @@
 import React from 'react';
+import type { CatalogBrandStores } from '../../types/catalog';
 
 type StoreRow = {
   name: string;
@@ -42,8 +43,28 @@ function buildWhereToBuy(brandName: string) {
   };
 }
 
-export function BrandWhereToBuySection({ brandName }: { brandName: string }) {
-  const { stores, distributors, services } = buildWhereToBuy(brandName);
+export function BrandWhereToBuySection({
+  brandName,
+  stores: catalogStores,
+}: {
+  brandName: string;
+  stores?: CatalogBrandStores;
+}) {
+  const hasRealData =
+    (catalogStores?.authorized?.length ?? 0) > 0 ||
+    (catalogStores?.distributors?.length ?? 0) > 0 ||
+    (catalogStores?.serviceCenters?.length ?? 0) > 0;
+
+  const fallback = buildWhereToBuy(brandName);
+  const stores: StoreRow[] = hasRealData
+    ? (catalogStores?.authorized ?? []).map((s) => ({ name: s.name, location: s.sub || '' }))
+    : fallback.stores;
+  const distributors: DistributorRow[] = hasRealData
+    ? (catalogStores?.distributors ?? []).map((s) => ({ name: s.name, type: '', region: s.sub || '' }))
+    : fallback.distributors;
+  const services: ServiceRow[] = hasRealData
+    ? (catalogStores?.serviceCenters ?? []).map((s) => ({ name: s.name, location: s.sub || '', hours: s.hours || '' }))
+    : fallback.services;
 
   return (
     <div id="store-location-section" className="scroll-mt-36 w-full">
@@ -99,8 +120,8 @@ export function BrandWhereToBuySection({ brandName }: { brandName: string }) {
             >
               <div className="min-w-0">
                 <div className="text-[11.5px] font-bold text-[#1A1A2E]">{row.name}</div>
-                <div className="text-[10px] text-[#9AA0AC]">{row.type}</div>
-                <div className="text-[10px] font-bold text-[#4B5563]">{row.region}</div>
+                {row.type && <div className="text-[10px] text-[#9AA0AC]">{row.type}</div>}
+                {row.region && <div className="text-[10px] font-bold text-[#4B5563]">{row.region}</div>}
               </div>
               <a
                 href="#"

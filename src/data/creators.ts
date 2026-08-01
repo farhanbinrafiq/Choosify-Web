@@ -46,6 +46,14 @@ export interface Creator {
   brandPartners?: { name: string; color?: string }[];
   /** Collaboration type pills on overview feed */
   collabTypes?: string[];
+  /** Social profile links rendered by ProfileSocialPills */
+  socialLinks?: {
+    facebook?: string;
+    instagram?: string;
+    youtube?: string;
+    tiktok?: string;
+    linkedin?: string;
+  };
   /** Catalog ranking fields — optional on mock data */
   featuredFlag?: boolean;
   verifiedStatus?: boolean;

@@ -356,7 +356,7 @@ export interface CatalogCreator {
   bio: string;
   followers: Record<string, string>;
   socialLinks?: CatalogCreatorSocialLinks;
-  brandPartners?: string[];
+  brandPartners?: { name: string; color?: string }[];
   collabTypes?: string[];
   responseTime?: string;
   preferredContact?: string;
@@ -414,6 +414,28 @@ export interface CatalogGuide {
     order: number;
     data?: Record<string, unknown>;
   }>;
+  /**
+   * Explicit editorial format chosen in Guide Edit Studio — drives SpotlightContentType
+   * resolution (mapGuideTypeToContent) instead of inferring from category/tags text.
+   */
+  format?: CatalogGuideFormat;
+  /** Admin-authored live session config — only meaningful when format === 'live'. */
+  live?: CatalogGuideLiveConfig;
+}
+
+export type CatalogGuideFormat =
+  | 'buying_guide'
+  | 'product_review'
+  | 'comparison'
+  | 'live'
+  | 'tutorial'
+  | 'tips';
+
+export interface CatalogGuideLiveConfig {
+  status?: 'live' | 'upcoming' | 'replay' | 'ended';
+  platform?: 'youtube' | 'facebook' | 'tiktok' | 'instagram' | 'vimeo' | 'native';
+  embedUrl?: string;
+  scheduledAt?: string;
 }
 
 export type CatalogPlacementSponsorType =
