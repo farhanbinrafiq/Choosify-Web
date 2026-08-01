@@ -1,3 +1,5 @@
+import type { BookingOfferCard } from '../types/serviceBooking';
+
 const API_BASE = ((import.meta as any).env?.VITE_API_BASE_URL as string | undefined) || '/api/v1';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -25,6 +27,41 @@ async function request<T>(path: string, method: HttpMethod = 'GET', body?: unkno
     throw err;
   }
   return response.json() as Promise<T>;
+}
+
+/** Shape of the pending-payment order server/booking/bookingService.ts builds and returns
+ * from accept/buyer-accept — already persisted server-side, so the client only needs to
+ * mirror it into local state (never re-POST it). */
+export interface ServerBookingOrder {
+  id: string;
+  orderId: string;
+  buyerId: string;
+  isCOD: boolean;
+  isSplit: boolean;
+  overallTotal: number;
+  subtotal?: number;
+  deliveryTotal?: number;
+  paymentMethod?: string;
+  status?: string;
+  bookingRequestId?: string;
+  paymentDueAt?: string;
+  createdAt: string;
+  updatedAt?: string;
+  subOrders: Array<{
+    sellerId: string;
+    sellerBusinessName: string;
+    invoiceId: string;
+    deliveryFee: number;
+    items: Array<{
+      productId: string;
+      productTitle: string;
+      quantity: number;
+      price: number;
+      productType?: 'physical' | 'service';
+      serviceCategory?: string;
+      serviceDetails?: Record<string, string | number>;
+    }>;
+  }>;
 }
 
 export interface PublicProductReview {
@@ -127,8 +164,8 @@ export const operationsApi = {
     );
     return result.data;
   },
-  getBookingRequest: async (requestId: string) => {
-    const result = await request<{ data: unknown }>(`/booking/requests/${encodeURIComponent(requestId)}`);
+  getBookingRequest: async (requestId: string): Promise<BookingOfferCard> => {
+    const result = await request<{ data: BookingOfferCard }>(`/booking/requests/${encodeURIComponent(requestId)}`);
     return result.data;
   },
   payBookingRequest: async (requestId: string, orderId?: string, paymentType: 'full' | 'partial' = 'full') => {
@@ -139,6 +176,39 @@ export const operationsApi = {
     );
     return result.data;
   },
+  acceptBookingRequest: async (
+    requestId: string,
+    sellerId: string,
+    sellerName?: string,
+  ): Promise<{ data: BookingOfferCard; order: ServerBookingOrder }> =>
+    request(`/booking/requests/${encodeURIComponent(requestId)}/accept`, 'POST', { sellerId, sellerName }),
+  declineBookingRequest: async (
+    requestId: string,
+    sellerId: string,
+    sellerName: string | undefined,
+    declineReason: string,
+  ): Promise<{ data: BookingOfferCard }> =>
+    request(`/booking/requests/${encodeURIComponent(requestId)}/decline`, 'POST', {
+      sellerId,
+      sellerName,
+      declineReason,
+    }),
+  counterBookingRequest: async (
+    requestId: string,
+    sellerId: string,
+    sellerName: string | undefined,
+    patch: { price?: number; fields?: Record<string, string | number>; notes?: string },
+  ): Promise<{ data: BookingOfferCard }> =>
+    request(`/booking/requests/${encodeURIComponent(requestId)}/counter`, 'POST', {
+      sellerId,
+      sellerName,
+      ...patch,
+    }),
+  buyerAcceptCounter: async (
+    requestId: string,
+    buyerId: string,
+  ): Promise<{ data: BookingOfferCard; order: ServerBookingOrder }> =>
+    request(`/booking/requests/${encodeURIComponent(requestId)}/buyer-accept`, 'POST', { buyerId }),
   submitSellerOffer: async (payload: {
     productName: string;
     category: string;
