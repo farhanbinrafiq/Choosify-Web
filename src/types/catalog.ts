@@ -83,6 +83,17 @@ export interface CatalogProduct {
   modeType?: 'retail';
   productType?: 'physical' | 'service';
   serviceCategory?: string;
+  relatedInfoType?: 'price_across_stores' | 'whats_nearby' | 'before_your_visit';
+  /** Physical products: opt-in toggle for showing Price Across Stores. */
+  priceAcrossStoresEnabled?: boolean;
+  /** Seller opt-in toggle for accepting an advance/partial payment on this product. */
+  partialPaymentEnabled?: boolean;
+  /** Deposit percent required upfront when partialPaymentEnabled is true. */
+  depositPercent?: number;
+  /** Keys from SERVICE_BOOKING_FIELDS the seller requires from buyers. */
+  requiredBookingFieldKeys?: string[];
+  /** Service listings only. Whether a new booking request needs seller approval before pay. */
+  requiresApproval?: boolean;
   price: number;
   originalPrice?: number;
   stock: number;
@@ -472,9 +483,11 @@ export interface CatalogProductSizeGuideRow {
 export interface CatalogProductSizeGuide {
   /** Set true in CMS to expose the size guide on the product detail page */
   enabled: boolean;
+  type?: 'table' | 'image' | 'html';
   title?: string;
   description?: string;
   imageUrl?: string;
+  htmlContent?: string;
   unitLabel?: string;
   columnHeaders?: string[];
   rows?: CatalogProductSizeGuideRow[];
@@ -497,6 +510,7 @@ export interface CatalogProductDetail {
     storeRating?: number;
     storeUrl?: string;
     storeLocation?: string;
+    isFeatured?: boolean;
   }>;
   /** Seller toggle — Price Across Stores sidebar (physical products only). */
   priceAcrossStoresEnabled?: boolean;
@@ -528,6 +542,7 @@ export interface CatalogProductDetail {
     stock?: number;
     options: Record<string, string>;
     images?: string[];
+    enabled?: boolean;
   }>;
   creatorContent: Array<{
     id: string;
@@ -543,6 +558,36 @@ export interface CatalogProductDetail {
   seoKeywords?: string;
   sizeGuide?: CatalogProductSizeGuide;
   updatedAt: string;
+
+  // Studio section on/off toggles — each gates the corresponding storefront section.
+  enableSpecs?: boolean;
+  enableStoreComparison?: boolean;
+  enableInfluencerReviews?: boolean;
+  enableOverviewSection?: boolean;
+  enableBestForTags?: boolean;
+  enablePhysicalStores?: boolean;
+  enableBoxContents?: boolean;
+  enableOptions?: boolean;
+  enableActiveVariantSpecs?: boolean;
+  enableAdditionalSpecs?: boolean;
+  enablePublicReviews?: boolean;
+  enableAddonItems?: boolean;
+
+  boxContents?: Array<{
+    id: string;
+    title: string;
+    description?: string;
+    icon?: string;
+    image?: string;
+    badge?: string;
+    price?: number;
+    isFree: boolean;
+    enabled: boolean;
+    sortOrder: number;
+  }>;
+  additionalSpecs?: { key: string; value: string }[];
+  publicReviews?: Array<{ id: string; reviewerName: string; rating: number; comment: string }>;
+  addonItems?: Array<{ id: string; title: string; description?: string; price: number }>;
 }
 
 export interface SiteSeoEntry {

@@ -200,6 +200,21 @@ const FALLBACK_ADDONS: ProductAddon[] = [
 function resolveAddons(product: any): ProductAddon[] {
   if (!product) return FALLBACK_ADDONS;
 
+  // Studio-authored add-ons take priority over the seeded fallback tables below.
+  if (
+    product.enableAddonItems !== false &&
+    Array.isArray(product.studioAddonItems) &&
+    product.studioAddonItems.length
+  ) {
+    return product.studioAddonItems.map((item: any) => ({
+      id: item.id,
+      title: item.title,
+      description: item.description || '',
+      price: item.price,
+      available: true,
+    }));
+  }
+
   // Service/booking listings: match on the stable `serviceCategory` enum, not the
   // free-text display category. No entry = no addons (e.g. real estate, passport
   // help, recruitment, B2B sourcing, equipment rental, donations).
@@ -283,9 +298,26 @@ export function ProductDetailPage() {
         : baseProduct?.variants,
       productType: (detail as any).productType ?? baseProduct?.productType,
       serviceCategory: (detail as any).serviceCategory ?? baseProduct?.serviceCategory,
-      complimentaryFeatures:
-        (baseProduct as any)?.complimentaryFeatures ||
-        detail.overviewBlocks?.[0]?.bullets,
+      complimentaryFeatures: (baseProduct as any)?.complimentaryFeatures,
+      // Studio section on/off toggles — undefined means "not published from this
+      // studio yet", treated as enabled everywhere below to match ProductStudio's
+      // own existing-product default.
+      enableSpecs: detail.enableSpecs,
+      enableStoreComparison: detail.enableStoreComparison,
+      enableInfluencerReviews: detail.enableInfluencerReviews,
+      enableOverviewSection: detail.enableOverviewSection,
+      enableBestForTags: detail.enableBestForTags,
+      enablePhysicalStores: detail.enablePhysicalStores,
+      enableBoxContents: detail.enableBoxContents,
+      enableOptions: detail.enableOptions,
+      enableActiveVariantSpecs: detail.enableActiveVariantSpecs,
+      enableAdditionalSpecs: detail.enableAdditionalSpecs,
+      enablePublicReviews: detail.enablePublicReviews,
+      enableAddonItems: detail.enableAddonItems,
+      studioBoxContents: detail.boxContents,
+      additionalSpecs: detail.additionalSpecs,
+      curatedPublicReviews: detail.publicReviews,
+      studioAddonItems: detail.addonItems,
       propertySpecs: (baseProduct as any)?.propertySpecs,
       images: (baseProduct as any)?.images,
       location: (baseProduct as any)?.location,
@@ -612,9 +644,9 @@ export function ProductDetailPage() {
   // Sync state options when product changes
   React.useEffect(() => {
     if (product && product.variants && product.variants.length > 0) {
-      // Auto select first entry that is in stock, or just first entry
+      // Auto select first entry that is in stock and not disabled by the seller, or just first entry
       const firstAvailable =
-        product.variants.find((v: any) => v.stock > 0) || product.variants[0];
+        product.variants.find((v: any) => v.stock > 0 && v.enabled !== false) || product.variants[0];
       if (firstAvailable) {
         if (firstAvailable.attributes?.color !== undefined)
           setSelectedColor(firstAvailable.attributes.color);
@@ -653,6 +685,18 @@ export function ProductDetailPage() {
 
   const getBoxContents = () => {
     if (!product) return [];
+
+    const studioItems = (product as any).studioBoxContents;
+    if (
+      (product as any).enableBoxContents !== false &&
+      Array.isArray(studioItems) &&
+      studioItems.length
+    ) {
+      return studioItems
+        .filter((item: any) => item.enabled !== false)
+        .sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+        .map((item: any) => item.title);
+    }
 
     const fromProduct = (product as any).complimentaryFeatures;
     if (Array.isArray(fromProduct) && fromProduct.length) return fromProduct;
@@ -778,14 +822,16 @@ export function ProductDetailPage() {
       ) as string[])
     : [];
 
-  // Availability lookup helpers for disabled states
+  // Availability lookup helpers for disabled states — a variant the seller has
+  // disabled in Product Studio is treated the same as an out-of-stock one.
   const isSizeOptionAvailable = (size: string) => {
     if (!product?.variants) return true;
     return product.variants.some(
       (v: any) =>
         v.attributes?.size === size &&
         (!selectedColor || v.attributes?.color === selectedColor) &&
-        v.stock > 0,
+        v.stock > 0 &&
+        v.enabled !== false,
     );
   };
 
@@ -795,7 +841,8 @@ export function ProductDetailPage() {
       (v: any) =>
         v.attributes?.color === color &&
         (!selectedSize || v.attributes?.size === selectedSize) &&
-        v.stock > 0,
+        v.stock > 0 &&
+        v.enabled !== false,
     );
   };
 
@@ -805,7 +852,8 @@ export function ProductDetailPage() {
       (v: any) =>
         v.attributes?.ram === ram &&
         (!selectedStorage || v.attributes?.storage === selectedStorage) &&
-        v.stock > 0,
+        v.stock > 0 &&
+        v.enabled !== false,
     );
   };
 
@@ -815,7 +863,8 @@ export function ProductDetailPage() {
       (v: any) =>
         v.attributes?.storage === storage &&
         (!selectedRam || v.attributes?.ram === selectedRam) &&
-        v.stock > 0,
+        v.stock > 0 &&
+        v.enabled !== false,
     );
   };
 
@@ -853,11 +902,11 @@ export function ProductDetailPage() {
     { label: "Gender", value: "Unisex / Mens" },
   ];
 
-  // Stock calculations
+  // Stock calculations — a seller-disabled variant is unpurchasable regardless of stock count.
   const isOutOfStock =
     product?.variants && product.variants.length > 0
       ? selectedVariant
-        ? selectedVariant.stock === 0
+        ? selectedVariant.stock === 0 || selectedVariant.enabled === false
         : true
       : product?.id === 3 ||
         Boolean(product?.title?.includes("MacBook")) ||
@@ -866,7 +915,9 @@ export function ProductDetailPage() {
   const stockQuantity =
     product?.variants && product.variants.length > 0
       ? selectedVariant
-        ? selectedVariant.stock
+        ? selectedVariant.enabled === false
+          ? 0
+          : selectedVariant.stock
         : 0
       : isOutOfStock
         ? 0
@@ -1124,6 +1175,7 @@ export function ProductDetailPage() {
 
       <main id="all-section" className="py-6 md:py-8">
           <div className={`${DETAIL_SINGLE_FEED}`}>
+            {product.enableSpecs !== false && (
             <StudioWrap sectionId="product-specs">
             <ProductSpecsOverview
               productTitle={product.title}
@@ -1133,8 +1185,8 @@ export function ProductDetailPage() {
                   ? `Service details for ${product.title}`
                   : undefined
               }
-              specs={
-                Array.isArray(product.specs) && product.specs.length
+              specs={[
+                ...(Array.isArray(product.specs) && product.specs.length
                   ? product.specs.map((row: any) => ({
                       label: String(row.label || row.key || ''),
                       value: String(row.value || ''),
@@ -1148,11 +1200,19 @@ export function ProductDetailPage() {
                       { label: 'Model', value: product.title?.substring(0, 16) || 'Classic' },
                       { label: 'Rating', value: `${product.rating || '4.8'} / 5` },
                       { label: 'Status', value: isOutOfStock ? 'Out of Stock' : 'In Stock' },
-                    ]
-              }
+                    ]),
+                ...(product.enableAdditionalSpecs !== false && Array.isArray((product as any).additionalSpecs)
+                  ? (product as any).additionalSpecs.map((row: any) => ({
+                      label: String(row.label || row.key || ''),
+                      value: String(row.value || ''),
+                    }))
+                  : []),
+              ]}
             />
             </StudioWrap>
+            )}
 
+            {product.enableInfluencerReviews !== false && (
             <StudioWrap sectionId="product-creator-reviews" className="scroll-mt-36 w-full">
               <CreatorReviewsPreview
                 context="product"
@@ -1165,6 +1225,7 @@ export function ProductDetailPage() {
                 subtitle="Video reviews from YouTube, Instagram & Facebook creators"
               />
             </StudioWrap>
+            )}
 
             {/* PUBLIC REVIEWS (ID: 'public-reviews-section') */}
             <StudioWrap
@@ -1197,6 +1258,19 @@ export function ProductDetailPage() {
                       images: [] as string[],
                       verified: true,
                     })),
+                  ...(product.enablePublicReviews !== false && Array.isArray((product as any).curatedPublicReviews)
+                    ? (product as any).curatedPublicReviews.map((r: any) => ({
+                        name: r.reviewerName,
+                        avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(r.reviewerName || '')}`,
+                        time: 'Verified purchase',
+                        rating: String(r.rating),
+                        content: r.comment,
+                        date: 'Verified purchase',
+                        helpful: 0,
+                        images: [] as string[],
+                        verified: true,
+                      }))
+                    : []),
                   {
                     name: 'Tanvir Hasan',
                     avatar: 'https://i.pravatar.cc/150?u=tanvir',
@@ -1448,18 +1522,22 @@ export function ProductDetailPage() {
                     ))}
               </div>
 
+              {product.enableBestForTags !== false && (
               <div className="pt-1 space-y-2.5">
                 <div className="text-[11px] font-extrabold text-[#8A00C4]"># BEST FOR TAGS</div>
                 <div className="flex flex-wrap gap-2">
-                  {[
-                    'premium lifestyle',
-                    'quality driven',
-                    'modern apparel',
-                    'exclusive designs',
-                    'sustainable wear',
-                    'best in segment',
-                    'elite deshi collect',
-                  ].map((tag) => (
+                  {(Array.isArray(product.bestForTags) && product.bestForTags.length
+                    ? product.bestForTags
+                    : [
+                        'premium lifestyle',
+                        'quality driven',
+                        'modern apparel',
+                        'exclusive designs',
+                        'sustainable wear',
+                        'best in segment',
+                        'elite deshi collect',
+                      ]
+                  ).map((tag: string) => (
                     <span
                       key={tag}
                       className="choosify-best-for-tag text-[11px] font-bold px-3.5 py-1.5 rounded-full"
@@ -1469,6 +1547,7 @@ export function ProductDetailPage() {
                   ))}
                 </div>
               </div>
+              )}
             </StudioWrap>
 
             {/* Box Content + Physical Specs — Choosify.dc.html */}
