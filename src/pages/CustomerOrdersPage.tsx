@@ -19,6 +19,23 @@ import {
   loadReturnRequests,
   saveReturnRequests,
 } from '../lib/dashboard/pendingActions';
+import { operationsApi } from '../services/operationsApi';
+
+function mapStorefrontReturnReason(
+  label: string,
+): 'defective' | 'damaged' | 'wrong_item' | 'not_as_described' | 'customer_changed_mind' {
+  switch (label) {
+    case 'Damaged':
+      return 'damaged';
+    case 'Not as Described':
+      return 'not_as_described';
+    case 'Changed Mind':
+      return 'customer_changed_mind';
+    case 'Wrong Item':
+    default:
+      return 'wrong_item';
+  }
+}
 
 export function CustomerOrdersPage({
   embedded = false,
@@ -502,15 +519,23 @@ Thank you for shopping with Choosify.bd
                           <button
                             type="button"
                             onClick={() => {
+                              if (!returnDesc.trim()) {
+                                toast.error('Please describe the issue.');
+                                return;
+                              }
                               const createdAt = new Date().toISOString();
+                              const sellerId = order.subOrders[0]?.sellerId || 'unknown';
+                              const itemId = String(order.subOrders[0]?.items?.[0]?.productId || order.orderId);
+                              const reasonCode = mapStorefrontReturnReason(returnReason);
                               const row: ReturnRequest = {
                                 id: `RET-${Date.now()}`,
                                 orderId: order.orderId,
-                                sellerId: order.subOrders[0]?.sellerId || 'unknown',
+                                sellerId,
                                 buyerId: currentUser.id,
-                                reason: returnReason,
-                                description: returnDesc,
-                                status: 'pending',
+                                itemId,
+                                reason: reasonCode,
+                                description: returnDesc.trim(),
+                                status: 'initiated',
                                 createdAt,
                               };
                               const nextReturns = [row, ...loadReturnRequests()];
@@ -521,6 +546,27 @@ Thank you for shopping with Choosify.bd
                                 returnReason,
                                 returnRequestedAt: createdAt,
                               });
+                              operationsApi
+                                .createReturn({
+                                  orderId: order.orderId,
+                                  buyerId: currentUser.id,
+                                  sellerId,
+                                  itemId,
+                                  reason: reasonCode,
+                                  description: returnDesc.trim(),
+                                  initiatedBy: 'customer',
+                                })
+                                .then((saved) => {
+                                  const merged = [
+                                    saved,
+                                    ...loadReturnRequests().filter((r) => r.id !== row.id && r.id !== saved.id),
+                                  ];
+                                  saveReturnRequests(merged);
+                                  window.dispatchEvent(new Event('choosify-returns-updated'));
+                                })
+                                .catch((err) => {
+                                  toast.error((err as Error)?.message || 'Failed to submit return to server.');
+                                });
                               window.dispatchEvent(
                                 new CustomEvent('choosify-return-request', {
                                   detail: {

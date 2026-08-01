@@ -59,7 +59,13 @@ export function isPendingToPay(order: Order, now = Date.now()): boolean {
 
 /** Active return = awaiting seller/admin action or approved & in progress. */
 export function isActiveReturn(row: ReturnRequest): boolean {
-  return row.status === 'pending' || row.status === 'approved';
+  return (
+    row.status === 'pending' ||
+    row.status === 'initiated' ||
+    row.status === 'approved' ||
+    row.status === 'returned_in_transit' ||
+    row.status === 'received'
+  );
 }
 
 /**

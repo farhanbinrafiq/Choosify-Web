@@ -184,12 +184,28 @@ export interface ReturnRequest {
   orderId: string;
   sellerId: string;
   buyerId: string;
+  itemId?: string;
   reason: string;
   description: string;
   evidence?: string;
-  status: 'pending' | 'approved' | 'rejected' | 'completed';
+  evidencePhotos?: string[];
+  /** Admin CMS statuses; `pending` kept as a storefront alias for `initiated`. */
+  status:
+    | 'pending'
+    | 'initiated'
+    | 'approved'
+    | 'rejected'
+    | 'returned_in_transit'
+    | 'received'
+    | 'refunded'
+    | 'dispute'
+    | 'completed';
   createdAt: string;
+  updatedAt?: string;
   resolvedAt?: string;
+  refundAmount?: number;
+  refundStatus?: string;
+  returnTrackingId?: string;
 }
 
 export interface PromoCode {

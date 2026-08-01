@@ -759,17 +759,31 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       return;
     }
 
+    const trimmedReason = reason.trim();
+    if (!trimmedReason) {
+      toast.error('A cancellation reason is required.');
+      return;
+    }
+
+    const cancelledAt = new Date().toISOString();
     setOrders(prev => prev.map(o => {
       if (o.orderId === orderId) {
         return {
           ...o,
-          cancelledAt: new Date().toISOString(),
-          cancellationReason: reason,
+          cancelledAt,
+          cancellationReason: trimmedReason,
+          cancelledBy: 'buyer' as const,
           status: 'cancelled' as const
         };
       }
       return o;
     }));
+
+    operationsApi
+      .cancelOrder(orderId, order.buyerId || currentUser.id, trimmedReason)
+      .catch((err) => {
+        toast.error((err as Error)?.message || 'Failed to cancel order on the server.');
+      });
 
     toast.success('Order cancelled successfully.');
 
@@ -778,7 +792,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     if (typeof addNotification === 'function') {
       addNotification(`Your order ${orderId} has been successfully cancelled!`, 'order');
     } else {
-      window.dispatchEvent(new CustomEvent('choosify-order-cancelled', { detail: { orderId, reason } }));
+      window.dispatchEvent(new CustomEvent('choosify-order-cancelled', { detail: { orderId, reason: trimmedReason } }));
     }
   };
 

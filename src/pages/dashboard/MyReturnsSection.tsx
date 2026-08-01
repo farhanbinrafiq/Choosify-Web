@@ -2,36 +2,58 @@ import React, { useEffect, useState } from 'react';
 import { RotateCcw } from 'lucide-react';
 import type { ReturnRequest } from '../../types/schemas';
 import { cn } from '../../lib/utils';
-import { loadReturnRequests } from '../../lib/dashboard/pendingActions';
+import { loadReturnRequests, saveReturnRequests } from '../../lib/dashboard/pendingActions';
+import { operationsApi } from '../../services/operationsApi';
+import { useGlobalState } from '../../context/GlobalStateContext';
 
 function statusMeta(status: ReturnRequest['status']) {
   switch (status) {
     case 'pending':
+    case 'initiated':
       return { text: 'Pending review', className: 'bg-amber-50 text-amber-700 border-amber-200' };
     case 'approved':
+    case 'returned_in_transit':
+    case 'received':
       return { text: 'In progress', className: 'bg-blue-50 text-blue-700 border-blue-200' };
     case 'rejected':
       return { text: 'Rejected', className: 'bg-rose-50 text-rose-700 border-rose-200' };
+    case 'refunded':
     case 'completed':
       return { text: 'Completed', className: 'bg-emerald-50 text-emerald-700 border-emerald-200' };
+    case 'dispute':
+      return { text: 'In dispute', className: 'bg-violet-50 text-violet-700 border-violet-200' };
     default:
       return { text: status, className: 'bg-slate-50 text-slate-600 border-slate-200' };
   }
 }
 
 export function MyReturnsSection() {
+  const { currentUser } = useGlobalState();
   const [returns, setReturns] = useState<ReturnRequest[]>([]);
 
   useEffect(() => {
-    setReturns(loadReturnRequests());
+    let cancelled = false;
+    const apply = (rows: ReturnRequest[]) => {
+      if (cancelled) return;
+      setReturns(rows);
+      saveReturnRequests(rows);
+    };
+
+    apply(loadReturnRequests());
+    operationsApi
+      .listReturns(currentUser.id)
+      .then(apply)
+      .catch(() => apply(loadReturnRequests()));
+
     const onStorage = () => setReturns(loadReturnRequests());
     window.addEventListener('storage', onStorage);
     window.addEventListener('choosify-returns-updated', onStorage);
     return () => {
+      cancelled = true;
       window.removeEventListener('storage', onStorage);
       window.removeEventListener('choosify-returns-updated', onStorage);
     };
-  }, []);
+  }, [currentUser.id]);
 
   return (
     <div className="max-w-3xl space-y-6 animate-in fade-in slide-in-from-bottom-5 duration-700">

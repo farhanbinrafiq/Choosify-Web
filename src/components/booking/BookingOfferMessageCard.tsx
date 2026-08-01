@@ -57,8 +57,9 @@ export function BookingOfferMessageCard({
     () => Object.entries(offer.fields).filter(([key]) => key !== 'notes'),
     [offer.fields],
   );
-  // Buyer only "accepts/declines" a seller counter-offer — once accepted, the action is Pay & Confirm.
+  // Buyer accepts/declines a seller counter; can also decline a seller-accepted offer before paying.
   const canRespondToCounter = offer.status === 'countered';
+  const canBuyerDecline = offer.status === 'countered' || offer.status === 'accepted';
   const canPay = !justPaid && (offer.status === 'accepted' || offer.status === 'buyer_accepted');
 
   return (
@@ -150,7 +151,7 @@ export function BookingOfferMessageCard({
       ) : null}
 
       <div className="flex flex-wrap justify-end gap-2 border-t border-[#E8EDF2] bg-[#F4F7F9] p-3">
-        {canRespondToCounter && onDecline ? (
+        {canBuyerDecline && onDecline ? (
           <button
             type="button"
             onClick={onDecline}

@@ -436,29 +436,14 @@ export function MessagesPage({
     }
   };
 
-  // NOTE: there is no buyer-facing decline endpoint on the backend today — bookingRouter.ts
-  // only exposes /accept, /decline, /counter (all seller-only) and /buyer-accept. A buyer
-  // declining a counter-offer or an already-accepted offer has nowhere real to write to, so
-  // this remains local-only (matches pre-existing behavior) rather than guessing at a call
-  // that would either 400 or silently do the wrong thing. Flagged back as a backend gap —
-  // needs a real POST /booking/requests/:id/buyer-decline route before this can be wired.
-  const declineBookingOffer = (offer: BookingOfferCard) => {
-    if (!activeThreadId) return;
-    const next: BookingOfferCard = {
-      ...offer,
-      status: 'buyer_declined',
-      version: offer.version + 1,
-      createdAt: new Date().toISOString(),
-    };
-    addThreadMessage(
-      activeThreadId,
-      `Buyer declined offer version ${offer.version}.`,
-      'user',
-      'Me',
-      undefined,
-      next,
-    );
-    toast.success('Offer declined.');
+  const declineBookingOffer = async (offer: BookingOfferCard) => {
+    try {
+      const result = await operationsApi.buyerDeclineBookingRequest(offer.requestId, currentUser.id);
+      applyServerOffer(result.data, 'user', `Buyer declined offer version ${offer.version}.`);
+      toast.success('Offer declined.');
+    } catch (err) {
+      toast.error((err as Error)?.message || 'Failed to decline this offer. Try again.');
+    }
   };
 
   const sellerRespondToOffer = async (

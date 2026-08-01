@@ -93,6 +93,42 @@ export const operationsApi = {
     const result = await request<{ data: Record<string, unknown> }>('/operations/orders', 'POST', payload);
     return result.data;
   },
+  cancelOrder: async (
+    orderId: string,
+    buyerId: string,
+    reason: string,
+  ): Promise<Record<string, unknown>> => {
+    const result = await request<{ data: Record<string, unknown> }>(
+      `/operations/orders/${encodeURIComponent(orderId)}/cancel`,
+      'POST',
+      { buyerId, reason },
+    );
+    return result.data;
+  },
+  listReturns: async (buyerId?: string): Promise<import('../types/schemas').ReturnRequest[]> => {
+    const qs = buyerId ? `?buyerId=${encodeURIComponent(buyerId)}` : '';
+    const result = await request<{ data: import('../types/schemas').ReturnRequest[] }>(
+      `/operations/returns${qs}`,
+    );
+    return result.data;
+  },
+  createReturn: async (payload: {
+    orderId: string;
+    buyerId: string;
+    sellerId: string;
+    itemId?: string;
+    reason: string;
+    description: string;
+    evidencePhotos?: string[];
+    initiatedBy?: 'customer' | 'admin';
+  }): Promise<import('../types/schemas').ReturnRequest> => {
+    const result = await request<{ data: import('../types/schemas').ReturnRequest }>(
+      '/operations/returns',
+      'POST',
+      payload,
+    );
+    return result.data;
+  },
   validateCoupon: async (payload: {
     code: string;
     cartTotal: number;
@@ -209,6 +245,15 @@ export const operationsApi = {
     buyerId: string,
   ): Promise<{ data: BookingOfferCard; order: ServerBookingOrder }> =>
     request(`/booking/requests/${encodeURIComponent(requestId)}/buyer-accept`, 'POST', { buyerId }),
+  buyerDeclineBookingRequest: async (
+    requestId: string,
+    buyerId: string,
+    declineReason?: string,
+  ): Promise<{ data: BookingOfferCard }> =>
+    request(`/booking/requests/${encodeURIComponent(requestId)}/buyer-decline`, 'POST', {
+      buyerId,
+      ...(declineReason !== undefined ? { declineReason } : {}),
+    }),
   submitSellerOffer: async (payload: {
     productName: string;
     category: string;
