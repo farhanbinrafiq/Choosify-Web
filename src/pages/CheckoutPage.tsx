@@ -250,9 +250,12 @@ export function CheckoutPage() {
         },
       };
       updateOrder(pendingOrder.orderId, confirmedOrder);
-      operationsApi
-        .createOrder(confirmedOrder as unknown as Record<string, unknown>)
-        .catch(() => {});
+      try {
+        await operationsApi.createOrder(confirmedOrder as unknown as Record<string, unknown>);
+      } catch (err) {
+        toast.error((err as Error)?.message || 'Could not save order — sign in again and retry.');
+        return;
+      }
       sessionStorage.setItem('choosify_last_order_id', pendingOrder.orderId);
       sessionStorage.setItem(
         'choosify_last_order_snapshot',
@@ -382,7 +385,7 @@ ORDER STATUS: PENDING_CONFIRMATION
 
     const fullOrderObject = {
       orderId: tempOrderId,
-      buyerId: 'user-standard',
+      buyerId: currentUser.id,
       isCOD: isCod,
       isSplit: splitCount > 1,
       overallTotal: finalTotal,
@@ -417,12 +420,19 @@ ORDER STATUS: PENDING_CONFIRMATION
       window.dispatchEvent(new CustomEvent('choosify-promo-applied', { detail: appliedPromo }));
     }
 
+    // Persist to operations store first (requireAuth) — fail loudly without a real token.
+    try {
+      await operationsApi.createOrder(fullOrderObject as Record<string, unknown>);
+    } catch (err) {
+      toast.error((err as Error)?.message || 'Could not save order — sign in again and retry.');
+      return;
+    }
+
     sessionStorage.setItem('choosify_last_order_id', tempOrderId);
     sessionStorage.setItem('choosify_last_order_snapshot', JSON.stringify(fullOrderObject));
 
     // Add to global state (which automatically updates localStorage and triggers reactivity)
     addOrder(fullOrderObject);
-    operationsApi.createOrder(fullOrderObject as Record<string, unknown>).catch(() => {});
 
     orderPlacedRef.current = true;
     toast.success(

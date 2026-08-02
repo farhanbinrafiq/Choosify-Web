@@ -1242,7 +1242,8 @@ export function ProductDetailPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[
+                {(() => {
+                  const publicReviews = [
                   ...(Array.isArray(reviews) ? reviews : [])
                     .filter((r: any) => r.productId === product.id)
                     .map((r: any) => ({
@@ -1254,7 +1255,6 @@ export function ProductDetailPage() {
                       date: formatReviewDate(r.createdAt) || 'Just now',
                       purchaseDate: formatReviewDate(r.purchaseDate) || undefined,
                       orderType: r.orderType,
-                      helpful: 0,
                       images: [] as string[],
                       verified: true,
                     })),
@@ -1266,59 +1266,27 @@ export function ProductDetailPage() {
                         rating: String(r.rating),
                         content: r.comment,
                         date: 'Verified purchase',
-                        helpful: 0,
                         images: [] as string[],
                         verified: true,
                       }))
                     : []),
-                  {
-                    name: 'Tanvir Hasan',
-                    avatar: 'https://i.pravatar.cc/150?u=tanvir',
-                    time: '2 weeks ago',
-                    rating: '5',
-                    content:
-                      'The material quality of the new Apex collection is absolutely top-notch. I was skeptical about the price but after wearing it once, I can say it\'s worth every taka. The fit is perfect for large build individuals as well.',
-                    date: '2 weeks ago',
-                    helpful: 124,
-                    verified: true,
-                    images: [
-                      'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=150&h=150&fit=crop',
-                      'https://images.unsplash.com/photo-1541643600914-78b084683601?w=150&h=150&fit=crop',
-                    ],
-                  },
-                  {
-                    name: 'Nusrat Jahan',
-                    avatar: 'https://i.pravatar.cc/150?u=nusrat',
-                    time: '1 month ago',
-                    rating: '4.8',
-                    content:
-                      'Beautiful designs! I bought three different items and all of them were delivered on time. The online sizing chart was very accurate which was a relief. Highly recommend the fusion wear collection.',
-                    date: '1 month ago',
-                    helpful: 89,
-                    verified: true,
-                    images: [
-                      'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=150&h=150&fit=crop',
-                    ],
-                  },
-                ].map((review, i) => (
+                  ];
+                  if (publicReviews.length === 0) {
+                    return (
+                      <div className="md:col-span-2 py-10 border border-dashed border-[#E8EDF2] rounded-[10px] flex flex-col items-center justify-center text-center bg-[#F4F7F9]">
+                        <p className="text-[13px] font-medium text-[#9AA0AC]">
+                          No customer reviews yet for this product
+                        </p>
+                      </div>
+                    );
+                  }
+                  return publicReviews.map((review, i) => (
                   <PublicReviewCard
                     key={i}
                     review={review}
-                    onHelpfulClick={() =>
-                      toast.success('Thanks for voting this review as helpful!')
-                    }
                   />
-                ))}
-              </div>
-
-              <div className="flex justify-center pt-1">
-                <button
-                  type="button"
-                  onClick={() => toast.success('All customer reviews are fully loaded.')}
-                  className="text-[11.5px] font-extrabold text-[#EB4501] bg-transparent border-0 cursor-pointer hover:underline"
-                >
-                  LOAD MORE REVIEWS
-                </button>
+                  ));
+                })()}
               </div>
 
               {/* Write a Customer Review — after list (Choosify.dc.html) */}
@@ -1632,13 +1600,9 @@ export function ProductDetailPage() {
               <p className="text-[11px] text-white/55 leading-relaxed mb-4">
                 Get free 1-hour home deliveries inside Dhaka metro area under Choosify Premium Club.
               </p>
-              <button
-                type="button"
-                onClick={() => toast.success('Choosify Premium Club VIP services requested!')}
-                className="bg-[#EB4501] hover:brightness-110 text-white px-4 py-2.5 rounded-lg text-[12px] font-bold transition-all cursor-pointer border-none"
-              >
-                Learn More
-              </button>
+              <p className="text-[11px] font-bold text-white/40 m-0">
+                Membership signup is not available yet.
+              </p>
             </div>
           </div>
       </main>

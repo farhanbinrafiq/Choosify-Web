@@ -38,6 +38,7 @@ import { PaginationBar } from "../components/PaginationBar";
 import { PublicReviewCard } from "../components/PublicReviewCard";
 import { TikTokIcon } from "../components/brand/TikTokIcon";
 import { BrandCouponsSection, BrandCouponCarouselCard, buildBrandCoupons } from "../components/brand/BrandCouponsSection";
+import { operationsApi, type PublicProductReview } from "../services/operationsApi";
 import { BrandWhereToBuySection } from "../components/brand/BrandWhereToBuySection";
 import { BrandFaqSection } from "../components/brand/BrandFaqSection";
 import { BrandStorySection } from "../components/brand/BrandStorySection";
@@ -182,6 +183,28 @@ export function BrandDetailPage() {
   useEffect(() => {
     setLocalClaimStatus(getBrandClaimStatus(brand.id));
   }, [brand, brandClaimStatuses]);
+
+  const [brandReviews, setBrandReviews] = useState<PublicProductReview[]>([]);
+  const [brandReviewsLoaded, setBrandReviewsLoaded] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    setBrandReviewsLoaded(false);
+    operationsApi
+      .listBrandReviews(brand.name)
+      .then((rows) => {
+        if (!cancelled) setBrandReviews(rows);
+      })
+      .catch(() => {
+        if (!cancelled) setBrandReviews([]);
+      })
+      .finally(() => {
+        if (!cancelled) setBrandReviewsLoaded(true);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [brand.name]);
 
   // Resolve products listed under this brand
   const brandNameLower = brand.name.toLowerCase();
@@ -1837,55 +1860,48 @@ export function BrandDetailPage() {
               <h3 className="text-[15px] font-extrabold text-[#1A1A2E] tracking-tight m-0">
                 WHAT CUSTOMERS SAY
               </h3>
-              <button
-                type="button"
-                onClick={() => toast.success("Loading all customer reviews...")}
-                className="text-[12px] font-bold text-[#1A1A2E] bg-transparent border-0 cursor-pointer hover:text-[#CF4400] shrink-0 p-0"
-              >
-                VIEW ALL REVIEWS ›
-              </button>
             </div>
             <p className="text-[11.5px] text-[#9AA0AC] m-0 mb-3.5">
               Real reviews from verified buyers
             </p>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-              {[
-                {
-                  name: "Tanvir Hasan",
-                  date: "2 weeks ago",
-                  purchaseDate: "April 2024",
-                  comment: `The material quality of the new ${brand.name} collection is absolutely top-notch. I was skeptical about the price but after wearing it once, I can say it's worth every taka. The fit is perfect.`,
-                  rating: 5,
-                  verified: true,
-                  productImages: [
-                    "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=400&fit=crop",
-                    "https://images.unsplash.com/photo-1541643600914-78b084683601?w=400&h=400&fit=crop",
-                  ],
-                  dp: "https://i.pravatar.cc/150?u=tanvir",
-                  helpful: 124,
-                },
-                {
-                  name: "Nusrat Jahan",
-                  date: "1 month ago",
-                  purchaseDate: "March 2024",
-                  comment:
-                    "Beautiful designs! I bought three different items and all of them were delivered on time. The online sizing chart was very accurate which was a relief. Highly recommend the collection.",
-                  rating: 4.8,
-                  verified: true,
-                  productImages: [
-                    "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=400&h=400&fit=crop",
-                  ],
-                  dp: "https://i.pravatar.cc/150?u=nusrat",
-                  helpful: 89,
-                },
-              ].map((review, i) => (
-                <PublicReviewCard
-                  key={i}
-                  review={review}
-                  onHelpfulClick={() => toast.success("Marked as helpful!")}
-                />
-              ))}
+              {!brandReviewsLoaded ? (
+                <div className="md:col-span-2 py-8 text-center text-[12px] text-[#9AA0AC]">
+                  Loading reviews…
+                </div>
+              ) : brandReviews.length === 0 ? (
+                <div className="md:col-span-2 py-10 border border-dashed border-[#E8EDF2] rounded-[10px] flex flex-col items-center justify-center text-center bg-white">
+                  <p className="text-[13px] font-medium text-[#9AA0AC]">
+                    No customer reviews yet for {brand.name}
+                  </p>
+                </div>
+              ) : (
+                brandReviews.map((review) => (
+                  <PublicReviewCard
+                    key={review.id}
+                    review={{
+                      name: review.userName,
+                      date: (() => {
+                        try {
+                          return new Date(review.createdAt).toLocaleDateString(undefined, {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                          });
+                        } catch {
+                          return review.createdAt;
+                        }
+                      })(),
+                      comment: review.comment,
+                      rating: review.rating,
+                      verified: true,
+                      productName: review.productTitle,
+                      dp: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(review.userName)}`,
+                    }}
+                  />
+                ))
+              )}
             </div>
           </div>
 

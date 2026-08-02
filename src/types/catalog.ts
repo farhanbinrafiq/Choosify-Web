@@ -107,6 +107,8 @@ export interface CatalogProduct {
   featuredFlag: boolean;
   isNewArrival: boolean;
   isBestseller: boolean;
+  /** Average customer star rating when known (0–5). */
+  rating?: number;
   createdAt: string;
   updatedAt: string;
 }

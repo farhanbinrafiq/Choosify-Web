@@ -77,6 +77,9 @@ export interface PublicProductReview {
   rating: number;
   comment: string;
   createdAt: string;
+  productId?: string;
+  productTitle?: string;
+  brandName?: string;
   response?: { id: string; author: string; comment: string; timestamp: string };
 }
 
@@ -159,6 +162,12 @@ export const operationsApi = {
   listProductReviews: async (productId: string): Promise<PublicProductReview[]> => {
     const result = await request<{ data: PublicProductReview[] }>(
       `/operations/reviews/public?productId=${encodeURIComponent(productId)}`,
+    );
+    return result.data;
+  },
+  listBrandReviews: async (brandName: string): Promise<PublicProductReview[]> => {
+    const result = await request<{ data: PublicProductReview[] }>(
+      `/operations/reviews/public?brandName=${encodeURIComponent(brandName)}`,
     );
     return result.data;
   },

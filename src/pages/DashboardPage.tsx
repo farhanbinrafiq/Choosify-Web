@@ -1623,54 +1623,6 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
 };
 
 
-const DEMO_SELLER_RATINGS = [
-  {
-    id: 'sr-1',
-    sellerName: 'Samsung Official Store',
-    sellerType: 'Brand',
-    orderRef: 'ORD-24018',
-    productName: 'Samsung Galaxy S24 Ultra',
-    rating: 5,
-    comment:
-      'Excellent buyer — clear communication, accepted delivery on time, and left helpful product feedback.',
-    date: 'Jun 2, 2026',
-    tags: ['On-time', 'Reliable'],
-  },
-  {
-    id: 'sr-2',
-    sellerName: 'TechLand BD',
-    sellerType: 'Seller',
-    orderRef: 'ORD-23991',
-    productName: 'Sony WH-1000XM5',
-    rating: 5,
-    comment: 'Smooth COD experience. Buyer was available and verified the order quickly.',
-    date: 'May 21, 2026',
-    tags: ['COD OK', 'Responsive'],
-  },
-  {
-    id: 'sr-3',
-    sellerName: 'Aarong Official',
-    sellerType: 'Brand',
-    orderRef: 'ORD-23844',
-    productName: 'Premium Cotton Panjabi',
-    rating: 4,
-    comment: 'Good buyer overall. One reschedule request, but completed the purchase cleanly.',
-    date: 'May 4, 2026',
-    tags: ['Completed'],
-  },
-  {
-    id: 'sr-4',
-    sellerName: 'Pickaboo',
-    sellerType: 'Seller',
-    orderRef: 'ORD-23702',
-    productName: 'Apple AirPods Pro 2',
-    rating: 5,
-    comment: 'Highly recommended customer. Fast confirmation and zero return issues.',
-    date: 'Apr 18, 2026',
-    tags: ['Trusted', 'No returns'],
-  },
-] as const;
-
 function MyReviewsSection() {
   const { currentUser } = useGlobalState();
   const { reviews } = useDashboard();
@@ -1678,15 +1630,13 @@ function MyReviewsSection() {
     100,
     Math.max(0, Math.round(currentUser?.reputation_score ?? 0)),
   );
-  const avgSellerRating =
-    DEMO_SELLER_RATINGS.reduce((sum, r) => sum + r.rating, 0) / DEMO_SELLER_RATINGS.length;
 
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-5 duration-700">
       <div className="text-left">
         <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-1">My Reviews</h2>
         <p className="text-[#9AA0AC] text-[12.5px]">
-          Seller ratings from your purchases and reviews you&apos;ve written
+          Reviews you&apos;ve written on products you purchased
         </p>
       </div>
 
@@ -1698,93 +1648,15 @@ function MyReviewsSection() {
               Choosify Score
             </div>
             <h3 className="text-[18px] font-extrabold text-[#1A1A2E] mb-1.5">
-              Built from seller ratings &amp; purchase trust
+              Built from purchase trust
             </h3>
             <p className="text-[12.5px] text-[#6B7280] leading-relaxed mb-3">
-              Brands and sellers rate you after completed orders. Higher scores unlock better COD
-              trust, deals, and premium perks.
+              Your score reflects completed orders and account trust. Higher scores unlock better COD
+              eligibility and deals.
             </p>
-            <div className="flex flex-wrap gap-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F4F7F9] border border-[#E8EDF2] text-[11px] font-bold text-[#1A1A2E]">
-                <Star size={12} className="text-[#EB4501] fill-[#EB4501]" />
-                Avg seller rating {avgSellerRating.toFixed(1)}
-              </span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#F4F7F9] border border-[#E8EDF2] text-[11px] font-bold text-[#1A1A2E]">
-                {DEMO_SELLER_RATINGS.length} seller reviews
-              </span>
-            </div>
           </div>
         </div>
       </div>
-
-      <section className="space-y-4 text-left">
-        <div>
-          <h3 className="text-[15px] font-extrabold text-[#1A1A2E]">Reviews from sellers</h3>
-          <p className="text-[12px] text-[#9AA0AC] mt-0.5">
-            Ratings left by brands and sellers you purchased from
-          </p>
-        </div>
-
-        <div className="space-y-3 max-w-3xl">
-          {DEMO_SELLER_RATINGS.map((item) => (
-            <article
-              key={item.id}
-              className="bg-white border border-[#E8EDF2] rounded-[10px] p-5 text-left"
-            >
-              <div className="flex items-start justify-between gap-3 mb-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-xl bg-[#FFF3EA] text-[#EB4501] flex items-center justify-center shrink-0">
-                    <Store size={18} />
-                  </div>
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h4 className="text-[13px] font-extrabold text-[#1A1A2E] truncate">
-                        {item.sellerName}
-                      </h4>
-                      <span className="px-2 py-0.5 rounded-md bg-[#F4F7F9] border border-[#E8EDF2] text-[9px] font-bold text-[#9AA0AC] uppercase tracking-wide">
-                        {item.sellerType}
-                      </span>
-                    </div>
-                    <p className="text-[11px] font-semibold text-[#9AA0AC] mt-0.5">
-                      Order {item.orderRef} · {item.date}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-0.5 shrink-0" aria-label={`${item.rating} out of 5`}>
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Star
-                      key={i}
-                      size={13}
-                      className={
-                        i < item.rating
-                          ? 'text-[#EB4501] fill-[#EB4501]'
-                          : 'text-[#E8EDF2] fill-[#E8EDF2]'
-                      }
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <p className="text-[12.5px] text-[#4B5563] leading-relaxed mb-3">{item.comment}</p>
-
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[10px] font-bold text-[#9AA0AC] uppercase tracking-wide">
-                  Purchase
-                </span>
-                <span className="text-[12px] font-bold text-[#1A1A2E]">{item.productName}</span>
-                {item.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="px-2 py-0.5 rounded-lg bg-[#07A828]/10 text-[#07A828] text-[10px] font-bold"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
 
       <section className="space-y-4 text-left">
         <div>

@@ -7,7 +7,6 @@ import {
   CheckCircle,
   Package,
   MapPin,
-  ExternalLink,
   MessageCircleMore,
 } from 'lucide-react';
 import { toast } from '../lib/notify';
@@ -436,20 +435,12 @@ export function OrderTrackingPage() {
                       </div>
                     )}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      if (remoteShipment?.trackingNumber) {
-                        toast.success(`Tracking ${remoteShipment.trackingNumber} — open courier site when linked.`);
-                      } else {
-                        toast('Courier tracking link will open when available.', { icon: '🚚' });
-                      }
-                    }}
-                    className="w-full choosify-dark-surface hover:brightness-110 text-white border-none py-2.5 rounded-lg text-[11.5px] font-bold cursor-pointer mt-3.5 flex items-center justify-center gap-1.5 transition-[filter]"
-                  >
-                    TRACK ON COURIER SITE
-                    <ExternalLink size={12} className="text-white" />
-                  </button>
+                  {remoteShipment?.trackingNumber ? (
+                    <div className="w-full choosify-dark-surface text-white border-none py-2.5 rounded-lg text-[11.5px] font-bold mt-3.5 text-center">
+                      Tracking #{remoteShipment.trackingNumber}
+                      {remoteShipment.courier ? ` · ${remoteShipment.courier}` : ''}
+                    </div>
+                  ) : null}
                 </div>
 
                 <button

@@ -798,7 +798,6 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
 
   const addOrder = (order: Order) => {
     setOrders(prev => [order, ...prev]);
-    operationsApi.createOrder(order as unknown as Record<string, unknown>).catch(() => {});
   };
 
   const addClaimedOrder = (order: Order) => {

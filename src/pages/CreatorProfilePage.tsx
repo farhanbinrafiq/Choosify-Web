@@ -18,6 +18,7 @@ import {
   CreatorReviewsTab,
   getCreatorReviewDemo,
 } from '../components/creator/CreatorProfileTabFeeds';
+import { operationsApi } from '../services/operationsApi';
 import { useRegisterPageFilters } from '../components/FilterEngine';
 
 type CreatorProfileTab =
@@ -98,14 +99,39 @@ export function CreatorProfilePage() {
   const [searchFilter, setSearchFilter] = useState('');
   const [currentSearchInput, setCurrentSearchInput] = useState('');
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!productDetails || !requirements) {
       toast.error('Please fill in both product details and campaign requirements.');
       return;
     }
-    setSubmitSuccess(true);
-    toast.success('Structured collaboration request finalized!');
+    if (!contactEmail.trim()) {
+      toast.error('A contact email is required so we can follow up.');
+      return;
+    }
+    try {
+      await operationsApi.submitLead({
+        brandName: productDetails.trim(),
+        contactPerson: creator.name,
+        email: contactEmail.trim(),
+        budget: budgetRange.trim() || undefined,
+        placementInterest: collabType,
+        message: [
+          `Creator collaboration request for ${creator.name}`,
+          `Type: ${collabType}`,
+          contactPhone.trim() ? `Phone: ${contactPhone.trim()}` : null,
+          '',
+          requirements.trim(),
+        ]
+          .filter((line) => line !== null)
+          .join('\n'),
+        source: 'creator-ask-for-branding',
+      });
+      setSubmitSuccess(true);
+      toast.success('Collaboration request sent.');
+    } catch (err) {
+      toast.error((err as Error)?.message || 'Could not send request. Try again.');
+    }
   };
 
   const resetFormAndModal = () => {
@@ -222,8 +248,8 @@ export function CreatorProfilePage() {
               { id: 'Guides' as const, count: String(creator.blogs.length || '') },
               { id: 'Videos' as const, count: String(creator.videos.length + creator.reels.length || '') },
               { id: 'Reviews' as const, count: String(reviewDemo.community.length || '') },
-              { id: 'Collections' as const, count: '48' },
-              { id: 'Deals' as const, count: '56' },
+              { id: 'Collections' as const, count: '' },
+              { id: 'Deals' as const, count: '' },
               { id: 'About' as const, count: '' },
             ] as const
           ).map((tab) => {
@@ -295,15 +321,19 @@ export function CreatorProfilePage() {
                )}
 
                {profileTab === 'Collections' && (
-                 <p className="text-[13px] text-[#4B5563] leading-relaxed">
-                   {creator.name.split(' ')[0]} has curated collections spanning budget phones, creator laptops, and smart home starter kits.
-                 </p>
+                 <div className="py-12 border border-dashed border-[#E8EDF2] rounded-[10px] text-center bg-white">
+                   <p className="text-[13px] font-medium text-[#9AA0AC]">
+                     Creator collections are not available yet
+                   </p>
+                 </div>
                )}
 
                {profileTab === 'Deals' && (
-                 <p className="text-[13px] text-[#4B5563] leading-relaxed">
-                   Exclusive creator deals and affiliate offers will appear here when campaigns are live.
-                 </p>
+                 <div className="py-12 border border-dashed border-[#E8EDF2] rounded-[10px] text-center bg-white">
+                   <p className="text-[13px] font-medium text-[#9AA0AC]">
+                     Creator deals are not available yet
+                   </p>
+                 </div>
                )}
 
                {profileTab === 'About' && (

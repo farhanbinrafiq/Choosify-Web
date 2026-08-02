@@ -1,5 +1,5 @@
 import React, { lazy, Suspense } from 'react';
-import { Share2, Heart, Trash2 } from 'lucide-react';
+import { Share2, Trash2 } from 'lucide-react';
 import { toast } from '../lib/notify';
 import { LoadingFallback } from '../components/LoadingFallback';
 import { useDashboard } from '../context/DashboardContext';
@@ -23,10 +23,6 @@ export function ComparePage() {
     } catch {
       toast.error('Unable to share right now');
     }
-  };
-
-  const handleSave = () => {
-    toast.success('Comparison saved to your list');
   };
 
   const handleClearAll = () => {
@@ -57,14 +53,6 @@ export function ComparePage() {
             >
               <Share2 size={14} aria-hidden />
               Share Comparison
-            </button>
-            <button
-              type="button"
-              onClick={handleSave}
-              className="inline-flex items-center gap-1.5 bg-white border border-[#E8EDF2] text-[#1A1A2E] px-4 py-2.5 rounded-lg text-xs font-bold cursor-pointer hover:border-[#D1D5DB] transition-colors"
-            >
-              <Heart size={14} className="text-[#EB4501]" strokeWidth={2} aria-hidden />
-              Save Comparison
             </button>
             <button
               type="button"

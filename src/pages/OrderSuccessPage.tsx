@@ -413,10 +413,19 @@ export function OrderSuccessPage() {
 
             <div className="choosify-dark-surface rounded-xl p-[18px] sm:px-5 text-white">
               <div className="text-xs font-extrabold mb-1.5">LOVE CHOOSIFY?</div>
-              <div className="text-[11px] text-white/50 mb-3.5">Rate your experience and earn 20 points!</div>
+              <div className="text-[11px] text-white/50 mb-3.5">
+                Rate a product from this order using the same review form as product pages.
+              </div>
               <button
                 type="button"
-                onClick={() => toast.success('Thanks! Rating will open in a future update.')}
+                onClick={() => {
+                  const firstItem = order.subOrders.flatMap((s) => s.items)[0];
+                  if (!firstItem?.productId) {
+                    toast.error('No product on this order to rate yet.');
+                    return;
+                  }
+                  navigate(`/products/${firstItem.productId}#public-reviews-section`);
+                }}
                 className="bg-[#EB4501] hover:bg-[#CF4400] text-white border-0 px-[18px] py-2.5 rounded-lg text-[11px] font-bold cursor-pointer"
               >
                 RATE ORDER ★

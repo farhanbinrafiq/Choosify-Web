@@ -81,7 +81,7 @@ export function AllProductsPage() {
   const [minPrice, setMinPrice] = useState<string>('');
   const [maxPrice, setMaxPrice] = useState<string>('');
   const [priceError, setPriceError] = useState<string>('');
-  const [sortOption, setSortOption] = useState<'popular' | 'price-asc' | 'price-desc'>('popular');
+  const [sortOption, setSortOption] = useState<'popular' | 'featured' | 'price-asc' | 'price-desc' | 'rating-desc'>('featured');
   const [activeSpecs, setActiveSpecs] = useState<Record<string, string>>({});
   const [priceMin, setPriceMin] = useState<number>(0);
   const priorityNowMs = usePriorityClockMs();
@@ -419,28 +419,13 @@ export function AllProductsPage() {
   const filteredProducts = React.useMemo(() => {
     let result = [...allCatalogProducts];
 
-    // 0. Tab Selection Filtering
+    // 0. Tab Selection Filtering — only real flags; no modulo / fabricated grids
     if (activeTab === 'New Arrivals' || activeTab === 'Newest') {
-      const arrivals = result.filter(p => p.isNewArrival === true);
-      if (arrivals.length === 0) {
-        result = [...result].sort((a, b) => b.createdAt.localeCompare(a.createdAt)).slice(0, 8);
-      } else {
-        result = arrivals;
-      }
+      result = result.filter(p => p.isNewArrival === true);
     } else if (activeTab === 'Bestsellers' || activeTab === 'Trending') {
-      const best = result.filter(p => p.isBestseller === true);
-      if (best.length === 0) {
-        result = result.filter(p => p.featuredFlag || p.isBestseller);
-      } else {
-        result = best;
-      }
+      result = result.filter(p => p.isBestseller === true);
     } else if (activeTab === 'Flash Deals' || activeTab === 'Featured' || activeTab === 'Popular') {
-      const deals = result.filter(p => p.isDeal === true && p.dealType === 'flash');
-      if (deals.length === 0) {
-        result = result.filter((_, idx) => idx % 2 === 0);
-      } else {
-        result = deals;
-      }
+      result = result.filter(p => p.isDeal === true && p.dealType === 'flash');
     } else if (activeTab === 'COD Ready' || activeTab === 'Top Rated') {
       result = result.filter(p => (p.stock || 0) > 0);
     }
@@ -504,7 +489,7 @@ export function AllProductsPage() {
 
     // Rating limit filter
     if (ratingFilter !== null) {
-      result = result.filter(p => p.featuredFlag || p.isBestseller);
+      result = result.filter((p) => Number(p.rating ?? 0) >= ratingFilter);
     }
 
     // Availability filter
@@ -537,11 +522,20 @@ export function AllProductsPage() {
     // Price range filtering (Fix 2)
     result = result.filter(p => p.price >= priceMin && p.price <= priceMax);
 
-    // 6. Explicit price sort OR default dynamic ranking
+    // 6. Explicit sort OR default dynamic ranking
     if (sortOption === 'price-asc') {
       result.sort((a, b) => a.price - b.price);
     } else if (sortOption === 'price-desc') {
       result.sort((a, b) => b.price - a.price);
+    } else if (sortOption === 'rating-desc') {
+      result.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
+    } else if (sortOption === 'featured') {
+      result.sort((a, b) => {
+        const aFeat = a.featuredFlag || a.isBestseller ? 1 : 0;
+        const bFeat = b.featuredFlag || b.isBestseller ? 1 : 0;
+        if (bFeat !== aFeat) return bFeat - aFeat;
+        return Number(b.rating || 0) - Number(a.rating || 0);
+      });
     } else {
       const brandFollowersById: Record<string, number> = {};
       for (const b of allBrands) {

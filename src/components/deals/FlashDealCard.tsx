@@ -29,13 +29,18 @@ export function FlashDealCard({
   category = 'Deals',
   price,
   originalPrice,
-  badge = `${Math.max(5, Math.round(((originalPrice ?? price * 1.2) - price) / (originalPrice ?? price * 1.2) * 100))}% OFF`,
-  claimedPct = 62,
+  badge,
+  claimedPct,
   href,
   onAddToCart,
   className,
 }: FlashDealCardProps) {
   const to = href ?? `/products/${id}`;
+  const discountBadge =
+    badge ??
+    (originalPrice != null && originalPrice > price
+      ? `${Math.round(((originalPrice - price) / originalPrice) * 100)}% OFF`
+      : undefined);
 
   return (
     <Link
@@ -52,9 +57,11 @@ export function FlashDealCard({
           className="w-full h-full object-cover"
           loading="lazy"
         />
-        <span className="absolute top-2 left-2 bg-[#FF000D] text-white text-[8.5px] font-extrabold px-1.5 py-0.5 rounded pointer-events-none">
-          {badge}
-        </span>
+        {discountBadge && (
+          <span className="absolute top-2 left-2 bg-[#FF000D] text-white text-[8.5px] font-extrabold px-1.5 py-0.5 rounded pointer-events-none">
+            {discountBadge}
+          </span>
+        )}
         <span className="absolute top-2 right-2 bg-black/55 text-white text-[8px] font-bold px-1.5 py-0.5 rounded pointer-events-none">
           FLASH DEAL
         </span>
@@ -74,12 +81,14 @@ export function FlashDealCard({
             </div>
           )}
         </div>
-        <div className="h-1 rounded bg-[#F1F1F3] overflow-hidden mb-2.5">
-          <div
-            className="h-full bg-[#EB4501] rounded"
-            style={{ width: `${Math.min(100, Math.max(8, claimedPct))}%` }}
-          />
-        </div>
+        {typeof claimedPct === 'number' && (
+          <div className="h-1 rounded bg-[#F1F1F3] overflow-hidden mb-2.5">
+            <div
+              className="h-full bg-[#EB4501] rounded"
+              style={{ width: `${Math.min(100, Math.max(0, claimedPct))}%` }}
+            />
+          </div>
+        )}
         <div className="flex justify-end items-center">
           <CartIconButton
             size={26}
@@ -106,6 +115,7 @@ export interface DealOfTheDayCardProps {
   sold?: string;
   claimedPct?: number;
   refreshLabel?: string;
+  validUntil?: string;
   href?: string;
 }
 
@@ -116,15 +126,42 @@ export function DealOfTheDayCard({
   image,
   price,
   originalPrice,
-  badge = '55% OFF',
-  rating = 4.8,
-  reviews = 214,
-  sold = '1.2K',
-  claimedPct = 72,
-  refreshLabel = '02:14:33',
+  badge,
+  rating,
+  reviews,
+  sold,
+  claimedPct,
+  refreshLabel,
+  validUntil,
   href,
 }: DealOfTheDayCardProps) {
   const to = href ?? `/products/${id}`;
+  const discountBadge =
+    badge ??
+    (originalPrice != null && originalPrice > price
+      ? `${Math.round(((originalPrice - price) / originalPrice) * 100)}% OFF`
+      : undefined);
+
+  const endsLabel = (() => {
+    if (refreshLabel) return refreshLabel;
+    if (!validUntil) return null;
+    try {
+      const diff = new Date(validUntil).getTime() - Date.now();
+      if (diff <= 0) return 'ended';
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+    } catch {
+      return null;
+    }
+  })();
+
+  const metaParts: string[] = [];
+  if (typeof rating === 'number') {
+    metaParts.push(`★ ${rating}${typeof reviews === 'number' ? ` (${reviews})` : ''}`);
+  }
+  if (sold) metaParts.push(`${sold} Sold`);
 
   return (
     <div className="choosify-dark-surface rounded-xl p-5 text-white h-full flex flex-col">
@@ -132,7 +169,11 @@ export function DealOfTheDayCard({
         <div className="text-[12px] font-extrabold text-[#EB4501] flex items-center gap-1">
           🏅 DEAL OF THE DAY
         </div>
-        <div className="text-[9.5px] text-white/50">New deal in {refreshLabel}</div>
+        {endsLabel && (
+          <div className="text-[9.5px] text-white/50">
+            {endsLabel === 'ended' ? 'Deal ended' : `Ends in ${endsLabel}`}
+          </div>
+        )}
       </div>
       <Link to={to} className="relative flex-1 min-h-[185px] rounded-[10px] overflow-hidden mb-3 block">
         <img
@@ -141,9 +182,11 @@ export function DealOfTheDayCard({
           className="w-full h-full object-cover"
           loading="lazy"
         />
-        <span className="absolute top-2 right-2 bg-[#FF000D] text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded">
-          {badge}
-        </span>
+        {discountBadge && (
+          <span className="absolute top-2 right-2 bg-[#FF000D] text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded">
+            {discountBadge}
+          </span>
+        )}
       </Link>
       <div className="text-[12.5px] font-bold text-white mb-1.5 line-clamp-2">{name}</div>
       <div className="flex items-baseline gap-2 mb-2">
@@ -154,15 +197,17 @@ export function DealOfTheDayCard({
           </div>
         )}
       </div>
-      <div className="text-[10.5px] text-white/50 mb-2">
-        ★ {rating} ({reviews}) · {sold} Sold
-      </div>
-      <div className="h-[5px] rounded bg-white/12 overflow-hidden mb-3.5">
-        <div
-          className="h-full bg-[#EB4501] rounded"
-          style={{ width: `${Math.min(100, Math.max(8, claimedPct))}%` }}
-        />
-      </div>
+      {metaParts.length > 0 && (
+        <div className="text-[10.5px] text-white/50 mb-2">{metaParts.join(' · ')}</div>
+      )}
+      {typeof claimedPct === 'number' && (
+        <div className="h-[5px] rounded bg-white/12 overflow-hidden mb-3.5">
+          <div
+            className="h-full bg-[#EB4501] rounded"
+            style={{ width: `${Math.min(100, Math.max(0, claimedPct))}%` }}
+          />
+        </div>
+      )}
       <Link
         to={to}
         className="mt-auto block w-full text-center bg-[#EB4501] text-white py-[11px] rounded-lg text-[12px] font-bold no-underline hover:brightness-110"

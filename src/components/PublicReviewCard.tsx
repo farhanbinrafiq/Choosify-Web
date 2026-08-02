@@ -196,7 +196,7 @@ export function PublicReviewCard({
               </button>
             )}
           </div>
-        ) : (
+        ) : onHelpfulClick ? (
           <button
             type="button"
             onClick={onHelpfulClick}
@@ -205,8 +205,10 @@ export function PublicReviewCard({
             <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="#4B5563" strokeWidth="1.7" aria-hidden>
               <path d="M2 9h3v9H2zM5 9l3-7c1 0 2 1 2 2v3h5c1 0 2 1 1.5 2l-1.5 7c-.3 1-1 2-2 2H5" />
             </svg>
-            Helpful ({review.helpful || 0})
+            Helpful{typeof review.helpful === 'number' ? ` (${review.helpful})` : ''}
           </button>
+        ) : (
+          <span />
         )}
         {!showActions && <MoreHorizontal size={16} className="text-[#9AA0AC]" aria-hidden />}
       </div>

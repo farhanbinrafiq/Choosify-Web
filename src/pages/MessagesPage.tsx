@@ -632,25 +632,6 @@ export function MessagesPage({
     }
 
     addThreadMessage(activeThreadId, userMsg, 'user', 'Me');
-
-    setTimeout(() => {
-      if (evaluatePostOrderConversationExpiry(linkedOrder).status === 'closed') return;
-      let responseText = `Thank you for your message. Our sales representative has received your ping about order reference ${activeThread?.orderRef || 'general inquiry'}. We will review this and respond shortly!`;
-
-      const lower = userMsg.toLowerCase();
-      if (lower.includes('deliver') || lower.includes('shipping') || lower.includes('when')) {
-        responseText = `Regarding dispatch, order ${activeThread?.orderRef || ''} current logistics status is [${(linkedSubOrder?.trackingStatus || 'Pending confirmation').toUpperCase()}]. We pack all items under safe cargo metrics immediately after confirmation!`;
-      } else if (lower.includes('discount') || lower.includes('price') || lower.includes('cost')) {
-        responseText = `Our listed retail prices reflect current verified brand offers. We help you compare the best deals in Bangladesh!`;
-      } else if (lower.includes('size') || lower.includes('color') || lower.includes('variant')) {
-        responseText = `Yes, your preferred parameters have been logged against Invoice [${linkedSubOrder?.invoiceId || 'N/A'}]. We will package exactly as staged!`;
-      } else if (lower.includes('confirm') || lower.includes('approved')) {
-        responseText = `Perfect! Your order logs have been successfully synced inside our supply terminal. Thank you for placing your secure trust in Choosify.bd!`;
-      }
-
-      addThreadMessage(activeThreadId, responseText, 'seller', activeThread?.title || 'Merchant Partner');
-      toast.success('New reply received from factory representative!');
-    }, 1500);
   };
 
   const handleNewConversation = () => {

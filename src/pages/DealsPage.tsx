@@ -39,10 +39,10 @@ const PROMO_CODES = [
   { brandId: 'adidas', brandName: "Adidas", code: "ADIEXTRA10", discount: "10% FLAT OFF" }
 ];
 
-function FlashDealCountdown({ validUntil }: { validUntil?: string }) {
-  const [parts, setParts] = useState({ h: '12', m: '00', s: '00' });
+function FlashDealCountdown({ validUntil }: { validUntil: string }) {
+  const [parts, setParts] = useState({ h: '00', m: '00', s: '00' });
   useEffect(() => {
-    const target = validUntil ? new Date(validUntil) : new Date(Date.now() + 12 * 60 * 60 * 1000);
+    const target = new Date(validUntil);
     const tick = () => {
       const diff = target.getTime() - Date.now();
       if (diff <= 0) {
@@ -184,20 +184,15 @@ export function DealsPage() {
     let result = [...productSource];
 
     if (activeTab === 'Flash Deals') {
-      const deals = result.filter(p => (p as any).isDeal === true && (p as any).dealType === 'flash');
-      result = deals.length > 0 ? deals : result.filter(p => p.id % 2 === 0);
+      result = result.filter(p => (p as any).isDeal === true && (p as any).dealType === 'flash');
     } else if (activeTab === 'Promo Codes') {
-      const promos = result.filter(p => (p as any).isDeal === true && (p as any).promoCode != null);
-      result = promos.length > 0 ? promos : result.filter(p => p.id % 3 === 0);
+      result = result.filter(p => (p as any).isDeal === true && (p as any).promoCode != null);
     } else if (activeTab === 'Brand Deals') {
-      const brands = result.filter(p => (p as any).isDeal === true && (p as any).dealType === 'brand');
-      result = brands.length > 0 ? brands : result.filter(p => p.brand);
+      result = result.filter(p => (p as any).isDeal === true && (p as any).dealType === 'brand');
     } else if (activeTab === 'Seasonal Campaigns' || activeTab === 'Seasonal') {
-      const seasonal = result.filter(p => (p as any).isDeal === true && (p as any).dealType === 'seasonal');
-      result = seasonal.length > 0 ? seasonal : result.filter(p => p.id % 5 === 0);
+      result = result.filter(p => (p as any).isDeal === true && (p as any).dealType === 'seasonal');
     } else if (activeTab === 'Expired Deals' || activeTab === 'Expired') {
-      const expired = result.filter(p => (p as any).isDeal === true && (p as any).dealType === 'clearance');
-      result = expired.length > 0 ? expired : result.filter(p => p.id % 4 === 1);
+      result = result.filter(p => (p as any).isDeal === true && (p as any).dealType === 'clearance');
     }
 
     if (selectedCategory) {
@@ -236,17 +231,32 @@ export function DealsPage() {
     [filteredProducts, infeedPlacements],
   );
 
-  const categoriesList = [
-    { name: 'Fashion', icon: <Shirt size={16} className="stroke-[2.5]" />, count: 550 },
-    { name: 'Gadgest', icon: <Smartphone size={16} className="stroke-[2.5]" />, count: 420 },
-    { name: 'Perfume', icon: <Droplets size={16} className="stroke-[2.5]" />, count: 180 },
-    { name: 'Electronics', icon: <Tv size={16} className="stroke-[2.5]" />, count: 350 },
-    { name: 'Travel', icon: <Compass size={16} className="stroke-[2.5]" />, count: 156 },
-    { name: 'Education', icon: <BookOpen size={16} className="stroke-[2.5]" />, count: 210 },
-    { name: 'Parenting', icon: <Heart size={16} className="stroke-[2.5]" />, count: 95 },
-    { name: 'Kids', icon: <Smile size={16} className="stroke-[2.5]" />, count: 240 },
-    { name: 'Cars / Bike', icon: <Car size={16} className="stroke-[2.5]" />, count: 310 }
-  ];
+  const categoriesList = React.useMemo(() => {
+    const defs = [
+      { name: 'Fashion', icon: <Shirt size={16} className="stroke-[2.5]" /> },
+      { name: 'Gadgets', icon: <Smartphone size={16} className="stroke-[2.5]" /> },
+      { name: 'Perfume', icon: <Droplets size={16} className="stroke-[2.5]" /> },
+      { name: 'Electronics', icon: <Tv size={16} className="stroke-[2.5]" /> },
+      { name: 'Travel', icon: <Compass size={16} className="stroke-[2.5]" /> },
+      { name: 'Education', icon: <BookOpen size={16} className="stroke-[2.5]" /> },
+      { name: 'Parenting', icon: <Heart size={16} className="stroke-[2.5]" /> },
+      { name: 'Kids', icon: <Smile size={16} className="stroke-[2.5]" /> },
+      { name: 'Cars / Bike', icon: <Car size={16} className="stroke-[2.5]" /> },
+    ];
+    return defs.map((d) => ({
+      ...d,
+      count: productSource.filter(
+        (p: any) =>
+          String(p.categoryName || p.category || '')
+            .toLowerCase()
+            .includes(d.name.toLowerCase().split(' ')[0].toLowerCase()) ||
+          (d.name === 'Gadgets' &&
+            String(p.categoryName || p.category || '')
+              .toLowerCase()
+              .includes('gadget')),
+      ).length,
+    }));
+  }, [productSource]);
 
   const dealsSectionNavItems = useMemo(
     () => [
@@ -645,14 +655,30 @@ export function DealsPage() {
                       ⚡ FLASH DEALS
                     </div>
                     <div className="flex items-center gap-2.5">
-                      <span className="text-[11px] text-[#9AA0AC]">Ends in</span>
-                      <FlashDealCountdown />
+                      {(() => {
+                        const flashPool = productSource.filter(
+                          (p: any) => p.isDeal === true && p.dealType === 'flash' && p.dealValidUntil,
+                        );
+                        const nearest = flashPool
+                          .map((p: any) => String(p.dealValidUntil))
+                          .sort()[0];
+                        if (!nearest) return null;
+                        return (
+                          <>
+                            <span className="text-[11px] text-[#9AA0AC]">Ends in</span>
+                            <FlashDealCountdown validUntil={nearest} />
+                          </>
+                        );
+                      })()}
                     </div>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 mb-3.5">
-                    {(filteredProducts.length > 0 ? filteredProducts : productSource)
-                      .slice(0, 4)
-                      .map((product: any, idx: number) => {
+                    {filteredProducts.length === 0 ? (
+                      <div className="sm:col-span-2 md:col-span-3 lg:col-span-4 py-10 text-center text-[13px] text-[#9AA0AC] border border-dashed border-[#E8EDF2] rounded-[10px]">
+                        No flash deals right now
+                      </div>
+                    ) : (
+                      filteredProducts.slice(0, 4).map((product: any) => {
                         const orig =
                           typeof product.originalPrice === 'number'
                             ? product.originalPrice
@@ -666,7 +692,7 @@ export function DealsPage() {
                         const pct =
                           orig && orig > price
                             ? Math.round(((orig - price) / orig) * 100)
-                            : 15 + idx * 5;
+                            : undefined;
                         return (
                           <FlashDealCard
                             key={product.id}
@@ -676,12 +702,15 @@ export function DealsPage() {
                             category={product.categoryName || product.category || 'Deals'}
                             price={price}
                             originalPrice={orig}
-                            badge={`${pct}% OFF`}
-                            claimedPct={55 + idx * 12}
-                            likes={product.likes || `${(1.1 + idx * 0.3).toFixed(1)}K`}
+                            badge={pct != null ? `${pct}% OFF` : undefined}
+                            claimedPct={
+                              typeof product.claimedPct === 'number' ? product.claimedPct : undefined
+                            }
+                            likes={product.likes}
                           />
                         );
-                      })}
+                      })
+                    )}
                   </div>
                   <button
                     type="button"
@@ -693,9 +722,14 @@ export function DealsPage() {
                 </div>
 
                 {(() => {
-                  const dotd =
-                    (filteredProducts.length > 0 ? filteredProducts : productSource)[0] || productSource[0];
-                  if (!dotd) return null;
+                  const dotd = filteredProducts[0];
+                  if (!dotd) {
+                    return (
+                      <div className="choosify-dark-surface rounded-xl p-5 text-white/60 text-[13px] flex items-center justify-center min-h-[280px]">
+                        No deal of the day right now
+                      </div>
+                    );
+                  }
                   const orig =
                     typeof dotd.originalPrice === 'number'
                       ? dotd.originalPrice
@@ -705,7 +739,7 @@ export function DealsPage() {
                       ? dotd.price
                       : Number(String(dotd.price ?? 0).replace(/[^\d]/g, '')) || 0;
                   const pct =
-                    orig && orig > price ? Math.round(((orig - price) / orig) * 100) : 55;
+                    orig && orig > price ? Math.round(((orig - price) / orig) * 100) : undefined;
                   return (
                     <DealOfTheDayCard
                       id={dotd.id}
@@ -713,11 +747,18 @@ export function DealsPage() {
                       image={dotd.image}
                       price={price}
                       originalPrice={orig}
-                      badge={`${pct}% OFF`}
-                      rating={dotd.rating || 4.8}
-                      reviews={dotd.reviewCount || 214}
-                      sold="1.2K"
-                      claimedPct={72}
+                      badge={pct != null ? `${pct}% OFF` : undefined}
+                      rating={typeof dotd.rating === 'number' ? dotd.rating : undefined}
+                      reviews={
+                        typeof dotd.reviewCount === 'number' ? dotd.reviewCount : undefined
+                      }
+                      sold={typeof (dotd as any).sold === 'string' ? (dotd as any).sold : undefined}
+                      claimedPct={
+                        typeof (dotd as any).claimedPct === 'number'
+                          ? (dotd as any).claimedPct
+                          : undefined
+                      }
+                      validUntil={dotd.dealValidUntil}
                     />
                   );
                 })()}
