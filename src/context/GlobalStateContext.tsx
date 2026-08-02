@@ -412,6 +412,120 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     localStorage.setItem('choosify_orders', JSON.stringify(orders));
   }, [orders]);
 
+  // Backend is source of truth for the orders list; localStorage is an optimistic cache only.
+  useEffect(() => {
+    if (!isLoggedIn || !currentUser?.id) return;
+
+    let cancelled = false;
+    const AUTH_TOKEN_KEY = 'choosify_auth_token';
+
+    const mapServerOrder = (row: Record<string, unknown>): Order => {
+      const subOrdersRaw = Array.isArray(row.subOrders) ? row.subOrders : [];
+      return {
+        orderId: String(row.orderId || row.id || ''),
+        buyerId: String(row.buyerId || ''),
+        isCOD: Boolean(row.isCOD),
+        isSplit: Boolean(row.isSplit),
+        overallTotal: Number(row.overallTotal) || 0,
+        subtotal: row.subtotal !== undefined ? Number(row.subtotal) : undefined,
+        deliveryTotal: row.deliveryTotal !== undefined ? Number(row.deliveryTotal) : undefined,
+        promoCode: typeof row.promoCode === 'string' ? row.promoCode : undefined,
+        promoDiscount: row.promoDiscount !== undefined ? Number(row.promoDiscount) : undefined,
+        promoType: typeof row.promoType === 'string' ? row.promoType : undefined,
+        paymentMethod: row.paymentMethod as Order['paymentMethod'],
+        shipping: row.shipping as Order['shipping'],
+        subOrders: subOrdersRaw.map((sub: any) => ({
+          sellerId: String(sub?.sellerId || ''),
+          sellerBusinessName: String(sub?.sellerBusinessName || ''),
+          items: Array.isArray(sub?.items)
+            ? sub.items.map((item: any) => ({
+                productId: Number(item?.productId) || 0,
+                productTitle: String(item?.productTitle || ''),
+                quantity: Number(item?.quantity) || 0,
+                price: Number(item?.price) || 0,
+                image: item?.image,
+                brand: item?.brand,
+                variantLabel: item?.variantLabel,
+                variantSku: item?.variantSku,
+                notes: item?.notes,
+                productType: item?.productType,
+                serviceCategory: item?.serviceCategory,
+                serviceDetails: item?.serviceDetails,
+              }))
+            : [],
+          deliveryFee: Number(sub?.deliveryFee) || 0,
+          invoiceId: String(sub?.invoiceId || ''),
+          trackingStatus: (sub?.trackingStatus || 'pending') as SubOrder['trackingStatus'],
+          codCollected: sub?.codCollected,
+          estimatedDeliveryDate: sub?.estimatedDeliveryDate,
+          cancellationReason: sub?.cancellationReason,
+        })),
+        createdAt: String(row.createdAt || new Date().toISOString()),
+        status: row.status as Order['status'],
+        bookingRequestId: typeof row.bookingRequestId === 'string' ? row.bookingRequestId : undefined,
+        paymentDueAt: typeof row.paymentDueAt === 'string' ? row.paymentDueAt : undefined,
+        paidAt: typeof row.paidAt === 'string' ? row.paidAt : undefined,
+        invoiceGeneratedAt:
+          typeof row.invoiceGeneratedAt === 'string' ? row.invoiceGeneratedAt : undefined,
+        cancelledAt: typeof row.cancelledAt === 'string' ? row.cancelledAt : undefined,
+        cancellationReason: String(row.cancellationReason || row.cancelReason || '') || undefined,
+        cancelledBy: row.cancelledBy as Order['cancelledBy'],
+        returnRequested: Boolean(row.returnRequested),
+        returnReason: typeof row.returnReason === 'string' ? row.returnReason : undefined,
+        returnRequestedAt:
+          typeof row.returnRequestedAt === 'string' ? row.returnRequestedAt : undefined,
+        disputeId: typeof row.disputeId === 'string' ? row.disputeId : undefined,
+        codDeliveryFeePaid: Boolean(row.codDeliveryFeePaid),
+        codDeliveryFeePaidAt:
+          typeof row.codDeliveryFeePaidAt === 'string' ? row.codDeliveryFeePaidAt : undefined,
+        codRemainingAmount:
+          row.codRemainingAmount !== undefined ? Number(row.codRemainingAmount) : undefined,
+        isPartialPayment: Boolean(row.isPartialPayment),
+        depositPercent: row.depositPercent !== undefined ? Number(row.depositPercent) : undefined,
+        depositAmount: row.depositAmount !== undefined ? Number(row.depositAmount) : undefined,
+        remainingAmount: row.remainingAmount !== undefined ? Number(row.remainingAmount) : undefined,
+      };
+    };
+
+    const hydrateOrdersFromApi = async () => {
+      if (!localStorage.getItem(AUTH_TOKEN_KEY)) return;
+      try {
+        const role = currentUser.role;
+        const isSeller = role === 'seller';
+        const isStaff = role === 'admin' || role === 'moderator';
+        const rows = await operationsApi.listOrders(
+          isStaff
+            ? undefined
+            : isSeller
+              ? { sellerId: currentUser.id }
+              : { buyerId: currentUser.id },
+        );
+        if (cancelled) return;
+        const mapped = rows.map(mapServerOrder).filter((o) => o.orderId);
+        setOrders(mapped);
+      } catch {
+        // Keep localStorage cache on transient failures.
+      }
+    };
+
+    hydrateOrdersFromApi();
+    const onFocus = () => {
+      if (document.visibilityState === 'visible') hydrateOrdersFromApi();
+    };
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onFocus);
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === 'visible') hydrateOrdersFromApi();
+    }, 60_000);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onFocus);
+      window.clearInterval(interval);
+    };
+  }, [isLoggedIn, currentUser.id, currentUser.role]);
+
   useEffect(() => {
     const handleBookingPaymentExpired = (event: Event) => {
       const orderId = (event as CustomEvent).detail?.orderId;

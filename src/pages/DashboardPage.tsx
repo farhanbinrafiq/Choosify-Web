@@ -1626,6 +1626,12 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
 function MyReviewsSection() {
   const { currentUser } = useGlobalState();
   const { reviews } = useDashboard();
+  const myReviews = (Array.isArray(reviews) ? reviews : []).filter((r: any) => {
+    if (r.userId) return String(r.userId) === String(currentUser.id);
+    // Optimistic local rows from submit (before refetch) — exclude product-page public merges.
+    if (r.authorName && r.authorName !== currentUser.name) return false;
+    return Boolean(r.product || r.productTitle) && Boolean(r.comment || r.text);
+  });
   const choosifyScore = Math.min(
     100,
     Math.max(0, Math.round(currentUser?.reputation_score ?? 0)),
@@ -1667,10 +1673,11 @@ function MyReviewsSection() {
         </div>
 
         <div className="space-y-4 max-w-3xl">
-          {reviews && reviews.length > 0 ? (
-            reviews.map((r, idx) => {
+          {myReviews.length > 0 ? (
+            myReviews.map((r, idx) => {
+              const productName = r.product || r.productTitle;
               const productImage =
-                PRODUCTS.find((p) => p.title === r.product)?.image || PLACEHOLDER_IMAGE;
+                PRODUCTS.find((p) => p.title === productName)?.image || PLACEHOLDER_IMAGE;
               return (
                 <PublicReviewCard
                   key={r.id || idx}
@@ -1678,9 +1685,9 @@ function MyReviewsSection() {
                     name: currentUser.name || 'You',
                     avatar: undefined,
                     rating: r.rating || 5,
-                    comment: r.comment,
+                    comment: r.comment || r.text,
                     date: r.date || r.createdAt || 'Just now',
-                    productName: r.product,
+                    productName,
                     productImage,
                     verified: true,
                   }}

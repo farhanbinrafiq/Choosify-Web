@@ -203,6 +203,102 @@ export function MessagesPage({
     setShowMobileInfo(false);
   }, [threadId]);
 
+  // Thread-open: fetch platform inbox history (conv_platform_<buyerId>). Booking-offer poll below is separate.
+  useEffect(() => {
+    if (!activeThreadId) return;
+    if (
+      activeThreadId === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID ||
+      activeThreadId === EMI_MESSAGES_THREAD_ID
+    ) {
+      return;
+    }
+    if (!currentUser?.id || !localStorage.getItem('choosify_auth_token')) return;
+    let cancelled = false;
+
+    const formatTime = (iso: string) => {
+      try {
+        return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      } catch {
+        return '';
+      }
+    };
+
+    (async () => {
+      try {
+        const result = await operationsApi.listPlatformMessages({ userId: currentUser.id });
+        if (cancelled) return;
+        const rows = Array.isArray(result.data) ? result.data : [];
+        if (!rows.length) return;
+
+        setThreadMessages((prev) => {
+          const mapped = rows.map((row) => {
+            const content = (row.content || {}) as { body?: string };
+            const rawBody = String(content.body || '');
+            const orderMatch = rawBody.match(/^\[Order\s+([^\]]+)\]/i);
+            const complaintThread = rawBody.match(/\[Complaint[^\]]*·\s*thread\s+([^\s\]]+)/i);
+            let threadId = 'thread-general';
+            if (complaintThread?.[1]) threadId = complaintThread[1];
+            else if (orderMatch?.[1]) {
+              const orderId = orderMatch[1].trim();
+              const byRef = threads.find((t) => t.orderRef === orderId);
+              threadId = byRef?.id || activeThreadId;
+            } else if (row.bookingOffer) {
+              threadId = activeThreadId;
+            }
+            const text = rawBody
+              .replace(/^\[Order\s+[^\]]+\]\s*/i, '')
+              .replace(/^\[Complaint[^\]]*\]\s*/i, '')
+              .trim();
+            const timestamp = String(row.timestamp || new Date().toISOString());
+            const serverId = String(row.id || `m_plat_${timestamp}`);
+            const isBuyer = row.direction === 'inbound';
+            let hash = 0;
+            for (let i = 0; i < serverId.length; i += 1) {
+              hash = (Math.imul(31, hash) + serverId.charCodeAt(i)) | 0;
+            }
+            return {
+              id: Math.abs(hash) || Date.now(),
+              serverId,
+              threadId,
+              text: text || rawBody,
+              sender: (isBuyer ? 'user' : 'other') as 'user' | 'other',
+              senderName: isBuyer ? 'Me' : String(row.senderName || 'Support'),
+              time: formatTime(timestamp),
+              createdAt: timestamp,
+              bookingOffer: row.bookingOffer as import('../types/serviceBooking').BookingOfferCard | undefined,
+              status: (isBuyer ? 'delivered' : undefined) as 'delivered' | undefined,
+            };
+          });
+
+          const serverIds = new Set(mapped.map((m) => m.serverId));
+          const kept = prev.filter((m) => {
+            if (
+              m.threadId === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID ||
+              m.threadId === EMI_MESSAGES_THREAD_ID
+            ) {
+              return true;
+            }
+            if (m.serverId) return serverIds.has(m.serverId);
+            if (mapped.length && m.threadId === 'thread-general' && !m.serverId && !m.bookingOffer) {
+              return false;
+            }
+            return true;
+          });
+          const byKey = new Map<string, (typeof mapped)[number] | (typeof prev)[number]>();
+          for (const m of kept) byKey.set(m.serverId || `local-${m.id}`, m);
+          for (const m of mapped) byKey.set(m.serverId || `local-${m.id}`, m);
+          return Array.from(byKey.values()) as typeof prev;
+        });
+      } catch {
+        // Keep local history if API unreachable.
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeThreadId, currentUser.id, setThreadMessages, threads]);
+
   useEffect(() => {
     const viewport = chatViewportRef.current;
     if (!viewport) return;

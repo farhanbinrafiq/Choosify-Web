@@ -18,8 +18,20 @@ import {
 import type { CustomerAddress } from '../lib/address/addressTypes';
 import { ADDRESS_STORAGE_KEY, getDefaultAddress, normalizeDefaultAddress } from '../lib/address/addressUtils';
 import type { BookingOfferCard } from '../types/serviceBooking';
+import { operationsApi } from '../services/operationsApi';
+import { useGlobalState } from './GlobalStateContext';
 
 export type { AnnouncementAssociatedEntity };
+
+/** Stable numeric id from omni message string ids (ThreadMessage.id stays number). */
+function stableMessageNumericId(key: string): number {
+  let hash = 0;
+  for (let i = 0; i < key.length; i += 1) {
+    hash = (Math.imul(31, hash) + key.charCodeAt(i)) | 0;
+  }
+  const abs = Math.abs(hash);
+  return abs > 0 ? abs : Date.now();
+}
 
 export interface MessageThread {
   id: string;
@@ -35,6 +47,8 @@ export interface MessageThread {
 
 export interface ThreadMessage {
   id: number;
+  /** Omni/platform message id when hydrated from GET /operations/platform-messages */
+  serverId?: string;
   threadId: string;
   text: string;
   sender: 'user' | 'other' | 'admin' | 'seller' | 'creator';
@@ -378,15 +392,10 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed)) return parsed;
       }
-      return [
-        { id: 1, product: 'Samsung Galaxy S24 Ultra', rating: 5, comment: 'Amazing performance! The AI features are game-changing.', date: 'May 12, 2026' },
-        { id: 2, product: 'LG C3 55" OLED EVO TV', rating: 4, comment: 'Very comfortable for daily runs, but size runs slightly small.', date: 'April 28, 2026' }
-      ];
+      // Prefer empty over fabricated seed — real rows come from GET /operations/reviews.
+      return [];
     } catch {
-      return [
-        { id: 1, product: 'Samsung Galaxy S24 Ultra', rating: 5, comment: 'Amazing performance! The AI features are game-changing.', date: 'May 12, 2026' },
-        { id: 2, product: 'LG C3 55" OLED EVO TV', rating: 4, comment: 'Very comfortable for daily runs, but size runs slightly small.', date: 'April 28, 2026' }
-      ];
+      return [];
     }
   });
 
@@ -655,6 +664,216 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     localStorage.setItem('choosify_reviews', JSON.stringify(reviews));
   }, [reviews]);
+
+  // "Reviews you wrote" — backend is source of truth; localStorage is cache only.
+  const { currentUser, isLoggedIn } = useGlobalState();
+  useEffect(() => {
+    if (!isLoggedIn || !currentUser?.id) return;
+    if (!localStorage.getItem('choosify_auth_token')) return;
+    let cancelled = false;
+
+    const hydrateMyReviews = async () => {
+      try {
+        const rows = await operationsApi.listMyReviews(currentUser.id);
+        if (cancelled) return;
+        const mapped = rows.map((row) => {
+          const createdAt = String(row.createdAt || '');
+          const dateLabel = createdAt
+            ? new Date(createdAt).toLocaleDateString(undefined, {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+              })
+            : '';
+          const productTitle = String(row.productTitle || row.product || 'Product');
+          const comment = String(row.comment || row.text || '');
+          return {
+            id: row.id,
+            product: productTitle,
+            productTitle,
+            productId: row.productId,
+            rating: Number(row.rating) || 0,
+            comment,
+            text: comment,
+            date: dateLabel,
+            createdAt,
+            orderId: row.orderId,
+            status: row.status,
+            userId: row.userId,
+            authorName: row.userName,
+          };
+        });
+        setReviews(mapped);
+      } catch {
+        // Keep cache on transient failures.
+      }
+    };
+
+    hydrateMyReviews();
+    const onFocus = () => {
+      if (document.visibilityState === 'visible') hydrateMyReviews();
+    };
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onFocus);
+    return () => {
+      cancelled = true;
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onFocus);
+    };
+  }, [isLoggedIn, currentUser.id]);
+
+  // Platform message history — one omni conversation per buyer (`conv_platform_<userId>`).
+  // Does not replace the booking-offer poll on MessagesPage; that stays for offer state only.
+  useEffect(() => {
+    if (!isLoggedIn || !currentUser?.id) return;
+    if (!localStorage.getItem('choosify_auth_token')) return;
+    let cancelled = false;
+
+    const formatTime = (iso: string) => {
+      try {
+        return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      } catch {
+        return '';
+      }
+    };
+
+    const resolveThreadId = (
+      body: string,
+      bookingOffer: BookingOfferCard | undefined,
+      knownThreads: MessageThread[],
+    ): string => {
+      const complaintThread = body.match(/\[Complaint[^\]]*·\s*thread\s+([^\s\]]+)/i);
+      if (complaintThread?.[1]) return complaintThread[1];
+      const orderMatch = body.match(/^\[Order\s+([^\]]+)\]/i);
+      if (orderMatch?.[1]) {
+        const orderId = orderMatch[1].trim();
+        const byRef = knownThreads.find((t) => t.orderRef === orderId);
+        if (byRef) return byRef.id;
+      }
+      if (bookingOffer?.sellerId) {
+        const sellerKey = String(bookingOffer.sellerId);
+        const bySeller = knownThreads.find(
+          (t) =>
+            t.id === `seller-${sellerKey}` ||
+            t.id === `thread-${sellerKey}` ||
+            t.id === sellerKey ||
+            t.id.includes(sellerKey),
+        );
+        if (bySeller) return bySeller.id;
+      }
+      return 'thread-general';
+    };
+
+    const hydratePlatformMessages = async () => {
+      try {
+        const result = await operationsApi.listPlatformMessages({ userId: currentUser.id });
+        if (cancelled) return;
+        const rows = Array.isArray(result.data) ? result.data : [];
+        setThreadMessages((prev) => {
+          const knownThreads = (() => {
+            try {
+              const saved = localStorage.getItem('choosify_threads');
+              return saved ? (JSON.parse(saved) as MessageThread[]) : [];
+            } catch {
+              return [] as MessageThread[];
+            }
+          })();
+
+          const mapped: ThreadMessage[] = rows.map((row) => {
+            const content = (row.content || {}) as { body?: string };
+            const rawBody = String(content.body || row.body || '');
+            const bookingOffer = row.bookingOffer as BookingOfferCard | undefined;
+            const threadId = resolveThreadId(rawBody, bookingOffer, knownThreads);
+            const text = rawBody
+              .replace(/^\[Order\s+[^\]]+\]\s*/i, '')
+              .replace(/^\[Complaint[^\]]*\]\s*/i, '')
+              .trim();
+            const timestamp = String(row.timestamp || row.createdAt || new Date().toISOString());
+            const serverId = String(row.id || `m_plat_${timestamp}`);
+            const isBuyer = row.direction === 'inbound';
+            return {
+              id: stableMessageNumericId(serverId),
+              serverId,
+              threadId,
+              text: text || rawBody,
+              sender: isBuyer ? 'user' : 'other',
+              senderName: isBuyer ? 'Me' : String(row.senderName || 'Support'),
+              time: formatTime(timestamp),
+              createdAt: timestamp,
+              bookingOffer,
+              status: isBuyer ? 'delivered' : undefined,
+            };
+          });
+
+          const protectedThread = (threadId: string) =>
+            threadId === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID || threadId === EMI_MESSAGES_THREAD_ID;
+
+          const serverIds = new Set(
+            mapped.map((m) => m.serverId).filter((id): id is string => Boolean(id)),
+          );
+          const kept = prev.filter((m) => {
+            if (protectedThread(m.threadId)) return true;
+            if (m.serverId) return serverIds.has(m.serverId);
+            // Drop fabricated seed for the platform admin thread once real history exists.
+            if (mapped.length && m.threadId === 'thread-general' && !m.serverId && !m.bookingOffer) {
+              return false;
+            }
+            return true;
+          });
+
+          const byKey = new Map<string, ThreadMessage>();
+          for (const m of kept) byKey.set(m.serverId || `local-${m.id}`, m);
+          for (const m of mapped) byKey.set(m.serverId || `local-${m.id}`, m);
+          return Array.from(byKey.values()).sort((a, b) =>
+            String(a.createdAt || '').localeCompare(String(b.createdAt || '')),
+          );
+        });
+
+        // Refresh thread previews from latest platform message per thread.
+        if (rows.length) {
+          setThreads((prevThreads) => {
+            const latestByThread = new Map<string, { text: string; time: string }>();
+            for (const row of rows) {
+              const content = (row.content || {}) as { body?: string };
+              const rawBody = String(content.body || '');
+              const bookingOffer = row.bookingOffer as BookingOfferCard | undefined;
+              const threadId = resolveThreadId(rawBody, bookingOffer, prevThreads);
+              const text = rawBody
+                .replace(/^\[Order\s+[^\]]+\]\s*/i, '')
+                .replace(/^\[Complaint[^\]]*\]\s*/i, '')
+                .trim();
+              const timestamp = String(row.timestamp || '');
+              latestByThread.set(threadId, { text: text || rawBody, time: formatTime(timestamp) });
+            }
+            return prevThreads.map((t) => {
+              const latest = latestByThread.get(t.id);
+              if (!latest) return t;
+              return { ...t, lastMessage: latest.text, time: latest.time || t.time };
+            });
+          });
+        }
+      } catch {
+        // Keep local thread cache on failure.
+      }
+    };
+
+    hydratePlatformMessages();
+    const onFocus = () => {
+      if (document.visibilityState === 'visible') hydratePlatformMessages();
+    };
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', onFocus);
+    const interval = window.setInterval(() => {
+      if (document.visibilityState === 'visible') hydratePlatformMessages();
+    }, 45_000);
+
+    return () => {
+      cancelled = true;
+      window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onFocus);
+      window.clearInterval(interval);
+    };
+  }, [isLoggedIn, currentUser.id]);
 
   const addToRecentlyViewed = (product: any) => {
     setRecentlyViewed(prev => {

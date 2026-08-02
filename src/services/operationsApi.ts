@@ -103,6 +103,19 @@ export const operationsApi = {
     const result = await request<{ data: Record<string, unknown> }>('/operations/orders', 'POST', payload);
     return result.data;
   },
+  listOrders: async (params?: {
+    buyerId?: string;
+    sellerId?: string;
+    status?: string;
+  }): Promise<Record<string, unknown>[]> => {
+    const qs = new URLSearchParams();
+    if (params?.buyerId) qs.set('buyerId', params.buyerId);
+    if (params?.sellerId) qs.set('sellerId', params.sellerId);
+    if (params?.status) qs.set('status', params.status);
+    const suffix = qs.toString() ? `?${qs}` : '';
+    const result = await request<{ data: Record<string, unknown>[] }>(`/operations/orders${suffix}`);
+    return result.data;
+  },
   cancelOrder: async (
     orderId: string,
     buyerId: string,
@@ -170,6 +183,27 @@ export const operationsApi = {
       `/operations/reviews/public?brandName=${encodeURIComponent(brandName)}`,
     );
     return result.data;
+  },
+  listMyReviews: async (userId?: string): Promise<Array<Record<string, unknown>>> => {
+    const qs = new URLSearchParams();
+    if (userId) qs.set('userId', userId);
+    const suffix = qs.toString() ? `?${qs}` : '';
+    const result = await request<{ data: Array<Record<string, unknown>> }>(
+      `/operations/reviews${suffix}`,
+    );
+    return result.data;
+  },
+  listPlatformMessages: async (params?: {
+    conversationId?: string;
+    threadId?: string;
+    userId?: string;
+  }): Promise<{ data: Array<Record<string, unknown>>; conversationId?: string }> => {
+    const qs = new URLSearchParams();
+    if (params?.conversationId) qs.set('conversationId', params.conversationId);
+    if (params?.threadId) qs.set('threadId', params.threadId);
+    if (params?.userId) qs.set('userId', params.userId);
+    const suffix = qs.toString() ? `?${qs}` : '';
+    return request(`/operations/platform-messages${suffix}`);
   },
   submitLead: async (payload: {
     brandName: string;
