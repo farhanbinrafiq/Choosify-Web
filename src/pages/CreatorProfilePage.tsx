@@ -157,11 +157,7 @@ export function CreatorProfilePage() {
             }
           }}
           onClaim={() => {
-            toast.loading('Initiating secure creator identity matching...', { duration: 1500 });
-            setTimeout(() => {
-              updateCreatorClaimStatus(creator.id, 'pending');
-              toast.success('Claim submitted successfully! Creator profile status changed to Pending Review.', { duration: 5000 });
-            }, 1500);
+            setIsClaimModalOpen(true);
           }}
           facts={[
             { icon: '📹', label: 'Videos', value: String(creator.videos?.length ?? 0) },
@@ -597,6 +593,18 @@ export function CreatorProfilePage() {
            </div>
          )}
       </AnimatePresence>
+
+      <ClaimProfileModal
+        isOpen={isClaimModalOpen}
+        onClose={() => setIsClaimModalOpen(false)}
+        targetType="creator"
+        targetId={creator.id}
+        targetName={creator.name}
+        onClaimSubmitted={() => {
+          setLocalClaimStatus('pending');
+          updateCreatorClaimStatus(creator.id, 'pending');
+        }}
+      />
 
     </div>
   );

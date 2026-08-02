@@ -1,13 +1,20 @@
 import type { BookingOfferCard } from '../types/serviceBooking';
 
 const API_BASE = ((import.meta as any).env?.VITE_API_BASE_URL as string | undefined) || '/api/v1';
+const AUTH_TOKEN_KEY = 'choosify_auth_token';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 async function request<T>(path: string, method: HttpMethod = 'GET', body?: unknown): Promise<T> {
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
   const response = await fetch(`${API_BASE}${path}`, {
     method,
-    headers: { 'Content-Type': 'application/json' },
+    headers,
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
   if (!response.ok) {
@@ -332,6 +339,19 @@ export const operationsApi = {
       'POST',
       payload,
     );
+    return result.data;
+  },
+  createVerification: async (payload: Record<string, unknown>) => {
+    const result = await request<{ data: unknown }>('/operations/verifications', 'POST', payload);
+    return result.data;
+  },
+  listVerifications: async (params?: { status?: string; entityType?: string; entityId?: string }) => {
+    const qs = new URLSearchParams();
+    if (params?.status) qs.set('status', params.status);
+    if (params?.entityType) qs.set('entityType', params.entityType);
+    if (params?.entityId) qs.set('entityId', params.entityId);
+    const suffix = qs.toString() ? `?${qs}` : '';
+    const result = await request<{ data: unknown[] }>(`/operations/verifications${suffix}`);
     return result.data;
   },
 };

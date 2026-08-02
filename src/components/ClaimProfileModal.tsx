@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from '../lib/notify';
+import { uploadVerificationFile } from '../services/mediaUpload';
+import { operationsApi } from '../services/operationsApi';
 
 interface ClaimProfileModalProps {
   isOpen: boolean;
@@ -18,6 +20,8 @@ interface ClaimProfileModalProps {
 }
 
 type ActiveSection = 'A' | 'B' | 'C' | 'D' | 'E';
+
+type UploadedAsset = { name: string; url: string };
 
 export function ClaimProfileModal({ 
   isOpen, 
@@ -54,16 +58,17 @@ export function ClaimProfileModal({
 
   // Section B
   const [tradeLicenseNo, setTradeLicenseNo] = useState('');
-  const [licenseFile, setLicenseFile] = useState<string | null>(null);
+  const [licenseFile, setLicenseFile] = useState<UploadedAsset | null>(null);
   const [websiteUrl, setWebsiteUrl] = useState('');
   const [businessEmail, setBusinessEmail] = useState('');
 
   // Section C
   const [nidNumber, setNidNumber] = useState('');
-  const [nidFront, setNidFront] = useState<string | null>(null);
-  const [nidBack, setNidBack] = useState<string | null>(null);
+  const [nidFront, setNidFront] = useState<UploadedAsset | null>(null);
+  const [nidBack, setNidBack] = useState<UploadedAsset | null>(null);
   const [selfieCaptured, setSelfieCaptured] = useState<boolean>(false);
   const [selfiePreview, setSelfiePreview] = useState<string | null>(null);
+  const [selfieUrl, setSelfieUrl] = useState<string | null>(null);
   const [isCapturing, setIsCapturing] = useState<boolean>(false);
   const [passportDrivingNum, setPassportDrivingNum] = useState('');
 
@@ -74,7 +79,7 @@ export function ClaimProfileModal({
   const [bankAccNumber, setBankAccNumber] = useState('');
   const [bankName, setBankName] = useState('');
   const [bankBranch, setBankBranch] = useState('');
-  const [bankFile, setBankFile] = useState<string | null>(null);
+  const [bankFile, setBankFile] = useState<UploadedAsset | null>(null);
 
   // Section E
   const [checkAuthorized, setCheckAuthorized] = useState(false);
@@ -96,7 +101,7 @@ export function ClaimProfileModal({
 
   // Section C (Identity Verification)
   const [creatorNid, setCreatorNid] = useState('');
-  const [creatorGovId, setCreatorGovId] = useState<string | null>(null);
+  const [creatorGovId, setCreatorGovId] = useState<UploadedAsset | null>(null);
 
   // Section D (Creator Authorization)
   const [creatorDeclare, setCreatorDeclare] = useState(false);
@@ -187,29 +192,63 @@ export function ClaimProfileModal({
     });
   };
 
-  // Safe file upload simulator
-  const simulateFileUpload = (fieldName: string, setter: (val: string) => void) => {
-    const loadingToast = toast.loading(`Uploading security attachment for ${fieldName}...`);
-    setTimeout(() => {
-      toast.dismiss(loadingToast);
-      const uuidPart = Math.floor(Math.random() * 90000 + 10000);
-      const randName = `VERIFICATION_${fieldName.toUpperCase().replace(/\s+/g, '_')}_${uuidPart}.pdf`;
-      setter(randName);
-      toast.success(`${fieldName} verification file processed successfully.`);
-    }, 1100);
+  // Real Cloudinary / ops upload (PDF trade license + NID/face images)
+  const pickAndUploadFile = (
+    fieldName: string,
+    setter: (val: UploadedAsset) => void,
+    accept = 'image/*,application/pdf',
+  ) => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = accept;
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      const loadingToast = toast.loading(`Uploading ${fieldName}...`);
+      try {
+        const uploaded = await uploadVerificationFile(file);
+        setter(uploaded);
+        toast.success(`${fieldName} uploaded successfully.`);
+      } catch (err) {
+        console.error('[ClaimProfile] upload failed:', err);
+        toast.error(
+          `Failed to upload ${fieldName}: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      } finally {
+        toast.dismiss(loadingToast);
+      }
+    };
+    input.click();
   };
 
-  // Face webcam match simulation
+  // Face photo for human reviewer comparison (not automated biometric/liveness)
   const handleTakeSelfie = () => {
-    setIsCapturing(true);
-    const takingToast = toast.loading('Capturing biometric face outline...');
-    setTimeout(() => {
-      toast.dismiss(takingToast);
-      setIsCapturing(false);
-      setSelfieCaptured(true);
-      setSelfiePreview('https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150&h=150&fit=crop');
-      toast.success('Biometric face verification vector synchronized.');
-    }, 1300);
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = 'image/*';
+    input.capture = 'user';
+    input.onchange = async () => {
+      const file = input.files?.[0];
+      if (!file) return;
+      setIsCapturing(true);
+      const takingToast = toast.loading('Uploading face photo for reviewer comparison...');
+      try {
+        const uploaded = await uploadVerificationFile(file);
+        setSelfieUrl(uploaded.url);
+        setSelfiePreview(uploaded.url);
+        setSelfieCaptured(true);
+        toast.success('Face photo uploaded. A reviewer will compare it to your ID.');
+      } catch (err) {
+        console.error('[ClaimProfile] selfie upload failed:', err);
+        toast.error(
+          `Face photo upload failed: ${err instanceof Error ? err.message : String(err)}`,
+        );
+      } finally {
+        toast.dismiss(takingToast);
+        setIsCapturing(false);
+      }
+    };
+    input.click();
   };
 
   // Form step navigation definitions
@@ -285,20 +324,105 @@ export function ClaimProfileModal({
     e.preventDefault();
     if (!validateForm()) return;
 
-    setFlowStep('submitting');
-    
-    // Non-blocking wait for encryption credentials simulation
-    await new Promise(resolve => setTimeout(resolve, 2200));
-
-    // Persist pending review state inside global context
-    if (targetType === 'brand') {
-      updateBrandClaimStatus(targetId, 'pending');
-    } else {
-      updateCreatorClaimStatus(String(targetId), 'pending');
+    if (!localStorage.getItem('choosify_auth_token')) {
+      toast.error(
+        'A signed-in account with a valid auth token is required to submit a claim for review. Mock login alone cannot create a verification request.',
+      );
+      return;
     }
 
-    setFlowStep('success_status');
-    onClaimSubmitted();
+    setFlowStep('submitting');
+    try {
+      const documents =
+        targetType === 'brand'
+          ? [
+              {
+                id: `doc_tl_${Date.now()}`,
+                type: 'Trade License' as const,
+                name: licenseFile!.name,
+                doc_url: licenseFile!.url,
+                status: 'pending' as const,
+              },
+              {
+                id: `doc_nid_f_${Date.now()}`,
+                type: 'Identity Verification' as const,
+                name: nidFront!.name,
+                doc_url: nidFront!.url,
+                status: 'pending' as const,
+              },
+              {
+                id: `doc_nid_b_${Date.now()}`,
+                type: 'Identity Verification' as const,
+                name: nidBack!.name,
+                doc_url: nidBack!.url,
+                status: 'pending' as const,
+              },
+              {
+                id: `doc_face_${Date.now()}`,
+                type: 'Identity Verification' as const,
+                name: 'Face_Photo_For_Review.jpg',
+                doc_url: selfieUrl!,
+                status: 'pending' as const,
+              },
+              ...(bankFile
+                ? [
+                    {
+                      id: `doc_bank_${Date.now()}`,
+                      type: 'Tax Certificate' as const,
+                      name: bankFile.name,
+                      doc_url: bankFile.url,
+                      status: 'pending' as const,
+                    },
+                  ]
+                : []),
+            ]
+          : [
+              {
+                id: `doc_gov_${Date.now()}`,
+                type: 'Identity Verification' as const,
+                name: creatorGovId!.name,
+                doc_url: creatorGovId!.url,
+                status: 'pending' as const,
+              },
+              {
+                id: `doc_face_${Date.now()}`,
+                type: 'Identity Verification' as const,
+                name: 'Face_Photo_For_Review.jpg',
+                doc_url: selfieUrl!,
+                status: 'pending' as const,
+              },
+            ];
+
+      await operationsApi.createVerification({
+        entityType: targetType,
+        entityId: String(targetId),
+        entityName: targetName,
+        brand_id: String(targetId),
+        brand_name: targetName,
+        logo_url: '',
+        submitted_by_name:
+          targetType === 'brand' ? fullName.trim() || currentUser?.name : creatorDisplayName.trim() || currentUser?.name,
+        status: 'Submitted',
+        documents,
+      });
+
+      // Local UX mirror of catalog pending state (server also flips brand claimStatus → pending)
+      if (targetType === 'brand') {
+        updateBrandClaimStatus(targetId, 'pending');
+      } else {
+        updateCreatorClaimStatus(String(targetId), 'pending');
+      }
+
+      setFlowStep('success_status');
+      onClaimSubmitted();
+      toast.success('Claim submitted for review. Status: pending — not verified yet.');
+    } catch (err) {
+      console.error('[ClaimProfile] createVerification failed:', err);
+      setFlowStep('form');
+      toast.error(
+        `Failed to submit claim: ${err instanceof Error ? err.message : String(err)}`,
+      );
+    }
   };
 
   const currentEmail = currentUser?.email || 'farhanbinrafiq@gmail.com';
@@ -561,13 +685,13 @@ export function ClaimProfileModal({
                                 <div className="space-y-1.5">
                                   <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Business Registration Document (Upload)</label>
                                   <div 
-                                    onClick={() => simulateFileUpload('Trade License', setLicenseFile)}
+                                    onClick={() => pickAndUploadFile('Trade License', setLicenseFile)}
                                     className="border-2 border-dashed border-gray-200 hover:border-[#F97316]/50 bg-white rounded-xl p-5 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1"
                                   >
                                     {licenseFile ? (
                                       <>
                                         <FileCheck className="w-8 h-8 text-green-600 animate-pulse" />
-                                        <span className="text-[10px] font-mono font-bold text-gray-800">{licenseFile}</span>
+                                        <span className="text-[10px] font-mono font-bold text-gray-800">{licenseFile.name}</span>
                                         <span className="text-[8px] text-gray-400 uppercase font-mono font-bold">Document uploaded successfully</span>
                                       </>
                                     ) : (
@@ -638,11 +762,11 @@ export function ClaimProfileModal({
                                   <div className="space-y-1">
                                     <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">NID Document (Front)</label>
                                     <div 
-                                      onClick={() => simulateFileUpload('NID Front Card', setNidFront)}
+                                      onClick={() => pickAndUploadFile('NID Front Card', setNidFront)}
                                       className="border border-dashed border-gray-200 bg-gray-50/50 hover:bg-white rounded-lg p-4 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1"
                                     >
                                       {nidFront ? (
-                                        <span className="text-[9px] font-mono font-bold text-green-600 block truncate max-w-full">{nidFront}</span>
+                                        <span className="text-[9px] font-mono font-bold text-green-600 block truncate max-w-full">{nidFront.name}</span>
                                       ) : (
                                         <>
                                           <Upload className="w-5 h-5 text-gray-400" />
@@ -655,11 +779,11 @@ export function ClaimProfileModal({
                                   <div className="space-y-1">
                                     <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">NID Document (Back)</label>
                                     <div 
-                                      onClick={() => simulateFileUpload('NID Back Card', setNidBack)}
+                                      onClick={() => pickAndUploadFile('NID Back Card', setNidBack)}
                                       className="border border-dashed border-gray-200 bg-gray-50/50 hover:bg-white rounded-lg p-4 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1"
                                     >
                                       {nidBack ? (
-                                        <span className="text-[9px] font-mono font-bold text-green-600 block truncate max-w-full">{nidBack}</span>
+                                        <span className="text-[9px] font-mono font-bold text-green-600 block truncate max-w-full">{nidBack.name}</span>
                                       ) : (
                                         <>
                                           <Upload className="w-5 h-5 text-gray-400" />
@@ -802,11 +926,11 @@ export function ClaimProfileModal({
                                 <div className="space-y-1.5">
                                   <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Business Bank Account/Cheque Verification document</label>
                                   <div 
-                                    onClick={() => simulateFileUpload('Settlement Bank Statement', setBankFile)}
+                                    onClick={() => pickAndUploadFile('Settlement Bank Statement', setBankFile)}
                                     className="border border-dashed border-gray-200 bg-gray-50/50 hover:bg-white rounded-lg p-3 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1"
                                   >
                                     {bankFile ? (
-                                      <span className="text-[9px] font-mono font-bold text-green-600 block truncate max-w-full">{bankFile}</span>
+                                      <span className="text-[9px] font-mono font-bold text-green-600 block truncate max-w-full">{bankFile.name}</span>
                                     ) : (
                                       <>
                                         <Upload className="w-5 h-5 text-gray-400" />
@@ -1031,13 +1155,13 @@ export function ClaimProfileModal({
                                 <div className="space-y-1.5">
                                   <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Government ID Document (Front Photo / Scan)</label>
                                   <div 
-                                    onClick={() => simulateFileUpload('Government ID', setCreatorGovId)}
+                                    onClick={() => pickAndUploadFile('Government ID', setCreatorGovId)}
                                     className="border-2 border-dashed border-gray-200 hover:border-[#F97316]/50 bg-white rounded-xl p-5 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1"
                                   >
                                     {creatorGovId ? (
                                       <>
                                         <FileCheck className="w-8 h-8 text-green-600" />
-                                        <span className="text-[10px] font-mono font-bold text-gray-850">{creatorGovId}</span>
+                                        <span className="text-[10px] font-mono font-bold text-gray-850">{creatorGovId.name}</span>
                                         <span className="text-[8px] text-gray-400 font-bold uppercase font-mono">ID received successfully</span>
                                       </>
                                     ) : (

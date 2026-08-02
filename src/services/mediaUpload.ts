@@ -1,0 +1,121 @@
+const API_BASE =
+  ((import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_API_BASE_URL as
+    | string
+    | undefined) || '/api/v1';
+
+const CLOUD_NAME =
+  ((import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_CLOUDINARY_CLOUD_NAME as
+    | string
+    | undefined) || 'djdyqr8yd';
+
+const UPLOAD_PRESET = (import.meta as ImportMeta & { env?: Record<string, string> }).env
+  ?.VITE_CLOUDINARY_UPLOAD_PRESET as string | undefined;
+
+const AUTH_TOKEN_KEY = 'choosify_auth_token';
+
+const fileToBase64 = (file: File) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => {
+      const result = String(reader.result || '');
+      const commaIndex = result.indexOf(',');
+      resolve(commaIndex >= 0 ? result.slice(commaIndex + 1) : result);
+    };
+    reader.onerror = () => reject(reader.error || new Error('Failed to read file'));
+    reader.readAsDataURL(file);
+  });
+
+async function uploadViaCloudinary(file: File, folder = 'choosify/verifications'): Promise<string> {
+  if (!UPLOAD_PRESET?.trim()) {
+    throw new Error('Missing VITE_CLOUDINARY_UPLOAD_PRESET');
+  }
+
+  const isImage = file.type.startsWith('image/');
+  const form = new FormData();
+  form.append('file', file);
+  form.append('upload_preset', UPLOAD_PRESET.trim());
+  form.append('folder', folder);
+
+  const endpoint = isImage
+    ? `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/image/upload`
+    : `https://api.cloudinary.com/v1_1/${CLOUD_NAME}/raw/upload`;
+
+  const response = await fetch(endpoint, {
+    method: 'POST',
+    body: form,
+  });
+
+  if (!response.ok) {
+    const raw = await response.text();
+    throw new Error(raw || `Cloudinary upload failed with ${response.status}`);
+  }
+
+  const payload = (await response.json()) as { secure_url?: string };
+  if (!payload.secure_url) {
+    throw new Error('Cloudinary upload succeeded but no secure_url was returned.');
+  }
+  return payload.secure_url;
+}
+
+async function uploadViaOperationsApi(file: File): Promise<string> {
+  const base64Data = await fileToBase64(file);
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  const token = localStorage.getItem(AUTH_TOKEN_KEY);
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE}/operations/media/upload-verification`, {
+    method: 'POST',
+    headers,
+    body: JSON.stringify({
+      fileName: file.name,
+      mimeType: file.type || (file.name.toLowerCase().endsWith('.pdf') ? 'application/pdf' : 'image/jpeg'),
+      data: base64Data,
+    }),
+  });
+
+  if (!response.ok) {
+    const raw = await response.text();
+    let message = raw || `Upload failed with ${response.status}`;
+    try {
+      const parsed = JSON.parse(raw) as { error?: string };
+      if (parsed.error) message = parsed.error;
+    } catch {
+      // keep raw
+    }
+    throw new Error(message);
+  }
+
+  const payload = (await response.json()) as { url?: string };
+  if (!payload.url) {
+    throw new Error('Upload succeeded but no URL was returned.');
+  }
+  return payload.url;
+}
+
+/**
+ * Trade license (PDF) + NID/face photos for claim verification.
+ * Prefers unsigned Cloudinary when configured; falls back to authenticated ops upload.
+ */
+export async function uploadVerificationFile(file: File): Promise<{ url: string; name: string }> {
+  const allowed =
+    file.type.startsWith('image/') ||
+    file.type === 'application/pdf' ||
+    /\.(pdf|jpe?g|png|webp|gif)$/i.test(file.name);
+  if (!allowed) {
+    throw new Error('Unsupported file. Upload a PDF or image (JPEG/PNG/WebP/GIF).');
+  }
+
+  if (UPLOAD_PRESET?.trim()) {
+    try {
+      const url = await uploadViaCloudinary(file);
+      return { url, name: file.name };
+    } catch (error) {
+      console.warn('[mediaUpload] Direct Cloudinary failed, trying operations API.', error);
+    }
+  }
+
+  const url = await uploadViaOperationsApi(file);
+  return { url, name: file.name };
+}
