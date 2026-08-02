@@ -126,8 +126,9 @@ async function writeSet(root, roundedSvg, maskableSvg, maskedMonoSvg) {
 
 const storeRounded = buildFaviconSvg('#FFFFFF', '#EB4501', { rounded: true });
 const storeMaskable = buildFaviconSvg('#FFFFFF', '#EB4501', { rounded: false });
-const adminRounded = buildFaviconSvg('#000435', '#FFFFFF', { rounded: true });
-const adminMaskable = buildFaviconSvg('#000435', '#FFFFFF', { rounded: false });
+/** Dashboard uses the same white / orange mark as the storefront. */
+const adminRounded = storeRounded;
+const adminMaskable = storeMaskable;
 const maskedMono = buildMaskedIconSvg();
 
 await writeSet(web, storeRounded, storeMaskable, maskedMono);
