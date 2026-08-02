@@ -40,6 +40,8 @@ interface ProductDetailBuyBoxProps {
   onToggleWishlist: () => void;
   onAddToCart: () => void;
   onCompare: () => void;
+  compareDisabled?: boolean;
+  compareHint?: string;
   onMessageSeller: () => void;
   isService?: boolean;
   messageCtaLabel?: string;
@@ -77,6 +79,8 @@ export function ProductDetailBuyBox({
   onToggleWishlist,
   onAddToCart,
   onCompare,
+  compareDisabled = false,
+  compareHint,
   onMessageSeller,
   isService = false,
   messageCtaLabel = 'Message Seller',
@@ -111,7 +115,7 @@ export function ProductDetailBuyBox({
           <div className="text-lg font-extrabold text-[#1A1A2E]">{viewCount.toLocaleString()}</div>
           <div className="text-[11px] text-[#9AA0AC]">Views</div>
         </div>
-        <div className="choosify-emi-gradient text-white text-[10px] font-extrabold px-3 py-1.5 rounded justify-self-center lg:justify-self-end whitespace-nowrap">
+        <div className="choosify-emi-gradient text-white text-[10px] font-extrabold px-3 py-1.5 rounded-full justify-self-center lg:justify-self-end whitespace-nowrap">
           TRENDING
         </div>
       </div>
@@ -120,15 +124,15 @@ export function ProductDetailBuyBox({
         {/* Left — product info */}
         <div className="bg-white rounded-xl border border-[#E8EDF2] p-[26px]">
           <div className="flex gap-2 mb-3.5 flex-wrap">
-            <span className="bg-[#EB4501] text-white text-[9px] font-extrabold px-2.5 py-1 rounded">FEATURED</span>
+            <span className="bg-[#EB4501] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-full">FEATURED</span>
             {isOutOfStock ? (
-              <span className="bg-[#FF000D] text-white text-[9px] font-extrabold px-2.5 py-1 rounded">
-                OUT OF STOCK
+              <span className="bg-[#FF000D] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-full">
+              OUT OF STOCK
               </span>
             ) : (
               <span
                 className={cn(
-                  'text-white text-[9px] font-extrabold px-2.5 py-1 rounded',
+                  'text-white text-[9px] font-extrabold px-2.5 py-1 rounded-full',
                   resolveStockDisplay(stockQuantity).bgClass,
                 )}
               >
@@ -259,9 +263,7 @@ export function ProductDetailBuyBox({
               onClick={onAskEmi}
               className="mt-1 inline-flex items-center gap-2 text-white border-none px-5 py-3 rounded-lg text-[12.5px] font-bold cursor-pointer choosify-emi-gradient"
             >
-              <span className="w-6 h-6 rounded-full bg-white flex items-center justify-center p-0.5 shrink-0">
-                <EmiAiLogo size={16} />
-              </span>
+              <EmiAiLogo size={24} />
               Ask EMI about this product
             </button>
           )}
@@ -342,9 +344,17 @@ export function ProductDetailBuyBox({
             <button
               type="button"
               onClick={onCompare}
-              className="w-full bg-white border border-[#E5E7EB] py-3 rounded-lg text-[12.5px] font-semibold hover:border-[#D1D5DB] transition-all"
+              title={compareHint || (compareDisabled ? 'Unavailable for current comparison' : 'Add to Compare')}
+              aria-label={compareHint || 'Add to Compare'}
+              aria-disabled={compareDisabled}
+              className={cn(
+                'w-full bg-white border border-[#E5E7EB] py-3 rounded-lg text-[12.5px] font-semibold hover:border-[#D1D5DB] transition-all',
+                compareDisabled && 'opacity-40 grayscale cursor-not-allowed hover:border-[#E5E7EB]',
+              )}
             >
-              <span className="choosify-emi-gradient-text">⇄ Compare</span>
+              <span className={cn('choosify-emi-gradient-text', compareDisabled && 'opacity-70')}>
+                ⇄ Compare
+              </span>
             </button>
             <button
               type="button"

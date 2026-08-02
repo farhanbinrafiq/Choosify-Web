@@ -20,7 +20,7 @@ interface SpotlightContentHeroProps {
   showLiveBadge?: boolean;
 }
 
-/** Spotlight / Guide Detail hero — Choosify.dc.html sliver gallery */
+/** Spotlight / Guide Detail hero — shared `DetailSliverMediaGallery` (animation, peeks, autoplay). */
 export function SpotlightContentHero({
   guide,
   variant,

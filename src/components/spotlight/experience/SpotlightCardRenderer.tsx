@@ -177,8 +177,8 @@ export function SpotlightCardRenderer({
             </span>
           )}
           {content.isSponsored && (
-            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-amber-50 text-amber-700 border border-amber-200">
-              Sponsored
+            <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-[#2323FF] text-white">
+              Promoted
             </span>
           )}
           {(content.isLive || content.contentType === 'live') && (

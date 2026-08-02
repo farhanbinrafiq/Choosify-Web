@@ -11,6 +11,8 @@ import { buildCategoryDisplayList } from '../utils/categoryDisplay';
 import { getHomeLivePulseItems } from '../lib/home/homepageLivePulse';
 import { buildHomeViralTodayItems } from '../utils/homeViralToday';
 import { usePriorityClockMs } from './usePriorityClockMs';
+import { resolveSpotlightExperience } from '../utils/spotlightContentResolver';
+import { getAllBrandPosts } from '../lib/brandPosts';
 import type { HomePromoTile } from '../components/home/sections/HomeTodaysDealsSection';
 
 type HomeGuideCarouselKind = 'youtube' | 'reels' | 'blog';
@@ -71,9 +73,28 @@ export function useHomePageData() {
 
   const priorityNowMs = usePriorityClockMs();
 
+  const spotlightExperience = useMemo(
+    () =>
+      resolveSpotlightExperience({
+        catalog: allCatalogProducts,
+        guides: allGuides ?? [],
+        creators: allCreators ?? [],
+        brandPosts: getAllBrandPosts(),
+        brandLogos: BRAND_IMAGES,
+      }),
+    [allCatalogProducts, allGuides, allCreators],
+  );
+
   const viralTodayItems = useMemo(
-    () => buildHomeViralTodayItems(viralTodayCards, allGuides ?? [], allCatalogProducts, priorityNowMs),
-    [viralTodayCards, allGuides, allCatalogProducts, priorityNowMs],
+    () =>
+      buildHomeViralTodayItems(
+        viralTodayCards,
+        allGuides ?? [],
+        allCatalogProducts,
+        priorityNowMs,
+        spotlightExperience,
+      ),
+    [viralTodayCards, allGuides, allCatalogProducts, priorityNowMs, spotlightExperience],
   );
 
   const featuredProducts = useMemo(() => {

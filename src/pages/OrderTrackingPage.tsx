@@ -11,6 +11,7 @@ import {
 } from 'lucide-react';
 import { toast } from '../lib/notify';
 import { ProductCard } from '../components/ProductCard';
+import { SponsoredCardChrome } from '../components/commerce/SponsoredCardChrome';
 import { PRODUCT_CARD_GRID } from '../lib/pageLayout';
 
 type TrackingStatus = 'pending' | 'dispatched' | 'transit' | 'delivered';
@@ -456,11 +457,9 @@ export function OrderTrackingPage() {
 
             {/* Optional sponsored banner — chrome only */}
             <div className="bg-[#FFF6EF] rounded-[10px] overflow-hidden border-[1.5px] border-dashed border-[#EB4501] relative">
-              <div className="absolute top-2.5 left-3.5 bg-[#1A1A2E] text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-[3px] z-[1]">
-                SPONSORED
-              </div>
-              <div className="h-[110px] bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-center justify-center text-white text-[12px] font-extrabold text-center px-5">
-                While you wait — deals picked for you
+              <div className="h-[110px] bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-center justify-center text-white text-[12px] font-extrabold text-center px-5 relative">
+                <SponsoredCardChrome brandName="Choosify" size="sm" />
+                <span className="relative z-[1]">While you wait — deals picked for you</span>
               </div>
               <div className="px-5 py-3.5 flex justify-between items-center gap-3 flex-wrap">
                 <div>

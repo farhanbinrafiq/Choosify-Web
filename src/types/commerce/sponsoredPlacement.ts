@@ -31,7 +31,7 @@ export interface SponsoredPlacementItem {
   sponsorName: string;
   sponsorLogoUrl?: string;
   isVerified?: boolean;
-  /** "Sponsored" or "Sponsored by Samsung" */
+  /** "Promoted" or "Promoted by Samsung" */
   sponsoredLabel: string;
   href: string;
   ctaLabel: string;

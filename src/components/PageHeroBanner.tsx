@@ -47,7 +47,7 @@ const PAGE_DEFAULT_SLIDES: Record<PageHeroBannerKey, HeroBannerSlide[]> = {
       ctaText: 'View Deals',
       ctaLink: '/deals',
       image: 'https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?w=1920&q=80',
-      sponsorBadge: 'Sponsored',
+      sponsorBadge: 'Promoted',
     },
   ],
   products: [
@@ -372,7 +372,13 @@ export function PageHeroBanner({ pageKey, className, hidden = false }: PageHeroB
 
             <div className="relative z-10 h-full max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-10 flex flex-col justify-center items-start text-left pointer-events-none">
               {current.sponsorBadge && (
-                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#EB4501]/20 text-[#FF8A50] text-[9px] font-bold uppercase tracking-wider border border-[#EB4501]/30 mb-2">
+                <span
+                  className={
+                    String(current.sponsorBadge).toLowerCase() === 'promoted'
+                      ? 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#2323FF] text-white text-[9px] font-bold uppercase tracking-wider mb-2'
+                      : 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#EB4501]/20 text-[#FF8A50] text-[9px] font-bold uppercase tracking-wider border border-[#EB4501]/30 mb-2'
+                  }
+                >
                   <Sparkles className="w-3 h-3" />
                   {current.sponsorBadge}
                 </span>

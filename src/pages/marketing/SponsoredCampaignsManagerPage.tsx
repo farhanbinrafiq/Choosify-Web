@@ -44,7 +44,7 @@ export function SponsoredCampaignsManagerPage() {
     <div className="flex-grow p-6 space-y-6 max-w-6xl">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight">Sponsored Campaigns</h1>
+          <h1 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight">Promoted Campaigns</h1>
           <p className="text-xs text-gray-500">Configure sponsored discovery placements · {campaigns.length} campaigns</p>
         </div>
         <Link

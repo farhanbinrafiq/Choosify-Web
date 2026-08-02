@@ -60,7 +60,7 @@ export function SponsoredCampaignEditorPage() {
     <div className="flex-grow p-6 max-w-4xl mx-auto space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link to="/marketing/sponsored" className="inline-flex items-center gap-2 text-xs text-gray-500 hover:text-[#CF4400]">
-          <ArrowLeft size={14} /> Sponsored Campaigns
+          <ArrowLeft size={14} /> Promoted Campaigns
         </Link>
         <button
           type="button"
@@ -72,7 +72,7 @@ export function SponsoredCampaignEditorPage() {
       </div>
 
       <h1 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight">
-        {isNew ? 'New Sponsored Campaign' : record.name}
+        {isNew ? 'New Promoted Campaign' : record.name}
       </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">

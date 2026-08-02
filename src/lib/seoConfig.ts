@@ -167,7 +167,7 @@ export const STATIC_PAGE_SEO: Record<string, SeoMeta> = {
   },
   '/advertise': {
     title: formatPageTitle('Advertise'),
-    description: 'Promote your brand with Choosify advertising and sponsored placements.',
+    description: 'Promote your brand with Choosify advertising and promoted placements.',
   },
   '/suggest-brand': {
     title: formatPageTitle('Suggest a Brand'),

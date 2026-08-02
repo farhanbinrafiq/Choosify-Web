@@ -51,7 +51,7 @@ import { PrescriptionUploadModule } from '../components/product/PrescriptionUplo
 import { PrescriptionDetailsModal, type PrescriptionData } from '../components/product/PrescriptionDetailsModal';
 import { formatReviewDate } from '../utils/formatReviewDate';
 import { CreatorReviewsPreview } from "../components/creatorReviews/CreatorReviewsPreview";
-import { PublicReviewCard } from "../components/PublicReviewCard";
+import { PublicReviewCard, resolvePublicReviewAvatarUrl } from "../components/PublicReviewCard";
 import NotFoundPage from "./NotFoundPage";
 import { useRegisterPageFilters } from "../components/FilterEngine";
 import { getBrandOfficialWebsite, normalizeExternalUrl } from "../utils/overviewRegistry";
@@ -63,9 +63,15 @@ import { ProductSpecsOverview } from "../components/ProductSpecsOverview";
 import { OverviewListItem } from "../components/OverviewListIcon";
 import { DcUnderlineTabs } from "../components/design/DcUnderlineTabs";
 import { CardEngagementStrip } from "../components/CardEngagementStrip";
+import { SponsoredCardChrome } from "../components/commerce/SponsoredCardChrome";
 import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
 import { usePageBreadcrumbs } from "../context/BreadcrumbContext";
 import { slugifyPathSegment } from "../lib/seoHelpers";
+import {
+  compareCategoryBrowseHref,
+  getCompareLockedCategory,
+  isSameCompareCategory,
+} from "../utils/compareCategory";
 import { StudioWrap } from "../components/studio/StudioWrap";
 import { useStudioEdit } from "../context/StudioEditContext";
 import { useHasRole } from "../components/auth/RequireRole";
@@ -470,7 +476,7 @@ export function ProductDetailPage() {
     setReviews,
     addNotification,
     comparedProducts,
-    setComparedProducts,
+    addToCompare,
     customOverviews,
   } = useDashboard();
 
@@ -496,6 +502,9 @@ export function ProductDetailPage() {
               rating: row.rating,
               text: row.comment,
               authorName: row.userName,
+              authorAvatar: row.userAvatar,
+              avatar: row.userAvatar,
+              userId: row.userId,
               createdAt: row.createdAt,
               status: 'published',
             })),
@@ -558,6 +567,8 @@ export function ProductDetailPage() {
       text: reviewText,
       comment: reviewText,
       authorName: currentUser.name,
+      authorAvatar: currentUser?.avatar,
+      avatar: currentUser?.avatar,
       userId: String(currentUser?.id || ''),
       createdAt: postedAt,
       date: new Date(postedAt).toLocaleDateString(undefined, {
@@ -578,6 +589,7 @@ export function ProductDetailPage() {
       .submitReview({
         userId: String(currentUser?.id || 'guest'),
         userName: currentUser?.name || 'Guest',
+        userAvatar: currentUser?.avatar || undefined,
         productId: String(product.id),
         productTitle: product.title,
         brandName: brandName,
@@ -592,17 +604,19 @@ export function ProductDetailPage() {
   };
 
   const handleAddToCompare = () => {
-    if (comparedProducts.some((p: any) => p.id === product.id)) {
-      toast.error('This product is already in your comparison list.');
-      return;
-    }
-    if (comparedProducts.length >= 4) {
-      toast.error('Comparison limit reached (4 products)');
-      return;
-    }
-    setComparedProducts((prev: any[]) => [product, ...prev]);
-    toast.success('Added to comparison!');
+    if (!product) return;
+    addToCompare(product);
   };
+
+  const compareLockedCategory = getCompareLockedCategory(comparedProducts);
+  const isCompareCategoryBlocked =
+    Boolean(product) &&
+    Boolean(compareLockedCategory) &&
+    !comparedProducts.some((p: any) => String(p.id) === String(product.id)) &&
+    !isSameCompareCategory(product, compareLockedCategory);
+  const compareHint = isCompareCategoryBlocked
+    ? `Irrelevant category for the current comparison (locked to ${compareLockedCategory!.label}). Browse matching products on /products?category=${encodeURIComponent(compareLockedCategory!.label)}.`
+    : undefined;
   const brandObj = product
     ? brandList.find((b: any) => b.id === product.brandId) ||
       brandList.find((b: any) => b.name?.toLowerCase() === product.brand?.toLowerCase())
@@ -1139,7 +1153,15 @@ export function ProductDetailPage() {
             addonCount: selectedAddons.length,
           });
         }}
-        onCompare={handleAddToCompare}
+        onCompare={
+          isCompareCategoryBlocked
+            ? () => {
+                navigate(compareCategoryBrowseHref(compareLockedCategory!.label));
+              }
+            : handleAddToCompare
+        }
+        compareDisabled={isCompareCategoryBlocked}
+        compareHint={compareHint}
         onMessageSeller={handleMessageOrder}
         onAskEmi={() => {
           openEmiPanel(`Tell me more about ${product.title} and alternatives`);
@@ -1256,7 +1278,15 @@ export function ProductDetailPage() {
                     .filter((r: any) => r.productId === product.id)
                     .map((r: any) => ({
                       name: r.authorName,
-                      avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(r.authorName)}`,
+                      avatar: resolvePublicReviewAvatarUrl(
+                        r.avatar,
+                        r.authorAvatar,
+                        r.userAvatar,
+                        r.dp,
+                        String(r.userId || '') === String(currentUser?.id || '')
+                          ? currentUser?.avatar
+                          : undefined,
+                      ),
                       time: formatReviewDate(r.createdAt) || 'Just now',
                       rating: String(r.rating),
                       content: r.text,
@@ -1269,7 +1299,7 @@ export function ProductDetailPage() {
                   ...(product.enablePublicReviews !== false && Array.isArray((product as any).curatedPublicReviews)
                     ? (product as any).curatedPublicReviews.map((r: any) => ({
                         name: r.reviewerName,
-                        avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(r.reviewerName || '')}`,
+                        avatar: resolvePublicReviewAvatarUrl(r.reviewerAvatar, r.avatar, r.dp),
                         time: 'Verified purchase',
                         rating: String(r.rating),
                         content: r.comment,
@@ -1599,10 +1629,8 @@ export function ProductDetailPage() {
 
             {/* Sponsored Advertisement */}
             <div className="choosify-dark-surface text-white rounded-xl p-6 relative overflow-hidden text-left w-full">
-              <span className="text-[11px] font-bold text-[#EB4501] tracking-tight block mb-1.5">
-                SPONSORED AD
-              </span>
-              <h4 className="text-sm font-extrabold tracking-tight mb-2 text-white">
+              <SponsoredCardChrome brandName="Choosify" size="sm" />
+              <h4 className="text-sm font-extrabold tracking-tight mb-2 text-white mt-8">
                 Upgrade To Express Delivery
               </h4>
               <p className="text-[11px] text-white/55 leading-relaxed mb-4">

@@ -3,6 +3,11 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Mail, Lock, LogIn, Github, ArrowRight } from 'lucide-react';
 import { toast } from '../lib/notify';
 import { useGlobalState } from '../context/GlobalStateContext';
+import {
+  firebaseAuthErrorMessage,
+  resolveSessionUser,
+  signInWithEmailPassword,
+} from '../lib/authSession';
 
 interface SignInModalProps {
   isOpen: boolean;
@@ -13,7 +18,7 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const { setIsLoggedIn } = useGlobalState();
+  const { setIsLoggedIn, updateCurrentUser, currentUser } = useGlobalState();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,12 +36,18 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
     }
 
     setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-
-    setIsLoading(false);
-    setIsLoggedIn(true);
-    toast.success('Welcome back!');
-    onClose();
+    try {
+      const firebaseUser = await signInWithEmailPassword(email, password);
+      const { user } = await resolveSessionUser(firebaseUser, currentUser);
+      updateCurrentUser(user);
+      setIsLoggedIn(true);
+      toast.success('Welcome back!');
+      onClose();
+    } catch (err) {
+      toast.error(firebaseAuthErrorMessage(err));
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (

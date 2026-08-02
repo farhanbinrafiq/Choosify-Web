@@ -31,7 +31,7 @@ export const Badge: React.FC<BadgeProps> = ({
   ...props
 }) => {
   const baseStyles =
-    'inline-flex items-center justify-center px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-md';
+    'inline-flex items-center justify-center px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider rounded-full';
 
   const variants: Record<BadgeVariant, string> = {
     default: 'bg-slate-100 text-slate-800',
@@ -43,7 +43,7 @@ export const Badge: React.FC<BadgeProps> = ({
     outline: 'border border-slate-200 text-slate-600',
     gray: 'bg-slate-200 text-slate-700',
     verified: 'bg-[#07D005] text-white',
-    sponsored: 'bg-[#EB4501] text-white',
+    sponsored: 'bg-[#2323FF] text-white',
     deal: 'bg-[#EB4501] text-white',
     featured: 'bg-[#000435] text-white',
     trending: 'bg-amber-500 text-white',

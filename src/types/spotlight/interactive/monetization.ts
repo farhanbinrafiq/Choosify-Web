@@ -24,7 +24,7 @@ export const INTERACTIVE_MONETIZATION_LABELS: Record<SpotlightInteractiveMonetiz
   featured_live: 'Featured Live',
   homepage_live: 'Homepage Live',
   premium_replay: 'Premium Replay',
-  sponsored_chapter: 'Sponsored Chapter',
+  sponsored_chapter: 'Promoted Chapter',
   pinned_offer: 'Pinned Offer',
   pinned_product: 'Pinned Product',
   creator_sponsorship: 'Creator Sponsorship',

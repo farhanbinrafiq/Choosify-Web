@@ -22,6 +22,8 @@ export type AdSlotCarouselProps<T> = {
   /** Where the pagination rail sits. Defaults to 'end' (right) for axis="y", 'below' for axis="x". */
   paginationPosition?: 'end' | 'below';
   ariaLabel?: string;
+  /** Ring offset behind active logo thumb — match the surface under the rail */
+  paginationRingOffsetClassName?: string;
 };
 
 const SWIPE_PX = 48;
@@ -37,6 +39,82 @@ function initialsFor(label: string): string {
       .slice(0, 2)
       .map((w) => w[0]?.toUpperCase() ?? '')
       .join('') || '?'
+  );
+}
+
+export type AdSlotPaginationRailProps = {
+  items: AdSlotPaginationIcon[];
+  activeIndex: number;
+  onSelect: (index: number) => void;
+  /** 'end' = vertical rail (banner side); 'below' = horizontal under the slide */
+  position?: 'end' | 'below';
+  ariaLabel?: string;
+  className?: string;
+  ringOffsetClassName?: string;
+  getKey?: (item: AdSlotPaginationIcon, index: number) => string;
+};
+
+/**
+ * Brand-logo thumbnail pagination used by sponsored banner / vertical ad carousels.
+ * Prefer this over plain dots whenever each slide has a sponsor mark.
+ */
+export function AdSlotPaginationRail({
+  items,
+  activeIndex,
+  onSelect,
+  position = 'below',
+  ariaLabel = 'Slides',
+  className,
+  ringOffsetClassName = 'ring-offset-white',
+  getKey = (_item, index) => String(index),
+}: AdSlotPaginationRailProps) {
+  if (items.length <= 1) return null;
+
+  return (
+    <div
+      className={cn(
+        'flex gap-2 pointer-events-auto',
+        position === 'end'
+          ? 'flex-col items-center justify-center shrink-0 gap-2.5'
+          : 'flex-row items-center justify-center flex-wrap',
+        className,
+      )}
+      role="tablist"
+      aria-label={ariaLabel}
+    >
+      {items.map((icon, i) => {
+        const active = i === activeIndex;
+        const color = AVATAR_COLORS[i % AVATAR_COLORS.length];
+        return (
+          <button
+            key={getKey(icon, i)}
+            type="button"
+            role="tab"
+            aria-selected={active}
+            aria-label={`Show ${icon.label}`}
+            title={icon.label}
+            onClick={() => onSelect(i)}
+            className={cn(
+              'shrink-0 w-7 h-7 rounded-full overflow-hidden cursor-pointer transition-all duration-300 flex items-center justify-center border-0 p-0',
+              active
+                ? cn('ring-2 ring-[#EB4501] ring-offset-1', ringOffsetClassName)
+                : 'opacity-55 hover:opacity-85 grayscale-[30%]',
+            )}
+          >
+            {icon.imageUrl ? (
+              <img src={icon.imageUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
+            ) : (
+              <span
+                className="w-full h-full flex items-center justify-center text-white text-[9px] font-extrabold"
+                style={{ backgroundColor: color }}
+              >
+                {initialsFor(icon.label)}
+              </span>
+            )}
+          </button>
+        );
+      })}
+    </div>
   );
 }
 
@@ -59,7 +137,8 @@ export function AdSlotCarousel<T>({
   showDots = true,
   getIcon,
   paginationPosition,
-  ariaLabel = 'Sponsored ads',
+  ariaLabel = 'Promoted ads',
+  paginationRingOffsetClassName = 'ring-offset-white',
 }: AdSlotCarouselProps<T>) {
   const [index, setIndex] = useState(0);
   const [hoverPaused, setHoverPaused] = useState(false);
@@ -112,7 +191,6 @@ export function AdSlotCarousel<T>({
     };
   }, [autoplay, autoplayMs, goNext, paused, total]);
 
-  // Wheel-through-slides while hover-locked; only active while the pointer is over the carousel.
   useEffect(() => {
     const el = containerRef.current;
     if (!el || total <= 1) return;
@@ -156,21 +234,33 @@ export function AdSlotCarousel<T>({
   const current = items[index];
 
   const pagination = showDots ? (
-    <div
-      className={cn(
-        'flex gap-2 pointer-events-auto',
-        resolvedPaginationPosition === 'end'
-          ? 'flex-col items-center justify-center shrink-0 gap-2.5'
-          : 'flex-row items-center justify-center flex-wrap mt-3',
-      )}
-      role="tablist"
-      aria-label="Ad slides"
-    >
-      {items.map((item, i) => {
-        const active = i === index;
-        const icon = icons?.[i];
-
-        if (!icon) {
+    icons ? (
+      <AdSlotPaginationRail
+        items={icons}
+        activeIndex={index}
+        position={resolvedPaginationPosition}
+        ariaLabel="Ad slides"
+        ringOffsetClassName={paginationRingOffsetClassName}
+        getKey={(icon, i) => `${getKey(items[i], i)}-${icon.label}`}
+        onSelect={(i) => {
+          goTo(i);
+          armManualResume();
+        }}
+        className={resolvedPaginationPosition === 'below' ? 'mt-3' : undefined}
+      />
+    ) : (
+      <div
+        className={cn(
+          'flex gap-2 pointer-events-auto',
+          resolvedPaginationPosition === 'end'
+            ? 'flex-col items-center justify-center shrink-0 gap-2.5'
+            : 'flex-row items-center justify-center flex-wrap mt-3',
+        )}
+        role="tablist"
+        aria-label="Ad slides"
+      >
+        {items.map((item, i) => {
+          const active = i === index;
           return (
             <button
               key={getKey(item, i)}
@@ -192,42 +282,9 @@ export function AdSlotCarousel<T>({
               {active ? <span className="w-1.5 h-1.5 rounded-full bg-[#EB4501]" /> : null}
             </button>
           );
-        }
-
-        const color = AVATAR_COLORS[i % AVATAR_COLORS.length];
-        return (
-          <button
-            key={getKey(item, i)}
-            type="button"
-            role="tab"
-            aria-selected={active}
-            aria-label={`Show ${icon.label} ad`}
-            title={icon.label}
-            onClick={() => {
-              goTo(i);
-              armManualResume();
-            }}
-            className={cn(
-              'shrink-0 w-7 h-7 rounded-full overflow-hidden cursor-pointer transition-all duration-300 flex items-center justify-center',
-              active
-                ? 'ring-2 ring-[#EB4501] ring-offset-1 ring-offset-white'
-                : 'opacity-55 hover:opacity-85 grayscale-[30%]',
-            )}
-          >
-            {icon.imageUrl ? (
-              <img src={icon.imageUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
-            ) : (
-              <span
-                className="w-full h-full flex items-center justify-center text-white text-[9px] font-extrabold"
-                style={{ backgroundColor: color }}
-              >
-                {initialsFor(icon.label)}
-              </span>
-            )}
-          </button>
-        );
-      })}
-    </div>
+        })}
+      </div>
+    )
   ) : null;
 
   const slide = (

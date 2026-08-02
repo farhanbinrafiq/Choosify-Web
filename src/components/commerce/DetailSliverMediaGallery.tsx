@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronLeft, ChevronRight, Radio, Clock, X } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import { cn } from '../../lib/utils';
 import type { CommerceMediaItem } from './commerceMediaTypes';
 import { isVideoKind } from '../media/choosifyMediaTypes';
@@ -15,11 +16,40 @@ export interface DetailSliverLiveBadge {
 const ZOOM_MAX = 4;
 const ZOOM_TAP_SCALE = 2.5;
 
+/** Match platform carousel feel — short eased slide + fade (ChoosifyCarousel ~300–400ms range) */
+const SLIDE_TRANSITION = { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] as const };
+/** Shared hero auto-advance (Product / Service / Guide / Spotlight detail heroes) */
+const AUTO_ADVANCE_MS = 4500;
+const AUTOPLAY_RESUME_MS = 5500;
+
+const slideVariants = {
+  enter: (direction: number) => ({
+    x: direction > 0 ? 48 : -48,
+    opacity: 0,
+  }),
+  center: {
+    x: 0,
+    opacity: 1,
+  },
+  exit: (direction: number) => ({
+    x: direction > 0 ? -48 : 48,
+    opacity: 0,
+  }),
+};
+
 /**
  * Touch-friendly fullscreen image: tap to toggle zoom, pinch to zoom, drag to pan.
- * Pointer-events based so it works with mouse (click toggles, drag pans) too.
+ * Horizontal swipe at 1x scale navigates the gallery when `onNavigate` is provided.
  */
-function PinchZoomImage({ src, alt }: { src: string; alt: string }) {
+function PinchZoomImage({
+  src,
+  alt,
+  onNavigate,
+}: {
+  src: string;
+  alt: string;
+  onNavigate?: (dir: 1 | -1) => void;
+}) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [view, setView] = useState({ scale: 1, x: 0, y: 0 });
   const [animate, setAnimate] = useState(true);
@@ -96,11 +126,13 @@ function PinchZoomImage({ src, alt }: { src: string; alt: string }) {
       return;
     }
 
-    if (pointers.current.size === 1 && view.scale > 1) {
+    if (pointers.current.size === 1) {
       const dx = e.clientX - g.origin.x;
       const dy = e.clientY - g.origin.y;
       if (Math.abs(dx) + Math.abs(dy) > 6) g.moved = true;
-      setView(clampView(view.scale, g.startX + dx, g.startY + dy));
+      if (view.scale > 1) {
+        setView(clampView(view.scale, g.startX + dx, g.startY + dy));
+      }
     }
   };
 
@@ -115,6 +147,17 @@ function PinchZoomImage({ src, alt }: { src: string; alt: string }) {
       setView({ scale: 1, x: 0, y: 0 });
     }
 
+    const dx = e.clientX - g.origin.x;
+    const dy = e.clientY - g.origin.y;
+
+    // At fit scale, horizontal swipe changes the gallery image (keep viewer open)
+    if (view.scale <= 1.05 && onNavigate && g.moved) {
+      if (Math.abs(dx) >= 48 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+        onNavigate(dx < 0 ? 1 : -1);
+        return;
+      }
+    }
+
     // Tap (no drag/pinch) toggles zoom around the tap point
     if (!g.moved && Date.now() - g.downAt < 350) {
       setAnimate(true);
@@ -127,9 +170,16 @@ function PinchZoomImage({ src, alt }: { src: string; alt: string }) {
     }
   };
 
+  // Reset pan/zoom when the media source changes (next/prev while fullscreen)
+  useEffect(() => {
+    setAnimate(false);
+    setView({ scale: 1, x: 0, y: 0 });
+  }, [src]);
+
   return (
     <div
       ref={containerRef}
+      data-zoom-viewport
       className="relative w-full h-full overflow-hidden select-none"
       style={{ touchAction: 'none', cursor: view.scale > 1 ? 'zoom-out' : 'zoom-in' }}
       onPointerDown={onPointerDown}
@@ -161,6 +211,10 @@ export interface DetailSliverMediaGalleryProps {
   className?: string;
   /** LIVE NOW / Upcoming / Replay badge overlaid on the media card */
   liveBadge?: DetailSliverLiveBadge;
+  /** Auto-advance slides (default on for multi-image heroes) */
+  autoplay?: boolean;
+  /** Ms between auto-advances while playing (default 4500) */
+  autoplayIntervalMs?: number;
 }
 
 function slideAt(items: CommerceMediaItem[], index: number, offset: number): CommerceMediaItem | null {
@@ -254,15 +308,19 @@ const PEEK_OPACITY: Record<PeekSlot['size'], string> = {
   far: 'opacity-40 hover:opacity-55',
 };
 
+/** Near peeks get more flex + a mobile min-width so side slivers read as content */
 const PEEK_FLEX: Record<PeekSlot['size'], string> = {
-  near: 'flex-[1.4_1_0%]',
-  mid: 'flex-[1_1_0%]',
+  near: 'flex-[2_1_0%] sm:flex-[1.4_1_0%] min-w-[5.5rem] sm:min-w-0',
+  mid: 'flex-[1_1_0%] min-w-[3.75rem] sm:min-w-0',
   far: 'flex-[0.75_1_0%]',
 };
 
 /**
- * Detail hero gallery — full-bleed center-focused strip with repeating side peeks
- * (shared by Product Detail + Guide Detail via ProductMediaGallery / RecommendationMediaGallery).
+ * Shared detail-page hero gallery — full-bleed center stage + side peeks.
+ * Used by Product/Service Details (`ProductMediaGallery`), Guide Details
+ * (`RecommendationMediaGallery`), and Spotlight heroes (`SpotlightContentHero`).
+ * Slide animation, mobile peek sizing, fullscreen viewer, and autoplay all live here
+ * so every detail hero stays consistent.
  */
 export function DetailSliverMediaGallery({
   items,
@@ -271,21 +329,131 @@ export function DetailSliverMediaGallery({
   onAddVideo,
   className,
   liveBadge,
+  autoplay = true,
+  autoplayIntervalMs = AUTO_ADVANCE_MS,
 }: DetailSliverMediaGalleryProps) {
   const safeItems = items.length ? items : [];
   const [activeIndex, setActiveIndex] = useState(0);
+  const [direction, setDirection] = useState(0);
   const [zoomOpen, setZoomOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [autoplayPaused, setAutoplayPaused] = useState(false);
   const total = safeItems.length;
+  const activeIndexRef = useRef(activeIndex);
+  activeIndexRef.current = activeIndex;
+  const swipeRef = useRef<{ x: number; y: number; active: boolean } | null>(null);
+  const suppressClickRef = useRef(false);
+  const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const hoverPausedRef = useRef(false);
+
+  const clearResumeTimer = useCallback(() => {
+    if (resumeTimerRef.current) {
+      clearTimeout(resumeTimerRef.current);
+      resumeTimerRef.current = null;
+    }
+  }, []);
+
+  /** Pause autoplay; schedule resume after idle unless sticky hover/zoom holds it */
+  const pauseAutoplayForInteraction = useCallback(() => {
+    setAutoplayPaused(true);
+    clearResumeTimer();
+    resumeTimerRef.current = setTimeout(() => {
+      resumeTimerRef.current = null;
+      if (!hoverPausedRef.current) setAutoplayPaused(false);
+    }, AUTOPLAY_RESUME_MS);
+  }, [clearResumeTimer]);
+
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 639px)');
+    const sync = () => setIsMobile(mq.matches);
+    sync();
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, []);
+
+  useEffect(() => () => clearResumeTimer(), [clearResumeTimer]);
+
+  const goTo = useCallback(
+    (nextIndex: number, dirHint?: number) => {
+      if (total <= 1) return;
+      const normalized = ((nextIndex % total) + total) % total;
+      const current = activeIndexRef.current;
+      if (normalized === current) return;
+      if (dirHint != null) {
+        setDirection(dirHint);
+      } else {
+        const forward = (normalized - current + total) % total;
+        const backward = (current - normalized + total) % total;
+        setDirection(forward <= backward ? 1 : -1);
+      }
+      setActiveIndex(normalized);
+    },
+    [total],
+  );
 
   const goNext = useCallback(() => {
     if (total <= 1) return;
-    setActiveIndex((i) => (i + 1) % total);
-  }, [total]);
+    pauseAutoplayForInteraction();
+    goTo(activeIndexRef.current + 1, 1);
+  }, [goTo, pauseAutoplayForInteraction, total]);
 
   const goPrev = useCallback(() => {
     if (total <= 1) return;
-    setActiveIndex((i) => (i - 1 + total) % total);
-  }, [total]);
+    pauseAutoplayForInteraction();
+    goTo(activeIndexRef.current - 1, -1);
+  }, [goTo, pauseAutoplayForInteraction, total]);
+
+  const goToSlide = useCallback(
+    (index: number) => {
+      pauseAutoplayForInteraction();
+      goTo(index);
+    },
+    [goTo, pauseAutoplayForInteraction],
+  );
+
+  // Auto-advance while idle (shared across all detail heroes)
+  useEffect(() => {
+    if (!autoplay || total <= 1 || autoplayPaused || zoomOpen) return;
+    if (typeof document !== 'undefined' && document.hidden) return;
+
+    const id = window.setInterval(() => {
+      if (document.hidden || hoverPausedRef.current) return;
+      const current = activeIndexRef.current;
+      setDirection(1);
+      setActiveIndex((current + 1) % total);
+    }, autoplayIntervalMs);
+
+    return () => window.clearInterval(id);
+  }, [autoplay, autoplayIntervalMs, autoplayPaused, total, zoomOpen]);
+
+  // Pause when tab is hidden; resume after idle when visible again
+  useEffect(() => {
+    const onVisibility = () => {
+      if (document.hidden) {
+        setAutoplayPaused(true);
+        clearResumeTimer();
+      } else if (!hoverPausedRef.current && !zoomOpen) {
+        pauseAutoplayForInteraction();
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => document.removeEventListener('visibilitychange', onVisibility);
+  }, [clearResumeTimer, pauseAutoplayForInteraction, zoomOpen]);
+
+  // Hold autoplay while fullscreen zoom is open; resume after close + idle
+  const wasZoomOpenRef = useRef(false);
+  useEffect(() => {
+    if (zoomOpen) {
+      wasZoomOpenRef.current = true;
+      setAutoplayPaused(true);
+      clearResumeTimer();
+      return;
+    }
+    if (wasZoomOpenRef.current) {
+      wasZoomOpenRef.current = false;
+      if (total > 1 && autoplay) pauseAutoplayForInteraction();
+    }
+  }, [zoomOpen, total, autoplay, clearResumeTimer, pauseAutoplayForInteraction]);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -300,23 +468,146 @@ export function DetailSliverMediaGallery({
     return () => window.removeEventListener('keydown', onKey);
   }, [goNext, goPrev, zoomOpen]);
 
-  // Lock page scroll while the fullscreen viewer is open
+  // Lock page scroll while the fullscreen viewer is open (modal scroll-lock)
   useEffect(() => {
     if (!zoomOpen) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    const body = document.body;
+    const html = document.documentElement;
+    const scrollY = window.scrollY;
+    const prev = {
+      bodyOverflow: body.style.overflow,
+      bodyPosition: body.style.position,
+      bodyTop: body.style.top,
+      bodyWidth: body.style.width,
+      htmlOverflow: html.style.overflow,
+    };
+
+    body.style.overflow = 'hidden';
+    html.style.overflow = 'hidden';
+    // iOS / mobile: overflow alone often still allows rubber-band scroll
+    body.style.position = 'fixed';
+    body.style.top = `-${scrollY}px`;
+    body.style.width = '100%';
+
+    const preventTouchScroll = (e: TouchEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (target?.closest?.('[data-zoom-viewport]')) return;
+      e.preventDefault();
+    };
+    document.addEventListener('touchmove', preventTouchScroll, { passive: false });
+
     return () => {
-      document.body.style.overflow = previous;
+      body.style.overflow = prev.bodyOverflow;
+      body.style.position = prev.bodyPosition;
+      body.style.top = prev.bodyTop;
+      body.style.width = prev.bodyWidth;
+      html.style.overflow = prev.htmlOverflow;
+      document.removeEventListener('touchmove', preventTouchScroll);
+      window.scrollTo(0, scrollY);
     };
   }, [zoomOpen]);
 
+  // Desktop: wheel / trackpad scroll navigates while fullscreen is open
+  useEffect(() => {
+    if (!zoomOpen || total <= 1) return;
+    let lastNavAt = 0;
+    const onWheel = (e: WheelEvent) => {
+      const now = Date.now();
+      if (now - lastNavAt < 320) return;
+      const absX = Math.abs(e.deltaX);
+      const absY = Math.abs(e.deltaY);
+      if (absX < 12 && absY < 12) return;
+      e.preventDefault();
+      lastNavAt = now;
+      if (absX >= absY) {
+        if (e.deltaX > 0) goNext();
+        else goPrev();
+      } else if (e.deltaY > 0) {
+        goNext();
+      } else {
+        goPrev();
+      }
+    };
+    window.addEventListener('wheel', onWheel, { passive: false });
+    return () => window.removeEventListener('wheel', onWheel);
+  }, [zoomOpen, total, goNext, goPrev]);
+
+  const zoomSwipeRef = useRef<{ x: number; y: number } | null>(null);
+
+  const onZoomSwipeDown = (e: React.PointerEvent) => {
+    if (total <= 1) return;
+    if ((e.target as HTMLElement).closest('button, a, iframe, [data-zoom-viewport]')) return;
+    zoomSwipeRef.current = { x: e.clientX, y: e.clientY };
+  };
+
+  const onZoomSwipeUp = (e: React.PointerEvent) => {
+    const start = zoomSwipeRef.current;
+    zoomSwipeRef.current = null;
+    if (!start || total <= 1) return;
+    const dx = e.clientX - start.x;
+    const dy = e.clientY - start.y;
+    if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+    if (dx < 0) goNext();
+    else goPrev();
+  };
+
+  const onSwipePointerDown = (e: React.PointerEvent) => {
+    if (total <= 1 || zoomOpen) return;
+    if ((e.target as HTMLElement).closest('a, iframe')) return;
+    swipeRef.current = { x: e.clientX, y: e.clientY, active: true };
+  };
+
+  const onSwipePointerUp = (e: React.PointerEvent) => {
+    const start = swipeRef.current;
+    swipeRef.current = null;
+    if (!start?.active || total <= 1) return;
+    const dx = e.clientX - start.x;
+    const dy = e.clientY - start.y;
+    if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
+    suppressClickRef.current = true;
+    if (dx < 0) goNext();
+    else goPrev();
+  };
+
+  const withSwipeClickGuard = (action: () => void) => (e: React.MouseEvent) => {
+    if (suppressClickRef.current) {
+      suppressClickRef.current = false;
+      e.preventDefault();
+      e.stopPropagation();
+      return;
+    }
+    action();
+  };
+
+  const onHeroMouseEnter = () => {
+    hoverPausedRef.current = true;
+    setAutoplayPaused(true);
+    clearResumeTimer();
+  };
+
+  const onHeroMouseLeave = () => {
+    hoverPausedRef.current = false;
+    clearResumeTimer();
+    resumeTimerRef.current = setTimeout(() => {
+      resumeTimerRef.current = null;
+      if (!hoverPausedRef.current) setAutoplayPaused(false);
+    }, AUTOPLAY_RESUME_MS);
+  };
+
+  const onHeroPointerDown = () => {
+    // Touch / press — pause immediately; resume after idle (mouse hover uses enter/leave)
+    if (hoverPausedRef.current) return;
+    pauseAutoplayForInteraction();
+  };
+
   const multi = total > 1;
-  /** Enough peeks to fill each side of a full-bleed hero without empty navy gaps */
+  /** Mobile: one wider peek per side; desktop keeps the fuller strip */
   const peeksPerSide = useMemo(() => {
     if (total <= 1) return 0;
+    if (isMobile) return 1;
     if (total === 2) return 2;
     return Math.min(3, total);
-  }, [total]);
+  }, [total, isMobile]);
 
   const leftSlots = useMemo(() => leftPeekSlots(peeksPerSide), [peeksPerSide]);
   const rightSlots = useMemo(() => rightPeekSlots(peeksPerSide), [peeksPerSide]);
@@ -324,17 +615,29 @@ export function DetailSliverMediaGallery({
   if (!safeItems.length) return null;
 
   const current = slideAt(safeItems, activeIndex, 0)!;
+  const slideKey = current.id ?? current.url ?? String(activeIndex);
 
   return (
-    <section className={cn('relative w-full overflow-x-clip', className)} aria-label={ariaLabel}>
+    <section
+      className={cn('relative w-full overflow-x-clip', className)}
+      aria-label={ariaLabel}
+      onMouseEnter={onHeroMouseEnter}
+      onMouseLeave={onHeroMouseLeave}
+      onPointerDown={onHeroPointerDown}
+    >
       <div
         className={cn(
-          'flex w-full items-center gap-2 sm:gap-3 md:gap-3.5',
+          'flex w-full items-center gap-2.5 sm:gap-3 md:gap-3.5',
           multi ? 'justify-stretch' : 'justify-center px-4',
         )}
+        onPointerDown={onSwipePointerDown}
+        onPointerUp={onSwipePointerUp}
+        onPointerCancel={() => {
+          swipeRef.current = null;
+        }}
       >
         {multi ? (
-          <div className="flex flex-1 min-w-0 items-center justify-end gap-2 sm:gap-3 md:gap-3.5 overflow-hidden">
+          <div className="flex flex-1 min-w-0 items-center justify-end gap-2.5 sm:gap-3 md:gap-3.5 overflow-hidden">
             {leftSlots.map((slot) => {
               const item = slideAt(safeItems, activeIndex, slot.offset);
               if (!item) return null;
@@ -342,7 +645,7 @@ export function DetailSliverMediaGallery({
                 <button
                   key={`L${slot.offset}`}
                   type="button"
-                  onClick={goPrev}
+                  onClick={withSwipeClickGuard(goPrev)}
                   className={cn(
                     'relative min-w-0 overflow-hidden cursor-pointer border-0 p-0 bg-transparent rounded-xl',
                     PEEK_FLEX[slot.size],
@@ -351,7 +654,18 @@ export function DetailSliverMediaGallery({
                   )}
                   aria-label="Previous media"
                 >
-                  <SliverMedia item={item} playSize={slot.size === 'near' ? 36 : 28} />
+                  <AnimatePresence mode="popLayout" initial={false}>
+                    <motion.div
+                      key={`${activeIndex}:${item.id ?? item.url}:${slot.offset}`}
+                      className="absolute inset-0"
+                      initial={{ opacity: 0.55, x: direction >= 0 ? 12 : -12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0.35, x: direction >= 0 ? -12 : 12 }}
+                      transition={SLIDE_TRANSITION}
+                    >
+                      <SliverMedia item={item} playSize={slot.size === 'near' ? 36 : 28} />
+                    </motion.div>
+                  </AnimatePresence>
                 </button>
               );
             })}
@@ -361,19 +675,28 @@ export function DetailSliverMediaGallery({
         <div
           className={cn(
             'relative overflow-hidden shrink-0 rounded-2xl md:rounded-none',
-            // Same center stage for 1 photo (LIVE) and multi carousels (product/guide)
-            'w-[min(52vw,760px)] sm:w-[min(50vw,720px)] md:w-[min(48vw,780px)] lg:w-[min(46vw,860px)]',
+            // Slightly narrower on mobile so side peeks get more room; desktop unchanged feel
+            'w-[min(46vw,760px)] sm:w-[min(50vw,720px)] md:w-[min(48vw,780px)] lg:w-[min(46vw,860px)]',
             'h-[280px] sm:h-[360px] md:h-[460px] lg:h-[580px]',
           )}
         >
-          <button
-            type="button"
-            onClick={() => setZoomOpen(true)}
-            className="block w-full h-full border-0 p-0 bg-transparent cursor-zoom-in"
-            aria-label="View media fullscreen"
-          >
-            <SliverMedia item={current} playSize={48} />
-          </button>
+          <AnimatePresence initial={false} custom={direction} mode="popLayout">
+            <motion.button
+              key={slideKey}
+              type="button"
+              custom={direction}
+              variants={slideVariants}
+              initial="enter"
+              animate="center"
+              exit="exit"
+              transition={SLIDE_TRANSITION}
+              onClick={withSwipeClickGuard(() => setZoomOpen(true))}
+              className="absolute inset-0 block w-full h-full border-0 p-0 bg-transparent cursor-zoom-in"
+              aria-label="View media fullscreen"
+            >
+              <SliverMedia item={current} playSize={48} />
+            </motion.button>
+          </AnimatePresence>
           <button
             type="button"
             onClick={() => setZoomOpen(true)}
@@ -387,7 +710,7 @@ export function DetailSliverMediaGallery({
             <div className="absolute top-3 left-3 sm:top-3.5 sm:left-3.5 z-10 flex flex-col items-start gap-2 max-w-[calc(100%-5rem)]">
               <span
                 className={cn(
-                  'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold tracking-tight shadow-md backdrop-blur-sm',
+                  'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-tight shadow-md backdrop-blur-sm',
                   liveBadge.isLive
                     ? 'bg-rose-600/90 text-white'
                     : 'bg-black/60 text-white',
@@ -397,7 +720,7 @@ export function DetailSliverMediaGallery({
                 {liveBadge.label}
               </span>
               {liveBadge.scheduledAt && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-black/50 text-white text-[10px] font-medium backdrop-blur-sm">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/50 text-white text-[10px] font-medium backdrop-blur-sm">
                   <Clock size={11} /> {new Date(liveBadge.scheduledAt).toLocaleString()}
                 </span>
               )}
@@ -405,7 +728,7 @@ export function DetailSliverMediaGallery({
                 <a
                   href="#spotlight-content-hero"
                   onClick={(e) => e.stopPropagation()}
-                  className="inline-flex items-center justify-center min-h-[32px] px-3 py-1.5 bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-wider rounded hover:bg-[#CF4400] no-underline shadow-md"
+                  className="inline-flex items-center justify-center min-h-[32px] px-3 py-1.5 bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-wider rounded-full hover:bg-[#CF4400] no-underline shadow-md"
                 >
                   {liveBadge.ctaLabel}
                 </a>
@@ -415,7 +738,7 @@ export function DetailSliverMediaGallery({
         </div>
 
         {multi ? (
-          <div className="flex flex-1 min-w-0 items-center justify-start gap-2 sm:gap-3 md:gap-3.5 overflow-hidden">
+          <div className="flex flex-1 min-w-0 items-center justify-start gap-2.5 sm:gap-3 md:gap-3.5 overflow-hidden">
             {rightSlots.map((slot) => {
               const item = slideAt(safeItems, activeIndex, slot.offset);
               if (!item) return null;
@@ -423,7 +746,7 @@ export function DetailSliverMediaGallery({
                 <button
                   key={`R${slot.offset}`}
                   type="button"
-                  onClick={goNext}
+                  onClick={withSwipeClickGuard(goNext)}
                   className={cn(
                     'relative min-w-0 overflow-hidden cursor-pointer border-0 p-0 bg-transparent rounded-xl',
                     PEEK_FLEX[slot.size],
@@ -432,7 +755,18 @@ export function DetailSliverMediaGallery({
                   )}
                   aria-label="Next media"
                 >
-                  <SliverMedia item={item} playSize={slot.size === 'near' ? 40 : 28} />
+                  <AnimatePresence mode="popLayout" initial={false}>
+                    <motion.div
+                      key={`${activeIndex}:${item.id ?? item.url}:${slot.offset}`}
+                      className="absolute inset-0"
+                      initial={{ opacity: 0.55, x: direction >= 0 ? 12 : -12 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0.35, x: direction >= 0 ? -12 : 12 }}
+                      transition={SLIDE_TRANSITION}
+                    >
+                      <SliverMedia item={item} playSize={slot.size === 'near' ? 40 : 28} />
+                    </motion.div>
+                  </AnimatePresence>
                 </button>
               );
             })}
@@ -466,9 +800,9 @@ export function DetailSliverMediaGallery({
           <button
             key={i}
             type="button"
-            onClick={() => setActiveIndex(i)}
+            onClick={() => goToSlide(i)}
             className={cn(
-              'rounded-full border-0 p-0 cursor-pointer transition-all',
+              'rounded-full border-0 p-0 cursor-pointer transition-all duration-300 ease-out',
               i === activeIndex ? 'w-5 h-2 bg-[#EB4501]' : 'w-2 h-2 bg-white/35 hover:bg-white/55',
             )}
             aria-label={`Go to slide ${i + 1}`}
@@ -488,8 +822,13 @@ export function DetailSliverMediaGallery({
 
       {zoomOpen && (
         <div
-          className="fixed inset-0 bg-black/90 z-[200] flex items-center justify-center"
+          className="fixed inset-0 bg-black/90 z-[200] flex items-center justify-center overscroll-none"
           onClick={() => setZoomOpen(false)}
+          onPointerDown={onZoomSwipeDown}
+          onPointerUp={onZoomSwipeUp}
+          onPointerCancel={() => {
+            zoomSwipeRef.current = null;
+          }}
           role="dialog"
           aria-modal="true"
           aria-label="Zoomed media"
@@ -499,9 +838,29 @@ export function DetailSliverMediaGallery({
             onClick={(e) => e.stopPropagation()}
           >
             {isVideoKind(current.kind) ? (
-              <SliverMedia item={current} playSize={64} />
+              <div
+                className="w-full h-full"
+                onPointerDown={(e) => {
+                  if (total <= 1) return;
+                  zoomSwipeRef.current = { x: e.clientX, y: e.clientY };
+                }}
+                onPointerUp={onZoomSwipeUp}
+              >
+                <SliverMedia item={current} playSize={64} />
+              </div>
             ) : (
-              <PinchZoomImage src={current.url} alt={current.alt ?? ''} />
+              <PinchZoomImage
+                src={current.url}
+                alt={current.alt ?? ''}
+                onNavigate={
+                  total > 1
+                    ? (dir) => {
+                        if (dir > 0) goNext();
+                        else goPrev();
+                      }
+                    : undefined
+                }
+              />
             )}
           </div>
           {total > 1 && (

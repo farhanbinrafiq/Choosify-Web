@@ -19,7 +19,7 @@ import { cn } from '../../lib/utils';
 
 const MODULES = [
   { to: '/marketing/content', label: 'Spotlight Content', icon: Megaphone, match: '/marketing/content' },
-  { to: '/marketing/sponsored', label: 'Sponsored Campaigns', icon: Target, match: '/marketing/sponsored' },
+  { to: '/marketing/sponsored', label: 'Promoted Campaigns', icon: Target, match: '/marketing/sponsored' },
   { to: '/marketing/collections', label: 'Collections', icon: FolderOpen, match: '/marketing/collections' },
   { to: '/marketing/live-events', label: 'Live Events', icon: Radio, match: '/marketing/live-events' },
   { to: '/marketing/buying-guides', label: 'Buying Guides', icon: BookOpen, match: '/marketing/buying-guides' },

@@ -17,6 +17,7 @@ import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 import { ListingAdRail } from '../components/ListingAdRail';
 import { AdSenseSlot } from '../components/AdSenseSlot';
 import { ProductsSponsoredBannerCarousel } from '../components/commerce/AdvertiseHereCard';
+import { SponsoredCardChrome } from '../components/commerce/SponsoredCardChrome';
 import { useSponsoredFeedEntries } from '../hooks/useSponsoredFeedEntries';
 import { useSponsoredPlacementsForSurface } from '../hooks/useSponsoredPlacementsForSurface';
 import { PLACEMENT_KEYS } from '../lib/placements';
@@ -1063,7 +1064,7 @@ export function AllProductsPage() {
           <div className="bg-white rounded-2xl border border-[#eef2f6] p-4.5 shadow-sm text-left relative overflow-hidden w-full flex flex-col">
              <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#eef2f6] px-1">
                 <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
-                   ðŸ‘‰ Sponsored Recommendations
+                   👉 Promoted Recommendations
                 </h3>
                 <Link 
                    to="/recommendations" 
@@ -1076,7 +1077,7 @@ export function AllProductsPage() {
              <div className="flex flex-col gap-3">
                 {SPONSORED_RECOMMENDATIONS.length === 0 ? (
                    <div className="text-center py-6 border border-dashed border-gray-200 rounded-2xl">
-                      <p className="text-xs text-gray-400 font-medium px-2">Sponsored recommendations will appear here.</p>
+                      <p className="text-xs text-gray-400 font-medium px-2">Promoted recommendations will appear here.</p>
                    </div>
                 ) : (
                    SPONSORED_RECOMMENDATIONS.map((item) => (
@@ -1092,7 +1093,7 @@ export function AllProductsPage() {
                                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                referrerPolicy="no-referrer"
                             />
-                            <span className="absolute bottom-0 right-0 bg-[#EB4501]/90 text-white text-[6px] font-black px-1 py-0.5 rounded-tl-md tracking-wider">AD</span>
+                            <SponsoredCardChrome brandName={item.author || item.title} logoUrl={item.image} size="sm" />
                          </div>
                          <div className="flex-1 min-w-0 flex flex-col justify-center text-left">
                             <span className="text-[7.5px] font-black text-[#EB4501] uppercase tracking-widest leading-none block mb-0.5">{item.category}</span>

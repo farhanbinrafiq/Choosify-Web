@@ -131,14 +131,14 @@ export function ContentDetailsPage() {
   const trustStatement = content.trustStatement || [
     { title: 'BSTI Certified Products Only', description: 'All recommended cosmetics, electronics, and food items are verified against Bangladesh Standards and Testing Institution safety regulations.' },
     { title: 'Independent Lab Testing', description: 'Our sound engineers, pilots, and tech curators physically test and unbox all products in local Dhaka environments.' },
-    { title: 'Zero Sponsored Bias', description: 'Our editorial opinions remain 100% independent. We only display valid merchant deals with official warranties.' }
+    { title: 'Zero Promoted Bias', description: 'Our editorial opinions remain 100% independent. We only display valid merchant deals with official warranties.' }
   ];
 
   // Callouts helper with high-quality, contextual local hints
   const callouts = content.callouts || [
     { variant: 'tip' as const, title: 'Pro Tip: Local Warranty Validation', content: 'Always check the importer seal on the retail box. Scan the bar code and match it with the Bangladesh Customs clearance database to ensure you receive a genuine product with official manufacturer warranty support.' },
     { variant: 'warning' as const, title: 'Important Warning: Grey Market Risks', content: 'Purchasing from unauthorized grey market dealers in Dhaka might save you 10-15% upfront, but you risk getting refurbished units with zero warranty coverage or counterfeit chargers.' },
-    ...(content.campaignBlock ? [{ variant: 'sponsored' as const, title: 'Sponsored Campaign Note', content: `This review highlights products featured in the ${content.campaignBlock.sponsorName} festive campaign. Use the code ${content.campaignBlock.voucherCode} for maximum savings.` }] : []),
+    ...(content.campaignBlock ? [{ variant: 'sponsored' as const, title: 'Promoted Campaign Note', content: `This review highlights products featured in the ${content.campaignBlock.sponsorName} festive campaign. Use the code ${content.campaignBlock.voucherCode} for maximum savings.` }] : []),
     { variant: 'expert' as const, title: 'Expert Note: Sound/Performance Analysis', content: 'Our laboratory tests show that operating these devices in high-humidity climates (like the summer months in Bangladesh) requires regular cleaning of charging pins and speaker meshes to avoid long-term oxide buildup.' }
   ];
 
@@ -305,7 +305,7 @@ export function ContentDetailsPage() {
                     />
                     <CalloutCard 
                       variant="sponsored" 
-                      title="Sponsored Campaign" 
+                      title="Promoted Campaign" 
                       content={`This is an official campaign by ${content.campaignBlock.sponsorName}. Valid for ${content.campaignBlock.durationDays} days.`} 
                     />
                   </div>

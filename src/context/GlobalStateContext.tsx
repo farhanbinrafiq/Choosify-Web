@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
+import { onAuthStateChanged } from 'firebase/auth';
 import { CommerceProduct, User, Seller, Brand, Order, SubOrder, SubOrderItem, Report, BuyerReputation } from '../types/schemas';
 import { CREATORS } from '../data/creators';
 import { loadMockCatalog } from '../data/loadMockCatalog';
@@ -17,6 +18,15 @@ import { hydrateBrandPostsFromApi } from '../lib/brandPosts';
 import { FEATURE_FLAG_DEFAULTS, isFlagEnabled, normalizeFeatureFlags } from '../lib/featureFlags';
 import { operationsApi } from '../services/operationsApi';
 import { ensureDemoExpiryOrders } from '../lib/messaging/demoExpiryOrders';
+import { auth } from '../lib/firebase';
+import {
+  AUTH_LOGIN_FLAG_KEY,
+  AUTH_PROFILE_KEY,
+  AUTH_TOKEN_KEY,
+  clearAuthToken,
+  resolveSessionUser,
+  signOutSession,
+} from '../lib/authSession';
 import type { CatalogBrand, CatalogCategory, CatalogCreator, CatalogDeal, CatalogGuide, CatalogPlacement, CatalogProduct, CatalogProductDetail, HomepageConfig, SiteConfig } from '../types/catalog';
 import { mapCatalogCreator, mapCatalogGuide } from '../utils/editorialMappers';
 import { commerceProductToCatalog, resolveCatalogProducts } from '../utils/productNormalize';
@@ -37,7 +47,7 @@ declare module '../types/schemas' {
     promoType?: string;
     subtotal?: number;
     deliveryTotal?: number;
-    paymentMethod?: 'cod' | 'credit';
+    paymentMethod?: 'cod' | 'credit' | 'online';
     shipping?: {
       fullName: string;
       phone: string;
@@ -109,28 +119,26 @@ export interface GlobalStateContextType {
 }
 
 const DEFAULT_USER: User = {
-  id: 'usr-892',
+  id: 'guest',
   role: 'customer',
-  name: 'Farhan Bin Rafiq',
-  username: 'farhanrafiq',
-  phone: '+880 1712-349812',
-  email: 'farhanbinrafiq@gmail.com',
-  avatar: 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png',
-  address: 'H-24, Road-11, Banani, Dhaka, Bangladesh',
-  reputation_score: 95,
+  name: 'Guest',
+  username: 'guest',
+  phone: '',
+  email: '',
+  avatar: '',
+  address: '',
+  reputation_score: 0,
   orderStats: {
-    totalOrders: 18,
-    completedOrders: 16,
-    cancelledOrders: 2
+    totalOrders: 0,
+    completedOrders: 0,
+    cancelledOrders: 0
   },
   verification: {
-    verified: true,
-    docType: 'NID',
-    docUrl: '#'
+    verified: false,
   },
-  premiumStatus: true,
-  createdAt: '2024-01-15T08:00:00Z',
-  updatedAt: '2026-05-20T12:00:00Z'
+  premiumStatus: false,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
 };
 
 const INITIAL_BUYER_REPUTATIONS: BuyerReputation[] = [
@@ -226,7 +234,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
 
   const [currentUser, setCurrentUser] = useState<User>(() => {
     try {
-      const saved = localStorage.getItem('choosify_user_profile');
+      const saved = localStorage.getItem(AUTH_PROFILE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
         return { ...DEFAULT_USER, ...parsed };
@@ -238,32 +246,69 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   const updateCurrentUser = (updates: Partial<User>) => {
     setCurrentUser(prev => {
       const next = { ...prev, ...updates };
-      try { localStorage.setItem('choosify_user_profile', JSON.stringify(next)); } catch {}
+      try { localStorage.setItem(AUTH_PROFILE_KEY, JSON.stringify(next)); } catch {}
       return next;
     });
   };
 
   const [isLoggedIn, _setIsLoggedIn] = useState<boolean>(() => {
     try {
-      const saved = localStorage.getItem('choosify_is_logged_in');
-      return saved === 'true';
+      const saved = localStorage.getItem(AUTH_LOGIN_FLAG_KEY);
+      const hasToken = Boolean(localStorage.getItem(AUTH_TOKEN_KEY));
+      return saved === 'true' && hasToken;
     } catch {
       return false;
     }
   });
 
+  const currentUserRef = useRef(currentUser);
+  currentUserRef.current = currentUser;
+
   const setIsLoggedIn = (val: boolean) => {
     _setIsLoggedIn(val);
     try {
-      localStorage.setItem('choosify_is_logged_in', String(val));
+      localStorage.setItem(AUTH_LOGIN_FLAG_KEY, String(val));
+      if (!val) clearAuthToken();
     } catch {}
   };
 
   const logout = () => {
-    setIsLoggedIn(false);
-    localStorage.removeItem('choosify_is_logged_in');
-    // Do NOT clear user profile on logout — preserve their saved data
+    void signOutSession();
+    _setIsLoggedIn(false);
+    try {
+      localStorage.setItem(AUTH_LOGIN_FLAG_KEY, 'false');
+    } catch {}
   };
+
+  // Restore / refresh real Firebase session into GlobalState (source of truth for identity).
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (!firebaseUser) {
+        _setIsLoggedIn(false);
+        try {
+          localStorage.setItem(AUTH_LOGIN_FLAG_KEY, 'false');
+        } catch {}
+        clearAuthToken();
+        return;
+      }
+      try {
+        const { user } = await resolveSessionUser(firebaseUser, currentUserRef.current);
+        setCurrentUser(user);
+        try {
+          localStorage.setItem(AUTH_PROFILE_KEY, JSON.stringify(user));
+          localStorage.setItem(AUTH_LOGIN_FLAG_KEY, 'true');
+        } catch {}
+        _setIsLoggedIn(true);
+      } catch {
+        clearAuthToken();
+        _setIsLoggedIn(false);
+        try {
+          localStorage.setItem(AUTH_LOGIN_FLAG_KEY, 'false');
+        } catch {}
+      }
+    });
+    return () => unsubscribe();
+  }, []);
 
   const [brandClaimStatuses, setBrandClaimStatuses] = useState<Record<string, 'verified' | 'pending' | 'community'>>(() => {
     const saved = localStorage.getItem('choosify_brand_claims_store');
@@ -414,10 +459,9 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
 
   // Backend is source of truth for the orders list; localStorage is an optimistic cache only.
   useEffect(() => {
-    if (!isLoggedIn || !currentUser?.id) return;
+    if (!isLoggedIn || !currentUser?.id || currentUser.id === 'guest') return;
 
     let cancelled = false;
-    const AUTH_TOKEN_KEY = 'choosify_auth_token';
 
     const mapServerOrder = (row: Record<string, unknown>): Order => {
       const subOrdersRaw = Array.isArray(row.subOrders) ? row.subOrders : [];
@@ -484,6 +528,13 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
         depositPercent: row.depositPercent !== undefined ? Number(row.depositPercent) : undefined,
         depositAmount: row.depositAmount !== undefined ? Number(row.depositAmount) : undefined,
         remainingAmount: row.remainingAmount !== undefined ? Number(row.remainingAmount) : undefined,
+        paymentProvider: row.paymentProvider as Order['paymentProvider'],
+        paymentStatus: row.paymentStatus as Order['paymentStatus'],
+        paymentTranId: typeof row.paymentTranId === 'string' ? row.paymentTranId : undefined,
+        paymentValId: typeof row.paymentValId === 'string' ? row.paymentValId : undefined,
+        paidAmount: row.paidAmount !== undefined ? Number(row.paidAmount) : undefined,
+        paymentValidatedAt:
+          typeof row.paymentValidatedAt === 'string' ? row.paymentValidatedAt : undefined,
       };
     };
 
@@ -697,7 +748,9 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       stock: typeof product.stock === 'number' ? product.stock : 0,
       sellerId: `seller-${(product.brandName || 'platform').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
       brandId: normalizedBrandId,
+      catalogBrandId: product.brandId,
       brand: product.brandName || 'Choosify',
+      brandName: product.brandName || 'Choosify',
       price: product.price || 0,
       description: product.description || '',
       category: product.categoryName || 'General',

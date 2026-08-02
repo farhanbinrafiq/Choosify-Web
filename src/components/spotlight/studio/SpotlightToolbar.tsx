@@ -33,7 +33,7 @@ export function SpotlightToolbar({ title, status, onSave, onPreview, onSubmit, o
       </div>
       <div className="flex items-center gap-2 shrink-0">
         <span className={cn(
-          'hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold uppercase',
+          'hidden sm:inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-bold uppercase',
           status === 'published' || status === 'live' ? 'bg-emerald-50 text-emerald-700' : 'bg-gray-100 text-gray-500',
         )}>
           <Clock size={10} /> {STATUS_LABELS[status]}

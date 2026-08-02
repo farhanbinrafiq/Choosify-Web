@@ -10,7 +10,7 @@ import { cn } from '../../lib/utils';
 const PREVIEW_MODES: { id: CmsPreviewMode; label: string; width: number }[] = [
   { id: 'spotlight_card', label: 'Spotlight Card', width: 360 },
   { id: 'spotlight_detail', label: 'Detail Page', width: 960 },
-  { id: 'sponsored_card', label: 'Sponsored Card', width: 360 },
+  { id: 'sponsored_card', label: 'Promoted Card', width: 360 },
   { id: 'mobile', label: 'Mobile', width: 390 },
   { id: 'desktop', label: 'Desktop', width: 1280 },
 ];
@@ -56,7 +56,7 @@ export function CmsPreviewPanel({ mode, onModeChange, content, sponsored }: CmsP
                 id: sponsored.campaignId,
                 kind: sponsored.campaignType,
                 sponsorName: sponsored.brandName ?? 'Sponsor',
-                sponsoredLabel: `Sponsored by ${sponsored.brandName ?? 'Partner'}`,
+                sponsoredLabel: `Promoted by ${sponsored.brandName ?? 'Partner'}`,
                 href: sponsored.cta.url,
                 ctaLabel: sponsored.cta.label,
                 title: sponsored.name,

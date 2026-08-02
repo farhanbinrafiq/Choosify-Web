@@ -24,6 +24,41 @@ import { CategorySponsoredAdCard } from '../components/categories/CategorySponso
 
 type CategoryItem = CategoryDisplayItem;
 
+function isBrandLogoImage(value?: string): value is string {
+  return Boolean(value && /^(https?:|data:|\/)/.test(value));
+}
+
+function resolveFeaturedBrandForCategory(
+  categoryName: string,
+  products: Array<{ brandId?: string; brandName?: string; categoryName?: string }>,
+  brands: Array<{ id: string | number; name: string; slug?: string; logo?: string; image?: string }>,
+) {
+  const needle = categoryName.toLowerCase().split(/\s+/)[0] ?? '';
+  const product = products.find(
+    (p) =>
+      Boolean(p.brandName) &&
+      String(p.categoryName ?? '')
+        .toLowerCase()
+        .includes(needle),
+  );
+  if (!product?.brandName) return undefined;
+
+  const brand =
+    brands.find(
+      (b) =>
+        (product.brandId != null && String(b.id) === String(product.brandId)) ||
+        b.name.toLowerCase() === product.brandName!.toLowerCase(),
+    ) ?? undefined;
+
+  const brandKey = brand?.id || product.brandId || brand?.slug;
+  const logoCandidate = brand?.logo || brand?.image;
+  return {
+    name: brand?.name || product.brandName,
+    href: brandKey ? `/brands/${brandKey}` : undefined,
+    logo: isBrandLogoImage(logoCandidate) ? logoCandidate : undefined,
+  };
+}
+
 export function CategoriesPage() {
   const {
     allCatalogProducts,
@@ -626,6 +661,11 @@ export function CategoriesPage() {
                       }
 
                       const cat = entry.item;
+                      const featured = resolveFeaturedBrandForCategory(
+                        cat.name,
+                        allCatalogProducts ?? [],
+                        (allCatalogBrands?.length ? allCatalogBrands : allBrands) ?? [],
+                      );
 
                       return (
                         <CategoryPremiumCard
@@ -635,15 +675,9 @@ export function CategoriesPage() {
                           icon={cat.icon}
                           image={cat.image}
                           subcategories={cat.subcategories}
-                          featuredBrand={
-                            (allCatalogProducts ?? []).find(
-                              (p) =>
-                                String(p.categoryName ?? '')
-                                  .toLowerCase()
-                                  .includes(cat.name.toLowerCase().split(/\s+/)[0] ?? '') &&
-                                p.brandName,
-                            )?.brandName
-                          }
+                          featuredBrand={featured?.name}
+                          featuredBrandHref={featured?.href}
+                          featuredBrandLogo={featured?.logo}
                         />
                       );
                     })

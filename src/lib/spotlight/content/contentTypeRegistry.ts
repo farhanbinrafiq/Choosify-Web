@@ -93,7 +93,7 @@ export function contentTypesForTab(tabId: string): SpotlightContentType[] {
     recommendations: ['recommendation'],
     videos: ['product_review', 'recommendation', 'creator_review'],
     reels: ['recommendation', 'creator_review'],
-    blogs: ['editorial', 'brand_story'],
+    blogs: ['editorial', 'brand_story', 'buying_guide', 'tutorial', 'tips', 'comparison'],
     announcements: ['announcement', 'event', 'whats_on'],
     launches: ['new_launch'],
     following: [],

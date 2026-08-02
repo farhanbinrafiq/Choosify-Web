@@ -1,6 +1,5 @@
 import React, { Suspense, lazy } from 'react';
 import { Link } from 'react-router-dom';
-import { BadgeCheck } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useGlobalState } from '../../context/GlobalStateContext';
 import type { SponsoredPlacementItem } from '../../types/commerce/sponsoredPlacement';
@@ -11,6 +10,7 @@ import {
 import { resolveCommerceCardVariant } from '../content/universalCommerceCardTypes';
 import type { ResolvedPlacement } from '../../utils/resolvePlacementContent';
 import { PLACEHOLDER_IMAGE } from '../../constants';
+import { SponsoredCardChrome } from './SponsoredCardChrome';
 
 const ProductCard = lazy(() =>
   import('../ProductCard').then((m) => ({ default: m.ProductCard })),
@@ -22,51 +22,6 @@ const UniversalCommerceCard = lazy(() =>
   import('../content/UniversalCommerceCard').then((m) => ({ default: m.UniversalCommerceCard })),
 );
 
-function SponsoredPublisherStrip({
-  item,
-  className,
-}: {
-  item: SponsoredPlacementItem;
-  className?: string;
-}) {
-  return (
-    <div className={cn('flex items-center gap-2 min-w-0 px-1 pb-2', className)}>
-      {item.sponsorLogoUrl ? (
-        <img
-          src={item.sponsorLogoUrl}
-          alt=""
-          className="w-6 h-6 rounded-full object-cover border border-gray-100 shrink-0"
-          loading="lazy"
-        />
-      ) : (
-        <span className="w-6 h-6 rounded-full bg-[#EB4501]/10 text-[#EB4501] text-[9px] font-black flex items-center justify-center shrink-0">
-          {item.sponsorName.slice(0, 1)}
-        </span>
-      )}
-      <div className="min-w-0 flex-1">
-        <div className="flex items-center gap-1 min-w-0">
-          <span className="text-[10px] font-bold text-[#1a1a2e] truncate">{item.sponsorName}</span>
-          {item.isVerified && (
-            <BadgeCheck size={11} className="text-[#EB4501] shrink-0" aria-hidden />
-          )}
-        </div>
-        <p
-          className="text-[8px] text-gray-400 uppercase tracking-wide truncate"
-          aria-label="Sponsored Content"
-        >
-          {item.sponsoredLabel}
-        </p>
-      </div>
-      <span
-        className="shrink-0 text-[7px] font-bold uppercase tracking-wider text-gray-400 border border-gray-200 rounded px-1 py-0.5"
-        aria-hidden
-      >
-        Sponsored
-      </span>
-    </div>
-  );
-}
-
 function SponsoredCompactCard({ item }: { item: SponsoredPlacementItem }) {
   const inner = (
     <div className="group block choosify-dark-surface rounded-[5px] hover:scale-[1.01] transition-all duration-300 flex flex-col h-full min-h-[260px] w-full overflow-hidden text-left">
@@ -77,11 +32,13 @@ function SponsoredCompactCard({ item }: { item: SponsoredPlacementItem }) {
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[2s]"
           loading="lazy"
         />
+        <SponsoredCardChrome
+          brandName={item.sponsorName}
+          logoUrl={item.sponsorLogoUrl}
+          size="md"
+        />
       </div>
       <div className="p-3 flex flex-col flex-[3] min-h-0 justify-center min-w-0">
-        <span className="text-[9px] font-extrabold uppercase tracking-wider text-[#EB4501] mb-1 flex items-center gap-1">
-          🏷️ Sponsored Ad
-        </span>
         {item.title && (
           <h3 className="text-xs font-bold uppercase text-white line-clamp-2 mb-1">{item.title}</h3>
         )}
@@ -130,7 +87,7 @@ const SPOTLIGHT_KINDS = new Set([
 
 /**
  * LE-006.3 — Universal sponsored card.
- * Reuses existing Choosify cards; only adds subtle sponsored publisher strip.
+ * Reuses existing Choosify cards; adds shared logo + PROMOTED chrome on the media.
  */
 export function ChoosifySponsoredCard({
   item,
@@ -191,10 +148,25 @@ export function ChoosifySponsoredCard({
     return <SponsoredCompactCard item={item} />;
   };
 
+  const needsOuterChrome =
+    ((item.kind === 'product' || item.kind === 'deal') && Boolean(product)) ||
+    (item.kind === 'brand' && Boolean(brand));
+
   return (
-    <div className={cn('w-full h-full flex flex-col min-h-0', className)} aria-label="Sponsored Content">
-      <SponsoredPublisherStrip item={item} />
-      <div className="flex-1 min-h-0">{renderInner()}</div>
+    <div
+      className={cn('w-full h-full flex flex-col min-h-0 relative', className)}
+      aria-label="Promoted Content"
+    >
+      <div className="flex-1 min-h-0 relative">
+        {renderInner()}
+        {needsOuterChrome ? (
+          <SponsoredCardChrome
+            brandName={item.sponsorName}
+            logoUrl={item.sponsorLogoUrl ?? brand?.logo ?? product?.image}
+            size="md"
+          />
+        ) : null}
+      </div>
     </div>
   );
 }

@@ -102,7 +102,7 @@ export function FeaturedCard({ guide }: { guide: any }) {
 
         {/* Badge: Featured Story */}
         <div className="absolute top-5 left-5 z-20">
-          <div className="bg-orange-primary px-3.5 py-1.5 rounded-[8px] flex items-center justify-center border border-white/10 shadow-sm">
+          <div className="bg-orange-primary px-3.5 py-1.5 rounded-full flex items-center justify-center border border-white/10 shadow-sm">
             <span className="text-[10px] font-black tracking-wider text-white uppercase leading-none">★ FEATURED</span>
           </div>
         </div>
@@ -126,7 +126,7 @@ export function FeaturedCard({ guide }: { guide: any }) {
         </div>
 
         {/* Bottom Time Pill */}
-        <div className="absolute bottom-5 right-5 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-[4px] text-[10px] font-mono font-bold text-white tracking-widest border border-white/10 leading-none">
+        <div className="absolute bottom-5 right-5 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-mono font-bold text-white tracking-widest border border-white/10 leading-none">
           {guide.duration || '8:10'}
         </div>
       </div>
@@ -660,7 +660,7 @@ export function GuidesPage() {
               selectedFollowers ? { id: 'followers', label: `Followers: ${selectedFollowers}`, onRemove: () => setSelectedFollowers(null) } : null,
               selectedEngagementRate ? { id: 'engagement', label: `Engagement: ${selectedEngagementRate}`, onRemove: () => setSelectedEngagementRate(null) } : null,
               selectedTopic ? { id: 'topic', label: `Topic: ${selectedTopic}`, onRemove: () => setSelectedTopic(null) } : null,
-              selectedSponsored ? { id: 'sponsored', label: 'Sponsored', onRemove: () => setSelectedSponsored(null) } : null,
+              selectedSponsored ? { id: 'sponsored', label: 'Promoted', onRemove: () => setSelectedSponsored(null) } : null,
               selectedOfficialCampaign ? { id: 'official', label: 'Official Campaign', onRemove: () => setSelectedOfficialCampaign(null) } : null,
               isTrending ? { id: 'trending', label: 'Trending', onRemove: () => setIsTrending(null) } : null,
               isNew ? { id: 'new', label: 'New Releases', onRemove: () => setIsNew(null) } : null,
@@ -968,7 +968,7 @@ export function GuidesPage() {
           <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Sponsors & Campaigns</h3>
           <div className="space-y-1">
             {[
-              { value: 'sponsored', label: 'Sponsored Guides Only' }
+              { value: 'sponsored', label: 'Promoted Guides Only' }
             ].map(opt => {
               const isSelected = selectedSponsored === true;
               return (
@@ -1123,7 +1123,7 @@ export function GuidesPage() {
           <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Sponsors & Campaigns</h3>
           <div className="space-y-1">
             {[
-              { value: 'sponsored', label: 'Sponsored Guides Only' }
+              { value: 'sponsored', label: 'Promoted Guides Only' }
             ].map(opt => {
               const isSelected = selectedSponsored === true;
               return (
@@ -1341,7 +1341,7 @@ export function GuidesPage() {
           selectedFollowers ? { id: 'followers', label: `Followers: ${selectedFollowers}`, onRemove: () => setSelectedFollowers(null) } : null,
           selectedEngagementRate ? { id: 'engagement', label: `Engagement: ${selectedEngagementRate}`, onRemove: () => setSelectedEngagementRate(null) } : null,
           selectedTopic ? { id: 'topic', label: `Topic: ${selectedTopic}`, onRemove: () => setSelectedTopic(null) } : null,
-          selectedSponsored ? { id: 'sponsored', label: 'Sponsored', onRemove: () => setSelectedSponsored(null) } : null,
+          selectedSponsored ? { id: 'sponsored', label: 'Promoted', onRemove: () => setSelectedSponsored(null) } : null,
           selectedOfficialCampaign ? { id: 'official', label: 'Official Campaign', onRemove: () => setSelectedOfficialCampaign(null) } : null,
           isTrending ? { id: 'trending', label: 'Trending', onRemove: () => setIsTrending(null) } : null,
           isNew ? { id: 'new', label: 'New Releases', onRemove: () => setIsNew(null) } : null,

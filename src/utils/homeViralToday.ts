@@ -1,5 +1,6 @@
 import type { CatalogProduct } from '../types/catalog';
 import type { HomepageSpotlightCardModel } from '../types/spotlight/homepage';
+import type { SpotlightContent } from '../types/spotlight/experience/content';
 import { resolvePreviewImage } from '../components/media/types/mediaModel';
 import { catalogGuideHref } from '../lib/spotlight/content';
 import { PLACEHOLDER_IMAGE } from '../constants';
@@ -7,9 +8,10 @@ import {
   classifyContentPriority,
   isPreviouslyLive,
   prioritizeContent,
+  spotlightContentToPriorityInput,
   type ContentPriorityInput,
 } from './contentPriority';
-
+import { resolveFeedCardVariant } from './spotlightMixedFeed';
 /** Lightweight Viral Today tile — Choosify.dc.html Home */
 export interface ViralTodayItem {
   id: string;
@@ -128,6 +130,36 @@ function guidePriorityInput(guide: ViralGuideInput): ContentPriorityInput {
   };
 }
 
+function spotlightToViral(
+  content: SpotlightContent,
+  nowMs: number,
+): ViralTodayItem {
+  const variant = resolveFeedCardVariant(content, nowMs);
+  const kind: ViralTodayItem['kind'] =
+    variant === 'live' ? 'live' : variant === 'reel' ? 'reel' : 'youtube';
+  const image =
+    content.media?.thumbnail ??
+    content.media?.posterImage ??
+    content.media?.previewImage ??
+    content.publisher.logoUrl ??
+    PLACEHOLDER_IMAGE;
+  const durationSec = content.media?.duration;
+  return {
+    id: content.contentId,
+    href: content.href,
+    title: content.headline,
+    image,
+    channel: content.publisher.name || 'Choosify',
+    duration:
+      durationSec != null
+        ? `${Math.floor(durationSec / 60)}:${String(durationSec % 60).padStart(2, '0')}`
+        : undefined,
+    productCount:
+      (content.connections.productIds?.length ?? 0) || (content.extraProductCount ?? 0),
+    kind,
+  };
+}
+
 /**
  * Prefer live Spotlight homepage campaigns; fall back to catalog guides
  * so Viral Today always has content on Home (Choosify.dc.html).
@@ -143,6 +175,8 @@ export function buildHomeViralTodayItems(
   guides: ViralGuideInput[],
   _products?: CatalogProduct[],
   nowMs: number = Date.now(),
+  /** Same Discover/Brand Story experience feed (demos + campaigns) for LIVE sizing parity */
+  spotlightExtras: SpotlightContent[] = [],
 ): ViralTodayItem[] {
   const candidates: ViralCandidate[] = [];
 
@@ -150,11 +184,14 @@ export function buildHomeViralTodayItems(
     const priority = campaignPriorityInput(card);
     const tier = classifyContentPriority(priority, nowMs);
     const kind: ViralTodayItem['kind'] =
-      tier === 'active_live' || tier === 'live_grace' || card.campaign.campaignType === 'livestream'
+      tier === 'active_live' || tier === 'live_grace'
         ? 'live'
-        : card.campaign.campaignType === 'creator_review' || card.campaign.campaignType === 'single_product'
-          ? 'reel'
-          : 'youtube';
+        : card.campaign.campaignType === 'livestream'
+          ? 'youtube'
+          : card.campaign.campaignType === 'creator_review' ||
+              card.campaign.campaignType === 'single_product'
+            ? 'reel'
+            : 'youtube';
     candidates.push({
       key: `campaign-${card.campaign.campaignId}`,
       item: { ...campaignToViral(card, kind), priorityTier: tier },
@@ -163,6 +200,21 @@ export function buildHomeViralTodayItems(
   }
 
   const seen = new Set(candidates.map((c) => c.key));
+  for (const content of spotlightExtras) {
+    const key = `spotlight-${content.contentId}`;
+    if (seen.has(key)) continue;
+    // Campaign cards already cover the same source when present
+    if (content.sourceKind === 'campaign' && seen.has(`campaign-${content.sourceId}`)) continue;
+    seen.add(key);
+    const priority = spotlightContentToPriorityInput(content);
+    const tier = classifyContentPriority(priority, nowMs);
+    candidates.push({
+      key,
+      item: { ...spotlightToViral(content, nowMs), priorityTier: tier },
+      priority,
+    });
+  }
+
   for (const guide of guides) {
     if (guide.status === 'draft' || guide.status === 'archived') continue;
     const key = `guide-${guide.id}`;
@@ -219,10 +271,12 @@ export function buildHomeViralTodayItems(
     items.push(item);
   }
 
-  // Pad lanes from remaining ranked content (option A: fill with older)
+  // Pad lanes from remaining ranked content (option A: fill with older).
+  // Never re-use featured LIVE / already-placed ids, and don't force LIVE into Reels.
   if (items.filter((i) => i.kind === 'youtube').length < 2) {
     for (const item of ranked) {
       if (items.filter((i) => i.kind === 'youtube').length >= 4) break;
+      if (item.priorityTier === 'active_live' || item.priorityTier === 'live_grace') continue;
       if (items.some((i) => i.id === item.id)) continue;
       items.push({
         ...item,
@@ -235,7 +289,9 @@ export function buildHomeViralTodayItems(
   if (items.filter((i) => i.kind === 'reel').length < 2) {
     for (const item of ranked) {
       if (items.filter((i) => i.kind === 'reel').length >= 6) break;
-      if (items.some((i) => i.id === item.id && i.kind === 'reel')) continue;
+      if (item.priorityTier === 'active_live' || item.priorityTier === 'live_grace') continue;
+      if (item.kind === 'live' && !item.previouslyLive) continue;
+      if (items.some((i) => i.id === item.id)) continue;
       items.push({ ...item, kind: 'reel' });
     }
   }

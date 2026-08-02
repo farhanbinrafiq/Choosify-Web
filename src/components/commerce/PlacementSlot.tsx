@@ -49,13 +49,13 @@ export function SponsoredCompareRail({ className }: { className?: string }) {
   return (
     <section
       className={cn('max-w-7xl mx-auto px-6 py-8', className)}
-      aria-label="Sponsored recommendations"
+      aria-label="Promoted recommendations"
     >
       <div className="mb-4">
         <h3 className="text-xs font-black uppercase tracking-widest text-[#1a1a2e]">
           Recommended Alternatives
         </h3>
-        <p className="text-[10px] text-gray-400 mt-1">Sponsored picks based on your comparison</p>
+        <p className="text-[10px] text-gray-400 mt-1">Promoted picks based on your comparison</p>
       </div>
       <div className="choosify-product-grid w-full">
         {items.map((item) => (

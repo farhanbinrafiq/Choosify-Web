@@ -37,7 +37,7 @@ export function resolvedPlacementToSponsoredItem(
     sponsorName: sponsor,
     sponsorLogoUrl: placement.image,
     isVerified: true,
-    sponsoredLabel: sponsorName ? `Sponsored by ${sponsorName}` : 'Sponsored',
+    sponsoredLabel: sponsorName ? `Promoted by ${sponsorName}` : 'Promoted',
     href: placement.href,
     ctaLabel: placement.ctaLabel,
     isExternal: placement.isExternal,

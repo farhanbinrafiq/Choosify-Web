@@ -47,12 +47,18 @@ export function HomePage() {
         )}
 
         {data.sectionVisible('spotlight') && data.hasViralToday && (
-          <HomeSpotlightPreviewSection items={data.viralTodayItems} />
+          <HomeSpotlightPreviewSection
+            items={data.viralTodayItems}
+            productFeed={
+              data.sectionVisible('trending') ? data.featuredProductFeed : undefined
+            }
+          />
         )}
 
-        {data.sectionVisible('trending') && (
-          <HomeFeaturedProductsSection feed={data.featuredProductFeed} />
-        )}
+        {data.sectionVisible('trending') &&
+          !(data.sectionVisible('spotlight') && data.hasViralToday) && (
+            <HomeFeaturedProductsSection feed={data.featuredProductFeed} />
+          )}
 
         {/* Choosify.dc.html — sponsored banner after featured products */}
         <HomeSponsoredBannerSection />

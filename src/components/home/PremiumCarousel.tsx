@@ -2,6 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { motion, useMotionValue, animate } from 'motion/react';
 import { cn } from '../../lib/utils';
+import {
+  AdSlotPaginationRail,
+  type AdSlotPaginationIcon,
+} from '../commerce/AdSlotCarousel';
 
 const SNAP_SPRING = { type: 'spring' as const, stiffness: 320, damping: 34, mass: 0.8 };
 
@@ -15,19 +19,22 @@ export function PremiumCarousel({
   showArrows = true,
   autoplay = false,
   autoplayMs = 4000,
+  getPaginationIcon,
 }: {
   items: any[];
   renderCard: (item: any, index: number, isActive: boolean) => React.ReactNode;
   itemWidth?: number;
   gap?: number;
-  /** `bar` = pill indicators; `ring` = target-style active dot (Today's Deals) */
-  paginationStyle?: 'bar' | 'ring';
+  /** `bar` = pill indicators; `ring` = target-style active dot; `logos` = brand-logo thumbs */
+  paginationStyle?: 'bar' | 'ring' | 'logos';
   paginationAlign?: 'between' | 'center';
   showArrows?: boolean;
   /** Auto-advance slides on an interval. Pauses on hover, resumes on mouse-leave.
    *  Clicking a pagination dot stops it for good (manual takeover). */
   autoplay?: boolean;
   autoplayMs?: number;
+  /** Required when paginationStyle is `logos` — one icon per item */
+  getPaginationIcon?: (item: any, index: number) => AdSlotPaginationIcon;
 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const containerRef = React.useRef<HTMLDivElement>(null);
@@ -62,7 +69,10 @@ export function PremiumCarousel({
 
   const goTo = useCallback(
     (index: number) => {
-      const upper = paginationStyle === 'ring' ? Math.max(0, totalItems - 1) : maxIndex;
+      const upper =
+        paginationStyle === 'ring' || paginationStyle === 'logos'
+          ? Math.max(0, totalItems - 1)
+          : maxIndex;
       const clamped = Math.max(0, Math.min(index, upper));
       setCurrentIndex(clamped);
       animate(x, offsetForIndex(Math.min(clamped, maxIndex)), SNAP_SPRING);
@@ -70,7 +80,6 @@ export function PremiumCarousel({
     [maxIndex, offsetForIndex, paginationStyle, totalItems, x],
   );
 
-  // Keep position valid when the container resizes
   useEffect(() => {
     x.set(offsetForIndex(Math.min(currentIndex, maxIndex)));
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -84,11 +93,12 @@ export function PremiumCarousel({
     goTo(index);
   };
 
-  // Auto-advance: pauses on hover (resumes on mouse-leave), stops for good once the
-  // viewer manually picks a slide via the pagination dots.
   useEffect(() => {
     if (!autoplay || isHovered || autoplayStopped || totalItems <= 1) return;
-    const upper = paginationStyle === 'ring' ? Math.max(0, totalItems - 1) : maxIndex;
+    const upper =
+      paginationStyle === 'ring' || paginationStyle === 'logos'
+        ? Math.max(0, totalItems - 1)
+        : maxIndex;
     const timer = setInterval(() => {
       setCurrentIndex((prevIndex) => {
         const nextIndex = prevIndex >= upper ? 0 : prevIndex + 1;
@@ -104,7 +114,6 @@ export function PremiumCarousel({
     info: { velocity: { x: number }; offset: { x: number } },
   ) => {
     isDragging.current = false;
-    // Project the resting position from release velocity, then snap to the nearest card
     const projected = x.get() + info.velocity.x * 0.22;
     goTo(Math.round(-projected / step));
   };
@@ -135,12 +144,16 @@ export function PremiumCarousel({
     };
 
     const container = containerRef.current;
-    let isHovered = false;
-    const onEnter = () => { isHovered = true; };
-    const onLeave = () => { isHovered = false; };
+    let hovered = false;
+    const onEnter = () => {
+      hovered = true;
+    };
+    const onLeave = () => {
+      hovered = false;
+    };
 
     const handleKeyGlobal = (e: KeyboardEvent) => {
-      if (isHovered) {
+      if (hovered) {
         handleKeyDown(e);
       }
     };
@@ -160,6 +173,11 @@ export function PremiumCarousel({
     };
   }, [totalItems, currentIndex, maxIndex]);
 
+  const logoIcons: AdSlotPaginationIcon[] | null =
+    paginationStyle === 'logos' && getPaginationIcon
+      ? items.map((item, i) => getPaginationIcon(item, i))
+      : null;
+
   return (
     <div
       className="relative w-full overflow-hidden select-none animate-fade-in"
@@ -174,9 +192,10 @@ export function PremiumCarousel({
           dragElastic={0.06}
           dragMomentum={false}
           style={{ x, touchAction: 'pan-y' }}
-          onDragStart={() => { isDragging.current = true; }}
+          onDragStart={() => {
+            isDragging.current = true;
+          }}
           onDragEnd={handleDragEnd}
-          // Swallow the click that follows a real drag so cards don't navigate accidentally
           onClickCapture={(e) => {
             if (isDragging.current) {
               e.preventDefault();
@@ -208,64 +227,75 @@ export function PremiumCarousel({
           paginationAlign === 'center' ? 'justify-center' : 'justify-between',
         )}
       >
-        <div className={cn('flex items-center', paginationStyle === 'ring' ? 'gap-2.5' : 'gap-1.5')}>
-          {(paginationStyle === 'ring' ? items : items.slice(0, maxIndex + 1)).map((_, i) => {
-            const active = i === currentIndex;
-            if (paginationStyle === 'ring') {
+        {logoIcons ? (
+          <AdSlotPaginationRail
+            items={logoIcons}
+            activeIndex={currentIndex}
+            position="below"
+            ariaLabel="Carousel slides"
+            className="mt-0"
+            onSelect={goToPaginated}
+          />
+        ) : (
+          <div className={cn('flex items-center', paginationStyle === 'ring' ? 'gap-2.5' : 'gap-1.5')}>
+            {(paginationStyle === 'ring' ? items : items.slice(0, maxIndex + 1)).map((_, i) => {
+              const active = i === currentIndex;
+              if (paginationStyle === 'ring') {
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => goToPaginated(i)}
+                    aria-label={`Go to slide ${i + 1}`}
+                    aria-current={active ? 'true' : undefined}
+                    className={cn(
+                      'rounded-full transition-all duration-300 cursor-pointer border-0 p-0 flex items-center justify-center',
+                      active
+                        ? 'w-3.5 h-3.5 border border-[#EB4501] bg-transparent'
+                        : 'w-2 h-2 bg-[#D1D5DB] hover:bg-[#9AA0AC]',
+                    )}
+                  >
+                    {active ? <span className="w-1.5 h-1.5 rounded-full bg-[#EB4501]" /> : null}
+                  </button>
+                );
+              }
               return (
                 <button
                   key={i}
                   type="button"
                   onClick={() => goToPaginated(i)}
-                  aria-label={`Go to slide ${i + 1}`}
-                  aria-current={active ? 'true' : undefined}
                   className={cn(
-                    'rounded-full transition-all duration-300 cursor-pointer border-0 p-0 flex items-center justify-center',
-                    active
-                      ? 'w-3.5 h-3.5 border border-[#EB4501] bg-transparent'
-                      : 'w-2 h-2 bg-[#D1D5DB] hover:bg-[#9AA0AC]',
+                    'h-1.5 rounded-full transition-all duration-300 cursor-pointer border-0',
+                    active ? 'w-5 bg-[#EB4501]' : 'w-1.5 bg-gray-200 hover:bg-gray-300',
                   )}
-                >
-                  {active ? <span className="w-1.5 h-1.5 rounded-full bg-[#EB4501]" /> : null}
-                </button>
+                  title={`Go to slide ${i + 1}`}
+                />
               );
-            }
-            return (
-              <button
-                key={i}
-                type="button"
-                onClick={() => goToPaginated(i)}
-                className={cn(
-                  'h-1.5 rounded-full transition-all duration-300 cursor-pointer border-0',
-                  active ? 'w-5 bg-[#EB4501]' : 'w-1.5 bg-gray-200 hover:bg-gray-300',
-                )}
-                title={`Go to slide ${i + 1}`}
-              />
-            );
-          })}
-        </div>
+            })}
+          </div>
+        )}
 
         {showArrows && paginationAlign !== 'center' && (
-        <div className="flex gap-2">
-           <button
-             type="button"
-             onClick={prev}
-             disabled={currentIndex === 0}
-             className="w-8 h-8 rounded-full border border-gray-100 bg-white flex items-center justify-center hover:bg-[#CF4400] hover:text-white hover:border-[#EB4501]/30 transition-all active:scale-90 shadow-xs cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
-             title="Previous Slide"
-           >
+          <div className="flex gap-2">
+            <button
+              type="button"
+              onClick={prev}
+              disabled={currentIndex === 0}
+              className="w-8 h-8 rounded-full border border-gray-100 bg-white flex items-center justify-center hover:bg-[#CF4400] hover:text-white hover:border-[#EB4501]/30 transition-all active:scale-90 shadow-xs cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
+              title="Previous Slide"
+            >
               <ChevronLeft size={16} />
-           </button>
-           <button
-             type="button"
-             onClick={next}
-             disabled={currentIndex >= maxIndex}
-             className="w-8 h-8 rounded-full border border-gray-100 bg-white flex items-center justify-center hover:bg-[#CF4400] hover:text-white hover:border-[#EB4501]/30 transition-all active:scale-90 shadow-xs cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
-             title="Next Slide"
-           >
+            </button>
+            <button
+              type="button"
+              onClick={next}
+              disabled={currentIndex >= maxIndex}
+              className="w-8 h-8 rounded-full border border-gray-100 bg-white flex items-center justify-center hover:bg-[#CF4400] hover:text-white hover:border-[#EB4501]/30 transition-all active:scale-90 shadow-xs cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
+              title="Next Slide"
+            >
               <ChevronRight size={16} />
-           </button>
-        </div>
+            </button>
+          </div>
         )}
       </div>
     </div>

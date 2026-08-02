@@ -137,7 +137,9 @@ export function SpotlightCampaignsPage() {
                 <div className="flex justify-between items-start mb-2">
                   <CampaignStatusBadge status={c.status} />
                   {c.isSponsored && (
-                    <span className="text-[10px] font-bold text-[#EB4501]">SPONSORED</span>
+                    <span className="inline-flex px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-[#2323FF] text-white">
+                      PROMOTED
+                    </span>
                   )}
                 </div>
                 <h3 className="font-bold text-navy text-sm">{c.campaignName}</h3>
@@ -162,7 +164,7 @@ export function SpotlightCampaignsPage() {
                   <th className="p-3">Campaign</th>
                   <th className="p-3">Type</th>
                   <th className="p-3">Status</th>
-                  <th className="p-3">Sponsored</th>
+                  <th className="p-3">Promoted</th>
                   <th className="p-3">Updated</th>
                   <th className="p-3" />
                 </tr>

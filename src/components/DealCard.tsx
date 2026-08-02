@@ -98,7 +98,7 @@ export const DealCard = memo(function DealCard({
           />
           {product.discount && (
             <div className="absolute top-2 left-2 z-10">
-              <span className="bg-[#EF4444] text-white text-[9px] font-black tracking-widest px-2.5 py-0.5 rounded uppercase shadow-sm">
+              <span className="bg-[#EF4444] text-white text-[9px] font-black tracking-widest px-2.5 py-0.5 rounded-full uppercase shadow-sm">
                 {product.discount}
               </span>
             </div>
@@ -218,7 +218,13 @@ export const DealCard = memo(function DealCard({
         className={`${deal.bg || 'bg-gradient-to-br from-[#EB4501] to-[#CF4400]'} rounded-3xl p-8 text-white relative overflow-hidden cursor-pointer hover:-translate-y-1 transition-all duration-300 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-transparent w-full`}
       >
         <div className="relative z-10 flex flex-col h-full text-left">
-          <span className="text-[10px] font-black uppercase tracking-widest bg-white/20 w-fit px-2 py-1 rounded mb-4">
+          <span
+            className={
+              String(deal.label).toUpperCase() === 'PROMOTED'
+                ? 'text-[10px] font-black uppercase tracking-widest bg-[#2323FF] text-white w-fit px-2 py-1 rounded-full mb-4'
+                : 'text-[10px] font-black uppercase tracking-widest bg-white/20 w-fit px-2 py-1 rounded-full mb-4'
+            }
+          >
             {deal.label}
           </span>
           <h3 className="text-2xl font-black leading-tight mb-2">{deal.title}</h3>

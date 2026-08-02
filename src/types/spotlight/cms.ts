@@ -110,6 +110,6 @@ export interface SpotlightCampaignRecord extends SpotlightCampaign, SpotlightCam
 export const SYSTEM_CAMPAIGN_FOLDERS: SpotlightCampaignFolder[] = [
   { folderId: 'my-campaigns', name: 'My Campaigns', icon: '📁', isSystem: true, createdAt: '' },
   { folderId: 'drafts', name: 'Drafts', icon: '📁', isSystem: true, createdAt: '' },
-  { folderId: 'sponsored', name: 'Sponsored', icon: '📁', isSystem: true, createdAt: '' },
+  { folderId: 'sponsored', name: 'Promoted', icon: '📁', isSystem: true, createdAt: '' },
   { folderId: 'archived', name: 'Archived', icon: '📁', isSystem: true, createdAt: '' },
 ];

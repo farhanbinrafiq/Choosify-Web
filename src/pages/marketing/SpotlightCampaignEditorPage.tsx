@@ -361,7 +361,7 @@ export function SpotlightCampaignEditorPage() {
                 checked={draft.isSponsored}
                 onChange={(e) => updateDraft({ isSponsored: e.target.checked })}
               />
-              Sponsored campaign
+              Promoted campaign
             </label>
             <label className="text-sm">
               Visibility

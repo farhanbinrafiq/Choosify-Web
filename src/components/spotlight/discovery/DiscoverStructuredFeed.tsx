@@ -17,9 +17,28 @@ import {
   resolveCommerceCardVariant,
 } from '../../content';
 import { DiscoverLowerSections } from './DiscoverLowerSections';
+import { EditorsPickCarousel, type EditorsPickItem } from './EditorsPickCarousel';
 import { usePriorityClockMs } from '../../../hooks/usePriorityClockMs';
 import { ListingFilterPills, type ListingFilterPillItem } from '../../design/ListingFilterPills';
 import { DISCOVER_FORMAT_TABS } from './DiscoverStickyFormatNav';
+import { PLACEHOLDER_IMAGE } from '../../../constants';
+
+function resolveEditorsPickMediaKind(content: SpotlightContent): 'image' | 'video' {
+  const media = content.media;
+  if (!media) return 'image';
+  if (media.videoUrl) return 'video';
+  const t = media.mediaType;
+  if (
+    t === 'vertical_video' ||
+    t === 'landscape_video' ||
+    t === 'square_video' ||
+    t === 'livestream' ||
+    t === 'creator_review'
+  ) {
+    return 'video';
+  }
+  return 'image';
+}
 
 export interface DiscoverQuickFilter {
   id: string;
@@ -177,14 +196,58 @@ export function DiscoverStructuredFeed({
   );
 
   const lanes = useMemo(() => partitionDiscoverFeedLanes(items, nowMs), [items, nowMs]);
-  const youtube = lanes.youtube.slice(0, LANE_LIMITS.youtube);
-  const reels = lanes.reels.slice(0, LANE_LIMITS.reels);
-  // Featured LIVE only (active + 24h grace) — already filtered by partition
-  const live = lanes.live.slice(0, LANE_LIMITS.live);
-  const blogs = lanes.blogs.slice(0, LANE_LIMITS.blogs);
+
+  /** When a format pill is active, show that lane in full (same as YouTube / Reels View All). */
+  const youtube =
+    activeFormatId === 'videos' ? lanes.youtube : lanes.youtube.slice(0, LANE_LIMITS.youtube);
+  const reels =
+    activeFormatId === 'reels' ? lanes.reels : lanes.reels.slice(0, LANE_LIMITS.reels);
+  const live =
+    activeFormatId === 'live' ? lanes.live : lanes.live.slice(0, LANE_LIMITS.live);
+  const blogsAside =
+    activeFormatId === 'blogs' ? [] : lanes.blogs.slice(0, LANE_LIMITS.blogs);
+  const blogsMain = activeFormatId === 'blogs' ? lanes.blogs : [];
+  const blogsFocused = activeFormatId === 'blogs';
+
+  /** Up to 5 editorial slides for Editor's Pick stacked carousel (below Blog Stories) */
+  const editorsPicks = useMemo((): EditorsPickItem[] => {
+    const pool = lanes.blogs.length ? lanes.blogs : items.filter((c) => {
+      const t = c.contentType;
+      return ['buying_guide', 'tutorial', 'tips', 'editorial', 'comparison'].includes(t);
+    });
+    return pool.slice(0, 5).map((content) => {
+      const product = primaryProductForContent(content, products);
+      const image =
+        content.media?.thumbnail ??
+        content.media?.posterImage ??
+        content.media?.previewImage ??
+        product?.image ??
+        content.publisher.logoUrl ??
+        PLACEHOLDER_IMAGE;
+      return {
+        id: content.contentId,
+        title: content.headline,
+        href: content.href,
+        image,
+        sourceName: content.publisher.name || 'Choosify',
+        sourceLogoUrl: content.publisher.logoUrl,
+        meta: content.publisher.name
+          ? `${content.publisher.name}${content.publisher.isVerified ? ' · Official Review' : ''}`
+          : undefined,
+        contentType: content.contentType,
+        isLive: content.isLive,
+        mediaKind: resolveEditorsPickMediaKind(content),
+        ctaLabel: content.ctaLabel,
+      };
+    });
+  }, [lanes.blogs, items, products]);
 
   const hasAnyLane =
-    youtube.length > 0 || reels.length > 0 || live.length > 0 || blogs.length > 0;
+    youtube.length > 0 ||
+    reels.length > 0 ||
+    live.length > 0 ||
+    blogsAside.length > 0 ||
+    blogsMain.length > 0;
 
   return (
     <div className={cn('w-full', className)}>
@@ -289,43 +352,75 @@ export function DiscoverStructuredFeed({
                 </div>
               </section>
             )}
+
+            {blogsMain.length > 0 && (
+              <section
+                className="mb-9 bg-white border border-[#E8EDF2] rounded-[10px] p-4"
+                aria-label="Blog Stories"
+              >
+                <LaneHeader
+                  icon="▤"
+                  iconClassName="text-[#07DD05]"
+                  title="Blog Stories"
+                  onViewAll={() => triggerFilter('blogs')}
+                />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {blogsMain.map((content) => (
+                    <FeedCard
+                      key={content.contentId}
+                      content={content}
+                      products={products}
+                      onNavigate={onNavigateCard}
+                      forceVariant="guide"
+                      nowMs={nowMs}
+                    />
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
 
-          <aside className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 self-start">
-            <div className="flex justify-between items-center mb-3.5">
-              <div className="flex items-center gap-1.5 text-[13px] font-extrabold text-[#1A1A2E]">
-                <span className="text-[#07DD05]">▤</span> Blog Stories
-              </div>
-              <button
-                type="button"
-                onClick={() => triggerFilter('blogs')}
-                className="text-[11px] font-bold text-[#1A1A2E] hover:text-[#CF4400] cursor-pointer bg-transparent border-0 p-0 min-h-[44px] sm:min-h-0"
-              >
-                View All ›
-              </button>
-            </div>
-            {blogs.length === 0 ? (
-              <p className="text-[12px] text-[#9AA0AC] py-6 text-center">No blog stories yet.</p>
-            ) : (
-              blogs.map((content, index) => (
-                <div
-                  key={content.contentId}
-                  className={cn(
-                    index < blogs.length - 1 && 'border-b border-[#F1F1F3] pb-3.5 mb-3.5',
-                  )}
-                >
-                  <FeedCard
-                    content={content}
-                    products={products}
-                    onNavigate={onNavigateCard}
-                    forceVariant="guide"
-                    compactMedia
-                    nowMs={nowMs}
-                    className="!bg-transparent !border-0 !rounded-none !overflow-visible"
-                  />
+          <aside className="flex flex-col gap-4 self-start min-w-0">
+            {!blogsFocused && (
+              <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-4">
+                <div className="flex justify-between items-center mb-3.5">
+                  <div className="flex items-center gap-1.5 text-[13px] font-extrabold text-[#1A1A2E]">
+                    <span className="text-[#07DD05]">▤</span> Blog Stories
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => triggerFilter('blogs')}
+                    className="text-[11px] font-bold text-[#1A1A2E] hover:text-[#CF4400] cursor-pointer bg-transparent border-0 p-0 min-h-[44px] sm:min-h-0"
+                  >
+                    View All ›
+                  </button>
                 </div>
-              ))
+                {blogsAside.length === 0 ? (
+                  <p className="text-[12px] text-[#9AA0AC] py-6 text-center">No blog stories yet.</p>
+                ) : (
+                  blogsAside.map((content, index) => (
+                    <div
+                      key={content.contentId}
+                      className={cn(
+                        index < blogsAside.length - 1 && 'border-b border-[#F1F1F3] pb-3.5 mb-3.5',
+                      )}
+                    >
+                      <FeedCard
+                        content={content}
+                        products={products}
+                        onNavigate={onNavigateCard}
+                        forceVariant="guide"
+                        compactMedia
+                        nowMs={nowMs}
+                        className="!bg-transparent !border-0 !rounded-none !overflow-visible"
+                      />
+                    </div>
+                  ))
+                )}
+              </div>
             )}
+
+            {editorsPicks.length > 0 && <EditorsPickCarousel items={editorsPicks} />}
           </aside>
         </div>
       )}

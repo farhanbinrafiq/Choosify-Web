@@ -46,8 +46,8 @@ export function BrandPostCarouselSection({
               {badgeLabel}
             </span>
             {showSponsoredBadge && (
-              <span className="px-1.5 py-0.5 text-[9px] font-black tracking-widest text-[#EB4501]/90 border border-[#EB4501]/30 uppercase bg-[#EB4501]/10 rounded-full">
-                Sponsored
+              <span className="px-1.5 py-0.5 text-[9px] font-black tracking-widest text-white uppercase bg-[#2323FF] rounded-full">
+                Promoted
               </span>
             )}
           </div>

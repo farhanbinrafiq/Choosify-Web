@@ -8,3 +8,5 @@ coverage/
 tsc-*.txt
 tsc-out.txt
 tsc-full.txt
+
+dist/

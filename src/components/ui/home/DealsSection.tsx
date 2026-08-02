@@ -34,7 +34,7 @@ export const DEALS_MOCK = [
   {
     type: 'sponsor',
     bg: 'bg-[#EC4899]',
-    label: 'SPONSORED',
+    label: 'PROMOTED',
     title: 'Pickaboo Mega Deals',
     subtitle: 'Best prices on electronics',
     icon: ShoppingBag,

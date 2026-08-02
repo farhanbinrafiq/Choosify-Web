@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import type { ResolvedPlacement } from '../utils/resolvePlacementContent';
 import { ChoosifySponsoredCardFromResolved } from './commerce/ChoosifySponsoredCard';
+import { SponsoredCardChrome } from './commerce/SponsoredCardChrome';
 
 export type SponsoredPlacementVariant = 'portrait' | 'landscape' | 'infeed';
 
@@ -58,6 +59,7 @@ export function SponsoredPlacementCard({
   description,
 }: SponsoredPlacementCardProps) {
   const tallImage = variant === 'portrait' || variant === 'infeed';
+  const brandName = placement.subtitle || placement.title;
 
   return (
     <div
@@ -69,18 +71,6 @@ export function SponsoredPlacementCard({
       )}
     >
       <div className="relative z-10 w-full flex flex-col flex-1 min-h-0">
-        {variant !== 'infeed' ? (
-          <div className="flex items-center justify-between pb-3 mb-4 border-b border-white/10 px-1 shrink-0">
-            <h3 className="text-[11px] font-extrabold text-[#EB4501] uppercase tracking-wider flex items-center gap-1">
-              🏷️ Sponsored Ad
-            </h3>
-          </div>
-        ) : (
-          <span className="text-[8px] font-black uppercase tracking-widest text-[#EB4501] mb-2 flex items-center gap-1 shrink-0">
-            🏷️ Sponsored Ad
-          </span>
-        )}
-
         <div
           className={cn(
             'w-full overflow-hidden relative mb-4',
@@ -95,6 +85,7 @@ export function SponsoredPlacementCard({
             referrerPolicy="no-referrer"
             loading="lazy"
           />
+          <SponsoredCardChrome brandName={brandName} logoUrl={placement.image} size="md" />
         </div>
 
         <div className={tallImage ? 'flex-[3] min-h-0 shrink-0 flex flex-col justify-center' : undefined}>

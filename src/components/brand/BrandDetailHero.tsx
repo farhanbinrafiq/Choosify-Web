@@ -128,7 +128,7 @@ export function BrandDetailHero({
               </div>
             )}
             {claimStatus === 'pending' && (
-              <div className="inline-flex items-center gap-1.5 bg-[#FF000D] text-white text-[10px] font-bold px-2.5 py-1 rounded-lg mb-2">
+              <div className="inline-flex items-center gap-1.5 bg-[#FF000D] text-white text-[10px] font-bold px-2.5 py-1 rounded-full mb-2">
                 Ownership verification pending
               </div>
             )}
@@ -226,7 +226,7 @@ export function BrandDetailHero({
               <div className="text-[10px] text-[#9AA0AC]">{item.label}</div>
             </div>
           ))}
-          <div className="choosify-emi-gradient text-white text-[10px] font-extrabold px-4 py-2 rounded-lg ml-auto">
+          <div className="choosify-emi-gradient text-white text-[10px] font-extrabold px-4 py-2 rounded-full ml-auto">
             TRENDING
           </div>
         </div>

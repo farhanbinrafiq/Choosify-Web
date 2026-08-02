@@ -30,7 +30,7 @@ export function CampaignStatusBadge({ status }: { status: SpotlightCampaignStatu
   return (
     <span
       className={cn(
-        'inline-flex px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide',
+        'inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide',
         STATUS_STYLES[status],
       )}
     >

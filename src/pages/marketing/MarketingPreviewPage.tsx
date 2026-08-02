@@ -40,7 +40,7 @@ export function MarketingPreviewPage() {
           onClick={() => setPreviewTarget('sponsored')}
           className={`px-3 py-1.5 text-[10px] font-bold uppercase rounded border ${previewTarget === 'sponsored' ? 'bg-navy text-white' : 'bg-white'}`}
         >
-          Sponsored Campaign
+          Promoted Campaign
         </button>
       </div>
 

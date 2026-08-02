@@ -104,7 +104,7 @@ export function RecommendationCard(props: any) {
                 </p>
              </div>
              
-             <div className="absolute bottom-6 right-6 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded text-[10px] font-mono text-white border border-white/10 leading-none">
+             <div className="absolute bottom-6 right-6 bg-black/75 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-mono text-white border border-white/10 leading-none">
                 {guide.duration || '8:10'}
              </div>
           </div>
@@ -145,7 +145,7 @@ export function RecommendationCard(props: any) {
           
           {/* Top Overlays */}
           <div className="absolute top-4 left-4 z-20">
-             <div className="bg-white px-2.5 py-1 rounded shadow-none border border-gray-100">
+             <div className="bg-white px-2.5 py-1 rounded-full shadow-none border border-gray-100">
                 <span className="text-[9px] font-semibold text-black uppercase tracking-wider leading-none">REEL</span>
              </div>
           </div>
@@ -172,7 +172,7 @@ export function RecommendationCard(props: any) {
                 {guide.title || "TOP 10 SMARTPHONES TO BUY IN 2026"}
              </h3>
              
-             <div className="absolute bottom-4 right-4 bg-black/75 backdrop-blur-md px-2 py-0.5 rounded text-[8px] font-mono text-white">
+             <div className="absolute bottom-4 right-4 bg-black/75 backdrop-blur-md px-2 py-0.5 rounded-full text-[8px] font-mono text-white">
                 {guide.duration || '8:10'}
              </div>
           </div>
@@ -210,7 +210,7 @@ export function RecommendationCard(props: any) {
               </div>
             </div>
             {guide.duration && (
-              <div className="absolute bottom-4 right-4 bg-black/75 backdrop-blur-md px-2 py-0.5 rounded text-[8px] font-mono text-white">
+              <div className="absolute bottom-4 right-4 bg-black/75 backdrop-blur-md px-2 py-0.5 rounded-full text-[8px] font-mono text-white">
                 {guide.duration}
               </div>
             )}
@@ -227,7 +227,7 @@ export function RecommendationCard(props: any) {
 
         {/* Badges */}
         <div className="absolute top-4 left-4 z-10">
-          <div className="bg-white px-2.5 py-1 rounded flex items-center gap-1.5 border border-gray-100 w-max">
+          <div className="bg-white px-2.5 py-1 rounded-full flex items-center gap-1.5 border border-gray-100 w-max">
             <BookOpen size={11} className="text-orange-primary" />
             <span className="text-[9px] font-mono text-gray-500 leading-none">{guide.readTime || '5 MIN READ'}</span>
           </div>

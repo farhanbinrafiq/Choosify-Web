@@ -15,6 +15,12 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from '../lib/notify';
 import { cn } from '../lib/utils';
 import { EmiAiLogo } from '../components/EmiAiLogo';
+import {
+  firebaseAuthErrorMessage,
+  registerWithEmailPassword,
+  resolveSessionUser,
+  signInWithEmailPassword,
+} from '../lib/authSession';
 
 type AuthTab = 'sign-in' | 'sign-up';
 
@@ -155,8 +161,9 @@ export function LoginSignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
-  const { setIsLoggedIn } = useGlobalState();
+  const { setIsLoggedIn, updateCurrentUser, currentUser } = useGlobalState();
   const location = useLocation();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const requestedTab = (location.state as { tab?: AuthTab } | null)?.tab;
@@ -165,7 +172,7 @@ export function LoginSignUpPage() {
     }
   }, [location.state]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (activeTab === 'sign-up' && !fullName.trim()) {
@@ -185,22 +192,34 @@ export function LoginSignUpPage() {
       return;
     }
 
-    // Demo auth: no Firebase/network call — persistence is localStorage only.
-    // Write the flag synchronously, then hard-navigate so a stale service-worker
-    // shell cannot keep painting /login after history changes (same class of bug
-    // as “URL changed, content stuck”). Default destination is homepage `/`.
-    setIsLoggedIn(true);
-    toast.success(activeTab === 'sign-up' ? 'Account created! Welcome to Choosify.' : 'Welcome back!');
-    const from = (location.state as { from?: string } | null)?.from;
-    const dest =
-      from && from !== '/login' && !from.startsWith('/login/')
-        ? from
-        : '/';
-    window.location.assign(dest);
+    setIsSubmitting(true);
+    try {
+      const firebaseUser =
+        activeTab === 'sign-up'
+          ? await registerWithEmailPassword(email, password, fullName)
+          : await signInWithEmailPassword(email, password);
+
+      const { user } = await resolveSessionUser(firebaseUser, currentUser);
+      updateCurrentUser(user);
+      setIsLoggedIn(true);
+      toast.success(activeTab === 'sign-up' ? 'Account created! Welcome to Choosify.' : 'Welcome back!');
+      const from = (location.state as { from?: string } | null)?.from;
+      const dest =
+        from && from !== '/login' && !from.startsWith('/login/')
+          ? from
+          : '/';
+      window.location.assign(dest);
+    } catch (err) {
+      toast.error(firebaseAuthErrorMessage(err));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const handleSocialLogin = (provider: 'Google' | 'Facebook' | 'Apple') => {
-    toast.success(`${provider} login coming soon! Use email for now.`);
+  const handleSocialLogin = (_provider: 'Google' | 'Facebook' | 'Apple') => {
+    toast.error(
+      'Social login needs provider credentials in Firebase Console first. Use email for now.',
+    );
   };
 
   const handleForgotPassword = () => {
@@ -245,9 +264,7 @@ export function LoginSignUpPage() {
               to="/messages/thread-emi-ai"
               className="flex items-center gap-1.5 choosify-emi-gradient rounded-full py-1.5 pl-1.5 pr-3.5 hover:brightness-110 transition-all border-0"
             >
-              <span className="w-[22px] h-[22px] rounded-full bg-white flex items-center justify-center p-0.5">
-                <EmiAiLogo size={18} />
-              </span>
+              <EmiAiLogo size={22} />
               <span className="text-xs font-bold text-white">Ask EMI</span>
             </Link>
           </div>
@@ -383,15 +400,23 @@ export function LoginSignUpPage() {
 
               <button
                 type="submit"
+                disabled={isSubmitting}
                 className={cn(
                   'w-full py-3.5 rounded-lg text-[13px] font-bold cursor-pointer active:scale-[0.99] transition-all flex items-center justify-center gap-2',
                   isSignUp
                     ? 'bg-[#EB4501] text-white border-none hover:brightness-105'
                     : 'bg-white border border-[#E5E7EB] text-[#EB4501] hover:border-[#D1D5DB]',
+                  isSubmitting && 'opacity-60 cursor-not-allowed',
                 )}
               >
-                {isSignUp ? 'Create account' : 'Sign in to Choosify'}
-                <ArrowRight size={16} strokeWidth={2.4} className="text-current" />
+                {isSubmitting
+                  ? isSignUp
+                    ? 'Creating account…'
+                    : 'Signing in…'
+                  : isSignUp
+                    ? 'Create account'
+                    : 'Sign in to Choosify'}
+                {!isSubmitting && <ArrowRight size={16} strokeWidth={2.4} className="text-current" />}
               </button>
             </form>
 

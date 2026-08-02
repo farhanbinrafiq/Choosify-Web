@@ -337,7 +337,7 @@ export function useSpotlightFloatingFilters({
             <div className="flex flex-wrap gap-2">
               {[
                 { id: 'trending', label: 'Trending', active: filters.trendingOnly, toggle: () => setFilters({ ...filters, trendingOnly: !filters.trendingOnly }) },
-                { id: 'sponsored', label: 'Sponsored', active: filters.sponsoredOnly, toggle: () => setFilters({ ...filters, sponsoredOnly: !filters.sponsoredOnly }) },
+                { id: 'sponsored', label: 'Promoted', active: filters.sponsoredOnly, toggle: () => setFilters({ ...filters, sponsoredOnly: !filters.sponsoredOnly }) },
                 { id: 'live', label: 'Live Only', active: filters.liveOnly, toggle: () => setFilters({ ...filters, liveOnly: !filters.liveOnly }) },
                 { id: 'offers', label: 'Offers', active: filters.promotionsOnly, toggle: () => setFilters({ ...filters, promotionsOnly: !filters.promotionsOnly, contentTypes: contentTypesForTab('campaigns') }) },
               ].map((chip) => (

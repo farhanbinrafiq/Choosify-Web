@@ -18,7 +18,7 @@ type FeaturedSlide =
   | { key: string; kind: 'product'; product: any }
   | { key: string; kind: 'ad' };
 
-/** Featured Products — product-list-sized cards in a horizontal carousel */
+/** Popular Products — product-list-sized cards in a horizontal carousel */
 export function HomeFeaturedProductsSection({ feed }: HomeFeaturedProductsSectionProps) {
   const slides = useMemo<FeaturedSlide[]>(() => {
     const products = feed
@@ -43,12 +43,12 @@ export function HomeFeaturedProductsSection({ feed }: HomeFeaturedProductsSectio
           id="section-featured-products-heading"
           className="text-[19px] font-extrabold text-[#1A1A2E]"
         >
-          Featured Products
+          Popular Products
         </h2>
         <ViewAllLink href="/products" label="VIEW ALL ›" />
       </div>
       <p className="text-[12.5px] text-[#9AA0AC] m-0 mb-4">Handpicked deals you&apos;ll love</p>
-      <div className="mb-6">
+      <div className="mb-4">
         <PremiumCarousel
           items={slides}
           itemWidth={FEATURED_CARD_WIDTH}

@@ -5,9 +5,14 @@ import type { ViralTodayItem } from '../../../utils/homeViralToday';
 import { DcHomePanel } from '../DcHomePanel';
 import { ViewAllLink } from '../../design/ViewAllLink';
 import { cn } from '../../../lib/utils';
+import { HomeFeaturedProductsSection } from './HomeFeaturedProductsSection';
+import type { SponsoredInjectedEntry } from '../../../utils/injectSponsoredIntoFeed';
+import { HOME_CONTENT_MAX, HOME_PANEL_GAP } from '../../../lib/design/homeTokens';
 
 interface HomeSpotlightPreviewSectionProps {
   items: ViralTodayItem[];
+  /** Popular Products — own panel between LIVE/YouTube and Reels when provided. */
+  productFeed?: SponsoredInjectedEntry<any>[];
 }
 
 const AVATAR_COLORS = ['#EB4501', '#2323FF', '#07A828', '#EB4501', '#000435', '#7C3AED'];
@@ -47,8 +52,14 @@ function youtubeBadge(card: ViralTodayItem): string {
   return 'YOUTUBE';
 }
 
-/** Choosify.dc.html — "Viral Today" featured LIVE + YouTube grid + Reels strip */
-export function HomeSpotlightPreviewSection({ items }: HomeSpotlightPreviewSectionProps) {
+/**
+ * Viral Today — section header, then three separate containers:
+ * 1) LIVE + YouTube  2) Popular Products  3) Reels
+ */
+export function HomeSpotlightPreviewSection({
+  items,
+  productFeed,
+}: HomeSpotlightPreviewSectionProps) {
   const { live, youtube, reels } = useMemo(() => {
     const liveItems = items.filter((i) => i.kind === 'live').slice(0, 2);
     const yt = items.filter((i) => i.kind === 'youtube').slice(0, 4);
@@ -70,174 +81,198 @@ export function HomeSpotlightPreviewSection({ items }: HomeSpotlightPreviewSecti
     };
   }, [items]);
 
-  if (!live.length && !youtube.length && !reels.length) return null;
+  const hasMedia = live.length > 0 || youtube.length > 0 || reels.length > 0;
+  const hasProducts = Boolean(productFeed && productFeed.length > 0);
+
+  if (!hasMedia && !hasProducts) return null;
 
   return (
-    <DcHomePanel id="section-spotlight-preview">
-      <div className="flex items-center justify-between gap-3 mb-4">
-        <h2
-          id="section-spotlight-preview-heading"
-          className="flex items-center gap-2 text-[19px] font-extrabold text-[#1A1A2E]"
-        >
-          <span className="text-[#FF000D] text-[17px]" aria-hidden>
-            ✦
-          </span>
-          Viral Today
-        </h2>
-        <ViewAllLink href="/spotlight" label="VIEW ALL ›" />
+    <section id="section-spotlight-preview" aria-labelledby="section-spotlight-preview-heading">
+      <div className={cn(HOME_CONTENT_MAX, HOME_PANEL_GAP, 'relative z-[3]')}>
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <h2
+            id="section-spotlight-preview-heading"
+            className="flex items-center gap-2 text-[19px] font-extrabold text-[#1A1A2E]"
+          >
+            <span className="text-[#FF000D] text-[17px]" aria-hidden>
+              ✦
+            </span>
+            Viral Today
+          </h2>
+          <ViewAllLink href="/spotlight" label="VIEW ALL ›" />
+        </div>
       </div>
 
-      {live.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-          {live.map((card) => (
-            <Link key={`live-${card.id}`} to={card.href} className="min-w-0 group">
-              <div className="relative aspect-video rounded-[10px] overflow-hidden mb-2.5 bg-[#F4F7F9] border border-[#E8EDF2]">
-                <img
-                  src={card.image}
-                  alt=""
-                  className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
-                  loading="lazy"
-                />
-                <span className="absolute top-2 left-2 bg-[#FF000D] text-white text-[9px] font-extrabold px-2 py-0.5 rounded pointer-events-none">
-                  LIVE
-                </span>
-                <ViralSaveButton size={11} className="absolute top-2 right-2 w-6 h-6" />
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="px-4 py-2 rounded-full bg-[#FF000D] text-white text-[11px] font-extrabold tracking-wide">
-                    WATCH LIVE
-                  </div>
-                </div>
-              </div>
-              <div className="text-[14px] font-extrabold text-[#1A1A2E] leading-snug line-clamp-2 mb-1">
-                {card.title}
-              </div>
-              <div className="text-[11.5px] text-[#4B5563] flex items-center gap-1">
-                {card.channel}
-                <span className="text-[#2323FF]">✓</span>
-              </div>
-              <div className="flex items-center gap-1.5 mt-2 text-[11px] font-bold text-[#4B5563]">
-                <Package size={12} />
-                {card.productCount} Products
-              </div>
-            </Link>
-          ))}
-        </div>
-      )}
-
-      {youtube.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {youtube.map((card, i) => (
-            <Link key={`yt-${card.id}`} to={card.href} className="min-w-0 group">
-              <div className="relative aspect-video rounded-[10px] overflow-hidden mb-2.5 bg-[#F4F7F9]">
-                <img
-                  src={card.image}
-                  alt=""
-                  className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
-                  loading="lazy"
-                />
-                <span className="absolute top-2 left-2 bg-[#FF000D] text-white text-[8.5px] font-extrabold px-2 py-0.5 rounded pointer-events-none">
-                  {youtubeBadge(card)}
-                </span>
-                <ViralSaveButton size={11} className="absolute top-2 right-2 w-6 h-6" />
-                {card.duration && (
-                  <span className="absolute bottom-2 right-2 bg-black/75 text-white text-[10px] font-bold px-1.5 py-0.5 rounded pointer-events-none">
-                    {card.duration}
-                  </span>
-                )}
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <div className="w-[42px] h-[42px] rounded-full bg-black/35 border-[1.5px] border-white/90 flex items-center justify-center">
-                    <div
-                      className="w-0 h-0 ml-0.5"
-                      style={{
-                        borderStyle: 'solid',
-                        borderWidth: '7px 0 7px 11px',
-                        borderColor: 'transparent transparent transparent #fff',
-                      }}
+      {/* Container 1 — LIVE + YouTube share one card */}
+      {(live.length > 0 || youtube.length > 0) && (
+        <DcHomePanel id="section-viral-live-youtube" spaced={false} className="mt-0">
+          {live.length > 0 && (
+            <div
+              className={cn(
+                'grid grid-cols-1 sm:grid-cols-2 gap-4',
+                youtube.length > 0 ? 'mb-6' : 'mb-4',
+              )}
+            >
+              {live.map((card) => (
+                <Link key={`live-${card.id}`} to={card.href} className="min-w-0 group">
+                  <div className="relative aspect-video rounded-[10px] overflow-hidden mb-2.5 bg-[#F4F7F9] border border-[#E8EDF2]">
+                    <img
+                      src={card.image}
+                      alt=""
+                      className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                      loading="lazy"
                     />
+                    <span className="absolute top-2 left-2 bg-[#FF000D] text-white text-[9px] font-extrabold px-2 py-0.5 rounded-full pointer-events-none">
+                      LIVE
+                    </span>
+                    <ViralSaveButton size={11} className="absolute top-2 right-2 w-6 h-6" />
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="px-4 py-2 rounded-full bg-[#FF000D] text-white text-[11px] font-extrabold tracking-wide">
+                        WATCH LIVE
+                      </div>
+                    </div>
                   </div>
-                </div>
-              </div>
-              <div className="flex gap-2.5">
-                <div
-                  className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[11px] font-extrabold shrink-0"
-                  style={{ backgroundColor: AVATAR_COLORS[i % AVATAR_COLORS.length] }}
-                >
-                  {card.channel.charAt(0).toUpperCase()}
-                </div>
-                <div className="min-w-0">
-                  <div className="text-[12.5px] font-bold text-[#1A1A2E] leading-snug line-clamp-2 mb-1">
+                  <div className="text-[14px] font-extrabold text-[#1A1A2E] leading-snug line-clamp-2 mb-1">
                     {card.title}
                   </div>
-                  <div className="text-[11px] text-[#4B5563] flex items-center gap-1">
+                  <div className="text-[11.5px] text-[#4B5563] flex items-center gap-1">
                     {card.channel}
                     <span className="text-[#2323FF]">✓</span>
                   </div>
-                  {(card.views || card.time) && (
-                    <div className="text-[10.5px] text-[#9AA0AC]">
-                      {[card.views, card.time].filter(Boolean).join(' · ')}
+                  <div className="flex items-center gap-1.5 mt-2 text-[11px] font-bold text-[#4B5563]">
+                    <Package size={12} />
+                    {card.productCount} Products
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+
+          {youtube.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+              {youtube.map((card, i) => (
+                <Link key={`yt-${card.id}`} to={card.href} className="min-w-0 group">
+                  <div className="relative aspect-video rounded-[10px] overflow-hidden mb-2.5 bg-[#F4F7F9]">
+                    <img
+                      src={card.image}
+                      alt=""
+                      className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
+                      loading="lazy"
+                    />
+                    <span className="absolute top-2 left-2 bg-[#FF000D] text-white text-[8.5px] font-extrabold px-2 py-0.5 rounded-full pointer-events-none">
+                      {youtubeBadge(card)}
+                    </span>
+                    <ViralSaveButton size={11} className="absolute top-2 right-2 w-6 h-6" />
+                    {card.duration && (
+                      <span className="absolute bottom-2 right-2 bg-black/75 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full pointer-events-none">
+                        {card.duration}
+                      </span>
+                    )}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-[42px] h-[42px] rounded-full bg-black/35 border-[1.5px] border-white/90 flex items-center justify-center">
+                        <div
+                          className="w-0 h-0 ml-0.5"
+                          style={{
+                            borderStyle: 'solid',
+                            borderWidth: '7px 0 7px 11px',
+                            borderColor: 'transparent transparent transparent #fff',
+                          }}
+                        />
+                      </div>
                     </div>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5 mt-2.5 text-[11px] font-bold text-[#4B5563]">
-                <Package size={12} />
-                {card.productCount} Products
-              </div>
-            </Link>
-          ))}
-        </div>
+                  </div>
+                  <div className="flex gap-2.5">
+                    <div
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-white text-[11px] font-extrabold shrink-0"
+                      style={{ backgroundColor: AVATAR_COLORS[i % AVATAR_COLORS.length] }}
+                    >
+                      {card.channel.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="min-w-0">
+                      <div className="text-[12.5px] font-bold text-[#1A1A2E] leading-snug line-clamp-2 mb-1">
+                        {card.title}
+                      </div>
+                      <div className="text-[11px] text-[#4B5563] flex items-center gap-1">
+                        {card.channel}
+                        <span className="text-[#2323FF]">✓</span>
+                      </div>
+                      {(card.views || card.time) && (
+                        <div className="text-[10.5px] text-[#9AA0AC]">
+                          {[card.views, card.time].filter(Boolean).join(' · ')}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-1.5 mt-2.5 text-[11px] font-bold text-[#4B5563]">
+                    <Package size={12} />
+                    {card.productCount} Products
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </DcHomePanel>
       )}
 
+      {/* Container 2 — Popular Products (own panel + VIEW ALL) */}
+      {hasProducts && <HomeFeaturedProductsSection feed={productFeed!} />}
+
+      {/* Container 3 — Reels & Shorts */}
       {reels.length > 0 && (
-        <div className="flex flex-nowrap overflow-x-auto gap-3.5 mb-8 snap-x snap-mandatory pb-1 scrollbar-hide">
-          {reels.map((card, i) => (
-            <Link
-              key={`reel-${card.id}`}
-              to={card.href}
-              className="w-[150px] shrink-0 snap-start"
-            >
-              <div className="relative aspect-[9/16] rounded-[10px] overflow-hidden mb-2 bg-[#F4F7F9]">
-                <img
-                  src={card.image}
-                  alt=""
-                  className="w-full h-full object-cover"
-                  loading="lazy"
-                />
-                <span className="absolute top-2 left-2 bg-[#FF000D] text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded pointer-events-none flex items-center gap-0.5">
-                  ⏵ REELS
-                </span>
-                <ViralSaveButton
-                  size={10}
-                  className="absolute top-2 right-2 w-[22px] h-[22px] z-[1]"
-                />
-                {card.duration && (
-                  <span className="absolute bottom-2 right-2 bg-black/75 text-white text-[9.5px] font-bold px-1.5 py-0.5 rounded pointer-events-none">
-                    {card.duration}
+        <DcHomePanel id="section-viral-reels">
+          <div className="flex items-baseline justify-between gap-3 mb-4">
+            <h2 className="text-[19px] font-extrabold text-[#1A1A2E]">Reels & Shorts</h2>
+          </div>
+          <div className="flex flex-nowrap overflow-x-auto gap-3.5 mb-4 snap-x snap-mandatory pb-1 scrollbar-hide">
+            {reels.map((card, i) => (
+              <Link
+                key={`reel-${card.id}`}
+                to={card.href}
+                className="w-[150px] shrink-0 snap-start"
+              >
+                <div className="relative aspect-[9/16] rounded-[10px] overflow-hidden mb-2 bg-[#F4F7F9]">
+                  <img
+                    src={card.image}
+                    alt=""
+                    className="w-full h-full object-cover"
+                    loading="lazy"
+                  />
+                  <span className="absolute top-2 left-2 bg-[#FF000D] text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-full pointer-events-none flex items-center gap-0.5">
+                    ⏵ REELS
                   </span>
+                  <ViralSaveButton
+                    size={10}
+                    className="absolute top-2 right-2 w-[22px] h-[22px] z-[1]"
+                  />
+                  {card.duration && (
+                    <span className="absolute bottom-2 right-2 bg-black/75 text-white text-[9.5px] font-bold px-1.5 py-0.5 rounded-full pointer-events-none">
+                      {card.duration}
+                    </span>
+                  )}
+                </div>
+                <div className="text-[11.5px] font-bold text-[#1A1A2E] leading-snug line-clamp-2 mb-1.5">
+                  {card.title}
+                </div>
+                <div className="flex items-center gap-1.5 text-[10.5px] text-[#4B5563] mb-1">
+                  <div
+                    className="w-5 h-5 rounded-full shrink-0"
+                    style={{ backgroundColor: AVATAR_COLORS[i % AVATAR_COLORS.length] }}
+                  />
+                  <span className="truncate">{card.channel}</span>
+                  <span className="text-[#2323FF]">✓</span>
+                </div>
+                {card.likes && (
+                  <div className="text-[10.5px] text-[#9AA0AC]">♡ {card.likes}</div>
                 )}
-              </div>
-              <div className="text-[11.5px] font-bold text-[#1A1A2E] leading-snug line-clamp-2 mb-1.5">
-                {card.title}
-              </div>
-              <div className="flex items-center gap-1.5 text-[10.5px] text-[#4B5563] mb-1">
-                <div
-                  className="w-5 h-5 rounded-full shrink-0"
-                  style={{ backgroundColor: AVATAR_COLORS[i % AVATAR_COLORS.length] }}
-                />
-                <span className="truncate">{card.channel}</span>
-                <span className="text-[#2323FF]">✓</span>
-              </div>
-              {card.likes && (
-                <div className="text-[10.5px] text-[#9AA0AC]">♡ {card.likes}</div>
-              )}
-              <div className={cn('flex items-center gap-1 mt-2 text-[10px] font-bold text-[#4B5563]')}>
-                <Package size={11} />
-                {card.productCount} Products
-              </div>
-            </Link>
-          ))}
-        </div>
+                <div className="flex items-center gap-1 mt-2 text-[10px] font-bold text-[#4B5563]">
+                  <Package size={11} />
+                  {card.productCount} Products
+                </div>
+              </Link>
+            ))}
+          </div>
+        </DcHomePanel>
       )}
-    </DcHomePanel>
+    </section>
   );
 }

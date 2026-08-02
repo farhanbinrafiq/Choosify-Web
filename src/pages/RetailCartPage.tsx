@@ -151,9 +151,9 @@ export function RetailCartPage() {
                     key={sellerId}
                     className="bg-white border border-[#E8EDF2] rounded-xl overflow-hidden shadow-sm"
                   >
-                    <div className="bg-[#F4F7F9] border-b border-[#E8EDF2] px-5 py-3.5 flex items-center justify-between gap-3">
+                    <div className="bg-white border-b border-[#E8EDF2] px-5 py-3.5 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-8 h-8 rounded-full bg-[#000435] flex items-center justify-center text-white shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-[#FFF3EA] flex items-center justify-center text-[#EB4501] shrink-0">
                           <Store size={14} />
                         </div>
                         <div className="min-w-0">
@@ -403,13 +403,13 @@ export function RetailCartPage() {
                 </p>
               </div>
 
-              <div className="choosify-dark-surface p-5 rounded-xl text-white flex gap-3.5 items-center">
+              <div className="bg-white border border-[#E8EDF2] shadow-sm p-5 rounded-xl flex gap-3.5 items-center">
                 <ShieldCheck size={28} className="text-[#EB4501] shrink-0" />
                 <div>
-                  <h4 className="text-[12.5px] font-extrabold leading-none mb-1.5">
+                  <h4 className="text-[12.5px] font-extrabold text-[#1A1A2E] leading-none mb-1.5">
                     Choosify secure guarantee
                   </h4>
-                  <p className="text-[10.5px] text-white/60 font-medium leading-relaxed m-0">
+                  <p className="text-[10.5px] text-[#9AA0AC] font-medium leading-relaxed m-0">
                     Verified suppliers, dispute monitoring, and COD protocols nationwide.
                   </p>
                 </div>

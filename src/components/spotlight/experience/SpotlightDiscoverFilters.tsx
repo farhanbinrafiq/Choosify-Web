@@ -61,7 +61,7 @@ export function SpotlightDiscoverFiltersPanel({ filters, onChange }: SpotlightDi
           [
             ['liveOnly', 'Live'],
             ['promotionsOnly', 'Promotions'],
-            ['sponsoredOnly', 'Sponsored'],
+            ['sponsoredOnly', 'Promoted'],
             ['verifiedOnly', 'Verified'],
             ['trendingOnly', 'Trending'],
           ] as const
@@ -94,7 +94,7 @@ export function SpotlightDiscoverFiltersPanel({ filters, onChange }: SpotlightDi
         <select
           value={filters.sort}
           onChange={(e) => onChange({ ...filters, sort: e.target.value as SpotlightDiscoverFilters['sort'] })}
-          className="px-3 py-2 text-xs font-bold uppercase border border-[#e8edf2] rounded-[5px] bg-white"
+          className="px-3 py-2 text-xs font-bold uppercase border border-[#e8edf2] rounded-full bg-white"
           aria-label="Sort Spotlight"
         >
           <option value="trending">Trending</option>

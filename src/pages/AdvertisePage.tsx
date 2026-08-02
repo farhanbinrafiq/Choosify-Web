@@ -49,17 +49,17 @@ export function AdvertisePage() {
   const adTypes = [
     {
       icon: <Sparkles className="w-5 h-5 text-orange-primary" />,
-      title: 'Sponsored Brands',
+      title: 'Promoted Brands',
       desc: 'Get featured at the top of brand listings and search pages. Drive high-visibility branding directly above alphabetical arrays.'
     },
     {
       icon: <TrendingUp className="w-5 h-5 text-rose-500" />,
-      title: 'Sponsored Deals',
+      title: 'Promoted Deals',
       desc: 'Pin your discount coupon, clearance code, or hot deal to the top of the popular "Deals" and category feeds.'
     },
     {
       icon: <Layers className="w-5 h-5 text-indigo-500" />,
-      title: 'Sponsored Recommendations',
+      title: 'Promoted Recommendations',
       desc: 'Embed your top-selling products inside highly-vetted community shopping guides and expert recommendation blogs.'
     },
     {
@@ -273,9 +273,9 @@ export function AdvertisePage() {
                           onChange={e => setFormData({...formData, placementInterest: e.target.value})}
                           className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium"
                         >
-                          <option value="sponsored-brands">Sponsored Brands Spotlight</option>
-                          <option value="sponsored-deals">Sponsored Deals & Promo Pins</option>
-                          <option value="sponsored-recs">Sponsored Guide Placement</option>
+                          <option value="sponsored-brands">Promoted Brands Spotlight</option>
+                          <option value="sponsored-deals">Promoted Deals & Promo Pins</option>
+                          <option value="sponsored-recs">Promoted Guide Placement</option>
                           <option value="homepage">Homepage Banner Spots</option>
                           <option value="creator-collabs">Influencer Collaborations</option>
                         </select>

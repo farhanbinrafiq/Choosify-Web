@@ -26,6 +26,8 @@ interface BrandCardDesignProps {
     isFeatured?: boolean;
     coverImage?: string;
     brandColor?: string;
+    /** Highest active %-off among this brand's live deals; omit when none */
+    maxDiscountPercent?: number;
   };
   onClick?: () => void;
 }
@@ -133,7 +135,11 @@ export const BrandCardDesign = memo(function BrandCardDesign({
 
   return (
     <Link
-      to={`/brands/${brand.id}`}
+      to={
+        brand.maxDiscountPercent && brand.maxDiscountPercent >= 1
+          ? `/brands/${brand.id}#deals-section`
+          : `/brands/${brand.id}`
+      }
       onClick={onClick}
       className="block w-full min-w-0 h-full bg-white rounded-[10px] border border-[#E8EDF2] overflow-hidden relative group select-none"
     >
@@ -142,6 +148,11 @@ export const BrandCardDesign = memo(function BrandCardDesign({
         className="relative h-[100px] flex items-center justify-center px-3 overflow-hidden"
         style={{ background: bannerBg }}
       >
+        {brand.maxDiscountPercent != null && brand.maxDiscountPercent >= 1 && (
+          <span className="absolute top-2 left-2 z-[11] rounded-full bg-[#FF000D] text-white text-[9px] font-extrabold px-2 py-0.5 leading-none shadow-sm pointer-events-none">
+            {Math.round(brand.maxDiscountPercent)}% Off
+          </span>
+        )}
         {brand.logo && /^(https?:|data:|\/)/.test(brand.logo) ? (
           <img
             src={brand.logo}

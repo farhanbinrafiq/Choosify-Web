@@ -180,7 +180,9 @@ export function SpotlightContentRenderer({
 
       {/* Sponsored badge */}
       {content.isSponsored && (
-        <p className="text-[10px] font-bold uppercase text-amber-600">Sponsored</p>
+        <span className="inline-flex px-1.5 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-[#2323FF] text-white">
+          Promoted
+        </span>
       )}
 
       <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">{typeLabel}</p>

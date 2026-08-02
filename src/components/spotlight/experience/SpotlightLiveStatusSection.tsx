@@ -29,7 +29,7 @@ export function SpotlightLiveStatusSection({
       >
         <span
           className={cn(
-            'inline-flex items-center gap-1.5 self-start px-2.5 py-1 rounded-md text-[11px] font-bold tracking-tight',
+            'inline-flex items-center gap-1.5 self-start px-2.5 py-1 rounded-full text-[11px] font-bold tracking-tight',
             isLive ? 'bg-rose-500/15 text-rose-300 border border-rose-400/30' : 'bg-[#EB4501]/15 text-[#FF8A4C] border border-[#EB4501]/30',
           )}
         >
@@ -65,7 +65,7 @@ export function SpotlightLiveStatusSection({
         <div className="flex items-center gap-3 min-w-0">
           <span
             className={cn(
-              'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-bold tracking-tight',
+              'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-bold tracking-tight',
               isLive ? 'bg-rose-50 text-rose-600 border border-rose-200' : 'bg-[#FFF0E8] text-[#EB4501] border border-[#EB4501]/20',
             )}
           >

@@ -20,6 +20,14 @@ import { ADDRESS_STORAGE_KEY, getDefaultAddress, normalizeDefaultAddress } from 
 import type { BookingOfferCard } from '../types/serviceBooking';
 import { operationsApi } from '../services/operationsApi';
 import { useGlobalState } from './GlobalStateContext';
+import {
+  compareCategoryBrowseHref,
+  compareCategoryMismatchMessage,
+  getCompareLockedCategory,
+  isSameCompareCategory,
+  pruneComparedToFirstCategory,
+  type CompareLockedCategory,
+} from '../utils/compareCategory';
 
 export type { AnnouncementAssociatedEntity };
 
@@ -118,6 +126,10 @@ interface DashboardContextType {
   setSavedGuides: React.Dispatch<React.SetStateAction<any[]>>;
   comparedProducts: any[];
   setComparedProducts: React.Dispatch<React.SetStateAction<any[]>>;
+  /** Category locked by the first item in the active comparison; null when empty. */
+  compareLockedCategory: CompareLockedCategory | null;
+  canAddToCompare: (product: any) => boolean;
+  getCompareCategoryBrowseHref: () => string | null;
   messages: any[];
   setMessages: React.Dispatch<React.SetStateAction<any[]>>;
   threads: MessageThread[];
@@ -205,7 +217,9 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     }
   });
 
-  const [comparedProducts, setComparedProducts] = useState<any[]>(() => readStoredArray('choosify_compared_products'));
+  const [comparedProducts, setComparedProducts] = useState<any[]>(() =>
+    pruneComparedToFirstCategory(readStoredArray('choosify_compared_products')),
+  );
 
   // Threaded Messaging States with Localstorage persistence
   const [threads, setThreads] = useState<MessageThread[]>(() => {
@@ -406,7 +420,16 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       setLovedBrands((prev) => (prev.length ? prev : [brands[1], brands[3], brands[4]]));
       setFollowedBrands((prev) => (prev.length ? prev : [brands[2], brands[5], brands[6], brands[10]]));
       setRecentlyViewed((prev) => (prev.length ? prev : [products[1], products[2], products[4]]));
-      setComparedProducts((prev) => (prev.length ? prev : [products[0], products[1]]));
+      setComparedProducts((prev) => {
+        if (prev.length) return pruneComparedToFirstCategory(prev);
+        const first = products[0];
+        if (!first) return [];
+        const locked = getCompareLockedCategory([first]);
+        const second = products.find(
+          (p, index) => index > 0 && isSameCompareCategory(p, locked),
+        );
+        return second ? [first, second] : [first];
+      });
     });
   }, []);
 
@@ -606,21 +629,43 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     });
   }, []);
 
+  const compareLockedCategory = getCompareLockedCategory(comparedProducts);
+
+  const canAddToCompare = useCallback(
+    (product: any) => {
+      if (!product) return false;
+      if (comparedProducts.length >= 4) return false;
+      if (comparedProducts.some((p) => String(p.id) === String(product.id))) return false;
+      return isSameCompareCategory(product, compareLockedCategory);
+    },
+    [comparedProducts, compareLockedCategory],
+  );
+
+  const getCompareCategoryBrowseHref = useCallback(() => {
+    if (!compareLockedCategory) return null;
+    return compareCategoryBrowseHref(compareLockedCategory.label);
+  }, [compareLockedCategory]);
+
   const addToCompare = (product: any) => {
     if (comparedProducts.length >= 4) {
       toast.error('Maximum 4 products allowed for comparison');
       return;
     }
-    if (comparedProducts.find(p => p.id === product.id)) {
+    if (comparedProducts.find((p) => String(p.id) === String(product.id))) {
       toast.error('Product already in comparison');
       return;
     }
-    setComparedProducts(prev => [...prev, product]);
+    const locked = getCompareLockedCategory(comparedProducts);
+    if (locked && !isSameCompareCategory(product, locked)) {
+      toast.error(compareCategoryMismatchMessage(locked));
+      return;
+    }
+    setComparedProducts((prev) => [...prev, product]);
     toast.success(`${product?.brand || product?.brandName || 'Product'} added to compare`);
   };
 
   const removeFromCompare = (id: number) => {
-    setComparedProducts(prev => prev.filter(p => p.id !== id));
+    setComparedProducts((prev) => prev.filter((p) => p.id !== id));
     toast.success('Product removed from comparison');
   };
 
@@ -701,6 +746,9 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
             status: row.status,
             userId: row.userId,
             authorName: row.userName,
+            avatar: row.userAvatar || row.avatar || row.authorAvatar,
+            authorAvatar: row.userAvatar || row.authorAvatar || row.avatar,
+            userAvatar: row.userAvatar || row.avatar || row.authorAvatar,
           };
         });
         setReviews(mapped);
@@ -1457,6 +1505,9 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       recentlyViewed, setRecentlyViewed,
       savedGuides, setSavedGuides,
       comparedProducts, setComparedProducts,
+      compareLockedCategory,
+      canAddToCompare,
+      getCompareCategoryBrowseHref,
       messages, setMessages,
       threads, setThreads,
       threadMessages, setThreadMessages,

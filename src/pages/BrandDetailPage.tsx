@@ -3,7 +3,6 @@ import {
   Search,
   CheckCircle2,
   X,
-  Lock,
   ShieldCheck,
 } from "lucide-react";
 import { BRANDS, PRODUCTS } from "../constants";
@@ -18,7 +17,7 @@ import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
 import { StudioWrap } from "../components/studio/StudioWrap";
 import { BrandPostCarouselSection } from "../components/BrandPostCarouselSection";
 import { getBrandPostsByBrandId } from "../lib/brandPosts";
-import { useNavigate, Link, useParams } from "react-router-dom";
+import { useNavigate, Link, useParams, useLocation } from "react-router-dom";
 import { ReportModal } from "../components/ReportModal";
 import { useGlobalState } from "../context/GlobalStateContext";
 import { toast } from '../lib/notify';
@@ -35,9 +34,9 @@ import {
 } from "../components/FilterEngine";
 import { UniversalCarousel } from "../components/design/UniversalCarousel";
 import { PaginationBar } from "../components/PaginationBar";
-import { PublicReviewCard } from "../components/PublicReviewCard";
+import { PublicReviewCard, resolvePublicReviewAvatarUrl } from "../components/PublicReviewCard";
 import { TikTokIcon } from "../components/brand/TikTokIcon";
-import { BrandCouponsSection, BrandCouponCarouselCard, buildBrandCoupons } from "../components/brand/BrandCouponsSection";
+import { BrandCouponCarouselCard, buildBrandCoupons } from "../components/brand/BrandCouponsSection";
 import { operationsApi, type PublicProductReview } from "../services/operationsApi";
 import { BrandWhereToBuySection } from "../components/brand/BrandWhereToBuySection";
 import { BrandFaqSection } from "../components/brand/BrandFaqSection";
@@ -50,12 +49,65 @@ import { usePriorityClockMs } from "../hooks/usePriorityClockMs";
 
 const BRAND_FEED_GRID = PRODUCT_CARD_GRID;
 
+/** Same check as CategoriesPage — treat only real image URLs as logos (not letter initials). */
+function isBrandLogoImage(value?: string): value is string {
+  return Boolean(value && /^(https?:|data:|\/)/.test(value));
+}
+
+function resolveBrandLogoUrl(source?: {
+  logo?: string;
+  image?: string;
+} | null): string | undefined {
+  if (!source) return undefined;
+  const candidate = source.logo || source.image;
+  return isBrandLogoImage(candidate) ? candidate : undefined;
+}
+
+function CompareBrandAvatar({
+  name,
+  logoUrl,
+  logoBg,
+}: {
+  name: string;
+  logoUrl?: string;
+  logoBg: string;
+}) {
+  const [logoFailed, setLogoFailed] = useState(false);
+  const showLogo = Boolean(logoUrl) && !logoFailed;
+
+  useEffect(() => {
+    setLogoFailed(false);
+  }, [logoUrl]);
+
+  return (
+    <div
+      className="w-6 h-6 rounded-md text-white text-[10px] font-extrabold flex items-center justify-center shrink-0 overflow-hidden"
+      style={{ background: showLogo ? '#FFFFFF' : logoBg }}
+    >
+      {showLogo ? (
+        <img
+          src={logoUrl}
+          alt=""
+          className="w-full h-full object-cover"
+          loading="lazy"
+          referrerPolicy="no-referrer"
+          onError={() => setLogoFailed(true)}
+        />
+      ) : (
+        name.slice(0, 1).toUpperCase() || '?'
+      )}
+    </div>
+  );
+}
+
 export function BrandDetailPage() {
   const brandHeroRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { id } = useParams();
+  const location = useLocation();
   const {
     allBrands,
+    allCatalogBrands,
     allProducts,
     getBrandClaimStatus,
     updateBrandClaimStatus,
@@ -184,6 +236,17 @@ export function BrandDetailPage() {
     setLocalClaimStatus(getBrandClaimStatus(brand.id));
   }, [brand, brandClaimStatuses]);
 
+  // Deep-link from brand list discount pill → Top Deals & Coupons (#deals-section)
+  useEffect(() => {
+    if (!location.hash) return;
+    const targetId = location.hash.replace(/^#/, '');
+    if (!targetId) return;
+    const timer = window.setTimeout(() => {
+      document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 80);
+    return () => window.clearTimeout(timer);
+  }, [location.hash, id, brand.id]);
+
   const [brandReviews, setBrandReviews] = useState<PublicProductReview[]>([]);
   const [brandReviewsLoaded, setBrandReviewsLoaded] = useState(false);
 
@@ -206,16 +269,27 @@ export function BrandDetailPage() {
     };
   }, [brand.name]);
 
-  // Resolve products listed under this brand
+  // Resolve products listed under this brand (id, catalog id, and name — mocks often lack brandId)
   const brandNameLower = brand.name.toLowerCase();
-  const brandProducts = productSource.filter(
-    (p: any) =>
-      p.brandId === brand.id ||
-      (p.brand && p.brand.toLowerCase() === brandNameLower),
-  );
+  const brandIdStr = String(brand.id);
+  const brandCatalogId = String((brand as { catalogId?: string }).catalogId || '').toLowerCase();
+  const brandProducts = productSource.filter((p: any) => {
+    if (p.brandId != null && String(p.brandId) === brandIdStr) return true;
+    if (
+      p.catalogBrandId != null &&
+      brandCatalogId &&
+      String(p.catalogBrandId).toLowerCase() === brandCatalogId
+    ) {
+      return true;
+    }
+    const productBrand = String(p.brandName || p.brand || '')
+      .toLowerCase()
+      .trim();
+    return Boolean(productBrand) && productBrand === brandNameLower;
+  });
 
-  const previewShowProductCatalogSection =
-    localClaimStatus !== "verified" || brandProducts.length > 0;
+  // Always expose Products in sticky nav — section renders even when the catalog is empty
+  const previewShowProductCatalogSection = true;
 
   const sectionNavItems = useMemo(
     () => [
@@ -873,7 +947,34 @@ export function BrandDetailPage() {
       brandProducts[0]?.category ||
       null;
     const brandId = String(brand.id);
+    const brandCatalogId = String((brand as { catalogId?: string }).catalogId || brand.id);
     const brandName = String(brand.name || '').toLowerCase();
+
+    const logoFromCatalog = (b: {
+      id?: string | number;
+      catalogId?: string;
+      name?: string;
+      logo?: string;
+      image?: string;
+    }) => {
+      const direct = resolveBrandLogoUrl(b);
+      if (direct) return direct;
+      const idKeys = new Set(
+        [b.id, b.catalogId].filter(Boolean).map((v) => String(v).toLowerCase()),
+      );
+      const nameKey = String(b.name || '').toLowerCase();
+      const catalogMatch = (allCatalogBrands || []).find((cb) => {
+        const cbId = String(cb.id || '').toLowerCase();
+        const cbSlug = String(cb.slug || '').toLowerCase();
+        return (
+          idKeys.has(cbId) ||
+          idKeys.has(cbSlug) ||
+          (nameKey && String(cb.name || '').toLowerCase() === nameKey)
+        );
+      });
+      return resolveBrandLogoUrl(catalogMatch);
+    };
+
     const others = (allBrands || []).filter((b: any) => {
       const id = String(b.id);
       const name = String(b.name || '').toLowerCase();
@@ -883,7 +984,13 @@ export function BrandDetailPage() {
     const selfRating = Number((brand as any).ratings ?? (brand as any).rating ?? 4.3);
     const selfRow = {
       name: brand.name,
-      logo: brand.name.slice(0, 1).toUpperCase(),
+      logoUrl: logoFromCatalog({
+        id: brand.id,
+        catalogId: brandCatalogId,
+        name: brand.name,
+        logo: (brand as { logo?: string }).logo,
+        image: (brand as { image?: string }).image,
+      }),
       logoBg: '#1A1A2E',
       overall: `${selfRating.toFixed(1)}/5`,
       quality: `${Math.min(5, selfRating + 0.2).toFixed(1)}/5`,
@@ -895,7 +1002,7 @@ export function BrandDetailPage() {
       const rating = Number(b.ratings ?? b.rating ?? 4.0);
       return {
         name: b.name,
-        logo: String(b.name || '?').slice(0, 1).toUpperCase(),
+        logoUrl: logoFromCatalog(b),
         logoBg: '#4B5563',
         overall: `${rating.toFixed(1)}/5`,
         quality: `${Math.min(5, rating + 0.1).toFixed(1)}/5`,
@@ -905,7 +1012,7 @@ export function BrandDetailPage() {
       };
     });
     return [selfRow, ...competitorRows];
-  }, [allBrands, brand, brandProducts, priorityNowMs]);
+  }, [allBrands, allCatalogBrands, brand, brandProducts, priorityNowMs]);
 
   const totalPages = Math.ceil(sortedProducts.length / productsPerPage);
   const paginatedProducts = sortedProducts.slice(
@@ -913,24 +1020,34 @@ export function BrandDetailPage() {
     currentPage * productsPerPage,
   );
 
-  // Extract deals (with specific tags or Sale flags)
+  // Extract deals (sale/deal flags) — fall back to top brand products so the merged carousel isn't empty
   const filteredDeals = sortedProducts.filter(
     (p: any) =>
-      p.tag === "SALE" || p.tag === "HOT" || p.tag === "NEW" || p.discount,
+      p.tag === "SALE" ||
+      p.tag === "HOT" ||
+      p.tag === "NEW" ||
+      p.discount ||
+      p.isDeal ||
+      (typeof p.discountPercent === "number" && p.discountPercent > 0) ||
+      Boolean(p.dealType),
   );
-  // Guarantee always active deals fallback
   const finalDeals =
-    filteredDeals.length > 0 ? filteredDeals : sortedProducts.slice(0, 3);
-
-  const hasCatalogProducts = filteredProducts.length > 0;
-  const hasCatalogDeals = finalDeals.length > 0;
-  const showProductCatalogSection =
-    localClaimStatus !== "verified" || hasCatalogProducts;
-  const showDealsSection = localClaimStatus !== "verified" || hasCatalogDeals;
+    filteredDeals.length > 0 ? filteredDeals : sortedProducts.slice(0, 6);
 
   // Counts
   const totalDealsFound = finalDeals.length;
   const totalProductsFound = sortedProducts.length || brandProducts.length;
+  const brandCoupons = buildBrandCoupons(brand.name);
+
+  const dealsCouponsCarouselItems = useMemo(
+    () => [
+      ...finalDeals.map((product: any) => ({ kind: "deal" as const, product })),
+      ...brandCoupons
+        .slice(0, 3)
+        .map((coupon) => ({ kind: "coupon" as const, coupon })),
+    ],
+    [finalDeals, brandCoupons],
+  );
 
   function clearAllFilters() {
     setSelectedCategory(null);
@@ -1129,8 +1246,6 @@ export function BrandDetailPage() {
       ],
     };
   };
-
-  const brandCoupons = buildBrandCoupons(brand.name);
 
   const fallbackOverview = getBrandOverviews(brand.name);
   const catalogOverview = (brand as { overview?: {
@@ -1656,188 +1771,103 @@ export function BrandDetailPage() {
               </div>
             )}
 
-            {/* B. DEALS + COUPONS */}
-            {showDealsSection && (
-              <StudioWrap sectionId="brand-deals" className="scroll-mt-36">
-                <div className="flex items-baseline justify-between gap-3 mb-1 text-left">
-                  <h2 className="text-[15px] font-extrabold text-[#1A1A2E] tracking-tight m-0">
-                    TOP DEALS & COUPONS ON {brand.name.toUpperCase()}
-                  </h2>
-                  <Link
-                    to="/deals"
-                    className="text-[12px] font-bold text-[#1A1A2E] no-underline hover:text-[#CF4400] shrink-0"
-                  >
-                    VIEW ALL DEALS ›
-                  </Link>
-                </div>
-                <p className="text-[11.5px] text-[#9AA0AC] m-0 mb-3.5">
-                  Limited-time offers on {brand.name} products
-                </p>
-
-                {localClaimStatus !== "verified" ? (
-                  <div className="bg-gray-50/60 border border-dashed border-gray-200 rounded-xl p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-inner py-10">
-                    <div className="w-12 h-12 rounded-full bg-[#EB4501]/10 flex items-center justify-center text-[#EB4501]">
-                      <Lock className="w-5 h-5" />
-                    </div>
-                    <h3 className="text-sm font-bold text-[#1A1A2E] tracking-tight">
-                      Active Exclusive Deals Locked
-                    </h3>
-                    <p className="text-xs text-gray-500 font-medium max-w-sm">
-                      Merchant-published coupons, flash discounts, and
-                      promotional banners are locked until ownership is
-                      verified.
-                    </p>
-                    {localClaimStatus === "community" && (
-                      <button
-                        onClick={() => {
-                          toast.loading(
-                            "Initiating secure brand verification link...",
-                            { duration: 1500 },
-                          );
-                          setTimeout(() => {
-                            updateBrandClaimStatus(brand.id, "pending");
-                            toast.success(
-                              "Verification submission parsed! Your status is now Pending Review.",
-                            );
-                          }, 1500);
-                        }}
-                        className="bg-[#FF000D] hover:brightness-110 text-white py-2 px-5 rounded-lg text-[12px] font-bold tracking-tight mt-2 cursor-pointer transition-all border-none"
-                      >
-                        Claim Brand Ownership
-                      </button>
-                    )}
-                    {localClaimStatus === "pending" && (
-                      <div className="inline-flex items-center bg-[#FF000D] text-white text-[12px] font-semibold tracking-tight mt-2 px-3 py-1.5 rounded-lg">
-                        Ownership Verification Under Review
-                      </div>
-                    )}
-                  </div>
-                ) : (
-                  <UniversalCarousel
-                    items={[
-                      ...finalDeals.map((product: any) => ({ kind: "deal" as const, product })),
-                      ...brandCoupons
-                        .slice(0, 3)
-                        .map((coupon) => ({ kind: "coupon" as const, coupon })),
-                    ]}
-                    getKey={(entry, i) =>
-                      entry.kind === "deal" ? String(entry.product.id ?? i) : entry.coupon.code
-                    }
-                    itemWidth={220}
-                    gap={14}
-                    className="pr-1"
-                    autoPlay
-                    renderItem={(entry) =>
-                      entry.kind === "deal" ? (
-                        <ProductCard product={entry.product} variant="grid" />
-                      ) : (
-                        <BrandCouponCarouselCard coupon={entry.coupon} />
-                      )
-                    }
-                  />
-                )}
-              </StudioWrap>
-            )}
-
-            {/* Coupons fallback when deals section is hidden — keep deals-section anchor for sticky nav */}
-            {!showDealsSection && (
-              <div id="deals-section" className="scroll-mt-36 w-full">
-                <BrandCouponsSection
-                  brandName={brand.name}
-                  coupons={brandCoupons}
-                />
+            {/* B. DEALS + COUPONS — always merged carousel (deals + coupon tiles) */}
+            <StudioWrap sectionId="brand-deals" className="scroll-mt-36">
+              <div className="flex items-baseline justify-between gap-3 mb-1 text-left">
+                <h2 className="text-[15px] font-extrabold text-[#1A1A2E] tracking-tight m-0">
+                  TOP DEALS & COUPONS ON {brand.name.toUpperCase()}
+                </h2>
+                <Link
+                  to="/deals"
+                  className="text-[12px] font-bold text-[#1A1A2E] no-underline hover:text-[#CF4400] shrink-0"
+                >
+                  VIEW ALL DEALS ›
+                </Link>
               </div>
-            )}
+              <p className="text-[11.5px] text-[#9AA0AC] m-0 mb-3.5">
+                Limited-time offers on {brand.name} products
+              </p>
 
-          {/* A. PRODUCTS SECTION */}
-            {showProductCatalogSection && (
-              <StudioWrap sectionId="brand-catalog" className="scroll-mt-36">
-                <div className="flex items-baseline justify-between gap-3 mb-1 text-left">
-                  <h2 className="text-[15px] font-extrabold text-[#1A1A2E] tracking-tight m-0">
-                    {brand.name.toUpperCase()} PRODUCTS
-                  </h2>
-                  <Link
-                    to={`/brands/${brand.id}/products`}
-                    className="text-[12px] font-bold text-[#1A1A2E] no-underline hover:text-[#CF4400] shrink-0"
-                  >
-                    VIEW ALL PRODUCTS ›
-                  </Link>
+              {dealsCouponsCarouselItems.length > 0 ? (
+                <UniversalCarousel
+                  items={dealsCouponsCarouselItems}
+                  getKey={(entry, i) =>
+                    entry.kind === "deal" ? String(entry.product.id ?? i) : entry.coupon.code
+                  }
+                  itemWidth={220}
+                  gap={14}
+                  className="pr-1"
+                  autoPlay
+                  renderItem={(entry) =>
+                    entry.kind === "deal" ? (
+                      <ProductCard product={entry.product} variant="grid" />
+                    ) : (
+                      <BrandCouponCarouselCard coupon={entry.coupon} />
+                    )
+                  }
+                />
+              ) : (
+                <div className="p-8 text-center bg-white border border-[#E8EDF2] rounded-xl text-gray-400 text-xs font-bold">
+                  No deals or coupons available for {brand.name} yet.
                 </div>
-                <p className="text-[11.5px] text-[#9AA0AC] m-0 mb-3.5">
-                  Explore all products from {brand.name}
-                </p>
+              )}
+            </StudioWrap>
 
-                {localClaimStatus !== "verified" ? (
-                  <div className="bg-gray-50/60 border border-dashed border-gray-200 rounded-xl p-8 text-center flex flex-col items-center justify-center gap-3 w-full shadow-inner py-12">
-                    <div className="w-12 h-12 rounded-full bg-[#EB4501]/10 flex items-center justify-center text-[#EB4501]">
-                      <Lock className="w-5 h-5" />
-                    </div>
-                    <h3 className="text-sm font-bold text-[#1A1A2E] tracking-tight">
-                      Products Locked
-                    </h3>
-                    <p className="text-xs text-gray-500 font-medium max-w-sm">
-                      The full catalog, price list sync, inventory metrics, and
-                      product grids are locked. Currently unclaimed profiles are
-                      restricted from showing merchant content.
-                    </p>
-                    {localClaimStatus === "community" && (
-                      <button
-                        onClick={() => {
-                          toast.loading(
-                            "Initiating secure brand verification link...",
-                            { duration: 1500 },
-                          );
-                          setTimeout(() => {
-                            updateBrandClaimStatus(brand.id, "pending");
-                            toast.success(
-                              "Verification submission parsed! Your status is now Pending Review.",
-                            );
-                          }, 1500);
-                        }}
-                        className="bg-[#FF000D] hover:brightness-110 text-white py-2 px-5 rounded-lg text-[12px] font-bold tracking-tight mt-2 cursor-pointer transition-all border-none"
-                      >
-                        Claim Brand Ownership
-                      </button>
-                    )}
-                    {localClaimStatus === "pending" && (
-                      <div className="inline-flex items-center bg-[#FF000D] text-white text-[12px] font-semibold tracking-tight mt-2 px-3 py-1.5 rounded-lg">
-                        Verification Pending Review
-                      </div>
-                    )}
-                  </div>
-                ) : filteredProducts.length > 0 ? (
-                  <div className={BRAND_FEED_GRID}>
-                    {paginatedProducts.map((product: any, i: number) => (
-                      <ProductCard
-                        key={product.id || i}
-                        product={product}
-                        variant="grid"
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="p-12 text-center bg-white border border-[#E8EDF2] rounded-xl text-gray-400 text-xs font-bold space-y-2">
-                    <p>No products match chosen criteria.</p>
+            {/* A. PRODUCTS SECTION — always rendered; grid when catalog matches */}
+            <StudioWrap sectionId="brand-catalog" className="scroll-mt-36">
+              <div className="flex items-baseline justify-between gap-3 mb-1 text-left">
+                <h2 className="text-[15px] font-extrabold text-[#1A1A2E] tracking-tight m-0">
+                  {brand.name.toUpperCase()} PRODUCTS
+                </h2>
+                <Link
+                  to={`/brands/${brand.id}/products`}
+                  className="text-[12px] font-bold text-[#1A1A2E] no-underline hover:text-[#CF4400] shrink-0"
+                >
+                  VIEW ALL PRODUCTS ›
+                </Link>
+              </div>
+              <p className="text-[11.5px] text-[#9AA0AC] m-0 mb-3.5">
+                Explore all products from {brand.name}
+              </p>
+
+              {filteredProducts.length > 0 ? (
+                <div className={BRAND_FEED_GRID}>
+                  {paginatedProducts.map((product: any, i: number) => (
+                    <ProductCard
+                      key={product.id || i}
+                      product={product}
+                      variant="grid"
+                    />
+                  ))}
+                </div>
+              ) : (
+                <div className="p-12 text-center bg-white border border-[#E8EDF2] rounded-xl text-gray-400 text-xs font-bold space-y-2">
+                  <p>
+                    {brandProducts.length === 0
+                      ? `No products listed for ${brand.name} yet.`
+                      : "No products match chosen criteria."}
+                  </p>
+                  {brandProducts.length > 0 && (
                     <button
                       onClick={clearAllFilters}
                       className="text-[#EB4501] underline hover:text-[#ff5d14] text-[10px] cursor-pointer bg-transparent border-0"
                     >
                       Clear Selections
                     </button>
-                  </div>
-                )}
+                  )}
+                </div>
+              )}
 
-                {localClaimStatus === "verified" && totalPages > 1 && (
-                  <PaginationBar
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    showingCount={paginatedProducts.length}
-                    totalCount={filteredProducts.length}
-                    onPageChange={setCurrentPage}
-                  />
-                )}
-              </StudioWrap>
-            )}
+              {totalPages > 1 && (
+                <PaginationBar
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  showingCount={paginatedProducts.length}
+                  totalCount={filteredProducts.length}
+                  onPageChange={setCurrentPage}
+                />
+              )}
+            </StudioWrap>
 
             {/* Creator reviews retired — replaced by Brand Story below FAQ */}
 
@@ -1897,7 +1927,11 @@ export function BrandDetailPage() {
                       rating: review.rating,
                       verified: true,
                       productName: review.productTitle,
-                      dp: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(review.userName)}`,
+                      avatar: resolvePublicReviewAvatarUrl(
+                        review.userAvatar,
+                        (review as { avatar?: string }).avatar,
+                        (review as { dp?: string }).dp,
+                      ),
                     }}
                   />
                 ))
@@ -1945,12 +1979,11 @@ export function BrandDetailPage() {
                   {/* Mobile: brand + overall on one line, labeled stats fill the row below */}
                   <div className="flex items-center justify-between gap-2 sm:justify-start">
                     <div className="flex items-center gap-2 min-w-0">
-                      <div
-                        className="w-6 h-6 rounded-md text-white text-[10px] font-extrabold flex items-center justify-center shrink-0"
-                        style={{ background: row.logoBg }}
-                      >
-                        {row.logo}
-                      </div>
+                      <CompareBrandAvatar
+                        name={row.name}
+                        logoUrl={row.logoUrl}
+                        logoBg={row.logoBg}
+                      />
                       <span className="text-[12px] font-bold text-[#1A1A2E] truncate">
                         {row.name}
                       </span>

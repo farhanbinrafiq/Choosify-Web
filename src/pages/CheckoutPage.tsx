@@ -71,7 +71,7 @@ export function CheckoutPage() {
   const [address, setAddress] = useState('House 42, Road 11, Banani, Dhaka');
   const [region, setRegion] = useState('Dhaka');
   const [deliveryNotes, setDeliveryNotes] = useState('');
-  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'credit'>(
+  const [paymentMethod, setPaymentMethod] = useState<'cod' | 'credit' | 'online'>(
     pendingOrder ? 'credit' : 'cod',
   );
 
@@ -81,10 +81,27 @@ export function CheckoutPage() {
   /** Deposit-now/rest-at-delivery choice for online payment. Scoped to single-item carts to
    *  avoid ambiguity over mixed per-product deposit rates in a multi-item order. */
   const [productPaymentType, setProductPaymentType] = useState<'full' | 'partial'>('full');
+  /** Real SSLCommerz — only true when backend reports credentials configured. */
+  const [sslcommerzConfigured, setSslcommerzConfigured] = useState(false);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    operationsApi
+      .getSslcommerzStatus()
+      .then((status) => {
+        if (!cancelled) setSslcommerzConfigured(Boolean(status.configured));
+      })
+      .catch(() => {
+        if (!cancelled) setSslcommerzConfigured(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const singleItem = !pendingOrder && activeCart.length === 1 ? activeCart[0] : null;
   const productPartialEligible =
-    paymentMethod === 'credit' &&
+    (paymentMethod === 'credit' || paymentMethod === 'online') &&
     !!singleItem?.product?.partialPaymentEnabled &&
     !!singleItem?.product?.depositPercent;
   const productDepositPercent = singleItem?.product?.depositPercent ?? 0;
@@ -101,9 +118,9 @@ export function CheckoutPage() {
 
   React.useEffect(() => {
     if (isCODRestricted) {
-      setPaymentMethod('credit');
+      setPaymentMethod(sslcommerzConfigured ? 'online' : 'credit');
     }
-  }, [isCODRestricted]);
+  }, [isCODRestricted, sslcommerzConfigured]);
 
   // If cart is empty, redirect — unless we just placed an order (cart clears before navigate)
   React.useEffect(() => {
@@ -197,8 +214,19 @@ export function CheckoutPage() {
 
   const isCODEligible = aggregateTotal < 150000 && !isCODRestricted;
 
-  /** Mock payment step (no real gateway wired) — brief delay so the UI reads as a real charge. */
+  /** Mock payment step for legacy `credit` path only — SSLCommerz uses real init+redirect. */
   const simulatePayment = () => new Promise((resolve) => setTimeout(resolve, 900));
+
+  const redirectToSslcommerz = async (orderId: string) => {
+    const session = await operationsApi.initSslcommerzPayment({
+      orderId,
+      customerEmail: currentUser.email,
+    });
+    if (!session.redirectUrl) {
+      throw new Error('Payment gateway did not return a redirect URL');
+    }
+    window.location.assign(session.redirectUrl);
+  };
 
   const handlePlaceOrder = async () => {
     if (!fullName.trim() || !phone.trim() || !address.trim()) {
@@ -229,6 +257,33 @@ export function CheckoutPage() {
         );
         toast.error('The 8-hour payment window has expired.');
         navigate('/dashboard', { state: { activeTab: 'orders' } });
+        return;
+      }
+
+      // Real SSLCommerz path — create/update unpaid order, then redirect. Never mark paid here.
+      if (paymentMethod === 'online' && sslcommerzConfigured) {
+        const pendingOnline = {
+          ...pendingOrder,
+          status: 'pending_payment' as const,
+          isCOD: false,
+          paymentMethod: 'online' as const,
+          paymentProvider: 'sslcommerz' as const,
+          paymentStatus: 'unpaid' as const,
+          shipping: {
+            fullName: fullName.trim(),
+            phone: phone.trim(),
+            address: address.trim(),
+            region,
+            deliveryNotes: deliveryNotes.trim() || undefined,
+          },
+        };
+        updateOrder(pendingOrder.orderId, pendingOnline);
+        try {
+          await operationsApi.createOrder(pendingOnline as unknown as Record<string, unknown>);
+          await redirectToSslcommerz(pendingOrder.orderId);
+        } catch (err) {
+          toast.error((err as Error)?.message || 'Could not start online payment.');
+        }
         return;
       }
 
@@ -374,12 +429,71 @@ ORDER STATUS: PENDING_CONFIRMATION
     });
 
     const isCod = paymentMethod === 'cod';
-    const isPartial = !isCod && productPartialEligible && productPaymentType === 'partial';
+    const isOnline = paymentMethod === 'online';
+    const isPartial =
+      !isCod && productPartialEligible && productPaymentType === 'partial';
     const depositAmount = isPartial ? Math.round((finalTotal * productDepositPercent) / 100) : 0;
     // COD: buyer prepays only the delivery fee now; product amount stays due at the doorstep.
     // Partial (online, deposit): buyer pays a deposit now, rest due at delivery.
     // Full online: buyer pays the full amount now, nothing remains due.
     const payingNow = isCod ? deliveryTotal : isPartial ? depositAmount : finalTotal;
+
+    // Real SSLCommerz — persist unpaid order, init session, redirect. No client-side "paid".
+    if (isOnline && sslcommerzConfigured) {
+      const onlineOrder = {
+        orderId: tempOrderId,
+        buyerId: currentUser.id,
+        isCOD: false,
+        isSplit: splitCount > 1,
+        overallTotal: finalTotal,
+        subtotal,
+        deliveryTotal,
+        subOrders: generatedSubOrders,
+        createdAt: new Date().toISOString(),
+        promoCode: appliedPromo?.code,
+        promoDiscount: promoDiscount,
+        promoType: appliedPromo?.type,
+        paymentMethod: 'online' as const,
+        paymentProvider: 'sslcommerz' as const,
+        paymentStatus: 'unpaid' as const,
+        status: 'pending_payment' as const,
+        isPartialPayment: isPartial ? true : undefined,
+        depositPercent: isPartial ? productDepositPercent : undefined,
+        depositAmount: isPartial ? depositAmount : undefined,
+        remainingAmount: isPartial ? Math.max(0, finalTotal - depositAmount) : undefined,
+        shipping: {
+          fullName: fullName.trim(),
+          phone: phone.trim(),
+          address: address.trim(),
+          region,
+          deliveryNotes: deliveryNotes.trim() || undefined,
+        },
+      };
+
+      if (appliedPromo) {
+        window.dispatchEvent(new CustomEvent('choosify-promo-applied', { detail: appliedPromo }));
+      }
+
+      try {
+        await operationsApi.createOrder(onlineOrder as Record<string, unknown>);
+      } catch (err) {
+        toast.error((err as Error)?.message || 'Could not save order — sign in again and retry.');
+        return;
+      }
+
+      sessionStorage.setItem('choosify_last_order_id', tempOrderId);
+      sessionStorage.setItem('choosify_last_order_snapshot', JSON.stringify(onlineOrder));
+      addOrder(onlineOrder);
+      orderPlacedRef.current = true;
+      toast.success(`Redirecting to secure payment for ৳${payingNow.toLocaleString()}…`);
+      try {
+        await redirectToSslcommerz(tempOrderId);
+      } catch (err) {
+        toast.error((err as Error)?.message || 'Could not start online payment.');
+      }
+      return;
+    }
+
     await simulatePayment();
     const paidAt = new Date().toISOString();
 
@@ -694,6 +808,31 @@ ORDER STATUS: PENDING_CONFIRMATION
                   <p className="text-[10px] text-[#9AA0AC] font-medium leading-normal">Pay securely via card, bank transfer, or digital wallet.</p>
                 </div>
               </button>
+
+              {sslcommerzConfigured && (
+                <button
+                  type="button"
+                  onClick={() => setPaymentMethod('online')}
+                  className={cn(
+                    "w-full p-4 rounded-lg border text-left flex gap-4 items-start transition-all",
+                    paymentMethod === 'online'
+                      ? "border-[#EB4501] bg-[#EB4501]/5"
+                      : "border-[#E8EDF2] bg-white hover:bg-[#F4F7F9]"
+                  )}
+                >
+                  <div className="w-5 h-5 rounded-full border flex items-center justify-center shrink-0 mt-0.5 bg-white border-gray-300">
+                    {paymentMethod === 'online' && <div className="w-2.5 h-2.5 bg-[#EB4501] rounded-full" />}
+                  </div>
+                  <div>
+                    <h4 className="text-[11px] font-extrabold text-[#1A1A2E] uppercase tracking-wide leading-none mb-1">
+                      Pay online (bKash / Nagad / Card)
+                    </h4>
+                    <p className="text-[10px] text-[#9AA0AC] font-medium leading-normal">
+                      Secure checkout via SSLCommerz — you will be redirected to complete payment.
+                    </p>
+                  </div>
+                </button>
+              )}
             </div>
 
             {/* Billing totals */}

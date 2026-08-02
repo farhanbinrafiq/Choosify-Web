@@ -18,6 +18,11 @@ import { toast } from '../lib/notify';
 import { Link, useNavigate } from 'react-router-dom';
 import { PRODUCTS } from '../constants';
 import { SponsoredCompareRail } from './commerce/PlacementSlot';
+import { ProductCard } from './ProductCard';
+import {
+  getCompareLockedCategory,
+  isSameCompareCategory,
+} from '../utils/compareCategory';
 
 import {
   BRAND_ITEMS,
@@ -88,7 +93,7 @@ export function CompareEngine() {
   const emiHelpRef = useRef<HTMLDivElement | null>(null);
 
   const STICKY_PILL_BASE =
-    'shrink-0 px-4 py-2.5 sm:py-2 rounded-none text-[10px] font-bold uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap touch-manipulation min-h-[40px] sm:min-h-0';
+    'shrink-0 px-4 py-2.5 sm:py-2 rounded-full text-[10px] font-bold uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap touch-manipulation min-h-[40px] sm:min-h-0';
   const STICKY_PILL_ACTIVE =
     'bg-[#EB4501] text-white border border-[#EB4501]';
   const STICKY_PILL_INACTIVE =
@@ -168,18 +173,26 @@ export function CompareEngine() {
       default: {
         const mappedProducts = (comparedProducts || []).map((product: any) => ({
           id: String(product.id),
-          brand: product.brand || 'Brand',
+          brand: product.brand || product.brandName || 'Brand',
           name: product.name || product.title || 'Product',
           image: (product.images && product.images[0]) || product.image || 'https://images.unsplash.com/photo-1707251759491-18d48607ea0c?w=400&h=400&fit=crop',
           tag: product.tag || 'Popular',
-          price: product.price || 0,
+          price: typeof product.price === 'number'
+            ? product.price
+            : Number(String(product.price ?? 0).replace(/[^\d.]/g, '')) || 0,
           rating: product.rating || 4.5,
           score: typeof product.score === 'number' ? product.score : undefined,
           category: product.category || product.categoryName || '',
           isWinner: product.isWinner || false,
           highlightText: product.description || 'Excellent quality decision match.',
+          /** Original catalog product for shared ProductCard proportions */
+          sourceProduct: {
+            ...product,
+            title: product.title || product.name || 'Product',
+            image: (product.images && product.images[0]) || product.image,
+          },
           specs: {
-            price: `৳${(product.price || 0).toLocaleString()}`,
+            price: `৳${(typeof product.price === 'number' ? product.price : Number(String(product.price ?? 0).replace(/[^\d.]/g, '')) || 0).toLocaleString()}`,
             value: product.value || 'Excellent',
             clearance: product.discount ? `${product.discount}% OFF` : 'No Offer',
             rating: `${product.rating || 4.5}/5.0`,
@@ -409,18 +422,24 @@ export function CompareEngine() {
     [comparedProducts],
   );
 
+  const compareLockedCategory = useMemo(
+    () => getCompareLockedCategory(comparedProducts),
+    [comparedProducts],
+  );
+
   const searchableProducts = useMemo(() => {
     const normalizedQuery = productSearchQuery.trim().toLowerCase();
     return catalogProducts
       .filter((product: any) => !comparedProductIds.has(String(product.id)))
+      .filter((product: any) => isSameCompareCategory(product, compareLockedCategory))
       .filter((product: any) => {
         if (!normalizedQuery) return true;
-        return [product.title, product.brand, product.category, product.description]
+        return [product.title, product.brand, product.brandName, product.category, product.categoryName, product.description]
           .filter(Boolean)
           .some((value) => String(value).toLowerCase().includes(normalizedQuery));
       })
       .slice(0, 12);
-  }, [catalogProducts, comparedProductIds, productSearchQuery]);
+  }, [catalogProducts, comparedProductIds, compareLockedCategory, productSearchQuery]);
 
   const metricValuesDiffer = (metricKey: string) => {
     const values = evaluatedMatchingColumns.map((p) => String(p.specs[metricKey] ?? ''));
@@ -571,7 +590,7 @@ export function CompareEngine() {
                   )}
                 >
                   {p.matchesCriteria && productWinner?.id === p.id && (
-                    <div className="absolute top-1.5 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-[#10B981] text-white text-[7px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-[3px] whitespace-nowrap">
+                    <div className="absolute top-1.5 left-1/2 -translate-x-1/2 flex items-center gap-1 bg-[#10B981] text-white text-[7px] font-black uppercase tracking-widest px-1.5 py-0.5 rounded-full whitespace-nowrap">
                       <Trophy size={8} /> Winner
                     </div>
                   )}
@@ -676,7 +695,7 @@ export function CompareEngine() {
                                     ) : metric.type === 'badge' ? (
                                       <span
                                         className={cn(
-                                          'inline-block px-2.5 py-1 rounded-md text-[11px] font-bold',
+                                          'inline-block px-2.5 py-1 rounded-full text-[11px] font-bold',
                                           [
                                             'Excellent',
                                             'Legacy Brand',
@@ -801,7 +820,7 @@ export function CompareEngine() {
                         </div>
                       )}
                       {!p.matchesCriteria && (
-                        <div className="absolute top-2 right-2 bg-red-50 text-red-500 text-[8px] font-extrabold px-2 py-0.5 rounded-[3px] uppercase tracking-wider z-20">
+                        <div className="absolute top-2 right-2 bg-red-50 text-red-500 text-[8px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider z-20">
                           Filtered Out
                         </div>
                       )}
@@ -1059,64 +1078,55 @@ export function CompareEngine() {
                   comparedProducts.length + heroProductSlots >= 4 && 'xl:grid-cols-4',
                 )}
               >
-                {evaluatedMatchingColumns.map((p) => (
-                  <div
-                    key={p.id}
-                    className={cn(
-                      'bg-white rounded-xl border border-[#E8EDF2] p-4 relative',
-                      !p.matchesCriteria && 'opacity-40 grayscale',
-                    )}
-                  >
-                    <div className="flex justify-between items-start mb-2.5">
-                      <span
-                        className={cn(
-                          'text-[10px] font-extrabold px-2.5 py-1 rounded-full',
-                          productWinner?.id === p.id
-                            ? 'bg-[#FFF3EA] text-[#EB4501]'
-                            : 'bg-[#F4F7F9] text-[#4B5563]',
-                        )}
-                      >
-                        {productWinner?.id === p.id ? '🏆 Best pick' : p.tag || 'Compared'}
-                      </span>
-                      {setComparedProducts && (
+                {evaluatedMatchingColumns.map((p) => {
+                  const isBestPick = productWinner?.id === p.id;
+                  const cardProduct = (p as { sourceProduct?: any }).sourceProduct ?? {
+                    id: p.id,
+                    title: p.name,
+                    name: p.name,
+                    image: p.image,
+                    brand: p.brand,
+                    price: p.price,
+                    rating: p.rating,
+                    tag: p.tag,
+                  };
+                  return (
+                    <div
+                      key={p.id}
+                      className={cn(
+                        'relative min-w-0 h-full',
+                        !p.matchesCriteria && 'opacity-40 grayscale',
+                      )}
+                    >
+                      {/* Compare-only chrome on standard ProductCard proportions */}
+                      {isBestPick ? (
+                        <span className="absolute top-2 left-2 z-30 text-[9px] font-extrabold px-[7px] py-[3px] rounded-full bg-[#FFF3EA] text-[#EB4501] pointer-events-none shadow-sm">
+                          🏆 Best pick
+                        </span>
+                      ) : null}
+                      {setComparedProducts ? (
                         <button
                           type="button"
-                          onClick={() => removeComparedProduct(p.id)}
-                          className="text-sm text-[#9AA0AC] hover:text-[#FF000D] cursor-pointer bg-transparent border-none p-0"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            e.preventDefault();
+                            removeComparedProduct(p.id);
+                          }}
+                          className="absolute top-2 right-2 z-30 w-6 h-6 rounded-full bg-white border border-[#E8EDF2] text-[#9AA0AC] hover:text-[#FF000D] hover:border-[#FF000D]/40 cursor-pointer flex items-center justify-center shadow-sm p-0"
                           aria-label={`Remove ${p.name}`}
                         >
                           ✕
                         </button>
-                      )}
+                      ) : null}
+                      <ProductCard product={cardProduct} variant="grid" />
                     </div>
-                    <div className="h-[150px] mb-3 rounded-lg overflow-hidden bg-[#F4F7F9]">
-                      <img src={p.image} alt={p.name} className="w-full h-full object-cover" />
-                    </div>
-                    <div className="text-[14.5px] font-extrabold text-[#1A1A2E] mb-0.5 line-clamp-2">{p.name}</div>
-                    <div className="text-[11.5px] text-[#9AA0AC] mb-2.5">{p.brand}</div>
-                    <div className="flex items-center gap-2 mb-3.5">
-                      <div className="text-base font-extrabold text-[#1A1A2E]">
-                        ৳ {(p.price || 0).toLocaleString()}
-                      </div>
-                      {p.specs?.officialStore === 'Yes' && (
-                        <span className="text-[9.5px] font-bold text-[#4B5563] bg-[#F4F7F9] px-1.5 py-0.5 rounded">
-                          Official Store
-                        </span>
-                      )}
-                    </div>
-                    <Link
-                      to={`/products/${p.id}`}
-                      className="block w-full text-center bg-[#EB4501] hover:brightness-110 text-white py-2.5 rounded-lg text-xs font-bold no-underline transition-all"
-                    >
-                      View on Store
-                    </Link>
-                  </div>
-                ))}
+                  );
+                })}
                 {heroProductSlots > 0 && (
                   <button
                     type="button"
                     onClick={() => setIsProductSearchOpen(true)}
-                    className="border-[1.5px] border-dashed border-[#D1D5DB] rounded-xl flex flex-col items-center justify-center gap-3 p-4 min-h-[290px] cursor-pointer bg-transparent hover:border-[#EB4501]/40 transition-colors"
+                    className="border-[1.5px] border-dashed border-[#D1D5DB] rounded-[10px] flex flex-col items-center justify-center gap-3 p-4 min-h-[280px] h-full cursor-pointer bg-transparent hover:border-[#EB4501]/40 transition-colors"
                   >
                     <div className="w-[54px] h-[54px] rounded-full border-[1.5px] border-dashed border-[#D1D5DB] flex items-center justify-center text-[22px] text-[#9AA0AC]">
                       +
@@ -1202,9 +1212,7 @@ export function CompareEngine() {
                   onClick={handleAskEmi}
                   className="w-full text-white py-2.5 rounded-lg text-xs font-bold cursor-pointer border-none flex items-center justify-center gap-2 choosify-emi-gradient hover:brightness-110 transition-all"
                 >
-                  <span className="w-5 h-5 rounded-full bg-white flex items-center justify-center p-0.5 shrink-0">
-                    <EmiAiLogo size={16} />
-                  </span>
+                  <EmiAiLogo size={20} />
                   Ask Emi. A.I
                 </button>
               </div>
@@ -1704,6 +1712,11 @@ export function CompareEngine() {
                   <div>
                     <div className="text-[11px] font-semibold tracking-tight text-[#9AA0AC]">Compare builder</div>
                     <h3 className="text-base font-extrabold tracking-tight text-[#1A1A2E]">Search and add products</h3>
+                    {compareLockedCategory && (
+                      <p className="text-[11px] font-semibold text-[#6B7280] mt-1 m-0">
+                        Showing {compareLockedCategory.label} only
+                      </p>
+                    )}
                   </div>
                   <button
                     type="button"
@@ -1791,7 +1804,9 @@ export function CompareEngine() {
                       <div>
                         <h4 className="text-sm font-extrabold tracking-tight text-[#1A1A2E]">No matching products</h4>
                         <p className="text-[13px] font-medium text-[#9AA0AC] mt-1">
-                          Try another keyword or remove a compared product first.
+                          {compareLockedCategory
+                            ? `No more ${compareLockedCategory.label} items match this search.`
+                            : 'Try another keyword or remove a compared product first.'}
                         </p>
                       </div>
                     </div>

@@ -311,6 +311,12 @@ interface BuildItemOptions {
   badges: string[];
   isSponsored?: boolean;
   isLive?: boolean;
+  /** Explicit live schedule — drives 24h featured → Previously LIVE sizing */
+  liveSchedule?: {
+    status: 'live' | 'upcoming' | 'ended' | 'replay';
+    scheduledAt: string;
+    endedAt?: string;
+  };
   productIds?: string[];
   brandIds?: string[];
   serviceIds?: string[];
@@ -318,10 +324,45 @@ interface BuildItemOptions {
   slugPrefix: string;
 }
 
+/** Demo LIVE windows relative to now: active / grace (≤24h) / past grace (>24h). */
+function demoLiveScheduleForIndex(
+  g: number,
+  nowMs: number = Date.now(),
+): NonNullable<BuildItemOptions['liveSchedule']> & { isLive: boolean } {
+  const hour = 3_600_000;
+  if (g % 3 === 0) {
+    return {
+      status: 'live',
+      scheduledAt: new Date(nowMs - 2 * hour).toISOString(),
+      endedAt: new Date(nowMs + 2 * hour).toISOString(),
+      isLive: true,
+    };
+  }
+  if (g % 3 === 1) {
+    // Ended 6h ago → still featured (grace)
+    return {
+      status: 'ended',
+      scheduledAt: new Date(nowMs - 10 * hour).toISOString(),
+      endedAt: new Date(nowMs - 6 * hour).toISOString(),
+      isLive: false,
+    };
+  }
+  // Ended 36h ago → YouTube size + Previously LIVE
+  return {
+    status: 'ended',
+    scheduledAt: new Date(nowMs - 48 * hour).toISOString(),
+    endedAt: new Date(nowMs - 36 * hour).toISOString(),
+    isLive: false,
+  };
+}
+
 function buildDemoItem(opts: BuildItemOptions): SpotlightContent {
   const slug = `${opts.slugPrefix}-${opts.index + 1}`;
   const productIds = opts.productIds ?? [String((opts.index % 8) + 1)];
   const brandIds = opts.brandIds ?? [];
+  const schedule = opts.liveSchedule;
+  const wantsLiveChrome = Boolean(schedule) || opts.isLive || opts.mediaProfile === 'live';
+  const isActivelyLive = schedule ? schedule.status === 'live' : Boolean(opts.isLive);
 
   const item: SpotlightContent = {
     contentId: `demo-feed-${slug}`,
@@ -355,26 +396,29 @@ function buildDemoItem(opts: BuildItemOptions): SpotlightContent {
         href: spotlightContentHref(slug),
       },
     },
-    live:
-      opts.isLive || opts.mediaProfile === 'live'
-        ? {
-            status: opts.isLive ? 'live' : 'upcoming',
-            platform: 'youtube',
-            productIds,
-            serviceIds: opts.serviceIds ?? [],
-            pinnedProductIds: productIds.slice(0, 2),
-            pinnedOfferIds: [],
-            notifyMeEnabled: true,
-            timelinePlaceholder: true,
-          }
-        : undefined,
+    live: wantsLiveChrome
+      ? {
+          status: schedule?.status ?? (opts.isLive ? 'live' : 'upcoming'),
+          platform: 'youtube',
+          scheduledAt: schedule?.scheduledAt,
+          endedAt: schedule?.endedAt,
+          productIds,
+          serviceIds: opts.serviceIds ?? [],
+          pinnedProductIds: productIds.slice(0, 2),
+          pinnedOfferIds: [],
+          notifyMeEnabled: true,
+          timelinePlaceholder: true,
+        }
+      : undefined,
     badges: opts.badges,
     isSponsored: opts.isSponsored ?? false,
-    isLive: opts.isLive ?? opts.mediaProfile === 'live',
+    isLive: isActivelyLive,
     isVerified: opts.publisher.isVerified,
     ctaLabel: getSpotlightContentCtaLabel(opts.contentType),
     href: spotlightContentHref(slug),
-    publishedAt: new Date(Date.now() - opts.index * 86_400_000).toISOString(),
+    publishedAt:
+      schedule?.scheduledAt ?? new Date(Date.now() - opts.index * 86_400_000).toISOString(),
+    endsAt: schedule?.endedAt,
     popularityScore: opts.popularityScore ?? 1200 + opts.index * 137,
     extraProductCount: Math.max(0, productIds.length - 1),
   };
@@ -609,6 +653,7 @@ export function buildDemoSpotlightFeed(
     ...generateBatch(cfg.liveShopping, idx, (_i, g) => {
       const slug = g === 0 ? 'demo-live' : `demo-live-${g + 1}`;
       const brand = pick(DEMO_BRANDS, g + 2);
+      const liveSchedule = demoLiveScheduleForIndex(g);
       const item = buildDemoItem({
         index: g,
         slugPrefix: 'demo-live',
@@ -617,9 +662,14 @@ export function buildDemoSpotlightFeed(
         publisher: publisherFromBrand(brand.id, brand.name, brand.logo),
         headline: pick(HEADLINES.live ?? [], g),
         description: 'Shop live with pinned products, flash offers, and replay available.',
-        badges: ['Live', 'Shop Now'],
+        badges: liveSchedule.isLive
+          ? ['Live', 'Shop Now']
+          : liveSchedule.status === 'ended'
+            ? ['Previously Live']
+            : ['Live', 'Upcoming'],
         brandIds: [brand.id],
-        isLive: g % 2 === 0,
+        isLive: liveSchedule.isLive,
+        liveSchedule,
         popularityScore: 5200 + g * 120,
       });
       return { ...item, slug, contentId: `demo-feed-${slug}`, href: spotlightContentHref(slug) };
@@ -717,9 +767,9 @@ export function buildDemoSpotlightFeed(
         contentType: 'campaign',
         mediaProfile: g % 2 === 0 ? 'square' : 'landscape',
         publisher: publisherFromBrand(brand.id, brand.name, brand.logo),
-        headline: `${brand.name} — Sponsored Product Spotlight`,
-        description: 'Sponsored product discovery with same card layout as organic picks.',
-        badges: ['Sponsored', 'Product'],
+        headline: `${brand.name} — Promoted Product Spotlight`,
+        description: 'Promoted product discovery with same card layout as organic picks.',
+        badges: ['Promoted', 'Product'],
         brandIds: [brand.id],
         isSponsored: true,
         popularityScore: 3800 + g * 70,
@@ -736,9 +786,9 @@ export function buildDemoSpotlightFeed(
         contentType: 'brand_story',
         mediaProfile: 'blog',
         publisher: publisherFromBrand(brand.id, brand.name, brand.logo),
-        headline: `Discover ${brand.name} — Sponsored Brand Story`,
-        description: 'Sponsored brand placement — subtle badge only, identical card chrome.',
-        badges: ['Sponsored', 'Brand'],
+        headline: `Discover ${brand.name} — Promoted Brand Story`,
+        description: 'Promoted brand placement — subtle badge only, identical card chrome.',
+        badges: ['Promoted', 'Brand'],
         brandIds: [brand.id],
         isSponsored: true,
         popularityScore: 2900 + g * 55,

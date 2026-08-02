@@ -10,7 +10,7 @@ const DEFAULT_EVENT_BADGES: SiteContentBadge[] = [
   { id: 'launch', label: 'Product Launch', color: '#1A1D4E', entityType: 'event', mapsTo: 'launch', priority: 5, isActive: true },
   { id: 'campaign', label: 'Brand Promotion', color: '#8a9bb0', entityType: 'event', mapsTo: 'campaign', priority: 6, isActive: true },
   { id: 'store_moment', label: 'Store Moment', color: '#1A1D4E', entityType: 'event', mapsTo: 'store_moment', priority: 7, isActive: true },
-  { id: 'sponsored', label: 'Sponsored', color: '#EB4501', entityType: 'event', mapsTo: 'sponsored', priority: 0, isActive: true },
+  { id: 'sponsored', label: 'Promoted', color: '#2323FF', entityType: 'event', mapsTo: 'sponsored', priority: 0, isActive: true },
 ];
 
 function getConfiguredEventBadges(siteConfig: SiteConfig | null): SiteContentBadge[] {

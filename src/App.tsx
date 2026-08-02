@@ -55,6 +55,7 @@ const BrandDealsPage = lazy(() => import('./pages/BrandDealsPage').then(m => ({ 
 const RetailCartPage = lazy(() => import('./pages/RetailCartPage').then(m => ({ default: m.RetailCartPage })));
 const CheckoutPage = lazy(() => import('./pages/CheckoutPage').then(m => ({ default: m.CheckoutPage })));
 const OrderSuccessPage = lazy(() => import('./pages/OrderSuccessPage').then(m => ({ default: m.OrderSuccessPage })));
+const PaymentReturnPage = lazy(() => import('./pages/PaymentReturnPage').then(m => ({ default: m.PaymentReturnPage })));
 const OrderTrackingPage = lazy(() => import('./pages/OrderTrackingPage').then(m => ({ default: m.OrderTrackingPage })));
 const OrderConfirmPage = lazy(() => import('./pages/OrderConfirmPage').then(m => ({ default: m.OrderConfirmPage })));
 const MessagesPage = lazy(() => import('./pages/MessagesPage').then(m => ({ default: m.MessagesPage })));
@@ -156,7 +157,10 @@ function LegacyRecommendationRedirect() {
 
 function readStoredLoginFlag(): boolean {
   try {
-    return localStorage.getItem('choosify_is_logged_in') === 'true';
+    return (
+      localStorage.getItem('choosify_is_logged_in') === 'true' &&
+      Boolean(localStorage.getItem('choosify_auth_token'))
+    );
   } catch {
     return false;
   }
@@ -249,6 +253,7 @@ function AppContent() {
             <Route path="/brand-deals" element={<FeatureFlagRoute flag="enable_brand_deals_page"><PageWrapper><BrandDealsPage /></PageWrapper></FeatureFlagRoute>} />
             <Route path="/cart/retail" element={<PageWrapper><RetailCartPage /></PageWrapper>} />
             <Route path="/checkout" element={<ProtectedRoute><PageWrapper><CheckoutPage /></PageWrapper></ProtectedRoute>} />
+            <Route path="/payment/return" element={<PageWrapper><PaymentReturnPage /></PageWrapper>} />
             <Route path="/order-success/:orderId" element={<PageWrapper><OrderSuccessPage /></PageWrapper>} />
             <Route path="/order-success" element={<PageWrapper><OrderSuccessPage /></PageWrapper>} />
             <Route path="/order-tracking" element={<PageWrapper><OrderTrackingPage /></PageWrapper>} />

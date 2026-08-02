@@ -268,7 +268,21 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  overflow: visible;
+  overflow: hidden;
+}
+
+/**
+ * Canonical app-icon container: square with ~22% corner radius (not circle/oval).
+ * Use on FABs, chat avatars, splash tiles — never rounded-full for logo marks.
+ */
+.choosify-icon-shell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1 / 1;
+  border-radius: 22%;
+  overflow: hidden;
+  flex-shrink: 0;
 }
 
 /** Shared Emi logo gradient fill (hero highlight pills, CTAs, etc.) */

@@ -124,10 +124,118 @@ export interface ProductRankingInput {
 
 export function productDiscountPercent(p: ProductRankingInput): number {
   if (typeof p.discountPercent === 'number' && p.discountPercent > 0) return p.discountPercent;
-  if (p.originalPrice && p.price && p.originalPrice > p.price) {
-    return ((p.originalPrice - p.price) / p.originalPrice) * 100;
+  const price =
+    typeof p.price === 'number'
+      ? p.price
+      : Number(String(p.price ?? '').replace(/,/g, '').replace(/[^\d.]/g, '')) || 0;
+  const original =
+    typeof p.originalPrice === 'number'
+      ? p.originalPrice
+      : Number(String(p.originalPrice ?? '').replace(/,/g, '').replace(/[^\d.]/g, '')) || 0;
+  if (original > 0 && price > 0 && original > price) {
+    return ((original - price) / original) * 100;
   }
   return 0;
+}
+
+export type BrandDiscountProductInput = ProductRankingInput & {
+  brandId?: string | number;
+  catalogBrandId?: string | number;
+  brand?: string;
+  brandName?: string;
+};
+
+/** True when the product has a live %-off discount (and dealValidUntil has not passed). */
+export function isActiveDiscountProduct(
+  p: BrandDiscountProductInput,
+  nowMs: number = Date.now(),
+): boolean {
+  if (productDiscountPercent(p) < 1) return false;
+  if (p.dealValidUntil) {
+    const until = Date.parse(String(p.dealValidUntil));
+    if (!Number.isNaN(until) && until < nowMs) return false;
+  }
+  return true;
+}
+
+/**
+ * Single O(n) pass over the product catalog → map of brand id/name (lowercased) → highest active % off.
+ * Prefer this on listing pages instead of per-card scans.
+ */
+export function buildBrandMaxActiveDiscountMap(
+  products: BrandDiscountProductInput[],
+  nowMs: number = Date.now(),
+): Map<string, number> {
+  const map = new Map<string, number>();
+  const bump = (raw: string | number | undefined | null, pct: number) => {
+    if (raw == null) return;
+    const key = String(raw).trim().toLowerCase();
+    if (!key) return;
+    const prev = map.get(key) ?? 0;
+    if (pct > prev) map.set(key, pct);
+  };
+
+  for (const p of products) {
+    if (!isActiveDiscountProduct(p, nowMs)) continue;
+    const pct = productDiscountPercent(p);
+    bump(p.brandId, pct);
+    bump(p.catalogBrandId, pct);
+    bump(p.brandName ?? p.brand, pct);
+  }
+  return map;
+}
+
+/** Lookup max active discount for a brand card; undefined when none. */
+export function lookupBrandMaxDiscount(
+  map: Map<string, number>,
+  brand: { id?: string | number; catalogId?: string; slug?: string; name?: string },
+): number | undefined {
+  const keys = [brand.catalogId, brand.slug, brand.id, brand.name]
+    .filter((v) => v != null && String(v).trim() !== '')
+    .map((v) => String(v).trim().toLowerCase());
+  let max = 0;
+  for (const key of keys) {
+    const v = map.get(key);
+    if (typeof v === 'number' && v > max) max = v;
+  }
+  return max >= 1 ? Math.round(max) : undefined;
+}
+
+/** Fold catalog deal rows (percentage-type, still valid) into an existing brand→max map. */
+export function mergeCatalogDealsIntoBrandDiscountMap(
+  map: Map<string, number>,
+  deals: Array<{
+    brandId?: string;
+    discountType?: string;
+    discountValue?: number;
+    status?: string;
+    validUntil?: string;
+    validFrom?: string;
+  }>,
+  nowMs: number = Date.now(),
+): Map<string, number> {
+  const next = new Map(map);
+  for (const deal of deals) {
+    if (deal.discountType !== 'percentage') continue;
+    const pct = Number(deal.discountValue) || 0;
+    if (pct < 1) continue;
+    const status = String(deal.status || '').toLowerCase();
+    if (status && status !== 'live' && status !== 'expiring') continue;
+    if (deal.validUntil) {
+      const until = Date.parse(String(deal.validUntil));
+      if (!Number.isNaN(until) && until < nowMs) continue;
+    }
+    if (deal.validFrom) {
+      const from = Date.parse(String(deal.validFrom));
+      if (!Number.isNaN(from) && from > nowMs) continue;
+    }
+    if (!deal.brandId) continue;
+    const key = String(deal.brandId).trim().toLowerCase();
+    if (!key) continue;
+    const prev = next.get(key) ?? 0;
+    if (pct > prev) next.set(key, pct);
+  }
+  return next;
 }
 
 export function scoreProduct(p: ProductRankingInput, nowMs: number = Date.now()): number {

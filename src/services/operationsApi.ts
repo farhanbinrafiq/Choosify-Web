@@ -74,6 +74,9 @@ export interface ServerBookingOrder {
 export interface PublicProductReview {
   id: string;
   userName: string;
+  userId?: string;
+  /** Uploaded profile photo URL when the reviewer has one */
+  userAvatar?: string;
   rating: number;
   comment: string;
   createdAt: string;
@@ -114,6 +117,31 @@ export const operationsApi = {
     if (params?.status) qs.set('status', params.status);
     const suffix = qs.toString() ? `?${qs}` : '';
     const result = await request<{ data: Record<string, unknown>[] }>(`/operations/orders${suffix}`);
+    return result.data;
+  },
+  getSslcommerzStatus: async (): Promise<{
+    configured: boolean;
+    provider: string;
+    mode: 'sandbox' | 'live' | null;
+  }> => {
+    const result = await request<{
+      data: { configured: boolean; provider: string; mode: 'sandbox' | 'live' | null };
+    }>('/operations/payments/sslcommerz/status');
+    return result.data;
+  },
+  initSslcommerzPayment: async (payload: {
+    orderId: string;
+    customerEmail?: string;
+  }): Promise<{ redirectUrl: string; tranId: string; orderId: string; amount: number }> => {
+    const result = await request<{
+      data: { redirectUrl: string; tranId: string; orderId: string; amount: number };
+    }>('/operations/payments/sslcommerz/init', 'POST', payload);
+    return result.data;
+  },
+  getOrder: async (orderId: string): Promise<Record<string, unknown>> => {
+    const result = await request<{ data: Record<string, unknown> }>(
+      `/operations/orders/${encodeURIComponent(orderId)}`,
+    );
     return result.data;
   },
   cancelOrder: async (
@@ -162,6 +190,7 @@ export const operationsApi = {
   submitReview: async (payload: {
     userId?: string;
     userName?: string;
+    userAvatar?: string;
     productId?: string;
     productTitle: string;
     brandName?: string;

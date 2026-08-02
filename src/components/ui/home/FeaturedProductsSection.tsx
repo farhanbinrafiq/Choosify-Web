@@ -11,7 +11,7 @@ export const FeaturedProductsSection: React.FC<FeaturedProductsSectionProps> = (
     <section>
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h2 className="text-2xl font-black text-slate-900 tracking-tight">Featured Products</h2>
+          <h2 className="text-2xl font-black text-slate-900 tracking-tight">Popular Products</h2>
           <p className="text-sm text-slate-400 font-medium mt-1">Handpicked deals you'll love</p>
         </div>
         <Link 

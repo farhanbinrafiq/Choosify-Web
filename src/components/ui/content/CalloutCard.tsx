@@ -18,7 +18,7 @@ export const CalloutCard: React.FC<CalloutCardProps> = ({
   content,
   className
 }) => {
-  const configs: Record<CalloutVariant, { bg: string; border: string; text: string; iconText: string; icon: React.ReactNode; badgeLabel: string; badgeVariant: "default" | "outline" | "red" | "orange" | "blue" | "purple" | "green" | "gray" }> = {
+  const configs: Record<CalloutVariant, { bg: string; border: string; text: string; iconText: string; icon: React.ReactNode; badgeLabel: string; badgeVariant: "default" | "outline" | "red" | "orange" | "blue" | "purple" | "green" | "gray" | "sponsored" }> = {
     info: {
       bg: 'bg-blue-50',
       border: 'border-blue-100',
@@ -65,13 +65,13 @@ export const CalloutCard: React.FC<CalloutCardProps> = ({
       badgeVariant: 'gray'
     },
     sponsored: {
-      bg: 'bg-[#EB4501]/10',
-      border: 'border-[#EB4501]/20',
+      bg: 'bg-[#2323FF]/10',
+      border: 'border-[#2323FF]/20',
       text: 'text-slate-900',
-      iconText: 'text-[#EB4501]',
+      iconText: 'text-[#2323FF]',
       icon: <Zap className="w-5 h-5" />,
-      badgeLabel: 'Sponsored',
-      badgeVariant: 'orange'
+      badgeLabel: 'Promoted',
+      badgeVariant: 'sponsored'
     }
   };
 

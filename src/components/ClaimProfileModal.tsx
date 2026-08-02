@@ -33,7 +33,6 @@ export function ClaimProfileModal({
 }: ClaimProfileModalProps) {
   const { 
     isLoggedIn, 
-    setIsLoggedIn, 
     currentUser, 
     setCurrentUser, 
     updateBrandClaimStatus, 
@@ -160,10 +159,10 @@ export function ClaimProfileModal({
     }
   }, [isOpen, isLoggedIn, currentUser, targetType]);
 
-  // Handle Login Event (simulation)
+  // Handle Login Event — redirect to real auth; do not fake a session.
   const handleLogIn = () => {
-    setIsLoggedIn(true);
-    toast.success('Signed in successfully as primary representative.');
+    onClose();
+    window.location.assign('/login');
   };
 
   // Convert role to Seller Mode

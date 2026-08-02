@@ -28,7 +28,7 @@ export function Navbar() {
   
   const navigate = useNavigate();
   const location = useLocation();
-  const { retailCart, isLoggedIn, setIsLoggedIn, currentUser, siteConfig, featureFlags } = useGlobalState();
+  const { retailCart, isLoggedIn, logout, currentUser, siteConfig, featureFlags } = useGlobalState();
   const { threads } = useDashboard();
 
   const unreadMsgCount = isLoggedIn ? threads.filter(t => t.unread).length : 0;
@@ -293,7 +293,7 @@ export function Navbar() {
             >
               <MessageCircleMore size={19} strokeWidth={2} className="text-white transition-colors" />
               {unreadMsgCount > 0 && (
-                <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 text-white text-[9px] font-bold bg-[#EB4501] rounded-lg flex items-center justify-center leading-none">
+                <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 text-white text-[9px] font-bold bg-[#EB4501] rounded-full flex items-center justify-center leading-none">
                   {unreadMsgCount > 99 ? '99+' : unreadMsgCount}
                 </span>
               )}
@@ -308,7 +308,7 @@ export function Navbar() {
             >
               <ShoppingCart size={19} strokeWidth={2} className="text-white transition-colors" />
               {activeCartCount > 0 && (
-                <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 text-white text-[9px] font-bold bg-[#EB4501] rounded-lg flex items-center justify-center leading-none">
+                <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 text-white text-[9px] font-bold bg-[#EB4501] rounded-full flex items-center justify-center leading-none">
                   {activeCartCount > 99 ? '99+' : activeCartCount}
                 </span>
               )}
@@ -372,7 +372,7 @@ export function Navbar() {
                             <item.icon size={14} className="text-[#9AA0AC]" />
                             <span>{item.label}</span>
                             {item.icon === MessageCircleMore && unreadMsgCount > 0 && (
-                              <span className="ml-auto min-w-[16px] h-4 px-1 bg-[#EB4501] text-white text-[9px] font-bold rounded-lg flex items-center justify-center">
+                              <span className="ml-auto min-w-[16px] h-4 px-1 bg-[#EB4501] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                                 {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
                               </span>
                             )}
@@ -382,7 +382,7 @@ export function Navbar() {
                           type="button"
                           onClick={() => {
                             setIsUserMenuOpen(false);
-                            setIsLoggedIn(false);
+                            logout();
                             toast.success('Successfully logged out.');
                           }}
                           className="w-full flex items-center gap-2 px-4 py-[11px] text-xs font-semibold text-[#FF000D] hover:bg-red-50 transition-colors"
@@ -589,7 +589,7 @@ export function Navbar() {
                       <item.icon size={14} className="text-[#9AA0AC] shrink-0" />
                       <span className="flex-1">{item.label}</span>
                       {item.icon === MessageCircleMore && unreadMsgCount > 0 && (
-                        <span className="min-w-[16px] h-4 px-1 bg-[#EB4501] text-white text-[9px] font-bold rounded-lg flex items-center justify-center">
+                        <span className="min-w-[16px] h-4 px-1 bg-[#EB4501] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                           {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
                         </span>
                       )}
@@ -608,7 +608,7 @@ export function Navbar() {
                       <item.icon size={14} className="text-[#9AA0AC] shrink-0" />
                       <span className="flex-1">{item.label}</span>
                       {item.path === '/messages' && unreadMsgCount > 0 && (
-                        <span className="min-w-[16px] h-4 px-1 bg-[#EB4501] text-white text-[9px] font-bold rounded-lg flex items-center justify-center leading-none">
+                        <span className="min-w-[16px] h-4 px-1 bg-[#EB4501] text-white text-[9px] font-bold rounded-full flex items-center justify-center leading-none">
                           {unreadMsgCount > 99 ? '99+' : unreadMsgCount}
                         </span>
                       )}
@@ -621,7 +621,7 @@ export function Navbar() {
                 <button
                   type="button"
                   onClick={() => {
-                    setIsLoggedIn(false);
+                    logout();
                     setIsMobileProfileOpen(false);
                     toast.success('Successfully logged out.');
                     navigate('/');

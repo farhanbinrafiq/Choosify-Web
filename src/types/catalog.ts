@@ -183,6 +183,9 @@ export interface CatalogDealsBanner {
   destinationRef: string;
   order: number;
   isActive: boolean;
+  /** Optional sponsor mark for carousel logo pagination / PROMOTED chrome */
+  brandName?: string;
+  brandLogoUrl?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -588,7 +591,13 @@ export interface CatalogProductDetail {
     sortOrder: number;
   }>;
   additionalSpecs?: { key: string; value: string }[];
-  publicReviews?: Array<{ id: string; reviewerName: string; rating: number; comment: string }>;
+  publicReviews?: Array<{
+    id: string;
+    reviewerName: string;
+    rating: number;
+    comment: string;
+    reviewerAvatar?: string;
+  }>;
   addonItems?: Array<{ id: string; title: string; description?: string; price: number }>;
 }
 

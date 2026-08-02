@@ -9,7 +9,7 @@ export function SpotlightPriorityBadge({ priority }: SpotlightPriorityBadgeProps
   const def = getPriorityDefinition(priority);
   return (
     <span
-      className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded text-white"
+      className="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-full text-white"
       style={{ backgroundColor: def.color }}
     >
       {def.label}

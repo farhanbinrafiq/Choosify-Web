@@ -122,7 +122,7 @@ export function CreatorProfileHero({
               </div>
             )}
             {claimStatus === 'pending' && (
-              <div className="inline-flex items-center gap-1.5 bg-[#FF000D] text-white text-[10px] font-bold px-2.5 py-1 rounded-lg mb-2">
+              <div className="inline-flex items-center gap-1.5 bg-[#FF000D] text-white text-[10px] font-bold px-2.5 py-1 rounded-full mb-2">
                 Ownership verification pending
               </div>
             )}

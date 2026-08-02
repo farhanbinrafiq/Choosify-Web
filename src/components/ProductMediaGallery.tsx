@@ -1,5 +1,6 @@
 /**
- * Product hero — Choosify.dc.html sliver gallery (detail pages only)
+ * Product / Service detail hero — thin adapter over shared `DetailSliverMediaGallery`
+ * (slide animation, mobile peeks, fullscreen viewer, autoplay).
  */
 import React from 'react';
 import { DetailSliverMediaGallery } from './commerce/DetailSliverMediaGallery';

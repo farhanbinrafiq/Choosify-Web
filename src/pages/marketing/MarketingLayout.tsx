@@ -5,7 +5,7 @@ import { MarketingSidebar } from '../../components/marketing/MarketingSidebar';
 
 const MODULE_LABELS: Record<string, string> = {
   content: 'Spotlight Content',
-  sponsored: 'Sponsored Campaigns',
+  sponsored: 'Promoted Campaigns',
   collections: 'Collections',
   'live-events': 'Live Events',
   'buying-guides': 'Buying Guides',

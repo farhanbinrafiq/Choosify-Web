@@ -20,7 +20,7 @@ import { PLACEMENT_KEYS, INFEED_INTERVAL, INFEED_MAX_PER_PAGE } from '../lib/pla
 import { injectPlacementsIntoFeed } from '../utils/injectFeedPlacements';
 import {BRAND_CARD_GRID, PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
-import { rankBrands } from '../utils/listingRanking';
+import { rankBrands, buildBrandMaxActiveDiscountMap, lookupBrandMaxDiscount, mergeCatalogDealsIntoBrandDiscountMap } from '../utils/listingRanking';
 import { usePriorityClockMs } from '../hooks/usePriorityClockMs';
 
 interface BrandDeal {
@@ -55,6 +55,8 @@ const PROMO_CODES: PromoCode[] = [
 
 interface Brand {
   id: string;
+  catalogId?: string;
+  slug?: string;
   name: string;
   description: string;
   logo: string;
@@ -75,7 +77,7 @@ interface Brand {
 }
 
 export function BrandsPage() {
-  const { allBrands: globalBrands, getBrandClaimStatus } = useGlobalState();
+  const { allBrands: globalBrands, allProducts, allDeals, getBrandClaimStatus } = useGlobalState();
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All Brands');
@@ -297,7 +299,9 @@ export function BrandsPage() {
   const brands: Brand[] = React.useMemo(() => {
     if (globalBrands && globalBrands.length > 0) {
       return globalBrands.map((brand) => ({
-        id: String(brand.id),
+        id: String(brand.catalogId || brand.slug || brand.id),
+        catalogId: brand.catalogId,
+        slug: brand.slug,
         name: brand.name,
         description: `${brand.name} official listing on Choosify`,
         logo: typeof brand.logo === 'string' ? brand.logo : brand.name.slice(0, 2).toUpperCase(),
@@ -319,6 +323,18 @@ export function BrandsPage() {
     }
     return fallbackBrands;
   }, [globalBrands]);
+
+  const brandMaxDiscountMap = React.useMemo(() => {
+    const fromProducts = buildBrandMaxActiveDiscountMap(
+      (allProducts || []) as any[],
+      priorityNowMs,
+    );
+    return mergeCatalogDealsIntoBrandDiscountMap(
+      fromProducts,
+      (allDeals || []) as any[],
+      priorityNowMs,
+    );
+  }, [allProducts, allDeals, priorityNowMs]);
 
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
@@ -506,7 +522,7 @@ export function BrandsPage() {
             <button 
               onClick={() => setSelectedLetter(null)}
               className={cn(
-                "col-span-5 py-1.5 rounded-2xl text-[8.5px] font-bold uppercase transition-all text-center cursor-pointer",
+                "col-span-5 py-1.5 rounded-full text-[8.5px] font-bold uppercase transition-all text-center cursor-pointer",
                 selectedLetter === null ? "bg-orange-primary text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
               )}
             >
@@ -696,7 +712,7 @@ export function BrandsPage() {
                       <button 
                         onClick={() => setSelectedLetter(null)}
                         className={cn(
-                          "col-span-5 py-1.5 rounded-2xl text-[8.5px] font-bold uppercase transition-all text-center cursor-pointer",
+                          "col-span-5 py-1.5 rounded-full text-[8.5px] font-bold uppercase transition-all text-center cursor-pointer",
                           selectedLetter === null ? "bg-orange-primary text-white" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
                         )}
                       >
@@ -846,7 +862,7 @@ export function BrandsPage() {
                     setVerificationFilter('all');
                     setPopularityFilter('all');
                   }}
-                  className="text-[9.5px] font-black text-orange-primary uppercase tracking-widest hover:underline flex items-center gap-1.5 transition-all bg-white border border-[#eef2f6] px-3.5 py-2 rounded-2xl shadow-sm hover:text-[#CF4400] cursor-pointer"
+                  className="text-[9.5px] font-black text-orange-primary uppercase tracking-widest hover:underline flex items-center gap-1.5 transition-all bg-white border border-[#eef2f6] px-3.5 py-2 rounded-full shadow-sm hover:text-[#CF4400] cursor-pointer"
                 >
                   Reset All Filters
                 </button>
@@ -921,7 +937,7 @@ export function BrandsPage() {
                   <Filter size={11} className="text-[#EB4501]" />
                   FILTER BY INITIAL:
                 </span>
-                <span className="px-2 py-0.5 bg-[#EB4501]/10 text-[#EB4501] text-[9px] font-black uppercase rounded-[3px] leading-none">
+                <span className="px-2 py-0.5 bg-[#EB4501]/10 text-[#EB4501] text-[9px] font-black uppercase rounded-full leading-none">
                   {selectedLetter === null ? 'All' : selectedLetter}
                 </span>
               </div>
@@ -939,7 +955,7 @@ export function BrandsPage() {
                       setIsMobileFilterOpen(false);
                     }}
                     className={cn(
-                      "col-span-6 sm:col-span-9 py-2 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all text-center cursor-pointer",
+                      "col-span-6 sm:col-span-9 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all text-center cursor-pointer",
                       selectedLetter === null ? "bg-orange-primary text-white shadow-lg shadow-orange-primary/10" : "bg-gray-50 text-gray-400 hover:bg-gray-100"
                     )}
                   >
@@ -972,7 +988,13 @@ export function BrandsPage() {
                   entry.kind === 'placement' ? (
                     <AdvertiseHereCard key={entry.key} variant="brand" />
                   ) : (
-                    <BrandCardDesign key={entry.key} brand={entry.item} />
+                    <BrandCardDesign
+                      key={entry.key}
+                      brand={{
+                        ...entry.item,
+                        maxDiscountPercent: lookupBrandMaxDiscount(brandMaxDiscountMap, entry.item),
+                      }}
+                    />
                   ),
                 )}
                 {infeedPlacements.length === 0 && <AdvertiseHereCard variant="brand" />}
@@ -1103,7 +1125,7 @@ export function BrandsPage() {
                           navigator.clipboard.writeText(item.code);
                           toast.success(`Coupon code "${item.code}" copied to clipboard!`);
                         }}
-                        className="px-2.5 py-1 bg-[#EB4501]/10 hover:bg-[#CF4400] text-[#EB4501] hover:text-white transition-all cursor-pointer rounded-2xl text-[8px] font-bold uppercase tracking-wider flex items-center gap-1 shrink-0"
+                        className="px-2.5 py-1 bg-[#EB4501]/10 hover:bg-[#CF4400] text-[#EB4501] hover:text-white transition-all cursor-pointer rounded-full text-[8px] font-bold uppercase tracking-wider flex items-center gap-1 shrink-0"
                       >
                         <Copy className="w-2.5 h-2.5" />
                         Copy

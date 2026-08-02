@@ -4,6 +4,7 @@ import { cn } from '../../lib/utils';
 import type { ResolvedPlacement } from '../../utils/resolvePlacementContent';
 import { AdSlotCarousel } from './AdSlotCarousel';
 import { SponsoredPlacementCard, type SponsoredPlacementVariant } from '../SponsoredPlacementCard';
+import { SponsoredCardChrome } from './SponsoredCardChrome';
 
 /** Fallback vertical ads when CMS returns fewer than 2 portrait placements */
 export const DEMO_VERTICAL_SPONSORED_PLACEMENTS: ResolvedPlacement[] = [
@@ -33,7 +34,7 @@ export const DEMO_VERTICAL_SPONSORED_PLACEMENTS: ResolvedPlacement[] = [
     id: 'vert-demo-3',
     placementId: 'vert-demo-3',
     title: 'Launch your product',
-    subtitle: 'Sponsored placement',
+    subtitle: 'Promoted placement',
     image: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600&h=750&fit=crop',
     href: '/advertise',
     ctaLabel: 'Get Started',
@@ -51,11 +52,9 @@ export function VerticalAdvertisePlaceholder({ className }: { className?: string
         className,
       )}
     >
-      <div className="absolute top-2 left-2 text-[8px] font-extrabold text-[#EB4501] uppercase tracking-wide z-[1] flex items-center gap-1">
-        🏷️ Sponsored Ad
-      </div>
-      <div className="flex-[7] min-h-0 bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-end justify-center pb-3">
-        <span className="text-white text-[12px] font-extrabold text-center px-3">
+      <div className="flex-[7] min-h-0 bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-end justify-center pb-3 relative">
+        <SponsoredCardChrome brandName="Advertise" size="md" />
+        <span className="text-white text-[12px] font-extrabold text-center px-3 relative z-[1]">
           PROMOTE YOUR DEAL
         </span>
       </div>
@@ -141,7 +140,7 @@ export function SponsoredVerticalAdCarousel({
       autoplay={autoplay}
       autoplayMs={autoplayMs}
       className={className}
-      ariaLabel="Sponsored vertical ads"
+      ariaLabel="Promoted vertical ads"
       getIcon={(placement) =>
         placement.id === 'advertise-placeholder'
           ? { label: 'Advertise' }

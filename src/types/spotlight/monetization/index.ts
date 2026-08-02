@@ -39,8 +39,8 @@ export interface SpotlightMonetizationContract {
 export const MONETIZATION_FEATURE_LABELS: Record<SpotlightMonetizationFeature, string> = {
   featured_publisher: 'Featured Publisher',
   featured_creator: 'Featured Creator',
-  sponsored_campaign: 'Sponsored Campaign',
-  sponsored_live: 'Sponsored Live',
+  sponsored_campaign: 'Promoted Campaign',
+  sponsored_live: 'Promoted Live',
   premium_placement: 'Premium Placement',
   premium_analytics: 'Premium Analytics',
   creator_marketplace: 'Creator Marketplace',

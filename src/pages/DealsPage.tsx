@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { ProductCard } from '../components/ProductCard';
 import { FlashDealCard, DealOfTheDayCard } from '../components/deals/FlashDealCard';
-import { Timer, Zap, ArrowRight, ShoppingBag, Bookmark, ChevronDown, Shirt, Tablets as Gem, Smartphone, Eye, Gamepad2, Utensils, Monitor, Tv, Home, Star, Droplets, BookOpen, Heart, Smile, Car, Compass, Search, ChevronRight, Package, Gift, Award, CalendarDays, XCircle, ShieldCheck, Flame } from 'lucide-react';
+import { Timer, Zap, ArrowRight, ShoppingBag, Bookmark, ChevronDown, Shirt, Tablets as Gem, Smartphone, Eye, Gamepad2, Utensils, Monitor, Tv, Home, Star, Droplets, BookOpen, Heart, Smile, Car, Compass, Search, ChevronRight, Package, Award, CalendarDays, XCircle, ShieldCheck, Flame } from 'lucide-react';
 import { PRODUCTS, BRANDS } from '../constants';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import { cn } from '../lib/utils';
@@ -30,7 +30,12 @@ import {
   DealsSubscribeBanner,
   DealsTopCouponsCard,
   DealsVerticalSponsoredCard,
+  TOP_COUPONS,
 } from '../components/deals/DealsLowerSections';
+import {
+  BrandCouponCarouselCard,
+  type BrandCoupon,
+} from '../components/brand/BrandCouponsSection';
 
 const PROMO_CODES = [
   { brandId: 'aarong', brandName: "Aarong", code: "AARONG15", discount: "Flat 15% OFF" },
@@ -38,6 +43,14 @@ const PROMO_CODES = [
   { brandId: 'sailor', brandName: "Sailor", code: "SAILOREID", discount: "Flat 20% OFF" },
   { brandId: 'adidas', brandName: "Adidas", code: "ADIEXTRA10", discount: "10% FLAT OFF" }
 ];
+
+function discountLabelToCouponPct(discount: string): string {
+  const pctMatch = discount.match(/(\d+)\s*%/);
+  if (pctMatch) return `${pctMatch[1]}%`;
+  const flatMatch = discount.match(/(?:BDT|৳|Flat)\s*([\d,]+)/i);
+  if (flatMatch) return `৳${flatMatch[1].replace(/,/g, '')}`;
+  return discount.replace(/\s*OFF\s*/gi, '').trim().slice(0, 10) || 'Deal';
+}
 
 function FlashDealCountdown({ validUntil }: { validUntil: string }) {
   const [parts, setParts] = useState({ h: '00', m: '00', s: '00' });
@@ -74,7 +87,7 @@ function FlashDealCountdown({ validUntil }: { validUntil: string }) {
       ).map((cd) => (
         <div
           key={cd.label}
-          className="bg-[#1A1A2E] text-white rounded-md px-2 py-1 text-[12px] font-extrabold min-w-[30px] text-center"
+          className="bg-[#1A1A2E] text-white rounded-full px-2 py-1 text-[12px] font-extrabold min-w-[30px] text-center"
         >
           {cd.value}
           <div className="text-[7px] font-semibold text-white/50">{cd.label}</div>
@@ -103,7 +116,6 @@ export function DealsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState(getInitialTab);
   const [minDiscount, setMinDiscount] = useState<number>(0);
-  const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const priorityNowMs = usePriorityClockMs();
   const dealsSponsoredBanners = useSponsoredPlacementsForSurface('deals', { limit: 4 });
   const productSource: any[] = allProducts.length > 0 ? allProducts : PRODUCTS;
@@ -126,6 +138,25 @@ export function DealsPage() {
     [allDeals]
   );
 
+  /** Full coupon set for Promo Codes feed — Brand Details carousel card shape. */
+  const feedCoupons = React.useMemo((): BrandCoupon[] => {
+    const fromDeals: BrandCoupon[] = promoCodes
+      .filter((promo) => promo.code)
+      .map((promo) => ({
+        pct: discountLabelToCouponPct(promo.discount),
+        code: promo.code,
+        min: promo.brandName ? `From ${promo.brandName}` : 'Platform promo',
+      }));
+    const seen = new Set(fromDeals.map((c) => c.code.toUpperCase()));
+    for (const cp of TOP_COUPONS) {
+      if (!seen.has(cp.code.toUpperCase())) {
+        fromDeals.push({ pct: cp.pct, code: cp.code, min: cp.min });
+        seen.add(cp.code.toUpperCase());
+      }
+    }
+    return fromDeals;
+  }, [promoCodes]);
+
   const TAB_TO_URL: Record<string, string> = {
     'Flash Deals': 'flash',
     'Promo Codes': 'promo',
@@ -139,6 +170,13 @@ export function DealsPage() {
     setActiveTab(tab);
     const urlKey = TAB_TO_URL[tab] || tab.toLowerCase().replace(/\s+/g, '_');
     setSearchParams({ tab: urlKey });
+  };
+
+  const handleViewAllCoupons = () => {
+    handleTabChange('Promo Codes');
+    requestAnimationFrame(() => {
+      document.getElementById('all-deals')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   };
 
   useEffect(() => {
@@ -620,8 +658,8 @@ export function DealsPage() {
                 (selectedCategory ? ` · ${selectedCategory}` : '') +
                 (searchQuery ? ` · “${searchQuery}”` : '')
               }
-              count={filteredProducts.length}
-              itemLabel="deals"
+              count={activeTab === 'Promo Codes' ? feedCoupons.length : filteredProducts.length}
+              itemLabel={activeTab === 'Promo Codes' ? 'coupons' : 'deals'}
             />
 
             <ListingFilterPills
@@ -672,7 +710,7 @@ export function DealsPage() {
                       })()}
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5 mb-3.5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3.5">
                     {filteredProducts.length === 0 ? (
                       <div className="sm:col-span-2 md:col-span-3 lg:col-span-4 py-10 text-center text-[13px] text-[#9AA0AC] border border-dashed border-[#E8EDF2] rounded-[10px]">
                         No flash deals right now
@@ -712,55 +750,68 @@ export function DealsPage() {
                       })
                     )}
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => handleTabChange('Flash Deals')}
-                    className="block w-full text-center text-[12px] font-bold text-[#1A1A2E] border-0 bg-transparent cursor-pointer hover:text-[#CF4400]"
-                  >
-                    VIEW ALL FLASH DEALS ›
-                  </button>
                 </div>
 
                 {(() => {
-                  const dotd = filteredProducts[0];
-                  if (!dotd) {
+                  const MAX_DOTD = 5;
+                  const flashPool = filteredProducts.filter(
+                    (p: any) => p.isDeal === true && p.dealType === 'flash',
+                  );
+                  const seen = new Set<string>();
+                  const pick: any[] = [];
+                  for (const p of flashPool) {
+                    const key = String(p.id);
+                    if (seen.has(key)) continue;
+                    seen.add(key);
+                    pick.push(p);
+                    if (pick.length >= MAX_DOTD) break;
+                  }
+                  if (pick.length < 2) {
+                    for (const p of filteredProducts) {
+                      const key = String(p.id);
+                      if (seen.has(key)) continue;
+                      seen.add(key);
+                      pick.push(p);
+                      if (pick.length >= MAX_DOTD) break;
+                    }
+                  }
+                  if (pick.length === 0) {
                     return (
                       <div className="choosify-dark-surface rounded-xl p-5 text-white/60 text-[13px] flex items-center justify-center min-h-[280px]">
                         No deal of the day right now
                       </div>
                     );
                   }
-                  const orig =
-                    typeof dotd.originalPrice === 'number'
-                      ? dotd.originalPrice
-                      : Number(String(dotd.originalPrice ?? '').replace(/[^\d]/g, '')) || undefined;
-                  const price =
-                    typeof dotd.price === 'number'
-                      ? dotd.price
-                      : Number(String(dotd.price ?? 0).replace(/[^\d]/g, '')) || 0;
-                  const pct =
-                    orig && orig > price ? Math.round(((orig - price) / orig) * 100) : undefined;
-                  return (
-                    <DealOfTheDayCard
-                      id={dotd.id}
-                      name={dotd.title || dotd.name}
-                      image={dotd.image}
-                      price={price}
-                      originalPrice={orig}
-                      badge={pct != null ? `${pct}% OFF` : undefined}
-                      rating={typeof dotd.rating === 'number' ? dotd.rating : undefined}
-                      reviews={
-                        typeof dotd.reviewCount === 'number' ? dotd.reviewCount : undefined
-                      }
-                      sold={typeof (dotd as any).sold === 'string' ? (dotd as any).sold : undefined}
-                      claimedPct={
-                        typeof (dotd as any).claimedPct === 'number'
-                          ? (dotd as any).claimedPct
-                          : undefined
-                      }
-                      validUntil={dotd.dealValidUntil}
-                    />
-                  );
+                  const deals = pick.map((dotd: any) => {
+                    const orig =
+                      typeof dotd.originalPrice === 'number'
+                        ? dotd.originalPrice
+                        : Number(String(dotd.originalPrice ?? '').replace(/[^\d]/g, '')) || undefined;
+                    const price =
+                      typeof dotd.price === 'number'
+                        ? dotd.price
+                        : Number(String(dotd.price ?? 0).replace(/[^\d]/g, '')) || 0;
+                    const pct =
+                      orig && orig > price ? Math.round(((orig - price) / orig) * 100) : undefined;
+                    return {
+                      id: dotd.id,
+                      name: dotd.title || dotd.name,
+                      image: dotd.image,
+                      price,
+                      originalPrice: orig,
+                      badge: pct != null ? `${pct}% OFF` : undefined,
+                      rating: typeof dotd.rating === 'number' ? dotd.rating : undefined,
+                      reviews:
+                        typeof dotd.reviewCount === 'number' ? dotd.reviewCount : undefined,
+                      sold: typeof dotd.sold === 'string' ? dotd.sold : undefined,
+                      claimedPct:
+                        typeof dotd.claimedPct === 'number' ? dotd.claimedPct : undefined,
+                      validUntil: dotd.dealValidUntil,
+                      brandName: dotd.brandName || undefined,
+                      brandLogoUrl: dotd.brandLogo || undefined,
+                    };
+                  });
+                  return <DealOfTheDayCard deals={deals} />;
                 })()}
               </div>
             </section>
@@ -779,55 +830,27 @@ export function DealsPage() {
                   <div className="mb-4 flex items-baseline justify-between gap-3">
                     <div>
                       <h2 className="text-[15px] font-extrabold text-[#1A1A2E] tracking-tight mb-1 flex items-center gap-1.5">
-                        🛡 TOP DEALS
+                        {activeTab === 'Promo Codes' ? '🎟 All Coupons' : '🛡 All Deals'}
                       </h2>
                       <p className="text-[12px] text-[#9AA0AC] m-0">
-                        Handpicked best offers for you
+                        {activeTab === 'Promo Codes'
+                          ? 'All available promo codes — copy and save'
+                          : 'Handpicked best offers for you'}
                       </p>
                     </div>
                     <span className="text-[11px] font-bold text-[#9AA0AC]">
-                      {filteredProducts.length} available
+                      {activeTab === 'Promo Codes'
+                        ? `${feedCoupons.length} available`
+                        : `${filteredProducts.length} available`}
                     </span>
                   </div>
 
                   {/* Top Deals — capped at 4 per row on desktop */}
                   <div className="grid grid-cols-1 min-[520px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch text-left">
                     {activeTab === 'Promo Codes' ? (
-                      promoCodes.map((promo) => (
-                        <div
-                          key={promo.code}
-                          className="bg-white border border-gray-150 rounded-2xl p-5 flex flex-col justify-between min-h-[180px] relative overflow-hidden shadow-sm group hover:border-[#EB4501]/30 transition-all duration-300"
-                        >
-                          <div className="absolute top-0 right-0 w-20 h-20 bg-[#EB4501]/[0.04] rounded-full -translate-y-1/2 translate-x-1/2 blur-md" />
-                          <div>
-                            <div className="flex items-center gap-1.5 mb-2">
-                              <Gift size={13} className="text-[#EB4501]" />
-                              <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">
-                                {promo.brandName}
-                              </span>
-                            </div>
-                            <h4 className="text-sm font-extrabold text-[#1A1A2E] tracking-tight mb-2 leading-tight">
-                              {promo.discount}
-                            </h4>
-                          </div>
-                          <div className="mt-4">
-                            <div className="bg-gray-50 border border-gray-150 rounded-lg p-1.5 flex items-center justify-between gap-2">
-                              <code className="font-mono font-black text-[11px] text-navy tracking-wider px-1.5">
-                                {promo.code}
-                              </code>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  navigator.clipboard.writeText(promo.code);
-                                  setCopiedCode(promo.code);
-                                  setTimeout(() => setCopiedCode(null), 2000);
-                                }}
-                                className="px-3 py-1.5 bg-[#EB4501] hover:brightness-110 text-white text-[12px] font-bold tracking-tight rounded-md cursor-pointer transition-colors border-none font-sans"
-                              >
-                                {copiedCode === promo.code ? 'Copied' : 'Copy'}
-                              </button>
-                            </div>
-                          </div>
+                      feedCoupons.map((coupon) => (
+                        <div key={coupon.code} className="w-full h-full">
+                          <BrandCouponCarouselCard coupon={coupon} />
                         </div>
                       ))
                     ) : (
@@ -854,12 +877,23 @@ export function DealsPage() {
                   </div>
 
                   <PaginationBar
-                    showingCount={Math.min(12, filteredProducts.length)}
-                    totalCount={filteredProducts.length}
+                    showingCount={
+                      activeTab === 'Promo Codes'
+                        ? feedCoupons.length
+                        : Math.min(12, filteredProducts.length)
+                    }
+                    totalCount={
+                      activeTab === 'Promo Codes' ? feedCoupons.length : filteredProducts.length
+                    }
                   />
                 </div>
 
-                <DealsTopCouponsCard className="self-start lg:sticky lg:top-28" />
+                <div className="flex flex-col gap-4 self-start lg:sticky lg:top-28 w-full min-w-0">
+                  <DealsTopCouponsCard onViewAllCoupons={handleViewAllCoupons} />
+                  {/* Fill remaining right-column height while the deals feed scrolls */}
+                  <DealsVerticalSponsoredCard />
+                  <DealsVerticalSponsoredCard />
+                </div>
               </div>
             </section>
 

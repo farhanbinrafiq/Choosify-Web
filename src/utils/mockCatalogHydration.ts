@@ -6,6 +6,12 @@ type LegacyMockProduct = {
   title: string;
   brand: string;
   price: string;
+  originalPrice?: string | number;
+  discountPercent?: number;
+  isDeal?: boolean;
+  dealType?: string;
+  dealValidUntil?: string;
+  tag?: string;
   image: string;
   description?: string;
   category?: string;
@@ -180,27 +186,55 @@ function getVariantsForProduct(productId: number, basePrice: number, baseImage: 
   return undefined;
 }
 
+function parseMoney(value: string | number | undefined | null): number | undefined {
+  if (value == null || value === '') return undefined;
+  if (typeof value === 'number') return Number.isFinite(value) ? value : undefined;
+  const n = parseFloat(String(value).replace(/,/g, '').replace(/[^\d.]/g, ''));
+  return Number.isFinite(n) ? n : undefined;
+}
+
 export function buildMappedProductsFromMock(
   products: LegacyMockProduct[],
   brands: LegacyMockBrand[] = [],
 ): CommerceProduct[] {
   return products.map((p) => {
-    const cleanPrice = parseFloat(p.price.replace(/,/g, '')) || 5000;
+    const cleanPrice = parseMoney(p.price) || 5000;
+    const originalPrice = parseMoney(p.originalPrice);
     const matchedBrand = brands.find((b) => b.name.toLowerCase() === p.brand.toLowerCase());
     const brandId = matchedBrand?.id ?? 0;
     const sellerId = matchedBrand
       ? `seller-${matchedBrand.name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`
       : 'seller-general';
+    const discountFromPrices =
+      originalPrice != null && originalPrice > cleanPrice
+        ? Math.round(((originalPrice - cleanPrice) / originalPrice) * 1000) / 10
+        : undefined;
+    const discountPercent =
+      typeof p.discountPercent === 'number' && p.discountPercent > 0
+        ? p.discountPercent
+        : discountFromPrices;
+    const isDeal =
+      p.isDeal === true ||
+      Boolean(discountPercent && discountPercent > 0) ||
+      p.tag === 'SALE' ||
+      p.tag === 'HOT';
+
     return {
       id: p.id,
       title: p.title,
       image: p.image,
       brand: p.brand,
+      brandName: p.brand,
       codSupport: p.id !== 1,
       stock: p.id === 3 ? 0 : p.id === 5 ? 3 : 58,
       sellerId,
       brandId,
       price: cleanPrice,
+      originalPrice,
+      discountPercent,
+      isDeal,
+      dealType: (p.dealType as CommerceProduct['dealType']) || (isDeal ? 'brand' : undefined),
+      dealValidUntil: p.dealValidUntil,
       description:
         p.description ||
         `Full verified ${p.title} with complete manufacturer accessory bundle and native local warranty coverage.`,

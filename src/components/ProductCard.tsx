@@ -18,6 +18,11 @@ import { CardEngagementStrip } from './CardEngagementStrip';
 import { ProductStatusBadge, ProductStatusBadgeStack, collectProductBadgeLabels } from './ProductStatusBadge';
 import { notify } from '../lib/notify';
 import { isServiceListing } from '../utils/serviceBooking';
+import {
+  compareCategoryBrowseHref,
+  getCompareLockedCategory,
+  isSameCompareCategory,
+} from '../utils/compareCategory';
 
 /** Choosify.dc.html product tile tokens */
 const DC = {
@@ -56,7 +61,7 @@ function resolveDcBadge(product: any): { label: string; bg: string } | null {
   }
   if (product.isNewArrival) return { label: 'NEW', bg: DC.newGreen };
   if (product.isBestseller) return { label: 'BESTSELLER', bg: DC.orange };
-  if (product.featuredFlag) return { label: 'Sponsored', bg: DC.orange };
+  if (product.featuredFlag) return { label: 'Promoted', bg: DC.officialBlue };
   if (product.isDeal || product.dealType || product.tag === 'SALE') {
     return { label: 'BEST DEAL', bg: DC.dealAmber };
   }
@@ -243,6 +248,17 @@ export const ProductCard = memo(function ProductCard({
 
   const isSaved = savedProducts.some((p) => p.id === product.id);
   const isInCompare = comparedProducts.some((p) => p.id === product.id);
+  const compareLockedCategory = getCompareLockedCategory(comparedProducts);
+  const isCompareCategoryBlocked =
+    !isInCompare && Boolean(compareLockedCategory) && !isSameCompareCategory(product, compareLockedCategory);
+  const compareBrowseHref = compareLockedCategory
+    ? compareCategoryBrowseHref(compareLockedCategory.label)
+    : '/products';
+  const compareButtonTitle = isCompareCategoryBlocked
+    ? `Irrelevant category for the current comparison (locked to ${compareLockedCategory!.label}). Browse matching products instead.`
+    : isInCompare
+      ? 'In comparison'
+      : 'Add to Compare';
   const engagementType = product.tag === 'SALE' ? ('deal' as const) : ('product' as const);
 
   const priceNum = parsePrice(product.price);
@@ -274,7 +290,19 @@ export const ProductCard = memo(function ProductCard({
   const handleCompare = (e: React.MouseEvent) => {
     e.stopPropagation();
     e.preventDefault();
+    if (isCompareCategoryBlocked) {
+      notify.error(
+        `Irrelevant category for this comparison. Browse ${compareLockedCategory!.label} products instead.`,
+      );
+      return;
+    }
     addToCompare(product);
+  };
+
+  const handleBrowseMatchingCategory = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+    navigate(compareBrowseHref);
   };
 
   const handlePrimaryAction = (e: React.MouseEvent) => {
@@ -331,7 +359,7 @@ export const ProductCard = memo(function ProductCard({
         <div className="relative z-10 flex-1 flex flex-col justify-center py-2 px-1">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-[12px] font-semibold text-[#9AA0AC]">{brandName}</span>
-            <span className="bg-[#EB4501]/10 text-[#EB4501] text-[11px] font-bold px-2 py-0.5 rounded flex items-center gap-1">
+            <span className="bg-[#EB4501]/10 text-[#EB4501] text-[11px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
               <Star size={11} className="fill-current" /> Featured
             </span>
           </div>
@@ -375,7 +403,7 @@ export const ProductCard = memo(function ProductCard({
           />
           {badge && (
             <div
-              className="absolute top-2 left-2 text-white text-[9px] font-extrabold px-[7px] py-[3px] rounded pointer-events-none"
+              className="absolute top-2 left-2 text-white text-[9px] font-extrabold px-[7px] py-[3px] rounded-full pointer-events-none"
               style={{ background: badge.bg }}
             >
               {badge.label}
@@ -405,12 +433,16 @@ export const ProductCard = memo(function ProductCard({
               {isOfficial && <ShieldCheck size={13} className="text-[#2323FF]" strokeWidth={1.8} />}
               <button
                 type="button"
-                onClick={handleCompare}
+                onClick={isCompareCategoryBlocked ? handleBrowseMatchingCategory : handleCompare}
+                disabled={false}
+                title={compareButtonTitle}
+                aria-label={compareButtonTitle}
+                aria-disabled={isCompareCategoryBlocked}
                 className={cn(
                   'w-7 h-7 rounded-full border-0 cursor-pointer inline-flex items-center justify-center bg-white shadow-sm',
                   isInCompare && 'bg-[#07A828] text-white',
+                  isCompareCategoryBlocked && 'opacity-40 grayscale cursor-not-allowed',
                 )}
-                aria-label="Compare"
               >
                 <ArrowLeftRight
                   size={13}
@@ -448,7 +480,7 @@ export const ProductCard = memo(function ProductCard({
 
         {badge && (
           <div
-            className="absolute top-2 left-2 z-20 text-white text-[9px] font-extrabold px-[7px] py-[3px] rounded pointer-events-none"
+            className="absolute top-2 left-2 z-20 text-white text-[9px] font-extrabold px-[7px] py-[3px] rounded-full pointer-events-none"
             style={{ background: badge.bg }}
           >
             {badge.label}
@@ -470,7 +502,7 @@ export const ProductCard = memo(function ProductCard({
         </button>
 
         {rating != null && (
-          <div className="absolute bottom-2 left-2 z-20 bg-[#07A828] text-white text-[10px] font-extrabold px-[7px] py-[3px] rounded-xl pointer-events-none">
+          <div className="absolute bottom-2 left-2 z-20 bg-[#07A828] text-white text-[10px] font-extrabold px-[7px] py-[3px] rounded-full pointer-events-none">
             {rating.toFixed(1)} ★
           </div>
         )}
@@ -536,12 +568,14 @@ export const ProductCard = memo(function ProductCard({
             )}
             <button
               type="button"
-              onClick={handleCompare}
-              title="Add to Compare"
-              aria-label="Add to Compare"
+              onClick={isCompareCategoryBlocked ? handleBrowseMatchingCategory : handleCompare}
+              title={compareButtonTitle}
+              aria-label={compareButtonTitle}
+              aria-disabled={isCompareCategoryBlocked}
               className={cn(
                 'w-7 h-7 rounded-full border-0 cursor-pointer inline-flex items-center justify-center bg-white shadow-sm',
                 isInCompare && 'bg-[#07A828] text-white',
+                isCompareCategoryBlocked && 'opacity-40 grayscale cursor-not-allowed',
               )}
             >
               <ArrowLeftRight

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { MoreHorizontal } from 'lucide-react';
 import { cn } from '../lib/utils';
 
@@ -33,6 +33,27 @@ interface PublicReviewCardProps {
   showActions?: boolean;
 }
 
+/** True when URL is a real uploaded/profile photo (not a generated initials placeholder). */
+export function isUsableReviewerPhoto(url?: string | null): boolean {
+  const v = (url ?? '').trim();
+  if (!v) return false;
+  if (!(v.startsWith('http') || v.startsWith('/') || v.startsWith('data:'))) return false;
+  const lower = v.toLowerCase();
+  if (lower.includes('api.dicebear.com') && lower.includes('/initials/')) return false;
+  if (lower.includes('ui-avatars.com')) return false;
+  return true;
+}
+
+/** First usable reviewer photo from candidates; otherwise undefined (initials fallback). */
+export function resolvePublicReviewAvatarUrl(
+  ...candidates: Array<string | undefined | null>
+): string | undefined {
+  for (const c of candidates) {
+    if (isUsableReviewerPhoto(c)) return String(c).trim();
+  }
+  return undefined;
+}
+
 /** Choosify.dc.html public review card — Product / Brand detail feeds */
 export function PublicReviewCard({
   review,
@@ -43,7 +64,9 @@ export function PublicReviewCard({
   showActions = false,
 }: PublicReviewCardProps) {
   const ratingNum = typeof review.rating === 'string' ? parseFloat(review.rating) : review.rating;
-  const avatarUrl = review.dp || review.avatar;
+  const resolvedAvatar = resolvePublicReviewAvatarUrl(review.dp, review.avatar);
+  const [avatarFailed, setAvatarFailed] = useState(false);
+  const showPhoto = Boolean(resolvedAvatar) && !avatarFailed;
   const displayComment = review.comment || review.content || '';
   const displayDate = review.date || review.time || 'Recently';
   const displayProductImages = review.productImages || review.images || [];
@@ -84,9 +107,16 @@ export function PublicReviewCard({
 
       <div className="flex items-center justify-between mb-3 gap-2">
         <div className="flex items-center gap-2.5 min-w-0">
-          {avatarUrl ? (
+          {showPhoto ? (
             <div className="w-[42px] h-[42px] rounded-full overflow-hidden shrink-0 bg-[#F4F7F9]">
-              <img src={avatarUrl} alt="" className="w-full h-full object-cover" />
+              <img
+                src={resolvedAvatar}
+                alt=""
+                className="w-full h-full object-cover"
+                loading="lazy"
+                referrerPolicy="no-referrer"
+                onError={() => setAvatarFailed(true)}
+              />
             </div>
           ) : (
             <div className="w-10 h-10 rounded-full bg-[#EB4501] text-white flex items-center justify-center text-[13px] font-extrabold shrink-0">

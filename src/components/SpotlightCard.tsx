@@ -4,6 +4,7 @@ import { CheckCircle, Heart, Play, Clock, Eye, LayoutGrid, Calendar, Share2, Sta
 import { cn } from '../lib/utils';
 import { toast } from '../lib/notify';
 import { Badge } from './ui/badges/Badge';
+import { SponsoredCardChrome } from './commerce/SponsoredCardChrome';
 
 // Unified Verified Icon to match what is used on the Home Page
 function VerifiedIcon({ size = 14, className = "text-blue-400" }: { size?: number; className?: string }) {
@@ -322,7 +323,7 @@ export const SpotlightCard = memo(function SpotlightCard({
               {finalBadge || 'CREATOR REVIEW'}
             </Badge>
           </div>
-          <div className="absolute bottom-3 right-3 z-10 bg-black/75 px-2 py-0.5 rounded text-[10px] font-mono font-black text-white tracking-wider">
+          <div className="absolute bottom-3 right-3 z-10 bg-black/75 px-2 py-0.5 rounded-full text-[10px] font-mono font-black text-white tracking-wider">
             {finalDuration}
           </div>
         </div>
@@ -436,13 +437,10 @@ export const SpotlightCard = memo(function SpotlightCard({
         <div className="absolute -right-8 -bottom-8 w-24 h-24 bg-[#EB4501]/5 rounded-full blur-xl pointer-events-none" />
 
         <div>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-4 relative min-h-[28px]">
             <Badge variant="campaign" className="px-2.5 py-0.5 text-[8px] shadow-xs">
               {sponsorBadge || 'CAMPAIGN'}
             </Badge>
-            <span className="text-[9px] font-bold text-orange-500 uppercase tracking-widest">
-              SPONSORED
-            </span>
           </div>
 
           <h3 className="text-lg font-black text-slate-900 leading-tight tracking-tight mb-2 mt-1">
@@ -459,14 +457,26 @@ export const SpotlightCard = memo(function SpotlightCard({
         </div>
 
         {finalImage && (
-          <div className="w-full h-32 rounded-xl overflow-hidden mb-4 border border-orange-50/50 bg-white">
+          <div className="w-full h-32 rounded-xl overflow-hidden mb-4 border border-orange-50/50 bg-white relative">
             <img
               src={finalImage}
               alt={finalTitle}
               className="w-full h-full object-cover group-hover:scale-103 transition-transform"
               referrerPolicy="no-referrer"
             />
+            <SponsoredCardChrome
+              brandName={sponsorBadge || finalCreator.name}
+              logoUrl={avatar || finalCreator.avatar}
+              size="sm"
+            />
           </div>
+        )}
+        {!finalImage && (
+          <SponsoredCardChrome
+            brandName={sponsorBadge || finalCreator.name}
+            logoUrl={avatar || finalCreator.avatar}
+            size="sm"
+          />
         )}
 
         <div className="mt-auto pt-3 border-t border-orange-100/50 flex items-center justify-between">

@@ -458,7 +458,7 @@ export function ChoosifyCommerceMediaGallery({
                 >
                   {renderMedia(media, 'thumb')}
                   {label && (
-                    <span className="absolute bottom-0.5 right-0.5 bg-black/80 text-white text-[6px] font-black uppercase px-1 rounded-sm">
+                    <span className="absolute bottom-0.5 right-0.5 bg-black/80 text-white text-[6px] font-black uppercase px-1 rounded-full">
                       {label}
                     </span>
                   )}

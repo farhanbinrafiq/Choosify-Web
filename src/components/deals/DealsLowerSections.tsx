@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 import { SponsoredVerticalAdCarousel } from '../commerce/SponsoredVerticalAdCarousel';
 
-const TOP_COUPONS = [
+export const TOP_COUPONS = [
   { pct: '10%', code: 'CHOOSIFY10', min: 'Min. Spend BDT 5,000' },
   { pct: '15%', code: 'SAVE15', min: 'Min. Spend BDT 10,000' },
   { pct: '5%', code: 'EMI5', min: 'Min. Spend BDT 3,000' },
@@ -36,10 +36,28 @@ const BRAND_DEALS_ROW = [
   { name: 'SONY', off: 'Up to 25% Off', color: '#1A1A2E' },
   { name: 'DELL', off: 'Up to 20% Off', color: '#2323FF' },
   { name: 'ASUS', off: 'Up to 20% Off', color: '#1A1A2E' },
+  // Second row — same curated static set as the first six
+  { name: 'LG', off: 'Up to 22% Off', color: '#A50034' },
+  { name: 'HP', off: 'Up to 18% Off', color: '#0096D6' },
+  { name: 'Lenovo', off: 'Up to 20% Off', color: '#E2231A' },
+  { name: 'Xiaomi', off: 'Up to 24% Off', color: '#FF6900' },
+  { name: 'OnePlus', off: 'Up to 16% Off', color: '#F5010C' },
+  { name: 'Canon', off: 'Up to 15% Off', color: '#C8102E' },
 ] as const;
 
-export function DealsTopCouponsCard({ className }: { className?: string }) {
+export function DealsTopCouponsCard({
+  className,
+  onViewAllCoupons,
+}: {
+  className?: string;
+  /** Same pattern as Discover lane “View All” — activates in-page filter, no navigation. */
+  onViewAllCoupons?: () => void;
+}) {
   const [copied, setCopied] = useState<string | null>(null);
+
+  const handleViewAll = () => {
+    onViewAllCoupons?.();
+  };
 
   return (
     <div
@@ -50,12 +68,13 @@ export function DealsTopCouponsCard({ className }: { className?: string }) {
     >
       <div className="flex justify-between items-center mb-3.5">
         <div className="text-[13px] font-extrabold text-[#1A1A2E]">TOP COUPONS</div>
-        <Link
-          to="/deals?tab=promo"
-          className="text-[11px] font-bold text-[#1A1A2E] no-underline hover:text-[#CF4400]"
+        <button
+          type="button"
+          onClick={handleViewAll}
+          className="text-[11px] font-bold text-[#1A1A2E] hover:text-[#CF4400] cursor-pointer bg-transparent border-0 p-0 min-h-[44px] sm:min-h-0"
         >
           VIEW ALL COUPONS ›
-        </Link>
+        </button>
       </div>
       <div className="flex flex-col gap-2.5 mb-3.5 flex-1">
         {TOP_COUPONS.map((cp) => (
@@ -82,12 +101,13 @@ export function DealsTopCouponsCard({ className }: { className?: string }) {
           </div>
         ))}
       </div>
-      <Link
-        to="/deals?tab=promo"
-        className="text-[11.5px] font-bold text-center block text-[#1A1A2E] no-underline hover:text-[#CF4400]"
+      <button
+        type="button"
+        onClick={handleViewAll}
+        className="text-[11.5px] font-bold text-center block w-full text-[#1A1A2E] hover:text-[#CF4400] cursor-pointer bg-transparent border-0 p-0"
       >
         MORE COUPONS ›
-      </Link>
+      </button>
     </div>
   );
 }

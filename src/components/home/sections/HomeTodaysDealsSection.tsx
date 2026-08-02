@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { DcHomeBlock } from '../DcHomePanel';
 import { PremiumCarousel } from '../PremiumCarousel';
+import { SponsoredCardChrome } from '../../commerce/SponsoredCardChrome';
 import { catalogApi } from '../../../services/catalogApi';
 import { resolveDealsBannerHref } from '../../../lib/home/dealsBannerUtils';
 import type { CatalogDealsBanner } from '../../../types/catalog';
@@ -18,6 +19,9 @@ export interface HomePromoTile {
 
 export type HomeDealsBannerCard = CatalogDealsBanner & { href?: string };
 
+/** Max ads shown in one Today's Deals horizontal row (matches admin studio cap). */
+export const TODAYS_DEALS_BANNER_MAX = 5;
+
 /** Fallback image banners when API has none yet (same card shell as before). */
 const FALLBACK_BANNERS: HomeDealsBannerCard[] = [
   {
@@ -27,6 +31,7 @@ const FALLBACK_BANNERS: HomeDealsBannerCard[] = [
     destinationRef: '/deals',
     order: 0,
     isActive: true,
+    brandName: 'Choosify',
     createdAt: '',
     updatedAt: '',
     href: '/deals',
@@ -38,6 +43,7 @@ const FALLBACK_BANNERS: HomeDealsBannerCard[] = [
     destinationRef: '/deals',
     order: 1,
     isActive: true,
+    brandName: 'Deals',
     createdAt: '',
     updatedAt: '',
     href: '/deals',
@@ -49,6 +55,7 @@ const FALLBACK_BANNERS: HomeDealsBannerCard[] = [
     destinationRef: '/brands',
     order: 2,
     isActive: true,
+    brandName: 'Brands',
     createdAt: '',
     updatedAt: '',
     href: '/brands',
@@ -60,6 +67,7 @@ const FALLBACK_BANNERS: HomeDealsBannerCard[] = [
     destinationRef: '/products',
     order: 3,
     isActive: true,
+    brandName: 'Shop',
     createdAt: '',
     updatedAt: '',
     href: '/products',
@@ -71,39 +79,7 @@ const FALLBACK_BANNERS: HomeDealsBannerCard[] = [
     destinationRef: '/deals',
     order: 4,
     isActive: true,
-    createdAt: '',
-    updatedAt: '',
-    href: '/deals',
-  },
-  {
-    id: 'fallback-6',
-    image: 'https://images.unsplash.com/photo-1560769629-975ec94e6a86?w=800&h=320&fit=crop',
-    destinationType: 'custom-url',
-    destinationRef: '/products',
-    order: 5,
-    isActive: true,
-    createdAt: '',
-    updatedAt: '',
-    href: '/products',
-  },
-  {
-    id: 'fallback-7',
-    image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&h=320&fit=crop',
-    destinationType: 'custom-url',
-    destinationRef: '/brands',
-    order: 6,
-    isActive: true,
-    createdAt: '',
-    updatedAt: '',
-    href: '/brands',
-  },
-  {
-    id: 'fallback-8',
-    image: 'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=800&h=320&fit=crop',
-    destinationType: 'custom-url',
-    destinationRef: '/deals',
-    order: 7,
-    isActive: true,
+    brandName: 'Flash',
     createdAt: '',
     updatedAt: '',
     href: '/deals',
@@ -171,7 +147,8 @@ export function HomeTodaysDealsSection({ banners: bannersProp }: HomeTodaysDeals
     return source
       .filter((b) => b.isActive !== false && Boolean(b.image))
       .slice()
-      .sort((a, b) => a.order - b.order);
+      .sort((a, b) => a.order - b.order)
+      .slice(0, TODAYS_DEALS_BANNER_MAX);
   }, [fetched]);
 
   return (
@@ -181,17 +158,21 @@ export function HomeTodaysDealsSection({ banners: bannersProp }: HomeTodaysDeals
         items={banners}
         itemWidth={280}
         gap={16}
-        paginationStyle="ring"
+        paginationStyle="logos"
         paginationAlign="center"
         showArrows={false}
         autoplay
         autoplayMs={4000}
+        getPaginationIcon={(banner: HomeDealsBannerCard) => ({
+          label: banner.brandName || 'Deal',
+          imageUrl: banner.brandLogoUrl || banner.image,
+        })}
         renderCard={(banner: HomeDealsBannerCard) => {
           const href = resolveDealsBannerHref(banner);
           return (
             <BannerCardLink
               href={href}
-              className="block w-full rounded-xl min-h-[120px] h-[120px] overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#EB4501]/50"
+              className="relative block w-full rounded-xl min-h-[120px] h-[120px] overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#EB4501]/50"
             >
               <img
                 src={banner.image}
@@ -199,6 +180,11 @@ export function HomeTodaysDealsSection({ banners: bannersProp }: HomeTodaysDeals
                 className="w-full h-full object-cover"
                 loading="lazy"
                 draggable={false}
+              />
+              <SponsoredCardChrome
+                brandName={banner.brandName || 'Deal'}
+                logoUrl={banner.brandLogoUrl}
+                size="sm"
               />
             </BannerCardLink>
           );

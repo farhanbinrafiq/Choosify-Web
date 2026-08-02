@@ -6,6 +6,7 @@ import { cn } from '../../../lib/utils';
 import { HOME_CARD_HOVER } from '../../../lib/design/homeTokens';
 import { resolvePreviewImage } from '../../../components/media/types/mediaModel';
 import { PLACEHOLDER_IMAGE } from '../../../constants';
+import { SponsoredCardChrome } from '../../commerce/SponsoredCardChrome';
 
 type EditorialBadge = {
   label: string;
@@ -33,7 +34,7 @@ function resolveEditorialBadge(card: HomepageSpotlightCardModel): EditorialBadge
     return { label: 'CAROUSEL', className: 'bg-blue-500 text-white' };
   }
   if (card.badges.includes('sponsored')) {
-    return { label: 'SPONSORED', className: 'bg-purple-500 text-white' };
+    return { label: 'PROMOTED', className: 'bg-[#2323FF] text-white' };
   }
   return { label: 'FEATURED', className: 'bg-[#1A1D4E] text-white' };
 }
@@ -78,6 +79,8 @@ export function HomeSpotlightEditorialCard({
   const source = resolveSource(card);
   const title = card.campaign.headline ?? card.campaign.campaignName ?? 'Spotlight';
 
+  const isSponsored = card.badges.includes('sponsored') || badge.label === 'PROMOTED';
+
   return (
     <Link
       to={href}
@@ -96,14 +99,18 @@ export function HomeSpotlightEditorialCard({
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 
-      <span
-        className={cn(
-          'absolute top-3 left-3 z-10 px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-wider',
-          badge.className,
-        )}
-      >
-        {badge.label}
-      </span>
+      {isSponsored ? (
+        <SponsoredCardChrome brandName={source.name} logoUrl={source.avatar} size="md" />
+      ) : (
+        <span
+          className={cn(
+            'absolute top-3 left-3 z-10 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider',
+            badge.className,
+          )}
+        >
+          {badge.label}
+        </span>
+      )}
 
       <div className="absolute bottom-0 left-0 right-0 p-4 z-10">
         <h3 className="text-sm md:text-base font-bold text-white leading-snug line-clamp-2 mb-2 group-hover:underline">

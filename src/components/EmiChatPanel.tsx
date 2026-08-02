@@ -195,9 +195,7 @@ export function EmiChatPanel({
     <div className={cn('flex flex-col min-h-0 h-full', className)}>
       <div className="px-4 sm:px-5 py-4 border-b border-white/10 flex items-center justify-between shrink-0 choosify-emi-gradient text-white gap-3">
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shrink-0 shadow-lg p-0.5">
-            <EmiAiLogo size={32} />
-          </div>
+          <EmiAiLogo size={40} className="shadow-lg" />
           <div className="min-w-0 text-left">
             <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-white/80 flex items-center gap-1 truncate">
               <Sparkles size={10} className="text-white shrink-0" />

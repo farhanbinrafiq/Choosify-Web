@@ -116,7 +116,7 @@ export function ProfileSocialPills({
         );
 
         const pillClass =
-          'inline-flex items-center gap-1.5 bg-white border border-[#E8EDF2] rounded-[20px] pl-1 pr-3 py-1 no-underline hover:border-[#EB4501]/40 transition-colors';
+          'inline-flex items-center gap-1.5 bg-white border border-[#E8EDF2] rounded-full pl-1 pr-3 py-1 no-underline hover:border-[#EB4501]/40 transition-colors';
 
         if (sl.href) {
           return (

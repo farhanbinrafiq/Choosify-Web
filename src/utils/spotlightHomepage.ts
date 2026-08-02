@@ -11,9 +11,9 @@ import type {
 } from '../types/spotlight/homepage';
 import { getMediaById, listCampaignRecords } from '../services/spotlightCampaignStorage';
 import type { UniversalMedia } from '../components/media/types/mediaModel';
+import { CONTENT_PRIORITY_WINDOW_MS } from './contentPriority';
 
 const NOW = () => Date.now();
-const LIVE_GRACE_MS = 24 * 60 * 60 * 1000;
 
 function isCampaignActive(c: SpotlightCampaignRecord): boolean {
   if (c.status !== 'published' && c.status !== 'scheduled') return false;
@@ -25,15 +25,33 @@ function isCampaignActive(c: SpotlightCampaignRecord): boolean {
   return start <= now && end >= now;
 }
 
-/** Livestreams that ended within the last 24h (grace pin for Viral Today / Discover). */
-function isLivestreamInGracePeriod(c: SpotlightCampaignRecord, nowMs: number = NOW()): boolean {
+function isLivestreamEligible(c: SpotlightCampaignRecord): boolean {
   if (c.campaignType !== 'livestream') return false;
   if (c.status !== 'published' && c.status !== 'scheduled' && c.status !== 'expired') return false;
   const surfaces = c.placementRules?.surfaces ?? [];
-  if (surfaces.length && !surfaces.includes('homepage') && !surfaces.includes('spotlight_feed')) return false;
+  if (surfaces.length && !surfaces.includes('homepage') && !surfaces.includes('spotlight_feed')) {
+    return false;
+  }
+  return true;
+}
+
+/** Livestreams that ended within the last 24h (grace pin for Viral Today / Discover). */
+function isLivestreamInGracePeriod(c: SpotlightCampaignRecord, nowMs: number = NOW()): boolean {
+  if (!isLivestreamEligible(c)) return false;
   const end = new Date(c.schedule.endAt).getTime();
   if (!Number.isFinite(end) || end > nowMs) return false;
-  return nowMs - end <= LIVE_GRACE_MS;
+  return nowMs - end <= CONTENT_PRIORITY_WINDOW_MS;
+}
+
+/**
+ * Livestreams past the 24h grace window — keep in feed at YouTube size with
+ * "Previously LIVE" (not featured LIVE lane).
+ */
+function isPastLivestream(c: SpotlightCampaignRecord, nowMs: number = NOW()): boolean {
+  if (!isLivestreamEligible(c)) return false;
+  const end = new Date(c.schedule.endAt).getTime();
+  if (!Number.isFinite(end) || end > nowMs) return false;
+  return nowMs - end > CONTENT_PRIORITY_WINDOW_MS;
 }
 
 export function listHomepageSpotlightCampaigns(): SpotlightCampaignRecord[] {
@@ -41,16 +59,22 @@ export function listHomepageSpotlightCampaigns(): SpotlightCampaignRecord[] {
 }
 
 /**
- * Active homepage campaigns plus livestreams still inside the 24h post-end grace window.
- * Used by Viral Today prioritization — does not change the main Spotlight carousel.
+ * Active campaigns + livestreams in 24h grace + past livestreams (shrink to YouTube size).
+ * Used by Viral Today / Discover / Brand Story — not the main Spotlight carousel.
  */
 export function listViralTodaySpotlightCampaigns(nowMs: number = NOW()): SpotlightCampaignRecord[] {
   const records = listCampaignRecords();
   const active = records.filter(isCampaignActive);
+  const activeIds = new Set(active.map((c) => c.campaignId));
   const grace = records.filter(
-    (c) => isLivestreamInGracePeriod(c, nowMs) && !active.some((a) => a.campaignId === c.campaignId),
+    (c) => isLivestreamInGracePeriod(c, nowMs) && !activeIds.has(c.campaignId),
   );
-  return [...active, ...grace];
+  const graceIds = new Set(grace.map((c) => c.campaignId));
+  const past = records.filter(
+    (c) =>
+      isPastLivestream(c, nowMs) && !activeIds.has(c.campaignId) && !graceIds.has(c.campaignId),
+  );
+  return [...active, ...grace, ...past];
 }
 
 function matchesFilter(c: SpotlightCampaignRecord, filter: SpotlightHomepageFilter): boolean {

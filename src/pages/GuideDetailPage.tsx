@@ -687,9 +687,7 @@ export function GuideDetailPage({
               }
               className="inline-flex items-center gap-1.5 bg-[linear-gradient(90deg,#6C4CFF,#EB4501)] text-white border-0 px-[18px] py-[11px] rounded-lg text-xs font-bold cursor-pointer hover:brightness-110 transition-all"
             >
-              <span className="w-5 h-5 rounded-full bg-white flex items-center justify-center p-0.5 shrink-0">
-                <EmiAiLogo size={14} />
-              </span>
+              <EmiAiLogo size={20} />
               Ask Emi about this Discovery
             </button>
             <button

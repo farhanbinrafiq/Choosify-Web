@@ -77,7 +77,7 @@ import { PRODUCTS } from '../constants';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { PLACEHOLDER_IMAGE } from '../constants';
-import { PublicReviewCard } from '../components/PublicReviewCard';
+import { PublicReviewCard, resolvePublicReviewAvatarUrl } from '../components/PublicReviewCard';
 import { AddressBookManager } from '../components/address/AddressBookManager';
 import { notify, toast } from '../lib/notify';
 import { toPlatformRole } from '../lib/platform/roles';
@@ -172,7 +172,7 @@ function DashboardSponsoredRail() {
   return (
     <aside
       className="hidden lg:block w-full max-w-[240px] shrink-0 sticky top-[88px] self-start isolate z-0"
-      aria-label="Sponsored advertisement"
+      aria-label="Promoted advertisement"
     >
       <DealsVerticalSponsoredCard />
     </aside>
@@ -1683,7 +1683,12 @@ function MyReviewsSection() {
                   key={r.id || idx}
                   review={{
                     name: currentUser.name || 'You',
-                    avatar: undefined,
+                    avatar: resolvePublicReviewAvatarUrl(
+                      currentUser.avatar,
+                      r.avatar,
+                      r.authorAvatar,
+                      r.userAvatar,
+                    ),
                     rating: r.rating || 5,
                     comment: r.comment || r.text,
                     date: r.date || r.createdAt || 'Just now',
@@ -1712,7 +1717,7 @@ function MyReviewsSection() {
 // --- MAIN PAGE ---
 
 export function DashboardPage() {
-  const { setIsLoggedIn, currentUser } = useGlobalState();
+  const { logout, currentUser } = useGlobalState();
   const { 
     savedProducts, 
     savedBrands, 
@@ -2022,7 +2027,7 @@ export function DashboardPage() {
         label="Log Out"
         onClick={() => {
           setMobileNavOpen(false);
-          setIsLoggedIn(false);
+          logout();
           navigate('/');
           toast.success('Successfully logged out.');
         }}

@@ -13,12 +13,14 @@ import {
   Package,
   Home,
   X,
+  Clock,
 } from 'lucide-react';
 import { toast } from '../lib/notify';
 import { useGlobalState } from '../context/GlobalStateContext';
 import type { Order } from '../types/schemas';
 import { cn } from '../lib/utils';
 import { usePageBreadcrumbs } from '../context/BreadcrumbContext';
+import { operationsApi } from '../services/operationsApi';
 
 const formatMoney = (amount: number) => `৳${amount.toLocaleString()}`;
 
@@ -109,12 +111,43 @@ export function OrderSuccessPage() {
   }
 
   const shipping = order.shipping;
+  const isConfirmingPayment =
+    order.paymentMethod === 'online' &&
+    (order.paymentStatus === 'pending' ||
+      order.paymentStatus === 'unpaid' ||
+      order.status === 'pending_payment') &&
+    !order.paidAt;
   const paymentLabel =
     order.paymentMethod === 'cod' || order.isCOD
       ? 'Cash on Delivery (COD)'
-      : 'Commercial Credit / Prepayment';
+      : order.paymentMethod === 'online'
+        ? isConfirmingPayment
+          ? 'Online payment — confirming…'
+          : 'Online payment (SSLCommerz)'
+        : 'Commercial Credit / Prepayment';
 
   const pointsEarned = Math.max(10, Math.round(order.overallTotal / 100));
+
+  React.useEffect(() => {
+    if (!isConfirmingPayment || !order.orderId) return;
+    let cancelled = false;
+    const poll = async () => {
+      try {
+        const row = await operationsApi.getOrder(order.orderId);
+        if (cancelled) return;
+        if (row.paymentStatus === 'paid' || row.paidAt) {
+          window.location.reload();
+        }
+      } catch {
+        /* next tick */
+      }
+    };
+    const id = window.setInterval(poll, 3000);
+    return () => {
+      cancelled = true;
+      window.clearInterval(id);
+    };
+  }, [isConfirmingPayment, order.orderId]);
 
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed pb-16">
@@ -134,15 +167,40 @@ export function OrderSuccessPage() {
             <span className="text-[#EB4501]">{order.orderId}</span>
           </nav>
 
-          <div className="w-16 h-16 rounded-full bg-[rgba(7,208,80,0.15)] border-2 border-[#07DD05] flex items-center justify-center text-[#07DD05] mx-auto mb-[18px]">
-            <CheckCircle2 size={32} />
+          <div
+            className={cn(
+              'w-16 h-16 rounded-full border-2 flex items-center justify-center mx-auto mb-[18px]',
+              isConfirmingPayment
+                ? 'bg-amber-500/15 border-amber-400 text-amber-300'
+                : 'bg-[rgba(7,208,80,0.15)] border-[#07DD05] text-[#07DD05]',
+            )}
+          >
+            {isConfirmingPayment ? <Clock size={32} className="animate-pulse" /> : <CheckCircle2 size={32} />}
           </div>
           <h1 className="text-2xl font-extrabold mb-2.5 leading-tight">
-            THANK YOU — YOUR ORDER IS <span className="text-[#07DD05]">CONFIRMED!</span>
+            {isConfirmingPayment ? (
+              <>
+                CONFIRMING YOUR <span className="text-amber-300">PAYMENT…</span>
+              </>
+            ) : (
+              <>
+                THANK YOU — YOUR ORDER IS <span className="text-[#07DD05]">CONFIRMED!</span>
+              </>
+            )}
           </h1>
           <p className="text-[13px] text-white/55 max-w-[520px] mx-auto">
-            Order <strong className="text-white font-mono">{order.orderId}</strong> has been recorded.
-            Sellers have been notified and your items will be on the way soon.
+            {isConfirmingPayment ? (
+              <>
+                Order <strong className="text-white font-mono">{order.orderId}</strong> is saved.
+                We&apos;re waiting for independent gateway confirmation — this page does not treat
+                the browser redirect as proof of payment.
+              </>
+            ) : (
+              <>
+                Order <strong className="text-white font-mono">{order.orderId}</strong> has been recorded.
+                Sellers have been notified and your items will be on the way soon.
+              </>
+            )}
           </p>
           <p className="text-[11.5px] text-white/45 mt-3.5">
             {formatDateTime(order.createdAt)}

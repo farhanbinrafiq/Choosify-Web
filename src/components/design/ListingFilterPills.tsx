@@ -33,7 +33,7 @@ export interface ListingFilterPillsProps {
 }
 
 const pillBase =
-  'px-3.5 py-2 rounded-[18px] text-[11.5px] font-bold cursor-pointer border transition-all min-h-[36px]';
+  'px-3.5 py-2 rounded-full text-[11.5px] font-bold cursor-pointer border transition-all min-h-[36px]';
 
 /** Idle sticky filter pills */
 const pillSurface =
@@ -120,7 +120,7 @@ export function ListingFilterPills({
                 onClick={onClearFilters}
                 className={cn(
                   pillBase,
-                  'rounded-[20px] bg-white text-[#EB4501] border-[#EB4501]/40 hover:bg-[#EB4501]/5 hover:border-[#EB4501]',
+                  'rounded-full bg-white text-[#EB4501] border-[#EB4501]/40 hover:bg-[#EB4501]/5 hover:border-[#EB4501]',
                 )}
               >
                 Clear Filters
@@ -130,7 +130,7 @@ export function ListingFilterPills({
               <button
                 type="button"
                 onClick={handleAi}
-                className="choosify-emi-gradient text-white text-[11.5px] font-bold px-4 py-2 rounded-[20px] cursor-pointer border-0 min-h-[36px] hover:brightness-110 transition-all"
+                className="choosify-emi-gradient text-white text-[11.5px] font-bold px-4 py-2 rounded-full cursor-pointer border-0 min-h-[36px] hover:brightness-110 transition-all"
               >
                 {aiDiscoverLabel}
               </button>

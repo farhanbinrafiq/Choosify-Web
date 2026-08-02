@@ -378,7 +378,7 @@ export function CustomPriceFilter({
               type="button"
               onClick={() => handlePresetClick(p)}
               className={cn(
-                "py-1.5 px-2 text-[9.5px] font-semibold rounded-[4px] border text-center transition-colors truncate cursor-pointer",
+                "py-1.5 px-2 text-[9.5px] font-semibold rounded-full border text-center transition-colors truncate cursor-pointer",
                 isSelected
                   ? "bg-orange-primary/10 border-orange-primary text-orange-primary"
                   : "bg-gray-50/50 border-[#e8edf2] text-gray-500 hover:bg-gray-100 hover:text-[#1A1D4E]"
@@ -496,7 +496,7 @@ export function UniversalFilterRenderer({
                 <button
                   onClick={() => onFilterChange(filter.id, null)}
                   className={cn(
-                    "col-span-6 py-1.5 rounded-[3px] text-[9.5px] font-black uppercase tracking-widest transition-all text-center cursor-pointer",
+                    "col-span-6 py-1.5 rounded-full text-[9.5px] font-black uppercase tracking-widest transition-all text-center cursor-pointer",
                     activeVal === null
                       ? "bg-orange-primary text-white shadow-sm shadow-orange-primary/10"
                       : "bg-gray-50 text-gray-400 hover:bg-gray-100"
@@ -657,7 +657,7 @@ export function ActiveFilterChips({ chips, onClearAll }: ActiveFilterChipsProps)
           {chips.map((chip, idx) => (
             <div
               key={`${chip.id}-${idx}`}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#EB4501] border-0 rounded-[4px] text-[10px] font-black text-white uppercase tracking-wider shadow-2xs transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#EB4501] border-0 rounded-full text-[10px] font-black text-white uppercase tracking-wider shadow-2xs transition-all"
             >
               <span>{chip.label}</span>
               <button
@@ -1433,7 +1433,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                             type="button"
                             onClick={() => activeFiltersData.sectionNav?.onNavigate(activeFiltersData.sectionNav.allId || 'all')}
                             className={cn(
-                              'shrink-0 px-4 py-2 rounded-[5px] text-[10px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap',
+                              'shrink-0 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap',
                               activeFiltersData.sectionNav.activeId === (activeFiltersData.sectionNav.allId || 'all')
                                 ? 'bg-[#EB4501] text-white border border-[#EB4501] shadow-md shadow-[#EB4501]/20'
                                 : 'bg-white text-[#1A1D4E] border border-[#e8edf2] hover:border-[#EB4501]/30 hover:text-[#CF4400]',
@@ -1449,7 +1449,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                                 type="button"
                                 onClick={() => activeFiltersData.sectionNav?.onNavigate(item.id)}
                                 className={cn(
-                                  'shrink-0 px-4 py-2 rounded-[5px] text-[10px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap',
+                                  'shrink-0 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap',
                                   activeFiltersData.sectionNav?.activeId === item.id
                                     ? 'bg-[#EB4501] text-white border border-[#EB4501] shadow-md shadow-[#EB4501]/20'
                                     : 'bg-white text-[#1A1D4E] border border-[#e8edf2] hover:border-[#EB4501]/30 hover:text-[#CF4400]',

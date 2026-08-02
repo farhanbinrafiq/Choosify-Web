@@ -64,6 +64,8 @@ export interface Brand {
 export interface CommerceProduct {
   id: number;
   catalogId?: string;
+  /** Catalog/API brand id string (e.g. brand-samsung) before numeric normalization */
+  catalogBrandId?: string;
   slug?: string;
   title: string;
   image: string;
@@ -72,6 +74,7 @@ export interface CommerceProduct {
   sellerId: string;
   brandId: number;
   brand?: string;
+  brandName?: string;
   price: number;
   description: string;
   category?: string;
@@ -130,7 +133,7 @@ export interface Order {
   promoCode?: string;
   promoDiscount?: number;
   promoType?: 'flat' | 'percentage' | string;
-  paymentMethod?: 'cod' | 'credit';
+  paymentMethod?: 'cod' | 'credit' | 'online';
   subOrders: SubOrder[];
   createdAt: string;
   status?: 'pending_payment' | 'active' | 'confirmed' | 'cancelled' | 'completed';
@@ -155,6 +158,13 @@ export interface Order {
   depositPercent?: number;
   depositAmount?: number;
   remainingAmount?: number;
+  /** SSLCommerz gateway lifecycle — alongside `status`, not a replacement for pending_payment. */
+  paymentProvider?: 'sslcommerz';
+  paymentStatus?: 'unpaid' | 'pending' | 'paid' | 'failed' | 'cancelled';
+  paymentTranId?: string;
+  paymentValId?: string;
+  paidAmount?: number;
+  paymentValidatedAt?: string;
 }
 
 export interface BuyerReputation {

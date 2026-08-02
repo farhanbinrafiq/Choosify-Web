@@ -201,9 +201,9 @@ export const TEST_SERVICE_PRODUCTS: SeedCommerceProduct[] = [
   },
   {
     id: 9103,
-    catalogId: 'test-svc-doctor-cardio',
-    slug: 'test-doctor-dr-nabila-cardiology',
-    title: '[TEST] Dr. Nabila Rahman — Cardiology Consult',
+    catalogId: 'test-svc-doctor-dimpoch',
+    slug: 'test-doctor-dr-razia-dimpoch',
+    title: '[TEST] Dr. Razia Faruk — Dimpoch Consult',
     image: doctorImages[0],
     images: doctorImages,
     brand: TEST_SERVICE_BRAND.name,
@@ -218,10 +218,10 @@ export const TEST_SERVICE_PRODUCTS: SeedCommerceProduct[] = [
     categoryName: 'Doctors & Clinics',
     productType: 'service',
     serviceCategory: 'doctors',
-    specialty: 'Cardiology',
+    specialty: 'Dimpoch',
     location: 'United Hospital Consulting Rooms, Gulshan',
     description:
-      'Board-certified cardiologist consultation. Use Message for Appointment to test patient name/age, appointment date/time, and reason fields.',
+      'Dimpoch consultation with Dr. Razia Faruk. Use Message for Appointment to test patient name/age, appointment date/time, and reason fields.',
     complimentaryFeatures: [
       'ECG review included',
       'Digital prescription',
@@ -235,7 +235,7 @@ export const TEST_SERVICE_PRODUCTS: SeedCommerceProduct[] = [
       'Languages: Bangla, English',
     ],
     specs: [
-      { label: 'Specialty', value: 'Cardiology' },
+      { label: 'Specialty', value: 'Dimpoch' },
       { label: 'Consultation fee', value: 'BDT 1,500' },
       { label: 'Clinic', value: 'United Hospital, Gulshan' },
       { label: 'Next availability', value: 'Weekday evenings' },

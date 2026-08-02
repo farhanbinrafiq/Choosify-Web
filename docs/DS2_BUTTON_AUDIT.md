@@ -43,6 +43,8 @@ inactive: bg-white border-[#e8edf2] text-gray-500
 
 **Heavy usage:** FilterEngine, StickySectionNav, CategoriesQuickNav, SpotlightHubNav, CompareEngine tabs
 
+> **Miss (fixed):** `CompareEngine` Decision Profile sticky pills (`STICKY_PILL_BASE`) had drifted to `rounded-none`; restored to platform `rounded-full` to match filter/quick-search pills.
+
 ### Icon Circle Buttons
 
 ```

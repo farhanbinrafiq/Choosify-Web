@@ -451,7 +451,7 @@ export function CreatorProfilePage() {
                          className="w-full px-4 py-2.5 bg-[#030310] border border-white/10 rounded-xl text-xs text-white outline-none focus:border-orange-primary appearance-none cursor-pointer"
                        >
                          <option value="Product Review">Product Review</option>
-                         <option value="Sponsored Post">Sponsored Post</option>
+                         <option value="Sponsored Post">Promoted Post</option>
                          <option value="Video Feature">Video Feature</option>
                          <option value="Social Campaign">Social Campaign</option>
                          <option value="Other">Other</option>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 import { getCategoryImage } from '../../lib/categoryImages';
@@ -12,6 +12,9 @@ export type CategoryPremiumCardProps = {
   image?: string;
   subcategories?: CategorySubcategory[];
   featuredBrand?: string;
+  /** Dedicated Brand Details route, e.g. `/brands/bata` */
+  featuredBrandHref?: string;
+  featuredBrandLogo?: string;
   onClick?: () => void;
   className?: string;
 };
@@ -25,13 +28,21 @@ export function CategoryPremiumCard({
   image,
   subcategories = [],
   featuredBrand,
+  featuredBrandHref,
+  featuredBrandLogo,
   onClick,
   className,
 }: CategoryPremiumCardProps) {
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
+  const [logoFailed, setLogoFailed] = useState(false);
   const featured = featuredBrand || name.split(/\s+/)[0] || 'Brand';
   const featuredInitial = featured.charAt(0).toUpperCase();
+  const brandHref = featuredBrandHref || `/brands?q=${encodeURIComponent(featured)}`;
+  const showLogo = Boolean(featuredBrandLogo) && !logoFailed;
+  useEffect(() => {
+    setLogoFailed(false);
+  }, [featuredBrandLogo]);
   const visible = expanded ? subcategories : subcategories.slice(0, SUBCAT_PREVIEW);
   const hasMore = subcategories.length > SUBCAT_PREVIEW;
   const moreLabel = expanded ? 'Show less' : 'Show All';
@@ -112,22 +123,31 @@ export function CategoryPremiumCard({
       </div>
 
       <Link
-        to={`/brands?q=${encodeURIComponent(featured)}`}
+        to={brandHref}
         className="mt-auto choosify-dark-surface text-white px-4 py-3 flex items-center gap-2.5 no-underline hover:brightness-110"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-extrabold shrink-0">
-          {featuredInitial}
+        <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-extrabold shrink-0 overflow-hidden">
+          {showLogo ? (
+            <img
+              src={featuredBrandLogo}
+              alt=""
+              className="w-full h-full object-cover"
+              loading="lazy"
+              onError={() => setLogoFailed(true)}
+            />
+          ) : (
+            featuredInitial
+          )}
         </div>
         <div className="text-[11px] text-white font-bold min-w-0 flex-1 truncate">
-          Featured Brand:{' '}
           <span className="text-white font-extrabold">{featured}</span>
         </div>
         <span
-          className="shrink-0 text-[9px] font-extrabold uppercase tracking-wide text-white bg-[#EB4501] rounded px-1.5 py-0.5"
-          title="Sponsored"
+          className="shrink-0 text-[9px] font-extrabold uppercase tracking-wide text-white bg-[#2323FF] rounded-full px-1.5 py-0.5"
+          title="Promoted"
         >
-          Ad
+          Promoted
         </span>
       </Link>
     </div>

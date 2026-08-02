@@ -9,7 +9,7 @@ const BADGE_LABELS: Record<SpotlightCampaignBadgeType, string> = {
   promotion: 'Promotion',
   sale: 'Sale',
   limited_time: 'Limited Time',
-  sponsored: 'Sponsored',
+  sponsored: 'Promoted',
   editors_pick: "Editor's Pick",
   trending: 'Trending',
   featured: 'Featured',
@@ -29,7 +29,12 @@ export function SpotlightCampaignBadges({ badges, campaignType, className }: Spo
   return (
     <div className={cn('flex flex-wrap gap-1.5', className)}>
       {primary && (
-        <span className="px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider bg-[#EB4501] text-white">
+        <span
+          className={cn(
+            'px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider text-white',
+            primary === 'sponsored' ? 'bg-[#2323FF]' : 'bg-[#EB4501]',
+          )}
+        >
           {BADGE_LABELS[primary]}
         </span>
       )}
@@ -37,8 +42,8 @@ export function SpotlightCampaignBadges({ badges, campaignType, className }: Spo
         {typeLabel}
       </span>
       {badges.includes('sponsored') && primary !== 'sponsored' && (
-        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-amber-50 text-amber-700 border border-amber-200">
-          Sponsored
+        <span className="px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-[#2323FF] text-white">
+          Promoted
         </span>
       )}
     </div>

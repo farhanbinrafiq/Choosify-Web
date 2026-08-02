@@ -380,9 +380,7 @@ export const AuthPage: React.FC = () => {
           >
             {/* Mascot Avatar with little hat */}
             <div className="relative w-6 h-6 flex items-center justify-center shrink-0">
-              <span className="w-6 h-6 rounded-full bg-white flex items-center justify-center p-0.5 shrink-0">
-                <EmiAiLogo size={18} />
-              </span>
+              <EmiAiLogo size={24} />
               <span className="absolute -top-1 -right-1 flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                 <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
@@ -437,8 +435,8 @@ export const AuthPage: React.FC = () => {
 
             {/* EMI ASSISTANT WIDGET & FLOATING BUBBLE */}
             <div className="bg-white/5 backdrop-blur-md border border-white/10 p-4.5 rounded-[24px] flex items-start gap-4 max-w-sm mt-8 relative shadow-xl hover:bg-white/[0.08] transition-all" id="emi-mascot-widget">
-              <div className="w-10 h-10 rounded-full bg-slate-900 border border-white/10 flex items-center justify-center shrink-0 shadow-inner relative">
-                <EmiAiLogo size={28} />
+              <div className="relative shrink-0">
+                <EmiAiLogo size={40} className="border border-white/10 shadow-inner" />
                 <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-[#000435]" />
               </div>
               <div className="text-xs leading-relaxed text-left flex-1">
@@ -1028,9 +1026,7 @@ export const AuthPage: React.FC = () => {
               {/* Header */}
               <div className="p-5 border-b border-white/10 flex items-center justify-between bg-gradient-to-r from-[#000435] to-[#EB4501]/10">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-[#EB4501]/15 flex items-center justify-center border border-[#EB4501]/20">
-                    <EmiAiLogo size={28} />
-                  </div>
+                  <EmiAiLogo size={40} className="border border-[#EB4501]/20" />
                   <div>
                     <h4 className="text-sm font-black">Ask Emi. A.I Assistant</h4>
                     <span className="text-[10px] text-emerald-400 font-extrabold flex items-center gap-1">

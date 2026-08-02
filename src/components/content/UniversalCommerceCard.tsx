@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Heart, Package } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { PLACEHOLDER_IMAGE } from '../../constants';
+import { SponsoredCardChrome } from '../commerce/SponsoredCardChrome';
 import type {
   CommerceCardVariant,
   UniversalCommerceCardProps,
@@ -57,6 +58,9 @@ interface CommerceCardMediaProps {
   onImageError: (e: React.SyntheticEvent<HTMLImageElement, Event>) => void;
   onBookmarkClick: (e: React.MouseEvent) => void;
   isSaved?: boolean;
+  isSponsored?: boolean;
+  brandName?: string;
+  logoUrl?: string;
 }
 
 /** Choosify.dc.html — Viral Today / Discover media chrome */
@@ -76,6 +80,9 @@ function CommerceCardMedia({
   onImageError,
   onBookmarkClick,
   isSaved = false,
+  isSponsored = false,
+  brandName,
+  logoUrl,
 }: CommerceCardMediaProps) {
   const isReel = variant === 'portrait-reel';
   const isBlog = variant === 'blog' || variant === 'guide';
@@ -158,46 +165,56 @@ function CommerceCardMedia({
         </>
       )}
 
-      <div className="absolute top-2 left-2 z-10 flex gap-1.5">
-        <div
-          className={cn(
-            'px-2 py-0.5 rounded text-white font-extrabold w-max pointer-events-none',
-            isReel ? 'text-[8px] bg-[#FF000D]' : 'text-[8.5px] bg-[#FF000D]',
-            isBlog && 'bg-[#F59E0B] text-[8px] text-[#1A1A2E]',
-            isLive && 'bg-[#FF000D] text-[9px]',
-          )}
-        >
-          {badgeText}
-        </div>
-        {isLive && viewersLabel && (
-          <div className="bg-black/60 text-white text-[9px] font-bold px-2 py-0.5 rounded pointer-events-none">
-            👁 {viewersLabel}
-          </div>
-        )}
-      </div>
-
-      <button
-        type="button"
-        className={cn(
-          'absolute top-2 right-2 z-10 rounded-full bg-white shadow-sm flex items-center justify-center border-0 cursor-pointer',
-          isReel ? 'w-[22px] h-[22px]' : 'w-6 h-6',
-        )}
-        onClick={onBookmarkClick}
-        aria-label={isSaved ? 'Unsave' : 'Save'}
-        aria-pressed={isSaved}
-      >
-        <Heart
-          size={isReel ? 10 : 11}
-          className="text-[#EB4501]"
-          strokeWidth={2}
-          fill={isSaved ? '#EB4501' : 'none'}
+      {isSponsored ? (
+        <SponsoredCardChrome
+          brandName={brandName || title || 'Sponsor'}
+          logoUrl={logoUrl}
+          size={isReel ? 'sm' : 'md'}
         />
-      </button>
+      ) : (
+        <>
+          <div className="absolute top-2 left-2 z-10 flex gap-1.5">
+            <div
+              className={cn(
+                'px-2 py-0.5 rounded-full text-white font-extrabold w-max pointer-events-none',
+                isReel ? 'text-[8px] bg-[#FF000D]' : 'text-[8.5px] bg-[#FF000D]',
+                isBlog && 'bg-[#F59E0B] text-[8px] text-[#1A1A2E]',
+                isLive && 'bg-[#FF000D] text-[9px]',
+              )}
+            >
+              {badgeText}
+            </div>
+            {isLive && viewersLabel && (
+              <div className="bg-black/60 text-white text-[9px] font-bold px-2 py-0.5 rounded-full pointer-events-none">
+                👁 {viewersLabel}
+              </div>
+            )}
+          </div>
+
+          <button
+            type="button"
+            className={cn(
+              'absolute top-2 right-2 z-10 rounded-full bg-white shadow-sm flex items-center justify-center border-0 cursor-pointer',
+              isReel ? 'w-[22px] h-[22px]' : 'w-6 h-6',
+            )}
+            onClick={onBookmarkClick}
+            aria-label={isSaved ? 'Unsave' : 'Save'}
+            aria-pressed={isSaved}
+          >
+            <Heart
+              size={isReel ? 10 : 11}
+              className="text-[#EB4501]"
+              strokeWidth={2}
+              fill={isSaved ? '#EB4501' : 'none'}
+            />
+          </button>
+        </>
+      )}
 
       {duration && !isLive && (
         <div
           className={cn(
-            'absolute bottom-2 right-2 bg-black/75 text-white font-bold rounded pointer-events-none z-10',
+            'absolute bottom-2 right-2 bg-black/75 text-white font-bold rounded-full pointer-events-none z-10',
             isReel ? 'text-[9.5px] px-1.5 py-0.5' : 'text-[10px] px-1.5 py-0.5',
           )}
         >
@@ -227,7 +244,7 @@ function CommerceCardPublisherHeader({
   className?: string;
 }) {
   if (!name) return null;
-  const subline = isSponsored ? 'Sponsored' : (date ?? typeLabel);
+  const subline = isSponsored ? 'Promoted' : (date ?? typeLabel);
 
   return (
     <div className={cn('flex items-center gap-2 min-w-0', className)}>
@@ -258,8 +275,8 @@ function CommerceCardPublisherHeader({
         )}
       </div>
       {isSponsored && (
-        <span className="shrink-0 text-[8px] font-bold uppercase tracking-wider text-[#9AA0AC] border border-[#E8EDF2] rounded px-1.5 py-0.5">
-          Sponsored
+        <span className="shrink-0 text-[8px] font-bold uppercase tracking-wider text-white bg-[#2323FF] rounded-full px-1.5 py-0.5">
+          Promoted
         </span>
       )}
     </div>
@@ -346,25 +363,35 @@ export function UniversalCommerceCard({
             className="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-[1.02] transition-transform duration-500"
             alt=""
           />
-          <div className="absolute top-1.5 left-1.5 z-10">
-            <div className="px-1.5 py-0.5 rounded bg-[#F59E0B] text-[#1A1A2E] text-[8px] font-extrabold w-max pointer-events-none">
-              {guideBadge}
-            </div>
-          </div>
-          <button
-            type="button"
-            className="absolute top-1.5 right-1.5 z-10 w-6 h-6 rounded-full bg-white shadow-sm flex items-center justify-center border-0 cursor-pointer"
-            onClick={stopBookmark}
-            aria-label={isSaved ? 'Unsave' : 'Save'}
-            aria-pressed={isSaved}
-          >
-            <Heart
-              size={11}
-              className="text-[#EB4501]"
-              strokeWidth={2}
-              fill={isSaved ? '#EB4501' : 'none'}
+          {model.isSponsored ? (
+            <SponsoredCardChrome
+              brandName={model.brandName || model.creatorName || model.title}
+              logoUrl={model.creatorAvatar || model.image}
+              size="sm"
             />
-          </button>
+          ) : (
+            <>
+              <div className="absolute top-1.5 left-1.5 z-10">
+                <div className="px-1.5 py-0.5 rounded-full bg-[#F59E0B] text-[#1A1A2E] text-[8px] font-extrabold w-max pointer-events-none">
+                  {guideBadge}
+                </div>
+              </div>
+              <button
+                type="button"
+                className="absolute top-1.5 right-1.5 z-10 w-6 h-6 rounded-full bg-white shadow-sm flex items-center justify-center border-0 cursor-pointer"
+                onClick={stopBookmark}
+                aria-label={isSaved ? 'Unsave' : 'Save'}
+                aria-pressed={isSaved}
+              >
+                <Heart
+                  size={11}
+                  className="text-[#EB4501]"
+                  strokeWidth={2}
+                  fill={isSaved ? '#EB4501' : 'none'}
+                />
+              </button>
+            </>
+          )}
         </div>
         <div className="w-[60%] min-w-0 flex flex-col justify-center gap-1 py-0.5 self-stretch">
           <div className="text-[12px] font-bold text-[#1A1A2E] leading-snug line-clamp-3 group-hover:text-[#CF4400] transition-colors">
@@ -502,7 +529,7 @@ export function UniversalCommerceCard({
             )}
           </div>
         </div>
-        <span className="shrink-0 bg-[#FF000D] text-white text-[11.5px] font-bold px-4 py-2 rounded-md">
+        <span className="shrink-0 bg-[#FF000D] text-white text-[11.5px] font-bold px-4 py-2 rounded-full">
           WATCH LIVE
         </span>
       </div>
@@ -551,6 +578,9 @@ export function UniversalCommerceCard({
           onImageError={handleImageError}
           onBookmarkClick={stopBookmark}
           isSaved={isSaved}
+          isSponsored={Boolean(model.isSponsored)}
+          brandName={model.brandName || model.creatorName || model.title}
+          logoUrl={model.creatorAvatar || model.image}
         />
       </div>
 

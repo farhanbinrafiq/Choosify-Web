@@ -20,7 +20,7 @@ export const MOCK_BRAND_POSTS: BrandPost[] = [
     body: [
       'Aarong invites you to the Eid Carnival 2026 — a celebration of Bangladeshi craftsmanship with curated heritage collections, trunk shows, and live weaving demonstrations.',
       'Visit participating outlets in Gulshan, Dhanmondi, and Bashundhara City for styling sessions, gift wrapping, and members-only preview hours before the public launch.',
-      'Sponsored brand awareness post. Product availability varies by outlet. Terms apply.',
+      'Promoted brand awareness post. Product availability varies by outlet. Terms apply.',
     ],
     startDate: '2026-04-10T10:00:00',
     endDate: '2026-04-20T22:00:00',
@@ -71,7 +71,7 @@ export const MOCK_BRAND_POSTS: BrandPost[] = [
       'https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&h=700&fit=crop',
     body: [
       'Yellow hosts an on-site styling lounge at Dhaka Fashion Week with complimentary fit checks and accessory pairing for registered guests.',
-      'Walk-ins welcome after 4 PM subject to availability. Sponsored event listing by Yellow.',
+      'Walk-ins welcome after 4 PM subject to availability. Promoted event listing by Yellow.',
     ],
     startDate: '2026-05-05T11:00:00',
     endDate: '2026-05-08T21:00:00',
@@ -96,7 +96,7 @@ export const MOCK_BRAND_POSTS: BrandPost[] = [
       'https://images.unsplash.com/photo-1587831990711-23ca6441447b?w=1200&h=700&fit=crop',
     body: [
       'Star Tech Gaming Fest returns with live benchmark demos, peripheral try-before-you-buy zones, and certified technician Q&A sessions.',
-      'Fest bundles are valid in-store during event hours only. Sponsored post — prices confirmed at checkout.',
+      'Fest bundles are valid in-store during event hours only. Promoted post — prices confirmed at checkout.',
     ],
     startDate: '2026-04-18T12:00:00',
     endDate: '2026-04-19T20:00:00',
@@ -122,7 +122,7 @@ export const MOCK_BRAND_POSTS: BrandPost[] = [
       'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&h=700&fit=crop',
     body: [
       'Apex showcases a marathon-focused silhouette with upgraded midsole foam and reflective upper panels at the city marathon expo.',
-      'Limited tester sizes available — first come, first served. Sponsored campaign by Apex Footwear.',
+      'Limited tester sizes available — first come, first served. Promoted campaign by Apex Footwear.',
     ],
     startDate: '2026-05-12T08:00:00',
     endDate: '2026-05-12T18:00:00',
@@ -172,7 +172,7 @@ export const MOCK_BRAND_POSTS: BrandPost[] = [
       'https://images.unsplash.com/photo-1541643600914-78b084683601?w=1200&h=700&fit=crop',
     body: [
       'Perfume World opens a seasonal gifting atelier with complimentary wrapping and scent profiling sessions.',
-      'Appointment slots recommended on weekends. Sponsored store moment listing.',
+      'Appointment slots recommended on weekends. Promoted store moment listing.',
     ],
     startDate: '2026-03-20T10:00:00',
     endDate: '2026-04-15T21:00:00',
@@ -202,7 +202,7 @@ export const MOCK_BRAND_POSTS: BrandPost[] = [
     ],
     body: [
       'Authorized Samsung outlets host watch parties with live Q&A, trade-in assessments, and pre-order bundles for Choosify-verified shoppers.',
-      'Registration opens one week before the event. Sponsored launch awareness by Samsung.',
+      'Registration opens one week before the event. Promoted launch awareness by Samsung.',
     ],
     startDate: '2026-07-15T19:00:00',
     endDate: '2026-07-15T23:00:00',

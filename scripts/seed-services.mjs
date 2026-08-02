@@ -9,7 +9,7 @@
 const LISTINGS = [
   { id: 9101, category: 'hotels', title: '[TEST] Riverside Deluxe Suite — Gulshan' },
   { id: 9102, category: 'hotels', title: '[TEST] Cox’s Bazar Garden Cottage' },
-  { id: 9103, category: 'doctors', title: '[TEST] Dr. Nabila Rahman — Cardiology Consult' },
+  { id: 9103, category: 'doctors', title: '[TEST] Dr. Razia Faruk — Dimpoch Consult' },
   { id: 9104, category: 'doctors', title: '[TEST] Dr. Arif Hossain — Dermatology Clinic' },
   { id: 9105, category: 'beauty', title: '[TEST] Bridal Glow Makeup Package' },
   { id: 9106, category: 'beauty', title: '[TEST] Deep Tissue Spa Therapy (90 min)' },

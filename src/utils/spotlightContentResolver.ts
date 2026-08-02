@@ -485,7 +485,7 @@ export interface SpotlightExperienceSources {
 export function resolveSpotlightExperience(sources: SpotlightExperienceSources): SpotlightContent[] {
   const demoFeed = buildDemoSpotlightFeed();
 
-  // Include active campaigns + livestreams still in the 24h post-end grace window
+  // Active campaigns + livestreams in 24h grace + past livestreams (Previously LIVE)
   const campaigns = listViralTodaySpotlightCampaigns();
   const campaignContent = campaigns.flatMap((c) => {
     try {

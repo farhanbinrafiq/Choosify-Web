@@ -71,7 +71,7 @@ export function DcListingHero({
           {titleBefore}{' '}
           <span
             className={cn(
-              'inline-block px-4 py-1 rounded-lg text-white',
+              'inline-block px-4 py-1 rounded-full text-white',
               EMI_GRADIENT_CLASS,
             )}
           >

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 import type { SponsoredPlacementItem } from '../../types/commerce/sponsoredPlacement';
 import { AdSlotCarousel } from './AdSlotCarousel';
+import { SponsoredCardChrome } from './SponsoredCardChrome';
 
 export type AdvertiseHereVariant = 'brand' | 'creator' | 'product-tile';
 
@@ -26,6 +27,7 @@ export const DEMO_SPONSORED_BANNER_SLIDES: SponsoredBannerSlide[] = [
     href: '/advertise',
     ctaLabel: 'Shop Now →',
     imageUrl: 'https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=1200&h=400&fit=crop',
+    logo: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=200',
   },
   {
     id: 'banner-walton',
@@ -34,6 +36,7 @@ export const DEMO_SPONSORED_BANNER_SLIDES: SponsoredBannerSlide[] = [
     href: '/advertise',
     ctaLabel: 'Shop Now →',
     imageUrl: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=1200&h=400&fit=crop',
+    logo: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=200',
   },
   {
     id: 'banner-xiaomi',
@@ -42,27 +45,31 @@ export const DEMO_SPONSORED_BANNER_SLIDES: SponsoredBannerSlide[] = [
     href: '/advertise',
     ctaLabel: 'Shop Now →',
     imageUrl: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&h=400&fit=crop',
+    logo: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=200',
   },
 ];
 
 const COPY: Record<
   AdvertiseHereVariant,
-  { headline: string; sub: string; bannerLabel: string }
+  { headline: string; sub: string; bannerLabel: string; brandName: string }
 > = {
   brand: {
     headline: 'Become a Featured Brand',
     sub: 'Get discovered by 2M+ verified shoppers on Choosify',
     bannerLabel: 'YOUR BRAND',
+    brandName: 'Your Brand',
   },
   creator: {
     headline: 'Become a Featured Creator',
     sub: 'Grow your audience on Choosify',
     bannerLabel: '',
+    brandName: 'Creator',
   },
   'product-tile': {
     headline: 'Advertise your product here',
     sub: '',
-    bannerLabel: 'SPONSORED',
+    bannerLabel: 'PROMOTED',
+    brandName: 'Sponsor',
   },
 };
 
@@ -88,19 +95,17 @@ export function AdvertiseHereCard({
         className,
       )}
     >
-      <div className="absolute top-1.5 left-1.5 text-[8px] font-extrabold text-[#EB4501] uppercase tracking-wide z-[1] flex items-center gap-1">
-        🏷️ {variant === 'product-tile' ? 'Ad' : 'Sponsored Ad'}
-      </div>
       <div
         className={cn(
-          'bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-center justify-center flex-[7] min-h-0',
+          'bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-center justify-center flex-[7] min-h-0 relative',
           variant !== 'product-tile' && 'items-end pb-2.5',
         )}
       >
+        <SponsoredCardChrome brandName={copy.brandName} size="md" />
         {copy.bannerLabel ? (
           <span
             className={cn(
-              'text-white font-extrabold text-center px-2.5',
+              'text-white font-extrabold text-center px-2.5 relative z-[1]',
               variant === 'product-tile' ? 'text-[10.5px]' : 'text-[13px]',
             )}
           >
@@ -167,9 +172,6 @@ export function SponsoredProductTile({
         className,
       )}
     >
-      <div className="absolute top-1.5 left-1.5 text-[8px] font-extrabold text-[#EB4501] uppercase tracking-wide z-[1] flex items-center gap-1">
-        🏷️ Sponsored Ad
-      </div>
       <div className="flex-[7] min-h-0 bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-center justify-center overflow-hidden relative">
         {imageUrl ? (
           <img src={imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover opacity-90" loading="lazy" />
@@ -178,6 +180,11 @@ export function SponsoredProductTile({
             {item.sponsorName}
           </span>
         )}
+        <SponsoredCardChrome
+          brandName={item.sponsorName}
+          logoUrl={item.sponsorLogoUrl}
+          size="md"
+        />
       </div>
       <div className="px-3 pt-2.5 pb-3.5 flex flex-col flex-[3] min-h-0 justify-center">
         <div className="text-[11.5px] font-bold text-white leading-snug line-clamp-2 mb-2">{headline}</div>
@@ -204,6 +211,8 @@ export function ProductsSponsoredBanner({
   ctaLabel = 'Shop Now →',
   href = '/advertise',
   imageUrl,
+  logoUrl,
+  brandName,
   className,
 }: {
   title?: string;
@@ -211,6 +220,8 @@ export function ProductsSponsoredBanner({
   ctaLabel?: string;
   href?: string;
   imageUrl?: string;
+  logoUrl?: string;
+  brandName?: string;
   className?: string;
 }) {
   const isExternal = href.startsWith('http');
@@ -234,10 +245,12 @@ export function ProductsSponsoredBanner({
           draggable={false}
         />
       ) : null}
-      <div className="absolute top-3.5 left-3.5 bg-[#EB4501] text-white text-[9px] font-extrabold tracking-[0.4px] px-2.5 py-1 rounded z-[1]">
-        SPONSORED AD
-      </div>
-      <div className="absolute inset-x-0 bottom-0 h-[22%] min-h-[60px] bg-gradient-to-t from-black/85 to-transparent flex items-center justify-between gap-4 px-5">
+      <SponsoredCardChrome
+        brandName={brandName || title || 'Sponsor'}
+        logoUrl={logoUrl}
+        size="md"
+      />
+      <div className="absolute inset-x-0 bottom-0 h-[22%] min-h-[60px] bg-gradient-to-t from-black/85 to-transparent flex items-center justify-between gap-4 px-5 z-[1]">
         <div className="min-w-0">
           <div className="text-sm font-extrabold text-white whitespace-nowrap overflow-hidden text-ellipsis">
             {title}
@@ -322,7 +335,7 @@ export function ProductsSponsoredBannerCarousel({
       autoplay={autoplay}
       autoplayMs={autoplayMs}
       className={className}
-      ariaLabel="Sponsored banner ads"
+      ariaLabel="Promoted banner ads"
       getIcon={(slide) => ({ label: slide.title || 'Sponsor', imageUrl: slide.logo })}
       renderSlide={(slide) => (
         <ProductsSponsoredBanner
@@ -330,6 +343,8 @@ export function ProductsSponsoredBannerCarousel({
           subtitle={slide.subtitle}
           href={slide.href}
           imageUrl={slide.imageUrl}
+          logoUrl={slide.logo}
+          brandName={slide.title}
           ctaLabel={slide.ctaLabel}
           className={cn('mb-0', bannerClassName)}
         />
