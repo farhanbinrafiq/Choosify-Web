@@ -194,12 +194,12 @@ export function LoginSignUpPage() {
 
     setIsSubmitting(true);
     try {
-      const firebaseUser =
+      const identity =
         activeTab === 'sign-up'
           ? await registerWithEmailPassword(email, password, fullName)
           : await signInWithEmailPassword(email, password);
 
-      const { user } = await resolveSessionUser(firebaseUser, currentUser);
+      const { user } = await resolveSessionUser(identity, currentUser);
       updateCurrentUser(user);
       setIsLoggedIn(true);
       toast.success(activeTab === 'sign-up' ? 'Account created! Welcome to Choosify.' : 'Welcome back!');

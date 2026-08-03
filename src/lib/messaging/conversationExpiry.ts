@@ -51,6 +51,7 @@ type OrderLikeItem = {
 };
 
 type OrderLikeSub = {
+  sellerId?: string;
   trackingStatus?: string;
   items?: OrderLikeItem[];
 };

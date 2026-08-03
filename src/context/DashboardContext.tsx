@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import { collection, onSnapshot, query, where } from 'firebase/firestore';
 import { loadMockCatalog } from '../data/loadMockCatalog';
 import { toast } from '../lib/notify';
 import {
@@ -17,6 +18,8 @@ import {
 } from '../lib/emiThread';
 import type { CustomerAddress } from '../lib/address/addressTypes';
 import { ADDRESS_STORAGE_KEY, getDefaultAddress, normalizeDefaultAddress } from '../lib/address/addressUtils';
+import { db } from '../lib/firestoreClient';
+import { getAccessToken } from '../lib/authSession';
 import type { BookingOfferCard } from '../types/serviceBooking';
 import { operationsApi } from '../services/operationsApi';
 import { useGlobalState } from './GlobalStateContext';
@@ -714,7 +717,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   const { currentUser, isLoggedIn } = useGlobalState();
   useEffect(() => {
     if (!isLoggedIn || !currentUser?.id) return;
-    if (!localStorage.getItem('choosify_auth_token')) return;
+    if (!getAccessToken()) return;
     let cancelled = false;
 
     const hydrateMyReviews = async () => {
@@ -771,11 +774,13 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   }, [isLoggedIn, currentUser.id]);
 
   // Platform message history — one omni conversation per buyer (`conv_platform_<userId>`).
-  // Does not replace the booking-offer poll on MessagesPage; that stays for offer state only.
+  // Live via Firestore onSnapshot; REST hydrate as fallback if the listener is denied.
   useEffect(() => {
     if (!isLoggedIn || !currentUser?.id) return;
-    if (!localStorage.getItem('choosify_auth_token')) return;
+    if (!getAccessToken()) return;
     let cancelled = false;
+    let unsub: (() => void) | undefined;
+    let pollId: number | undefined;
 
     const formatTime = (iso: string) => {
       try {
@@ -812,114 +817,147 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       return 'thread-general';
     };
 
-    const hydratePlatformMessages = async () => {
-      try {
-        const result = await operationsApi.listPlatformMessages({ userId: currentUser.id });
-        if (cancelled) return;
-        const rows = Array.isArray(result.data) ? result.data : [];
-        setThreadMessages((prev) => {
-          const knownThreads = (() => {
-            try {
-              const saved = localStorage.getItem('choosify_threads');
-              return saved ? (JSON.parse(saved) as MessageThread[]) : [];
-            } catch {
-              return [] as MessageThread[];
-            }
-          })();
+    type PlatformRow = {
+      id?: string;
+      content?: { body?: string };
+      body?: string;
+      bookingOffer?: BookingOfferCard;
+      timestamp?: string;
+      createdAt?: string;
+      direction?: string;
+      senderName?: string;
+    };
 
-          const mapped: ThreadMessage[] = rows.map((row) => {
+    const applyPlatformRows = (rows: PlatformRow[]) => {
+      setThreadMessages((prev) => {
+        const knownThreads = (() => {
+          try {
+            const saved = localStorage.getItem('choosify_threads');
+            return saved ? (JSON.parse(saved) as MessageThread[]) : [];
+          } catch {
+            return [] as MessageThread[];
+          }
+        })();
+
+        const mapped: ThreadMessage[] = rows.map((row) => {
+          const content = (row.content || {}) as { body?: string };
+          const rawBody = String(content.body || row.body || '');
+          const bookingOffer = row.bookingOffer as BookingOfferCard | undefined;
+          const threadId = resolveThreadId(rawBody, bookingOffer, knownThreads);
+          const text = rawBody
+            .replace(/^\[Order\s+[^\]]+\]\s*/i, '')
+            .replace(/^\[Complaint[^\]]*\]\s*/i, '')
+            .trim();
+          const timestamp = String(row.timestamp || row.createdAt || new Date().toISOString());
+          const serverId = String(row.id || `m_plat_${timestamp}`);
+          const isBuyer = row.direction === 'inbound';
+          return {
+            id: stableMessageNumericId(serverId),
+            serverId,
+            threadId,
+            text: text || rawBody,
+            sender: isBuyer ? 'user' : 'other',
+            senderName: isBuyer ? 'Me' : String(row.senderName || 'Support'),
+            time: formatTime(timestamp),
+            createdAt: timestamp,
+            bookingOffer,
+            status: isBuyer ? 'delivered' : undefined,
+          };
+        });
+
+        const protectedThread = (threadId: string) =>
+          threadId === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID || threadId === EMI_MESSAGES_THREAD_ID;
+
+        const serverIds = new Set(
+          mapped.map((m) => m.serverId).filter((id): id is string => Boolean(id)),
+        );
+        const kept = prev.filter((m) => {
+          if (protectedThread(m.threadId)) return true;
+          if (m.serverId) return serverIds.has(m.serverId);
+          if (mapped.length && m.threadId === 'thread-general' && !m.serverId && !m.bookingOffer) {
+            return false;
+          }
+          return true;
+        });
+
+        const byKey = new Map<string, ThreadMessage>();
+        for (const m of kept) byKey.set(m.serverId || `local-${m.id}`, m);
+        for (const m of mapped) byKey.set(m.serverId || `local-${m.id}`, m);
+        return Array.from(byKey.values()).sort((a, b) =>
+          String(a.createdAt || '').localeCompare(String(b.createdAt || '')),
+        );
+      });
+
+      if (rows.length) {
+        setThreads((prevThreads) => {
+          const latestByThread = new Map<string, { text: string; time: string }>();
+          for (const row of rows) {
             const content = (row.content || {}) as { body?: string };
-            const rawBody = String(content.body || row.body || '');
+            const rawBody = String(content.body || '');
             const bookingOffer = row.bookingOffer as BookingOfferCard | undefined;
-            const threadId = resolveThreadId(rawBody, bookingOffer, knownThreads);
+            const threadId = resolveThreadId(rawBody, bookingOffer, prevThreads);
             const text = rawBody
               .replace(/^\[Order\s+[^\]]+\]\s*/i, '')
               .replace(/^\[Complaint[^\]]*\]\s*/i, '')
               .trim();
-            const timestamp = String(row.timestamp || row.createdAt || new Date().toISOString());
-            const serverId = String(row.id || `m_plat_${timestamp}`);
-            const isBuyer = row.direction === 'inbound';
-            return {
-              id: stableMessageNumericId(serverId),
-              serverId,
-              threadId,
-              text: text || rawBody,
-              sender: isBuyer ? 'user' : 'other',
-              senderName: isBuyer ? 'Me' : String(row.senderName || 'Support'),
-              time: formatTime(timestamp),
-              createdAt: timestamp,
-              bookingOffer,
-              status: isBuyer ? 'delivered' : undefined,
-            };
+            const timestamp = String(row.timestamp || '');
+            latestByThread.set(threadId, { text: text || rawBody, time: formatTime(timestamp) });
+          }
+          return prevThreads.map((t) => {
+            const latest = latestByThread.get(t.id);
+            if (!latest) return t;
+            return { ...t, lastMessage: latest.text, time: latest.time || t.time };
           });
-
-          const protectedThread = (threadId: string) =>
-            threadId === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID || threadId === EMI_MESSAGES_THREAD_ID;
-
-          const serverIds = new Set(
-            mapped.map((m) => m.serverId).filter((id): id is string => Boolean(id)),
-          );
-          const kept = prev.filter((m) => {
-            if (protectedThread(m.threadId)) return true;
-            if (m.serverId) return serverIds.has(m.serverId);
-            // Drop fabricated seed for the platform admin thread once real history exists.
-            if (mapped.length && m.threadId === 'thread-general' && !m.serverId && !m.bookingOffer) {
-              return false;
-            }
-            return true;
-          });
-
-          const byKey = new Map<string, ThreadMessage>();
-          for (const m of kept) byKey.set(m.serverId || `local-${m.id}`, m);
-          for (const m of mapped) byKey.set(m.serverId || `local-${m.id}`, m);
-          return Array.from(byKey.values()).sort((a, b) =>
-            String(a.createdAt || '').localeCompare(String(b.createdAt || '')),
-          );
         });
+      }
+    };
 
-        // Refresh thread previews from latest platform message per thread.
-        if (rows.length) {
-          setThreads((prevThreads) => {
-            const latestByThread = new Map<string, { text: string; time: string }>();
-            for (const row of rows) {
-              const content = (row.content || {}) as { body?: string };
-              const rawBody = String(content.body || '');
-              const bookingOffer = row.bookingOffer as BookingOfferCard | undefined;
-              const threadId = resolveThreadId(rawBody, bookingOffer, prevThreads);
-              const text = rawBody
-                .replace(/^\[Order\s+[^\]]+\]\s*/i, '')
-                .replace(/^\[Complaint[^\]]*\]\s*/i, '')
-                .trim();
-              const timestamp = String(row.timestamp || '');
-              latestByThread.set(threadId, { text: text || rawBody, time: formatTime(timestamp) });
-            }
-            return prevThreads.map((t) => {
-              const latest = latestByThread.get(t.id);
-              if (!latest) return t;
-              return { ...t, lastMessage: latest.text, time: latest.time || t.time };
-            });
-          });
-        }
+    const hydrateViaRest = async () => {
+      try {
+        const result = await operationsApi.listPlatformMessages({ userId: currentUser.id });
+        if (cancelled) return;
+        const rows = Array.isArray(result.data) ? (result.data as PlatformRow[]) : [];
+        applyPlatformRows(rows);
       } catch {
         // Keep local thread cache on failure.
       }
     };
 
-    hydratePlatformMessages();
-    const onFocus = () => {
-      if (document.visibilityState === 'visible') hydratePlatformMessages();
-    };
-    window.addEventListener('focus', onFocus);
-    document.addEventListener('visibilitychange', onFocus);
-    const interval = window.setInterval(() => {
-      if (document.visibilityState === 'visible') hydratePlatformMessages();
-    }, 45_000);
+    const conversationId = `conv_platform_${currentUser.id}`;
+    const msgQuery = query(
+      collection(db, 'omni_messages'),
+      where('conversationId', '==', conversationId),
+    );
+
+    unsub = onSnapshot(
+      msgQuery,
+      (snapshot) => {
+        if (cancelled) return;
+        const rows: PlatformRow[] = snapshot.docs.map((docSnap) => {
+          const data = docSnap.data() as PlatformRow;
+          return { ...data, id: data.id || docSnap.id };
+        });
+        rows.sort((a, b) =>
+          String(a.timestamp || '').localeCompare(String(b.timestamp || '')),
+        );
+        applyPlatformRows(rows);
+      },
+      (err) => {
+        console.warn('[Dashboard] omni_messages listener failed; using REST poll.', err);
+        void hydrateViaRest();
+        pollId = window.setInterval(() => {
+          if (document.visibilityState === 'visible') void hydrateViaRest();
+        }, 45_000);
+      },
+    );
+
+    // One REST pass for immediate paint before the first snapshot (or if offline).
+    void hydrateViaRest();
 
     return () => {
       cancelled = true;
-      window.removeEventListener('focus', onFocus);
-      document.removeEventListener('visibilitychange', onFocus);
-      window.clearInterval(interval);
+      unsub?.();
+      if (pollId) window.clearInterval(pollId);
     };
   }, [isLoggedIn, currentUser.id]);
 
@@ -1397,7 +1435,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
             ? { ...m, status: 'seen' as const }
             : m,
         );
-      } else if (sender !== 'user') {
+      } else {
         next = next.map((m) =>
           m.threadId === threadId && m.sender === 'user' && m.status !== 'seen'
             ? { ...m, status: 'seen' as const }

@@ -1,3 +1,5 @@
+import { getAccessToken } from '../lib/authSession';
+
 const API_BASE =
   ((import.meta as ImportMeta & { env?: Record<string, string> }).env?.VITE_API_BASE_URL as
     | string
@@ -10,8 +12,6 @@ const CLOUD_NAME =
 
 const UPLOAD_PRESET = (import.meta as ImportMeta & { env?: Record<string, string> }).env
   ?.VITE_CLOUDINARY_UPLOAD_PRESET as string | undefined;
-
-const AUTH_TOKEN_KEY = 'choosify_auth_token';
 
 const fileToBase64 = (file: File) =>
   new Promise<string>((resolve, reject) => {
@@ -60,13 +60,14 @@ async function uploadViaCloudinary(file: File, folder = 'choosify/verifications'
 async function uploadViaOperationsApi(file: File): Promise<string> {
   const base64Data = await fileToBase64(file);
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  const token = localStorage.getItem(AUTH_TOKEN_KEY);
+  const token = getAccessToken();
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
 
   const response = await fetch(`${API_BASE}/operations/media/upload-verification`, {
     method: 'POST',
+    credentials: 'include',
     headers,
     body: JSON.stringify({
       fileName: file.name,

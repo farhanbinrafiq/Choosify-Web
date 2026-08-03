@@ -119,7 +119,7 @@ function GuideTypeCard({
   image: string;
 }) {
   const [expanded, setExpanded] = useState(false);
-  const [imgSrc, setImgSrc] = useState(image);
+  const [imgSrc, setImgSrc] = useState<string>(image);
   const hasMore = links.length > GUIDE_LINK_PREVIEW;
   const visible = expanded ? links : links.slice(0, GUIDE_LINK_PREVIEW);
 
@@ -213,7 +213,7 @@ function ExpertPickRow({
 }: {
   pick: (typeof EXPERT_PICKS)[number];
 }) {
-  const [imgSrc, setImgSrc] = useState(pick.image);
+  const [imgSrc, setImgSrc] = useState<string>(pick.image);
 
   return (
     <Link

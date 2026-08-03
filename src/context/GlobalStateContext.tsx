@@ -1,5 +1,4 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { onAuthStateChanged } from 'firebase/auth';
 import { CommerceProduct, User, Seller, Brand, Order, SubOrder, SubOrderItem, Report, BuyerReputation } from '../types/schemas';
 import { CREATORS } from '../data/creators';
 import { loadMockCatalog } from '../data/loadMockCatalog';
@@ -18,12 +17,13 @@ import { hydrateBrandPostsFromApi } from '../lib/brandPosts';
 import { FEATURE_FLAG_DEFAULTS, isFlagEnabled, normalizeFeatureFlags } from '../lib/featureFlags';
 import { operationsApi } from '../services/operationsApi';
 import { ensureDemoExpiryOrders } from '../lib/messaging/demoExpiryOrders';
-import { auth } from '../lib/firebase';
 import {
   AUTH_LOGIN_FLAG_KEY,
   AUTH_PROFILE_KEY,
-  AUTH_TOKEN_KEY,
   clearAuthToken,
+  getAccessToken,
+  persistAuthToken,
+  refreshSession,
   resolveSessionUser,
   signOutSession,
 } from '../lib/authSession';
@@ -253,9 +253,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
 
   const [isLoggedIn, _setIsLoggedIn] = useState<boolean>(() => {
     try {
-      const saved = localStorage.getItem(AUTH_LOGIN_FLAG_KEY);
-      const hasToken = Boolean(localStorage.getItem(AUTH_TOKEN_KEY));
-      return saved === 'true' && hasToken;
+      return localStorage.getItem(AUTH_LOGIN_FLAG_KEY) === 'true';
     } catch {
       return false;
     }
@@ -280,19 +278,30 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     } catch {}
   };
 
-  // Restore / refresh real Firebase session into GlobalState (source of truth for identity).
+  // Silent restore via httpOnly refresh cookie → access token in memory → profile.
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (!firebaseUser) {
-        _setIsLoggedIn(false);
-        try {
-          localStorage.setItem(AUTH_LOGIN_FLAG_KEY, 'false');
-        } catch {}
-        clearAuthToken();
-        return;
-      }
+    let cancelled = false;
+    (async () => {
       try {
-        const { user } = await resolveSessionUser(firebaseUser, currentUserRef.current);
+        const refreshed = await refreshSession();
+        if (cancelled) return;
+        if (!refreshed?.accessToken) {
+          clearAuthToken();
+          _setIsLoggedIn(false);
+          try {
+            localStorage.setItem(AUTH_LOGIN_FLAG_KEY, 'false');
+          } catch {}
+          return;
+        }
+        persistAuthToken(refreshed.accessToken);
+        const { user } = await resolveSessionUser(
+          {
+            uid: '',
+            accessToken: refreshed.accessToken,
+          },
+          currentUserRef.current,
+        );
+        if (cancelled) return;
         setCurrentUser(user);
         try {
           localStorage.setItem(AUTH_PROFILE_KEY, JSON.stringify(user));
@@ -300,14 +309,17 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
         } catch {}
         _setIsLoggedIn(true);
       } catch {
+        if (cancelled) return;
         clearAuthToken();
         _setIsLoggedIn(false);
         try {
           localStorage.setItem(AUTH_LOGIN_FLAG_KEY, 'false');
         } catch {}
       }
-    });
-    return () => unsubscribe();
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const [brandClaimStatuses, setBrandClaimStatuses] = useState<Record<string, 'verified' | 'pending' | 'community'>>(() => {
@@ -539,7 +551,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     };
 
     const hydrateOrdersFromApi = async () => {
-      if (!localStorage.getItem(AUTH_TOKEN_KEY)) return;
+      if (!getAccessToken()) return;
       try {
         const role = currentUser.role;
         const isSeller = role === 'seller';

@@ -157,10 +157,7 @@ function LegacyRecommendationRedirect() {
 
 function readStoredLoginFlag(): boolean {
   try {
-    return (
-      localStorage.getItem('choosify_is_logged_in') === 'true' &&
-      Boolean(localStorage.getItem('choosify_auth_token'))
-    );
+    return localStorage.getItem('choosify_is_logged_in') === 'true';
   } catch {
     return false;
   }

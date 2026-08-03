@@ -1,13 +1,13 @@
 import type { BookingOfferCard } from '../types/serviceBooking';
+import { getAccessToken } from '../lib/authSession';
 
 const API_BASE = ((import.meta as any).env?.VITE_API_BASE_URL as string | undefined) || '/api/v1';
-const AUTH_TOKEN_KEY = 'choosify_auth_token';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
 async function request<T>(path: string, method: HttpMethod = 'GET', body?: unknown): Promise<T> {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  const token = localStorage.getItem(AUTH_TOKEN_KEY);
+  const token = getAccessToken();
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
@@ -15,6 +15,7 @@ async function request<T>(path: string, method: HttpMethod = 'GET', body?: unkno
   const response = await fetch(`${API_BASE}${path}`, {
     method,
     headers,
+    credentials: 'include',
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
   if (!response.ok) {

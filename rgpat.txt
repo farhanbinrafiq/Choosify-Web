@@ -1,0 +1,1 @@
+className="(?![^"]*rounded)[^"]*bg-white[^"]*border[^"]*"
