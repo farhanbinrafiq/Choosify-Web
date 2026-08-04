@@ -18,6 +18,7 @@ interface DealProduct {
   id: string;
   title: string;
   brand: string;
+  brandName?: string;
   image: string;
   price: number;
   originalPrice: number;

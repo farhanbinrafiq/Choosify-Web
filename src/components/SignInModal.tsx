@@ -37,8 +37,8 @@ export function SignInModal({ isOpen, onClose }: SignInModalProps) {
 
     setIsLoading(true);
     try {
-      const firebaseUser = await signInWithEmailPassword(email, password);
-      const { user } = await resolveSessionUser(firebaseUser, currentUser);
+      const identity = await signInWithEmailPassword(email, password);
+      const { user } = await resolveSessionUser(identity, currentUser);
       updateCurrentUser(user);
       setIsLoggedIn(true);
       toast.success('Welcome back!');

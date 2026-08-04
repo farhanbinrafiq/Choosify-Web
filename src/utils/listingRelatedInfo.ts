@@ -54,6 +54,14 @@ const BEFORE_VISIT_FIELDS_BY_CATEGORY: Record<ServiceCategory, BeforeVisitFieldK
   restaurants: [],
   travel: [],
   real_estate: [],
+  events: [],
+  tickets: [],
+  home_services: [],
+  gov_services: [],
+  recruitment: [],
+  b2b: [],
+  rental: [],
+  donation: [],
 };
 
 export function resolveRelatedInfoRule(

@@ -39,6 +39,7 @@ export const mapCatalogGuide = (guide: CatalogGuide) => ({
   authorAvatar: guide.authorAvatar,
   /** ISO publish timestamp — used by dynamic Viral Today / Discover priority */
   publishedAt: guide.publishedAt,
+  updatedAt: guide.updatedAt || guide.publishedAt,
   status: guide.status,
   date: new Date(guide.publishedAt || Date.now()).toLocaleDateString('en-US', {
     month: 'short',

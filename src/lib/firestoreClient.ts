@@ -1,5 +1,8 @@
+/**
+ * Firestore client only — Auth moved to authApi / authSession (JWT).
+ * Kept so messaging listeners in DashboardContext can use onSnapshot.
+ */
 import { initializeApp } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 import firebaseConfig from '../../firebase-applet-config.json';
 
@@ -13,7 +16,5 @@ const app = initializeApp({
   measurementId: firebaseConfig.measurementId || undefined,
 });
 
-/** Same named Firestore DB as admin — client rules deny writes; Auth does not need it. */
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
-export const auth = getAuth(app);
 export { firebaseConfig };

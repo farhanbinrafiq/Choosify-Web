@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { IconBrandApple } from '@tabler/icons-react';
 
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from '../lib/notify';
 import { cn } from '../lib/utils';
@@ -163,6 +163,7 @@ export function LoginSignUpPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const { setIsLoggedIn, updateCurrentUser, currentUser } = useGlobalState();
   const location = useLocation();
+  const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -187,19 +188,19 @@ export function LoginSignUpPage() {
       toast.error('Please enter a valid email address.');
       return;
     }
-    if (password.length < 6) {
-      toast.error('Password must be at least 6 characters.');
+    if (activeTab === 'sign-up' && password.length < 8) {
+      toast.error('Password must be at least 8 characters.');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const firebaseUser =
+      const identity =
         activeTab === 'sign-up'
           ? await registerWithEmailPassword(email, password, fullName)
           : await signInWithEmailPassword(email, password);
 
-      const { user } = await resolveSessionUser(firebaseUser, currentUser);
+      const { user } = await resolveSessionUser(identity, currentUser);
       updateCurrentUser(user);
       setIsLoggedIn(true);
       toast.success(activeTab === 'sign-up' ? 'Account created! Welcome to Choosify.' : 'Welcome back!');
@@ -208,7 +209,7 @@ export function LoginSignUpPage() {
         from && from !== '/login' && !from.startsWith('/login/')
           ? from
           : '/';
-      window.location.assign(dest);
+      navigate(dest, { replace: true });
     } catch (err) {
       toast.error(firebaseAuthErrorMessage(err));
     } finally {

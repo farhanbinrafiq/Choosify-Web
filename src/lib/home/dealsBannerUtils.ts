@@ -1,4 +1,4 @@
-import type { CatalogDealsBanner } from '../types/catalog';
+import type { CatalogDealsBanner } from '../../types/catalog';
 
 export function resolveDealsBannerHref(
   banner: Pick<CatalogDealsBanner, 'destinationType' | 'destinationRef'> & { href?: string },

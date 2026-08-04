@@ -58,7 +58,7 @@ export const SearchHero: React.FC<SearchHeroProps> = ({ rawQuery, total, onSearc
               <div className="flex flex-wrap items-center justify-center gap-2">
                 <span className="text-[10px] text-white/50 font-bold uppercase tracking-wider mr-2">Trending:</span>
                 {trendingSearches.map((s) => (
-                  <Badge key={s} variant="secondary" className="cursor-pointer bg-white/10 text-white hover:bg-white/20 text-[9px]" onClick={() => onSearch(s)}>
+                  <Badge key={s} variant="outline" className="cursor-pointer bg-white/10 text-white hover:bg-white/20 text-[9px]" onClick={() => onSearch(s)}>
                     {s}
                   </Badge>
                 ))}
@@ -66,7 +66,7 @@ export const SearchHero: React.FC<SearchHeroProps> = ({ rawQuery, total, onSearc
               <div className="flex flex-wrap items-center justify-center gap-2">
                 <span className="text-[10px] text-white/50 font-bold uppercase tracking-wider mr-2">Recent:</span>
                 {recentSearches.map((s) => (
-                  <Badge key={s} variant="secondary" className="cursor-pointer bg-white/10 text-white hover:bg-white/20 text-[9px]" onClick={() => onSearch(s)}>
+                  <Badge key={s} variant="outline" className="cursor-pointer bg-white/10 text-white hover:bg-white/20 text-[9px]" onClick={() => onSearch(s)}>
                     {s}
                   </Badge>
                 ))}

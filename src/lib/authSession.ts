@@ -1,26 +1,41 @@
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  updateProfile,
-  type User as FirebaseUser,
-} from 'firebase/auth';
-import { auth } from './firebase';
 import type { User, UserRole } from '../types/schemas';
+import {
+  getCurrentUser,
+  login as apiLogin,
+  logout as apiLogout,
+  refreshSession as apiRefreshSession,
+  register as apiRegister,
+  type AuthMeResponse,
+} from './authApi';
 
 export const AUTH_TOKEN_KEY = 'choosify_auth_token';
 export const AUTH_LOGIN_FLAG_KEY = 'choosify_is_logged_in';
 export const AUTH_PROFILE_KEY = 'choosify_user_profile';
 
-const API_BASE =
-  ((import.meta as any).env?.VITE_API_BASE_URL as string | undefined) || '/api/v1';
+export type { AuthMeResponse };
 
-export type AuthMeResponse = {
+/** In-memory access token — never persisted to localStorage. */
+let accessTokenMemory: string | null = null;
+
+export type SessionIdentity = {
   uid: string;
-  email: string;
-  displayName: string;
-  role: string;
+  email?: string | null;
+  displayName?: string | null;
+  role?: string;
+  accessToken: string;
 };
+
+export function getAccessToken(): string | null {
+  return accessTokenMemory;
+}
+
+export function persistAuthToken(token: string) {
+  accessTokenMemory = token;
+}
+
+export function clearAuthToken() {
+  accessTokenMemory = null;
+}
 
 function mapBackendRole(role: string | undefined): UserRole {
   switch ((role || '').toLowerCase()) {
@@ -41,31 +56,12 @@ function mapBackendRole(role: string | undefined): UserRole {
   }
 }
 
-export function persistAuthToken(token: string) {
-  localStorage.setItem(AUTH_TOKEN_KEY, token);
-}
-
-export function clearAuthToken() {
-  localStorage.removeItem(AUTH_TOKEN_KEY);
-}
-
 /**
- * Admin /auth/me returns 200 for staff/seller profiles, 403 for bare Firebase shoppers.
- * Shoppers are still authenticated — operations routes accept role "user" via Bearer token.
+ * Admin /auth/me returns 200 for staff/seller profiles, 403 for buyers (role user).
+ * Buyers are still authenticated — operations routes accept role "user" via Bearer token.
  */
 export async function fetchAuthMe(token: string): Promise<AuthMeResponse | null> {
-  const response = await fetch(`${API_BASE}/auth/me`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (response.status === 403) return null;
-  if (!response.ok) {
-    throw new Error(
-      response.status === 401
-        ? 'Invalid or expired session. Please sign in again.'
-        : 'Unable to verify session with the server.',
-    );
-  }
-  return response.json() as Promise<AuthMeResponse>;
+  return getCurrentUser(token);
 }
 
 export function buildUserFromAuth(input: {
@@ -112,84 +108,134 @@ export function buildUserFromAuth(input: {
   };
 }
 
+function decodeAccessTokenClaims(token: string): {
+  uid?: string;
+  email?: string;
+  emailVerified?: boolean;
+} {
+  try {
+    const payload = token.split('.')[1];
+    if (!payload) return {};
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const json = JSON.parse(atob(normalized)) as {
+      uid?: string;
+      sub?: string;
+      email?: string;
+      emailVerified?: boolean;
+    };
+    return {
+      uid: json.uid || json.sub,
+      email: json.email,
+      emailVerified: json.emailVerified,
+    };
+  } catch {
+    return {};
+  }
+}
+
 export async function resolveSessionUser(
-  firebaseUser: FirebaseUser,
+  identity: SessionIdentity,
   previous?: User | null,
 ): Promise<{ token: string; user: User }> {
-  const token = await firebaseUser.getIdToken();
+  const token = identity.accessToken;
   persistAuthToken(token);
 
   let remote: AuthMeResponse | null = null;
   try {
     remote = await fetchAuthMe(token);
   } catch (err) {
-    // Token rejected by backend (e.g. Admin SDK not configured locally) — still keep Firebase session
-    // for client state, but clear token so API calls don't spam 401s with a bad token.
     if (err instanceof Error && err.message.includes('Invalid or expired')) {
       clearAuthToken();
       throw err;
     }
-    // Network / other — keep token; profile from Firebase only
   }
 
+  const claims = decodeAccessTokenClaims(token);
   const user = buildUserFromAuth({
-    uid: remote?.uid || firebaseUser.uid,
-    email: remote?.email || firebaseUser.email,
-    displayName: remote?.displayName || firebaseUser.displayName || firebaseUser.email,
-    role: remote?.role || 'user',
+    uid: remote?.uid || identity.uid || claims.uid || '',
+    email: remote?.email || identity.email || claims.email,
+    displayName: remote?.displayName || identity.displayName || identity.email || claims.email,
+    role: remote?.role || identity.role || 'user',
     previous,
   });
 
   return { token, user };
 }
 
-export async function signInWithEmailPassword(email: string, password: string) {
-  const credential = await signInWithEmailAndPassword(auth, email.trim(), password);
-  return credential.user;
+export async function signInWithEmailPassword(email: string, password: string): Promise<SessionIdentity> {
+  const result = await apiLogin(email, password);
+  return {
+    uid: result.uid,
+    email: result.email,
+    displayName: result.displayName,
+    role: result.role,
+    accessToken: result.accessToken,
+  };
 }
 
+/** Storefront sign-up. Creates a standard customer account (role=user). */
 export async function registerWithEmailPassword(
   email: string,
   password: string,
   fullName: string,
-) {
-  const credential = await createUserWithEmailAndPassword(auth, email.trim(), password);
-  if (fullName.trim()) {
-    await updateProfile(credential.user, { displayName: fullName.trim() });
-  }
-  return credential.user;
+): Promise<SessionIdentity> {
+  const name = fullName.trim() || email.trim().split('@')[0] || 'Choosify member';
+  const result = await apiRegister({
+    email: email.trim(),
+    password,
+    fullName: name,
+  });
+  return {
+    uid: result.uid,
+    email: result.email,
+    displayName: result.displayName,
+    role: result.role,
+    accessToken: result.customToken,
+  };
 }
 
 export async function signOutSession() {
   clearAuthToken();
   localStorage.removeItem(AUTH_LOGIN_FLAG_KEY);
   try {
-    await signOut(auth);
+    await apiLogout();
   } catch {
     // Ignore — local session already cleared
   }
 }
 
+export async function refreshSession(): Promise<{ accessToken: string } | null> {
+  return apiRefreshSession();
+}
+
 export function firebaseAuthErrorMessage(error: unknown): string {
-  const code = (error as { code?: string })?.code || '';
-  switch (code) {
-    case 'auth/invalid-email':
-      return 'Please enter a valid email address.';
-    case 'auth/user-disabled':
-      return 'This account has been disabled.';
-    case 'auth/user-not-found':
-    case 'auth/wrong-password':
-    case 'auth/invalid-credential':
-      return 'Incorrect email or password.';
-    case 'auth/email-already-in-use':
-      return 'An account with this email already exists. Sign in instead.';
-    case 'auth/weak-password':
-      return 'Password must be at least 6 characters.';
-    case 'auth/too-many-requests':
-      return 'Too many attempts. Please wait and try again.';
-    case 'auth/network-request-failed':
-      return 'Network error. Check your connection and try again.';
-    default:
-      return error instanceof Error ? error.message : 'Authentication failed.';
+  const message = error instanceof Error ? error.message : String(error || '');
+  const lower = message.toLowerCase();
+  if (lower.includes('invalid email') || lower.includes('valid email')) {
+    return 'Please enter a valid email address.';
   }
+  if (lower.includes('disabled')) {
+    return 'This account has been disabled.';
+  }
+  if (
+    lower.includes('invalid email or password') ||
+    lower.includes('incorrect') ||
+    lower.includes('unauthorized') ||
+    lower.includes('401')
+  ) {
+    return 'Incorrect email or password.';
+  }
+  if (lower.includes('already') || lower.includes('exists') || lower.includes('in use')) {
+    return 'An account with this email already exists. Sign in instead.';
+  }
+  if (lower.includes('password') && lower.includes('8')) {
+    return 'Password must be at least 8 characters.';
+  }
+  if (lower.includes('too many')) {
+    return 'Too many attempts. Please wait and try again.';
+  }
+  if (lower.includes('network') || lower.includes('failed to fetch')) {
+    return 'Network error. Check your connection and try again.';
+  }
+  return message || 'Authentication failed.';
 }
