@@ -4,7 +4,7 @@ import {
   login as apiLogin,
   logout as apiLogout,
   refreshSession as apiRefreshSession,
-  sellerRegister as apiSellerRegister,
+  register as apiRegister,
   type AuthMeResponse,
 } from './authApi';
 
@@ -173,25 +173,17 @@ export async function signInWithEmailPassword(email: string, password: string): 
   };
 }
 
-/**
- * Storefront sign-up. Backend currently exposes seller-register (not a bare customer register).
- * Uses minimal seller profile fields so the existing form (name/email/password) still works.
- * FLAG: creates role=seller until a dedicated customer /auth/register exists.
- */
+/** Storefront sign-up. Creates a standard customer account (role=user). */
 export async function registerWithEmailPassword(
   email: string,
   password: string,
   fullName: string,
 ): Promise<SessionIdentity> {
   const name = fullName.trim() || email.trim().split('@')[0] || 'Choosify member';
-  const result = await apiSellerRegister({
+  const result = await apiRegister({
     email: email.trim(),
     password,
-    displayName: name,
-    storeName: `${name}'s Store`,
-    phone: '+8801000000000',
-    category: 'General',
-    city: 'Dhaka',
+    fullName: name,
   });
   return {
     uid: result.uid,
@@ -236,8 +228,8 @@ export function firebaseAuthErrorMessage(error: unknown): string {
   if (lower.includes('already') || lower.includes('exists') || lower.includes('in use')) {
     return 'An account with this email already exists. Sign in instead.';
   }
-  if (lower.includes('password') && lower.includes('6')) {
-    return 'Password must be at least 6 characters.';
+  if (lower.includes('password') && lower.includes('8')) {
+    return 'Password must be at least 8 characters.';
   }
   if (lower.includes('too many')) {
     return 'Too many attempts. Please wait and try again.';

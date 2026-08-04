@@ -13,6 +13,12 @@ export type LoginResponse = {
   accessToken: string;
 };
 
+export type RegisterPayload = {
+  email: string;
+  password: string;
+  fullName: string;
+};
+
 export type SellerRegisterPayload = {
   email: string;
   password?: string;
@@ -32,6 +38,16 @@ export type SellerRegisterResponse = {
   /** Access JWT (same response key as legacy Firebase custom token). */
   customToken: string;
   dashboardPath: string;
+};
+
+export type RegisterResponse = {
+  uid: string;
+  email: string;
+  displayName: string;
+  role: string;
+  /** Access JWT — same response shape as /auth/seller-register for Closed Beta. */
+  customToken: string;
+  dashboardPath: string | null;
 };
 
 export type AuthMeResponse = {
@@ -66,6 +82,19 @@ export async function login(email: string, password: string): Promise<LoginRespo
     throw new Error(await readErrorMessage(response));
   }
   return response.json() as Promise<LoginResponse>;
+}
+
+export async function register(payload: RegisterPayload): Promise<RegisterResponse> {
+  const response = await fetch(`${API_BASE}/auth/register`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!response.ok) {
+    throw new Error(await readErrorMessage(response));
+  }
+  return response.json() as Promise<RegisterResponse>;
 }
 
 export async function sellerRegister(payload: SellerRegisterPayload): Promise<SellerRegisterResponse> {
