@@ -211,6 +211,9 @@ export async function refreshSession(): Promise<{ accessToken: string } | null> 
 export function firebaseAuthErrorMessage(error: unknown): string {
   const message = error instanceof Error ? error.message : String(error || '');
   const lower = message.toLowerCase();
+  if (lower.includes('invalid email or password')) {
+    return 'Incorrect email or password.';
+  }
   if (lower.includes('invalid email') || lower.includes('valid email')) {
     return 'Please enter a valid email address.';
   }
@@ -218,7 +221,6 @@ export function firebaseAuthErrorMessage(error: unknown): string {
     return 'This account has been disabled.';
   }
   if (
-    lower.includes('invalid email or password') ||
     lower.includes('incorrect') ||
     lower.includes('unauthorized') ||
     lower.includes('401')
