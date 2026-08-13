@@ -1,14 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  ChevronRight, Users, Handshake, Briefcase, Award, Zap, 
-  ArrowRight, ShieldCheck, CheckCircle2
+  Users, Briefcase, Award, Zap, 
+  ArrowRight, ShieldCheck
 } from 'lucide-react';
 import { StaticPageHero } from '../components/StaticPageHero';
 import { operationsApi } from '../services/operationsApi';
+import { useGlobalState } from '../context/GlobalStateContext';
+import { enabledSorted, fillTemplate, resolveSitePages } from '../lib/cmsSitePages';
+
+function partnershipIcon(key?: string) {
+  const k = (key || '').toLowerCase();
+  if (k === 'users' || k === 'creator') return <Users className="w-6 h-6 text-[#5C2AFE]" />;
+  if (k === 'zap' || k === 'affiliate') return <Zap className="w-6 h-6 text-amber-500" />;
+  if (k === 'briefcase' || k === 'agency') return <Briefcase className="w-6 h-6 text-emerald-500" />;
+  return <Award className="w-6 h-6 text-orange-primary" />;
+}
 
 export function PartnershipPage() {
+  const { siteConfig } = useGlobalState();
+  const content = resolveSitePages(siteConfig?.sitePages).partnership;
+  const categories = enabledSorted(content.categories);
+  const modelOptions = enabledSorted(content.modelOptions);
+  const defaultModel = modelOptions[0]?.value || 'brand';
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -17,7 +32,7 @@ export function PartnershipPage() {
     companyName: '',
     contactName: '',
     email: '',
-    partnershipType: 'brand',
+    partnershipType: defaultModel,
     message: ''
   });
 
@@ -44,33 +59,6 @@ export function PartnershipPage() {
     setSubmitted(true);
   };
 
-  const categories = [
-    {
-      id: 'brand',
-      icon: <Award className="w-6 h-6 text-orange-primary" />,
-      title: 'Brand Partnerships',
-      desc: 'Connect your catalog with high-intent buyers, secure a verification badge, and deploy campaigns that drive tangible ROI.'
-    },
-    {
-      id: 'creator',
-      icon: <Users className="w-6 h-6 text-[#5C2AFE]" />,
-      title: 'Creator Partnerships',
-      desc: 'Collaborate on sponsored deals, leverage direct affiliate loops, and expand your community reach across our creator marketplace.'
-    },
-    {
-      id: 'affiliate',
-      icon: <Zap className="w-6 h-6 text-amber-500" />,
-      title: 'Affiliate Partnerships',
-      desc: 'Unlock special commission overrides, integrate exclusive coupon codes, and build durable passive earnings from your traffic.'
-    },
-    {
-      id: 'agency',
-      icon: <Briefcase className="w-6 h-6 text-emerald-500" />,
-      title: 'Agency Partnerships',
-      desc: 'Get consolidated dashboards to manage multiple client brand listings, unlock analytics APIs, and scale brand verified campaigns.'
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-choosify-feed font-sans">
       {/* 1. HERO SECTION */}
@@ -81,13 +69,13 @@ export function PartnershipPage() {
             {/* Left Column */}
             <div className="lg:col-span-7 space-y-4 text-left">
               <span className="inline-block bg-[#EB4501]/10 text-orange-primary text-[9px] font-mono font-black uppercase tracking-[0.25em] px-3.5 py-1 rounded-full border border-orange-primary/10">
-                Collaborate & Scale
+                {content.hero.badge}
               </span>
               <h1 className="text-2xl sm:text-3xl md:text-[2.5rem] font-extrabold text-white tracking-tight leading-tight">
-                Partnership Opportunities
+                {content.hero.title}
               </h1>
               <p className="text-gray-300 text-sm md:text-base font-medium leading-relaxed max-w-xl">
-                Partner with Choosify, Bangladeshâ€™s leading product discovery platform. Join forces with us to accelerate growth, enhance brand transparency, and empower consumers.
+                {content.hero.description}
               </p>
             </div>
 
@@ -102,15 +90,15 @@ export function PartnershipPage() {
                 <div className="absolute -bottom-10 -left-10 w-24 h-24 bg-purple-600/10 rounded-full blur-2xl pointer-events-none" />
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-400 text-lg">
-                    ðŸ¤
+                    {content.hero.sideCardIcon || '🤝'}
                   </div>
                   <div>
-                    <h3 className="text-white text-xs font-black uppercase tracking-wider">Synergetic Ecosystem</h3>
-                    <p className="text-white/40 text-[10px] uppercase font-bold tracking-widest mt-0.5">Win-Win Dynamic</p>
+                    <h3 className="text-white text-xs font-black uppercase tracking-wider">{content.hero.sideCardTitle}</h3>
+                    <p className="text-white/40 text-[10px] uppercase font-bold tracking-widest mt-0.5">{content.hero.sideCardSubtitle}</p>
                   </div>
                 </div>
                 <p className="text-white/70 text-xs leading-relaxed font-medium">
-                  We match verified brands with native creators to drive trustworthy commerce. Empowering buyers with crystal clear data.
+                  {content.hero.sideCardBody}
                 </p>
               </motion.div>
             </div>
@@ -128,25 +116,25 @@ export function PartnershipPage() {
             {/* Partner With Choosify */}
             <div className="space-y-4">
               <h2 className="text-xl md:text-2xl font-extrabold text-[#1A1A2E] tracking-tight">
-                Partner With Choosify
+                {content.partnerHeading}
               </h2>
               <div className="h-0.5 w-16 bg-orange-primary mb-6" />
               <p className="text-gray-600 text-sm leading-relaxed font-medium">
-                Choosify acts as the primary hub connecting authentic brands with verified creators and curious shoppers. Our platform supports collaborative growth models that align brand visibility with real audience engagement. Explore how our partnerships can unlock reliable revenue pipelines for your business.
+                {content.partnerBody}
               </p>
             </div>
 
             {/* Grid of Categories (Partnership Categories) */}
             <div className="space-y-4">
               <h3 className="text-lg font-extrabold text-[#1A1A2E] tracking-tight mb-6">
-                Partnership Categories
+                {content.categoriesHeading}
               </h3>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {categories.map((cat, idx) => (
-                  <div key={idx} className="bg-white border border-[#e8edf2] rounded-[5px] p-6 hover:border-orange-primary/20 transition-colors shadow-xs relative overflow-hidden group">
+                {categories.map((cat) => (
+                  <div key={cat.id} className="bg-white border border-[#e8edf2] rounded-[5px] p-6 hover:border-orange-primary/20 transition-colors shadow-xs relative overflow-hidden group">
                     <div className="absolute top-0 right-0 w-16 h-16 bg-gray-50 rounded-bl-full group-hover:bg-orange-primary/5 transition-colors" />
-                    <div className="mb-4 relative z-10">{cat.icon}</div>
+                    <div className="mb-4 relative z-10">{partnershipIcon(cat.icon || cat.id)}</div>
                     <h4 className="text-xs font-black text-navy uppercase tracking-wider mb-2 relative z-10">
                       {cat.title}
                     </h4>
@@ -163,10 +151,10 @@ export function PartnershipPage() {
               <div className="absolute top-0 right-0 w-32 h-32 bg-orange-primary/5 rounded-full blur-xl pointer-events-none" />
               <h4 className="text-xs font-black text-navy uppercase tracking-wider mb-3 flex items-center gap-2">
                 <ShieldCheck className="text-emerald-500 w-5 h-5 shrink-0" />
-                Durable Platform Credibility
+                {content.credibilityTitle}
               </h4>
               <p className="text-gray-500 text-xs leading-relaxed font-semibold">
-                By aligning with Choosify, partners leverage Bangladeshâ€™s premier, scam-free discovery database. Our unified pricing engine and brand verified claim statuses ensure that customer trust is maintained at every touchpoint.
+                {content.credibilityBody}
               </p>
             </div>
 
@@ -187,68 +175,67 @@ export function PartnershipPage() {
                     className="space-y-6"
                   >
                     <div>
-                      <h3 className="text-sm font-extrabold text-[#1A1A2E] tracking-tight mb-1">Request Partnership</h3>
-                      <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Submit strategic collaboration request</p>
+                      <h3 className="text-sm font-extrabold text-[#1A1A2E] tracking-tight mb-1">{content.formHeading}</h3>
+                      <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">{content.formSubheading}</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4 text-xs font-semibold text-gray-700">
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">Company / Brand Name *</label>
+                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.companyName.label}</label>
                         <input 
                           type="text" 
                           required
                           value={formData.companyName}
                           onChange={e => setFormData({...formData, companyName: e.target.value})}
-                          placeholder="e.g., Bata, Apex, local agency, or creator name" 
+                          placeholder={content.fields.companyName.placeholder}
                           className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium"
                         />
                       </div>
 
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">Primary Contact Name *</label>
+                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.contactName.label}</label>
                         <input 
                           type="text" 
                           required
                           value={formData.contactName}
                           onChange={e => setFormData({...formData, contactName: e.target.value})}
-                          placeholder="e.g., Farhan Rafiq" 
+                          placeholder={content.fields.contactName.placeholder}
                           className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium"
                         />
                       </div>
 
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">Business Email *</label>
+                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.email.label}</label>
                         <input 
                           type="email" 
                           required
                           value={formData.email}
                           onChange={e => setFormData({...formData, email: e.target.value})}
-                          placeholder="e.g., partnerships@brand.com" 
+                          placeholder={content.fields.email.placeholder}
                           className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium"
                         />
                       </div>
 
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">Partnership Model</label>
+                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.partnershipModel.label}</label>
                         <select 
                           value={formData.partnershipType}
                           onChange={e => setFormData({...formData, partnershipType: e.target.value})}
                           className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium"
                         >
-                          <option value="brand">Brand Partnerships</option>
-                          <option value="creator">Creator Partnerships</option>
-                          <option value="affiliate">Affiliate Partnerships</option>
-                          <option value="agency">Agency Partnerships</option>
+                          {modelOptions.map((opt) => (
+                            <option key={opt.id} value={opt.value}>{opt.label}</option>
+                          ))}
                         </select>
                       </div>
 
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">Brief Proposal / Message</label>
+                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.message.label}</label>
                         <textarea 
                           rows={4}
                           value={formData.message}
                           onChange={e => setFormData({...formData, message: e.target.value})}
-                          placeholder="Describe your goals, audience size, integration interests, or agency roster details." 
+                          placeholder={content.fields.message.placeholder}
                           className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium resize-none"
                         />
                       </div>
@@ -257,7 +244,7 @@ export function PartnershipPage() {
                         type="submit"
                         className="w-full py-3 bg-[#050514] hover:bg-orange-primary text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-all flex items-center justify-center gap-2 group border-none cursor-pointer mt-4"
                       >
-                        Submit Proposal
+                        {content.submitLabel}
                         <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
                       </button>
                     </form>
@@ -270,23 +257,26 @@ export function PartnershipPage() {
                     className="py-12 px-2 text-center flex flex-col items-center justify-center space-y-6"
                   >
                     <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-500 flex items-center justify-center text-3xl">
-                      âœ“
+                      ✓
                     </div>
                     <div>
-                      <h3 className="text-base font-extrabold text-[#1A1A2E] tracking-tight mb-1">Proposal Logged</h3>
-                      <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Partnership Desk Acknowledged</p>
+                      <h3 className="text-base font-extrabold text-[#1A1A2E] tracking-tight mb-1">{content.successTitle}</h3>
+                      <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">{content.successSubtitle}</p>
                     </div>
                     <p className="text-gray-500 text-xs leading-relaxed font-semibold max-w-sm">
-                      We have received the partnership brief for <span className="text-navy font-bold">{formData.companyName}</span>. Our strategic relations desk will review and contact <span className="text-navy font-bold">{formData.contactName}</span> within 2 business days. Thank you for choosing Choosify!
+                      {fillTemplate(content.successBodyTemplate, {
+                        companyName: formData.companyName,
+                        contactName: formData.contactName,
+                      })}
                     </p>
                     <button 
                       onClick={() => {
-                        setFormData({ companyName: '', contactName: '', email: '', partnershipType: 'brand', message: '' });
+                        setFormData({ companyName: '', contactName: '', email: '', partnershipType: defaultModel, message: '' });
                         setSubmitted(false);
                       }}
                       className="px-6 py-2.5 bg-navy hover:bg-orange-primary text-white text-[9px] font-black uppercase tracking-widest rounded-lg transition-colors border-none cursor-pointer"
                     >
-                      Submit Another Request
+                      {content.successResetLabel}
                     </button>
                   </motion.div>
                 )}

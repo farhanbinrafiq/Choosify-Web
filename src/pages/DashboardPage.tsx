@@ -80,8 +80,7 @@ import { PLACEHOLDER_IMAGE } from '../constants';
 import { PublicReviewCard, resolvePublicReviewAvatarUrl } from '../components/PublicReviewCard';
 import { AddressBookManager } from '../components/address/AddressBookManager';
 import { notify, toast } from '../lib/notify';
-import { toPlatformRole } from '../lib/platform/roles';
-import { getDashboardNavForRole, isDashboardTabAllowed } from '../lib/platform/dashboardRegistry';
+import { getConsumerStorefrontDashboardNav, isConsumerDashboardTabAllowed } from '../lib/platform/dashboardRegistry';
 import { SellerWorkspaceSection } from './ReviewDetailPage';
 import { CustomerOrdersPage } from './CustomerOrdersPage';
 import { DealsVerticalSponsoredCard } from '../components/deals/DealsLowerSections';
@@ -1729,8 +1728,9 @@ export function DashboardPage() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const platformRole = toPlatformRole(currentUser.role);
-  const dashboardNav = getDashboardNavForRole(platformRole);
+  // Storefront /dashboard is always the Consumer shopping shell — never role-filter
+  // away Saved Items / Orders / etc. when the account also has Seller/Creator capability.
+  const dashboardNav = getConsumerStorefrontDashboardNav();
 
   const DASHBOARD_ICONS: Record<string, any> = {
     LayoutDashboard,
@@ -1819,7 +1819,7 @@ export function DashboardPage() {
       setActiveTab(redirectedTab);
       return;
     }
-    if (queryTab && !REMOVED_TABS.has(queryTab) && isDashboardTabAllowed(queryTab, platformRole)) {
+    if (queryTab && !REMOVED_TABS.has(queryTab) && isConsumerDashboardTabAllowed(queryTab)) {
       setActiveTab(queryTab);
       if (queryTab === 'settings') {
         const sub = params.get('section');
@@ -1840,7 +1840,7 @@ export function DashboardPage() {
       if (tab !== requestedTab) {
         navigate(`/dashboard?tab=${tab}`, { replace: true });
       }
-      if (REMOVED_TABS.has(tab) || !isDashboardTabAllowed(tab, platformRole)) {
+      if (REMOVED_TABS.has(tab) || !isConsumerDashboardTabAllowed(tab)) {
         setActiveTab('overview');
       } else {
         setActiveTab(tab);
@@ -1849,7 +1849,7 @@ export function DashboardPage() {
         setSettingsSubTab(location.state.settingsSubTab);
       }
     }
-  }, [location.state, location.search, platformRole, navigate]);
+  }, [location.state, location.search, navigate]);
 
   const goToTab = (tab: string) => {
     setActiveTab(tab);
@@ -1857,7 +1857,7 @@ export function DashboardPage() {
   };
 
   const renderContent = () => {
-    if (!isDashboardTabAllowed(activeTab, platformRole)) {
+    if (!isConsumerDashboardTabAllowed(activeTab)) {
       return <OverviewSection onTabChange={goToTab} userName={currentUser.name} />;
     }
 

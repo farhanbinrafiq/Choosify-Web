@@ -53,9 +53,43 @@ export function getDashboardNavForRole(role: PlatformRole): {
   };
 }
 
+/**
+ * Storefront /dashboard is the Consumer account shell.
+ * Always use the buyer shopping menu here — never Seller/Creator/Admin workspace modules.
+ * Partner entitlements must not affect these consumer tabs.
+ */
+export function getConsumerStorefrontDashboardNav(): {
+  platform: DashboardNavItem[];
+  workspace: DashboardNavItem[];
+  account: DashboardNavItem[];
+} {
+  return getDashboardNavForRole('buyer');
+}
+
+/** Approved consumer sidebar ids (regression lock). */
+export const CONSUMER_DASHBOARD_TAB_IDS = [
+  'overview',
+  'saved-items',
+  'following',
+  'recently-viewed',
+  'orders',
+  'to-pay',
+  'my-cancellations',
+  'my-returns',
+  'my-payment-options',
+  'my-reviews',
+  'addresses',
+  'settings',
+] as const;
+
 export function isDashboardTabAllowed(tabId: string, role: PlatformRole): boolean {
   if (role === 'admin') return true;
   const item = DASHBOARD_NAV_REGISTRY.find((i) => i.id === tabId);
   if (!item) return tabId === 'overview';
   return item.roles.includes(role);
+}
+
+/** Consumer storefront dashboard tab allowlist (ignores partner workspace roles). */
+export function isConsumerDashboardTabAllowed(tabId: string): boolean {
+  return (CONSUMER_DASHBOARD_TAB_IDS as readonly string[]).includes(tabId) || tabId === 'overview';
 }

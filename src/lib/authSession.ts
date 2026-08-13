@@ -51,6 +51,11 @@ function mapBackendRole(role: string | undefined): UserRole {
       return 'admin';
     case 'brand':
       return 'brand';
+    case 'customer':
+    case 'consumer':
+    case 'buyer':
+    case 'user':
+      return 'customer';
     default:
       return 'customer';
   }

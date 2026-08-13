@@ -1,5 +1,5 @@
 import React, { lazy, Suspense, useEffect } from 'react';
-import { BrowserRouter, Routes, Route, useLocation, Link, Navigate, useParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useLocation, Link, Navigate, useParams, useSearchParams } from 'react-router-dom';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { PageSeo } from './components/PageSeo';
@@ -10,6 +10,8 @@ import { PageBreadcrumbsBar } from './components/PageBreadcrumbs';
 import { BreadcrumbProvider } from './context/BreadcrumbContext';
 import { DashboardProvider } from './context/DashboardContext';
 import { GlobalStateProvider } from './context/GlobalStateContext';
+import { CmsDraftPreviewProvider } from './contexts/CmsDraftPreviewContext';
+import { isValidCmsPreviewToken } from './lib/cmsPreview';
 import { OfflineFallbackBanner } from './components/OfflineFallbackBanner';
 import { DrawerFilterProvider, FloatingFilterProvider } from './components/FilterEngine';
 import { StudioEditProvider } from './context/StudioEditContext';
@@ -21,6 +23,7 @@ import { LoadingFallback } from './components/LoadingFallback';
 
 // Lazy load pages for performance
 const HomePage = lazy(() => import('./pages/HomePage').then(m => ({ default: m.HomePage })));
+const CmsPreviewPage = lazy(() => import('./pages/CmsPreviewPage').then(m => ({ default: m.CmsPreviewPage })));
 const AllProductsPage = lazy(() => import('./pages/AllProductsPage').then(m => ({ default: m.AllProductsPage })));
 const BrandsPage = lazy(() => import('./pages/BrandsPage').then(m => ({ default: m.BrandsPage })));
 const CategoriesPage = lazy(() => import('./pages/CategoriesPage').then(m => ({ default: m.CategoriesPage })));
@@ -128,7 +131,7 @@ function FeatureFlagRoute({
 function MaintenanceGate({ children }: { children: React.ReactNode }) {
   const { isFeatureEnabled } = useGlobalState();
   const location = useLocation();
-  const allowedDuringMaintenance = ['/login', '/contact', '/about'];
+  const allowedDuringMaintenance = ['/login', '/contact', '/about', '/cms-preview'];
   if (
     isFeatureEnabled('maintenance_mode') &&
     !allowedDuringMaintenance.some((path) => location.pathname.startsWith(path))
@@ -178,14 +181,18 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 
 function AppContent() {
   const location = useLocation();
+  const [searchParams] = useSearchParams();
   const isCompactShell = location.pathname === '/login';
   const isMessagesShell = location.pathname.startsWith('/messages');
+  const cmsPreviewToken =
+    location.pathname.startsWith('/cms-preview') ? searchParams.get('token') : null;
+  const cmsPreviewActive = isValidCmsPreviewToken(cmsPreviewToken);
 
   useEffect(() => {
     perfRouteTransition(location.pathname);
   }, [location.pathname]);
 
-  return (
+  const shell = (
     <div className="antialiased selection:bg-orange-primary selection:text-white">
       {/* Navbar renders on the auth page too, so users can get back home via the logo */}
       <Navbar />
@@ -199,6 +206,7 @@ function AppContent() {
           */}
           <Routes>
             <Route path="/" element={<PageWrapper><HomePage /></PageWrapper>} />
+            <Route path="/cms-preview" element={<PageWrapper><CmsPreviewPage /></PageWrapper>} />
             <Route path="/products" element={<PageWrapper><AllProductsPage /></PageWrapper>} />
             <Route path="/products/:id" element={<PageWrapper><ProductDetailPage /></PageWrapper>} />
             <Route path="/brands" element={<PageWrapper><BrandsPage /></PageWrapper>} />
@@ -305,6 +313,12 @@ function AppContent() {
       {!isCompactShell && !isMessagesShell && <Footer />}
     </div>
   );
+
+  // Lift draft provider above Navbar/Footer so siteConfig overrides apply storefront-wide.
+  if (cmsPreviewActive) {
+    return <CmsDraftPreviewProvider token={cmsPreviewToken}>{shell}</CmsDraftPreviewProvider>;
+  }
+  return shell;
 }
 
 export default function App() {

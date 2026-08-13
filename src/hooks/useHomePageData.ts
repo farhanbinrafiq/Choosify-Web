@@ -9,11 +9,13 @@ import { pickByCatalogIds, orderByCatalogIds } from '../utils/catalogMatch';
 import { isPlacementActive } from '../utils/editorialMappers';
 import { buildCategoryDisplayList } from '../utils/categoryDisplay';
 import { getHomeLivePulseItems } from '../lib/home/homepageLivePulse';
-import { buildHomeViralTodayItems } from '../utils/homeViralToday';
+import { buildHomeViralTodayItems, type ViralTodayItem } from '../utils/homeViralToday';
 import { usePriorityClockMs } from './usePriorityClockMs';
 import { resolveSpotlightExperience } from '../utils/spotlightContentResolver';
 import { getAllBrandPosts } from '../lib/brandPosts';
 import type { HomePromoTile } from '../components/home/sections/HomeTodaysDealsSection';
+import type { HomeCategoryItem } from '../components/home/sections/HomeTopCategoriesSection';
+import type { HomepageConfig } from '../types/catalog';
 
 type HomeGuideCarouselKind = 'youtube' | 'reels' | 'blog';
 
@@ -31,6 +33,23 @@ function getHomeGuideKind(guide: any): HomeGuideCarouselKind {
   if (guide?.type === 'reels' || guide?.type === 'shorts') return 'reels';
   if (guide?.type === 'video') return 'youtube';
   return 'blog';
+}
+
+function mapCmsViralTodayItems(
+  items: NonNullable<HomepageConfig['viralTodayItems']>,
+): ViralTodayItem[] {
+  return [...items]
+    .sort((a, b) => a.order - b.order)
+    .map((item) => ({
+      id: item.id,
+      href: '#',
+      title: item.title,
+      image: item.thumbnailUrl || item.mediaUrl,
+      channel: 'Choosify',
+      productCount: 0,
+      // CMS badge surfaces via card title chrome in HomeSpotlightPreviewSection
+      kind: 'youtube' as const,
+    }));
 }
 
 export function useHomePageData() {
@@ -61,10 +80,20 @@ export function useHomePageData() {
     [homepageConfig, siteConfig],
   );
 
-  const categories = useMemo(
-    () => buildCategoryDisplayList(allCategories ?? [], allCatalogProducts ?? []).slice(0, 12),
-    [allCategories, allCatalogProducts],
-  );
+  const categories = useMemo((): HomeCategoryItem[] => {
+    const cmsCats = homepageConfig?.topCategories;
+    if (cmsCats?.length) {
+      return [...cmsCats]
+        .sort((a, b) => a.order - b.order)
+        .map((item) => ({
+          id: item.id,
+          name: item.label,
+          count: 0,
+          image: item.image,
+        }));
+    }
+    return buildCategoryDisplayList(allCategories ?? [], allCatalogProducts ?? []).slice(0, 12);
+  }, [allCategories, allCatalogProducts, homepageConfig?.topCategories]);
 
   const { cards: spotlightCards, viralTodayCards, hasCampaigns: hasSpotlight } = useHomepageSpotlight(
     allCatalogProducts,
@@ -85,17 +114,26 @@ export function useHomePageData() {
     [allCatalogProducts, allGuides, allCreators],
   );
 
-  const viralTodayItems = useMemo(
-    () =>
-      buildHomeViralTodayItems(
-        viralTodayCards,
-        allGuides ?? [],
-        allCatalogProducts,
-        priorityNowMs,
-        spotlightExperience,
-      ),
-    [viralTodayCards, allGuides, allCatalogProducts, priorityNowMs, spotlightExperience],
-  );
+  const viralTodayItems = useMemo(() => {
+    const cmsItems = homepageConfig?.viralTodayItems;
+    if (cmsItems?.length) {
+      return mapCmsViralTodayItems(cmsItems);
+    }
+    return buildHomeViralTodayItems(
+      viralTodayCards,
+      allGuides ?? [],
+      allCatalogProducts,
+      priorityNowMs,
+      spotlightExperience,
+    );
+  }, [
+    homepageConfig?.viralTodayItems,
+    viralTodayCards,
+    allGuides,
+    allCatalogProducts,
+    priorityNowMs,
+    spotlightExperience,
+  ]);
 
   const featuredProducts = useMemo(() => {
     const featuredIds = homepageConfig?.featuredProductIds?.length
@@ -240,6 +278,7 @@ export function useHomePageData() {
   }, [allCreators, homepageConfig]);
 
   return {
+    homepageConfig,
     sectionVisible,
     livePulseItems,
     categories,

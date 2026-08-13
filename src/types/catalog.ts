@@ -170,6 +170,8 @@ export interface HomepageHeroBanner {
   backgroundImage: string;
   /** Optional muted looping video for hybrid photo/video hero slides. */
   backgroundVideo?: string;
+  mediaType?: 'photo' | 'video';
+  mediaUrl?: string;
   isActive: boolean;
   order: number;
 }
@@ -208,6 +210,16 @@ export interface HomepageConfig {
   featuredDealIds: string[];
   featuredCreatorIds: string[];
   featuredGuideIds: string[];
+  topCategories?: Array<{ id: string; label: string; image: string; link?: string; order: number }>;
+  viralTodayItems?: Array<{
+    id: string;
+    title: string;
+    mediaType: 'photo' | 'video';
+    mediaUrl: string;
+    thumbnailUrl?: string;
+    badge?: string;
+    order: number;
+  }>;
   updatedAt: string;
 }
 
@@ -305,6 +317,39 @@ export interface SiteConfig {
     copyrightText: string;
     columns: SiteFooterColumn[];
     newsletterEnabled: boolean;
+    tagline?: string;
+    contactEmail?: string;
+    contactPhone?: string;
+    usaOffice?: { title: string; lines?: string[]; address?: string };
+    bangladeshOffice?: { title: string; lines?: string[]; address?: string };
+    paymentsAccepted?: Array<{
+      id: string;
+      label: string;
+      image: string;
+      enabled?: boolean;
+      order?: number;
+      url?: string;
+    }>;
+    deliveryPartners?: Array<{
+      id: string;
+      label: string;
+      image: string;
+      enabled?: boolean;
+      order?: number;
+      url?: string;
+    }>;
+    platforms?: Array<{
+      id: string;
+      platform: string;
+      store: string;
+      href: string;
+      qrImage?: string;
+      enabled?: boolean;
+    }>;
+    dbid?: string;
+    tradeLicense?: string;
+    showPaymentIcons?: boolean;
+    showDeliveryPartners?: boolean;
   };
   socialLinks: SiteSocialLink[];
   popularSearches: SitePopularSearch[];
@@ -315,6 +360,8 @@ export interface SiteConfig {
   contentBadges?: SiteContentBadge[];
   heroTickers?: SiteHeroTickerItem[];
   websiteAssets?: SiteWebsiteAssets;
+  /** Informational / legal / business page bodies from Website Manager → Pages */
+  sitePages?: import('../lib/cmsSitePages').SitePagesConfig;
   updatedAt: string;
 }
 

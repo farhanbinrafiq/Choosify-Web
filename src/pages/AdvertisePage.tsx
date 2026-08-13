@@ -1,14 +1,35 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
-  ChevronRight, TrendingUp, Sparkles, Megaphone, Target, BarChart3, 
-  Layers, Users2, Star, ArrowRight, DollarSign, CheckCircle
+  TrendingUp, Sparkles, Megaphone, BarChart3, 
+  Layers, Users2, ArrowRight
 } from 'lucide-react';
 import { StaticPageHero } from '../components/StaticPageHero';
 import { operationsApi } from '../services/operationsApi';
+import { useGlobalState } from '../context/GlobalStateContext';
+import { enabledSorted, fillTemplate, resolveSitePages } from '../lib/cmsSitePages';
+
+const STAT_VALUE_COLORS = ['text-[#5C2AFE]', 'text-orange-primary', 'text-emerald-500'] as const;
+
+function placementIcon(key?: string) {
+  const k = (key || '').toLowerCase();
+  if (k === 'trending' || k === 'deals') return <TrendingUp className="w-5 h-5 text-rose-500" />;
+  if (k === 'layers' || k === 'recs') return <Layers className="w-5 h-5 text-indigo-500" />;
+  if (k === 'megaphone' || k === 'home') return <Megaphone className="w-5 h-5 text-amber-500" />;
+  if (k === 'users' || k === 'creators') return <Users2 className="w-5 h-5 text-emerald-500" />;
+  return <Sparkles className="w-5 h-5 text-orange-primary" />;
+}
 
 export function AdvertisePage() {
+  const { siteConfig } = useGlobalState();
+  const content = resolveSitePages(siteConfig?.sitePages).advertise;
+  const audienceStats = enabledSorted(content.audienceStats);
+  const placements = enabledSorted(content.placements);
+  const budgetOptions = enabledSorted(content.budgetOptions);
+  const placementOptions = enabledSorted(content.placementOptions);
+  const defaultBudget = budgetOptions[0]?.value || 'under-50k';
+  const defaultPlacement = placementOptions[0]?.value || 'sponsored-brands';
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -17,8 +38,8 @@ export function AdvertisePage() {
     brandName: '',
     contactPerson: '',
     email: '',
-    budget: 'under-50k',
-    placementInterest: 'sponsored-brands',
+    budget: defaultBudget,
+    placementInterest: defaultPlacement,
     message: ''
   });
 
@@ -46,34 +67,6 @@ export function AdvertisePage() {
     }
   };
 
-  const adTypes = [
-    {
-      icon: <Sparkles className="w-5 h-5 text-orange-primary" />,
-      title: 'Promoted Brands',
-      desc: 'Get featured at the top of brand listings and search pages. Drive high-visibility branding directly above alphabetical arrays.'
-    },
-    {
-      icon: <TrendingUp className="w-5 h-5 text-rose-500" />,
-      title: 'Promoted Deals',
-      desc: 'Pin your discount coupon, clearance code, or hot deal to the top of the popular "Deals" and category feeds.'
-    },
-    {
-      icon: <Layers className="w-5 h-5 text-indigo-500" />,
-      title: 'Promoted Recommendations',
-      desc: 'Embed your top-selling products inside highly-vetted community shopping guides and expert recommendation blogs.'
-    },
-    {
-      icon: <Megaphone className="w-5 h-5 text-amber-500" />,
-      title: 'Homepage Placement',
-      desc: 'Capture absolute attention with hero carousel banners or dedicated bento-grid display items on our central discovery homepage.'
-    },
-    {
-      icon: <Users2 className="w-5 h-5 text-emerald-500" />,
-      title: 'Creator Collaborations',
-      desc: 'Let us match your catalog with viral local TikTokers and Instagram influencers to deploy authentic social campaigns.'
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-choosify-feed font-sans">
       {/* 1. HERO SECTION */}
@@ -84,13 +77,13 @@ export function AdvertisePage() {
             {/* Left Column */}
             <div className="lg:col-span-7 space-y-4 text-left">
               <span className="inline-block bg-[#EB4501]/10 text-orange-primary text-[9px] font-mono font-black uppercase tracking-[0.25em] px-3.5 py-1 rounded-full border border-orange-primary/10">
-                Premium Brand Exposure
+                {content.hero.badge}
               </span>
               <h1 className="text-2xl sm:text-3xl md:text-[2.5rem] font-extrabold text-white tracking-tight leading-tight">
-                Advertise on Choosify
+                {content.hero.title}
               </h1>
               <p className="text-gray-300 text-sm md:text-base font-medium leading-relaxed max-w-xl">
-                Reach thousands of high-intent Bangladeshi shoppers actively comparing pricing, seeking recommendations, and preparing to purchase.
+                {content.hero.description}
               </p>
             </div>
 
@@ -105,10 +98,10 @@ export function AdvertisePage() {
                 <div className="absolute -top-10 -right-10 w-24 h-24 bg-[#5C2AFE]/10 rounded-full blur-2xl pointer-events-none" />
                 <h3 className="text-xs font-black uppercase tracking-wider text-white mb-2 flex items-center gap-2">
                   <BarChart3 size={16} className="text-orange-primary" />
-                  Targeting Precision
+                  {content.hero.sideCardTitle}
                 </h3>
                 <p className="text-white/70 text-xs leading-relaxed font-semibold">
-                  We don't do blind eyeballs. Choosify positions your brand right where active purchase comparisons occur. Ensure your catalog remains top-of-mind.
+                  {content.hero.sideCardBody}
                 </p>
               </motion.div>
             </div>
@@ -126,47 +119,41 @@ export function AdvertisePage() {
             {/* Why Advertise */}
             <div className="space-y-4">
               <h2 className="text-xl md:text-2xl font-extrabold text-[#1A1A2E] tracking-tight">
-                Why Advertise
+                {content.whyHeading}
               </h2>
               <div className="h-0.5 w-16 bg-orange-primary mb-6" />
               <p className="text-gray-600 text-sm leading-relaxed font-medium">
-                Traditional social platforms bombard users with interrupting feeds. On Choosify, users come with an active intention: **Compare, Discovery, and Purchase**. Advertising here guarantees alignment with customers at the bottom of the buying funnel, boosting click-through rates and campaign efficiency.
+                {content.whyBody}
               </p>
             </div>
 
             {/* Audience Overview */}
             <div className="space-y-4">
               <h2 className="text-xl md:text-2xl font-extrabold text-[#1A1A2E] tracking-tight">
-                Audience Overview
+                {content.audienceHeading}
               </h2>
               <div className="h-0.5 w-16 bg-orange-primary mb-6" />
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="bg-white border border-[#e8edf2] rounded-[5px] p-5 shadow-xs text-center">
-                  <span className="block text-2xl font-black text-[#5C2AFE] italic font-mono mb-1">150K+</span>
-                  <span className="block text-[9px] font-black text-gray-400 uppercase tracking-widest">Monthly Shoppers</span>
-                </div>
-                <div className="bg-white border border-[#e8edf2] rounded-[5px] p-5 shadow-xs text-center">
-                  <span className="block text-2xl font-black text-orange-primary italic font-mono mb-1">75%</span>
-                  <span className="block text-[9px] font-black text-gray-400 uppercase tracking-widest">Dhaka-Based Buyers</span>
-                </div>
-                <div className="bg-white border border-[#e8edf2] rounded-[5px] p-5 shadow-xs text-center">
-                  <span className="block text-2xl font-black text-emerald-500 italic font-mono mb-1">4.2m+</span>
-                  <span className="block text-[9px] font-black text-gray-400 uppercase tracking-widest">Monthly Impressions</span>
-                </div>
+                {audienceStats.map((stat, i) => (
+                  <div key={stat.id} className="bg-white border border-[#e8edf2] rounded-[5px] p-5 shadow-xs text-center">
+                    <span className={`block text-2xl font-black italic font-mono mb-1 ${STAT_VALUE_COLORS[i % STAT_VALUE_COLORS.length]}`}>{stat.value}</span>
+                    <span className="block text-[9px] font-black text-gray-400 uppercase tracking-widest">{stat.label}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* Placement Opportunities (Advertising Types) */}
             <div className="space-y-4">
               <h2 className="text-xl md:text-2xl font-extrabold text-[#1A1A2E] tracking-tight">
-                Placement Opportunities
+                {content.placementsHeading}
               </h2>
               <div className="h-0.5 w-16 bg-orange-primary mb-6" />
               
               <div className="space-y-4">
-                {adTypes.map((ad, i) => (
-                  <div key={i} className="bg-white border border-[#e8edf2] rounded-[5px] p-5 flex gap-4 items-start shadow-xs">
-                    <div className="p-3 rounded-full bg-gray-50 shrink-0">{ad.icon}</div>
+                {placements.map((ad) => (
+                  <div key={ad.id} className="bg-white border border-[#e8edf2] rounded-[5px] p-5 flex gap-4 items-start shadow-xs">
+                    <div className="p-3 rounded-full bg-gray-50 shrink-0">{placementIcon(ad.icon || ad.id)}</div>
                     <div>
                       <h4 className="text-xs font-black text-navy uppercase tracking-wider mb-1">
                         {ad.title}
@@ -184,13 +171,13 @@ export function AdvertisePage() {
             <div className="bg-orange-primary/5 border border-orange-primary/10 rounded-[5px] p-6 text-left relative overflow-hidden">
               <div className="absolute top-0 right-0 w-24 h-24 bg-orange-primary/10 rounded-full blur-2xl pointer-events-none" />
               <div className="flex items-center gap-3 mb-2">
-                <span className="text-lg">ðŸ’Ž</span>
+                <span className="text-lg">💎</span>
                 <h4 className="text-xs font-black text-navy uppercase tracking-wider">
-                  Custom Pricing Available
+                  {content.pricingTitle}
                 </h4>
               </div>
               <p className="text-gray-600 text-xs leading-relaxed font-semibold">
-                No rigid packages. We structure custom pricing tailored directly to your brandâ€™s monthly budget, target category, and specific conversion goals. Start scaling from small community campaigns upwards!
+                {content.pricingBody}
               </p>
             </div>
 
@@ -211,83 +198,80 @@ export function AdvertisePage() {
                     className="space-y-6"
                   >
                     <div>
-                      <h3 className="text-sm font-extrabold text-[#1A1A2E] tracking-tight mb-1">Talk To Our Team</h3>
-                      <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Start building your custom campaign</p>
+                      <h3 className="text-sm font-extrabold text-[#1A1A2E] tracking-tight mb-1">{content.formHeading}</h3>
+                      <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">{content.formSubheading}</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4 text-xs font-semibold text-gray-700">
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">Brand Name *</label>
+                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.brandName.label}</label>
                         <input 
                           type="text" 
                           required
                           value={formData.brandName}
                           onChange={e => setFormData({...formData, brandName: e.target.value})}
-                          placeholder="e.g., Bata Bangladesh, Apex, Sailor" 
+                          placeholder={content.fields.brandName.placeholder}
                           className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium"
                         />
                       </div>
 
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">Contact Person *</label>
+                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.contactPerson.label}</label>
                         <input 
                           type="text" 
                           required
                           value={formData.contactPerson}
                           onChange={e => setFormData({...formData, contactPerson: e.target.value})}
-                          placeholder="e.g., Farhan Rafiq" 
+                          placeholder={content.fields.contactPerson.placeholder}
                           className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium"
                         />
                       </div>
 
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">Business Email *</label>
+                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.email.label}</label>
                         <input 
                           type="email" 
                           required
                           value={formData.email}
                           onChange={e => setFormData({...formData, email: e.target.value})}
-                          placeholder="e.g., marketing@brand.com" 
+                          placeholder={content.fields.email.placeholder}
                           className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium"
                         />
                       </div>
 
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">Monthly Budget Scope</label>
+                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.budget.label}</label>
                         <select 
                           value={formData.budget}
                           onChange={e => setFormData({...formData, budget: e.target.value})}
                           className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium"
                         >
-                          <option value="under-50k">Under à§³50,000 / month</option>
-                          <option value="50k-150k">à§³50,000 - à§³150,000 / month</option>
-                          <option value="150k-500k">à§³150,000 - à§³500,000 / month</option>
-                          <option value="above-500k">Above à§³500,000 / month</option>
+                          {budgetOptions.map((opt) => (
+                            <option key={opt.id} value={opt.value}>{opt.label}</option>
+                          ))}
                         </select>
                       </div>
 
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">Placement Interest</label>
+                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.placementInterest.label}</label>
                         <select 
                           value={formData.placementInterest}
                           onChange={e => setFormData({...formData, placementInterest: e.target.value})}
                           className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium"
                         >
-                          <option value="sponsored-brands">Promoted Brands Spotlight</option>
-                          <option value="sponsored-deals">Promoted Deals & Promo Pins</option>
-                          <option value="sponsored-recs">Promoted Guide Placement</option>
-                          <option value="homepage">Homepage Banner Spots</option>
-                          <option value="creator-collabs">Influencer Collaborations</option>
+                          {placementOptions.map((opt) => (
+                            <option key={opt.id} value={opt.value}>{opt.label}</option>
+                          ))}
                         </select>
                       </div>
 
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">Campaign Goals</label>
+                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.message.label}</label>
                         <textarea 
                           rows={3}
                           value={formData.message}
                           onChange={e => setFormData({...formData, message: e.target.value})}
-                          placeholder="Describe what products you wish to spotlight, your launch timeline, etc." 
+                          placeholder={content.fields.message.placeholder}
                           className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium resize-none"
                         />
                       </div>
@@ -296,7 +280,7 @@ export function AdvertisePage() {
                         type="submit"
                         className="w-full py-3 bg-[#050514] hover:bg-orange-primary text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-all flex items-center justify-center gap-2 group border-none cursor-pointer mt-4"
                       >
-                        Talk To Our Team
+                        {content.submitLabel}
                         <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
                       </button>
                     </form>
@@ -309,23 +293,26 @@ export function AdvertisePage() {
                     className="py-12 px-2 text-center flex flex-col items-center justify-center space-y-6"
                   >
                     <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-500 flex items-center justify-center text-3xl">
-                      âœ“
+                      ✓
                     </div>
                     <div>
-                      <h3 className="text-base font-extrabold text-[#1A1A2E] tracking-tight mb-1">Inquiry Sent</h3>
-                      <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Campaign Desk Notified</p>
+                      <h3 className="text-base font-extrabold text-[#1A1A2E] tracking-tight mb-1">{content.successTitle}</h3>
+                      <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">{content.successSubtitle}</p>
                     </div>
                     <p className="text-gray-500 text-xs leading-relaxed font-semibold max-w-sm">
-                      We have logged your campaign parameters for <span className="text-navy font-bold">{formData.brandName}</span>. An advertising manager will contact <span className="text-navy font-bold">{formData.contactPerson}</span> with custom mock media-kit and CTR models in 24 hours.
+                      {fillTemplate(content.successBodyTemplate, {
+                        brandName: formData.brandName,
+                        contactPerson: formData.contactPerson,
+                      })}
                     </p>
                     <button 
                       onClick={() => {
-                        setFormData({ brandName: '', contactPerson: '', email: '', budget: 'under-50k', placementInterest: 'sponsored-brands', message: '' });
+                        setFormData({ brandName: '', contactPerson: '', email: '', budget: defaultBudget, placementInterest: defaultPlacement, message: '' });
                         setSubmitted(false);
                       }}
                       className="px-6 py-2.5 bg-navy hover:bg-orange-primary text-white text-[9px] font-black uppercase tracking-widest rounded-lg transition-colors border-none cursor-pointer"
                     >
-                      Submit Another Inquiry
+                      {content.successResetLabel}
                     </button>
                   </motion.div>
                 )}

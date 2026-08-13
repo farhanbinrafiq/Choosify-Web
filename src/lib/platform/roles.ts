@@ -13,11 +13,15 @@ export const ALL_PLATFORM_ROLES: PlatformRole[] = [
 ];
 
 /** Map persisted user role → platform role */
-export function toPlatformRole(role: UserRole): PlatformRole {
-  switch (role) {
+export function toPlatformRole(role: UserRole | string): PlatformRole {
+  switch (String(role || '').toLowerCase()) {
     case 'customer':
+    case 'consumer':
+    case 'buyer':
+    case 'user':
       return 'buyer';
     case 'seller':
+    case 'verified_seller':
       return 'seller';
     case 'brand':
       return 'brand';
@@ -26,6 +30,7 @@ export function toPlatformRole(role: UserRole): PlatformRole {
     case 'moderator':
       return 'moderator';
     case 'admin':
+    case 'super_admin':
       return 'admin';
     default:
       return 'buyer';

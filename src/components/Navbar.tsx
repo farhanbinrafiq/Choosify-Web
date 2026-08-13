@@ -12,7 +12,7 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
 import { CartDrawer } from './CartDrawer';
 import { cn } from '../lib/utils';
-import { PRIMARY_NAV_ITEMS, resolveSiteNavigation } from '../lib/navigation';
+import { resolveSiteNavigation } from '../lib/navigation';
 import { isNavPathEnabled } from '../lib/featureFlags';
 import { toast } from '../lib/notify';
 import { ChoosifyWordmarkLogo } from './ChoosifyWordmarkLogo';
@@ -92,30 +92,13 @@ export function Navbar() {
   const navItems = resolveSiteNavigation(siteConfig?.navigation);
 
   const renderNavLinks = (linkClass: (path: string) => string) =>
-    navItems ? (
-      navItems
-        .filter((item) => isNavPathEnabled(item.path, featureFlags))
-        .map((item) => (
+    navItems
+      .filter((item) => isNavPathEnabled(item.path, featureFlags))
+      .map((item) => (
         <Link key={item.id} to={item.path} className={linkClass(item.path)}>
           {item.label}
         </Link>
-      ))
-    ) : (
-      <>
-        {PRIMARY_NAV_ITEMS.filter((item) => isNavPathEnabled(item.path, featureFlags)).map((item) => (
-          <Link key={item.id} to={item.path} className={linkClass(item.path)}>
-            {item.labelWide ? (
-              <>
-                <span className="2xl:hidden">{item.label}</span>
-                <span className="hidden 2xl:inline">{item.labelWide}</span>
-              </>
-            ) : (
-              item.label
-            )}
-          </Link>
-        ))}
-      </>
-    );
+      ));
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -435,7 +418,7 @@ export function Navbar() {
           <div
             ref={categoryStripRef}
             {...categoryStripProps}
-            className="choosify-touch-scroll-row flex items-center gap-5 xl:gap-[22px] overflow-x-auto no-scrollbar px-4 sm:px-6 lg:px-6 xl:px-8 h-[38px] max-w-[100vw]"
+            className="choosify-touch-scroll-row flex items-center gap-4 xl:gap-5 2xl:gap-[22px] overflow-x-auto no-scrollbar px-4 sm:px-6 lg:px-6 xl:px-8 h-[38px] max-w-[100vw]"
           >
             {renderNavLinks(getLinkClass)}
           </div>
@@ -468,7 +451,7 @@ export function Navbar() {
             >
               <div className="flex flex-col">
                 <div className="flex items-center justify-between px-5 py-4 bg-[#F4F7F9] border-b border-[#E8EDF2]">
-                  <span className="text-[13px] font-bold tracking-tight text-[#1A1A2E]">Browse</span>
+                  <span className="text-[13px] font-bold tracking-tight text-[#1A1A2E]">Menu</span>
                   <button
                     type="button"
                     onClick={() => setIsMobileMenuOpen(false)}
@@ -483,31 +466,19 @@ export function Navbar() {
                   <span className="text-[10.5px] font-bold text-[#9AA0AC] tracking-[0.04em] mb-2 px-1">
                     Sections
                   </span>
-                  {navItems ? (
-                    navItems
-                      .filter((item) => item.path !== '/messages')
-                      .map((item) => (
-                        <Link
-                          key={item.id}
-                          to={item.path}
-                          onClick={() => setIsMobileMenuOpen(false)}
-                          className={getMobileLinkClass(item.path)}
-                        >
-                          <span>{item.label}</span>
-                        </Link>
-                      ))
-                  ) : (
-                    PRIMARY_NAV_ITEMS.filter((item) => item.path !== '/messages').map((item) => (
+                  {navItems
+                    .filter((item) => item.path !== '/messages')
+                    .filter((item) => isNavPathEnabled(item.path, featureFlags))
+                    .map((item) => (
                       <Link
                         key={item.id}
                         to={item.path}
                         onClick={() => setIsMobileMenuOpen(false)}
                         className={getMobileLinkClass(item.path)}
                       >
-                        <span>{item.labelWide || item.label}</span>
+                        <span>{item.label}</span>
                       </Link>
-                    ))
-                  )}
+                    ))}
                 </div>
 
               </div>

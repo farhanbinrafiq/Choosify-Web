@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useGlobalState } from '../context/GlobalStateContext';
 import type { SiteFooterColumn } from '../types/catalog';
+import { getNavigationLabel } from '../lib/navigation';
 import { ChoosifyTextWordmarkLogo } from './ChoosifyTextWordmarkLogo';
 import { ChoosifyWordmarkLogo } from './ChoosifyWordmarkLogo';
 import { BrandIcon } from './icons/BrandIcon';
@@ -14,7 +15,7 @@ const DEFAULT_FOOTER_COLUMNS: SiteFooterColumn[] = [
     title: 'Discover',
     links: [
       { label: 'Top Brands', url: '/brands' },
-      { label: 'Browse', url: '/products' },
+      { label: 'Products & Services', url: '/products' },
       { label: 'New Arrival', url: '/products?sort=new' },
       { label: 'Compare Tool', url: '/compare' },
       { label: 'Best Deals', url: '/deals' },
@@ -24,9 +25,9 @@ const DEFAULT_FOOTER_COLUMNS: SiteFooterColumn[] = [
     id: 'company',
     title: 'Company',
     links: [
-      { label: 'Suggest a brand', url: '/about#suggest-brand' },
-      { label: 'Partnership', url: '/about#partnership' },
-      { label: 'Advertise', url: '/about#advertise' },
+      { label: 'Suggest a brand', url: '/suggest-brand' },
+      { label: 'Partnership', url: '/partnership' },
+      { label: 'Advertise', url: '/advertise' },
       { label: 'B2B', url: '/about#b2b' },
     ],
   },
@@ -34,9 +35,9 @@ const DEFAULT_FOOTER_COLUMNS: SiteFooterColumn[] = [
     id: 'legal',
     title: 'Legal',
     links: [
-      { label: 'Terms', url: '/about#terms' },
-      { label: 'Policy', url: '/about#privacy' },
-      { label: 'Contact us', url: '/about#contact' },
+      { label: 'Terms', url: '/terms' },
+      { label: 'Policy', url: '/privacy' },
+      { label: 'Contact us', url: '/contact' },
       { label: 'About', url: '/about' },
       { label: 'Careers', url: '/careers' },
     ],
@@ -123,13 +124,14 @@ function FooterLink({
   label: string;
   url: string;
 }) {
-  const isCompare = label.toLowerCase().includes('compare');
+  const displayLabel = getNavigationLabel(url, label);
+  const isCompare = displayLabel.toLowerCase().includes('compare');
   const className =
     'text-[13px] font-medium text-white/70 hover:text-white transition-colors inline-flex items-center gap-2';
 
   const content = (
     <>
-      {label}
+      {displayLabel}
       {isCompare && (
         <span className="text-[9px] font-bold text-white bg-[#2323FF] px-1.5 py-0.5 rounded tracking-wide">
           NEW
@@ -167,6 +169,50 @@ export function Footer() {
     [footer?.columns],
   );
 
+  const officeAddresses = useMemo(() => {
+    const fromCms = [footer?.usaOffice, footer?.bangladeshOffice]
+      .filter(Boolean)
+      .map((office, idx) => {
+        const lines =
+          (office?.lines && office.lines.length
+            ? office.lines
+            : String((office as { address?: string } | undefined)?.address || '')
+                .split(/\n+/)
+                .map((l) => l.trim())
+                .filter(Boolean)) || [];
+        return {
+          id: idx === 0 ? 'usa' : 'bangladesh',
+          label: office?.title || (idx === 0 ? 'USA Office' : 'Bangladesh Office'),
+          lines: lines.length ? lines : OFFICE_ADDRESSES[idx]?.lines || [],
+        };
+      })
+      .filter((o) => o.lines.length > 0);
+    return fromCms.length ? fromCms : OFFICE_ADDRESSES;
+  }, [footer?.usaOffice, footer?.bangladeshOffice]);
+
+  const contactEmail = footer?.contactEmail || 'support@choosify.bd';
+  const contactPhone = footer?.contactPhone || '+880 01410 423014';
+  const dbid = footer?.dbid?.trim() || '—';
+  const tradeLicense = footer?.tradeLicense?.trim() || '—';
+  const year = new Date().getFullYear();
+
+  const deliveryPartners = (footer?.deliveryPartners || [])
+    .filter((p) => p.enabled !== false)
+    .sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  const platforms =
+    footer?.platforms?.filter((p) => p.enabled !== false).length
+      ? footer.platforms.filter((p) => p.enabled !== false)
+      : APP_DOWNLOADS.map((app) => ({
+          id: app.id,
+          platform: app.platform,
+          store: app.store,
+          href: app.href,
+          qrImage: undefined as string | undefined,
+          storeIcon: app.storeIcon,
+          platformIcon: app.platformIcon,
+        }));
+
   return (
     <footer
       className="w-full footer-brand-gradient text-gray-400 font-sans relative overflow-hidden"
@@ -180,7 +226,8 @@ export function Footer() {
               <ChoosifyTextWordmarkLogo height={48} className="h-12 w-auto" />
             </Link>
             <p className="text-white/50 text-[13px] leading-relaxed mb-6">
-              {footer?.description ||
+              {footer?.tagline ||
+                footer?.description ||
                 "Bangladesh's smartest product discovery platform. Find the best brand, compare price, and shop with confidence."}
             </p>
             <FooterHeading>Connect</FooterHeading>
@@ -209,16 +256,16 @@ export function Footer() {
             <FooterHeading>Contact Us</FooterHeading>
             <div className="flex flex-col gap-2">
               <a
-                href="mailto:support@choosify.bd"
+                href={`mailto:${contactEmail}`}
                 className="text-[13px] font-medium text-white/70 hover:text-white transition-colors"
               >
-                Email: support@choosify.bd
+                Email: {contactEmail}
               </a>
               <a
-                href="tel:+8801410423014"
+                href={`tel:${contactPhone.replace(/\s+/g, '')}`}
                 className="text-[13px] font-medium text-white/70 hover:text-white transition-colors"
               >
-                Phone: +880 01410 423014
+                Phone: {contactPhone}
               </a>
             </div>
           </div>
@@ -242,7 +289,7 @@ export function Footer() {
             <div>
               <FooterHeading>Address</FooterHeading>
               <div className="flex flex-col gap-4">
-                {OFFICE_ADDRESSES.map((office) => (
+                {officeAddresses.map((office) => (
                   <div key={office.id}>
                     <p className="text-[13px] font-semibold text-white/90 mb-1">{office.label}</p>
                     <p className="text-[12px] font-medium text-white/50 leading-relaxed">
@@ -260,133 +307,159 @@ export function Footer() {
         </div>
 
         {/* Bottom strip: payments + apps — same column split as brand/links above */}
-        <div className="border-t border-white/10 pt-8 pb-8">
-          <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_1.85fr] gap-10 lg:gap-16 items-start">
-            <div>
-              <FooterHeading>Payments Accepted</FooterHeading>
-              <PaymentMethodsGrid layout="row" />
-            </div>
+        {footer?.showPaymentIcons !== false && (
+          <div className="border-t border-white/10 pt-8 pb-8">
+            <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_1.85fr] gap-10 lg:gap-16 items-start">
+              <div>
+                <FooterHeading>Payments Accepted</FooterHeading>
+                <PaymentMethodsGrid layout="row" />
+              </div>
 
-            <div className="w-full lg:flex lg:flex-col lg:items-end lg:text-right">
-              <FooterHeading>Available On Platforms</FooterHeading>
-              <p className="text-white/45 text-xs mb-4 lg:max-w-md">
-                Download the app — or scan to open the store
-              </p>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full lg:w-auto lg:max-w-[520px]">
-                {APP_DOWNLOADS.map((app) => (
-                  <div
-                    key={app.id}
-                    className="flex items-center gap-3 rounded-2xl bg-white/[0.04] border border-white/10 p-2.5 pr-3 text-left w-full"
-                  >
-                    <a
-                      href={app.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-2.5 flex-1 min-w-0 hover:opacity-90 transition-opacity"
-                      aria-label={`Download Choosify on ${app.store}`}
-                    >
-                      <span className="w-10 h-10 rounded-xl bg-black flex items-center justify-center overflow-hidden shrink-0">
-                        <img
-                          src={app.storeIcon}
-                          alt=""
-                          className="w-6 h-6 object-contain"
-                          draggable={false}
-                        />
-                      </span>
-                      <span className="flex flex-col min-w-0">
-                        <span className="text-[10px] uppercase tracking-wide text-white/40 font-semibold truncate">
-                          Get it on
-                        </span>
-                        <span className="flex items-center gap-1 text-[13px] font-semibold text-white/90 min-w-0">
+              <div className="w-full lg:flex lg:flex-col lg:items-end lg:text-right">
+                <FooterHeading>Available On Platforms</FooterHeading>
+                <p className="text-white/45 text-xs mb-4 lg:max-w-md">
+                  Download the app — or scan to open the store
+                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full lg:w-auto lg:max-w-[520px]">
+                  {platforms.map((app) => {
+                    const fallback = APP_DOWNLOADS.find((a) => a.id === app.id);
+                    const storeIcon = (app as { storeIcon?: string }).storeIcon || fallback?.storeIcon;
+                    const platformIcon = (app as { platformIcon?: string }).platformIcon || fallback?.platformIcon;
+                    return (
+                      <div
+                        key={app.id}
+                        className="flex items-center gap-3 rounded-2xl bg-white/[0.04] border border-white/10 p-2.5 pr-3 text-left w-full"
+                      >
+                        <a
+                          href={app.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2.5 flex-1 min-w-0 hover:opacity-90 transition-opacity"
+                          aria-label={`Download Choosify on ${app.store}`}
+                        >
+                          <span className="w-10 h-10 rounded-xl bg-black flex items-center justify-center overflow-hidden shrink-0">
+                            {storeIcon ? (
+                              <img
+                                src={storeIcon}
+                                alt=""
+                                className="w-6 h-6 object-contain"
+                                draggable={false}
+                              />
+                            ) : null}
+                          </span>
+                          <span className="flex flex-col min-w-0">
+                            <span className="text-[10px] uppercase tracking-wide text-white/40 font-semibold truncate">
+                              Get it on
+                            </span>
+                            <span className="flex items-center gap-1 text-[13px] font-semibold text-white/90 min-w-0">
+                              {platformIcon ? (
+                                <img
+                                  src={platformIcon}
+                                  alt=""
+                                  className={
+                                    app.id === 'apple'
+                                      ? 'w-3 h-3 object-contain invert shrink-0'
+                                      : 'w-3 h-3 object-contain shrink-0'
+                                  }
+                                  draggable={false}
+                                />
+                              ) : null}
+                              <span className="truncate">{app.platform}</span>
+                            </span>
+                          </span>
+                        </a>
+
+                        <a
+                          href={app.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="shrink-0 rounded-lg bg-white p-1.5 hover:opacity-95 transition-opacity"
+                          aria-label={`Scan QR code for ${app.store}`}
+                          title={`Scan for ${app.store}`}
+                        >
                           <img
-                            src={app.platformIcon}
-                            alt=""
-                            className={
-                              app.id === 'apple'
-                                ? 'w-3 h-3 object-contain invert shrink-0'
-                                : 'w-3 h-3 object-contain shrink-0'
+                            src={
+                              app.qrImage ||
+                              `https://api.qrserver.com/v1/create-qr-code/?size=72x72&margin=6&data=${encodeURIComponent(app.href)}`
                             }
-                            draggable={false}
+                            alt={`QR code for ${app.store}`}
+                            width={64}
+                            height={64}
+                            className="w-14 h-14 min-[400px]:w-16 min-[400px]:h-16 object-contain"
+                            loading="lazy"
                           />
-                          <span className="truncate">{app.platform}</span>
-                        </span>
-                      </span>
-                    </a>
-
-                    <a
-                      href={app.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="shrink-0 rounded-lg bg-white p-1.5 hover:opacity-95 transition-opacity"
-                      aria-label={`Scan QR code for ${app.store}`}
-                      title={`Scan for ${app.store}`}
-                    >
-                      <img
-                        src={`https://api.qrserver.com/v1/create-qr-code/?size=72x72&margin=6&data=${encodeURIComponent(app.href)}`}
-                        alt={`QR code for ${app.store}`}
-                        width={64}
-                        height={64}
-                        className="w-14 h-14 min-[400px]:w-16 min-[400px]:h-16 object-contain"
-                        loading="lazy"
-                      />
-                    </a>
-                  </div>
-                ))}
+                        </a>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Delivery partner + business IDs */}
-        <div className="border-t border-white/10 pt-8 pb-8">
-          <div className="flex flex-wrap gap-8 lg:gap-16">
-            {TRUST_SECTIONS.map((section) => (
-              <div key={section.id}>
-                <FooterHeading>{section.title}</FooterHeading>
+        {footer?.showDeliveryPartners !== false && (
+          <div className="border-t border-white/10 pt-8 pb-8">
+            <div className="flex flex-wrap gap-8 lg:gap-16">
+              <div>
+                <FooterHeading>Delivery Partner</FooterHeading>
                 <div className="flex flex-wrap items-center gap-2">
-                  {section.logos.map((logo) => (
+                  {(deliveryPartners.length
+                    ? deliveryPartners.map((logo) => ({
+                        src: logo.image || '',
+                        alt: logo.label,
+                      }))
+                    : TRUST_SECTIONS[0].logos
+                  ).map((logo) => (
                     <span
-                      key={logo.src}
+                      key={logo.src || logo.alt}
                       className="inline-flex items-center justify-center h-9 w-[72px] px-1.5 rounded-md overflow-hidden bg-white"
                       title={logo.alt}
                       aria-label={logo.alt}
                     >
-                      <img
-                        src={logo.src}
-                        alt={logo.alt}
-                        className="h-5 w-auto max-w-full object-contain"
-                        loading="lazy"
-                        draggable={false}
-                      />
+                      {logo.src ? (
+                        <img
+                          src={logo.src}
+                          alt={logo.alt}
+                          className="h-5 w-auto max-w-full object-contain"
+                          loading="lazy"
+                          draggable={false}
+                        />
+                      ) : (
+                        <span className="text-[9px] font-bold text-slate-700">{logo.alt}</span>
+                      )}
                     </span>
                   ))}
                 </div>
               </div>
-            ))}
 
-            <div className="flex flex-wrap gap-8 lg:gap-16 lg:ml-auto lg:text-right">
-              <div>
-                <FooterHeading>DBID</FooterHeading>
-                <p className="text-[13px] font-medium text-white/70">
-                  DBID No: —
-                </p>
-              </div>
+              <div className="flex flex-wrap gap-8 lg:gap-16 lg:ml-auto lg:text-right">
+                <div>
+                  <FooterHeading>DBID</FooterHeading>
+                  <p className="text-[13px] font-medium text-white/70">DBID No: {dbid}</p>
+                </div>
 
-              <div>
-                <FooterHeading>Trade License Number</FooterHeading>
-                <p className="text-[13px] font-medium text-white/70">
-                  Trade License No: —
-                </p>
+                <div>
+                  <FooterHeading>Trade License Number</FooterHeading>
+                  <p className="text-[13px] font-medium text-white/70">Trade License No: {tradeLicense}</p>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
         <div className="border-t border-white/10 py-5 flex items-center justify-center">
           <p className="text-xs text-white/35">
-            <span className="text-orange-primary">©</span> 2026{' '}
-            <span className="text-orange-primary font-semibold">Choosify</span>
-            . All rights reserved.
+            {footer?.copyrightText ? (
+              footer.copyrightText
+            ) : (
+              <>
+                <span className="text-orange-primary">©</span> {year}{' '}
+                <span className="text-orange-primary font-semibold">Choosify</span>
+                . All rights reserved.
+              </>
+            )}
           </p>
         </div>
       </div>

@@ -31,6 +31,7 @@ import type { CatalogBrand, CatalogCategory, CatalogCreator, CatalogDeal, Catalo
 import { mapCatalogCreator, mapCatalogGuide } from '../utils/editorialMappers';
 import { commerceProductToCatalog, resolveCatalogProducts } from '../utils/productNormalize';
 import type { Creator } from '../data/creators';
+import { useOptionalCmsDraftPreview } from '../contexts/CmsDraftPreviewContext';
 
 declare module '../types/schemas' {
   interface SubOrderItem {
@@ -1127,6 +1128,15 @@ export function useGlobalState() {
   const context = useContext(GlobalStateContext);
   if (!context) {
     throw new Error('useGlobalState must be used within a GlobalStateProvider');
+  }
+  // Soft optional: CMS draft preview overrides published homepage/site when present.
+  const draftPreview = useOptionalCmsDraftPreview();
+  if (draftPreview?.homepageOverride || draftPreview?.siteOverride) {
+    return {
+      ...context,
+      homepageConfig: draftPreview.homepageOverride ?? context.homepageConfig,
+      siteConfig: draftPreview.siteOverride ?? context.siteConfig,
+    };
   }
   return context;
 }

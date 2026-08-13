@@ -1,14 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  ChevronRight, Plus, CheckCircle, Info, Star, Award, ShieldCheck, 
-  Globe, Send, HelpCircle, ArrowRight
-} from 'lucide-react';
+import { Award, ShieldCheck, ArrowRight } from 'lucide-react';
 import { StaticPageHero } from '../components/StaticPageHero';
 import { operationsApi } from '../services/operationsApi';
+import { useGlobalState } from '../context/GlobalStateContext';
+import { enabledSorted, fillTemplate, resolveSitePages } from '../lib/cmsSitePages';
+
+function whyCardIcon(id: string, index: number) {
+  if (id === 'local' || index === 1) {
+    return <Award className="text-orange-primary w-4.5 h-4.5 shrink-0" />;
+  }
+  return <ShieldCheck className="text-emerald-500 w-4.5 h-4.5 shrink-0" />;
+}
 
 export function SuggestBrandPage() {
+  const { siteConfig } = useGlobalState();
+  const content = resolveSitePages(siteConfig?.sitePages).suggestBrand;
+  const whyCards = enabledSorted(content.whyCards);
+  const howSteps = enabledSorted(content.howSteps);
+  const categoryOptions = enabledSorted(content.categoryOptions);
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
@@ -52,13 +63,13 @@ export function SuggestBrandPage() {
             {/* Left Column: Title & Description */}
             <div className="lg:col-span-7 space-y-4 text-left">
               <span className="inline-block bg-[#EB4501]/10 text-orange-primary text-[9px] font-mono font-black uppercase tracking-[0.25em] px-3.5 py-1 rounded-full border border-orange-primary/10">
-                Community Discovery
+                {content.hero.badge}
               </span>
               <h1 className="text-2xl sm:text-3xl md:text-[2.5rem] font-extrabold text-white tracking-tight leading-tight">
-                Suggest a Brand
+                {content.hero.title}
               </h1>
               <p className="text-gray-300 text-sm md:text-base font-medium leading-relaxed max-w-xl">
-                Help us discover great brands for the Choosify community. Recommend local or international brands that offer quality, authenticity, and incredible value.
+                {content.hero.description}
               </p>
             </div>
 
@@ -73,15 +84,15 @@ export function SuggestBrandPage() {
                 <div className="absolute -top-10 -right-10 w-24 h-24 bg-orange-primary/10 rounded-full blur-2xl pointer-events-none" />
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 rounded-full bg-orange-primary/10 border border-orange-primary/20 flex items-center justify-center text-orange-primary text-lg">
-                    ðŸ’¡
+                    {content.hero.sideCardIcon || '💡'}
                   </div>
                   <div>
-                    <h3 className="text-white text-xs font-black uppercase tracking-wider">Discovery Engine</h3>
-                    <p className="text-white/40 text-[10px] uppercase font-bold tracking-widest mt-0.5">Community Driven</p>
+                    <h3 className="text-white text-xs font-black uppercase tracking-wider">{content.hero.sideCardTitle}</h3>
+                    <p className="text-white/40 text-[10px] uppercase font-bold tracking-widest mt-0.5">{content.hero.sideCardSubtitle}</p>
                   </div>
                 </div>
                 <p className="text-white/70 text-xs leading-relaxed font-medium">
-                  Over 70% of listed brand catalogs are vetted directly from recommendations proposed by savvy consumers like you. Let's make smart shopping mainstream!
+                  {content.hero.sideCardBody}
                 </p>
               </motion.div>
             </div>
@@ -99,48 +110,37 @@ export function SuggestBrandPage() {
             {/* Section: Why Suggest Brands */}
             <div className="space-y-4">
               <h2 className="text-xl md:text-2xl font-extrabold text-[#1A1A2E] tracking-tight">
-                Why Suggest Brands
+                {content.whyHeading}
               </h2>
               <div className="h-0.5 w-16 bg-orange-primary mb-6" />
               <p className="text-gray-600 text-sm leading-relaxed font-medium">
-                Choosify is built on trust, transparency, and authenticity. By suggesting high-quality brands that deserve a spotlight, you're helping thousands of Bangladeshi consumers make confident buying choices. Avoid online shop scams and help others connect with authentic, verified outlets.
+                {content.whyBody}
               </p>
               
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
-                <div className="bg-white border border-[#e8edf2] rounded-[5px] p-5 shadow-xs">
-                  <h4 className="text-xs font-black text-navy uppercase tracking-wider mb-2 flex items-center gap-2">
-                    <ShieldCheck className="text-emerald-500 w-4.5 h-4.5 shrink-0" />
-                    Expand Secure Outlets
-                  </h4>
-                  <p className="text-gray-500 text-[11px] leading-relaxed font-semibold">
-                    We vet every recommended store against stringent authenticity guidelines to protect consumers.
-                  </p>
-                </div>
-                <div className="bg-white border border-[#e8edf2] rounded-[5px] p-5 shadow-xs">
-                  <h4 className="text-xs font-black text-navy uppercase tracking-wider mb-2 flex items-center gap-2">
-                    <Award className="text-orange-primary w-4.5 h-4.5 shrink-0" />
-                    Promote Local Craft
-                  </h4>
-                  <p className="text-gray-500 text-[11px] leading-relaxed font-semibold">
-                    Support home-grown Bangladeshi artisans, weavers, boutique designers, and indie entrepreneurs.
-                  </p>
-                </div>
+                {whyCards.map((card, index) => (
+                  <div key={card.id} className="bg-white border border-[#e8edf2] rounded-[5px] p-5 shadow-xs">
+                    <h4 className="text-xs font-black text-navy uppercase tracking-wider mb-2 flex items-center gap-2">
+                      {whyCardIcon(card.id, index)}
+                      {card.title}
+                    </h4>
+                    <p className="text-gray-500 text-[11px] leading-relaxed font-semibold">
+                      {card.desc}
+                    </p>
+                  </div>
+                ))}
               </div>
             </div>
 
             {/* Section: How Brand Discovery Works */}
             <div className="space-y-4">
               <h2 className="text-xl md:text-2xl font-extrabold text-[#1A1A2E] tracking-tight">
-                How Brand Discovery Works
+                {content.howHeading}
               </h2>
               <div className="h-0.5 w-16 bg-orange-primary mb-6" />
               <div className="space-y-6">
-                {[
-                  { step: '01', title: 'Submit Recommendation', desc: 'Provide basic brand coordinates such as their website, social media profile, and category fields.' },
-                  { step: '02', title: 'Authenticity Vetting', desc: 'Our moderation desk evaluates their customer reputation, catalog quality, and business integrity.' },
-                  { step: '03', title: 'Platform Onboarding', desc: 'We list the approved brand profile, letting users search their items, compare rates, and write reviews.' }
-                ].map((item, index) => (
-                  <div key={index} className="flex gap-4 items-start">
+                {howSteps.map((item) => (
+                  <div key={item.id} className="flex gap-4 items-start">
                     <span className="text-2xl font-black text-orange-primary/30 font-mono italic leading-none">{item.step}</span>
                     <div>
                       <h4 className="text-xs font-black text-navy uppercase tracking-wider mb-1">{item.title}</h4>
@@ -154,24 +154,17 @@ export function SuggestBrandPage() {
             {/* Section: Benefits of Joining Choosify */}
             <div className="space-y-4">
               <h2 className="text-xl md:text-2xl font-extrabold text-[#1A1A2E] tracking-tight">
-                Benefits of Joining Choosify
+                {content.benefitsHeading}
               </h2>
               <div className="h-0.5 w-16 bg-orange-primary mb-6" />
               <p className="text-gray-600 text-sm leading-relaxed font-medium">
-                Vetted brands receive extensive visibility on Bangladesh's smartest product discovery canvas:
+                {content.benefitsIntro}
               </p>
               <ul className="grid grid-cols-1 md:grid-cols-2 gap-3 pl-0 list-none text-xs text-gray-500 font-semibold">
-                {[
-                  'âœ“ Premium brand listing placement in search results',
-                  'âœ“ Direct verification badge to showcase credibility',
-                  'âœ“ Instant review tracking & customer feedback cycles',
-                  'âœ“ Access to compare tools highlighting key selling points',
-                  'âœ“ Ability to post deals, promos, and discount vouchers',
-                  'âœ“ Targeted campaign spots reaching high-intent buyers'
-                ].map((benefit, i) => (
+                {content.benefits.map((benefit, i) => (
                   <li key={i} className="flex items-center gap-2">
-                    <span className="text-orange-primary">â˜…</span>
-                    <span>{benefit.substring(2)}</span>
+                    <span className="text-orange-primary">★</span>
+                    <span>{benefit}</span>
                   </li>
                 ))}
               </ul>
@@ -194,71 +187,68 @@ export function SuggestBrandPage() {
                     className="space-y-6"
                   >
                     <div>
-                      <h3 className="text-sm font-extrabold text-[#1A1A2E] tracking-tight mb-1">Suggest Sourcing</h3>
-                      <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Fill in brand credentials below</p>
+                      <h3 className="text-sm font-extrabold text-[#1A1A2E] tracking-tight mb-1">{content.formHeading}</h3>
+                      <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">{content.formSubheading}</p>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4 text-xs font-semibold text-gray-700">
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">Brand Name *</label>
+                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.brandName.label}</label>
                         <input 
                           type="text" 
                           required
                           value={formData.brandName}
                           onChange={e => setFormData({...formData, brandName: e.target.value})}
-                          placeholder="e.g., Aarong, Apex, local boutique name" 
+                          placeholder={content.fields.brandName.placeholder}
                           className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium"
                         />
                       </div>
 
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">Website / Social Profile *</label>
+                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.website.label}</label>
                         <input 
                           type="text" 
                           required
                           value={formData.website}
                           onChange={e => setFormData({...formData, website: e.target.value})}
-                          placeholder="e.g., www.brand.com or social URL" 
+                          placeholder={content.fields.website.placeholder}
                           className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium"
                         />
                       </div>
 
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">Category</label>
+                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.category.label}</label>
                         <select 
                           value={formData.category}
                           onChange={e => setFormData({...formData, category: e.target.value})}
                           className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium"
                         >
-                          <option value="">Select a Category</option>
-                          <option value="Fashion & Lifestyle">Fashion & Lifestyle</option>
-                          <option value="Mobile & Phones">Mobile & Phones</option>
-                          <option value="Tech & Electronics">Tech & Electronics</option>
-                          <option value="Beauty & Cosmetics">Beauty & Cosmetics</option>
-                          <option value="Jewelry & Accessories">Jewelry & Accessories</option>
-                          <option value="Home & Living">Home & Living</option>
+                          <option value="">{content.fields.category.placeholder || 'Select a Category'}</option>
+                          {categoryOptions.map((opt) => (
+                            <option key={opt.id} value={opt.value}>{opt.label}</option>
+                          ))}
                         </select>
                       </div>
 
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">Country</label>
+                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.country.label}</label>
                         <input 
                           type="text" 
                           value={formData.country}
                           onChange={e => setFormData({...formData, country: e.target.value})}
-                          placeholder="e.g., Bangladesh, Japan, USA" 
+                          placeholder={content.fields.country.placeholder}
                           className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium"
                         />
                       </div>
 
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">Why should we list this brand? *</label>
+                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.reason.label}</label>
                         <textarea 
                           rows={3}
                           required
                           value={formData.reason}
                           onChange={e => setFormData({...formData, reason: e.target.value})}
-                          placeholder="Tell us what makes them stand out, their catalog, authenticity level, etc." 
+                          placeholder={content.fields.reason.placeholder}
                           className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium resize-none"
                         />
                       </div>
@@ -267,7 +257,7 @@ export function SuggestBrandPage() {
                         type="submit"
                         className="w-full py-3 bg-[#050514] hover:bg-orange-primary text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-all flex items-center justify-center gap-2 group border-none cursor-pointer mt-4"
                       >
-                        Submit Suggestion
+                        {content.submitLabel}
                         <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
                       </button>
                     </form>
@@ -280,14 +270,14 @@ export function SuggestBrandPage() {
                     className="py-12 px-2 text-center flex flex-col items-center justify-center space-y-6"
                   >
                     <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-500 flex items-center justify-center text-3xl">
-                      âœ“
+                      ✓
                     </div>
                     <div>
-                      <h3 className="text-base font-extrabold text-[#1A1A2E] tracking-tight mb-1">Thank You!</h3>
-                      <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">Suggestion Submitted Successfully</p>
+                      <h3 className="text-base font-extrabold text-[#1A1A2E] tracking-tight mb-1">{content.successTitle}</h3>
+                      <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">{content.successSubtitle}</p>
                     </div>
                     <p className="text-gray-500 text-xs leading-relaxed font-semibold max-w-sm">
-                      We have logged your suggestion for <span className="text-navy font-bold">{formData.brandName}</span>. Our vetting desk will evaluate this brand profile shortly. Thank you for contributing to the Choosify discovery platform!
+                      {fillTemplate(content.successBodyTemplate, { brandName: formData.brandName })}
                     </p>
                     <button 
                       onClick={() => {
@@ -296,7 +286,7 @@ export function SuggestBrandPage() {
                       }}
                       className="px-6 py-2.5 bg-navy hover:bg-orange-primary text-white text-[9px] font-black uppercase tracking-widest rounded-lg transition-colors border-none cursor-pointer"
                     >
-                      Suggest Another Brand
+                      {content.successResetLabel}
                     </button>
                   </motion.div>
                 )}

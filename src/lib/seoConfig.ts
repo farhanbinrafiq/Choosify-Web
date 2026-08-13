@@ -63,11 +63,11 @@ export const STATIC_PAGE_SEO: Record<string, SeoMeta> = {
     ogCardType: 'default',
   },
   '/products': {
-    title: formatPageTitle('Browse Products & Services'),
+    title: formatPageTitle('Products & Services'),
     description:
       'Browse verified products and services with prices, reviews, and brand trust signals.',
     ogCardType: 'default',
-    label: 'Browse',
+    label: 'Products & Services',
   },
   '/brands': {
     title: formatPageTitle('Top Brands'),
