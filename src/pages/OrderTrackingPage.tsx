@@ -13,6 +13,8 @@ import { toast } from '../lib/notify';
 import { ProductCard } from '../components/ProductCard';
 import { SponsoredCardChrome } from '../components/commerce/SponsoredCardChrome';
 import { PRODUCT_CARD_GRID } from '../lib/pageLayout';
+import { useDashboard } from '../context/DashboardContext';
+import { ensureStorefrontSupportThread } from '../lib/supportConversation';
 
 type TrackingStatus = 'pending' | 'dispatched' | 'transit' | 'delivered';
 
@@ -66,6 +68,7 @@ function statusIndex(status: string) {
 export function OrderTrackingPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { createNewThread } = useDashboard();
   const { orders, allProducts } = useGlobalState();
 
   // Load from location state OR retrieve latest order from localStorage database
@@ -446,7 +449,10 @@ export function OrderTrackingPage() {
 
                 <button
                   type="button"
-                  onClick={() => navigate('/messages')}
+                  onClick={async () => {
+                    const opened = await ensureStorefrontSupportThread({ createNewThread });
+                    navigate(opened?.conversationId ? `/messages/${opened.conversationId}` : '/messages');
+                  }}
                   className="bg-white border border-[#FCA5A5] text-[#FF000D] py-2.5 rounded-lg text-[11.5px] font-bold cursor-pointer hover:bg-[#FEF2F2] transition-colors flex items-center justify-center gap-1.5"
                 >
                   <MessageCircleMore size={13} className="text-[#EB4501]" />

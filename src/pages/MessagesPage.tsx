@@ -29,6 +29,8 @@ import { EmiChatPanel } from '../components/EmiChatPanel';
 import type { BookingOfferCard } from '../types/serviceBooking';
 import type { Order } from '../types/schemas';
 import { evaluatePostOrderConversationExpiry, resolveOrderForMessageThread } from '../lib/messaging/conversationExpiry';
+import { ensureStorefrontSupportThread, isChoosifySupportThread } from '../lib/supportConversation';
+import { messagingApi } from '../services/messagingApi';
 
 type ConversationTab = 'all' | 'orders' | 'support' | 'unread';
 
@@ -223,6 +225,44 @@ export function MessagesPage({
       }
     };
 
+    if (isChoosifySupportThread(activeThread)) {
+      (async () => {
+        try {
+          const rows = await messagingApi.listSupportMessages(activeThreadId);
+          if (cancelled || !Array.isArray(rows) || !rows.length) return;
+          setThreadMessages((prev) => {
+            const mapped = rows.map((row, index) => {
+              const timestamp = String(row.createdAt || new Date().toISOString());
+              const isUser = row.senderRole !== 'admin' && row.senderRole !== 'system';
+              return {
+                id: index + 1,
+                serverId: String(row.id),
+                threadId: activeThreadId,
+                text: String(row.body || ''),
+                sender: (isUser ? 'user' : 'other') as 'user' | 'other',
+                senderName: isUser ? 'Me' : 'Choosify Support',
+                time: formatTime(timestamp),
+                createdAt: timestamp,
+                status: (isUser ? 'delivered' : undefined) as 'delivered' | undefined,
+              };
+            });
+            const serverIds = new Set(mapped.map((m) => m.serverId));
+            const kept = prev.filter(
+              (m) =>
+                m.threadId !== activeThreadId ||
+                (m.serverId && serverIds.has(m.serverId)),
+            );
+            return [...kept, ...mapped] as typeof prev;
+          });
+        } catch {
+          /* keep local history if API unreachable */
+        }
+      })();
+      return () => {
+        cancelled = true;
+      };
+    }
+
     (async () => {
       try {
         const result = await operationsApi.listPlatformMessages({ userId: currentUser.id });
@@ -297,7 +337,7 @@ export function MessagesPage({
     return () => {
       cancelled = true;
     };
-  }, [activeThreadId, currentUser.id, setThreadMessages, threads]);
+  }, [activeThreadId, activeThread, currentUser.id, setThreadMessages, threads]);
 
   useEffect(() => {
     const viewport = chatViewportRef.current;
@@ -695,6 +735,17 @@ export function MessagesPage({
     const userMsg = inputText.trim();
     setInputText('');
 
+    if (isChoosifySupportThread(activeThread)) {
+      try {
+        await messagingApi.sendSupportMessage(activeThreadId, userMsg);
+      } catch (err) {
+        toast.error((err as Error)?.message || 'Could not send support message.');
+        return;
+      }
+      addThreadMessage(activeThreadId, userMsg, 'user', 'Me');
+      return;
+    }
+
     try {
       await operationsApi.submitPlatformMessage({
         buyerId: currentUser.id || 'user-standard',
@@ -730,17 +781,14 @@ export function MessagesPage({
     addThreadMessage(activeThreadId, userMsg, 'user', 'Me');
   };
 
-  const handleNewConversation = () => {
-    const id = `thread-support-${Date.now()}`;
-    createNewThread(
-      id,
-      'Choosify Support',
-      PLACEHOLDER_IMAGE,
-      'general',
-      'How can we help you today?',
-    );
-    selectThread(id);
-    setConversationTab('support');
+  const handleNewConversation = async () => {
+    const opened = await ensureStorefrontSupportThread({
+      createNewThread,
+      selectThread,
+    });
+    if (opened?.conversationId) {
+      setConversationTab('support');
+    }
   };
 
   const handleMarkAllAsRead = () => {
@@ -856,14 +904,14 @@ export function MessagesPage({
           }`}
         >
           <div className="p-4 border-b border-[#E8EDF2] space-y-3 bg-white shrink-0">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2">
               <span className="text-[11px] font-extrabold text-[#9AA0AC] tracking-[0.4px]">
                 Your conversations
               </span>
               <button
                 type="button"
                 onClick={handleNewConversation}
-                className="px-3 py-1.5 rounded-full bg-[#EB4501] text-white flex items-center gap-1.5 text-[10.5px] font-bold border-none cursor-pointer hover:bg-[#CF4400] transition-colors shrink-0"
+                className="w-full box-border px-3 py-2 rounded-lg bg-[#EB4501] text-white flex items-center justify-center gap-1.5 text-[10.5px] font-bold border-none cursor-pointer hover:bg-[#CF4400] transition-colors"
                 title="Start a new conversation with Choosify Support"
               >
                 <MessageCircleMore size={12} strokeWidth={2.5} />
