@@ -683,6 +683,11 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
         setCatalogPlacements(placements);
         setHomepageConfig(homepage.homepage);
         setSiteConfig(site);
+        const cmsFavicon = site?.websiteAssets?.favicon;
+        if (cmsFavicon && typeof document !== 'undefined') {
+          const iconLink = document.querySelector<HTMLLinkElement>('link[rel="icon"]');
+          if (iconLink) iconLink.href = cmsFavicon;
+        }
         setFeatureFlags((prev) => normalizeFeatureFlags({ ...prev, ...flags }));
 
         const detailEntries = await Promise.all(

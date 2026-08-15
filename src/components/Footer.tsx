@@ -223,7 +223,15 @@ export function Footer() {
         <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_1.85fr] gap-10 lg:gap-16 pb-10">
           <div className="max-w-sm">
             <Link to="/" className="inline-flex items-center mb-4" aria-label="Choosify Home">
-              <ChoosifyTextWordmarkLogo height={48} className="h-12 w-auto" />
+              {siteConfig?.websiteAssets?.footerLogo ? (
+                <img
+                  src={siteConfig.websiteAssets.footerLogo}
+                  alt="Choosify"
+                  className="h-12 w-auto object-contain"
+                />
+              ) : (
+                <ChoosifyTextWordmarkLogo height={48} className="h-12 w-auto" />
+              )}
             </Link>
             <p className="text-white/50 text-[13px] leading-relaxed mb-6">
               {footer?.tagline ||

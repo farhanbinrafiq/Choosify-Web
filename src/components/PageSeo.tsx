@@ -104,6 +104,8 @@ function resolveMeta(
   if (staticMeta) {
     return {
       ...staticMeta,
+      title: cmsEntry?.title || staticMeta.title,
+      description: cmsEntry?.metaDescription || staticMeta.description,
       keywords: cmsEntry?.keywords || staticMeta.keywords,
       ogType: staticMeta.ogType || resolveOgType(pathname),
       entityImage: cmsEntry?.ogImage,

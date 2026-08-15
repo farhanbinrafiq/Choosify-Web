@@ -217,10 +217,18 @@ export function Navbar() {
         {/* LOGO — official Choosify wordmark (shrinks on narrow mobile so it never covers search) */}
         <div className="flex items-center min-w-0 shrink max-w-[min(132px,34vw)] sm:max-w-[min(300px,64vw)] sm:shrink-0">
           <Link to="/" className="flex min-w-0 items-center group" aria-label="Choosify Home">
-            <ChoosifyWordmarkLogo
-              fluid
-              className="h-9 sm:h-[3.25rem] w-auto max-w-full group-hover:opacity-95 transition-opacity"
-            />
+            {siteConfig?.websiteAssets?.navbarLogo ? (
+              <img
+                src={siteConfig.websiteAssets.navbarLogo}
+                alt="Choosify"
+                className="h-9 sm:h-[3.25rem] w-auto max-w-full group-hover:opacity-95 transition-opacity object-contain"
+              />
+            ) : (
+              <ChoosifyWordmarkLogo
+                fluid
+                className="h-9 sm:h-[3.25rem] w-auto max-w-full group-hover:opacity-95 transition-opacity"
+              />
+            )}
           </Link>
         </div>
 
