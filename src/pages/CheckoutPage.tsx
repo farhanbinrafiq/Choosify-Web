@@ -122,6 +122,16 @@ export function CheckoutPage() {
     }
   }, [isCODRestricted, sslcommerzConfigured]);
 
+  // The 'credit' (simulated) option is only ever rendered while sslcommerzConfigured is false.
+  // Once the real gateway status resolves true, move any stale 'credit' selection (e.g. the
+  // pendingOrder/booking default below) onto the real 'online' path so a hidden button can
+  // never remain silently selected.
+  React.useEffect(() => {
+    if (sslcommerzConfigured && paymentMethod === 'credit') {
+      setPaymentMethod('online');
+    }
+  }, [sslcommerzConfigured, paymentMethod]);
+
   // If cart is empty, redirect — unless we just placed an order (cart clears before navigate)
   React.useEffect(() => {
     if (orderPlacedRef.current) return;
@@ -791,23 +801,28 @@ ORDER STATUS: PENDING_CONFIRMATION
                 </div>
               </button>
 
-              <button
-                onClick={() => setPaymentMethod('credit')}
-                className={cn(
-                  "w-full p-4 rounded-lg border text-left flex gap-4 items-start transition-all",
-                  paymentMethod === 'credit' 
-                    ? "border-[#EB4501] bg-[#EB4501]/5" 
-                    : "border-[#E8EDF2] bg-white hover:bg-[#F4F7F9]"
-                )}
-              >
-                <div className="w-5 h-5 rounded-full border flex items-center justify-center shrink-0 mt-0.5 bg-white border-gray-300">
-                  {paymentMethod === 'credit' && <div className="w-2.5 h-2.5 bg-[#EB4501] rounded-full" />}
-                </div>
-                <div>
-                  <h4 className="text-[11px] font-extrabold text-[#1A1A2E] uppercase tracking-wide leading-none mb-1">Online / Prepayment</h4>
-                  <p className="text-[10px] text-[#9AA0AC] font-medium leading-normal">Pay securely via card, bank transfer, or digital wallet.</p>
-                </div>
-              </button>
+              {/* Legacy simulated-payment fallback: only offered while no real gateway is
+                  configured, so it never sits next to (and gets confused with) the real
+                  SSLCommerz option below. Labeled honestly — this does not process a real charge. */}
+              {!sslcommerzConfigured && (
+                <button
+                  onClick={() => setPaymentMethod('credit')}
+                  className={cn(
+                    "w-full p-4 rounded-lg border text-left flex gap-4 items-start transition-all",
+                    paymentMethod === 'credit'
+                      ? "border-[#EB4501] bg-[#EB4501]/5"
+                      : "border-[#E8EDF2] bg-white hover:bg-[#F4F7F9]"
+                  )}
+                >
+                  <div className="w-5 h-5 rounded-full border flex items-center justify-center shrink-0 mt-0.5 bg-white border-gray-300">
+                    {paymentMethod === 'credit' && <div className="w-2.5 h-2.5 bg-[#EB4501] rounded-full" />}
+                  </div>
+                  <div>
+                    <h4 className="text-[11px] font-extrabold text-[#1A1A2E] uppercase tracking-wide leading-none mb-1">Prepayment (Test Mode)</h4>
+                    <p className="text-[10px] text-[#9AA0AC] font-medium leading-normal">No live payment gateway is connected yet — this records the order as paid without charging a real card, bank, or wallet.</p>
+                  </div>
+                </button>
+              )}
 
               {sslcommerzConfigured && (
                 <button
