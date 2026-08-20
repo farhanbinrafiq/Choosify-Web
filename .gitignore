@@ -10,3 +10,4 @@ tsc-out.txt
 tsc-full.txt
 
 dist/
+dist-server/

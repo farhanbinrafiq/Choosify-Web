@@ -224,7 +224,7 @@ export function LoginSignUpPage() {
   };
 
   const handleForgotPassword = () => {
-    toast('Password reset coming soon. Contact support if you need help.', { icon: '🔑' });
+    navigate('/forgot-password');
   };
 
   const isSignUp = activeTab === 'sign-up';

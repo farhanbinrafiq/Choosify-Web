@@ -5,7 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "dev:server": "tsx server.ts",
+    "build": "vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist-server/server.cjs",
+    "start": "node dist-server/server.cjs",
     "preview": "vite preview",
     "lint": "tsc --noEmit",
     "generate:og": "node scripts/generate-og-assets.mjs",

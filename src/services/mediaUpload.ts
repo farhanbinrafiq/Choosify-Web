@@ -120,3 +120,89 @@ export async function uploadVerificationFile(file: File): Promise<{ url: string;
   const url = await uploadViaOperationsApi(file);
   return { url, name: file.name };
 }
+
+/**
+ * Routes a Consumer's own file through the canonical media chokepoint
+ * (`server/media/mediaUploadService.ts` via `POST /catalog/media/upload`) —
+ * the same pipeline sellers/creators/admins use for product/brand images,
+ * just with a category any authenticated user may write to for their own
+ * account (see `CONSUMER_UPLOAD_CATEGORIES` server-side). No separate
+ * upload architecture, only a narrower auth gate on the same endpoint.
+ */
+async function uploadViaCatalogMediaFull(
+  file: File,
+  category: 'users' | 'reviews' | 'warranty-claims',
+): Promise<{ url: string; mediaId: string }> {
+  const allowedImage = file.type.startsWith('image/');
+  const allowedVideo = category === 'warranty-claims' && file.type.startsWith('video/');
+  if (!allowedImage && !allowedVideo) {
+    throw new Error(
+      category === 'warranty-claims'
+        ? 'Please choose a JPG, PNG, WebP image or MP4/WebM video file.'
+        : 'Please choose a JPG, PNG, or WebP image file.',
+    );
+  }
+  const base64Data = await fileToBase64(file);
+  const token = getAccessToken();
+  if (!token) {
+    throw new Error('You must be signed in to upload a photo.');
+  }
+  const response = await fetch(`${API_BASE}/catalog/media/upload`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({
+      fileName: file.name,
+      mimeType: file.type,
+      data: base64Data,
+      category,
+    }),
+  });
+  if (!response.ok) {
+    const raw = await response.text();
+    let message = raw || `Upload failed with ${response.status}`;
+    try {
+      const parsed = JSON.parse(raw) as { error?: string };
+      if (parsed.error) message = parsed.error;
+    } catch {
+      // keep raw
+    }
+    throw new Error(message);
+  }
+  const payload = (await response.json()) as { url?: string; mediaId?: string };
+  if (!payload.url || !payload.mediaId) {
+    throw new Error('Upload succeeded but no URL/id was returned.');
+  }
+  return { url: payload.url, mediaId: payload.mediaId };
+}
+
+async function uploadViaCatalogMedia(file: File, category: 'users' | 'reviews'): Promise<string> {
+  const result = await uploadViaCatalogMediaFull(file, category);
+  return result.url;
+}
+
+/** Consumer avatar — server-backed, replacing the old localStorage/data-URL-only avatar. */
+export async function uploadUserAvatar(file: File): Promise<string> {
+  return uploadViaCatalogMedia(file, 'users');
+}
+
+/** Review evidence photos — server-backed, up to the caller to cap count (backend caps at 6). */
+export async function uploadReviewPhotos(files: File[]): Promise<string[]> {
+  const urls: string[] = [];
+  for (const file of files.slice(0, 6)) {
+    // eslint-disable-next-line no-await-in-loop
+    urls.push(await uploadViaCatalogMedia(file, 'reviews'));
+  }
+  return urls;
+}
+
+/** Warranty claim evidence — photo/video, private (buyer/seller/admin only). Returns media ids for attachmentMediaIds. */
+export async function uploadWarrantyClaimEvidence(files: File[]): Promise<string[]> {
+  const mediaIds: string[] = [];
+  for (const file of files.slice(0, 8)) {
+    // eslint-disable-next-line no-await-in-loop
+    const result = await uploadViaCatalogMediaFull(file, 'warranty-claims');
+    mediaIds.push(result.mediaId);
+  }
+  return mediaIds;
+}

@@ -37,6 +37,9 @@ const GuideProductsPage = lazy(() => import('./pages/GuideProductsPage').then(m 
 // Eager Login: auth entry must not suspend under Suspense (even with
 // useTransitions={false}, a blank LoadingFallback on Sign In feels broken).
 import { LoginSignUpPage } from './pages/LoginSignUpPage';
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
+const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
 const PostOfferPage = lazy(() => import('./pages/PostOfferPage').then(m => ({ default: m.PostOfferPage })));
 const SearchPage = lazy(() => import('./pages/SearchPage').then(m => ({ default: m.SearchPage })));
 const CreatorsPage = lazy(() => import('./pages/CreatorsPage').then(m => ({ default: m.CreatorsPage })));
@@ -235,6 +238,9 @@ function AppContent() {
             <Route path="/recommendations/:id" element={<LegacyRecommendationRedirect />} />
             <Route path="/guides/:id/products" element={<PageWrapper><GuideProductsPage /></PageWrapper>} />
             <Route path="/login" element={<LoginSignUpPage />} />
+            <Route path="/forgot-password" element={<PageWrapper><ForgotPasswordPage /></PageWrapper>} />
+            <Route path="/reset-password" element={<PageWrapper><ResetPasswordPage /></PageWrapper>} />
+            <Route path="/verify-email" element={<PageWrapper><VerifyEmailPage /></PageWrapper>} />
             <Route path="/post-offer" element={<ProtectedRoute><PageWrapper><PostOfferPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/whats-on" element={<Navigate to="/products" replace />} />
             <Route path="/whats-on/:slug" element={<PageWrapper><LegacyWhatsOnContentRedirect /></PageWrapper>} />

@@ -55,6 +55,7 @@ export type AuthMeResponse = {
   email: string;
   displayName: string;
   role: string;
+  avatarUrl?: string;
 };
 
 export type RefreshResponse = {
@@ -149,4 +150,71 @@ export async function getCurrentUser(accessToken: string): Promise<AuthMeRespons
     throw new Error(await readErrorMessage(response));
   }
   return response.json() as Promise<AuthMeResponse>;
+}
+
+/** Persists a server-uploaded avatar URL (or clears it by passing ''). */
+export async function updateAvatarUrl(accessToken: string, avatarUrl: string): Promise<{ avatarUrl?: string }> {
+  const response = await fetch(`${API_BASE}/auth/profile`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+    body: JSON.stringify({ avatarUrl }),
+  });
+  if (!response.ok) {
+    throw new Error(await readErrorMessage(response));
+  }
+  const body = (await response.json()) as { data?: { avatarUrl?: string } };
+  return { avatarUrl: body.data?.avatarUrl };
+}
+
+// ── Pre-VPS self-hosting pass — self-service email verification + forgot/reset password ──
+
+export async function requestPasswordReset(email: string): Promise<{ success: boolean; message: string }> {
+  const response = await fetch(`${API_BASE}/auth/password-reset-request`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email: email.trim() }),
+  });
+  // Deliberately generic — the API returns the same body whether or not the
+  // email exists. Only a genuinely malformed request (missing/invalid email
+  // format) throws.
+  if (response.status === 400) {
+    throw new Error(await readErrorMessage(response));
+  }
+  return response.json() as Promise<{ success: boolean; message: string }>;
+}
+
+export type ResetPasswordResult = { success: boolean; message?: string; error?: string };
+
+export async function resetPassword(token: string, newPassword: string): Promise<ResetPasswordResult> {
+  const response = await fetch(`${API_BASE}/auth/reset-password`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, newPassword }),
+  });
+  const data = (await response.json().catch(() => ({}))) as ResetPasswordResult;
+  return { ...data, success: response.ok && Boolean(data.success) };
+}
+
+export type VerifyEmailResult = { success: boolean; error?: string };
+
+export async function verifyEmail(token: string): Promise<VerifyEmailResult> {
+  const response = await fetch(`${API_BASE}/auth/verify-email`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token }),
+  });
+  const data = (await response.json().catch(() => ({}))) as VerifyEmailResult;
+  return { ...data, success: response.ok && Boolean(data.success) };
+}
+
+export async function resendVerificationEmail(accessToken: string): Promise<{ success: boolean; message?: string }> {
+  const response = await fetch(`${API_BASE}/auth/resend-verification`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+  });
+  if (!response.ok) {
+    throw new Error(await readErrorMessage(response));
+  }
+  return response.json() as Promise<{ success: boolean; message?: string }>;
 }

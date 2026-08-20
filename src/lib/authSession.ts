@@ -74,6 +74,7 @@ export function buildUserFromAuth(input: {
   email?: string | null;
   displayName?: string | null;
   role?: string;
+  avatarUrl?: string | null;
   previous?: User | null;
 }): User {
   const prev = input.previous;
@@ -93,10 +94,13 @@ export function buildUserFromAuth(input: {
     username,
     phone: prev?.id === input.uid ? prev.phone || '' : '',
     email,
+    // Server-uploaded avatar is authoritative; fall back to a locally-cached
+    // one (pre-migration sessions) and finally a generated placeholder.
     avatar:
-      prev?.id === input.uid && prev.avatar
+      input.avatarUrl ||
+      (prev?.id === input.uid && prev.avatar
         ? prev.avatar
-        : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=EB4501&color=fff`,
+        : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=EB4501&color=fff`),
     address: prev?.id === input.uid ? prev.address || '' : '',
     reputation_score: prev?.id === input.uid ? prev.reputation_score : 50,
     orderStats:
@@ -161,6 +165,7 @@ export async function resolveSessionUser(
     email: remote?.email || identity.email || claims.email,
     displayName: remote?.displayName || identity.displayName || identity.email || claims.email,
     role: remote?.role || identity.role || 'user',
+    avatarUrl: remote?.avatarUrl,
     previous,
   });
 

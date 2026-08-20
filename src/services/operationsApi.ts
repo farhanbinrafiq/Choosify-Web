@@ -80,6 +80,7 @@ export interface PublicProductReview {
   userAvatar?: string;
   rating: number;
   comment: string;
+  photos?: string[];
   createdAt: string;
   productId?: string;
   productTitle?: string;
@@ -198,6 +199,7 @@ export const operationsApi = {
     storeName?: string;
     rating: number;
     comment: string;
+    photos?: string[];
   }) => {
     const result = await request<{ data: unknown }>('/operations/reviews', 'POST', payload);
     return result.data;
