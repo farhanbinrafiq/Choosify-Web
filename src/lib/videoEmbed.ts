@@ -1,3 +1,29 @@
+/**
+ * Pre-VPS self-hosting pass — domains this app will render inside an
+ * <iframe src="...">. Anything else falls through to isEmbeddableVideo()
+ * returning false rather than being blindly framed — embeds stay strictly
+ * URL-based (never raw iframe HTML), but the URL itself is now checked
+ * against an allowlist instead of trusted unconditionally.
+ */
+const ALLOWED_EMBED_HOSTS = [
+  'youtube.com',
+  'www.youtube.com',
+  'youtu.be',
+  'tiktok.com',
+  'www.tiktok.com',
+  'player.vimeo.com',
+  'vimeo.com',
+];
+
+function hasAllowedEmbedHost(url: string): boolean {
+  try {
+    const host = new URL(url).hostname.toLowerCase();
+    return ALLOWED_EMBED_HOSTS.some((allowed) => host === allowed || host.endsWith(`.${allowed}`));
+  } catch {
+    return false;
+  }
+}
+
 /** Converts common video URLs into iframe-safe embed URLs. */
 export function getVideoEmbedUrl(url: string): string {
   if (!url || url === '#') return '';
@@ -50,5 +76,11 @@ export function isDirectVideoFile(url: string): boolean {
 export function isEmbeddableVideo(url: string): boolean {
   if (!url || url === '#') return false;
   const embed = getVideoEmbedUrl(url);
-  return embed.length > 0 && (embed.includes('/embed/') || embed.includes('tiktok.com') || isDirectVideoFile(embed));
+  if (!embed.length) return false;
+  // Direct video files / blob: URLs render via a plain <video> tag, not an
+  // iframe — no cross-origin framing risk, so the host allowlist doesn't apply.
+  if (isDirectVideoFile(embed)) return true;
+  // Anything that would render inside an <iframe src="..."> must be on the
+  // allowlist — this is the actual safety boundary Phase 9 asks for.
+  return (embed.includes('/embed/') || embed.includes('tiktok.com')) && hasAllowedEmbedHost(embed);
 }
