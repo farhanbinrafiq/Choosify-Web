@@ -30,6 +30,12 @@ interface BrandCardDesignProps {
     maxDiscountPercent?: number;
   };
   onClick?: () => void;
+  /**
+   * Quick Comparison only: marks this card as the brand currently being viewed —
+   * disables the link-through, swaps the CTA to "This Brand", and adds a badge/accent
+   * border instead of the normal navigable card treatment. Does not affect any other caller.
+   */
+  isCurrentInComparison?: boolean;
 }
 
 const BRAND_COLORS = [
@@ -98,6 +104,7 @@ export function mapBrandToCardDesign(brand: any, fallback?: any) {
 export const BrandCardDesign = memo(function BrandCardDesign({
   brand,
   onClick,
+  isCurrentInComparison,
 }: BrandCardDesignProps) {
   const { savedBrands, setSavedBrands } = useDashboard();
   const bestForText = brand.bestFor ?? brand.category ?? 'Fashion';
@@ -133,22 +140,36 @@ export const BrandCardDesign = memo(function BrandCardDesign({
     }
   };
 
+  const CardWrapper: any = isCurrentInComparison ? 'div' : Link;
+  const wrapperProps = isCurrentInComparison
+    ? {}
+    : {
+        to:
+          brand.maxDiscountPercent && brand.maxDiscountPercent >= 1
+            ? `/brands/${brand.id}#deals-section`
+            : `/brands/${brand.id}`,
+        onClick,
+      };
+
   return (
-    <Link
-      to={
-        brand.maxDiscountPercent && brand.maxDiscountPercent >= 1
-          ? `/brands/${brand.id}#deals-section`
-          : `/brands/${brand.id}`
-      }
-      onClick={onClick}
-      className="block w-full min-w-0 h-full bg-white rounded-[10px] border border-[#E8EDF2] overflow-hidden relative group select-none"
+    <CardWrapper
+      {...(wrapperProps as any)}
+      className={cn(
+        'block w-full min-w-0 h-full bg-white rounded-[10px] border overflow-hidden relative group select-none',
+        isCurrentInComparison ? 'border-[#EB4501] ring-1 ring-[#EB4501]/30' : 'border-[#E8EDF2]',
+      )}
     >
+      {isCurrentInComparison && (
+        <span className="absolute top-2 left-2 z-[11] rounded-full bg-[#EB4501] text-white text-[9px] font-black uppercase tracking-wide px-2.5 py-1 leading-none shadow-sm pointer-events-none">
+          This Brand
+        </span>
+      )}
       {/* Cover — genuine uploaded brand logo when available, text banner as fallback */}
       <div
         className="relative h-[100px] flex items-center justify-center px-3 overflow-hidden"
         style={{ background: bannerBg }}
       >
-        {brand.maxDiscountPercent != null && brand.maxDiscountPercent >= 1 && (
+        {!isCurrentInComparison && brand.maxDiscountPercent != null && brand.maxDiscountPercent >= 1 && (
           <span className="absolute top-2 left-2 z-[11] rounded-full bg-[#FF000D] text-white text-[9px] font-extrabold px-2 py-0.5 leading-none shadow-sm pointer-events-none">
             {Math.round(brand.maxDiscountPercent)}% Off
           </span>
@@ -233,10 +254,17 @@ export const BrandCardDesign = memo(function BrandCardDesign({
           </div>
         </div>
 
-        <span className="mt-auto block w-full choosify-dark-surface hover:brightness-110 text-white text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-[filter]">
-          View Brand
+        <span
+          className={cn(
+            'mt-auto block w-full text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-[filter]',
+            isCurrentInComparison
+              ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+              : 'choosify-dark-surface hover:brightness-110 text-white',
+          )}
+        >
+          {isCurrentInComparison ? 'This Brand' : 'View Brand'}
         </span>
       </div>
-    </Link>
+    </CardWrapper>
   );
 });

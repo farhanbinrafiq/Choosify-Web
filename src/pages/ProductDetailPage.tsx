@@ -33,10 +33,13 @@ import {
   X,
   Tag,
   Check,
+  ImagePlus,
 } from "lucide-react";
 import { PRODUCTS, BRANDS, PLACEHOLDER_IMAGE } from "../constants";
 import { useGlobalState } from "../context/GlobalStateContext";
 import { operationsApi } from "../services/operationsApi";
+import { uploadReviewPhotos } from "../services/mediaUpload";
+import { ProductQuickComparison } from "../components/QuickComparisonSection";
 import { notificationApi } from "../services/notificationApi";
 import { useDashboard } from "../context/DashboardContext";
 import { motion, AnimatePresence } from "motion/react";
@@ -501,6 +504,7 @@ export function ProductDetailPage() {
               productTitle: product.title,
               rating: row.rating,
               text: row.comment,
+              images: row.photos || [],
               authorName: row.userName,
               authorAvatar: row.userAvatar,
               avatar: row.userAvatar,
@@ -518,6 +522,23 @@ export function ProductDetailPage() {
   const [selectedRating, setSelectedRating] = useState(5);
   const [reviewText, setReviewText] = useState("");
   const [selectedReviewOrderId, setSelectedReviewOrderId] = useState("");
+  const [reviewPhotoFiles, setReviewPhotoFiles] = useState<File[]>([]);
+  const [reviewPhotoPreviews, setReviewPhotoPreviews] = useState<string[]>([]);
+  const [isSubmittingReview, setIsSubmittingReview] = useState(false);
+  const reviewPhotoInputRef = useRef<HTMLInputElement>(null);
+
+  const handleReviewPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const picked = Array.from(e.target.files || []).filter((f) => f.type.startsWith('image/'));
+    e.target.value = '';
+    if (!picked.length) return;
+    setReviewPhotoFiles((prev) => [...prev, ...picked].slice(0, 6));
+    setReviewPhotoPreviews((prev) => [...prev, ...picked.map((f) => URL.createObjectURL(f))].slice(0, 6));
+  };
+
+  const removeReviewPhoto = (index: number) => {
+    setReviewPhotoFiles((prev) => prev.filter((_, i) => i !== index));
+    setReviewPhotoPreviews((prev) => prev.filter((_, i) => i !== index));
+  };
 
   // Reviews may only be posted against a delivered order that contains this product —
   // this is what lets sellers see the purchase date / order type on the posted review.
@@ -549,10 +570,21 @@ export function ProductDetailPage() {
 
   const selectedReviewOrder = reviewableOrders.find((o) => o.orderId === selectedReviewOrderId);
 
-  const handleReviewSubmit = (e: React.FormEvent) => {
+  const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedReviewOrder) {
       toast.error('Choose the order you purchased this product with before posting your review.');
+      return;
+    }
+    setIsSubmittingReview(true);
+    let uploadedPhotoUrls: string[] = [];
+    try {
+      if (reviewPhotoFiles.length) {
+        uploadedPhotoUrls = await uploadReviewPhotos(reviewPhotoFiles);
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to upload review photos.');
+      setIsSubmittingReview(false);
       return;
     }
     const orderType = selectedReviewOrder.isCOD ? 'COD' : 'Online Payment';
@@ -566,6 +598,7 @@ export function ProductDetailPage() {
       rating: selectedRating,
       text: reviewText,
       comment: reviewText,
+      photos: uploadedPhotoUrls,
       authorName: currentUser.name,
       authorAvatar: currentUser?.avatar,
       avatar: currentUser?.avatar,
@@ -584,6 +617,9 @@ export function ProductDetailPage() {
     setSelectedRating(5);
     setReviewText("");
     setSelectedReviewOrderId("");
+    setReviewPhotoFiles([]);
+    setReviewPhotoPreviews([]);
+    setIsSubmittingReview(false);
     toast.success('Review submitted! It will appear after approval.');
     operationsApi
       .submitReview({
@@ -596,6 +632,7 @@ export function ProductDetailPage() {
         storeName: brandName,
         rating: selectedRating,
         comment: reviewText.trim(),
+        photos: uploadedPhotoUrls,
       })
       .catch(() => {});
     if (typeof addNotification === 'function') {
@@ -1293,7 +1330,7 @@ export function ProductDetailPage() {
                       date: formatReviewDate(r.createdAt) || 'Just now',
                       purchaseDate: formatReviewDate(r.purchaseDate) || undefined,
                       orderType: r.orderType,
-                      images: [] as string[],
+                      images: (r.images || r.photos || []) as string[],
                       verified: true,
                     })),
                   ...(product.enablePublicReviews !== false && Array.isArray((product as any).curatedPublicReviews)
@@ -1401,27 +1438,64 @@ export function ProductDetailPage() {
                           className="w-full border-0 outline-none resize-none text-[13px] text-[#1A1A2E] bg-transparent min-h-[20px] leading-relaxed p-0 disabled:cursor-not-allowed"
                         />
                       </div>
-                      <div className="flex justify-between items-center mt-2.5">
-                        <div className="flex items-center gap-1">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <button
-                              key={star}
-                              type="button"
-                              disabled={!selectedReviewOrderId}
-                              onClick={() => setSelectedRating(star)}
-                              className="bg-transparent border-0 p-0 cursor-pointer text-[#FBBF24] text-base leading-none disabled:cursor-not-allowed disabled:opacity-50"
-                              aria-label={`Rate ${star}`}
-                            >
-                              {star <= selectedRating ? '★' : '☆'}
-                            </button>
+
+                      {reviewPhotoPreviews.length > 0 && (
+                        <div className="flex flex-wrap gap-2 mt-2.5">
+                          {reviewPhotoPreviews.map((src, i) => (
+                            <div key={src} className="relative w-14 h-14 rounded-lg overflow-hidden border border-[#E5E7EB]">
+                              <img src={src} alt="" className="w-full h-full object-cover" />
+                              <button
+                                type="button"
+                                onClick={() => removeReviewPhoto(i)}
+                                className="absolute top-0 right-0 bg-black/60 text-white p-0.5"
+                                aria-label="Remove photo"
+                              >
+                                <X size={12} />
+                              </button>
+                            </div>
                           ))}
+                        </div>
+                      )}
+
+                      <div className="flex justify-between items-center mt-2.5">
+                        <div className="flex items-center gap-3">
+                          <div className="flex items-center gap-1">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                              <button
+                                key={star}
+                                type="button"
+                                disabled={!selectedReviewOrderId}
+                                onClick={() => setSelectedRating(star)}
+                                className="bg-transparent border-0 p-0 cursor-pointer text-[#FBBF24] text-base leading-none disabled:cursor-not-allowed disabled:opacity-50"
+                                aria-label={`Rate ${star}`}
+                              >
+                                {star <= selectedRating ? '★' : '☆'}
+                              </button>
+                            ))}
+                          </div>
+                          <input
+                            ref={reviewPhotoInputRef}
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            className="hidden"
+                            onChange={handleReviewPhotoChange}
+                          />
+                          <button
+                            type="button"
+                            disabled={!selectedReviewOrderId || reviewPhotoFiles.length >= 6}
+                            onClick={() => reviewPhotoInputRef.current?.click()}
+                            className="flex items-center gap-1 text-[11px] font-bold text-[#6B7280] hover:text-[#EB4501] disabled:opacity-40 disabled:cursor-not-allowed"
+                          >
+                            <ImagePlus size={14} /> Add photo
+                          </button>
                         </div>
                         <button
                           type="submit"
-                          disabled={!selectedReviewOrderId}
+                          disabled={!selectedReviewOrderId || isSubmittingReview}
                           className="bg-[#EB4501] text-white border-0 px-5 py-2 rounded-lg text-[11.5px] font-extrabold cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                         >
-                          SUBMIT REVIEW
+                          {isSubmittingReview ? 'SUBMITTING…' : 'SUBMIT REVIEW'}
                         </button>
                       </div>
                     </div>
@@ -1643,6 +1717,10 @@ export function ProductDetailPage() {
           </div>
       </main>
       </div>
+
+      {(product?.catalogId || product?.id) && (
+        <ProductQuickComparison productId={String(product?.catalogId ?? product?.id)} />
+      )}
 
       {/* Trust Section */}
       <section className="w-full bg-[#F4F9FF] border-t border-blue-50 py-12">

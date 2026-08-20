@@ -6,6 +6,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { BRANDS, PRODUCTS } from "../constants";
+import { BrandQuickComparison } from "../components/QuickComparisonSection";
 import type { CatalogBrandFaq, CatalogBrandStores } from "../types/catalog";
 import { ProductCard } from "../components/ProductCard";
 import { motion, AnimatePresence } from "motion/react";
@@ -43,62 +44,10 @@ import { BrandFaqSection } from "../components/brand/BrandFaqSection";
 import { BrandStorySection } from "../components/brand/BrandStorySection";
 import {
   rankBrandCatalogProducts,
-  rankCompetitorBrands,
 } from "../utils/listingRanking";
 import { usePriorityClockMs } from "../hooks/usePriorityClockMs";
 
 const BRAND_FEED_GRID = PRODUCT_CARD_GRID;
-
-/** Same check as CategoriesPage — treat only real image URLs as logos (not letter initials). */
-function isBrandLogoImage(value?: string): value is string {
-  return Boolean(value && /^(https?:|data:|\/)/.test(value));
-}
-
-function resolveBrandLogoUrl(source?: {
-  logo?: string;
-  image?: string;
-} | null): string | undefined {
-  if (!source) return undefined;
-  const candidate = source.logo || source.image;
-  return isBrandLogoImage(candidate) ? candidate : undefined;
-}
-
-function CompareBrandAvatar({
-  name,
-  logoUrl,
-  logoBg,
-}: {
-  name: string;
-  logoUrl?: string;
-  logoBg: string;
-}) {
-  const [logoFailed, setLogoFailed] = useState(false);
-  const showLogo = Boolean(logoUrl) && !logoFailed;
-
-  useEffect(() => {
-    setLogoFailed(false);
-  }, [logoUrl]);
-
-  return (
-    <div
-      className="w-6 h-6 rounded-md text-white text-[10px] font-extrabold flex items-center justify-center shrink-0 overflow-hidden"
-      style={{ background: showLogo ? '#FFFFFF' : logoBg }}
-    >
-      {showLogo ? (
-        <img
-          src={logoUrl}
-          alt=""
-          className="w-full h-full object-cover"
-          loading="lazy"
-          referrerPolicy="no-referrer"
-          onError={() => setLogoFailed(true)}
-        />
-      ) : (
-        name.slice(0, 1).toUpperCase() || '?'
-      )}
-    </div>
-  );
-}
 
 export function BrandDetailPage() {
   const brandHeroRef = useRef<HTMLDivElement>(null);
@@ -940,79 +889,6 @@ export function BrandDetailPage() {
     }
     return rankBrandCatalogProducts(list, priorityNowMs);
   }, [filteredProducts, sortOption, priorityNowMs]);
-
-  const compareCompetitorRows = useMemo(() => {
-    const primaryCategory =
-      (brand as { category?: string }).category ||
-      brandProducts[0]?.category ||
-      null;
-    const brandId = String(brand.id);
-    const brandCatalogId = String((brand as { catalogId?: string }).catalogId || brand.id);
-    const brandName = String(brand.name || '').toLowerCase();
-
-    const logoFromCatalog = (b: {
-      id?: string | number;
-      catalogId?: string;
-      name?: string;
-      logo?: string;
-      image?: string;
-    }) => {
-      const direct = resolveBrandLogoUrl(b);
-      if (direct) return direct;
-      const idKeys = new Set(
-        [b.id, b.catalogId].filter(Boolean).map((v) => String(v).toLowerCase()),
-      );
-      const nameKey = String(b.name || '').toLowerCase();
-      const catalogMatch = (allCatalogBrands || []).find((cb) => {
-        const cbId = String(cb.id || '').toLowerCase();
-        const cbSlug = String(cb.slug || '').toLowerCase();
-        return (
-          idKeys.has(cbId) ||
-          idKeys.has(cbSlug) ||
-          (nameKey && String(cb.name || '').toLowerCase() === nameKey)
-        );
-      });
-      return resolveBrandLogoUrl(catalogMatch);
-    };
-
-    const others = (allBrands || []).filter((b: any) => {
-      const id = String(b.id);
-      const name = String(b.name || '').toLowerCase();
-      return id !== brandId && name !== brandName;
-    });
-    const ranked = rankCompetitorBrands(others, primaryCategory, priorityNowMs).slice(0, 3);
-    const selfRating = Number((brand as any).ratings ?? (brand as any).rating ?? 4.3);
-    const selfRow = {
-      name: brand.name,
-      logoUrl: logoFromCatalog({
-        id: brand.id,
-        catalogId: brandCatalogId,
-        name: brand.name,
-        logo: (brand as { logo?: string }).logo,
-        image: (brand as { image?: string }).image,
-      }),
-      logoBg: '#1A1A2E',
-      overall: `${selfRating.toFixed(1)}/5`,
-      quality: `${Math.min(5, selfRating + 0.2).toFixed(1)}/5`,
-      value: `${Math.max(3.5, selfRating - 0.2).toFixed(1)}/5`,
-      support: `${Math.max(3.5, selfRating - 0.3).toFixed(1)}/5`,
-      products: `+${Math.min(99, brandProducts.length || 12)}`,
-    };
-    const competitorRows = ranked.map((b: any) => {
-      const rating = Number(b.ratings ?? b.rating ?? 4.0);
-      return {
-        name: b.name,
-        logoUrl: logoFromCatalog(b),
-        logoBg: '#4B5563',
-        overall: `${rating.toFixed(1)}/5`,
-        quality: `${Math.min(5, rating + 0.1).toFixed(1)}/5`,
-        value: `${Math.max(3.4, rating - 0.1).toFixed(1)}/5`,
-        support: `${Math.max(3.4, rating - 0.2).toFixed(1)}/5`,
-        products: `+${Math.min(99, Math.round((b.followers || 0) / 1000) || 10)}`,
-      };
-    });
-    return [selfRow, ...competitorRows];
-  }, [allBrands, allCatalogBrands, brand, brandProducts, priorityNowMs]);
 
   const totalPages = Math.ceil(sortedProducts.length / productsPerPage);
   const paginatedProducts = sortedProducts.slice(
@@ -1957,81 +1833,6 @@ export function BrandDetailPage() {
 
             <BrandStorySection brandId={brand.id} brandName={brand.name} />
 
-          {/* Compare — softened DC-style */}
-          <div className="w-full">
-            <h3 className="text-[15px] font-extrabold text-[#1A1A2E] mb-3.5">
-              COMPARE {brand.name.toUpperCase()} WITH OTHER BRANDS
-            </h3>
-            <div className="bg-white border border-[#E8EDF2] rounded-[10px] overflow-hidden mb-3.5">
-              <div className="hidden sm:grid grid-cols-[1.4fr_1fr_0.8fr_0.8fr_0.8fr_1.2fr] gap-2.5 px-5 py-3 bg-[#F4F7F9] text-[10px] font-extrabold text-[#9AA0AC]">
-                <div>BRAND</div>
-                <div>OVERALL SCORE</div>
-                <div>QUALITY</div>
-                <div>VALUE</div>
-                <div>SUPPORT</div>
-                <div>POPULAR PRODUCTS</div>
-              </div>
-              {compareCompetitorRows.map((row) => (
-                <div
-                  key={row.name}
-                  className="px-4 sm:px-5 py-3.5 border-t border-[#F1F1F3] sm:grid sm:grid-cols-[1.4fr_1fr_0.8fr_0.8fr_0.8fr_1.2fr] sm:gap-2.5 sm:items-center"
-                >
-                  {/* Mobile: brand + overall on one line, labeled stats fill the row below */}
-                  <div className="flex items-center justify-between gap-2 sm:justify-start">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <CompareBrandAvatar
-                        name={row.name}
-                        logoUrl={row.logoUrl}
-                        logoBg={row.logoBg}
-                      />
-                      <span className="text-[12px] font-bold text-[#1A1A2E] truncate">
-                        {row.name}
-                      </span>
-                    </div>
-                    <div className="text-[11.5px] text-[#1A1A2E] whitespace-nowrap sm:hidden">
-                      {row.overall}{" "}
-                      <span className="text-[#FBBF24]">★★★★</span>
-                    </div>
-                  </div>
-                  <div className="hidden sm:block text-[11.5px] text-[#1A1A2E] whitespace-nowrap">
-                    {row.overall}{" "}
-                    <span className="text-[#FBBF24]">★★★★</span>
-                  </div>
-                  <div className="mt-2.5 grid grid-cols-4 gap-2 sm:hidden">
-                    {[
-                      { label: "Quality", value: row.quality },
-                      { label: "Value", value: row.value },
-                      { label: "Support", value: row.support },
-                      { label: "Products", value: row.products },
-                    ].map((stat) => (
-                      <div key={stat.label} className="min-w-0">
-                        <div className="text-[9px] font-extrabold uppercase tracking-wide text-[#9AA0AC]">
-                          {stat.label}
-                        </div>
-                        <div className="text-[11.5px] text-[#4B5563] whitespace-nowrap">
-                          {stat.value}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className="hidden sm:block text-[11.5px] text-[#4B5563] whitespace-nowrap">{row.quality}</div>
-                  <div className="hidden sm:block text-[11.5px] text-[#4B5563] whitespace-nowrap">{row.value}</div>
-                  <div className="hidden sm:block text-[11.5px] text-[#4B5563] whitespace-nowrap">{row.support}</div>
-                  <div className="hidden sm:block text-[11px] text-[#9AA0AC]">{row.products}</div>
-                </div>
-              ))}
-            </div>
-            <div className="text-center mb-2">
-              <button
-                type="button"
-                onClick={() => navigate("/compare")}
-                className="choosify-emi-gradient text-white border-0 px-5 py-2.5 rounded-lg text-[12px] font-bold cursor-pointer hover:brightness-110 transition-all"
-              >
-                COMPARE MORE BRANDS
-              </button>
-            </div>
-          </div>
-
           {/* Trust strip — DC style */}
           <div className="w-full choosify-dark-surface rounded-xl px-7 py-5 text-center text-white">
             <div className="text-[13px] font-extrabold mb-1">
@@ -2059,6 +1860,10 @@ export function BrandDetailPage() {
           </div>
         </div>
       </div>
+
+      {(brand as { catalogId?: string })?.catalogId || brand?.id ? (
+        <BrandQuickComparison brandId={String((brand as { catalogId?: string })?.catalogId || brand.id)} />
+      ) : null}
 
       <ReportModal
         isOpen={isReportOpen}
