@@ -47,6 +47,7 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { MyPaymentOptionsSection } from './dashboard/MyPaymentOptionsSection';
 import { MyCancellationsSection } from './dashboard/MyCancellationsSection';
 import { MyReturnsSection } from './dashboard/MyReturnsSection';
+import { MyWarrantySection } from './dashboard/MyWarrantySection';
 import { ToPaySection } from './dashboard/ToPaySection';
 import {
   getActiveReturns,
@@ -80,6 +81,9 @@ import { PLACEHOLDER_IMAGE } from '../constants';
 import { PublicReviewCard, resolvePublicReviewAvatarUrl } from '../components/PublicReviewCard';
 import { AddressBookManager } from '../components/address/AddressBookManager';
 import { notify, toast } from '../lib/notify';
+import { getAccessToken } from '../lib/authSession';
+import { updateAvatarUrl } from '../lib/authApi';
+import { uploadUserAvatar } from '../services/mediaUpload';
 import { getConsumerStorefrontDashboardNav, isConsumerDashboardTabAllowed } from '../lib/platform/dashboardRegistry';
 import { SellerWorkspaceSection } from './ReviewDetailPage';
 import { CustomerOrdersPage } from './CustomerOrdersPage';
@@ -99,6 +103,7 @@ const DASHBOARD_TABS_WITH_RIGHT_CONTENT = new Set([
   'to-pay',
   'my-cancellations',
   'my-returns',
+  'my-warranty',
   'my-payment-options',
 ]);
 
@@ -225,6 +230,7 @@ const ACTIVITY_TAB_IDS = new Set([
   'to-pay',
   'my-cancellations',
   'my-returns',
+  'my-warranty',
   'my-payment-options',
 ]);
 const COMMUNICATION_TAB_IDS = new Set(['my-reviews', 'addresses']);
@@ -1416,6 +1422,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
   const [email, setEmail] = useState(currentUser?.email || '');
   const [phone, setPhone] = useState(currentUser?.phone || '');
   const [avatar, setAvatar] = useState(currentUser?.avatar || DEFAULT_AVATAR);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [settingsSubTab, setSettingsSubTab] = useState<SettingsSubTab>(initialSubTab);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -1445,27 +1452,40 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
 
   const handleUploadClick = () => fileInputRef.current?.click();
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
     if (!file.type.startsWith('image/')) {
       toast.error('Please choose an image file.');
       return;
     }
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = String(reader.result || '');
-      setAvatar(dataUrl);
-      persistProfile(dataUrl);
+    const token = getAccessToken();
+    if (!token) {
+      toast.error('You must be signed in to update your profile photo.');
+      return;
+    }
+    setIsUploadingAvatar(true);
+    try {
+      const url = await uploadUserAvatar(file);
+      await updateAvatarUrl(token, url);
+      setAvatar(url);
+      persistProfile(url);
       toast.success('Profile photo updated.');
-    };
-    reader.readAsDataURL(file);
-    e.target.value = '';
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to upload photo.');
+    } finally {
+      setIsUploadingAvatar(false);
+    }
   };
 
-  const handleDeletePhoto = () => {
+  const handleDeletePhoto = async () => {
+    const token = getAccessToken();
     setAvatar(DEFAULT_AVATAR);
     persistProfile(DEFAULT_AVATAR);
+    if (token) {
+      await updateAvatarUrl(token, '').catch(() => undefined);
+    }
     toast.success('Profile photo removed.');
   };
 
@@ -1522,8 +1542,9 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
                 <button
                   type="button"
                   onClick={handleUploadClick}
+                  disabled={isUploadingAvatar}
                   aria-label="Upload new photo"
-                  className="absolute bottom-0 right-0 w-9 h-9 rounded-full bg-[#EB4501] text-white border-2 border-white flex items-center justify-center cursor-pointer shadow-sm hover:brightness-110"
+                  className="absolute bottom-0 right-0 w-9 h-9 rounded-full bg-[#EB4501] text-white border-2 border-white flex items-center justify-center cursor-pointer shadow-sm hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <Camera size={16} />
                 </button>
@@ -1539,15 +1560,16 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
                 <button
                   type="button"
                   onClick={handleUploadClick}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-bold text-[#EB4501] bg-[#EB4501]/10 hover:bg-[#EB4501]/15 border border-[#EB4501]/25 rounded-lg cursor-pointer"
+                  disabled={isUploadingAvatar}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-bold text-[#EB4501] bg-[#EB4501]/10 hover:bg-[#EB4501]/15 border border-[#EB4501]/25 rounded-lg cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <Upload size={14} />
-                  Upload new photo
+                  {isUploadingAvatar ? 'Uploading…' : 'Upload new photo'}
                 </button>
                 <button
                   type="button"
                   onClick={handleDeletePhoto}
-                  disabled={!avatar || avatar === DEFAULT_AVATAR}
+                  disabled={!avatar || avatar === DEFAULT_AVATAR || isUploadingAvatar}
                   className="inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 border border-rose-100 rounded-lg cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
                 >
                   <Trash2 size={14} />
@@ -1882,6 +1904,8 @@ export function DashboardPage() {
         return <MyCancellationsSection />;
       case 'my-returns':
         return <MyReturnsSection />;
+      case 'my-warranty':
+        return <MyWarrantySection />;
       case 'my-payment-options':
         return <MyPaymentOptionsSection />;
       case 'seller-products':
