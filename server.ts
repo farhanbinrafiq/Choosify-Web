@@ -18,7 +18,7 @@ import { buildShareHtml } from './server/shareHtml';
 import { generateOgImage } from './server/ogImage';
 
 const PORT = Number(process.env.PORT) || 4000;
-const HOST = process.env.HOST || '127.0.0.1';
+const HOST = process.env.HOST || '127.0.0.1'; // Production traffic reaches this server through the local Nginx reverse proxy.
 const isProduction = process.env.NODE_ENV === 'production';
 
 function isCrawlerRequest(userAgent: string, pathname: string): boolean {
