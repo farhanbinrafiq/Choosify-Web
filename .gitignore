@@ -11,3 +11,4 @@ tsc-full.txt
 
 dist/
 dist-server/
+dist-server.previous/
