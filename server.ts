@@ -18,6 +18,7 @@ import { buildShareHtml } from './server/shareHtml';
 import { generateOgImage } from './server/ogImage';
 
 const PORT = Number(process.env.PORT) || 4000;
+const HOST = process.env.HOST || '127.0.0.1';
 const isProduction = process.env.NODE_ENV === 'production';
 
 function isCrawlerRequest(userAgent: string, pathname: string): boolean {
@@ -113,7 +114,7 @@ async function startServer() {
   }
 
   const httpServer = createServer(app);
-  httpServer.listen(PORT, '0.0.0.0', () => {
+  httpServer.listen(PORT, HOST, () => {
     console.log(`[Choosify-Web] listening on :${PORT} (${isProduction ? 'production' : 'development'})`);
   });
 }
