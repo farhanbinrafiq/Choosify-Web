@@ -40,14 +40,6 @@ async function startServer() {
   const distPath = path.join(process.cwd(), 'dist');
   const assetRoot = isProduction ? distPath : path.join(process.cwd(), 'public');
 
-  // TEMPORARY, test-only: intentionally makes GET / unhealthy to exercise
-  // the deployment script's automatic rollback path. Must be reverted
-  // immediately after the test. See commit
-  // 'test(ops): exercise automatic web health rollback'.
-  app.get('/', (_req, res) => {
-    res.status(503).send('Service Temporarily Unavailable (deployment rollback test)');
-  });
-
   app.get('/api/og', async (req, res) => {
     try {
       const png = await generateOgImage(
