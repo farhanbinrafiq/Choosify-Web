@@ -90,6 +90,7 @@ import { CustomerOrdersPage } from './CustomerOrdersPage';
 import { DealsVerticalSponsoredCard } from '../components/deals/DealsLowerSections';
 import { UniversalCarousel } from '../components/design/UniversalCarousel';
 import { SellerAccountSidebarCard } from '../components/dashboard/SellerAccountSidebarCard';
+import { BecomeCreatorSidebarCard } from '../components/dashboard/BecomeCreatorSidebarCard';
 
 /** Tabs with their own right column / dense forms — do not inject sponsored rail */
 const DASHBOARD_TABS_WITH_RIGHT_CONTENT = new Set([
@@ -2060,7 +2061,10 @@ export function DashboardPage() {
   );
 
   const sellerAccountCard = (
-    <SellerAccountSidebarCard email={currentUser.email || ''} />
+    <div className="space-y-2">
+      <SellerAccountSidebarCard email={currentUser.email || ''} />
+      <BecomeCreatorSidebarCard email={currentUser.email || ''} />
+    </div>
   );
 
   return (
@@ -2107,8 +2111,12 @@ export function DashboardPage() {
               </button>
             </div>
             {renderSidebarNav(true)}
-            <div className="p-4 mt-auto border-t border-[#E8EDF2]">
+            <div className="p-4 mt-auto border-t border-[#E8EDF2] space-y-2">
               <SellerAccountSidebarCard
+                email={currentUser.email || ''}
+                onNavigate={() => setMobileNavOpen(false)}
+              />
+              <BecomeCreatorSidebarCard
                 email={currentUser.email || ''}
                 onNavigate={() => setMobileNavOpen(false)}
               />

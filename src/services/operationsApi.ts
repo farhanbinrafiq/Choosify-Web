@@ -361,7 +361,7 @@ export const operationsApi = {
   },
   getSellerStatus: async (
     email: string,
-  ): Promise<{ hasSellerAccount: boolean; dashboardPath?: string }> =>
+  ): Promise<{ hasSellerAccount: boolean; hasCreatorAccount?: boolean; dashboardPath?: string }> =>
     request(`/auth/seller-status?email=${encodeURIComponent(email)}`),
 
   listPublicJobs: async (): Promise<PublicJobPosting[]> => {
