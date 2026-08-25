@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  LayoutDashboard, 
-  Heart, 
-  Bookmark, 
-  MessageCircleMore, 
+import {
+  LayoutDashboard,
+  Heart,
+  Bookmark,
+  Loader2,
+  AlertTriangle,
+  RefreshCw,
+  MessageCircleMore,
   Star, 
   Settings, 
   Search, 
@@ -82,6 +85,7 @@ import { PLACEHOLDER_IMAGE } from '../constants';
 import { PublicReviewCard, resolvePublicReviewAvatarUrl } from '../components/PublicReviewCard';
 import { AddressBookManager } from '../components/address/AddressBookManager';
 import { notify, toast } from '../lib/notify';
+import { notificationApi, type AppNotification } from '../services/notificationApi';
 import { getAccessToken } from '../lib/authSession';
 import { updateAvatarUrl } from '../lib/authApi';
 import { uploadUserAvatar } from '../services/mediaUpload';
@@ -1348,10 +1352,48 @@ const MessagesSection = () => {
 };
 
 const NotificationsSection = () => {
-  const { notifications, setNotifications } = useDashboard();
+  const navigate = useNavigate();
+  const [items, setItems] = useState<AppNotification[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const markAllAsRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  const load = React.useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const result = await notificationApi.list({ limit: 30 });
+      setItems(result.items);
+    } catch (e) {
+      setLoadError(e instanceof Error ? e.message : 'Failed to load notifications.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const markAllAsRead = async () => {
+    const unreadIds = items.filter((n) => !n.read).map((n) => n.id);
+    if (!unreadIds.length) return;
+    setItems((prev) => prev.map((n) => ({ ...n, read: true })));
+    try {
+      await notificationApi.markAllRead(unreadIds);
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : 'Failed to mark notifications as read.');
+      load();
+    }
+  };
+
+  const handleOpen = async (n: AppNotification) => {
+    if (!n.read) {
+      setItems((prev) => prev.map((item) => (item.id === n.id ? { ...item, read: true } : item)));
+      notificationApi.markRead(n.id).catch(() => load());
+    }
+    if (n.actionUrl) {
+      navigate(n.actionUrl);
+    }
   };
 
   return (
@@ -1361,49 +1403,83 @@ const NotificationsSection = () => {
           <h2 className="text-2xl font-extrabold text-[#1A1A2E] tracking-tight mb-2">Notifications</h2>
           <p className="text-[#9AA0AC] text-[13px] font-medium">Updates on your curated world</p>
         </div>
-        <button 
-          onClick={markAllAsRead}
+        <div className="flex items-center gap-3">
+          <button
+            onClick={load}
+            disabled={loading}
+            className="flex items-center gap-1.5 text-[12px] font-bold text-gray-500 hover:text-[#1A1A2E] border-none bg-transparent cursor-pointer disabled:opacity-50"
+          >
+            <RefreshCw size={13} className={cn(loading && 'animate-spin')} /> Refresh
+          </button>
+          <button
+            onClick={markAllAsRead}
             className="text-[12px] font-bold text-[#EB4501] tracking-tight hover:underline border-none bg-transparent cursor-pointer"
-        >
-          Mark all as read
-        </button>
+          >
+            Mark all as read
+          </button>
+        </div>
       </div>
 
-      <div className="space-y-4">
-        {notifications.length > 0 ? (
-          notifications.map((n) => (
-            <div 
-              key={n.id} 
-              className={cn(
-                "p-8 bg-white border border-[#e8edf2] rounded-[5px] flex items-start gap-6 transition-all hover:bg-gray-50 relative overflow-hidden group shadow-sm",
-                !n.read && "border-[#EB4501]/30 bg-[#EB4501]/5"
-              )}
-            >
-              {!n.read && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#EB4501]" />}
-              <div className={cn(
-                "w-12 h-12 rounded-lg flex items-center justify-center shrink-0 shadow-sm",
-                n.type === 'price' ? "bg-[#059669]/10 text-[#059669]" : 
-                n.type === 'reply' ? "bg-[#EB4501]/10 text-[#EB4501]" : 
-                "bg-[#EB4501]/15 text-[#EB4501]"
-              )}>
-                {n.type === 'price' ? <TrendingUp size={24} /> : n.type === 'reply' ? <MessageCircleMore size={24} className="text-[#EB4501]" /> : <Bell size={24} />}
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-base font-extrabold text-[#1A1A2E] tracking-tight">{n.title}</h4>
-                  <span className="text-[10px] font-black text-gray-500 uppercase">{n.time}</span>
+      {loading && items.length === 0 ? (
+        <div className="py-32 flex items-center justify-center text-gray-400">
+          <Loader2 size={24} className="animate-spin mr-2" /> Loading notifications…
+        </div>
+      ) : loadError ? (
+        <div className="py-16 flex flex-col items-center text-center text-rose-500 bg-rose-50/40 border border-dashed border-rose-200 rounded-[5px]">
+          <AlertTriangle size={28} className="mb-3" />
+          <p className="text-[13px] font-medium mb-3">{loadError}</p>
+          <button onClick={load} className="text-[11px] font-bold border border-rose-200 rounded-full px-3 py-1.5 cursor-pointer">
+            Try again
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {items.length > 0 ? (
+            items.map((n) => (
+              <div
+                key={n.id}
+                onClick={() => handleOpen(n)}
+                role="button"
+                tabIndex={0}
+                className={cn(
+                  'p-8 bg-white border border-[#e8edf2] rounded-[5px] flex items-start gap-6 transition-all hover:bg-gray-50 relative overflow-hidden group shadow-sm cursor-pointer',
+                  !n.read && 'border-[#EB4501]/30 bg-[#EB4501]/5',
+                )}
+              >
+                {!n.read && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#EB4501]" />}
+                <div
+                  className={cn(
+                    'w-12 h-12 rounded-lg flex items-center justify-center shrink-0 shadow-sm',
+                    n.category === 'seller' ? 'bg-[#059669]/10 text-[#059669]' : 'bg-[#EB4501]/15 text-[#EB4501]',
+                  )}
+                >
+                  {n.type.includes('message') ? (
+                    <MessageCircleMore size={24} className="text-[#EB4501]" />
+                  ) : (
+                    <Bell size={24} />
+                  )}
                 </div>
-                <p className="text-gray-500 text-sm font-bold italic leading-relaxed">{n.message}</p>
+                <div className="flex-1">
+                  <div className="flex items-center justify-between mb-2">
+                    <h4 className="text-base font-extrabold text-[#1A1A2E] tracking-tight">{n.title}</h4>
+                    <span className="text-[10px] font-black text-gray-500 uppercase">
+                      {new Date(n.createdAt).toLocaleString('en-BD')}
+                    </span>
+                  </div>
+                  {n.summary ? (
+                    <p className="text-gray-500 text-sm font-bold italic leading-relaxed">{n.summary}</p>
+                  ) : null}
+                </div>
               </div>
+            ))
+          ) : (
+            <div className="py-32 flex flex-col items-center text-center text-gray-400">
+              <Bell size={64} className="mb-8" />
+              <p className="text-[13px] font-medium text-[#9AA0AC]">No new notifications</p>
             </div>
-          ))
-        ) : (
-          <div className="py-32 flex flex-col items-center text-center text-gray-400">
-            <Bell size={64} className="mb-8" />
-            <p className="text-[13px] font-medium text-[#9AA0AC]">No new notifications</p>
-          </div>
-        )}
-      </div>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -1900,6 +1976,8 @@ export function DashboardPage() {
             }}
           />
         );
+      case 'notifications':
+        return <NotificationsSection />;
       case 'to-pay':
         return <ToPaySection />;
       case 'my-cancellations':

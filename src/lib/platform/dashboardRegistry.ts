@@ -11,6 +11,7 @@ export interface DashboardNavItem {
 
 export const DASHBOARD_NAV_REGISTRY: DashboardNavItem[] = [
   { id: 'overview', label: 'Overview', icon: 'LayoutDashboard', group: 'platform', roles: ['buyer', 'seller', 'brand', 'creator', 'moderator', 'admin'] },
+  { id: 'notifications', label: 'Notifications', icon: 'Bell', group: 'platform', roles: ['buyer', 'seller', 'brand', 'creator', 'moderator', 'admin'] },
   { id: 'saved-items', label: 'Saved Items', icon: 'Bookmark', group: 'platform', roles: ['buyer'] },
   { id: 'following', label: 'Following', icon: 'CheckCircle2', group: 'platform', roles: ['buyer'] },
   { id: 'recently-viewed', label: 'Recently Viewed', icon: 'Clock', group: 'platform', roles: ['buyer'] },

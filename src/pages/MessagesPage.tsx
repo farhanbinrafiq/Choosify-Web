@@ -20,7 +20,6 @@ import {
 } from 'lucide-react';
 import { toast } from '../lib/notify';
 import { operationsApi, type ServerBookingOrder } from '../services/operationsApi';
-import { notificationApi } from '../services/notificationApi';
 import { MessagesRightRail } from '../components/messages/MessagesRightRail';
 import { MobileThreadInfoSheet } from '../components/messages/MobileThreadInfoSheet';
 import { ReportConversationProblemModal } from '../components/messages/ReportConversationProblemModal';
@@ -557,15 +556,7 @@ export function MessagesPage({
           detail: { requestId: offer.requestId, orderId: order.orderId, sellerId: offer.sellerId },
         }),
       );
-      notificationApi
-        .createAndSend({
-          title: 'Buyer accepted your offer',
-          message: `Request ${offer.requestId} was accepted. Pending order ${order.orderId} was created.`,
-          type: 'order',
-          audience: `user:${offer.sellerId}`,
-          sendWeb: true,
-        })
-        .catch(() => {});
+      // Server-side buyerAcceptCounter notifies the seller directly (Sprint 9).
       toast.success('Offer accepted. Pending payment order created.');
     } catch (err) {
       toast.error((err as Error)?.message || 'Failed to accept this offer. Try again.');
@@ -601,15 +592,7 @@ export function MessagesPage({
         );
         applyServerOffer(result.data, 'seller', `Seller declined this request: ${reason}`);
         addNotification(`${offer.sellerName} declined your request: ${reason}`, 'message');
-        notificationApi
-          .createAndSend({
-            title: 'Booking request declined',
-            message: `${offer.sellerName} declined request ${offer.requestId}: ${reason}`,
-            type: 'order',
-            audience: `user:${offer.buyerId}`,
-            sendWeb: true,
-          })
-          .catch(() => {});
+        // Server-side declineBookingRequest notifies the buyer directly (Sprint 9).
       } catch (err) {
         toast.error((err as Error)?.message || 'Failed to decline this booking request.');
       }
@@ -648,15 +631,7 @@ export function MessagesPage({
           `${offer.sellerName} sent a counter-offer of BDT ${price.toLocaleString()}.`,
           'message',
         );
-        notificationApi
-          .createAndSend({
-            title: 'New counter-offer',
-            message: `${offer.sellerName} modified request ${offer.requestId} to BDT ${price.toLocaleString()}.`,
-            type: 'order',
-            audience: `user:${offer.buyerId}`,
-            sendWeb: true,
-          })
-          .catch(() => {});
+        // Server-side counterBookingRequest notifies the buyer directly (Sprint 9).
       } catch (err) {
         toast.error((err as Error)?.message || 'Failed to send counter-offer.');
       }
@@ -676,15 +651,7 @@ export function MessagesPage({
         `${offer.sellerName} accepted your request. You have 8 hours to complete payment.`,
         'message',
       );
-      notificationApi
-        .createAndSend({
-          title: 'Booking request accepted',
-          message: `${offer.sellerName} accepted request ${offer.requestId}. Complete payment within 8 hours.`,
-          type: 'order',
-          audience: `user:${offer.buyerId}`,
-          sendWeb: true,
-        })
-        .catch(() => {});
+      // Server-side acceptBookingRequest notifies the buyer directly (Sprint 9).
     } catch (err) {
       toast.error((err as Error)?.message || 'Failed to accept this booking request.');
     }

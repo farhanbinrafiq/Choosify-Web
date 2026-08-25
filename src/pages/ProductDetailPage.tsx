@@ -40,7 +40,6 @@ import { useGlobalState } from "../context/GlobalStateContext";
 import { operationsApi } from "../services/operationsApi";
 import { uploadReviewPhotos } from "../services/mediaUpload";
 import { ProductQuickComparison } from "../components/QuickComparisonSection";
-import { notificationApi } from "../services/notificationApi";
 import { useDashboard } from "../context/DashboardContext";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../lib/utils";
@@ -1105,15 +1104,7 @@ export function ProductDetailPage() {
           },
         }),
       );
-      notificationApi
-        .createAndSend({
-          title: isService ? 'New booking request' : 'New product request',
-          message: `${currentUser.name} sent request ${requestId} for ${product.title}.`,
-          type: 'order',
-          audience: `user:${sellerId}`,
-          sendWeb: true,
-        })
-        .catch(() => {});
+      // Server-side createBookingRequest notifies the seller directly (Sprint 9).
 
       // Show toast and close
       notify.bookingSent(brandName, isService);
