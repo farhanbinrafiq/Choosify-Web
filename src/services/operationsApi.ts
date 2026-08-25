@@ -257,7 +257,15 @@ export const operationsApi = {
     sellerId?: string;
     conversationId?: string;
     isComplaint?: boolean;
-    bookingOffer?: unknown;
+    /**
+     * Omit `requestId` to have the server create the canonical booking_requests
+     * row and return it in the response's `message.bookingOffer` (with the real
+     * requestId) — see `resolveAutoApprove`/`createBookingRequest` reconciliation
+     * in operationsRouter.ts's platform-messages handler. Only pass a requestId
+     * here when attaching an already-canonical offer (e.g. relaying a seller's
+     * counter-offer message).
+     */
+    bookingOffer?: Omit<Partial<BookingOfferCard>, 'requestId'> & { requestId?: string };
     /** Used by server when ops store has no order row yet (close-only enforcement). */
     orderSnapshot?: {
       orderId?: string;
@@ -272,8 +280,12 @@ export const operationsApi = {
         }>;
       }>;
     };
-  }) => {
-    const result = await request<{ data: unknown }>('/operations/platform-messages', 'POST', payload);
+  }): Promise<{ conversation: unknown; message: { bookingOffer?: BookingOfferCard } }> => {
+    const result = await request<{ data: { conversation: unknown; message: { bookingOffer?: BookingOfferCard } } }>(
+      '/operations/platform-messages',
+      'POST',
+      payload,
+    );
     return result.data;
   },
   getConversationExpiry: async (orderId: string) => {
@@ -284,6 +296,12 @@ export const operationsApi = {
   },
   getBookingRequest: async (requestId: string): Promise<BookingOfferCard> => {
     const result = await request<{ data: BookingOfferCard }>(`/booking/requests/${encodeURIComponent(requestId)}`);
+    return result.data;
+  },
+  listBookingRequestsForBuyer: async (buyerId: string): Promise<BookingOfferCard[]> => {
+    const result = await request<{ data: BookingOfferCard[] }>(
+      `/booking/requests?buyerId=${encodeURIComponent(buyerId)}`,
+    );
     return result.data;
   },
   payBookingRequest: async (requestId: string, orderId?: string, paymentType: 'full' | 'partial' = 'full') => {

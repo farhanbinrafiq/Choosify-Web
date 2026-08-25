@@ -699,6 +699,7 @@ export function ProductDetailPage() {
   const [orderNotes, setOrderNotes] = useState("");
   const [requestValues, setRequestValues] = useState<Record<string, string | number>>({});
   const [showOrderConfirm, setShowOrderConfirm] = useState(false);
+  const [isSendingBookingRequest, setIsSendingBookingRequest] = useState(false);
 
   // Sync state options when product changes
   React.useEffect(() => {
@@ -1005,9 +1006,9 @@ export function ProductDetailPage() {
     setShowOrderConfig(true);
   };
 
-  const handleConfirmAndSend = () => {
+  const handleConfirmAndSend = async () => {
+    if (isSendingBookingRequest) return;
     const threadId = `thread-brand-${brandId}`;
-    const requestId = `REQ-${Date.now()}`;
     const notesValue = String(requestValues.notes || orderNotes || '');
     const cleanFields = Object.fromEntries(
       Object.entries(requestValues).filter(([key, value]) => key !== 'notes' && value !== ''),
@@ -1017,88 +1018,116 @@ export function ProductDetailPage() {
     const structuredMsg = isService
       ? `Booking request sent for ${product.title}. The seller has 24 hours to respond.`
       : `Product request sent for ${product.title}. The seller has 24 hours to respond.`;
-    const now = Date.now();
-    const bookingOffer: BookingOfferCard = {
-      kind: 'booking_offer',
-      requestId,
-      version: 1,
-      listingId: String(product.id),
-      listingTitle: product.title,
-      listingImage: product.image || PLACEHOLDER_IMAGE,
-      listingHref: `/products/${product.id}`,
-      sellerId: String(product.sellerId || brandId),
-      sellerName: brandName,
-      buyerId: String(currentUser.id),
-      serviceCategory: isService ? serviceCategory : undefined,
-      isService,
-      fields: cleanFields,
-      notes: notesValue,
-      price: estimatedPrice,
-      currency: 'BDT',
-      status: 'pending',
-      createdAt: new Date(now).toISOString(),
-      sellerRespondBy: new Date(now + 24 * 60 * 60 * 1000).toISOString(),
-    };
+    const sellerId = String(product.sellerId || brandId);
+    const listingId = String(product.id);
 
-    // 1. Create message thread
-    createNewThread(
-      threadId,
-      brandName,
-      brandObj?.logo || "https://i.pravatar.cc/150?u=brand",
-      'retail',
-      structuredMsg,
-      requestId
-    );
+    setIsSendingBookingRequest(true);
+    try {
+      // Don't create a second active request for the same listing (e.g. a
+      // repeat click, or reopening "Message to Book" while one is still
+      // pending/countered/accepted) -- reuse the existing one instead.
+      const existing = await operationsApi
+        .listBookingRequestsForBuyer(String(currentUser.id))
+        .catch(() => [] as BookingOfferCard[]);
+      const activeDuplicate = existing.find(
+        (r) =>
+          r.listingId === listingId &&
+          ['pending', 'countered', 'accepted', 'buyer_accepted'].includes(r.status),
+      );
+      if (activeDuplicate) {
+        notify.info(`You already have an active request for ${product.title} — opening it.`);
+        setShowOrderConfirm(false);
+        navigate(`/messages/${threadId}`);
+        return;
+      }
 
-    // 2. Add structural msg
-    addThreadMessage(
-      threadId,
-      structuredMsg,
-      "user",
-      "Me",
-      undefined,
-      bookingOffer,
-    );
-    addNotification(
-      `New ${isService ? 'booking' : 'product'} request ${requestId} sent to ${brandName}.`,
-      'message',
-    );
-    operationsApi
-      .submitPlatformMessage({
+      // Server creates the canonical booking_requests row and returns it with
+      // a real requestId (no requestId is sent here on purpose -- see
+      // operationsApi.submitPlatformMessage).
+      const result = await operationsApi.submitPlatformMessage({
         buyerId: String(currentUser.id),
         userName: currentUser.name || 'Buyer',
         body: structuredMsg,
-        orderId: requestId,
-        sellerId: bookingOffer.sellerId,
-        bookingOffer,
-      })
-      .catch(() => {});
-    window.dispatchEvent(
-      new CustomEvent('choosify-booking-request-created', {
-        detail: {
-          requestId,
-          sellerId: bookingOffer.sellerId,
-          sellerName: brandName,
+        sellerId,
+        bookingOffer: {
+          kind: 'booking_offer',
+          listingId,
           listingTitle: product.title,
+          listingImage: product.image || PLACEHOLDER_IMAGE,
+          listingHref: `/products/${product.id}`,
+          sellerId,
+          sellerName: brandName,
+          buyerId: String(currentUser.id),
+          serviceCategory: isService ? serviceCategory : undefined,
+          isService,
+          fields: cleanFields,
+          notes: notesValue,
+          price: estimatedPrice,
         },
-      }),
-    );
-    notificationApi
-      .createAndSend({
-        title: isService ? 'New booking request' : 'New product request',
-        message: `${currentUser.name} sent request ${requestId} for ${product.title}.`,
-        type: 'order',
-        audience: `user:${bookingOffer.sellerId}`,
-        sendWeb: true,
-      })
-      .catch(() => {});
+      });
 
-    // Show toast and close
-    notify.bookingSent(brandName, isService);
-    setShowOrderConfirm(false);
-    
-    // Redirect to Messages thread
-    navigate(`/messages/${threadId}`);
+      const bookingOffer = result.message?.bookingOffer;
+      const requestId = bookingOffer?.requestId;
+      if (!bookingOffer || !requestId) {
+        throw new Error('Booking request was not created');
+      }
+
+      // 1. Create message thread
+      createNewThread(
+        threadId,
+        brandName,
+        brandObj?.logo || "https://i.pravatar.cc/150?u=brand",
+        'retail',
+        structuredMsg,
+        requestId
+      );
+
+      // 2. Add structural msg
+      addThreadMessage(
+        threadId,
+        structuredMsg,
+        "user",
+        "Me",
+        undefined,
+        bookingOffer,
+      );
+      addNotification(
+        `New ${isService ? 'booking' : 'product'} request ${requestId} sent to ${brandName}.`,
+        'message',
+      );
+      window.dispatchEvent(
+        new CustomEvent('choosify-booking-request-created', {
+          detail: {
+            requestId,
+            sellerId,
+            sellerName: brandName,
+            listingTitle: product.title,
+          },
+        }),
+      );
+      notificationApi
+        .createAndSend({
+          title: isService ? 'New booking request' : 'New product request',
+          message: `${currentUser.name} sent request ${requestId} for ${product.title}.`,
+          type: 'order',
+          audience: `user:${sellerId}`,
+          sendWeb: true,
+        })
+        .catch(() => {});
+
+      // Show toast and close
+      notify.bookingSent(brandName, isService);
+      setShowOrderConfirm(false);
+
+      // Redirect to Messages thread
+      navigate(`/messages/${threadId}`);
+    } catch (error) {
+      notify.error(
+        error instanceof Error ? error.message : 'Could not send this request. Please try again.',
+      );
+    } finally {
+      setIsSendingBookingRequest(false);
+    }
   };
 
   if (!product) {
@@ -1994,15 +2023,17 @@ export function ProductDetailPage() {
                       setShowOrderConfirm(false);
                       setShowOrderConfig(true);
                     }}
-                    className="flex-1 py-3 text-center border border-[#E5E7EB] rounded-lg hover:bg-[#F4F7F9] transition-all text-[13px] font-bold tracking-tight text-[#1A1A2E] cursor-pointer bg-white"
+                    disabled={isSendingBookingRequest}
+                    className="flex-1 py-3 text-center border border-[#E5E7EB] rounded-lg hover:bg-[#F4F7F9] transition-all text-[13px] font-bold tracking-tight text-[#1A1A2E] cursor-pointer bg-white disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Back
                   </button>
                   <button
                     onClick={handleConfirmAndSend}
-                    className="flex-1 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-all text-[13px] font-bold tracking-tight shadow-sm cursor-pointer border-none"
+                    disabled={isSendingBookingRequest}
+                    className="flex-1 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-all text-[13px] font-bold tracking-tight shadow-sm cursor-pointer border-none disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Send Request
+                    {isSendingBookingRequest ? 'Sending…' : 'Send Request'}
                   </button>
                 </div>
               </div>
