@@ -21,6 +21,7 @@ import { ADDRESS_STORAGE_KEY, getDefaultAddress, normalizeDefaultAddress } from 
 import { db } from '../lib/firestoreClient';
 import { getAccessToken } from '../lib/authSession';
 import type { BookingOfferCard } from '../types/serviceBooking';
+import type { ManualOrderOfferCard } from '../types/manualOrder';
 import { operationsApi } from '../services/operationsApi';
 import { useGlobalState } from './GlobalStateContext';
 import {
@@ -84,6 +85,8 @@ export interface ThreadMessage {
   };
   /** Negotiable service/product request rendered as a distinct card in this thread */
   bookingOffer?: BookingOfferCard;
+  /** Seller-initiated manual product order offer (Sprint 10) — accept/reject only, deliberately separate from bookingOffer. */
+  orderOffer?: ManualOrderOfferCard;
   /**
    * For Choosify Announcements messages: the product/guide/campaign/etc.
    * this announcement is about. Used by the announcements right rail.
@@ -169,6 +172,7 @@ interface DashboardContextType {
     senderName?: string,
     productCard?: any,
     bookingOffer?: BookingOfferCard,
+    orderOffer?: ManualOrderOfferCard,
   ) => void;
   createNewThread: (id: string, title: string, avatar: string, type: 'retail' | 'general' | 'announcement', lastMessage: string, orderRef?: string) => void;
   markAllAsRead: () => void;
@@ -794,6 +798,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       body: string,
       bookingOffer: BookingOfferCard | undefined,
       knownThreads: MessageThread[],
+      orderOffer?: ManualOrderOfferCard,
     ): string => {
       const complaintThread = body.match(/\[Complaint[^\]]*·\s*thread\s+([^\s\]]+)/i);
       if (complaintThread?.[1]) return complaintThread[1];
@@ -803,8 +808,8 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
         const byRef = knownThreads.find((t) => t.orderRef === orderId);
         if (byRef) return byRef.id;
       }
-      if (bookingOffer?.sellerId) {
-        const sellerKey = String(bookingOffer.sellerId);
+      if (bookingOffer?.sellerId || orderOffer?.sellerId) {
+        const sellerKey = String(bookingOffer?.sellerId || orderOffer?.sellerId);
         const bySeller = knownThreads.find(
           (t) =>
             t.id === `seller-${sellerKey}` ||
@@ -822,6 +827,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       content?: { body?: string };
       body?: string;
       bookingOffer?: BookingOfferCard;
+      orderOffer?: ManualOrderOfferCard;
       timestamp?: string;
       createdAt?: string;
       direction?: string;
@@ -843,7 +849,8 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
           const content = (row.content || {}) as { body?: string };
           const rawBody = String(content.body || row.body || '');
           const bookingOffer = row.bookingOffer as BookingOfferCard | undefined;
-          const threadId = resolveThreadId(rawBody, bookingOffer, knownThreads);
+          const orderOffer = row.orderOffer as ManualOrderOfferCard | undefined;
+          const threadId = resolveThreadId(rawBody, bookingOffer, knownThreads, orderOffer);
           const text = rawBody
             .replace(/^\[Order\s+[^\]]+\]\s*/i, '')
             .replace(/^\[Complaint[^\]]*\]\s*/i, '')
@@ -861,6 +868,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
             time: formatTime(timestamp),
             createdAt: timestamp,
             bookingOffer,
+            orderOffer,
             status: isBuyer ? 'delivered' : undefined,
           };
         });
@@ -1392,12 +1400,13 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const addThreadMessage = (
-    threadId: string, 
-    text: string, 
-    sender: 'user' | 'other' | 'admin' | 'seller' | 'creator', 
+    threadId: string,
+    text: string,
+    sender: 'user' | 'other' | 'admin' | 'seller' | 'creator',
     senderName?: string,
     productCard?: any,
     bookingOffer?: BookingOfferCard,
+    orderOffer?: ManualOrderOfferCard,
   ) => {
     if (threadId === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID && sender === 'user') {
       return;
@@ -1422,6 +1431,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       status: tracksDelivery ? 'sent' : undefined,
       productCard,
       bookingOffer,
+      orderOffer,
     };
 
     setThreadMessages(prev => {

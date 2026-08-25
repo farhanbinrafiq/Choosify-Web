@@ -7,6 +7,7 @@ import { CHOOSIFY_ANNOUNCEMENTS_TITLE } from '../../lib/announcements';
 import { EntityCard } from './MessagesDynamicContentRail';
 import type { ThreadMessage } from '../../context/DashboardContext';
 import type { BookingOfferCard } from '../../types/serviceBooking';
+import type { ManualOrderOfferCard } from '../../types/manualOrder';
 import { cn } from '../../lib/utils';
 
 export type MessageDeliveryStatus = 'sent' | 'delivered' | 'seen';
@@ -29,6 +30,8 @@ type MessageThreadExchangeProps = {
   onWithdrawProductCard?: (message: ThreadMessage) => void;
   onAcceptProductCounter?: (message: ThreadMessage) => void;
   onDeclineProductCounter?: (message: ThreadMessage) => void;
+  onAcceptOrderOffer?: (offer: ManualOrderOfferCard) => void;
+  onRejectOrderOffer?: (offer: ManualOrderOfferCard) => void;
 };
 
 function isOutgoingForViewer(message: ThreadMessage, viewerIsSeller: boolean): boolean {
@@ -103,6 +106,8 @@ export function MessageThreadExchange({
   onWithdrawProductCard,
   onAcceptProductCounter,
   onDeclineProductCounter,
+  onAcceptOrderOffer,
+  onRejectOrderOffer,
 }: MessageThreadExchangeProps) {
   const lastOutgoingId = useMemo(() => {
     for (let i = messages.length - 1; i >= 0; i -= 1) {
@@ -217,6 +222,93 @@ export function MessageThreadExchange({
                           type="button"
                           onClick={() => onSellerRespondToOffer(m.bookingOffer!, 'accept')}
                           className="rounded-lg border-0 bg-emerald-600 px-3 py-1.5 text-[9px] font-bold text-white cursor-pointer"
+                        >
+                          Accept
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {m.orderOffer && (
+                  <div className="w-full max-w-sm rounded-[14px] overflow-hidden border border-[#E8EDF2] mb-2 text-left bg-white shadow-sm">
+                    <div className="px-4 py-2 border-b border-[#E8EDF2] flex items-center justify-between bg-[#F4F7F9]">
+                      <span className="text-[9px] font-bold uppercase text-[#9AA0AC] tracking-wider flex items-center gap-1.5">
+                        <Package size={11} className="text-[#EB4501]" />
+                        Order offer
+                      </span>
+                      <span
+                        className={cn(
+                          'px-2 py-0.5 text-[9px] font-bold rounded-md border',
+                          m.orderOffer.status === 'pending' &&
+                            'bg-amber-500/10 text-amber-600 border-amber-500/20',
+                          m.orderOffer.status === 'accepted' &&
+                            'bg-green-500/10 text-green-600 border-green-500/20',
+                          m.orderOffer.status === 'rejected' &&
+                            'bg-gray-400/10 text-gray-500 border-gray-400/20',
+                        )}
+                      >
+                        {m.orderOffer.status === 'pending'
+                          ? 'Awaiting response'
+                          : m.orderOffer.status === 'accepted'
+                            ? 'Accepted'
+                            : 'Rejected'}
+                      </span>
+                    </div>
+
+                    <div className="p-4 space-y-2">
+                      {m.orderOffer.items.map((it, idx) => (
+                        <div key={idx} className="flex gap-3 items-center">
+                          <img
+                            src={it.image || PLACEHOLDER_IMAGE}
+                            className="w-12 h-12 rounded-lg object-cover shrink-0 border border-[#E8EDF2] bg-white"
+                            alt=""
+                            referrerPolicy="no-referrer"
+                          />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-xs font-bold text-[#1A1A2E] leading-tight line-clamp-1">
+                              {it.productTitle}
+                            </p>
+                            <p className="text-[10px] text-[#9AA0AC] font-medium">
+                              Qty {it.quantity} · ৳{it.price.toLocaleString()} each
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                      {m.orderOffer.notes && (
+                        <div className="bg-[#F4F7F9] border border-[#E8EDF2] rounded-lg p-2">
+                          <span className="text-[9px] font-bold text-[#9AA0AC] block mb-0.5">Note</span>
+                          <p className="text-[#4B5563] text-[11px] font-medium">{m.orderOffer.notes}</p>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="px-4 py-3 bg-[#F4F7F9]/80 border-t border-[#E8EDF2] text-[10px] flex items-center justify-between">
+                      <span className="text-[#9AA0AC] font-medium">Total</span>
+                      <span className="text-xs font-extrabold text-[#EB4501]">
+                        ৳{m.orderOffer.overallTotal.toLocaleString()}
+                      </span>
+                    </div>
+
+                    {m.orderOffer.status === 'rejected' && m.orderOffer.rejectReason && (
+                      <div className="px-4 py-2 bg-white border-t border-[#E8EDF2] text-[10px] text-[#9AA0AC]">
+                        Reason: {m.orderOffer.rejectReason}
+                      </div>
+                    )}
+
+                    {!viewerIsSeller && m.orderOffer.status === 'pending' && (
+                      <div className="p-3 bg-[#F4F7F9] border-t border-[#E8EDF2] flex justify-end gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => onRejectOrderOffer?.(m.orderOffer!)}
+                          className="px-3 py-1.5 bg-white hover:bg-[#F4F7F9] text-[#4B5563] border border-[#E5E7EB] rounded-lg text-[9px] font-bold transition-all cursor-pointer"
+                        >
+                          Reject
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onAcceptOrderOffer?.(m.orderOffer!)}
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[9px] font-bold transition-all cursor-pointer border-none"
                         >
                           Accept
                         </button>

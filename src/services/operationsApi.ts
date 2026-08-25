@@ -1,4 +1,5 @@
 import type { BookingOfferCard } from '../types/serviceBooking';
+import type { ManualOrderOfferCard, ManualOrderOfferItem } from '../types/manualOrder';
 import { getAccessToken } from '../lib/authSession';
 
 const API_BASE = ((import.meta as any).env?.VITE_API_BASE_URL as string | undefined) || '/api/v1';
@@ -128,6 +129,31 @@ export const operationsApi = {
     );
     return result.data;
   },
+  createManualOrderOffer: async (payload: {
+    buyerId: string;
+    buyerName?: string;
+    items: Array<Pick<ManualOrderOfferItem, 'productId' | 'quantity' | 'price' | 'variantId'>>;
+    deliveryTotal?: number;
+    notes?: string;
+  }): Promise<ManualOrderOfferCard> => {
+    const result = await request<{ data: ManualOrderOfferCard }>('/operations/manual-offers', 'POST', payload);
+    return result.data;
+  },
+  getManualOrderOffer: async (offerId: string): Promise<ManualOrderOfferCard> => {
+    const result = await request<{ data: ManualOrderOfferCard }>(
+      `/operations/manual-offers/${encodeURIComponent(offerId)}`,
+    );
+    return result.data;
+  },
+  acceptManualOrderOffer: async (
+    offerId: string,
+  ): Promise<{ data: ManualOrderOfferCard; order: Record<string, unknown> }> =>
+    request(`/operations/manual-offers/${encodeURIComponent(offerId)}/accept`, 'POST'),
+  rejectManualOrderOffer: async (
+    offerId: string,
+    reason?: string,
+  ): Promise<{ data: ManualOrderOfferCard }> =>
+    request(`/operations/manual-offers/${encodeURIComponent(offerId)}/reject`, 'POST', { reason }),
   getSslcommerzStatus: async (): Promise<{
     configured: boolean;
     provider: string;

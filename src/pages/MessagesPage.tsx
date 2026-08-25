@@ -24,6 +24,8 @@ import { MessagesRightRail } from '../components/messages/MessagesRightRail';
 import { MobileThreadInfoSheet } from '../components/messages/MobileThreadInfoSheet';
 import { ReportConversationProblemModal } from '../components/messages/ReportConversationProblemModal';
 import { MessageThreadExchange } from '../components/messages/MessageThreadExchange';
+import { SendOrderOfferModal } from '../components/messages/SendOrderOfferModal';
+import type { ManualOrderOfferCard } from '../types/manualOrder';
 import { EmiChatPanel } from '../components/EmiChatPanel';
 import type { BookingOfferCard } from '../types/serviceBooking';
 import type { Order } from '../types/schemas';
@@ -117,6 +119,7 @@ export function MessagesPage({
 
   // Interactive Modal states
   const [showReportModal, setShowReportModal] = useState(false);
+  const [showSendOfferModal, setShowSendOfferModal] = useState(false);
   const [showMobileInfo, setShowMobileInfo] = useState(false);
   const [expiryNow, setExpiryNow] = useState(() => Date.now());
   const [focusedAnnouncementId, setFocusedAnnouncementId] = useState<number | null>(null);
@@ -570,6 +573,37 @@ export function MessagesPage({
       toast.success('Offer declined.');
     } catch (err) {
       toast.error((err as Error)?.message || 'Failed to decline this offer. Try again.');
+    }
+  };
+
+  const acceptOrderOffer = async (offer: ManualOrderOfferCard) => {
+    if (!activeThreadId) return;
+    try {
+      const result = await operationsApi.acceptManualOrderOffer(offer.offerId);
+      const orderId = (result.order as { orderId?: string })?.orderId || result.data.orderId;
+      addThreadMessage(
+        activeThreadId,
+        `Offer accepted — order ${orderId} created.`,
+        'user',
+        'Me',
+        undefined,
+        undefined,
+        result.data,
+      );
+      toast.success('Offer accepted — order created.');
+    } catch (err) {
+      toast.error((err as Error)?.message || 'Failed to accept this offer. Try again.');
+    }
+  };
+
+  const rejectOrderOffer = async (offer: ManualOrderOfferCard) => {
+    if (!activeThreadId) return;
+    try {
+      const result = await operationsApi.rejectManualOrderOffer(offer.offerId);
+      addThreadMessage(activeThreadId, 'Offer rejected.', 'user', 'Me', undefined, undefined, result.data);
+      toast.success('Offer rejected.');
+    } catch (err) {
+      toast.error((err as Error)?.message || 'Failed to reject this offer. Try again.');
     }
   };
 
@@ -1261,6 +1295,18 @@ export function MessagesPage({
                   </div>
                 )}
 
+                {currentUser.role === 'seller' && activeThreadId && !isAnnouncementsThread && !isEmiThread && (
+                  <div className="max-w-2xl mx-auto w-full flex justify-end mb-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowSendOfferModal(true)}
+                      className="px-3 py-1.5 bg-white hover:bg-[#FFF3EC] text-[#4B5563] hover:text-[#CF4400] border border-[#E5E7EB] hover:border-[#EB4501] rounded-lg text-[11px] font-bold transition-all cursor-pointer"
+                    >
+                      + Send Order Offer
+                    </button>
+                  </div>
+                )}
+
                 {/* Messages — Messenger-style exchange */}
                 <div className="max-w-2xl mx-auto w-full">
                   {isAnnouncementsThread && announcementSearchQuery && visibleMessages.length === 0 && (
@@ -1280,6 +1326,8 @@ export function MessagesPage({
                     onAcceptBookingOffer={acceptBookingOffer}
                     onDeclineBookingOffer={declineBookingOffer}
                     onSellerRespondToOffer={sellerRespondToOffer}
+                    onAcceptOrderOffer={acceptOrderOffer}
+                    onRejectOrderOffer={rejectOrderOffer}
                     onWithdrawProductCard={(m) => {
                       if (!m.productCard || !activeThreadId) return;
                       updateProductCard(m.id, { status: 'canceled' });
@@ -1510,6 +1558,14 @@ export function MessagesPage({
         buyerId={currentUser.id || 'user-standard'}
         userName={currentUser.name || 'Buyer'}
       />
+
+      {showSendOfferModal && (
+        <SendOrderOfferModal
+          buyerIdDefault={activeThreadId?.startsWith('conv_platform_') ? activeThreadId.replace('conv_platform_', '') : undefined}
+          onClose={() => setShowSendOfferModal(false)}
+          onSent={() => setShowSendOfferModal(false)}
+        />
+      )}
     </div>
   );
 }
