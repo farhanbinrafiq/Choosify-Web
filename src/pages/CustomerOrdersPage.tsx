@@ -454,15 +454,16 @@ Thank you for shopping with Choosify.bd
                         <div className="flex gap-3 flex-wrap">
                           <button
                             type="button"
-                            onClick={() => {
+                            onClick={async () => {
                               if (!cancelReason.trim()) {
                                 toast.error('Cancellation reason is required.');
                                 return;
                               }
-                              cancelOrder(order.orderId, cancelReason);
-                              setCancellingOrderId(null);
-                              setCancelReason('');
-                              toast.success('Order cancelled successfully.');
+                              const succeeded = await cancelOrder(order.orderId, cancelReason);
+                              if (succeeded) {
+                                setCancellingOrderId(null);
+                                setCancelReason('');
+                              }
                             }}
                             className="px-5 py-2.5 bg-[#EB4501] hover:bg-[#CF4400] text-white text-[12px] font-bold rounded-lg transition-all cursor-pointer border-0"
                           >

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { toast } from '../lib/notify';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
@@ -36,11 +36,13 @@ export function CreatorProfilePage() {
   const { openVideo, getCreatorClaimStatus, updateCreatorClaimStatus, creatorClaimStatuses, allCreators } = useGlobalState();
 
   // Prefer catalog creators; fall back to mock CREATORS
-  const creator =
-    allCreators.find((c) => c.id === id) ||
-    CREATORS.find((c) => c.id === id) ||
-    allCreators[0] ||
-    CREATORS[0];
+  const matchedCreator = allCreators.find((c) => c.id === id) || CREATORS.find((c) => c.id === id);
+  // Fallback creator record only exists to keep hooks below call-safe when no
+  // match is found (React hooks must run unconditionally) -- creatorNotFound
+  // decides what actually renders, so an unknown :id never shows someone else's
+  // profile as if it were real.
+  const creator = matchedCreator || allCreators[0] || CREATORS[0];
+  const creatorNotFound = Boolean(id) && !matchedCreator;
   const [profileTab, setProfileTab] = useState<CreatorProfileTab>('Overview');
 
   useRegisterPageFilters({
@@ -160,6 +162,23 @@ export function CreatorProfilePage() {
   );
 
   const reviewDemo = getCreatorReviewDemo(creator);
+
+  if (creatorNotFound) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center gap-4">
+        <h1 className="text-xl font-bold text-[#1A1A2E]">Creator not found</h1>
+        <p className="text-[13px] text-[#6B7280] max-w-sm">
+          This creator profile doesn&apos;t exist or may have been removed.
+        </p>
+        <Link
+          to="/creators"
+          className="px-5 py-2.5 bg-[#EB4501] hover:bg-[#CF4400] text-white text-[12px] font-bold rounded-lg transition-all"
+        >
+          Browse creators
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">

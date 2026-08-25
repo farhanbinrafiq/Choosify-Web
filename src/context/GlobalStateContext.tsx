@@ -74,7 +74,7 @@ export interface GlobalStateContextType {
   clearCart: () => void;
   orders: Order[];
   createOrder: (isCOD: boolean) => Order | null;
-  cancelOrder: (orderId: string, reason: string) => void;
+  cancelOrder: (orderId: string, reason: string) => Promise<boolean>;
   addOrder: (order: Order) => void;
   /** Insert an order that's already persisted server-side (e.g. a claimed manual order) without re-POSTing it. */
   addClaimedOrder: (order: Order) => void;
@@ -932,23 +932,30 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     return newOrder;
   };
 
-  const cancelOrder = (orderId: string, reason: string) => {
+  const cancelOrder = async (orderId: string, reason: string): Promise<boolean> => {
     const order = orders.find(o => o.orderId === orderId);
     if (!order) {
       toast.error('Order not found.');
-      return;
+      return false;
     }
 
     const allPending = order.subOrders.every(sub => sub.trackingStatus === 'pending');
     if (!allPending) {
       toast.error('This order has already been dispatched and cannot be cancelled.');
-      return;
+      return false;
     }
 
     const trimmedReason = reason.trim();
     if (!trimmedReason) {
       toast.error('A cancellation reason is required.');
-      return;
+      return false;
+    }
+
+    try {
+      await operationsApi.cancelOrder(orderId, order.buyerId || currentUser.id, trimmedReason);
+    } catch (err) {
+      toast.error((err as Error)?.message || 'Failed to cancel order on the server.');
+      return false;
     }
 
     const cancelledAt = new Date().toISOString();
@@ -965,12 +972,6 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       return o;
     }));
 
-    operationsApi
-      .cancelOrder(orderId, order.buyerId || currentUser.id, trimmedReason)
-      .catch((err) => {
-        toast.error((err as Error)?.message || 'Failed to cancel order on the server.');
-      });
-
     toast.success('Order cancelled successfully.');
 
     // Trigger notification if available, otherwise just use standard channels
@@ -980,6 +981,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     } else {
       window.dispatchEvent(new CustomEvent('choosify-order-cancelled', { detail: { orderId, reason: trimmedReason } }));
     }
+    return true;
   };
 
   const addOrder = (order: Order) => {

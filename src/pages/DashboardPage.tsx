@@ -461,6 +461,32 @@ const OverviewSection = ({
         </p>
       </div>
 
+      {currentUser?.role && currentUser.role !== 'customer' ? (
+        <a
+          href="https://dashboard.choosify.bd/admin/dashboard"
+          className="block bg-[#1A1A2E] rounded-[10px] p-4 hover:opacity-95 transition-opacity"
+        >
+          <div className="text-[13px] font-extrabold text-white">
+            Looking for your{' '}
+            {currentUser.role === 'seller'
+              ? 'seller tools'
+              : currentUser.role === 'creator'
+                ? 'creator tools'
+                : 'partner workspace'}
+            ?
+          </div>
+          <p className="text-[11.5px] text-white/70 mt-0.5">
+            This page is your shopping account. Manage
+            {currentUser.role === 'seller'
+              ? ' products, orders, and payouts'
+              : currentUser.role === 'creator'
+                ? ' your creator profile and content'
+                : ' your workspace'}{' '}
+            at dashboard.choosify.bd.
+          </p>
+        </a>
+      ) : null}
+
       {quickAccessCards.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 min-w-0">
           {quickAccessCards.map((card) => {
