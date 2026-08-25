@@ -575,6 +575,13 @@ export function ProductDetailPage() {
       toast.error('Choose the order you purchased this product with before posting your review.');
       return;
     }
+    const reviewedItemId = selectedReviewOrder.subOrders
+      .flatMap((sub) => sub.items)
+      .find((item) => item.productId === product.id)?.itemId;
+    if (!reviewedItemId) {
+      toast.error('This order predates itemized reviews and cannot be reviewed here. Contact support.');
+      return;
+    }
     setIsSubmittingReview(true);
     let uploadedPhotoUrls: string[] = [];
     try {
@@ -612,19 +619,13 @@ export function ProductDetailPage() {
       orderType,
       purchaseDate,
     };
-    setReviews((prev: any[]) => [newReview, ...prev]);
-    setSelectedRating(5);
-    setReviewText("");
-    setSelectedReviewOrderId("");
-    setReviewPhotoFiles([]);
-    setReviewPhotoPreviews([]);
-    setIsSubmittingReview(false);
-    toast.success('Review submitted! It will appear after approval.');
-    operationsApi
-      .submitReview({
+    try {
+      const result = await operationsApi.submitReview({
         userId: String(currentUser?.id || 'guest'),
         userName: currentUser?.name || 'Guest',
         userAvatar: currentUser?.avatar || undefined,
+        orderId: selectedReviewOrder.orderId,
+        orderItemId: reviewedItemId,
         productId: String(product.id),
         productTitle: product.title,
         brandName: brandName,
@@ -632,10 +633,25 @@ export function ProductDetailPage() {
         rating: selectedRating,
         comment: reviewText.trim(),
         photos: uploadedPhotoUrls,
-      })
-      .catch(() => {});
-    if (typeof addNotification === 'function') {
-      addNotification('Your review was submitted successfully.', 'system');
+      });
+      setReviews((prev: any[]) => [newReview, ...prev]);
+      setSelectedRating(5);
+      setReviewText("");
+      setSelectedReviewOrderId("");
+      setReviewPhotoFiles([]);
+      setReviewPhotoPreviews([]);
+      toast.success(
+        result.reused
+          ? 'You already reviewed this order.'
+          : 'Review submitted! It will appear after approval.',
+      );
+      if (typeof addNotification === 'function') {
+        addNotification('Your review was submitted successfully.', 'system');
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to submit review.');
+    } finally {
+      setIsSubmittingReview(false);
     }
   };
 

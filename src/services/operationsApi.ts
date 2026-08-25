@@ -200,6 +200,10 @@ export const operationsApi = {
     userId?: string;
     userName?: string;
     userAvatar?: string;
+    /** Required — the specific delivered order this review is for (Sprint 9 uniqueness key). */
+    orderId: string;
+    /** Required — the specific line item within that order. */
+    orderItemId: string;
     productId?: string;
     productTitle: string;
     brandName?: string;
@@ -207,9 +211,8 @@ export const operationsApi = {
     rating: number;
     comment: string;
     photos?: string[];
-  }) => {
-    const result = await request<{ data: unknown }>('/operations/reviews', 'POST', payload);
-    return result.data;
+  }): Promise<{ data: unknown; reused?: boolean }> => {
+    return request<{ data: unknown; reused?: boolean }>('/operations/reviews', 'POST', payload);
   },
   listProductReviews: async (productId: string): Promise<PublicProductReview[]> => {
     const result = await request<{ data: PublicProductReview[] }>(

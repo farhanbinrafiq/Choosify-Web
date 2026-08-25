@@ -101,6 +101,8 @@ export interface CommerceProduct {
 }
 
 export interface SubOrderItem {
+  /** Server-assigned identity for this specific line item — required to review or mark delivered. */
+  itemId?: string;
   productId: number;
   productTitle: string;
   quantity: number;

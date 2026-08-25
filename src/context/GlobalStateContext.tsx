@@ -496,6 +496,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
           sellerBusinessName: String(sub?.sellerBusinessName || ''),
           items: Array.isArray(sub?.items)
             ? sub.items.map((item: any) => ({
+                itemId: typeof item?.itemId === 'string' ? item.itemId : undefined,
                 productId: Number(item?.productId) || 0,
                 productTitle: String(item?.productTitle || ''),
                 quantity: Number(item?.quantity) || 0,
