@@ -48,6 +48,7 @@ import { MyPaymentOptionsSection } from './dashboard/MyPaymentOptionsSection';
 import { MyCancellationsSection } from './dashboard/MyCancellationsSection';
 import { MyReturnsSection } from './dashboard/MyReturnsSection';
 import { MyWarrantySection } from './dashboard/MyWarrantySection';
+import { SellerOrdersSection } from './dashboard/SellerOrdersSection';
 import { ToPaySection } from './dashboard/ToPaySection';
 import {
   getActiveReturns,
@@ -1909,8 +1910,9 @@ export function DashboardPage() {
         return <MyWarrantySection />;
       case 'my-payment-options':
         return <MyPaymentOptionsSection />;
-      case 'seller-products':
       case 'seller-orders':
+        return <SellerOrdersSection />;
+      case 'seller-products':
       case 'spotlight-requests':
       case 'seller-performance':
       case 'creator-studio':

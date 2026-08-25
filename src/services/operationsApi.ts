@@ -121,6 +121,13 @@ export const operationsApi = {
     const result = await request<{ data: Record<string, unknown>[] }>(`/operations/orders${suffix}`);
     return result.data;
   },
+  markOrderItemDelivered: async (orderId: string, itemId: string): Promise<Record<string, unknown>> => {
+    const result = await request<{ data: Record<string, unknown> }>(
+      `/operations/orders/${encodeURIComponent(orderId)}/items/${encodeURIComponent(itemId)}/mark-delivered`,
+      'POST',
+    );
+    return result.data;
+  },
   getSslcommerzStatus: async (): Promise<{
     configured: boolean;
     provider: string;
