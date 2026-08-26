@@ -60,35 +60,6 @@ export function CreatorsPage() {
   const [verificationFilter, setVerificationFilter] = useState<'all' | 'verified' | 'unverified'>('all');
   const [popularityFilter, setPopularityFilter] = useState<'all' | 'high' | 'normal'>('all');
 
-  // Restore state from sessionStorage on mount
-  React.useEffect(() => {
-    try {
-      const saved = sessionStorage.getItem('choosify_creators_filters');
-      if (saved) {
-        const filters = JSON.parse(saved);
-        if (filters.selectedCategory) setSelectedCategory(filters.selectedCategory);
-        if (filters.selectedLetter) setSelectedLetter(filters.selectedLetter);
-        if (filters.verificationFilter) setVerificationFilter(filters.verificationFilter);
-        if (filters.popularityFilter) setPopularityFilter(filters.popularityFilter);
-        if (filters.activeTab) setActiveTab(filters.activeTab);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }, []);
-
-  // Save state on updates
-  React.useEffect(() => {
-    const filters = {
-      selectedCategory,
-      selectedLetter,
-      verificationFilter,
-      popularityFilter,
-      activeTab
-    };
-    sessionStorage.setItem('choosify_creators_filters', JSON.stringify(filters));
-  }, [selectedCategory, selectedLetter, verificationFilter, popularityFilter, activeTab]);
-
   // Model-level augmentation matching BrandsPage visual cards rating, reviews structure
   const mappedCreators = React.useMemo(() => {
     return allCreators.map(c => {

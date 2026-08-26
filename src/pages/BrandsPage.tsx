@@ -87,35 +87,6 @@ export function BrandsPage() {
   const [popularityFilter, setPopularityFilter] = useState<'all' | 'hot' | 'featured' | 'top-rated'>('all');
   const priorityNowMs = usePriorityClockMs();
 
-  // Restore state from sessionStorage on mount
-  useEffect(() => {
-    try {
-      const saved = sessionStorage.getItem('choosify_brands_filters');
-      if (saved) {
-        const filters = JSON.parse(saved);
-        if (filters.selectedCategory) setSelectedCategory(filters.selectedCategory);
-        if (filters.selectedLetter) setSelectedLetter(filters.selectedLetter);
-        if (filters.verificationFilter) setVerificationFilter(filters.verificationFilter);
-        if (filters.popularityFilter) setPopularityFilter(filters.popularityFilter);
-        if (filters.activeTab) setActiveTab(filters.activeTab);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }, []);
-
-  // Save state on updates
-  useEffect(() => {
-    const filters = {
-      selectedCategory,
-      selectedLetter,
-      verificationFilter,
-      popularityFilter,
-      activeTab
-    };
-    sessionStorage.setItem('choosify_brands_filters', JSON.stringify(filters));
-  }, [selectedCategory, selectedLetter, verificationFilter, popularityFilter, activeTab]);
-
   const fallbackBrands: Brand[] = [
     {
       id: 'samsung',
