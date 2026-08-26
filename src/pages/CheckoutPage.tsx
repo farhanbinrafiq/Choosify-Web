@@ -149,6 +149,11 @@ export function CheckoutPage() {
   // orderId instead of minting a fresh one -- letting the server's existing
   // idempotent-by-orderId order creation actually do its job.
   const stableOrderIdRef = useRef<string | null>(null);
+  // Order creation is idempotent by orderId server-side, so a re-entrant
+  // submit call is harmless there -- but the seller message has no such
+  // dedup, so without this guard every re-entrant call sent another copy of
+  // the same "order placed" message.
+  const sentOrderMessageForRef = useRef<string | null>(null);
 
   React.useEffect(() => {
     if (isCODRestricted) {
@@ -393,6 +398,12 @@ export function CheckoutPage() {
     const tempOrderId = stableOrderIdRef.current;
     const splitCount = sellerIds.length;
 
+    // Only the first call for this orderId sends the seller message -- any
+    // re-entrant call (see stableOrderIdRef above) reuses the same orderId
+    // and must not send a second copy.
+    const shouldSendOrderMessage = sentOrderMessageForRef.current !== tempOrderId;
+    sentOrderMessageForRef.current = tempOrderId;
+
     // Generate SubOrders structure
     const generatedSubOrders = sellerIds.map((sellerId, sIdx) => {
       const items = groupedCart[sellerId];
@@ -413,31 +424,34 @@ export function CheckoutPage() {
       // regex there) -- without it the message still sends, but lands in a
       // generic catch-all bucket instead of this seller's thread.
       const threadId = `thread-${sellerId}`;
-      const orderMsg = `[Order ${tempOrderId}] Hi! I've just placed an order with you.\n\nItems:\n${itemsListStr}\n\nSubtotal: ৳${calculateSellerSubtotal(items).toLocaleString()}\n\nDelivering to: ${fullName}, ${phone}\n${address}, ${region}\n\nLooking forward to it!`;
 
-      // Local sidebar entry so the conversation is visible in the buyer's own
-      // inbox immediately, without waiting on a fetch -- the real message
-      // content above is what the seller actually receives.
-      createNewThread(
-        threadId,
-        sellerName,
-        PLACEHOLDER_IMAGE,
-        'retail',
-        `Order ${tempOrderId} placed`,
-        tempOrderId,
-      );
+      if (shouldSendOrderMessage) {
+        const orderMsg = `[Order ${tempOrderId}] Hi! I've just placed an order with you.\n\nItems:\n${itemsListStr}\n\nSubtotal: ৳${calculateSellerSubtotal(items).toLocaleString()}\n\nDelivering to: ${fullName}, ${phone}\n${address}, ${region}\n\nLooking forward to it!`;
 
-      operationsApi
-        .submitPlatformMessage({
-          buyerId: currentUser?.id || '',
-          userName: fullName || currentUser?.name || 'Buyer',
-          body: orderMsg,
-          orderId: tempOrderId,
-          sellerId,
-        })
-        .catch(() => {
-          // Best-effort -- a failed courtesy message must never block checkout.
-        });
+        // Local sidebar entry so the conversation is visible in the buyer's
+        // own inbox immediately, without waiting on a fetch -- the real
+        // message content above is what the seller actually receives.
+        createNewThread(
+          threadId,
+          sellerName,
+          PLACEHOLDER_IMAGE,
+          'retail',
+          `Order ${tempOrderId} placed`,
+          tempOrderId,
+        );
+
+        operationsApi
+          .submitPlatformMessage({
+            buyerId: currentUser?.id || '',
+            userName: fullName || currentUser?.name || 'Buyer',
+            body: orderMsg,
+            orderId: tempOrderId,
+            sellerId,
+          })
+          .catch(() => {
+            // Best-effort -- a failed courtesy message must never block checkout.
+          });
+      }
 
       return {
         sellerId,
