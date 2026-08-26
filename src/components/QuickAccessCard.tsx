@@ -15,7 +15,7 @@ export function QuickAccessCard() {
     { to: '/categories', label: 'Categories', icon: Grid },
     { to: '/products', label: 'Products & Services', icon: ShoppingBag },
     { to: '/brands', label: 'Brands', icon: ShieldCheck },
-    { to: '/guides', label: 'Recommendations', icon: Sparkles },
+    { to: '/spotlight', label: 'Recommendations', icon: Sparkles },
     { to: '/compare', label: 'Compare', icon: SlidersHorizontal },
     { to: '/deals', label: 'Deals', icon: Flame },
     { to: '/creators', label: 'Creators', icon: Users },

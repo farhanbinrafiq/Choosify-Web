@@ -13,8 +13,11 @@ export type PrimaryNavItem = {
 
 /**
  * Canonical primary navigation — Choosify storefront header order.
- * Discover (/spotlight) is intentionally omitted from the main nav (redundant with Recommendations).
- * The /spotlight route itself remains available for deep links.
+ * Recommendations links straight to /spotlight (the neutral Discover feed,
+ * "All" active, no filter) rather than /guides (/spotlight?tab=guides) --
+ * a navbar entry point should not silently pre-apply a content-type filter
+ * the user never asked for. /guides remains a valid deep link elsewhere
+ * (e.g. "View All" on a Buying Guides rail) for when a filter is the point.
  */
 export const PRIMARY_NAV_ITEMS: PrimaryNavItem[] = [
   { id: 'home', path: '/', label: 'Home', heroTitle: 'Home' },
@@ -28,7 +31,7 @@ export const PRIMARY_NAV_ITEMS: PrimaryNavItem[] = [
   { id: 'brands', path: '/brands', label: 'Brands', heroTitle: 'Brands' },
   {
     id: 'recommendations',
-    path: '/guides',
+    path: '/spotlight',
     label: 'Recommendations',
     heroTitle: 'Recommendations',
   },
@@ -39,14 +42,14 @@ export const PRIMARY_NAV_ITEMS: PrimaryNavItem[] = [
 
 /** Paths that must never appear in the main storefront navbar. */
 const RETIRED_MAIN_NAV_PATHS = new Set([
-  '/spotlight',
   '/whats-on',
-  '/recommendations', // legacy alias — use /guides as Recommendations
+  '/recommendations', // legacy alias — use /spotlight as Recommendations
 ]);
 
 /** Force storefront labels even when CMS nav still says "Browse" / "Discover". */
 const NAV_PATH_LABEL_OVERRIDES: Record<string, string> = {
   '/products': 'Products & Services',
+  '/spotlight': 'Recommendations',
   '/guides': 'Recommendations',
 };
 
@@ -78,9 +81,10 @@ export function isRetiredMainNavPath(path: string): boolean {
 
 export function getNavItemByPath(path: string): PrimaryNavItem | undefined {
   if (path === '/') return PRIMARY_NAV_ITEMS.find((item) => item.path === '/');
-  // Prefer /guides over /spotlight for Recommendations active state
-  if (path.startsWith('/spotlight')) {
-    return PRIMARY_NAV_ITEMS.find((item) => item.path === '/guides');
+  // /guides is a deep link into Recommendations (/spotlight?tab=guides) --
+  // resolve it to the same nav item as /spotlight for active-state purposes.
+  if (path.startsWith('/spotlight') || path.startsWith('/guides')) {
+    return PRIMARY_NAV_ITEMS.find((item) => item.id === 'recommendations');
   }
   return PRIMARY_NAV_ITEMS.find(
     (item) => item.path !== '/' && path.startsWith(item.path),
