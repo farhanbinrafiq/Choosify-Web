@@ -1,6 +1,5 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useRef, ReactNode } from 'react';
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
-import { loadMockCatalog } from '../data/loadMockCatalog';
 import { toast } from '../lib/notify';
 import {
   CHOOSIFY_ANNOUNCEMENTS_THREAD_ID,
@@ -193,40 +192,57 @@ function readStoredArray(key: string): any[] {
   }
 }
 
+/**
+ * Per-account personal data (saved items, addresses, payment methods, etc.)
+ * is cached in localStorage, which is scoped to the browser, not the signed-
+ * in account. Without a userId suffix, logging into a different account on
+ * the same device/browser would silently inherit the previous account's
+ * saved products, addresses, and payment methods. Logged-out state uses the
+ * bare key so anonymous browsing still has somewhere to stash e.g. a
+ * pre-login wishlist click.
+ */
+function scopedKey(base: string, userId?: string | null): string {
+  return userId ? `${base}::${userId}` : base;
+}
+
 export const DashboardProvider = ({ children }: { children: ReactNode }) => {
-  const [savedProducts, setSavedProducts] = useState<any[]>(() => readStoredArray('choosify_saved_products'));
-  const [savedBrands, setSavedBrands] = useState<any[]>(() => readStoredArray('choosify_saved_brands'));
-  const [lovedBrands, setLovedBrands] = useState<any[]>(() => readStoredArray('choosify_loved_brands'));
-  const [followedBrands, setFollowedBrands] = useState<any[]>(() => readStoredArray('choosify_followed_brands'));
-  const [recentlyViewed, setRecentlyViewed] = useState<any[]>(() => readStoredArray('choosify_recently_viewed'));
+  // Read first: personal-data cache keys below are scoped by this id.
+  const { currentUser, isLoggedIn } = useGlobalState();
+  const userId = currentUser?.id;
+
+  const [savedProducts, setSavedProducts] = useState<any[]>(() => readStoredArray(scopedKey('choosify_saved_products', userId)));
+  const [savedBrands, setSavedBrands] = useState<any[]>(() => readStoredArray(scopedKey('choosify_saved_brands', userId)));
+  const [lovedBrands, setLovedBrands] = useState<any[]>(() => readStoredArray(scopedKey('choosify_loved_brands', userId)));
+  const [followedBrands, setFollowedBrands] = useState<any[]>(() => readStoredArray(scopedKey('choosify_followed_brands', userId)));
+  const [recentlyViewed, setRecentlyViewed] = useState<any[]>(() => readStoredArray(scopedKey('choosify_recently_viewed', userId)));
   const [customerAddresses, setCustomerAddresses] = useState<CustomerAddress[]>(() =>
-    normalizeDefaultAddress(readStoredArray(ADDRESS_STORAGE_KEY) as CustomerAddress[]),
+    normalizeDefaultAddress(readStoredArray(scopedKey(ADDRESS_STORAGE_KEY, userId)) as CustomerAddress[]),
   );
 
-  const [savedGuides, setSavedGuides] = useState<any[]>(() => {
-    try {
-      const saved = localStorage.getItem('choosify_saved_guides');
-      if (saved) {
-        const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          return parsed.filter((guide) => guide && guide.id != null);
-        }
-      }
-      return [
-        { id: 1, title: 'Best Budget Smartwatches 2026', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop', category: 'Tech' },
-        { id: 2, title: 'Top 5 Sustainable Fashion Brands', image: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400&h=300&fit=crop', category: 'Fashion' }
-      ];
-    } catch {
-      return [
-        { id: 1, title: 'Best Budget Smartwatches 2026', image: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=300&fit=crop', category: 'Tech' },
-        { id: 2, title: 'Top 5 Sustainable Fashion Brands', image: 'https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=400&h=300&fit=crop', category: 'Fashion' }
-      ];
-    }
-  });
+  const [savedGuides, setSavedGuides] = useState<any[]>(() =>
+    readStoredArray(scopedKey('choosify_saved_guides', userId)).filter((guide) => guide && guide.id != null),
+  );
 
   const [comparedProducts, setComparedProducts] = useState<any[]>(() =>
-    pruneComparedToFirstCategory(readStoredArray('choosify_compared_products')),
+    pruneComparedToFirstCategory(readStoredArray(scopedKey('choosify_compared_products', userId))),
   );
+
+  // Re-read every scoped key when the signed-in account changes (login,
+  // logout, or switching accounts) without a full page reload -- the lazy
+  // initializers above only run once, at first mount.
+  const mountedUserIdRef = useRef(userId);
+  useEffect(() => {
+    if (mountedUserIdRef.current === userId) return;
+    mountedUserIdRef.current = userId;
+    setSavedProducts(readStoredArray(scopedKey('choosify_saved_products', userId)));
+    setSavedBrands(readStoredArray(scopedKey('choosify_saved_brands', userId)));
+    setLovedBrands(readStoredArray(scopedKey('choosify_loved_brands', userId)));
+    setFollowedBrands(readStoredArray(scopedKey('choosify_followed_brands', userId)));
+    setRecentlyViewed(readStoredArray(scopedKey('choosify_recently_viewed', userId)));
+    setCustomerAddresses(normalizeDefaultAddress(readStoredArray(scopedKey(ADDRESS_STORAGE_KEY, userId)) as CustomerAddress[]));
+    setSavedGuides(readStoredArray(scopedKey('choosify_saved_guides', userId)).filter((guide) => guide && guide.id != null));
+    setComparedProducts(pruneComparedToFirstCategory(readStoredArray(scopedKey('choosify_compared_products', userId))));
+  }, [userId]);
 
   // Threaded Messaging States with Localstorage persistence
   const [threads, setThreads] = useState<MessageThread[]>(() => {
@@ -419,26 +435,6 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       return [];
     }
   });
-
-  useEffect(() => {
-    loadMockCatalog().then(({ products, brands }) => {
-      setSavedProducts((prev) => (prev.length ? prev : [products[0], products[3], products[5]]));
-      setSavedBrands((prev) => (prev.length ? prev : [brands[0], brands[2], brands[9]]));
-      setLovedBrands((prev) => (prev.length ? prev : [brands[1], brands[3], brands[4]]));
-      setFollowedBrands((prev) => (prev.length ? prev : [brands[2], brands[5], brands[6], brands[10]]));
-      setRecentlyViewed((prev) => (prev.length ? prev : [products[1], products[2], products[4]]));
-      setComparedProducts((prev) => {
-        if (prev.length) return pruneComparedToFirstCategory(prev);
-        const first = products[0];
-        if (!first) return [];
-        const locked = getCompareLockedCategory([first]);
-        const second = products.find(
-          (p, index) => index > 0 && isSameCompareCategory(p, locked),
-        );
-        return second ? [first, second] : [first];
-      });
-    });
-  }, []);
 
   const [campaigns, setCampaigns] = useState<Campaign[]>(() => {
     const saved = localStorage.getItem('choosify_campaigns');
@@ -676,38 +672,38 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
     toast.success('Product removed from comparison');
   };
 
-  // Persist standard states to localStorage
+  // Persist standard states to localStorage, scoped to the signed-in account
   useEffect(() => {
-    localStorage.setItem('choosify_saved_products', JSON.stringify(savedProducts));
-  }, [savedProducts]);
+    localStorage.setItem(scopedKey('choosify_saved_products', userId), JSON.stringify(savedProducts));
+  }, [savedProducts, userId]);
 
   useEffect(() => {
-    localStorage.setItem('choosify_saved_brands', JSON.stringify(savedBrands));
-  }, [savedBrands]);
+    localStorage.setItem(scopedKey('choosify_saved_brands', userId), JSON.stringify(savedBrands));
+  }, [savedBrands, userId]);
 
   useEffect(() => {
-    localStorage.setItem('choosify_loved_brands', JSON.stringify(lovedBrands));
-  }, [lovedBrands]);
+    localStorage.setItem(scopedKey('choosify_loved_brands', userId), JSON.stringify(lovedBrands));
+  }, [lovedBrands, userId]);
 
   useEffect(() => {
-    localStorage.setItem('choosify_followed_brands', JSON.stringify(followedBrands));
-  }, [followedBrands]);
+    localStorage.setItem(scopedKey('choosify_followed_brands', userId), JSON.stringify(followedBrands));
+  }, [followedBrands, userId]);
 
   useEffect(() => {
-    localStorage.setItem('choosify_recently_viewed', JSON.stringify(recentlyViewed));
-  }, [recentlyViewed]);
+    localStorage.setItem(scopedKey('choosify_recently_viewed', userId), JSON.stringify(recentlyViewed));
+  }, [recentlyViewed, userId]);
 
   useEffect(() => {
-    localStorage.setItem(ADDRESS_STORAGE_KEY, JSON.stringify(customerAddresses));
-  }, [customerAddresses]);
+    localStorage.setItem(scopedKey(ADDRESS_STORAGE_KEY, userId), JSON.stringify(customerAddresses));
+  }, [customerAddresses, userId]);
 
   useEffect(() => {
-    localStorage.setItem('choosify_saved_guides', JSON.stringify(savedGuides));
-  }, [savedGuides]);
+    localStorage.setItem(scopedKey('choosify_saved_guides', userId), JSON.stringify(savedGuides));
+  }, [savedGuides, userId]);
 
   useEffect(() => {
-    localStorage.setItem('choosify_compared_products', JSON.stringify(comparedProducts));
-  }, [comparedProducts]);
+    localStorage.setItem(scopedKey('choosify_compared_products', userId), JSON.stringify(comparedProducts));
+  }, [comparedProducts, userId]);
 
   useEffect(() => {
     localStorage.setItem('choosify_notifications', JSON.stringify(notifications));
@@ -718,7 +714,6 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   }, [reviews]);
 
   // "Reviews you wrote" — backend is source of truth; localStorage is cache only.
-  const { currentUser, isLoggedIn } = useGlobalState();
   useEffect(() => {
     if (!isLoggedIn || !currentUser?.id) return;
     if (!getAccessToken()) return;

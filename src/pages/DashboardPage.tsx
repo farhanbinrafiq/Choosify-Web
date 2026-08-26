@@ -60,7 +60,6 @@ import {
   getPendingToPayOrders,
   loadPaymentMethods,
   loadReturnRequests,
-  seedDefaultPaymentMethodsIfEmpty,
 } from '../lib/dashboard/pendingActions';
 import { ProductCard } from '../components/ProductCard';
 import { BrandCardDesign, mapBrandToCardDesign } from '../components/BrandCardDesign';
@@ -316,10 +315,7 @@ const OverviewSection = ({
   const pendingToPayCount = getPendingToPayOrders(orders).length;
   const pendingCancellationsCount = getPendingCancellationOrders(orders).length;
   const activeReturnsCount = getActiveReturns(loadReturnRequests()).length;
-  const paymentMethods =
-    loadPaymentMethods().length > 0
-      ? loadPaymentMethods()
-      : seedDefaultPaymentMethodsIfEmpty();
+  const paymentMethods = loadPaymentMethods(currentUser?.id);
   const paymentAttentionCount = getAttentionPaymentMethods(paymentMethods).length;
 
   const quickAccessCards = [

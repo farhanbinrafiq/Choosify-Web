@@ -32,12 +32,17 @@ export function saveReturnRequests(rows: ReturnRequest[]) {
   writeJsonArray(RETURNS_KEY, rows);
 }
 
-export function loadPaymentMethods(): SavedPaymentMethod[] {
-  return readJsonArray<SavedPaymentMethod>(PAYMENT_METHODS_KEY);
+/** localStorage is browser-scoped, not account-scoped -- suffix by userId so a different account signed into the same browser never inherits a prior account's saved cards/mobile wallets. */
+function paymentMethodsKey(userId?: string | null): string {
+  return userId ? `${PAYMENT_METHODS_KEY}::${userId}` : PAYMENT_METHODS_KEY;
 }
 
-export function savePaymentMethods(rows: SavedPaymentMethod[]) {
-  writeJsonArray(PAYMENT_METHODS_KEY, rows);
+export function loadPaymentMethods(userId?: string | null): SavedPaymentMethod[] {
+  return readJsonArray<SavedPaymentMethod>(paymentMethodsKey(userId));
+}
+
+export function savePaymentMethods(rows: SavedPaymentMethod[], userId?: string | null) {
+  writeJsonArray(paymentMethodsKey(userId), rows);
 }
 
 export function loadSeenCancellationIds(): Set<string> {
@@ -120,31 +125,3 @@ export function getAttentionPaymentMethods(
   return methods.filter(paymentMethodNeedsAttention);
 }
 
-export function seedDefaultPaymentMethodsIfEmpty(): SavedPaymentMethod[] {
-  const existing = loadPaymentMethods();
-  if (existing.length > 0) return existing;
-  const seeded: SavedPaymentMethod[] = [
-    {
-      id: 'pm-card-1',
-      kind: 'card',
-      label: 'Visa ending 4242',
-      maskedAccount: '•••• 4242',
-      brand: 'Visa',
-      expiryMonth: 8,
-      expiryYear: 2027,
-      isDefault: true,
-      status: 'ok',
-      createdAt: new Date().toISOString(),
-    },
-    {
-      id: 'pm-bkash-1',
-      kind: 'bkash',
-      label: 'bKash Personal',
-      maskedAccount: '01XXX-XXX789',
-      status: 'ok',
-      createdAt: new Date().toISOString(),
-    },
-  ];
-  savePaymentMethods(seeded);
-  return seeded;
-}

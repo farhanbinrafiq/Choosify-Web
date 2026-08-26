@@ -1,12 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { CreditCard, Plus, Trash2, Smartphone } from 'lucide-react';
 import { toast } from '../../lib/notify';
 import { cn } from '../../lib/utils';
+import { useGlobalState } from '../../context/GlobalStateContext';
 import type { PaymentMethodKind, SavedPaymentMethod } from '../../types/paymentMethods';
-import {
-  savePaymentMethods,
-  seedDefaultPaymentMethodsIfEmpty,
-} from '../../lib/dashboard/pendingActions';
+import { loadPaymentMethods, savePaymentMethods } from '../../lib/dashboard/pendingActions';
 
 const KIND_LABEL: Record<PaymentMethodKind, string> = {
   card: 'Card',
@@ -29,15 +27,21 @@ function statusLabel(status: SavedPaymentMethod['status']) {
 }
 
 export function MyPaymentOptionsSection() {
-  const [methods, setMethods] = useState<SavedPaymentMethod[]>(() =>
-    seedDefaultPaymentMethodsIfEmpty(),
-  );
+  const { currentUser } = useGlobalState();
+  const userId = currentUser?.id;
+  const [methods, setMethods] = useState<SavedPaymentMethod[]>(() => loadPaymentMethods(userId));
   const [showAdd, setShowAdd] = useState(false);
   const [kind, setKind] = useState<PaymentMethodKind>('card');
   const [label, setLabel] = useState('');
   const [account, setAccount] = useState('');
   const [expiryMonth, setExpiryMonth] = useState('12');
   const [expiryYear, setExpiryYear] = useState('2028');
+
+  // Re-read when the signed-in account changes (login/logout/switch) without
+  // a full page reload -- the lazy initializer above only runs once.
+  useEffect(() => {
+    setMethods(loadPaymentMethods(userId));
+  }, [userId]);
 
   const sorted = useMemo(
     () =>
@@ -47,7 +51,7 @@ export function MyPaymentOptionsSection() {
 
   const persist = (next: SavedPaymentMethod[]) => {
     setMethods(next);
-    savePaymentMethods(next);
+    savePaymentMethods(next, userId);
   };
 
   const handleDelete = (id: string) => {

@@ -125,7 +125,7 @@ export function SearchableSelectField({
         createPortal(
           <div
             ref={menuRef}
-            className="fixed z-[220] rounded-lg border border-[#e8edf2] bg-white shadow-lg overflow-hidden"
+            className="fixed z-[310] rounded-lg border border-[#e8edf2] bg-white shadow-lg overflow-hidden"
             style={{
               top: menuPos.top,
               left: menuPos.left,
