@@ -204,10 +204,17 @@ export function DiscoverStructuredFeed({
     activeFormatId === 'reels' ? lanes.reels : lanes.reels.slice(0, LANE_LIMITS.reels);
   const live =
     activeFormatId === 'live' ? lanes.live : lanes.live.slice(0, LANE_LIMITS.live);
-  const blogsAside =
-    activeFormatId === 'blogs' ? [] : lanes.blogs.slice(0, LANE_LIMITS.blogs);
-  const blogsMain = activeFormatId === 'blogs' ? lanes.blogs : [];
-  const blogsFocused = activeFormatId === 'blogs';
+  // 'guides' (Buying Guides) is a content-type subset of the 'blogs' lane
+  // bucket -- partitionDiscoverFeedLanes classifies buying_guide/tutorial/
+  // tips/comparison items as the 'blog' card variant regardless of which of
+  // the two tabs filtered them in. Landing on Guides previously left this
+  // check matching only 'blogs', so the (already correctly filtered) guide
+  // items never rendered in the main pane -- just an empty page until the
+  // user navigated away. Treat both tabs as the same focused lane.
+  const isBlogsLaneFocused = activeFormatId === 'blogs' || activeFormatId === 'guides';
+  const blogsAside = isBlogsLaneFocused ? [] : lanes.blogs.slice(0, LANE_LIMITS.blogs);
+  const blogsMain = isBlogsLaneFocused ? lanes.blogs : [];
+  const blogsFocused = isBlogsLaneFocused;
 
   /** Up to 5 editorial slides for Editor's Pick stacked carousel (below Blog Stories) */
   const editorsPicks = useMemo((): EditorsPickItem[] => {
@@ -356,13 +363,13 @@ export function DiscoverStructuredFeed({
             {blogsMain.length > 0 && (
               <section
                 className="mb-9 bg-white border border-[#E8EDF2] rounded-[10px] p-4"
-                aria-label="Blog Stories"
+                aria-label={activeFormatId === 'guides' ? 'Buying Guides' : 'Blog Stories'}
               >
                 <LaneHeader
                   icon="▤"
                   iconClassName="text-[#07DD05]"
-                  title="Blog Stories"
-                  onViewAll={() => triggerFilter('blogs')}
+                  title={activeFormatId === 'guides' ? 'Buying Guides' : 'Blog Stories'}
+                  onViewAll={() => triggerFilter(activeFormatId === 'guides' ? 'guides' : 'blogs')}
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   {blogsMain.map((content) => (
