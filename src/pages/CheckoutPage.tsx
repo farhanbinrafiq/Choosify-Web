@@ -35,7 +35,7 @@ export function CheckoutPage() {
     buyerReputations,
     isFeatureEnabled,
   } = useGlobalState();
-  const { createNewThread, addNotification, defaultCustomerAddress } = useDashboard();
+  const { createNewThread, addNotification, customerAddresses, defaultCustomerAddress } = useDashboard();
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -80,6 +80,19 @@ export function CheckoutPage() {
     () => (defaultCustomerAddress ? formatAddressLine(defaultCustomerAddress) : currentUser?.address || ''),
   );
   const [region, setRegion] = useState('Dhaka');
+  // Which saved address book entry is filling the fields above -- lets a
+  // buyer with more than one saved address switch delivery address at
+  // checkout instead of always getting the default and having to retype it.
+  const [selectedAddressId, setSelectedAddressId] = useState(defaultCustomerAddress?.id ?? null);
+
+  const applySavedAddress = (id: string) => {
+    const picked = customerAddresses.find((a) => a.id === id);
+    if (!picked) return;
+    setSelectedAddressId(id);
+    setFullName(picked.recipientName || currentUser?.name || '');
+    setPhone(picked.phone || currentUser?.phone || '');
+    setAddress(formatAddressLine(picked));
+  };
   const [deliveryNotes, setDeliveryNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'credit' | 'online'>(
     pendingOrder ? 'credit' : 'cod',
@@ -677,6 +690,34 @@ ORDER STATUS: PENDING_CONFIRMATION
               <MapPin size={16} className="text-[#EB4501]" />
               DELIVERY INFORMATION
             </h2>
+
+            {customerAddresses.length > 1 && (
+              <div>
+                <label className="text-[10px] font-bold text-[#9AA0AC] uppercase block mb-2 leading-none">
+                  Deliver to
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {customerAddresses.map((saved) => (
+                    <button
+                      key={saved.id}
+                      type="button"
+                      onClick={() => applySavedAddress(saved.id)}
+                      className={cn(
+                        'text-left px-3.5 py-2 rounded-lg border text-[12px] font-semibold max-w-[240px] transition-colors',
+                        selectedAddressId === saved.id
+                          ? 'border-[#EB4501] bg-[#FFF3EA] text-[#1A1A2E]'
+                          : 'border-[#E5E7EB] text-[#6B7280] hover:border-[#EB4501]/40',
+                      )}
+                    >
+                      <span className="block font-bold">{saved.label}</span>
+                      <span className="block truncate text-[11px] font-medium opacity-80">
+                        {formatAddressLine(saved)}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
               <div>

@@ -184,7 +184,8 @@ export function OrderSuccessPage() {
               </>
             ) : (
               <>
-                THANK YOU — YOUR ORDER IS <span className="text-[#07DD05]">CONFIRMED!</span>
+                THANK YOU — YOUR ORDER HAS BEEN RECEIVED{' '}
+                <span className="text-[#07DD05]">& WILL CONFIRM SHORTLY!</span>
               </>
             )}
           </h1>
