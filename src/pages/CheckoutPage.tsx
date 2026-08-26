@@ -16,6 +16,7 @@ import { toast } from '../lib/notify';
 import { operationsApi } from '../services/operationsApi';
 import { usePageBreadcrumbs } from '../context/BreadcrumbContext';
 import { formatAddressLine } from '../lib/address/addressUtils';
+import { PLACEHOLDER_IMAGE } from '../constants';
 
 const KNOWN_PROMOS_FALLBACK = [
   { code: 'AARONG15', discount: 15, type: 'percentage' as const },
@@ -35,7 +36,7 @@ export function CheckoutPage() {
     buyerReputations,
     isFeatureEnabled,
   } = useGlobalState();
-  const { addNotification, customerAddresses, defaultCustomerAddress } = useDashboard();
+  const { createNewThread, addNotification, customerAddresses, defaultCustomerAddress } = useDashboard();
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -406,8 +407,26 @@ export function CheckoutPage() {
       // Real message into the buyer's platform conversation (visible to this
       // seller and admin, not a local-only/fake thread) -- was previously a
       // localStorage-only fake thread with a fabricated "seller reply" that
-      // never actually reached the seller.
-      const orderMsg = `Hi! I've just placed an order with you.\n\nOrder: ${tempOrderId}\nItems:\n${itemsListStr}\n\nSubtotal: ৳${calculateSellerSubtotal(items).toLocaleString()}\n\nDelivering to: ${fullName}, ${phone}\n${address}, ${region}\n\nLooking forward to it!`;
+      // never actually reached the seller. The "[Order X]" prefix matches the
+      // convention MessagesPage's platform-message fetch already parses to
+      // route a message into the right sidebar thread (see the orderMatch
+      // regex there) -- without it the message still sends, but lands in a
+      // generic catch-all bucket instead of this seller's thread.
+      const threadId = `thread-${sellerId}`;
+      const orderMsg = `[Order ${tempOrderId}] Hi! I've just placed an order with you.\n\nItems:\n${itemsListStr}\n\nSubtotal: ৳${calculateSellerSubtotal(items).toLocaleString()}\n\nDelivering to: ${fullName}, ${phone}\n${address}, ${region}\n\nLooking forward to it!`;
+
+      // Local sidebar entry so the conversation is visible in the buyer's own
+      // inbox immediately, without waiting on a fetch -- the real message
+      // content above is what the seller actually receives.
+      createNewThread(
+        threadId,
+        sellerName,
+        PLACEHOLDER_IMAGE,
+        'retail',
+        `Order ${tempOrderId} placed`,
+        tempOrderId,
+      );
+
       operationsApi
         .submitPlatformMessage({
           buyerId: currentUser?.id || '',

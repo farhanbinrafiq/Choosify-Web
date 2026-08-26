@@ -245,40 +245,20 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   }, [userId]);
 
   // Threaded Messaging States with Localstorage persistence
+  const FAKE_DEMO_THREAD_IDS = ['thread-general', 'seller-apple', 'seller-panorama-hotel'];
+
   const [threads, setThreads] = useState<MessageThread[]>(() => {
     const saved = localStorage.getItem('choosify_threads');
     if (saved) {
       try {
         const parsed = JSON.parse(saved) as MessageThread[];
         if (!Array.isArray(parsed)) throw new Error('bad threads');
-        let next = parsed.map((t) => {
-          if (t.id === 'seller-apple' && !t.orderRef) {
-            return { ...t, orderRef: 'ORD-DEMO-PHYSICAL', type: t.type || 'retail' };
-          }
-          return t;
-        });
-        if (!next.some((t) => t.id === 'seller-panorama-hotel')) {
-          next = [
-            ...next,
-            {
-              id: 'seller-panorama-hotel',
-              title: 'Panorama Hotel Dhaka',
-              avatar: 'https://i.pravatar.cc/150?u=panorama-hotel',
-              lastMessage: 'Your room is reserved. Message us until checkout tonight.',
-              time: 'Yesterday',
-              type: 'retail',
-              unread: false,
-              orderRef: 'ORD-DEMO-SERVICE',
-            },
-          ];
-        } else {
-          next = next.map((t) =>
-            t.id === 'seller-panorama-hotel' && !t.orderRef
-              ? { ...t, orderRef: 'ORD-DEMO-SERVICE', type: t.type || 'retail' }
-              : t,
-          );
-        }
-        return next;
+        // One-time cleanup: earlier builds seeded (and kept re-seeding) fake
+        // demo conversations -- "Apple Retail BD", "Panorama Hotel Dhaka",
+        // and a fabricated exchange with a fake buyer and a reply attributed
+        // to the real site owner -- into every account. Strip them out of
+        // whatever a browser already has saved.
+        return parsed.filter((t) => !FAKE_DEMO_THREAD_IDS.includes(t.id));
       } catch {
         // fall through to defaults
       }
@@ -304,15 +284,23 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
         type: 'general',
         unread: false,
       },
-      { id: 'thread-general', title: 'Farhan Rafiq (Admin)', avatar: 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png', lastMessage: 'Absolutely! We can ship the S24 Ultra...', time: '10:30 AM', type: 'general', unread: true },
-      { id: 'seller-apple', title: 'Apple Retail BD', avatar: 'https://i.pravatar.cc/150?u=apple', lastMessage: 'Your iPhone order is confirmed — ask us anything before delivery.', time: '2 days ago', type: 'retail', unread: false, orderRef: 'ORD-DEMO-PHYSICAL' },
-      { id: 'seller-panorama-hotel', title: 'Panorama Hotel Dhaka', avatar: 'https://i.pravatar.cc/150?u=panorama-hotel', lastMessage: 'Your room is reserved. Message us until checkout tonight.', time: 'Yesterday', type: 'retail', unread: false, orderRef: 'ORD-DEMO-SERVICE' },
     ];
   });
 
   const [threadMessages, setThreadMessages] = useState<ThreadMessage[]>(() => {
     const saved = localStorage.getItem('choosify_thread_messages');
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved) as ThreadMessage[];
+        // Matches the threads cleanup above -- drop messages belonging to
+        // the removed fake demo threads.
+        return Array.isArray(parsed)
+          ? parsed.filter((m) => !FAKE_DEMO_THREAD_IDS.includes(m.threadId))
+          : parsed;
+      } catch {
+        return [];
+      }
+    }
     const welcomeTime = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     return [
       {
@@ -393,9 +381,6 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
         time: welcomeTime,
         avatar: EMI_MESSAGES_THREAD_AVATAR,
       },
-      { id: 1, threadId: 'thread-general', text: 'Hello! I am interested in the Samsung S24 Ultra you posted. Is it still available?', sender: 'other', senderName: 'Rahat Hossain', time: '10:30 AM', avatar: 'https://i.pravatar.cc/150?u=1' },
-      { id: 2, threadId: 'thread-general', text: 'Yes, it is still available. Would you like to know more about the warranty?', sender: 'user', senderName: 'Me', time: '10:35 AM' },
-      { id: 3, threadId: 'thread-general', text: 'Absolutely! We can ship the S24 Ultra to Banani with standard COD coverage.', sender: 'other', senderName: 'Farhan Rafiq', time: '11:00 AM', avatar: 'https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png' },
     ];
   });
 
