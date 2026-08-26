@@ -15,6 +15,7 @@ import {
 import { toast } from '../lib/notify';
 import { operationsApi } from '../services/operationsApi';
 import { usePageBreadcrumbs } from '../context/BreadcrumbContext';
+import { formatAddressLine } from '../lib/address/addressUtils';
 
 const KNOWN_PROMOS_FALLBACK = [
   { code: 'AARONG15', discount: 15, type: 'percentage' as const },
@@ -34,7 +35,7 @@ export function CheckoutPage() {
     buyerReputations,
     isFeatureEnabled,
   } = useGlobalState();
-  const { createNewThread, addNotification } = useDashboard();
+  const { createNewThread, addNotification, defaultCustomerAddress } = useDashboard();
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -65,10 +66,19 @@ export function CheckoutPage() {
       ) as typeof retailCart)
     : retailCart;
 
-  // Contact States
-  const [fullName, setFullName] = useState('Kamal Uddin');
-  const [phone, setPhone] = useState('+880 1712-345678');
-  const [address, setAddress] = useState('House 42, Road 11, Banani, Dhaka');
+  // Contact States -- prefill from the buyer's own saved default address (or
+  // profile fields) when one exists; otherwise leave blank so the buyer
+  // enters their real details instead of a placeholder identity going out
+  // on a real order.
+  const [fullName, setFullName] = useState(
+    () => defaultCustomerAddress?.recipientName || currentUser?.name || '',
+  );
+  const [phone, setPhone] = useState(
+    () => defaultCustomerAddress?.phone || currentUser?.phone || '',
+  );
+  const [address, setAddress] = useState(
+    () => (defaultCustomerAddress ? formatAddressLine(defaultCustomerAddress) : currentUser?.address || ''),
+  );
   const [region, setRegion] = useState('Dhaka');
   const [deliveryNotes, setDeliveryNotes] = useState('');
   const [paymentMethod, setPaymentMethod] = useState<'cod' | 'credit' | 'online'>(

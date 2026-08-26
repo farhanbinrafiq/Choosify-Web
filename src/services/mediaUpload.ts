@@ -25,6 +25,52 @@ const fileToBase64 = (file: File) =>
     reader.readAsDataURL(file);
   });
 
+const MAX_IMAGE_DIMENSION = 1600; // px, longest side
+const MAX_IMAGE_BYTES = 1_000_000; // ~1MB target after compression
+
+/**
+ * Downscale + re-encode an oversized image client-side before it ever
+ * leaves the browser -- keeps uploads well under nginx's request-body
+ * limit and off the JSON-snapshot disk store without the user having to
+ * think about file size. Skips SVGs, GIFs (drops animation), already-small
+ * files, and anything that fails to decode -- those upload as-is rather
+ * than block the user's upload on a compression bug.
+ */
+async function compressImageFile(file: File): Promise<File> {
+  if (!file.type.startsWith('image/')) return file;
+  if (file.type === 'image/svg+xml' || file.type === 'image/gif') return file;
+  if (file.size <= MAX_IMAGE_BYTES) return file;
+
+  try {
+    const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+    const scale = Math.min(1, MAX_IMAGE_DIMENSION / Math.max(bitmap.width, bitmap.height));
+    const width = Math.max(1, Math.round(bitmap.width * scale));
+    const height = Math.max(1, Math.round(bitmap.height * scale));
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return file;
+    ctx.drawImage(bitmap, 0, 0, width, height);
+    bitmap.close();
+
+    let blob: Blob | null = null;
+    for (let quality = 0.85; quality >= 0.4; quality -= 0.15) {
+      // eslint-disable-next-line no-await-in-loop
+      blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/jpeg', quality));
+      if (blob && blob.size <= MAX_IMAGE_BYTES) break;
+    }
+    if (!blob) return file;
+
+    const name = file.name.replace(/\.[^./]+$/, '') + '.jpg';
+    return new File([blob], name, { type: 'image/jpeg', lastModified: file.lastModified });
+  } catch (error) {
+    console.warn('[mediaUpload] Client-side image compression failed, uploading original file.', error);
+    return file;
+  }
+}
+
 async function uploadViaCloudinary(file: File, folder = 'choosify/verifications'): Promise<string> {
   if (!UPLOAD_PRESET?.trim()) {
     throw new Error('Missing VITE_CLOUDINARY_UPLOAD_PRESET');
@@ -108,16 +154,18 @@ export async function uploadVerificationFile(file: File): Promise<{ url: string;
     throw new Error('Unsupported file. Upload a PDF or image (JPEG/PNG/WebP/GIF).');
   }
 
+  const uploadFile = await compressImageFile(file);
+
   if (UPLOAD_PRESET?.trim()) {
     try {
-      const url = await uploadViaCloudinary(file);
+      const url = await uploadViaCloudinary(uploadFile);
       return { url, name: file.name };
     } catch (error) {
       console.warn('[mediaUpload] Direct Cloudinary failed, trying operations API.', error);
     }
   }
 
-  const url = await uploadViaOperationsApi(file);
+  const url = await uploadViaOperationsApi(uploadFile);
   return { url, name: file.name };
 }
 
@@ -142,7 +190,8 @@ async function uploadViaCatalogMediaFull(
         : 'Please choose a JPG, PNG, or WebP image file.',
     );
   }
-  const base64Data = await fileToBase64(file);
+  const uploadFile = allowedImage ? await compressImageFile(file) : file;
+  const base64Data = await fileToBase64(uploadFile);
   const token = getAccessToken();
   if (!token) {
     throw new Error('You must be signed in to upload a photo.');
@@ -152,8 +201,8 @@ async function uploadViaCatalogMediaFull(
     credentials: 'include',
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify({
-      fileName: file.name,
-      mimeType: file.type,
+      fileName: uploadFile.name,
+      mimeType: uploadFile.type,
       data: base64Data,
       category,
     }),
