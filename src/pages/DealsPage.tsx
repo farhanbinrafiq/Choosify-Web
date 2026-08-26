@@ -109,7 +109,11 @@ export function DealsPage() {
     if (t === 'seasonal') return 'Seasonal Campaigns';
     if (t === 'expired') return 'Expired Deals';
     if (t === 'all') return 'All Deals';
-    return 'Flash Deals'; // default
+    // Landing directly on a narrow tab (Flash Deals) made the page look
+    // pre-filtered/empty on arrival, with its browse-dock tile shown
+    // highlighted as if a filter were already applied. Default to the
+    // neutral, unfiltered-among-deals view instead.
+    return 'All Deals'; // default
   };
 
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
@@ -231,6 +235,10 @@ export function DealsPage() {
       result = result.filter(p => (p as any).isDeal === true && (p as any).dealType === 'seasonal');
     } else if (activeTab === 'Expired Deals' || activeTab === 'Expired') {
       result = result.filter(p => (p as any).isDeal === true && (p as any).dealType === 'clearance');
+    } else {
+      // 'All Deals' (and any unrecognized tab) previously fell through with no
+      // filter at all, showing the entire catalog instead of just deals.
+      result = result.filter(p => (p as any).isDeal === true);
     }
 
     if (selectedCategory) {

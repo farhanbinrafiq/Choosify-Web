@@ -28,19 +28,28 @@ export function useHomepageHeroSlides(): HeroSlide[] {
 
     if (!active.length) return [VIDEO_ONLY_SLIDE];
 
-    return active.map((banner): HeroSlide => {
-      const isVideo = banner.mediaType === 'video';
-      const mediaUrl = banner.mediaUrl || banner.backgroundVideo || banner.backgroundImage;
-      return {
-        id: banner.id,
-        title: banner.headline,
-        subtitle: banner.subtitle,
-        primaryCtaText: banner.ctaText,
-        primaryCtaLink: banner.ctaUrl,
-        ...(isVideo
-          ? { videoUrl: mediaUrl || banner.backgroundImage }
-          : { image: banner.mediaUrl || banner.backgroundImage }),
-      };
-    });
+    // A banner marked active in the CMS but never given a real image/video
+    // (e.g. created but not yet finished) previously still rendered a slide
+    // with an empty media src -- a visibly broken image on the homepage.
+    // Skip those rather than render a blank slide; fall back to the video
+    // slide if nothing usable remains.
+    const slides = active
+      .map((banner): HeroSlide | null => {
+        const isVideo = banner.mediaType === 'video';
+        const mediaUrl = banner.mediaUrl || banner.backgroundVideo || banner.backgroundImage;
+        const resolvedMedia = isVideo ? mediaUrl || banner.backgroundImage : banner.mediaUrl || banner.backgroundImage;
+        if (!resolvedMedia) return null;
+        return {
+          id: banner.id,
+          title: banner.headline,
+          subtitle: banner.subtitle,
+          primaryCtaText: banner.ctaText,
+          primaryCtaLink: banner.ctaUrl,
+          ...(isVideo ? { videoUrl: resolvedMedia } : { image: resolvedMedia }),
+        };
+      })
+      .filter((slide): slide is HeroSlide => slide !== null);
+
+    return slides.length ? slides : [VIDEO_ONLY_SLIDE];
   }, [homepageConfig]);
 }

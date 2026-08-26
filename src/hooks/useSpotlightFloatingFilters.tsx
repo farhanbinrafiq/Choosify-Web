@@ -41,7 +41,17 @@ export function useSpotlightFloatingFilters({
 
   const activeFilterCount = useMemo(() => {
     let count = 0;
-    if (filters.contentTypes.length) count += 1;
+    // A tab's own baseline content-type scope (set automatically by
+    // SpotlightDiscoverPage when the tab changes, e.g. landing on "Guides"
+    // presets contentTypes to the guide-related types) is not a filter the
+    // user applied -- only count contentTypes when it diverges from that
+    // baseline, so switching tabs doesn't show a spurious "1 filter active"
+    // badge with nothing real to clear.
+    const tabBaselineTypes = contentTypesForTab(activeTab);
+    const isTabBaseline =
+      filters.contentTypes.length === tabBaselineTypes.length &&
+      filters.contentTypes.every((t) => tabBaselineTypes.includes(t));
+    if (filters.contentTypes.length && !isTabBaseline) count += 1;
     if (filters.liveOnly) count += 1;
     if (filters.trendingOnly) count += 1;
     if (filters.sponsoredOnly) count += 1;

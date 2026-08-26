@@ -111,7 +111,7 @@ export function SellerAccountSidebarCard({ email, onNavigate }: SellerAccountSid
         data-testid="seller-join-now"
         className="flex items-center justify-center w-full rounded-[8px] bg-orange-primary text-white text-[11px] font-black uppercase tracking-wider px-3 py-2.5 hover:opacity-90 transition-opacity"
       >
-        Join Now
+        Join as Seller
       </a>
     </div>
   );
