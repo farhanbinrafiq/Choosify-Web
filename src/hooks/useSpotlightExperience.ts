@@ -28,7 +28,15 @@ function loadFilters(): SpotlightDiscoverFilters {
       Array.isArray(value) ? (value as T[]) : fallback;
     return {
       ...merged,
-      contentTypes: asArray(merged.contentTypes, []),
+      // contentTypes and liveOnly are tab-scoped presets, re-derived fresh by
+      // SpotlightDiscoverPage's mount effect from whatever tab the URL
+      // actually requests. Persisting them across a fresh page load let a
+      // "Live Only" toggle set on one visit reappear as active on an
+      // unrelated tab on the next visit/reload, before that effect had a
+      // chance to correct it -- reset both to their real defaults here so a
+      // fresh load never starts from stale tab-preset state.
+      contentTypes: [],
+      liveOnly: false,
       brandIds: asArray(merged.brandIds, []),
       publisherIds: asArray(merged.publisherIds, []),
       publisherTypes: asArray(merged.publisherTypes, []),
