@@ -87,7 +87,7 @@ import { AddressBookManager } from '../components/address/AddressBookManager';
 import { notify, toast } from '../lib/notify';
 import { notificationApi, type AppNotification } from '../services/notificationApi';
 import { getAccessToken } from '../lib/authSession';
-import { updateAvatarUrl } from '../lib/authApi';
+import { updateAvatarUrl, updateDisplayName } from '../lib/authApi';
 import { uploadUserAvatar } from '../services/mediaUpload';
 import { getConsumerStorefrontDashboardNav, isConsumerDashboardTabAllowed } from '../lib/platform/dashboardRegistry';
 import { SellerWorkspaceSection } from './ReviewDetailPage';
@@ -1527,6 +1527,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
   const [phone, setPhone] = useState(currentUser?.phone || '');
   const [avatar, setAvatar] = useState(currentUser?.avatar || DEFAULT_AVATAR);
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
+  const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [settingsSubTab, setSettingsSubTab] = useState<SettingsSubTab>(initialSubTab);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -1549,9 +1550,29 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
     localStorage.setItem('choosify_user_profile', JSON.stringify(next));
   };
 
-  const handleSave = () => {
-    persistProfile(avatar);
-    toast.success('Profile settings updated successfully');
+  const handleSave = async () => {
+    // Only `name` (displayName) is real -- the backend has no email or phone
+    // column to persist those to (see authApi.ts's updateDisplayName docs).
+    const trimmedName = name.trim();
+    if (!trimmedName) {
+      toast.error('Name cannot be empty.');
+      return;
+    }
+    const token = getAccessToken();
+    if (!token) {
+      toast.error('You must be signed in to update your profile.');
+      return;
+    }
+    setIsSavingProfile(true);
+    try {
+      await updateDisplayName(token, trimmedName);
+      persistProfile(avatar);
+      toast.success('Profile settings updated successfully');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to update profile.');
+    } finally {
+      setIsSavingProfile(false);
+    }
   };
 
   const handleUploadClick = () => fileInputRef.current?.click();
@@ -1607,9 +1628,10 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
         {settingsSubTab === 'personal' && (
           <button
             onClick={handleSave}
-            className="px-5 py-2.5 bg-[#EB4501] hover:brightness-110 text-white text-[13px] font-bold tracking-tight rounded-xl transition-all cursor-pointer border-0 shadow-sm flex items-center gap-2"
+            disabled={isSavingProfile}
+            className="px-5 py-2.5 bg-[#EB4501] hover:brightness-110 text-white text-[13px] font-bold tracking-tight rounded-xl transition-all cursor-pointer border-0 shadow-sm flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
           >
-            Save Changes
+            {isSavingProfile ? 'Saving…' : 'Save Changes'}
           </button>
         )}
       </div>
@@ -1703,22 +1725,30 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
                     Email Address
                   </label>
                   <input
-                    className="w-full h-12 bg-slate-50 border border-slate-200/60 rounded-2xl px-5 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#EB4501]/10 focus:border-[#EB4501]/40 focus:bg-white transition-all"
+                    className="w-full h-12 bg-slate-100 border border-slate-200/60 rounded-2xl px-5 text-xs font-bold text-[#6B7280] cursor-not-allowed"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    readOnly
+                    disabled
                     placeholder="your@email.com"
                   />
+                  <p className="text-[11px] text-[#9AA0AC] ml-1">
+                    Email changes aren&apos;t supported yet. Contact support if you need this updated.
+                  </p>
                 </div>
                 <div className="space-y-2">
                   <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight ml-1">
                     Phone Number
                   </label>
                   <input
-                    className="w-full h-12 bg-slate-50 border border-slate-200/60 rounded-2xl px-5 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#EB4501]/10 focus:border-[#EB4501]/40 focus:bg-white transition-all"
+                    className="w-full h-12 bg-slate-100 border border-slate-200/60 rounded-2xl px-5 text-xs font-bold text-[#6B7280] cursor-not-allowed"
                     value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="+880 1XXX-XXXXXX"
+                    readOnly
+                    disabled
+                    placeholder="Not yet supported"
                   />
+                  <p className="text-[11px] text-[#9AA0AC] ml-1">
+                    Phone number isn&apos;t collected on this account yet.
+                  </p>
                 </div>
               </div>
             </div>

@@ -152,6 +152,27 @@ export async function getCurrentUser(accessToken: string): Promise<AuthMeRespons
   return response.json() as Promise<AuthMeResponse>;
 }
 
+/**
+ * Persists the account's real display name. The backend PATCH /auth/profile
+ * only accepts displayName/username/website/bio/avatarUrl -- there is no
+ * email or phone column on the users table, so those fields cannot be
+ * persisted here (see DashboardPage.tsx's SettingsSection, which keeps them
+ * read-only rather than pretending to save them).
+ */
+export async function updateDisplayName(accessToken: string, displayName: string): Promise<{ displayName?: string }> {
+  const response = await fetch(`${API_BASE}/auth/profile`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+    body: JSON.stringify({ displayName }),
+  });
+  if (!response.ok) {
+    throw new Error(await readErrorMessage(response));
+  }
+  const body = (await response.json()) as { data?: { displayName?: string } };
+  return { displayName: body.data?.displayName };
+}
+
 /** Persists a server-uploaded avatar URL (or clears it by passing ''). */
 export async function updateAvatarUrl(accessToken: string, avatarUrl: string): Promise<{ avatarUrl?: string }> {
   const response = await fetch(`${API_BASE}/auth/profile`, {

@@ -831,6 +831,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       timestamp?: string;
       createdAt?: string;
       direction?: string;
+      senderId?: string;
       senderName?: string;
     };
 
@@ -857,19 +858,24 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
             .trim();
           const timestamp = String(row.timestamp || row.createdAt || new Date().toISOString());
           const serverId = String(row.id || `m_plat_${timestamp}`);
-          const isBuyer = row.direction === 'inbound';
+          // Real sender identity (senderId) is the authoritative signal for
+          // "is this my message" -- it correctly identifies self for a buyer
+          // OR a seller viewing the same thread. Fall back to direction for
+          // older/system rows that may not carry a senderId.
+          const isSelf = row.senderId ? row.senderId === currentUser.id : row.direction === 'inbound';
+          const sender = isSelf ? (currentUser.role === 'seller' ? 'seller' : 'user') : 'other';
           return {
             id: stableMessageNumericId(serverId),
             serverId,
             threadId,
             text: text || rawBody,
-            sender: isBuyer ? 'user' : 'other',
-            senderName: isBuyer ? 'Me' : String(row.senderName || 'Support'),
+            sender,
+            senderName: isSelf ? 'Me' : String(row.senderName || 'Support'),
             time: formatTime(timestamp),
             createdAt: timestamp,
             bookingOffer,
             orderOffer,
-            status: isBuyer ? 'delivered' : undefined,
+            status: isSelf ? 'delivered' : undefined,
           };
         });
 
