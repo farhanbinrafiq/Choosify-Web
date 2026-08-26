@@ -44,7 +44,7 @@ export function OrderSuccessPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const { orderId } = useParams<{ orderId: string }>();
-  const { orders, clearCart, currentUser } = useGlobalState();
+  const { orders, clearCart } = useGlobalState();
 
   const locationOrder = (location.state as { order?: Order } | null)?.order;
 
@@ -524,7 +524,16 @@ export function OrderSuccessPage() {
             </button>
             <button
               type="button"
-              onClick={() => navigate(currentUser?.id ? `/messages/conv_platform_${currentUser.id}` : '/messages')}
+              onClick={() => {
+                // Matches the thread-${sellerId} id CheckoutPage creates for
+                // this order's automatic message -- conv_platform_<buyerId>
+                // is the real backend conversation, but it isn't the id the
+                // buyer's own inbox sidebar has an entry for, so opening it
+                // directly landed on a generic/empty view instead of this
+                // order's seller thread.
+                const firstSellerId = order.subOrders[0]?.sellerId;
+                navigate(firstSellerId ? `/messages/thread-${firstSellerId}` : '/messages');
+              }}
               className="flex items-center justify-center gap-2 h-11 rounded-lg bg-[#EB4501] hover:bg-[#CF4400] text-white text-[11px] font-bold uppercase tracking-wide transition-colors cursor-pointer border-0"
             >
               <MessageCircleMore size={14} className="text-[#EB4501]" />
