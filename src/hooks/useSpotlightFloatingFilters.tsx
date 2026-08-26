@@ -39,19 +39,23 @@ export function useSpotlightFloatingFilters({
 }: UseSpotlightFloatingFiltersOptions) {
   const navigate = useNavigate();
 
+  // A tab's own baseline content-type scope (set automatically by
+  // SpotlightDiscoverPage when the tab changes, e.g. landing on "Guides"
+  // presets contentTypes to the guide-related types) is not a filter the
+  // user applied. Shared by the filter-count badge and the individual
+  // Content Type chips below, so neither shows the tab's own baseline as if
+  // it were something the user chose and could clear.
+  const tabBaselineTypes = useMemo(() => contentTypesForTab(activeTab), [activeTab]);
+  const isTabBaselineContentTypes = useMemo(
+    () =>
+      filters.contentTypes.length === tabBaselineTypes.length &&
+      filters.contentTypes.every((t) => tabBaselineTypes.includes(t)),
+    [filters.contentTypes, tabBaselineTypes],
+  );
+
   const activeFilterCount = useMemo(() => {
     let count = 0;
-    // A tab's own baseline content-type scope (set automatically by
-    // SpotlightDiscoverPage when the tab changes, e.g. landing on "Guides"
-    // presets contentTypes to the guide-related types) is not a filter the
-    // user applied -- only count contentTypes when it diverges from that
-    // baseline, so switching tabs doesn't show a spurious "1 filter active"
-    // badge with nothing real to clear.
-    const tabBaselineTypes = contentTypesForTab(activeTab);
-    const isTabBaseline =
-      filters.contentTypes.length === tabBaselineTypes.length &&
-      filters.contentTypes.every((t) => tabBaselineTypes.includes(t));
-    if (filters.contentTypes.length && !isTabBaseline) count += 1;
+    if (filters.contentTypes.length && !isTabBaselineContentTypes) count += 1;
     if (filters.liveOnly) count += 1;
     if (filters.trendingOnly) count += 1;
     if (filters.sponsoredOnly) count += 1;
@@ -70,7 +74,7 @@ export function useSpotlightFloatingFilters({
     if (replayOnly) count += 1;
     if (upcomingOnly) count += 1;
     return count;
-  }, [filters, replayOnly, upcomingOnly]);
+  }, [filters, replayOnly, upcomingOnly, isTabBaselineContentTypes]);
 
   const goTab = (tab: SpotlightContentTabId) => navigate(`/spotlight?tab=${tab}`);
 
@@ -315,7 +319,10 @@ export function useSpotlightFloatingFilters({
             </h3>
             <div className="flex flex-wrap gap-2">
               {FILTERABLE_TYPES.slice(0, 14).map((type) => {
-                const active = filters.contentTypes.includes(type);
+                // Don't show the tab's own automatic baseline as pre-selected
+                // -- only light a chip up once the user has actually changed
+                // the content-type selection away from that baseline.
+                const active = filters.contentTypes.includes(type) && !isTabBaselineContentTypes;
                 return (
                   <button
                     key={type}
