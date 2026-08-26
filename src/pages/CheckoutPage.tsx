@@ -115,6 +115,16 @@ export function CheckoutPage() {
   const cancellationRatio = userRep ? userRep.cancellationRatio : 0;
   const isCODRestricted = codTrustScore < 50 || cancellationRatio > 40;
   const orderPlacedRef = useRef(false);
+  // React state (isProcessingPayment) is batched/async and cannot reliably
+  // block a genuine same-tick double-invocation (double-click, double
+  // Enter-press) -- this ref is checked+set synchronously as the very first
+  // thing in handlePlaceOrder, closing that race regardless of render timing.
+  const isSubmittingRef = useRef(false);
+  // Stable for the lifetime of one checkout attempt so a second invocation
+  // (if the re-entrancy guard above is ever bypassed) reuses the same
+  // orderId instead of minting a fresh one -- letting the server's existing
+  // idempotent-by-orderId order creation actually do its job.
+  const stableOrderIdRef = useRef<string | null>(null);
 
   React.useEffect(() => {
     if (isCODRestricted) {
@@ -243,11 +253,13 @@ export function CheckoutPage() {
       toast.error('Please deliver all shipping credentials!');
       return;
     }
-    if (isProcessingPayment) return;
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
     setIsProcessingPayment(true);
     try {
       await placeOrder();
     } finally {
+      isSubmittingRef.current = false;
       setIsProcessingPayment(false);
     }
   };
@@ -347,8 +359,14 @@ export function CheckoutPage() {
       return;
     }
 
-    // Trigger global order engine
-    const tempOrderId = 'ORD-' + Math.floor(Math.random() * 90000 + 10000);
+    // Trigger global order engine. Stable per checkout attempt (see
+    // stableOrderIdRef) so a re-entrant call reuses the same orderId instead
+    // of racing the server's idempotent-by-orderId order creation with two
+    // different ids.
+    if (!stableOrderIdRef.current) {
+      stableOrderIdRef.current = 'ORD-' + Math.floor(Math.random() * 90000 + 10000);
+    }
+    const tempOrderId = stableOrderIdRef.current;
     const splitCount = sellerIds.length;
 
     // Generate SubOrders structure
