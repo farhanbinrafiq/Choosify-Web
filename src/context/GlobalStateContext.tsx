@@ -804,6 +804,18 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   const allPlacements: CatalogPlacement[] = catalogPlacements;
 
   const addToCart = (product: any, quantity: number, selectedVariant?: any) => {
+    // Central stock guard -- ProductDetailPage already disables its own Add
+    // to Cart button when out of stock, but quick-add entry points (product
+    // cards on listing/search/category pages) called this directly with no
+    // check at all, letting a 0-stock product reach checkout instead of
+    // being caught until then. selectedVariant, when passed, is trusted to
+    // be a real variant on this product (callers resolve that themselves).
+    const variantBlocked = selectedVariant && (selectedVariant.stock === 0 || selectedVariant.enabled === false);
+    const productBlocked = !selectedVariant && (product?.stock === 0 || product?.status === 'out_of_stock');
+    if (variantBlocked || productBlocked) {
+      notify.error(`${product?.title || 'This item'} is out of stock.`);
+      return;
+    }
     setRetailCart(prev => {
       const existing = prev.find(item => 
         item.product.id === product.id && 
