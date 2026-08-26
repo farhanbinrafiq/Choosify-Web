@@ -35,7 +35,7 @@ export function CheckoutPage() {
     buyerReputations,
     isFeatureEnabled,
   } = useGlobalState();
-  const { createNewThread, addNotification, customerAddresses, defaultCustomerAddress } = useDashboard();
+  const { addNotification, customerAddresses, defaultCustomerAddress } = useDashboard();
   
   const navigate = useNavigate();
   const location = useLocation();
@@ -403,57 +403,22 @@ export function CheckoutPage() {
 
       const invoiceIdStr = `INV-${sellerId.toUpperCase().slice(0, 4)}-${Math.floor(Math.random() * 90000 + 10000)}`;
 
-      // Construct Thread starter messages containing products list status details
-      const startMsg = `ORDER REFERENCE: ${tempOrderId}
-INVOICE ID: ${invoiceIdStr}
-MODE: RETAIL
-DELIVERY RECIPIENT: ${fullName}
-CONTACT PHONE: ${phone}
-DELIVERY LOCATION: ${address}, ${region}
-DELIVERY METHOD: Standard Express Parcel
-DELIVERY FEE: ৳${DELIVERY_FEE_PER_SELLER}
-
-STAGED PRODUCTS IN LOT:
-${itemsListStr}
-
-LOT METRIC AMOUNT: ৳${calculateSellerSubtotal(items).toLocaleString()}
-ORDER STATUS: PENDING_CONFIRMATION
-
-"Hello Partner! Clicking above confirms receipt of this staged ticket. Our logistics representative has started routing this package. Please review the parcel invoice."`;
-
-      // Trigger automatic buyer-seller conversation threads using existing messaging context
-      createNewThread(
-        `thread-${sellerId}`,
-        `${sellerName} Factory Outlet`,
-        `https://i.pravatar.cc/150?u=${sellerId}`,
-        'retail',
-        `New lot transaction initialized (${tempOrderId})`,
-        tempOrderId
-      );
-
-      // Seed the elaborate starter ticket block inside the thread
-      setTimeout(() => {
-        // Post first system details ticket
-        const threadElements = localStorage.getItem('choosify_thread_messages');
-        if (threadElements) {
-          try {
-            const parsed = JSON.parse(threadElements);
-            const exists = parsed.some((x: any) => x.threadId === `thread-${sellerId}` && x.text.includes(tempOrderId));
-            if (!exists) {
-              const newMsg = {
-                id: Date.now() + Math.floor(Math.random() * 50),
-                threadId: `thread-${sellerId}`,
-                text: startMsg,
-                sender: 'other',
-                senderName: `${sellerName} Factory Support`,
-                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                avatar: `https://i.pravatar.cc/150?u=${sellerId}`
-              };
-              localStorage.setItem('choosify_thread_messages', JSON.stringify([...parsed, newMsg]));
-            }
-          } catch (e) {}
-        }
-      }, 300);
+      // Real message into the buyer's platform conversation (visible to this
+      // seller and admin, not a local-only/fake thread) -- was previously a
+      // localStorage-only fake thread with a fabricated "seller reply" that
+      // never actually reached the seller.
+      const orderMsg = `Hi! I've just placed an order with you.\n\nOrder: ${tempOrderId}\nItems:\n${itemsListStr}\n\nSubtotal: ৳${calculateSellerSubtotal(items).toLocaleString()}\n\nDelivering to: ${fullName}, ${phone}\n${address}, ${region}\n\nLooking forward to it!`;
+      operationsApi
+        .submitPlatformMessage({
+          buyerId: currentUser?.id || '',
+          userName: fullName || currentUser?.name || 'Buyer',
+          body: orderMsg,
+          orderId: tempOrderId,
+          sellerId,
+        })
+        .catch(() => {
+          // Best-effort -- a failed courtesy message must never block checkout.
+        });
 
       return {
         sellerId,
