@@ -16,7 +16,6 @@ import { catalogApi } from '../services/catalogApi';
 import { hydrateBrandPostsFromApi } from '../lib/brandPosts';
 import { FEATURE_FLAG_DEFAULTS, isFlagEnabled, normalizeFeatureFlags } from '../lib/featureFlags';
 import { operationsApi } from '../services/operationsApi';
-import { ensureDemoExpiryOrders } from '../lib/messaging/demoExpiryOrders';
 import {
   AUTH_LOGIN_FLAG_KEY,
   AUTH_PROFILE_KEY,
@@ -227,9 +226,9 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     try {
       const saved = localStorage.getItem('choosify_orders');
       const parsed: Order[] = saved ? JSON.parse(saved) : [];
-      return ensureDemoExpiryOrders(Array.isArray(parsed) ? parsed : []);
+      return Array.isArray(parsed) ? parsed : [];
     } catch {
-      return ensureDemoExpiryOrders([]);
+      return [];
     }
   });
 
@@ -556,14 +555,18 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       if (!getAccessToken()) return;
       try {
         const role = currentUser.role;
-        const isSeller = role === 'seller';
         const isStaff = role === 'admin' || role === 'moderator';
+        // This state is the buyer's own purchase history (My Orders, order
+        // tracking, warranty, cancellations, reviews) -- always fetch by
+        // buyerId regardless of the account's role. A seller-role account
+        // (even one still pending partner approval) can still have placed
+        // real orders as a buyer and needs to see them; the seller-role
+        // branch this used to take instead queried sellerId, which silently
+        // returned nothing for a seller who was buying, not selling. The
+        // seller's OWN incoming-orders-to-fulfill view (SellerOrdersSection)
+        // fetches independently by sellerId and is unaffected by this.
         const rows = await operationsApi.listOrders(
-          isStaff
-            ? undefined
-            : isSeller
-              ? { sellerId: currentUser.id }
-              : { buyerId: currentUser.id },
+          isStaff ? undefined : { buyerId: currentUser.id },
         );
         if (cancelled) return;
         const mapped = rows.map(mapServerOrder).filter((o) => o.orderId);
