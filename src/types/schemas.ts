@@ -167,6 +167,14 @@ export interface Order {
   paymentValId?: string;
   paidAmount?: number;
   paymentValidatedAt?: string;
+  /** Buyer delivery details captured at checkout -- present on every real order. */
+  shipping?: {
+    fullName: string;
+    phone: string;
+    address: string;
+    region: string;
+    deliveryNotes?: string;
+  };
 }
 
 export interface BuyerReputation {

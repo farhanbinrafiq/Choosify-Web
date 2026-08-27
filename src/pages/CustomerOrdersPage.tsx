@@ -83,39 +83,9 @@ export function CustomerOrdersPage({
   };
 
   const handleDownloadInvoice = (order: any, sub: any) => {
-    const content = `
-CHOOSIFY.BD — OFFICIAL INVOICE
-================================
-Order ID: ${order.orderId}
-Invoice ID: ${sub.invoiceId}
-Date: ${new Date(order.createdAt).toLocaleDateString('en-BD')}
-Seller: ${sub.sellerBusinessName}
-Payment: ${order.isCOD ? 'Cash on Delivery' : 'Online Payment'}
-
-ITEMS:
-${sub.items.map((it: any) => {
-  const base = `- ${it.productTitle} x${it.quantity} @ ৳${it.price.toLocaleString()} = ৳${(it.price * it.quantity).toLocaleString()}`;
-  if (it.productType !== 'service') return base;
-  const serviceDetails = Object.entries(it.serviceDetails || {})
-    .map(([label, value]) => `    ${label.replace(/([A-Z])/g, ' $1')}: ${value}`)
-    .join('\n');
-  return `${base}\n  Service Overview: ${it.serviceCategory || 'Service'}\n  Service Specifications:\n${serviceDetails || '    As agreed in seller conversation'}\n  Complimentary Features: See confirmed offer\n  Property Specs: See listing details`;
-}).join('\n')}
-
-Subtotal: ৳${sub.items.reduce((a: number, it: any) => a + it.price * it.quantity, 0).toLocaleString()}
-Delivery: ৳${sub.deliveryFee}
-TOTAL: ৳${(sub.items.reduce((a: number, it: any) => a + it.price * it.quantity, 0) + sub.deliveryFee).toLocaleString()}
-
-Thank you for shopping with Choosify.bd
-    `.trim();
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${sub.invoiceId}.txt`;
-    a.click();
-    URL.revokeObjectURL(url);
-    toast.success(`Invoice ${sub.invoiceId} downloaded.`);
+    // Real designed invoice (same layout the admin/seller side sees for this
+    // order), not a plain-text mockup -- see src/pages/InvoicePage.tsx.
+    navigate(`/invoice/${order.orderId}/${sub.sellerId}`);
   };
 
   const getProductImageByTitle = (title: string) => {
