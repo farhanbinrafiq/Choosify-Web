@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { Store, Award } from 'lucide-react';
 import { useGlobalState } from '../context/GlobalStateContext';
 import type { SiteFooterColumn } from '../types/catalog';
 import { getNavigationLabel } from '../lib/navigation';
@@ -8,6 +9,35 @@ import { ChoosifyWordmarkLogo } from './ChoosifyWordmarkLogo';
 import { BrandIcon } from './icons/BrandIcon';
 import { APP_STORE_ICON, socialIconSrc } from './icons/brandIcons';
 import { PaymentMethodsGrid } from './icons/PaymentMethodIcons';
+
+/**
+ * A visitor who hasn't signed up as a buyer at all still needs a way to
+ * become a seller or creator directly -- both signup forms live on the
+ * admin app (dashboard.choosify.bd/signup), not here. Mirrors the same
+ * dev/prod origin resolution already used by the logged-in buyer dashboard's
+ * "Join as Seller"/"Join as Creator" sidebar cards (SellerAccountSidebarCard.tsx,
+ * BecomeCreatorSidebarCard.tsx) -- duplicated rather than shared since those
+ * two also prefill ?email= from the logged-in buyer, which doesn't apply to
+ * an anonymous footer link.
+ */
+const DEV_PARTNER_SIGNUP_ORIGIN = 'http://localhost:3001';
+const PROD_PARTNER_SIGNUP_ORIGIN = 'https://dashboard.choosify.bd';
+
+function resolvePartnerSignupOrigin(): string {
+  const fromEnv = ((import.meta as any).env?.VITE_SELLER_DASHBOARD_URL as string | undefined)?.replace(
+    /\/$/,
+    '',
+  );
+  if (import.meta.env.DEV) {
+    if (fromEnv && /(localhost|127\.0\.0\.1)/i.test(fromEnv)) return fromEnv;
+    return DEV_PARTNER_SIGNUP_ORIGIN;
+  }
+  return fromEnv || PROD_PARTNER_SIGNUP_ORIGIN;
+}
+
+const PARTNER_SIGNUP_ORIGIN = resolvePartnerSignupOrigin();
+const SELLER_SIGNUP_URL = PARTNER_SIGNUP_ORIGIN + "/signup?type=seller";
+const CREATOR_SIGNUP_URL = PARTNER_SIGNUP_ORIGIN + "/signup?type=creator";
 
 const DEFAULT_FOOTER_COLUMNS: SiteFooterColumn[] = [
   {
@@ -274,6 +304,34 @@ export function Footer() {
                 className="text-[13px] font-medium text-white/70 hover:text-white transition-colors"
               >
                 Phone: {contactPhone}
+              </a>
+            </div>
+
+            {/*
+              A visitor browsing anonymously has no reason to create a buyer
+              account first just to reach seller/creator signup -- these go
+              straight to dashboard.choosify.bd/signup?type=... regardless of
+              whether the visitor has any Choosify account at all.
+            */}
+            <FooterHeading>Sell Or Create With Us</FooterHeading>
+            <div className="flex flex-col gap-2 mb-2">
+              <a
+                href={SELLER_SIGNUP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-[13px] font-semibold text-white/70 hover:text-white transition-colors"
+              >
+                <Store size={14} className="text-orange-primary shrink-0" />
+                Sign Up As A Seller
+              </a>
+              <a
+                href={CREATOR_SIGNUP_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 text-[13px] font-semibold text-white/70 hover:text-white transition-colors"
+              >
+                <Award size={14} className="text-orange-primary shrink-0" />
+                Join As A Creator
               </a>
             </div>
           </div>
