@@ -1868,7 +1868,7 @@ function MyReviewsSection() {
 // --- MAIN PAGE ---
 
 export function DashboardPage() {
-  const { logout, currentUser } = useGlobalState();
+  const { logout, currentUser, orders } = useGlobalState();
   const { 
     savedProducts, 
     savedBrands, 
@@ -1916,6 +1916,7 @@ export function DashboardPage() {
     if (id === 'saved-items') return savedProducts.length + savedBrands.length + savedGuides.length;
     if (id === 'following') return followedBrands.length + lovedBrands.length;
     if (id === 'recently-viewed') return recentlyViewed.length;
+    if (id === 'orders') return orders.length;
     return null;
   };
 
