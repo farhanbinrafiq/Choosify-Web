@@ -1,24 +1,43 @@
 import type { BookingOfferCard } from '../types/serviceBooking';
 import type { ManualOrderOfferCard, ManualOrderOfferItem } from '../types/manualOrder';
-import { getAccessToken } from '../lib/authSession';
+import { getAccessToken, persistAuthToken, refreshSession } from '../lib/authSession';
 
 const API_BASE = ((import.meta as any).env?.VITE_API_BASE_URL as string | undefined) || '/api/v1';
 
 type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
-async function request<T>(path: string, method: HttpMethod = 'GET', body?: unknown): Promise<T> {
+function doFetch(path: string, method: HttpMethod, body: unknown, token: string | null) {
   const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-  const token = getAccessToken();
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-
-  const response = await fetch(`${API_BASE}${path}`, {
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return fetch(`${API_BASE}${path}`, {
     method,
     headers,
     credentials: 'include',
     body: body !== undefined ? JSON.stringify(body) : undefined,
   });
+}
+
+async function request<T>(path: string, method: HttpMethod = 'GET', body?: unknown): Promise<T> {
+  const token = getAccessToken();
+  let response = await doFetch(path, method, body, token);
+
+  // A tab left open across a long session can outlive its access token.
+  // Try one silent refresh via the httpOnly refresh cookie and retry before
+  // surfacing a raw "expired token" error the user has no way to act on --
+  // the fix from their side is always just "log in again", so do that part
+  // for them when possible.
+  if (response.status === 401 && token) {
+    try {
+      const refreshed = await refreshSession();
+      if (refreshed?.accessToken) {
+        persistAuthToken(refreshed.accessToken);
+        response = await doFetch(path, method, body, refreshed.accessToken);
+      }
+    } catch {
+      // Refresh failed -- fall through to the normal error handling below.
+    }
+  }
+
   if (!response.ok) {
     const rawError = await response.text();
     let parsed: { error?: string; message?: string } | null = null;
