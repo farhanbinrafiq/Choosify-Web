@@ -291,20 +291,31 @@ export function Footer() {
               ))}
             </div>
 
-            <FooterHeading>Contact Us</FooterHeading>
-            <div className="flex flex-col gap-2">
-              <a
-                href={`mailto:${contactEmail}`}
-                className="text-[13px] font-medium text-white/70 hover:text-white transition-colors"
-              >
-                Email: {contactEmail}
-              </a>
-              <a
-                href={`tel:${contactPhone.replace(/\s+/g, '')}`}
-                className="text-[13px] font-medium text-white/70 hover:text-white transition-colors"
-              >
-                Phone: {contactPhone}
-              </a>
+          </div>
+
+          {/*
+            Sits beside Contact Us rather than stacked under it -- the brand
+            column above is capped at max-w-sm (logo/tagline read better
+            narrow), which leaves this row free to use the blank space next
+            to it up to the link columns' own gutter.
+          */}
+          <div className="flex flex-wrap gap-x-10 gap-y-6 sm:gap-x-16 -mt-2">
+            <div>
+              <FooterHeading>Contact Us</FooterHeading>
+              <div className="flex flex-col gap-2">
+                <a
+                  href={`mailto:${contactEmail}`}
+                  className="text-[13px] font-medium text-white/70 hover:text-white transition-colors"
+                >
+                  Email: {contactEmail}
+                </a>
+                <a
+                  href={`tel:${contactPhone.replace(/\s+/g, '')}`}
+                  className="text-[13px] font-medium text-white/70 hover:text-white transition-colors"
+                >
+                  Phone: {contactPhone}
+                </a>
+              </div>
             </div>
 
             {/*
@@ -313,26 +324,28 @@ export function Footer() {
               straight to dashboard.choosify.bd/signup?type=... regardless of
               whether the visitor has any Choosify account at all.
             */}
-            <FooterHeading>Sell Or Create With Us</FooterHeading>
-            <div className="flex flex-col gap-2 mb-2">
-              <a
-                href={SELLER_SIGNUP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-[13px] font-semibold text-white/70 hover:text-white transition-colors"
-              >
-                <Store size={14} className="text-orange-primary shrink-0" />
-                Sign Up As A Seller
-              </a>
-              <a
-                href={CREATOR_SIGNUP_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 text-[13px] font-semibold text-white/70 hover:text-white transition-colors"
-              >
-                <Award size={14} className="text-orange-primary shrink-0" />
-                Join As A Creator
-              </a>
+            <div>
+              <FooterHeading>Sell Or Create With Us</FooterHeading>
+              <div className="flex flex-col gap-2">
+                <a
+                  href={SELLER_SIGNUP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-[13px] font-semibold text-white/70 hover:text-white transition-colors"
+                >
+                  <Store size={14} className="text-orange-primary shrink-0" />
+                  Sign Up As A Seller
+                </a>
+                <a
+                  href={CREATOR_SIGNUP_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 text-[13px] font-semibold text-white/70 hover:text-white transition-colors"
+                >
+                  <Award size={14} className="text-orange-primary shrink-0" />
+                  Join As A Creator
+                </a>
+              </div>
             </div>
           </div>
 
