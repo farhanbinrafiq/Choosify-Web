@@ -224,6 +224,13 @@ export function SearchPage() {
     else if (sortBy === 'newest') products = [...products].sort((a, b) => Number(b.id) - Number(a.id));
     else products = [...products].sort((a, b) => (b.score || 0) - (a.score || 0));
 
+    // Out-of-stock results sink to the end regardless of sort -- a stable
+    // partition, so each group keeps the order just computed above.
+    if (!inStockOnly) {
+      const isOOS = (p: any) => p.status === 'out_of_stock' || p.stock === 0;
+      products = [...products.filter((p) => !isOOS(p)), ...products.filter(isOOS)];
+    }
+
     const brands = brandSource
       .map((b: any) => {
         const overviews = getBrandOverviews(b.name, customOverviews);

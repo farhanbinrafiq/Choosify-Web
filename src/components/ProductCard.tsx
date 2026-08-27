@@ -37,6 +37,7 @@ const DC = {
   discountRed: '#FF000D',
   newGreen: '#07DD05',
   dealAmber: '#D97706',
+  outOfStockGray: '#6B7280',
 } as const;
 
 function formatBdt(value: number | string | undefined): string {
@@ -51,6 +52,12 @@ function parsePrice(value: unknown): number {
 }
 
 function resolveDcBadge(product: any): { label: string; bg: string } | null {
+  // Checked first and returned immediately -- an unavailable product
+  // shouldn't advertise a discount/deal/promo it can't currently be bought
+  // under, and shoppers need to see "Out of Stock" before anything else.
+  if (product.status === 'out_of_stock' || product.stock === 0) {
+    return { label: 'OUT OF STOCK', bg: DC.outOfStockGray };
+  }
   const discount =
     product.discountPercent ??
     (typeof product.discount === 'string'

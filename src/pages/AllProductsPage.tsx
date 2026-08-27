@@ -550,6 +550,13 @@ export function AllProductsPage() {
       });
     }
 
+    // Out-of-stock items always sink to the end, after whichever sort ran
+    // above -- a stable partition, so each group keeps its own sorted order,
+    // just with the unavailable ones moved past everything buyable.
+    const isOutOfStock = (p: (typeof result)[number]) =>
+      (p as { status?: string }).status === 'out_of_stock' || (p as { stock?: number }).stock === 0;
+    result = [...result.filter((p) => !isOutOfStock(p)), ...result.filter(isOutOfStock)];
+
     return result;
   }, [allCatalogProducts, searchParams, selectedCategory, selectedBrand, ratingFilter, availabilityFilter, retailPriceLimit, minPrice, maxPrice, sortOption, activeTab, activeSpecs, priceMin, priceMax, allBrands, priorityNowMs]);
 

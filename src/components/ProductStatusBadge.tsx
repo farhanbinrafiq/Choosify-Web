@@ -1,9 +1,9 @@
 import React from 'react';
-import { Flame, Sparkles, Star, Tag, Ticket, Zap } from 'lucide-react';
+import { Ban, Flame, Sparkles, Star, Tag, Ticket, Zap } from 'lucide-react';
 import { cn } from '../lib/utils';
 import type { SiteProductBadge } from '../types/catalog';
 
-export type ProductBadgeTone = 'hot' | 'new' | 'featured' | 'sale' | 'event' | 'promo' | 'default';
+export type ProductBadgeTone = 'hot' | 'new' | 'featured' | 'sale' | 'event' | 'promo' | 'outOfStock' | 'default';
 
 const TONE_STYLES: Record<ProductBadgeTone, string> = {
   hot: 'bg-gradient-to-r from-[#EB4501] to-[#CF4400] text-white border-[#FF8A4C]/40 shadow-[0_2px_8px_rgba(235, 69, 1,0.35)]',
@@ -12,12 +12,16 @@ const TONE_STYLES: Record<ProductBadgeTone, string> = {
   sale: 'bg-gradient-to-r from-rose-600 to-red-500 text-white border-rose-300/40 shadow-[0_2px_8px_rgba(225,29,72,0.28)]',
   event: 'bg-gradient-to-r from-violet-600 to-purple-500 text-white border-violet-300/40 shadow-[0_2px_8px_rgba(124,58,237,0.28)]',
   promo: 'bg-gradient-to-r from-amber-500 to-orange-500 text-white border-amber-200/50 shadow-[0_2px_8px_rgba(245,158,11,0.28)]',
+  // Deliberately muted/gray, not a vibrant promo gradient -- this is a
+  // negative status, not something to draw the eye to.
+  outOfStock: 'bg-gray-600/95 text-white border-gray-400/40 shadow-[0_2px_8px_rgba(75,85,99,0.28)]',
   default: 'bg-gradient-to-r from-[#EB4501] to-[#CF4400] text-white border-orange-200/40 shadow-[0_2px_8px_rgba(235, 69, 1,0.25)]',
 };
 
 function resolveTone(label: string): ProductBadgeTone {
   const normalized = label.replace(/[^\w\s%]/g, ' ').trim().toUpperCase();
 
+  if (/\bOUT OF STOCK\b/.test(normalized)) return 'outOfStock';
   if (/\b(HOT|VIRAL|TRENDING|FLASH)\b/.test(normalized)) return 'hot';
   if (/\b(NEW|ARRIVAL)\b/.test(normalized)) return 'new';
   if (/\b(FEATURED|EDITOR|STAFF|PICK)\b/.test(normalized)) return 'featured';
@@ -42,6 +46,8 @@ function BadgeIcon({ tone }: { tone: ProductBadgeTone }) {
       return <Sparkles className={className} />;
     case 'promo':
       return <Ticket className={className} />;
+    case 'outOfStock':
+      return <Ban className={className} />;
     default:
       return <Tag className={className} />;
   }
@@ -122,6 +128,12 @@ export function collectProductBadgeLabels(
   cmsBadges: SiteProductBadge[] = [],
 ): string[] {
   const labels: string[] = [];
+  const isOutOfStock = product.status === 'out_of_stock' || product.stock === 0;
+
+  // Out of stock leads -- ProductStatusBadgeStack only shows the first two
+  // unique labels, so this must come first to guarantee it's never crowded
+  // out by a promotional badge on the same product.
+  if (isOutOfStock) labels.push('OUT OF STOCK');
 
   cmsBadges.forEach((badge) => labels.push(badge.label));
 
@@ -131,7 +143,8 @@ export function collectProductBadgeLabels(
 
   if (product.isNewArrival) labels.push('NEW');
   if (product.featuredFlag) labels.push('FEATURED');
-  if (product.isDeal || product.dealType) labels.push('SALE');
+  // Advertising a deal on something unavailable to buy is misleading.
+  if (!isOutOfStock && (product.isDeal || product.dealType)) labels.push('SALE');
   if (product.isBestseller) labels.push('HOT');
 
   return labels;
