@@ -118,6 +118,13 @@ export function InvoicePage() {
         __html: `
           @media print {
             .no-print { display: none !important; }
+            /* This page renders inside the storefront's always-on Navbar/
+               Footer shell (App.tsx never excludes /invoice from either) --
+               neither has a .no-print class of its own, so print/PDF output
+               was showing the whole site chrome around the invoice. Hide
+               them by their own stable ids instead of restructuring the
+               route just for this page. */
+            #main-navbar, #global-footer { display: none !important; }
             body { background: #ffffff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .invoice-card { box-shadow: none !important; border: none !important; margin: 0 !important; }
             @page { margin: 15mm; size: A4; }
