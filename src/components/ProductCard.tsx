@@ -274,6 +274,7 @@ export const ProductCard = memo(function ProductCard({
   const origLabel =
     origNum > priceNum ? formatBdt(origNum) : product.originalPrice ? formatBdt(product.originalPrice) : '';
   const badge = resolveDcBadge(product);
+  const isOutOfStock = product.status === 'out_of_stock' || product.stock === 0;
   const variantLine = resolveVariantLine(product);
   const cashback = resolveCashbackLabel(priceNum);
   const rating = resolveRating(product);
@@ -335,6 +336,10 @@ export const ProductCard = memo(function ProductCard({
         />
       );
     }
+    // No cart action on a card already showing "Out of Stock" -- addToCart
+    // would refuse it anyway (see GlobalStateContext), so don't offer a
+    // button that can only ever fail.
+    if (isOutOfStock) return null;
     return <CartIconButton size={size} onClick={handlePrimaryAction} />;
   };
 
