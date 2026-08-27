@@ -312,7 +312,13 @@ function AppContent() {
             </Route>
             <Route path="/messages" element={<ProtectedRoute><PageWrapper><MessagesPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/messages/:threadId" element={<ProtectedRoute><PageWrapper><MessagesPage /></PageWrapper></ProtectedRoute>} />
-            <Route path="/profile/orders" element={<ProtectedRoute><PageWrapper><CustomerOrdersPage /></PageWrapper></ProtectedRoute>} />
+            {/* My Orders lives inside the dashboard shell (see DashboardPage's
+                handleNavClick comment) -- this route stays as a stable
+                redirect target for the navbar dropdown, order-success/
+                tracking/invoice back-links, etc., rather than the separate
+                standalone page (CustomerOrdersPage) those used to point at,
+                which had no sidebar nav and looked like a different app. */}
+            <Route path="/profile/orders" element={<Navigate to="/dashboard?tab=orders" replace />} />
             <Route path="*" element={<PageWrapper><NotFoundPage /></PageWrapper>} />
           </Routes>
         </Suspense>
