@@ -251,6 +251,7 @@ export function Footer() {
       <div className="max-w-[1280px] mx-auto px-6 md:px-10 pt-14 md:pt-16 relative z-10">
         {/* Top: brand + link columns */}
         <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_1.85fr] gap-10 lg:gap-16 pb-10">
+          <div>
           <div className="max-w-sm">
             <Link to="/" className="inline-flex items-center mb-4" aria-label="Choosify Home">
               {siteConfig?.websiteAssets?.footerLogo ? (
@@ -290,16 +291,15 @@ export function Footer() {
                 </a>
               ))}
             </div>
-
           </div>
 
           {/*
             Sits beside Contact Us rather than stacked under it -- the brand
-            column above is capped at max-w-sm (logo/tagline read better
+            block above is capped at max-w-sm (logo/tagline read better
             narrow), which leaves this row free to use the blank space next
-            to it up to the link columns' own gutter.
+            to it, still within this same first grid column.
           */}
-          <div className="flex flex-wrap gap-x-10 gap-y-6 sm:gap-x-16 -mt-2">
+          <div className="flex flex-wrap gap-x-10 gap-y-6 sm:gap-x-16 mt-6">
             <div>
               <FooterHeading>Contact Us</FooterHeading>
               <div className="flex flex-col gap-2">
@@ -347,6 +347,7 @@ export function Footer() {
                 </a>
               </div>
             </div>
+          </div>
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-8">
