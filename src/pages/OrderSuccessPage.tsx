@@ -86,7 +86,10 @@ export function OrderSuccessPage() {
     0;
 
   const handleDownloadInvoice = () => {
-    toast.success('Invoice ready — PDF download will be available in a future update.');
+    // Real invoice (see InvoicePage.tsx) -- for a multi-seller order this
+    // opens the first seller's; each sub-order below also links its own.
+    const firstSellerId = order.subOrders[0]?.sellerId;
+    if (firstSellerId) navigate(`/invoice/${order.orderId}/${firstSellerId}`);
   };
 
   if (!order) {
@@ -315,6 +318,12 @@ export function OrderSuccessPage() {
                           </span>
                           <p className="text-[12.5px] font-bold text-[#1A1A2E]">{sub.sellerBusinessName}</p>
                           <p className="text-[10.5px] font-mono text-[#9AA0AC]">ID: {sub.invoiceId}</p>
+                          <Link
+                            to={`/invoice/${order.orderId}/${sub.sellerId}`}
+                            className="text-[10.5px] font-bold text-[#EB4501] hover:underline inline-block mt-1"
+                          >
+                            View Invoice →
+                          </Link>
                         </div>
                         <span
                           className={cn(
