@@ -64,7 +64,13 @@ async function fetchCatalogJson(path: string): Promise<any> {
       signal: AbortSignal.timeout(4000),
     });
     if (!res.ok) return null;
-    return res.json();
+    // A wrong path can 200 with an HTML fallback page instead of 404 --
+    // check content-type before trying to parse, and `await` the parse so a
+    // malformed body is caught here (a bare `return res.json()` inside this
+    // try block does NOT let this catch handle that promise's rejection).
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) return null;
+    return await res.json();
   } catch {
     return null;
   }
@@ -139,14 +145,14 @@ async function resolveShareMeta(pathname: string, search: string): Promise<Share
   const [section, id] = segments;
 
   if (section === 'products' && id) {
-    const product = await fetchCatalogJson(`/products/${encodeURIComponent(id)}`);
+    const product = await fetchCatalogJson(`/catalog/products/${encodeURIComponent(id)}`);
     const title = product?.seoTitle || product?.title || product?.name || humanize(id);
     const description =
       product?.seoDescription ||
       product?.description ||
       `View ${title} on Choosify — verified product discovery for Bangladesh.`;
     const brand = product?.brandName || product?.brand || '';
-    const image = product?.image || product?.images?.[0] || '';
+    const image = product?.image || product?.gallery?.[0] || '';
     return {
       title: formatPageTitle(title),
       description: clip(description, 160),
@@ -165,7 +171,11 @@ async function resolveShareMeta(pathname: string, search: string): Promise<Share
   }
 
   if (section === 'brands' && id) {
-    const brand = await fetchCatalogJson(`/brands/${encodeURIComponent(id)}`);
+    // No singular brand-detail endpoint exists server-side -- fetch the
+    // list and find the match, same as the web app's own catalogApi.ts does.
+    const brands = await fetchCatalogJson('/catalog/brands');
+    const brandList = Array.isArray(brands?.data) ? brands.data : Array.isArray(brands) ? brands : [];
+    const brand = brandList.find((b: any) => b?.id === id || b?.slug === id);
     const name = brand?.name || humanize(id);
     const description = brand?.description || brand?.category || `Explore ${name} on Choosify.`;
     return {
