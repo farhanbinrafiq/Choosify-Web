@@ -12,3 +12,8 @@ tsc-full.txt
 dist/
 dist-server/
 dist-server.previous/
+
+# Local-only throwaway probes / debug scripts / screenshots - never committed.
+_tmp_*
+**/_tmp_*
+.devserver*.log

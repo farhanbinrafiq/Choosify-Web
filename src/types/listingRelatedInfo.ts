@@ -23,12 +23,28 @@ export type BeforeVisitFieldKey =
   | 'wheelchairAccess'
   | 'insuranceAccepted';
 
-export type BeforeYourVisitData = Partial<Record<BeforeVisitFieldKey, string>>;
+export interface BeforeVisitCustomField {
+  id: string;
+  label: string;
+  value: string;
+}
+
+export type BeforeYourVisitData = Partial<Record<BeforeVisitFieldKey, string>> & {
+  /** Seller-added fields beyond the five presets. */
+  customFields?: BeforeVisitCustomField[];
+};
+
+/** Seller-defined Related Information section (columns of heading + bullets). */
+export interface CustomRelatedInfoData {
+  title?: string;
+  blocks?: Array<{ id: string; heading: string; items: string[] }>;
+}
 
 export type RelatedInfoSectionKind =
   | 'price_across_stores'
   | 'whats_nearby'
-  | 'before_your_visit';
+  | 'before_your_visit'
+  | 'custom';
 
 export type RelatedInfoVisibility = 'mandatory' | 'optional' | 'seller_enabled';
 
@@ -43,12 +59,20 @@ export type ListingRelatedInfoProduct = {
   productType?: string;
   serviceCategory?: string;
   priceAcrossStoresEnabled?: boolean;
+  /** Explicit Related Information variant chosen in Product Studio. */
+  relatedInfoType?: 'price_across_stores' | 'whats_nearby' | 'before_your_visit' | 'custom';
+  customRelatedInfo?: CustomRelatedInfoData;
   storeComparisonList?: Array<{
     id?: string;
     storeName: string;
     price: number;
     availability?: string;
     storeUrl?: string;
+    logoUrl?: string;
+    isFeatured?: boolean;
+    /** Merge output — true ⇒ Choosify/admin-promoted (render a badge). */
+    sponsored?: boolean;
+    promoLabel?: string;
   }>;
   whatsNearby?: WhatsNearbyData;
   beforeYourVisit?: BeforeYourVisitData;

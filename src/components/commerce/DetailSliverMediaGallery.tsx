@@ -234,10 +234,24 @@ function SliverMedia({
 }) {
   const video = isVideoKind(item.kind);
   const src = item.posterUrl ?? item.url;
+  // A real, directly-playable video file (uploaded /media clip or external .mp4/.webm)
+  // — render it as a native <video>, not a broken <img src="…​.mp4">.
+  const isPlayableVideoFile =
+    video && item.kind !== 'live' && /\.(mp4|webm|mov|m4v)(\?.*)?$/i.test(item.url || '');
 
   return (
     <div className={cn('relative w-full h-full bg-[#0a0c18]', className)}>
-      {video && item.kind !== 'live' ? (
+      {isPlayableVideoFile ? (
+        <video
+          src={item.url}
+          poster={item.posterUrl || undefined}
+          controls
+          playsInline
+          preload="none"
+          className="w-full h-full object-cover bg-black"
+          onClick={(e) => e.stopPropagation()}
+        />
+      ) : video && item.kind !== 'live' ? (
         <>
           <img src={src} alt={item.alt ?? ''} className="w-full h-full object-cover" loading="lazy" />
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
@@ -536,7 +550,7 @@ export function DetailSliverMediaGallery({
 
   const onZoomSwipeDown = (e: React.PointerEvent) => {
     if (total <= 1) return;
-    if ((e.target as HTMLElement).closest('button, a, iframe, [data-zoom-viewport]')) return;
+    if ((e.target as HTMLElement).closest('button, a, iframe, video, [data-zoom-viewport]')) return;
     zoomSwipeRef.current = { x: e.clientX, y: e.clientY };
   };
 
@@ -553,7 +567,7 @@ export function DetailSliverMediaGallery({
 
   const onSwipePointerDown = (e: React.PointerEvent) => {
     if (total <= 1 || zoomOpen) return;
-    if ((e.target as HTMLElement).closest('a, iframe')) return;
+    if ((e.target as HTMLElement).closest('a, iframe, video')) return;
     swipeRef.current = { x: e.clientX, y: e.clientY, active: true };
   };
 

@@ -64,6 +64,8 @@ export interface ContentDetailSectionData {
   itemIds?: string[];
   /** Brand ids for brands_mentioned */
   brandIds?: string[];
+  /** Per-entity "why it's good for…" keyword chips (max 4), keyed by product/brand id. */
+  highlightTags?: Record<string, string[]>;
   /** Why-this-won chip labels */
   whyWonChips?: string[];
   /** Verdict lists */

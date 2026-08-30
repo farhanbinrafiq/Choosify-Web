@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import { resolveListingRelatedInfoSection } from '../../../utils/listingRelatedInfo';
 import type { ListingRelatedInfoProduct } from '../../../types/listingRelatedInfo';
 import { BeforeYourVisitCard } from './BeforeYourVisitCard';
+import { CustomRelatedInfoCard } from './CustomRelatedInfoCard';
 import { PriceAcrossStoresPanel } from './PriceAcrossStoresPanel';
 import { WhatsNearbyCard } from './WhatsNearbyCard';
 
@@ -50,6 +51,10 @@ export function ListingRelatedInfoPanel({
         fields={resolved.beforeVisitFields || []}
       />
     );
+  }
+
+  if (resolved.kind === 'custom') {
+    return <CustomRelatedInfoCard className={className} data={resolved.customRelatedInfo} />;
   }
 
   return null;

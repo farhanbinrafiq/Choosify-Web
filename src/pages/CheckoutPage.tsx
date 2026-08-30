@@ -35,9 +35,38 @@ export function CheckoutPage() {
     currentUser,
     buyerReputations,
     isFeatureEnabled,
+    clearCartGuideOffers,
   } = useGlobalState();
   const { createNewThread, addNotification, customerAddresses, defaultCustomerAddress } = useDashboard();
-  
+
+  // Set when the server rejects a stale guide/LIVE promotional price (409
+  // GUIDE_OFFER_PRICE_CHANGED). The buyer must review the refreshed total and
+  // re-submit; the item then checks out at the current authoritative price.
+  const [offerChangedNotice, setOfferChangedNotice] = useState<string | null>(null);
+
+  /**
+   * Returns true when `err` is the server's explicit stale-promo rejection
+   * (409 GUIDE_OFFER_PRICE_CHANGED). Strips the stale offer context from the
+   * cart, surfaces the authoritative price, and asks the buyer to re-review —
+   * a re-submit then goes through at the current price (still-active offer or
+   * canonical). Never results in a silent charge.
+   */
+  const isGuideOfferPriceChange = (err: unknown): boolean => {
+    const e = err as { status?: number; serverCode?: string; message?: string; details?: Record<string, unknown> };
+    if (e?.status !== 409 || e?.serverCode !== 'GUIDE_OFFER_PRICE_CHANGED') return false;
+    clearCartGuideOffers();
+    const actual = Number(e?.details?.actualUnitPrice);
+    setOfferChangedNotice(
+      e?.message ||
+        (Number.isFinite(actual)
+          ? `A LIVE offer in your cart has changed or expired. The current price is ৳${actual.toLocaleString()}. Review the updated total and place the order again to continue.`
+          : 'A LIVE offer in your cart has changed or expired. Review the updated total and place the order again to continue.'),
+    );
+    toast.error('LIVE offer changed — review your updated total.');
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
+    return true;
+  };
+
   const navigate = useNavigate();
   const location = useLocation();
   const pendingOrderId =
@@ -470,6 +499,20 @@ export function CheckoutPage() {
             : undefined,
           variantSku: it.selectedVariant?.sku,
           notes: deliveryNotes.trim() || undefined,
+          // Guide LIVE-offer context — carried through so the server can identify
+          // an item that came in via a Guide offer and revalidate the promo price
+          // with its own clock. Price is NEVER trusted from here.
+          guideOfferRef:
+            (it.product as any)?.guideOfferRef && typeof (it.product as any).guideOfferRef === 'object'
+              ? {
+                  guideId: String((it.product as any).guideOfferRef.guideId || ''),
+                  productId: String((it.product as any).guideOfferRef.productId || it.product.id),
+                }
+              : undefined,
+          expectedUnitPrice:
+            typeof (it.product as any)?.expectedUnitPrice === 'number'
+              ? (it.product as any).expectedUnitPrice
+              : undefined,
         })),
         deliveryFee: DELIVERY_FEE_PER_SELLER,
         invoiceId: invoiceIdStr,
@@ -526,6 +569,7 @@ export function CheckoutPage() {
       try {
         await operationsApi.createOrder(onlineOrder as Record<string, unknown>);
       } catch (err) {
+        if (isGuideOfferPriceChange(err)) return;
         toast.error((err as Error)?.message || 'Could not save order — sign in again and retry.');
         return;
       }
@@ -587,6 +631,7 @@ export function CheckoutPage() {
     try {
       await operationsApi.createOrder(fullOrderObject as Record<string, unknown>);
     } catch (err) {
+      if (isGuideOfferPriceChange(err)) return;
       toast.error((err as Error)?.message || 'Could not save order — sign in again and retry.');
       return;
     }
@@ -612,6 +657,24 @@ export function CheckoutPage() {
 
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
+      {offerChangedNotice ? (
+        <div className="w-full px-5 sm:px-10 pt-4">
+          <div className="max-w-[1280px] mx-auto rounded-xl border border-[#F59E0B] bg-[#FFFBEB] px-4 py-3 flex items-start gap-3">
+            <ShieldCheck size={18} className="text-[#B45309] shrink-0 mt-0.5" />
+            <div className="min-w-0">
+              <p className="text-[13px] font-bold text-[#92400E] m-0">LIVE offer changed</p>
+              <p className="text-[12px] text-[#92400E] m-0 mt-0.5">{offerChangedNotice}</p>
+              <button
+                type="button"
+                onClick={() => setOfferChangedNotice(null)}
+                className="mt-1.5 text-[11px] font-bold text-[#92400E] underline"
+              >
+                I’ve reviewed the updated total
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
       {/* Checkout Header — constrained to feed silhouette */}
       <div className="w-full px-5 sm:px-10 pt-4">
         <header className="max-w-[1280px] mx-auto choosify-dark-surface text-white px-5 sm:px-10 py-6 rounded-none overflow-hidden">

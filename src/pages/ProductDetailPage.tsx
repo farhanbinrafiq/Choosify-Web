@@ -38,11 +38,13 @@ import {
 import { PRODUCTS, BRANDS, PLACEHOLDER_IMAGE } from "../constants";
 import { useGlobalState } from "../context/GlobalStateContext";
 import { operationsApi } from "../services/operationsApi";
+import { catalogApi } from "../services/catalogApi";
 import { uploadReviewPhotos } from "../services/mediaUpload";
 import { ProductQuickComparison } from "../components/QuickComparisonSection";
 import { useDashboard } from "../context/DashboardContext";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../lib/utils";
+import { mergeRelatedStores } from "../lib/relatedInfoMerge";
 import { notify, toast } from "../lib/notify";
 import { ProductMediaGallery } from "../components/ProductMediaGallery";
 import { ProductDetailBuyBox } from "../components/product/ProductDetailBuyBox";
@@ -208,19 +210,30 @@ const FALLBACK_ADDONS: ProductAddon[] = [
 function resolveAddons(product: any): ProductAddon[] {
   if (!product) return FALLBACK_ADDONS;
 
-  // Studio-authored add-ons take priority over the seeded fallback tables below.
+  // Canonical Studio-authored add-ons are AUTHORITATIVE — when present the seeded
+  // fallback tables below are never used. Respect enabled / sortOrder / badge /
+  // maxQuantity from the canonical detail.addonItems shape.
   if (
     product.enableAddonItems !== false &&
     Array.isArray(product.studioAddonItems) &&
     product.studioAddonItems.length
   ) {
-    return product.studioAddonItems.map((item: any) => ({
-      id: item.id,
-      title: item.title,
-      description: item.description || '',
-      price: item.price,
-      available: true,
-    }));
+    return [...product.studioAddonItems]
+      .filter((item: any) => item && item.title)
+      .sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+      .map((item: any) => ({
+        id: item.id,
+        title: item.title,
+        description: item.description || '',
+        price: typeof item.price === 'number' ? item.price : Number(item.price) || 0,
+        badge: item.badge || undefined,
+        maxQuantity:
+          typeof item.maxQuantity === 'number' && item.maxQuantity >= 1
+            ? Math.floor(item.maxQuantity)
+            : 1,
+        // A seller-disabled add-on is shown struck-through but not selectable.
+        available: item.enabled !== false,
+      }));
   }
 
   // Service/booking listings: match on the stable `serviceCategory` enum, not the
@@ -272,10 +285,26 @@ export function ProductDetailPage() {
     productList.find((p: any) => p.id === Number(id) + 1000) ||
     null;
 
+  // The global context only pre-hydrates details for the first handful of
+  // products. Always fetch THIS product's canonical detail (variants / add-ons /
+  // option groups) on demand so the detail page is complete for every listing.
+  const baseCatalogId = String(baseProduct?.catalogId || '');
+  const [lazyDetail, setLazyDetail] = React.useState<any>(null);
+  React.useEffect(() => {
+    setLazyDetail(null);
+    if (!baseCatalogId || productDetailsById[baseCatalogId]) return;
+    let cancelled = false;
+    catalogApi
+      .getProductDetail(baseCatalogId)
+      .then((d) => { if (!cancelled && d) setLazyDetail(d); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [baseCatalogId, productDetailsById]);
+
   const product = React.useMemo(() => {
     if (!baseProduct) return null;
     const catalogKey = String(baseProduct?.catalogId || '');
-    const detail = productDetailsById[catalogKey];
+    const detail = productDetailsById[catalogKey] || lazyDetail;
     if (!detail) return baseProduct;
     return {
       ...baseProduct,
@@ -284,7 +313,12 @@ export function ProductDetailPage() {
       pros: detail.pros,
       cons: detail.cons,
       bestForTags: detail.bestForTags,
-      storeComparisonList: detail.storeComparisonList,
+      storeComparisonList: mergeRelatedStores(
+        detail.storeComparisonList,
+        (detail as any).adminPromotedStores,
+      ),
+      relatedInfoType: (detail as any).relatedInfoType ?? (baseProduct as any)?.relatedInfoType,
+      customRelatedInfo: (detail as any).customRelatedInfo ?? (baseProduct as any)?.customRelatedInfo,
       priceAcrossStoresEnabled: detail.priceAcrossStoresEnabled ?? (baseProduct as any)?.priceAcrossStoresEnabled,
       whatsNearby: detail.whatsNearby ?? (baseProduct as any)?.whatsNearby,
       beforeYourVisit: detail.beforeYourVisit ?? (baseProduct as any)?.beforeYourVisit,
@@ -322,10 +356,18 @@ export function ProductDetailPage() {
       enableAdditionalSpecs: detail.enableAdditionalSpecs,
       enablePublicReviews: detail.enablePublicReviews,
       enableAddonItems: detail.enableAddonItems,
+      enableDeliveryInfo: (detail as any).enableDeliveryInfo,
+      enableWarrantyInfo: (detail as any).enableWarrantyInfo,
       studioBoxContents: detail.boxContents,
       additionalSpecs: detail.additionalSpecs,
       curatedPublicReviews: detail.publicReviews,
       studioAddonItems: detail.addonItems,
+      deliveryInfo: (detail as any).deliveryInfo,
+      afterSalesInfo: (detail as any).afterSalesInfo,
+      warrantyMonths: (baseProduct as any)?.warrantyMonths,
+      warrantyType: (baseProduct as any)?.warrantyType,
+      warrantyProvider: (baseProduct as any)?.warrantyProvider,
+      warrantyTerms: (baseProduct as any)?.warrantyTerms,
       propertySpecs: (baseProduct as any)?.propertySpecs,
       images: (baseProduct as any)?.images,
       location: (baseProduct as any)?.location,
@@ -334,7 +376,7 @@ export function ProductDetailPage() {
       brand: baseProduct.brand || baseProduct.brandName,
       brandName: baseProduct.brandName || baseProduct.brand,
     };
-  }, [baseProduct, productDetailsById]);
+  }, [baseProduct, productDetailsById, lazyDetail]);
 
   const isService = isServiceListing(product);
   const serviceCategory = normalizeServiceCategory(product?.serviceCategory);
@@ -368,7 +410,9 @@ export function ProductDetailPage() {
 
   // ── Optional Add-ons State ───────────────────────────────────────
   const [selectedAddonIds, setSelectedAddonIds] = useState<Set<string>>(new Set());
-  const resolvedAddons = useMemo(() => resolveAddons(product), [product?.id]);
+  // Depend on `product` itself (it is memoized upstream) so add-ons re-resolve
+  // once the canonical detail (studioAddonItems) arrives via the lazy fetch.
+  const resolvedAddons = useMemo(() => resolveAddons(product), [product]);
   const hasAddons = resolvedAddons.length > 0;
 
   // ── Prescription upload (Eyewear — required once a prescription lens addon is selected) ──
@@ -691,11 +735,30 @@ export function ProductDetailPage() {
   const [purchasedCount] = useState(854);
   const [viewCount] = useState(() => 8420 + (product?.id ?? 0) * 37);
 
-  // Variant support state hooks
-  const [selectedColor, setSelectedColor] = useState<string>("");
-  const [selectedSize, setSelectedSize] = useState<string>("");
-  const [selectedRam, setSelectedRam] = useState<string>("");
-  const [selectedStorage, setSelectedStorage] = useState<string>("");
+  // Generic, category-schema-driven variant selection: { dimensionName: value }.
+  // No Color/Size/RAM/Storage special-casing — dimensions come from the
+  // canonical optionGroups / productVariants.
+  const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+  const pickOpt = (re: RegExp) => {
+    const k = Object.keys(selectedOptions).find((n) => re.test(n));
+    return k ? selectedOptions[k] : "";
+  };
+  const selectOption = (groupName: string, value: string) =>
+    setSelectedOptions((p) => ({ ...p, [groupName]: value }));
+  // Read-only compatibility shims for the (many) downstream references that
+  // still speak in colour/size terms (message-to-order flow, request fields …).
+  const selectedColor = pickOpt(/colou?r/i);
+  const selectedSize = pickOpt(/^size$/i);
+  const selectedRam = pickOpt(/\bram\b|memory/i);
+  const selectedStorage = pickOpt(/storage|capacity/i);
+  // Legacy setter shims — resolve the real dimension name then delegate.
+  const setByAlias = (re: RegExp, fallbackKey: string) => (v: string) => {
+    const g = (variantOptionGroups.find((x) => re.test(x.name))?.name) || fallbackKey;
+    selectOption(g, v);
+  };
+  const setSelectedColor = setByAlias(/colou?r/i, 'Color');
+  const setSelectedSize = setByAlias(/^size$/i, 'Size');
+  const setSelectedRam = setByAlias(/\bram\b|memory/i, 'RAM');
   const [isSizeChartOpen, setIsSizeChartOpen] = useState<boolean>(false);
   const [isWishlisted, setIsWishlisted] = useState(false);
   const [cartQty, setCartQty] = useState(1);
@@ -716,45 +779,73 @@ export function ProductDetailPage() {
   const [showOrderConfirm, setShowOrderConfirm] = useState(false);
   const [isSendingBookingRequest, setIsSendingBookingRequest] = useState(false);
 
-  // Sync state options when product changes
-  React.useEffect(() => {
-    if (product && product.variants && product.variants.length > 0) {
-      // Auto select first entry that is in stock and not disabled by the seller, or just first entry
-      const firstAvailable =
-        product.variants.find((v: any) => v.stock > 0 && v.enabled !== false) || product.variants[0];
-      if (firstAvailable) {
-        if (firstAvailable.attributes?.color !== undefined)
-          setSelectedColor(firstAvailable.attributes.color);
-        if (firstAvailable.attributes?.size !== undefined)
-          setSelectedSize(firstAvailable.attributes.size);
-        if (firstAvailable.attributes?.ram !== undefined)
-          setSelectedRam(firstAvailable.attributes.ram);
-        if (firstAvailable.attributes?.storage !== undefined)
-          setSelectedStorage(firstAvailable.attributes.storage);
+  // Variant-active helper (canonical: explicit `status` wins over legacy `enabled`).
+  const variantActive = (v: any) =>
+    v?.status ? v.status === 'active' : v?.enabled !== false;
+
+  // The variant dimensions to render — the canonical optionGroups when present,
+  // otherwise derived from the variant rows themselves (legacy products).
+  const variantOptionGroups: Array<{ id: string; name: string; displayType?: string; values: string[] }> =
+    React.useMemo(() => {
+      const groups = (product as any)?.optionGroups;
+      if (Array.isArray(groups) && groups.length) {
+        return groups
+          .filter((g: any) => g?.name && Array.isArray(g.values) && g.values.length)
+          .map((g: any) => ({ id: g.id || g.name, name: g.name, displayType: g.displayType, values: g.values }));
       }
-    } else {
-      setSelectedColor("");
-      setSelectedSize("");
-      setSelectedRam("");
-      setSelectedStorage("");
-    }
+      const vs = (product as any)?.variants;
+      if (!Array.isArray(vs) || !vs.length) return [];
+      const acc = new Map<string, Set<string>>();
+      for (const v of vs) {
+        for (const [k, val] of Object.entries(v.attributes ?? v.options ?? {})) {
+          if (!acc.has(k)) acc.set(k, new Set());
+          acc.get(k)!.add(String(val));
+        }
+      }
+      return [...acc.entries()].map(([name, set]) => ({ id: name, name, values: [...set] }));
+    }, [product]);
+
+  // Auto-select the first purchasable combination. Re-runs when the product
+  // changes AND when its variant rows first arrive (lazy detail fetch).
+  const variantSignature = React.useMemo(() => {
+    const vs = (product as any)?.variants;
+    return Array.isArray(vs) ? vs.map((v: any) => v.id || v.sku).join('|') : '';
   }, [product]);
+  React.useEffect(() => {
+    const vs = (product as any)?.variants;
+    if (!Array.isArray(vs) || vs.length === 0) {
+      setSelectedOptions({});
+      return;
+    }
+    const first = vs.find((v: any) => (v.stock ?? 0) > 0 && variantActive(v)) || vs[0];
+    setSelectedOptions({ ...(first?.attributes ?? first?.options ?? {}) });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product?.id, variantSignature]);
 
   const getSelectedVariant = () => {
-    if (!product || !product.variants || product.variants.length === 0)
-      return null;
-    return product.variants.find((v: any) => {
-      const attrs = v.attributes ?? {};
-      const hasColor = attrs.color !== undefined;
-      const hasSize = attrs.size !== undefined;
-      const hasRam = attrs.ram !== undefined;
-      const hasStorage = attrs.storage !== undefined;
+    const vs = (product as any)?.variants;
+    if (!Array.isArray(vs) || vs.length === 0) return null;
+    const keys = variantOptionGroups.map((g) => g.name);
+    return vs.find((v: any) => {
+      const attrs = v.attributes ?? v.options ?? {};
+      // Every rendered dimension must match the current selection.
+      return keys.every((k) => attrs[k] === undefined || attrs[k] === selectedOptions[k]);
+    });
+  };
 
-      if (hasColor && attrs.color !== selectedColor) return false;
-      if (hasSize && attrs.size !== selectedSize) return false;
-      if (hasRam && attrs.ram !== selectedRam) return false;
-      if (hasStorage && attrs.storage !== selectedStorage) return false;
-      return true;
+  /** A value is offerable if some active, in-stock combination has it, given the
+   *  other current selections. */
+  const isValueAvailable = (groupName: string, value: string) => {
+    const vs = (product as any)?.variants;
+    if (!Array.isArray(vs) || vs.length === 0) return true;
+    return vs.some((v: any) => {
+      const attrs = v.attributes ?? v.options ?? {};
+      if (attrs[groupName] !== value) return false;
+      for (const [k, sel] of Object.entries(selectedOptions)) {
+        if (k === groupName) continue;
+        if (attrs[k] !== undefined && attrs[k] !== sel) return false;
+      }
+      return (v.stock ?? 0) > 0 && variantActive(v);
     });
   };
 
@@ -1188,6 +1279,11 @@ export function ProductDetailPage() {
         setSelectedSize={setSelectedSize}
         setSelectedRam={setSelectedRam}
         getColorHexClass={getColorHexClass}
+        optionGroups={variantOptionGroups}
+        selectedOptions={selectedOptions}
+        onSelectOption={selectOption}
+        isValueAvailable={isValueAvailable}
+        resolvedVariant={selectedVariant}
         showSizeGuideButton={showSizeGuideButton}
         onOpenSizeChart={() => setIsSizeChartOpen(true)}
         qty={cartQty}
@@ -1206,11 +1302,26 @@ export function ProductDetailPage() {
             toast.error('Add your lens power details or upload your prescription before adding to cart.');
             return;
           }
-          addToCart(product, cartQty);
+          // Preserve the canonical selected combination (variantId + SKU +
+          // resolved price/MRP/media) through the cart.
+          const variantForCart = selectedVariant
+            ? {
+                id: selectedVariant.id,
+                sku: selectedVariant.sku,
+                price: selectedVariant.price ?? product.price,
+                originalPrice: selectedVariant.originalPrice,
+                options: selectedVariant.attributes ?? selectedVariant.options,
+                image: selectedVariant.image ?? (selectedVariant.images && selectedVariant.images[0]),
+                stock: selectedVariant.stock,
+              }
+            : undefined;
+          addToCart(product, cartQty, variantForCart);
           if (selectedAddons.length > 0) {
             sessionStorage.setItem(
               `choosify_addons_${product.id}`,
-              JSON.stringify(selectedAddons),
+              JSON.stringify(
+                selectedAddons.map((a: any) => ({ id: a.id, title: a.title, price: a.price, quantity: 1 })),
+              ),
             );
           }
           if (prescriptionData) {
@@ -1556,60 +1667,29 @@ export function ProductDetailPage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                {[
-                  {
-                    title: 'Quality & Materials',
-                    icon: <Tag size={14} />,
-                    items: [
-                      'Authentic standard sewing with brand labels',
-                      'High dust & spill proof coated exterior',
-                      'Unbreakable grade finishing structure',
-                      'Breathable premium cloths ideal for long wear',
-                    ],
-                  },
-                  {
-                    title: 'Features & Benefits',
-                    icon: <Award size={14} />,
-                    items: [
-                      '7 days satisfaction refund/exchange guarantee',
-                      'Secure partner checkout integrations',
-                      'Official deck warranty with unique serial code',
-                      'Nationwide compliance delivery coverage',
-                    ],
-                  },
-                  {
-                    title: 'Audience & Use Cases',
-                    icon: <Users size={14} />,
-                    items: [
-                      'Value-oriented buyers appraising build integrity',
-                      'Lifestyle creators requiring reliable wears',
-                      'Everyday shoppers seeking reliable value',
-                      'Modern Bangladeshi lifestyle and active circles',
-                    ],
-                  },
-                  {
-                    title: 'Customer Support & Assurance',
-                    icon: <ShieldCheck size={14} />,
-                    items: [
-                      'Real-time messaging from high priority staff',
-                      'Complete verification certificates deposited',
-                      'Easy access transit system integrations',
-                      'Secured personalized inbound support log',
-                    ],
-                  },
-                ].map((col) => (
-                  <div key={col.title} className="bg-[#F4F7F9] rounded-[10px] px-5 py-[18px] flex flex-col gap-3">
-                    <div className="flex items-center gap-2 text-[12px] font-extrabold text-[#1A1A2E]">
-                      <span className="text-[#EB4501]">{col.icon}</span>
-                      {col.title}
+                {(() => {
+                  const OV_ICONS = [<Tag size={14} />, <Award size={14} />, <Users size={14} />, <ShieldCheck size={14} />];
+                  const blocks: Array<{ title?: string; bullets?: string[] }> = Array.isArray(product.overviewBlocks)
+                    ? product.overviewBlocks
+                    : [];
+                  const filled = blocks
+                    .filter((b) => b?.title && Array.isArray(b.bullets) && b.bullets.filter(Boolean).length)
+                    .map((b) => ({ title: String(b.title), items: (b.bullets || []).filter(Boolean) }));
+                  if (!filled.length) return null;
+                  return filled.map((col, i) => (
+                    <div key={col.title} className="bg-[#F4F7F9] rounded-[10px] px-5 py-[18px] flex flex-col gap-3">
+                      <div className="flex items-center gap-2 text-[12px] font-extrabold text-[#1A1A2E]">
+                        <span className="text-[#EB4501]">{OV_ICONS[i % OV_ICONS.length]}</span>
+                        {col.title}
+                      </div>
+                      <div className="space-y-2 text-[11.5px] text-[#4B5563] leading-relaxed">
+                        {col.items.map((item) => (
+                          <OverviewListItem key={item} text={item} />
+                        ))}
+                      </div>
                     </div>
-                    <div className="space-y-2 text-[11.5px] text-[#4B5563] leading-relaxed">
-                      {col.items.map((item) => (
-                        <OverviewListItem key={item} text={item} />
-                      ))}
-                    </div>
-                  </div>
-                ))}
+                  ));
+                })()}
 
                 {customOverviews &&
                   customOverviews
@@ -1708,6 +1788,57 @@ export function ProductDetailPage() {
                 ))}
               </div>
             </StudioWrap>
+
+            {/* Warranty & After-Sales Services */}
+            {(() => {
+              const months = Number((product as any).warrantyMonths) || 0;
+              const wType = String((product as any).warrantyType || '').trim();
+              const wProvider = String((product as any).warrantyProvider || '').trim();
+              const wTerms = String((product as any).warrantyTerms || '').trim();
+              const afterSales: string[] = Array.isArray((product as any).afterSalesInfo?.bullets)
+                ? (product as any).afterSalesInfo.bullets.filter(Boolean)
+                : [];
+              if (!months && !wType && !wProvider && !wTerms && !afterSales.length) return null;
+              return (
+                <StudioWrap
+                  sectionId="product-warranty"
+                  className="scroll-mt-36 bg-white rounded-xl border border-[#E8EDF2] p-6 w-full text-left"
+                >
+                  <div className="text-[11px] font-extrabold text-[#1A1A2E] mb-3">
+                    WARRANTY &amp; AFTER-SALES SERVICES
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    {(months || wType || wProvider || wTerms) && (
+                      <div className="bg-[#F4F7F9] rounded-[10px] p-4">
+                        <div className="text-[12px] font-extrabold text-[#1A1A2E] mb-1.5">
+                          {months ? `${months} month${months === 1 ? '' : 's'} warranty` : 'Warranty'}
+                          {wType ? ` · ${wType}` : ''}
+                        </div>
+                        {wProvider ? (
+                          <div className="text-[11.5px] text-[#4B5563] mb-1">Provider: {wProvider}</div>
+                        ) : null}
+                        {wTerms ? (
+                          <div className="text-[11.5px] text-[#4B5563] leading-relaxed">{wTerms}</div>
+                        ) : null}
+                      </div>
+                    )}
+                    {afterSales.length > 0 && (
+                      <div className="bg-[#F4F7F9] rounded-[10px] p-4">
+                        <div className="text-[12px] font-extrabold text-[#1A1A2E] mb-2">After-Sales Services</div>
+                        {afterSales.map((item, i) => (
+                          <OverviewListItem
+                            key={i}
+                            text={item}
+                            className="text-[11.5px] text-[#4B5563] mb-1.5"
+                            iconClassName="text-emerald-500"
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </StudioWrap>
+              );
+            })()}
 
             {/* Same Brands-list directory tile (standard grid cell size — not stretched) */}
             <div

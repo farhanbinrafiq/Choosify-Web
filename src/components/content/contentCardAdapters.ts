@@ -2,6 +2,7 @@ import type { CatalogGuide, CatalogProduct } from '../../types/catalog';
 import type { SpotlightContent } from '../../types/spotlight/experience/content';
 import type { UniversalAspectRatio } from '../media/types/mediaModel';
 import { resolveCtaLabel } from '../../lib/spotlight/content/ctaRegistry';
+import { getVideoPosterUrl } from '../../lib/videoEmbed';
 import { catalogGuideHref } from '../../lib/spotlight/content';
 import {
   resolveFeedCardVariant,
@@ -232,7 +233,7 @@ export function legacyCreatorContentToPreviewModel(
     title: item.title,
     layoutVariant: isPortrait ? 'reel' : 'landscape',
     aspectRatio: (isPortrait ? '9/16' : '16/9') as ContentCardAspectRatio,
-    image: item.thumbnail,
+    image: (item.thumbnail || '').trim() || getVideoPosterUrl(item.videoUrl),
     videoUrl: item.videoUrl,
     badgeLabel: isPortrait ? 'REEL' : 'VIDEO',
     platform,

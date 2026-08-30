@@ -69,6 +69,10 @@ export interface CommerceProduct {
   slug?: string;
   title: string;
   image: string;
+  /** Ordered storefront image list (primary first). Mirrors CatalogProduct.gallery. */
+  gallery?: string[];
+  /** Single canonical storefront product video (YouTube / direct HTTPS video / /media path). */
+  videoUrl?: string;
   codSupport: boolean;
   stock: number;
   sellerId: string;

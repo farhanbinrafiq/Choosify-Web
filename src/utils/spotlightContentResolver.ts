@@ -349,6 +349,7 @@ export function guideToSpotlightContent(guide: CatalogGuide, catalog: CatalogPro
     media: guideToUniversalMedia(guide),
     connections: buildConnections({
       productIds,
+      brandIds: (guide.brandIds ?? []).map(String),
       guideIds: [guide.id],
       creatorIds: guide.creatorId ? [guide.creatorId] : [],
       recommendationIds: contentType === 'recommendation' ? [guide.id] : [],

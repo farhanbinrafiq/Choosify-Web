@@ -40,6 +40,13 @@ export function ContentDetailBrandsMentionedSection({
   if (!brands.length) return null;
 
   const title = getBrandsMentionedTitle(ctx.category ?? ctx.content?.category);
+  const highlightTags = (section.data?.highlightTags ?? {}) as Record<string, string[]>;
+  const tagsFor = (brand: any): string[] =>
+    (highlightTags[String(brand.catalogId)] ||
+      highlightTags[String(brand.id)] ||
+      highlightTags[String(brand.slug)] ||
+      [])
+      .slice(0, 4);
 
   return (
     <div id="brands-mentioned" className="scroll-mt-36">
@@ -73,6 +80,18 @@ export function ContentDetailBrandsMentionedSection({
             </div>
             {brand.category ? (
               <div className="text-[10px] text-[#9AA0AC] mt-0.5 truncate">{brand.category}</div>
+            ) : null}
+            {tagsFor(brand).length ? (
+              <div className="flex flex-wrap justify-center gap-1 mt-1.5">
+                {tagsFor(brand).map((t, i) => (
+                  <span
+                    key={i}
+                    className="text-[7px] font-bold text-[#7C3AED] bg-[#F3E8FF] rounded px-1 py-0.5 uppercase tracking-wide"
+                  >
+                    #{String(t).replace(/^#+/, '')}
+                  </span>
+                ))}
+              </div>
             ) : null}
           </Link>
         ))}

@@ -2,7 +2,9 @@ import type { UniversalMedia } from '../components/media/types/mediaModel';
 import type { CatalogGuide } from '../types/catalog';
 import type { BrandPost } from '../types/brandPost';
 
-type GuideLike = Pick<CatalogGuide, 'id' | 'title' | 'image' | 'videoUrl' | 'type'>;
+type GuideLike = Pick<CatalogGuide, 'id' | 'title' | 'image' | 'videoUrl' | 'type'> & {
+  gallery?: string[];
+};
 
 function isYoutubeUrl(url: string): boolean {
   return /youtube\.com|youtu\.be/i.test(url);
@@ -15,6 +17,13 @@ function isFacebookUrl(url: string): boolean {
 export function guideToUniversalMedia(guide: GuideLike): UniversalMedia | null {
   const isVertical = guide.type === 'reels' || guide.type === 'shorts';
   const isVideo = Boolean(guide.videoUrl);
+  const photos =
+    Array.isArray(guide.gallery) && guide.gallery.length
+      ? guide.gallery.filter(Boolean)
+      : guide.image
+        ? [guide.image]
+        : [];
+  const primary = photos[0] || guide.image || '';
 
   return {
     mediaId: `guide-media-${guide.id}`,
@@ -22,14 +31,16 @@ export function guideToUniversalMedia(guide: GuideLike): UniversalMedia | null {
       ? isVertical
         ? 'vertical_video'
         : 'landscape_video'
-      : 'landscape_image',
+      : photos.length > 1
+        ? 'carousel'
+        : 'landscape_image',
     orientation: isVertical ? 'portrait' : 'landscape',
     aspectRatio: isVertical ? '9:16' : '16:9',
-    thumbnail: guide.image,
-    posterImage: guide.image,
-    previewImage: guide.image,
+    thumbnail: primary,
+    posterImage: primary,
+    previewImage: primary,
     videoUrl: guide.videoUrl || undefined,
-    imageUrls: guide.image ? [guide.image] : [],
+    imageUrls: photos,
     displayOrder: 0,
     altText: guide.title,
     caption: guide.title,

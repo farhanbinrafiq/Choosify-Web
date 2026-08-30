@@ -57,7 +57,6 @@ import type { SpotlightPageSectionId } from "../types/spotlight/experience/pageS
 import {
   isBrandOwnedContent,
   isPageSectionVisible,
-  shouldShowBrandProfileCard,
   shouldShowCreatorProfileCard,
 } from "../lib/spotlight/content/sectionManifestRegistry";
 import { resolveContentDetailOptionalSections } from "../lib/spotlight/content/resolveContentDetailSections";
@@ -178,7 +177,14 @@ export function GuideDetailPage({
   const id = guideIdOverride ?? routeId;
   const navigate = useNavigate();
   const { pathname } = useLocation();
-  const { allGuides, allBrands, addToCart, allCatalogProducts } = useGlobalState();
+  const {
+    allGuides,
+    allBrands,
+    addToCart,
+    allCatalogProducts,
+    allCatalogGuides,
+    allCreators,
+  } = useGlobalState();
   const { allContent: spotlightAllContent } = useSpotlightExperience();
   const [relatedPlatformFilter, setRelatedPlatformFilter] = useState<string>('all');
   const [relatedTopicFilter, setRelatedTopicFilter] = useState<string>('all');
@@ -216,11 +222,308 @@ export function GuideDetailPage({
         : "mobile",
   };
 
+  /**
+   * A "canonical" Guide is one backed by a real CatalogGuide record. For those
+   * every relationship (products, brands, creator) resolves against the real
+   * Choosify catalog — never the mock `PRODUCTS` / `DYNAMIC_GUIDES` fixtures.
+   */
+  const isCanonicalGuide = useMemo(
+    () =>
+      (allCatalogGuides ?? []).some(
+        (g) => String(g.id) === String(guide?.id) || g.slug === (guide as any)?.slug,
+      ) || Boolean(spotlightContent),
+    [allCatalogGuides, guide, spotlightContent],
+  );
+
+  const sectionProductIds = useMemo(() => {
+    const out: string[] = [];
+    for (const s of ((guide as any)?.sections ?? []) as Array<{ id: string; data?: any }>) {
+      for (const key of ['winnerIds', 'itemIds', 'topPickIds']) {
+        const arr = s?.data?.[key];
+        if (Array.isArray(arr)) out.push(...arr.map(String));
+      }
+    }
+    return out;
+  }, [guide]);
+
+  const guideProductIds = useMemo(() => {
+    const raw = [
+      ...(((guide as any)?.productIds ?? []) as string[]),
+      ...(((guide as any)?.recommendedProducts ?? []) as string[]),
+      ...sectionProductIds,
+    ].map(String);
+    return Array.from(new Set(raw.filter(Boolean)));
+  }, [guide, sectionProductIds]);
+
+  /** Canonical products for this guide, in reference order. Unresolved ids drop. */
+  const canonicalGuideProducts = useMemo(() => {
+    if (!guideProductIds.length) return [];
+    const byId = new Map((allCatalogProducts ?? []).map((p: any) => [String(p.id), p]));
+    return guideProductIds.map((pid) => byId.get(pid)).filter(Boolean);
+  }, [guideProductIds, allCatalogProducts]);
+
+  // ── Part-2 canonical guide fields (off-platform refs, picks, typed winner,
+  //    time-boxed offers, social links). Rendered directly off the CatalogGuide
+  //    so the additive storefront blocks don't disturb the spotlight resolver. ─
+  const guideExternalRefs = useMemo(
+    () =>
+      (Array.isArray((guide as any)?.externalRefs) ? (guide as any).externalRefs : [])
+        .filter((r: any) => r && r.title && r.externalUrl && /^https:\/\//i.test(String(r.externalUrl)))
+        .sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)) as Array<{
+        id: string;
+        kind: 'product' | 'brand';
+        title: string;
+        imageUrl?: string;
+        externalUrl: string;
+        subtitle?: string;
+        brandName?: string;
+        commentary?: string;
+      }>,
+    [guide],
+  );
+
+  const externalById = useMemo(
+    () => new Map(guideExternalRefs.map((r) => [String(r.id), r])),
+    [guideExternalRefs],
+  );
+
+  const resolveEntityRef = useMemo(() => {
+    const productById = new Map((allCatalogProducts ?? []).map((p: any) => [String(p.id), p]));
+    const brandByKey = new Map<string, any>();
+    for (const b of (allBrands ?? []) as any[]) {
+      brandByKey.set(String(b.id), b);
+      if (b.catalogId) brandByKey.set(String(b.catalogId), b);
+      if (b.slug) brandByKey.set(String(b.slug), b);
+    }
+    return (ref: { entityType: string; entityId: string }) => {
+      if (!ref) return null;
+      if (ref.entityType === 'product') {
+        const p = productById.get(String(ref.entityId));
+        return p ? { kind: 'product' as const, title: p.title, image: p.image, price: p.price, href: `/products/${p.slug || p.id}` } : null;
+      }
+      if (ref.entityType === 'brand') {
+        const b = brandByKey.get(String(ref.entityId));
+        return b ? { kind: 'brand' as const, title: b.name, image: b.logo, href: `/brands/${b.slug || b.id}` } : null;
+      }
+      const x = externalById.get(String(ref.entityId));
+      return x
+        ? {
+            kind: (ref.entityType === 'external_brand' ? 'external_brand' : 'external_product') as
+              | 'external_product'
+              | 'external_brand',
+            title: x.title,
+            image: x.imageUrl,
+            external: x,
+          }
+        : null;
+    };
+  }, [allCatalogProducts, allBrands, externalById]);
+
+  const guideWinner = useMemo(() => {
+    const w = ((guide as any)?.sections ?? []).find((s: any) => s.id === 'winner')?.data ?? {};
+    const overall = w.overall && w.overall.entityType && w.overall.entityId ? w.overall : null;
+    const legacyId =
+      !overall && Array.isArray(w.winnerIds) && w.winnerIds.length ? String(w.winnerIds[0]) : '';
+    const overallRef = overall || (legacyId ? { entityType: 'product', entityId: legacyId } : null);
+    const awards = (Array.isArray(w.awards) ? w.awards : [])
+      .filter((a: any) => a && a.label && a.ref && a.ref.entityType && a.ref.entityId)
+      .map((a: any) => ({ id: String(a.id || a.label), label: String(a.label), ref: a.ref }));
+    return { overallRef, awards };
+  }, [guide]);
+
+  const guidePicks = useMemo(() => {
+    const p = ((guide as any)?.sections ?? []).find((s: any) => s.id === 'recommendations')?.data
+      ?.picks;
+    return (Array.isArray(p) ? p : [])
+      .filter((x: any) => x && x.label && x.ref && x.ref.entityType && x.ref.entityId)
+      .map((x: any) => ({ id: String(x.id || x.label), label: String(x.label), ref: x.ref }));
+  }, [guide]);
+
+  const guideSocialLinks = useMemo(
+    () =>
+      (Array.isArray((guide as any)?.socialLinks) ? (guide as any).socialLinks : [])
+        .filter((l: any) => l && l.enabled !== false && /^https:\/\//i.test(String(l.url || '')))
+        .sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0)) as Array<{
+        id: string;
+        platform: string;
+        url: string;
+        label?: string;
+      }>,
+    [guide],
+  );
+
+  const activeGuideOffers = useMemo(() => {
+    if (String((guide as any)?.status) !== 'live') return [];
+    const now = Date.now();
+    const productById = new Map((allCatalogProducts ?? []).map((p: any) => [String(p.id), p]));
+    return (Array.isArray((guide as any)?.liveOffers) ? (guide as any).liveOffers : [])
+      .filter((o: any) => o && o.enabled !== false && o.productId)
+      .map((o: any) => {
+        const p = productById.get(String(o.productId));
+        if (!p) return null;
+        const start = Date.parse(o.startsAt);
+        const end = Date.parse(o.endsAt);
+        const hasWindow = Number.isFinite(start) && Number.isFinite(end);
+        const isActive = hasWindow && now >= start && now < end;
+        const isUpcoming = hasWindow && now < start;
+        const isExpired = hasWindow && now >= end;
+        const base = Number(p.price) || 0;
+        let promo = base;
+        if (typeof o.promoPrice === 'number') promo = o.promoPrice;
+        else if (o.discountType === 'percent')
+          promo = Math.round(base * (1 - Math.min(90, Number(o.discountValue) || 0) / 100));
+        else if (o.discountType === 'amount') promo = Math.max(0, base - (Number(o.discountValue) || 0));
+        const savings = Math.max(0, base - promo);
+        const savingsPct = base > 0 ? Math.round((savings / base) * 100) : 0;
+        // "safely derived from canonical endsAt" — a static relative phrase, not a
+        // ticking countdown (no fabricated values).
+        const msLeft = end - now;
+        let endsInLabel = '';
+        if (isActive && msLeft > 0) {
+          const days = Math.floor(msLeft / 86400000);
+          const hours = Math.floor((msLeft % 86400000) / 3600000);
+          endsInLabel =
+            days >= 1 ? `ends in ${days} day${days === 1 ? '' : 's'}` : hours >= 1 ? `ends in ${hours}h` : 'ends soon';
+        }
+        return {
+          id: String(o.id),
+          product: p,
+          base,
+          promo,
+          savings,
+          savingsPct,
+          isActive,
+          isUpcoming,
+          isExpired,
+          endsInLabel,
+          startsAt: o.startsAt,
+          endsAt: o.endsAt,
+        };
+      })
+      .filter((x: any) => x && x.promo < x.base);
+  }, [guide, allCatalogProducts]);
+
+  const guideBrandIds = useMemo(() => {
+    const g = guide as any;
+    if (Array.isArray(g?.brandIds) && g.brandIds.length) return g.brandIds.map(String);
+    const conn = spotlightContent?.connections?.brandIds;
+    if (Array.isArray(conn) && conn.length) return conn.map(String);
+    const legacy = ((g?.sections ?? []) as Array<{ id: string; data?: any }>).find(
+      (s) => s.id === 'brands_mentioned',
+    )?.data?.brandIds;
+    return Array.isArray(legacy) ? legacy.map(String) : [];
+  }, [guide, spotlightContent]);
+
+  const canonicalGuideBrands = useMemo(() => {
+    if (!guideBrandIds.length) return [];
+    // `allBrands` carries a numeric `id` plus the real catalog id as `catalogId`.
+    const byKey = new Map<string, any>();
+    for (const b of (allBrands ?? []) as any[]) {
+      byKey.set(String(b.id), b);
+      if (b.catalogId) byKey.set(String(b.catalogId), b);
+      if (b.slug) byKey.set(String(b.slug), b);
+    }
+    return guideBrandIds.map((bid: string) => byKey.get(String(bid))).filter(Boolean);
+  }, [guideBrandIds, allBrands]);
+
+  // ── Publisher identity (Creator-vs-Brand publisher rule) ──────────────────
+  // `publisherType === 'brand'` → the CatalogBrand in `publisherBrandId` is the
+  // author (ABOUT THE BRAND, no author card). Otherwise the guide is
+  // creator-authored (ABOUT THE AUTHOR). `brandIds` are *mentions* only and never
+  // imply authorship — they render as "BRAND MENTIONED".
+  const guidePublisherType: 'creator' | 'brand' =
+    (guide as any)?.publisherType === 'brand' ? 'brand' : 'creator';
+  const publisherBrandId = (guide as any)?.publisherBrandId as string | undefined;
+
+  const publisherBrandCard = useMemo(() => {
+    if (guidePublisherType !== 'brand') return null;
+    const b = (allBrands ?? []).find(
+      (x: any) =>
+        String(x.catalogId) === String(publisherBrandId) ||
+        String(x.id) === String(publisherBrandId) ||
+        String(x.slug) === String(publisherBrandId),
+    );
+    if (b) return mapBrandToCardDesign(b);
+    // Server enrichment: resolved publisher brand identity travels with the guide
+    // so a brand-authored guide always renders "About the Brand".
+    const pb = (guide as any)?.publisherBrand;
+    if (pb && pb.name) {
+      return mapBrandToCardDesign({ id: pb.id, name: pb.name, logo: pb.logo, slug: pb.slug });
+    }
+    return null;
+  }, [guidePublisherType, publisherBrandId, allBrands, guide]);
+
+  /** Mentioned brands = canonical brand mentions, excluding the publisher brand itself. */
+  const mentionedBrandCards = useMemo(
+    () =>
+      canonicalGuideBrands
+        .filter(
+          (b: any) =>
+            !(
+              guidePublisherType === 'brand' &&
+              (String(b?.catalogId) === String(publisherBrandId) ||
+                String(b?.id) === String(publisherBrandId))
+            ),
+        )
+        .map((b: any) => mapBrandToCardDesign(b)),
+    [canonicalGuideBrands, guidePublisherType, publisherBrandId],
+  );
+
+  const canonicalCreator = useMemo(() => {
+    const cid = (guide as any)?.creatorId;
+    if (!cid) return null;
+    const c = (allCreators ?? []).find((x: any) => String(x.id) === String(cid));
+    if (!c) return null;
+    const followerTotal = Object.values((c.followers ?? {}) as Record<string, string>)
+      .map((v) => Number(String(v).replace(/[^0-9.]/g, '')))
+      .filter((n) => Number.isFinite(n) && n > 0)
+      .reduce((a, b) => a + b, 0);
+    return {
+      id: c.id,
+      name: c.name,
+      avatar: c.avatar || (guide as any)?.authorAvatar || '',
+      handle: c.handle || c.name,
+      verifiedStatus: c.verifiedStatus ? 'Verified creator' : 'Creator',
+      bestFor: c.bestFor || 'Creator',
+      score: typeof c.score === 'number' && c.score > 0 ? c.score : null,
+      followers: followerTotal > 0 ? followerTotal : null,
+      reviews: null as number | null,
+      rating: null as number | null,
+      platforms: Array.isArray(c.platforms) ? c.platforms : [],
+    };
+  }, [guide, allCreators]);
+
   const creator = useMemo(() => {
+    // Canonical guide → real creator record only (no fabricated stats).
+    if (isCanonicalGuide) {
+      if (canonicalCreator) return canonicalCreator;
+      if ((guide as any)?.author) {
+        return {
+          id: (guide as any).creatorId || 'creator-editorial',
+          name: (guide as any).author,
+          avatar: (guide as any).authorAvatar || '',
+          handle: (guide as any).author,
+          verifiedStatus: 'Choosify Editorial',
+          bestFor: 'Choosify Editorial',
+          score: null as number | null,
+          followers: null as number | null,
+          reviews: null as number | null,
+          rating: null as number | null,
+          platforms: [] as string[],
+        };
+      }
+      return null;
+    }
+    // Non-canonical demo/legacy path keeps the mock creator.
     const fromDynamic = dynamicData.creator as any;
     if (fromDynamic?.name) return fromDynamic;
     const pub = spotlightContent?.publisher;
-    if (pub && (pub.publisherType === 'creator' || pub.publisherType === 'influencer' || pub.publisherType === 'editorial_team')) {
+    if (
+      pub &&
+      (pub.publisherType === 'creator' ||
+        pub.publisherType === 'influencer' ||
+        pub.publisherType === 'editorial_team')
+    ) {
       return {
         id: pub.publisherId || 'creator-editorial',
         name: pub.name || guide?.author || 'Choosify Editorial',
@@ -228,30 +531,11 @@ export function GuideDetailPage({
         handle: pub.name,
         verifiedStatus: pub.isVerified ? 'Verified creator' : 'Choosify Editor',
         bestFor: 'Choosify Editor',
-        rating: 4.9,
-        reviews: 24,
-        followers: 1200,
         platforms: [],
-        score: 92,
-      };
-    }
-    if (guide?.author) {
-      return {
-        id: (guide as any).creatorId || 'creator-editorial',
-        name: guide.author,
-        avatar: (guide as any).authorAvatar,
-        handle: guide.author,
-        verifiedStatus: 'Choosify Editor',
-        bestFor: 'Choosify Editor',
-        rating: 4.9,
-        reviews: 24,
-        followers: 1200,
-        platforms: [],
-        score: 92,
       };
     }
     return fromDynamic;
-  }, [dynamicData.creator, spotlightContent?.publisher, guide]);
+  }, [isCanonicalGuide, canonicalCreator, dynamicData.creator, spotlightContent?.publisher, guide]);
   const specConfig =
     CATEGORY_SPEC_CONFIGS[dynamicData.categorySpecType] ||
     CATEGORY_SPEC_CONFIGS.mobile;
@@ -346,35 +630,19 @@ export function GuideDetailPage({
       .slice(0, 4);
   }, [spotlightContent, spotlightAllContent]);
 
+  // Exactly one primary publisher identity block:
+  //   creator publisher → ABOUT THE AUTHOR   (never also a brand author card)
+  //   brand publisher   → ABOUT THE BRAND    (never also an author card)
   const showCreatorCard =
+    guidePublisherType === 'creator' &&
     Boolean(creator) &&
-    (!spotlightContent || shouldShowCreatorProfileCard(spotlightContent));
-  // Brand-owned content (publisherType brand/retailer/…) shows brand profile, not creator.
-  // Profile is a fixed Content Detail section — always render when applicable.
-  const showBrandCard =
-    Boolean(spotlightContent) &&
-    shouldShowBrandProfileCard(spotlightContent!) &&
-    !showCreatorCard;
+    (!spotlightContent ||
+      isCanonicalGuide ||
+      shouldShowCreatorProfileCard(spotlightContent));
+  const showPublisherBrandCard = guidePublisherType === 'brand' && Boolean(publisherBrandCard);
 
-  // Same directory tile as the Brands list page — resolved from the brand catalog,
-  // falling back to publisher info when the brand record isn't in state.
-  const brandCardModel = useMemo(() => {
-    if (!spotlightContent) return null;
-    const brandId = spotlightContent.connections.brandIds[0];
-    const publisherName = spotlightContent.publisher.name?.trim().toLowerCase();
-    const match = (allBrands ?? []).find(
-      (b: any) =>
-        (brandId != null &&
-          (String(b.id) === String(brandId) || String(b.id) === String(Number(brandId)))) ||
-        (publisherName && String(b.name || '').trim().toLowerCase() === publisherName),
-    );
-    if (match) return mapBrandToCardDesign(match);
-    return mapBrandToCardDesign({
-      id: brandId ?? spotlightContent.publisher.publisherId,
-      name: spotlightContent.publisher.name,
-      logo: spotlightContent.publisher.logoUrl,
-    });
-  }, [spotlightContent, allBrands]);
+  // Non-publisher brand relationships rendered separately as "BRAND MENTIONED".
+  const showBrandMentioned = mentionedBrandCards.length > 0;
 
   const { activeId: activeSectionId, scrollToSection } =
     useSectionScrollSpy(guideSectionNavItems);
@@ -400,12 +668,14 @@ export function GuideDetailPage({
   const [visibleCount, setVisibleCount] = useState(3);
   const [activeProductIdx, setActiveProductIdx] = useState(0);
 
+  // Love / Helpful / Purchased have no canonical persistence yet — start empty
+  // and render "—" for zero counts (see DECISION 12: no fabricated engagement).
   const [interactions, setInteractions] = useState({
-    loved: 1000,
+    loved: 0,
     isLoved: false,
-    helpful: 400,
+    helpful: 0,
     isHelpful: false,
-    purchases: 95,
+    purchases: 0,
     isPurchased: false,
   });
 
@@ -448,31 +718,31 @@ export function GuideDetailPage({
       (prev) => (prev - 1 + guideImages.length) % guideImages.length,
     );
 
-  // Products related to this guide based on constants mapping
-  const recommendedProductIds = (guide as any).recommendedProducts || [];
-  const allGuideProducts = PRODUCTS.filter((p) => {
-    if (recommendedProductIds.includes(p.id)) return true;
-    const guideCategory = (guide.category || "").toLowerCase();
-    const productCategory = (p.category || "").toLowerCase();
-    if (guideCategory.includes("mobile") && productCategory.includes("phone"))
-      return true;
-    if (
-      guideCategory.includes("fashion") &&
-      productCategory.includes("fashion")
-    )
-      return true;
-    if (guideCategory.includes("gaming") && productCategory.includes("gaming"))
-      return true;
-    if (guideCategory.includes("home") && productCategory.includes("home"))
-      return true;
-    if (guideCategory.includes("beauty") && productCategory.includes("beauty"))
-      return true;
-    return false;
-  });
+  // Products related to this guide.
+  //  - Canonical guide  → real catalog products resolved from productIds /
+  //    section ids only. Unresolved ids simply drop (honest missing relation);
+  //    the mock `PRODUCTS` catalog is never substituted.
+  //  - Non-canonical demo/legacy path keeps the old category-matched fixtures.
+  const legacyGuideProducts = useMemo(() => {
+    const recommendedProductIds = (guide as any).recommendedProducts || [];
+    return PRODUCTS.filter((p) => {
+      if (recommendedProductIds.includes(p.id)) return true;
+      const guideCategory = (guide.category || '').toLowerCase();
+      const productCategory = (p.category || '').toLowerCase();
+      if (guideCategory.includes('mobile') && productCategory.includes('phone')) return true;
+      if (guideCategory.includes('fashion') && productCategory.includes('fashion')) return true;
+      if (guideCategory.includes('gaming') && productCategory.includes('gaming')) return true;
+      if (guideCategory.includes('home') && productCategory.includes('home')) return true;
+      if (guideCategory.includes('beauty') && productCategory.includes('beauty')) return true;
+      return false;
+    });
+  }, [guide]);
 
-  // If no recommended products, fallback to first 3 products of matched categories, else global
-  const displayProducts =
-    allGuideProducts.length > 0
+  const allGuideProducts = isCanonicalGuide ? canonicalGuideProducts : legacyGuideProducts;
+
+  const displayProducts = isCanonicalGuide
+    ? allGuideProducts.slice(0, visibleCount)
+    : allGuideProducts.length > 0
       ? allGuideProducts.slice(0, visibleCount)
       : PRODUCTS.slice(0, visibleCount);
 
@@ -522,8 +792,23 @@ export function GuideDetailPage({
 
   const guideReadTime =
     (guide as { readTime?: string }).readTime?.replace(/_/g, " ") || "12 Min Read";
-  const guideLastUpdated = "Updated June 2026";
-  const guideViewCount = 12_480;
+  // Canonical guide → honest values from the record; legacy/demo keeps a nominal display.
+  const guideViewCount = useMemo(() => {
+    const raw = Number(String((guide as any)?.views ?? '').replace(/[^0-9.]/g, ''));
+    if (Number.isFinite(raw) && raw > 0) return raw;
+    return isCanonicalGuide ? 0 : 12_480;
+  }, [guide, isCanonicalGuide]);
+  const guideLastUpdated = useMemo(() => {
+    const iso = (guide as any)?.updatedAt || (guide as any)?.publishedAt;
+    if (iso) {
+      const d = new Date(iso);
+      if (!Number.isNaN(d.getTime()))
+        return `Updated ${d.toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}`;
+    }
+    return isCanonicalGuide ? '' : 'Updated June 2026';
+  }, [guide, isCanonicalGuide]);
+  const viewCountLabel = guideViewCount > 0 ? guideViewCount.toLocaleString() : '—';
+  const metricLabel = (n: number) => (n > 0 ? n.toLocaleString() : '—');
   const guideKindLabel = useMemo(() => {
     const guideType = String((guide as any)?.type || '').toLowerCase();
     if (guideType === 'video') return 'VIDEO GUIDE';
@@ -590,13 +875,13 @@ export function GuideDetailPage({
         <div className="bg-white rounded-xl border border-[#E8EDF2] border-t-[3px] border-t-[#2323FF] px-[26px] py-[18px] mb-4 flex flex-wrap items-center justify-center gap-8 sm:gap-14 text-center">
           <div>
             <div className="text-[15px] font-extrabold text-[#1A1A2E] tabular-nums">
-              {guideViewCount.toLocaleString()}
+              {viewCountLabel}
             </div>
             <div className="text-[10px] text-[#9AA0AC] mt-0.5">Views</div>
           </div>
           <div>
             <div className="text-[15px] font-extrabold text-[#1A1A2E] tabular-nums">
-              {interactions.loved.toLocaleString()}
+              {metricLabel(interactions.loved)}
             </div>
             <button
               type="button"
@@ -614,7 +899,7 @@ export function GuideDetailPage({
           </div>
           <div>
             <div className="text-[15px] font-extrabold text-[#1A1A2E] tabular-nums">
-              {interactions.helpful.toLocaleString()}
+              {metricLabel(interactions.helpful)}
             </div>
             <button
               type="button"
@@ -630,7 +915,7 @@ export function GuideDetailPage({
           </div>
           <div>
             <div className="text-[15px] font-extrabold text-[#EB4501] tabular-nums">
-              {interactions.purchases.toLocaleString()}
+              {metricLabel(interactions.purchases)}
             </div>
             <button
               type="button"
@@ -675,7 +960,9 @@ export function GuideDetailPage({
                 <CheckCircle2 size={14} className="text-[#3B82F6] shrink-0" aria-label="Verified" />
               </div>
               <div className="text-[11px] text-[#9AA0AC]">
-                {guideLastUpdated} · {guideReadTime} · {guideViewCount.toLocaleString()} views
+                {[guideLastUpdated, guideReadTime, guideViewCount > 0 ? `${viewCountLabel} views` : null]
+                  .filter(Boolean)
+                  .join(' · ')}
               </div>
             </div>
           </div>
@@ -805,19 +1092,293 @@ export function GuideDetailPage({
                 onSelect={setActiveProductIdx}
               />
 
-              {/* Optional sections — order/visibility from content.sections config */}
+              {/* Optional sections — order/visibility from content.sections config.
+                  `products` is the FULL resolved set so winnerIds / itemIds /
+                  topPickIds resolve against every referenced product, not just
+                  the visible slice. Canonical guides resolve these against the
+                  real catalog only. */}
               <ContentDetailOptionalSections
                 sections={optionalSections}
                 ctx={{
                   content: spotlightContent ?? null,
                   category: spotlightContent?.category ?? guide?.category,
-                  products: displayProducts,
+                  products: allGuideProducts,
                   hasMoreProducts: allGuideProducts.length > displayProducts.length,
                   onLoadMoreProducts: () => setVisibleCount((prev) => prev + 4),
                 }}
               />
 
-                {showBrandCard && brandCardModel && (
+                {/* ── Overall winner + category awards (typed refs; optional) ── */}
+                {(guideWinner.overallRef || guideWinner.awards.length > 0) && (() => {
+                  const overall = guideWinner.overallRef ? resolveEntityRef(guideWinner.overallRef) : null;
+                  if (!overall && !guideWinner.awards.length) return null;
+                  return (
+                    <section id="winner" className="scroll-mt-36 mt-9 w-full text-left">
+                      <div className="text-[11px] font-extrabold text-[#1A1A2E] tracking-wide mb-3.5 flex items-center gap-1.5">
+                        <Award size={14} className="text-[#EB4501]" /> OVERALL WINNER
+                      </div>
+                      {overall && (
+                        <a
+                          href={(overall as any).href || (overall as any).external?.externalUrl || '#'}
+                          target={(overall as any).external ? '_blank' : undefined}
+                          rel={(overall as any).external ? 'noopener noreferrer' : undefined}
+                          className="flex items-center gap-3 bg-white border border-[#E8EDF2] rounded-[10px] p-3 max-w-md hover:border-[#EB4501]/40 transition-colors"
+                        >
+                          <div className="w-16 h-16 rounded-lg bg-[#F4F7F9] overflow-hidden shrink-0">
+                            {overall.image ? (
+                              <img src={overall.image} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                            ) : null}
+                          </div>
+                          <div className="min-w-0">
+                            {(overall as any).external ? (
+                              <span className="text-[8px] font-extrabold text-[#6B7280] bg-[#F3F4F6] rounded px-1 py-0.5 uppercase">
+                                {overall.kind === 'external_brand' ? 'External Brand' : 'External Product'}
+                              </span>
+                            ) : null}
+                            <div className="text-[13px] font-extrabold text-[#1A1A2E] line-clamp-2">{overall.title}</div>
+                            {'price' in overall && overall.price ? (
+                              <div className="text-[12px] font-bold text-[#EB4501]">৳{Number(overall.price).toLocaleString()}</div>
+                            ) : null}
+                          </div>
+                        </a>
+                      )}
+                      {guideWinner.awards.length > 0 && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
+                          {guideWinner.awards.map((a: any) => {
+                            const r = resolveEntityRef(a.ref);
+                            if (!r) return null;
+                            return (
+                              <div key={a.id}>
+                                <div className="text-[9px] font-extrabold text-[#EB4501] uppercase tracking-wide mb-1">{a.label}</div>
+                                <a
+                                  href={(r as any).href || (r as any).external?.externalUrl || '#'}
+                                  target={(r as any).external ? '_blank' : undefined}
+                                  rel={(r as any).external ? 'noopener noreferrer' : undefined}
+                                  className="flex items-center gap-2 bg-white border border-[#E8EDF2] rounded-[10px] p-2 hover:border-[#EB4501]/40 transition-colors"
+                                >
+                                  <div className="w-10 h-10 rounded-md bg-[#F4F7F9] overflow-hidden shrink-0">
+                                    {r.image ? <img src={r.image} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" /> : null}
+                                  </div>
+                                  <div className="text-[11.5px] font-bold text-[#1A1A2E] line-clamp-2">{r.title}</div>
+                                </a>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </section>
+                  );
+                })()}
+
+                {/* ── Recommendations / Picks (labelled, no ranking) ── */}
+                {guidePicks.length > 0 && (
+                  <section id="picks" className="scroll-mt-36 mt-9 w-full text-left">
+                    <div className="text-[11px] font-extrabold text-[#1A1A2E] tracking-wide mb-3.5">
+                      RECOMMENDATIONS &amp; PICKS
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {guidePicks.map((p: any) => {
+                        const r = resolveEntityRef(p.ref);
+                        if (!r) return null;
+                        return (
+                          <div key={p.id}>
+                            <div className="text-[9px] font-extrabold text-[#8A00C4] uppercase tracking-wide mb-1">{p.label}</div>
+                            <a
+                              href={(r as any).href || (r as any).external?.externalUrl || '#'}
+                              target={(r as any).external ? '_blank' : undefined}
+                              rel={(r as any).external ? 'noopener noreferrer' : undefined}
+                              className="flex items-center gap-2 bg-white border border-[#E8EDF2] rounded-[10px] p-2 hover:border-[#8A00C4]/40 transition-colors"
+                            >
+                              <div className="w-11 h-11 rounded-md bg-[#F4F7F9] overflow-hidden shrink-0">
+                                {r.image ? <img src={r.image} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" /> : null}
+                              </div>
+                              <div className="min-w-0">
+                                {(r as any).external ? (
+                                  <span className="text-[8px] font-extrabold text-[#6B7280] bg-[#F3F4F6] rounded px-1 py-0.5 uppercase">
+                                    {r.kind === 'external_brand' ? 'External Brand' : 'External Product'}
+                                  </span>
+                                ) : null}
+                                <div className="text-[11.5px] font-bold text-[#1A1A2E] line-clamp-2">{r.title}</div>
+                              </div>
+                            </a>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </section>
+                )}
+
+                {/* ── Time-boxed guide offers (never mutates base product price) ── */}
+                {activeGuideOffers.length > 0 && (
+                  <section id="guide-offers" className="scroll-mt-36 mt-9 w-full text-left">
+                    <div className="text-[11px] font-extrabold text-[#1A1A2E] tracking-wide mb-3.5">
+                      LIMITED GUIDE OFFERS
+                    </div>
+                    <div className="space-y-2.5">
+                      {activeGuideOffers.map((o: any) => (
+                        <div
+                          key={o.id}
+                          className={cn(
+                            'rounded-[12px] border p-3.5',
+                            o.isActive
+                              ? 'bg-[#FFF7F3] border-[#F5B79E]'
+                              : 'bg-white border-[#E8EDF2]',
+                          )}
+                        >
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div className="flex items-center gap-3 min-w-0">
+                              <div className="w-14 h-14 rounded-lg bg-[#F4F7F9] overflow-hidden shrink-0">
+                                {o.product.image ? (
+                                  <img src={o.product.image} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                                ) : null}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="flex items-center gap-1.5 mb-0.5">
+                                  {o.isActive ? (
+                                    <span className="inline-flex items-center gap-1 text-[8.5px] font-extrabold text-white bg-[#EB4501] rounded px-1.5 py-0.5 uppercase tracking-wide">
+                                      <Zap size={9} /> LIVE offer
+                                    </span>
+                                  ) : o.isUpcoming ? (
+                                    <span className="text-[8.5px] font-extrabold text-[#6B7280] bg-[#F3F4F6] rounded px-1.5 py-0.5 uppercase tracking-wide">
+                                      Starts {new Date(o.startsAt).toLocaleDateString()}
+                                    </span>
+                                  ) : (
+                                    <span className="text-[8.5px] font-extrabold text-[#6B7280] bg-[#F3F4F6] rounded px-1.5 py-0.5 uppercase tracking-wide">
+                                      Offer ended
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="text-[12.5px] font-bold text-[#1A1A2E] truncate">{o.product.title}</div>
+                                {o.isActive ? (
+                                  <div className="text-[11px] mt-0.5">
+                                    <span className="font-extrabold text-[#EB4501] text-[13px]">৳{Number(o.promo).toLocaleString()}</span>{' '}
+                                    <span className="line-through text-[#9AA0AC]">৳{Number(o.base).toLocaleString()}</span>{' '}
+                                    <span className="font-bold text-[#059669]">
+                                      save ৳{Number(o.savings).toLocaleString()}
+                                      {o.savingsPct ? ` (${o.savingsPct}%)` : ''}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <div className="text-[11px] mt-0.5">
+                                    <span className="font-bold text-[#1A1A2E]">৳{Number(o.base).toLocaleString()}</span>{' '}
+                                    <span className="text-[10px] text-[#9AA0AC]">— standard price</span>
+                                  </div>
+                                )}
+                                <div className="text-[10px] text-[#9AA0AC] mt-0.5">
+                                  {o.isActive
+                                    ? `Offer ends ${new Date(o.endsAt).toLocaleString()}${o.endsInLabel ? ` · ${o.endsInLabel}` : ''}`
+                                    : o.isUpcoming
+                                      ? `Runs ${new Date(o.startsAt).toLocaleDateString()} – ${new Date(o.endsAt).toLocaleDateString()}`
+                                      : `Ended ${new Date(o.endsAt).toLocaleString()}`}
+                                </div>
+                              </div>
+                            </div>
+                            {o.isActive ? (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  addToCart(
+                                    {
+                                      ...o.product,
+                                      guideOfferRef: {
+                                        guideId: String((guide as any).id),
+                                        productId: String(o.product.id),
+                                      },
+                                      expectedUnitPrice: o.promo,
+                                    },
+                                    1,
+                                  )
+                                }
+                                className="px-4 py-2 rounded-full bg-orange-primary hover:brightness-110 text-white text-[11px] font-bold transition-all"
+                              >
+                                Add to Cart · ৳{Number(o.promo).toLocaleString()}
+                              </button>
+                            ) : (
+                              <Link
+                                to={`/products/${o.product.slug || o.product.id}`}
+                                className="px-4 py-2 rounded-full border border-[#E8EDF2] text-[#374151] text-[11px] font-bold"
+                              >
+                                View product
+                              </Link>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-[#9AA0AC] mt-2">
+                      Guide offers are time-boxed and re-verified at checkout with server time. If an offer changes or
+                      ends while an item is in your cart, you’ll be shown the updated total to review before you pay —
+                      you’re never charged a different amount silently.
+                    </p>
+                  </section>
+                )}
+
+                {/* ── Off-platform product / brand references (editorial only) ── */}
+                {guideExternalRefs.length > 0 && (
+                  <section id="off-platform" className="scroll-mt-36 mt-9 w-full text-left">
+                    <div className="text-[11px] font-extrabold text-[#1A1A2E] tracking-wide mb-3.5">
+                      ALSO MENTIONED — OFF PLATFORM
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {guideExternalRefs.map((x) => (
+                        <a
+                          key={x.id}
+                          href={x.externalUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="block bg-white border border-[#E8EDF2] rounded-[10px] overflow-hidden hover:border-[#2563EB]/40 transition-colors"
+                        >
+                          <div className="aspect-[16/10] bg-[#F4F7F9]">
+                            {x.imageUrl ? (
+                              <img src={x.imageUrl} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                            ) : null}
+                          </div>
+                          <div className="p-3">
+                            <span className="text-[8px] font-extrabold text-[#6B7280] bg-[#F3F4F6] rounded px-1 py-0.5 uppercase">
+                              {x.kind === 'brand' ? 'External Brand' : 'External Product'}
+                            </span>
+                            <div className="text-[12px] font-bold text-[#1A1A2E] line-clamp-2 mt-1">{x.title}</div>
+                            {x.brandName ? <div className="text-[10px] text-[#9AA0AC]">{x.brandName}</div> : null}
+                            {x.commentary ? (
+                              <p className="text-[11px] text-[#4B5563] mt-1 line-clamp-2 m-0">{x.commentary}</p>
+                            ) : null}
+                            <div className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-[#2563EB]">
+                              {x.kind === 'brand' ? 'Visit Brand' : 'Visit Product'} <Globe size={11} />
+                            </div>
+                            <p className="text-[9px] text-[#9AA0AC] mt-1 m-0">
+                              External link — interaction takes place outside Choosify
+                            </p>
+                          </div>
+                        </a>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* ── Continue watching / social links (guide-scoped) ── */}
+                {guideSocialLinks.length > 0 && (
+                  <section id="continue-watching" className="scroll-mt-36 mt-9 w-full text-left">
+                    <div className="text-[11px] font-extrabold text-[#1A1A2E] tracking-wide mb-3.5">
+                      CONTINUE WATCHING
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {guideSocialLinks.map((l) => (
+                        <a
+                          key={l.id}
+                          href={l.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-[#E8EDF2] bg-white px-3.5 py-2 text-[11px] font-bold text-[#1A1A2E] hover:border-[#EB4501]/40"
+                        >
+                          {l.label || `Continue on ${l.platform}`} <Globe size={12} />
+                        </a>
+                      ))}
+                    </div>
+                  </section>
+                )}
+
+                {/* Primary publisher identity — brand author only. */}
+                {showPublisherBrandCard && publisherBrandCard && (
                   <section
                     id="reviewer-profile"
                     className="scroll-mt-36 mt-9 w-full text-left"
@@ -829,9 +1390,29 @@ export function GuideDetailPage({
                     >
                       ABOUT THE BRAND
                     </div>
-                    {/* Same Brands-list grid → one cell = standard card width/height */}
                     <div className={BRAND_CARD_GRID}>
-                      <BrandCardDesign brand={brandCardModel} />
+                      <BrandCardDesign brand={publisherBrandCard} />
+                    </div>
+                  </section>
+                )}
+
+                {/* Brands the guide mentions / discusses — never authorship. */}
+                {showBrandMentioned && (
+                  <section
+                    id="brands-mentioned"
+                    className="scroll-mt-36 mt-9 w-full text-left"
+                    aria-labelledby="brand-mentioned-heading"
+                  >
+                    <div
+                      id="brand-mentioned-heading"
+                      className="text-[11px] font-extrabold text-[#1A1A2E] tracking-wide mb-3.5"
+                    >
+                      BRAND MENTIONED
+                    </div>
+                    <div className={BRAND_CARD_GRID}>
+                      {mentionedBrandCards.map((b) => (
+                        <BrandCardDesign key={b.id} brand={b} />
+                      ))}
                     </div>
                   </section>
                 )}
@@ -869,7 +1450,7 @@ export function GuideDetailPage({
                       <div className="flex items-center justify-center border-y border-[#F1F1F3] py-3 mb-3.5">
                         <div className="flex-1">
                           <div className="text-[14px] font-extrabold text-[#1A1A2E]">
-                            {creator.reviews ?? 24}
+                            {typeof creator.reviews === 'number' ? creator.reviews : '—'}
                           </div>
                           <div className="text-[9.5px] text-[#9AA0AC]">Reviews</div>
                         </div>
@@ -880,16 +1461,16 @@ export function GuideDetailPage({
                               ? creator.followers >= 1000
                                 ? `${(creator.followers / 1000).toFixed(1)}K`
                                 : creator.followers
-                              : '1.2K'}
+                              : '—'}
                           </div>
                           <div className="text-[9.5px] text-[#9AA0AC]">Followers</div>
                         </div>
                         <div className="w-px h-[26px] bg-[#F1F1F3]" />
                         <div className="flex-1">
                           <div className="text-[14px] font-extrabold text-[#1A1A2E]">
-                            {(creator.rating ?? 4.9).toFixed(1)}
+                            {typeof creator.score === 'number' ? creator.score : '—'}
                           </div>
-                          <div className="text-[9.5px] text-[#9AA0AC]">Rating</div>
+                          <div className="text-[9.5px] text-[#9AA0AC]">Score</div>
                         </div>
                       </div>
                       <FollowButton

@@ -14,6 +14,10 @@ export interface BeforeYourVisitCardProps {
 export function BeforeYourVisitCard({ data, fields, className }: BeforeYourVisitCardProps) {
   const fieldDefs = BEFORE_VISIT_FIELD_DEFS.filter((def) => fields.includes(def.key));
 
+  const customFields = (data?.customFields || []).filter(
+    (f) => String(f?.label || '').trim() || String(f?.value || '').trim(),
+  );
+
   return (
     <div className={cn('bg-[#F4F7F9] rounded-[10px] p-4 text-left', className)}>
       <div className="text-[11px] font-extrabold text-[#1A1A2E] mb-3">BEFORE YOUR VISIT</div>
@@ -31,6 +35,18 @@ export function BeforeYourVisitCard({ data, fields, className }: BeforeYourVisit
             </div>
           );
         })}
+        {customFields.map((field) => (
+          <div key={field.id}>
+            <div className="text-[10.5px] font-bold text-[#EB4501] uppercase tracking-wide mb-1">
+              {String(field.label || 'Detail').trim()}
+            </div>
+            <p className="text-[11.5px] text-[#4B5563] leading-relaxed m-0">
+              {String(field.value || '').trim() || (
+                <span className="text-[#9AA0AC] italic">Not listed yet</span>
+              )}
+            </p>
+          </div>
+        ))}
       </div>
     </div>
   );

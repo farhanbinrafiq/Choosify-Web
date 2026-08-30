@@ -29,53 +29,105 @@ export function choosifyMediaFromUrl(
   };
 }
 
-/** Build gallery items from a product (preserves existing demo media sets) */
+const PRODUCT_VIDEO_YT_RE =
+  /(?:youtube(?:-nocookie)?\.com\/(?:watch\?v=|embed\/|shorts\/|v\/)|youtu\.be\/)([\w-]{6,})/i;
+const PRODUCT_VIDEO_FILE_RE = /\.(mp4|webm|mov|m4v)(\?.*)?$/i;
+
+/**
+ * Resolve a product's single canonical `videoUrl` into one gallery media item.
+ * Supported sources (mirrors the platform's server-side normalization):
+ *   - a YouTube link (watch / youtu.be / embed / shorts)  -> embedded iframe slide
+ *   - a direct HTTPS video file (.mp4/.webm/.mov/.m4v)     -> native <video> slide
+ *   - a platform `/media/products/*.mp4` path              -> native <video> slide
+ * Anything else is ignored (no broken slide). Returns null when there is no video.
+ */
+function productVideoMediaItem(raw: string | undefined, poster: string): ChoosifyMediaItem | null {
+  const s = (raw || '').trim();
+  if (!s) return null;
+  const yt = s.match(PRODUCT_VIDEO_YT_RE);
+  if (yt) {
+    return {
+      id: mid('pvideo'),
+      kind: 'live',
+      url: s,
+      embedUrl: `https://www.youtube-nocookie.com/embed/${yt[1]}`,
+      posterUrl: poster || undefined,
+      alt: 'Product video',
+      aspectRatio: '16/9',
+    };
+  }
+  if (s.startsWith('/media/') || PRODUCT_VIDEO_FILE_RE.test(s)) {
+    return {
+      id: mid('pvideo'),
+      kind: 'landscape_video',
+      url: s,
+      posterUrl: poster || undefined,
+      alt: 'Product video',
+      aspectRatio: '16/9',
+    };
+  }
+  return null;
+}
+
+/**
+ * Build the Product Detail media gallery from a product.
+ *
+ * Real, seller-managed media only: the ordered `gallery` (primary image first)
+ * plus the one canonical `videoUrl`, rendered as a real video/embed slide.
+ * Catalog/API products always carry at least `image` (mapped into `gallery`
+ * upstream), so production listings render exactly what the seller published and
+ * NEVER receive fabricated demo/stock media. The category demo sets below are a
+ * legacy fallback for mock fixtures that ship with no media at all, and they no
+ * longer inject any demo video.
+ */
 export function buildProductGalleryItems(product: {
   title?: string;
   image?: string;
   category?: string;
   gallery?: string[];
+  videoUrl?: string;
 }): ChoosifyMediaItem[] {
   const mainImg = product.image || PLACEHOLDER_IMAGE;
+  const video = productVideoMediaItem(product.videoUrl, mainImg);
+
+  if (product.gallery?.length || video) {
+    const imgs = product.gallery?.length ? product.gallery : [mainImg];
+    const items = imgs
+      .filter(Boolean)
+      .map((url, i) =>
+        choosifyMediaFromUrl(url, url.match(/\.(mp4|webm|mov)/i) ? 'landscape_video' : 'image', {
+          alt: `${product.title ?? 'Product'} ${i + 1}`,
+        }),
+      );
+    if (video) items.push(video);
+    return items;
+  }
+
   const cat = (product.category || '').toLowerCase();
   const isTech =
     cat.includes('tech') || cat.includes('mobile') || cat.includes('phone') || cat.includes('gaming') || cat.includes('appliance');
   const isFashion = cat.includes('fashion') || cat.includes('lifestyle') || cat.includes('jewelry');
 
-  if (product.gallery?.length) {
-    return product.gallery.map((url, i) =>
-      choosifyMediaFromUrl(url, url.match(/\.(mp4|webm)/i) ? 'landscape_video' : 'image', {
-        alt: `${product.title ?? 'Product'} ${i + 1}`,
-      }),
-    );
-  }
-
   if (isTech) {
     return [
-      choosifyMediaFromUrl('https://assets.mixkit.co/videos/preview/mixkit-taking-photos-with-a-smartphone-34356-large.mp4', 'landscape_video'),
       choosifyMediaFromUrl(mainImg, 'image', { alt: product.title }),
       choosifyMediaFromUrl('https://images.unsplash.com/photo-1526738549149-8e07eca6c147?w=1200&h=800&fit=crop', 'image'),
       choosifyMediaFromUrl('https://images.unsplash.com/photo-1468495244123-6c6c332eeece?w=1200&h=800&fit=crop', 'image'),
-      choosifyMediaFromUrl('https://assets.mixkit.co/videos/preview/mixkit-young-man-wearing-virtual-reality-glasses-4384-large.mp4', 'landscape_video'),
       choosifyMediaFromUrl('https://images.unsplash.com/photo-1531297484001-80022131f5a1?w=1200&h=800&fit=crop', 'image'),
     ];
   }
   if (isFashion) {
     return [
-      choosifyMediaFromUrl('https://assets.mixkit.co/videos/preview/mixkit-holding-a-pair-of-new-athletic-shoes-42999-large.mp4', 'landscape_video'),
       choosifyMediaFromUrl(mainImg, 'image', { alt: product.title }),
       choosifyMediaFromUrl('https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1200&h=800&fit=crop', 'image'),
       choosifyMediaFromUrl('https://images.unsplash.com/photo-1490481651871-ab68de25d43d?w=1200&h=800&fit=crop', 'image'),
-      choosifyMediaFromUrl('https://assets.mixkit.co/videos/preview/mixkit-man-putting-on-designer-sneakers-42998-large.mp4', 'landscape_video'),
       choosifyMediaFromUrl('https://images.unsplash.com/photo-1445205170230-053b830c6050?w=1200&h=800&fit=crop', 'image'),
     ];
   }
   return [
-    choosifyMediaFromUrl('https://assets.mixkit.co/videos/preview/mixkit-serving-coffee-from-a-french-press-coffee-maker-41223-large.mp4', 'landscape_video'),
     choosifyMediaFromUrl(mainImg, 'image', { alt: product.title }),
     choosifyMediaFromUrl('https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=1200&h=800&fit=crop', 'image'),
     choosifyMediaFromUrl('https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?w=1200&h=800&fit=crop', 'image'),
-    choosifyMediaFromUrl('https://assets.mixkit.co/videos/preview/mixkit-coffee-maker-dripping-fresh-beverage-41224-large.mp4', 'landscape_video'),
     choosifyMediaFromUrl('https://images.unsplash.com/photo-1484154218962-a197022b5858?w=1200&h=800&fit=crop', 'image'),
   ];
 }

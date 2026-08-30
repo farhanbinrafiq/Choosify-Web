@@ -68,6 +68,31 @@ export function getVideoEmbedUrl(url: string): string {
   return clean;
 }
 
+/**
+ * Poster/thumbnail image for a video URL where the platform exposes one
+ * publicly. YouTube only for now — other hosts need an API call, so callers
+ * fall back to a placeholder. Returns '' when nothing can be derived.
+ */
+export function getVideoPosterUrl(url: string): string {
+  const clean = (url || '').trim();
+  if (!clean) return '';
+  let id = '';
+  if (clean.includes('youtu.be/')) {
+    id = clean.split('youtu.be/')[1]?.split(/[?&#/]/)[0] || '';
+  } else if (clean.includes('youtube.com/shorts/')) {
+    id = clean.split('/shorts/')[1]?.split(/[?&#/]/)[0] || '';
+  } else if (clean.includes('youtube.com/embed/')) {
+    id = clean.split('/embed/')[1]?.split(/[?&#/]/)[0] || '';
+  } else if (clean.includes('youtube.com/watch')) {
+    try {
+      id = new URLSearchParams(clean.substring(clean.indexOf('?'))).get('v') || '';
+    } catch {
+      id = '';
+    }
+  }
+  return id ? `https://img.youtube.com/vi/${id}/hqdefault.jpg` : '';
+}
+
 export function isDirectVideoFile(url: string): boolean {
   if (!url || url === '#') return false;
   return /\.(mp4|webm|ogg)(\?|$)/i.test(url) || url.startsWith('blob:');

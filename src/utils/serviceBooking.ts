@@ -311,7 +311,7 @@ export function listingSectionLabels(product: any) {
   return {
     specifications: service ? 'Service Specifications' : 'Product Specifications',
     overview: service ? 'Service Overview' : 'Product Overview',
-    boxContent: service ? 'Complimentary Features' : 'Box Content',
+    boxContent: 'Complimentary Features',
     physicalSpecs: service ? 'Property Specs' : 'Physical Specs',
   };
 }

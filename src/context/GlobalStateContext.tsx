@@ -71,6 +71,7 @@ export interface GlobalStateContextType {
   removeFromCart: (productId: number) => void;
   updateCartQuantity: (productId: number, quantity: number) => void;
   clearCart: () => void;
+  clearCartGuideOffers: () => void;
   orders: Order[];
   createOrder: (isCOD: boolean) => Order | null;
   cancelOrder: (orderId: string, reason: string) => Promise<boolean>;
@@ -752,6 +753,10 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       featuredFlag: brand.featuredFlag,
       category: brand.category,
       claimStatus: status,
+      pinnedProductIds: Array.isArray(brand.pinnedProductIds) ? brand.pinnedProductIds : undefined,
+      pinnedShowcaseProductIds: Array.isArray(brand.pinnedShowcaseProductIds)
+        ? brand.pinnedShowcaseProductIds
+        : undefined,
       createdAt: brand.createdAt,
       updatedAt: brand.updatedAt,
     };
@@ -766,6 +771,12 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       slug: product.slug,
       title: product.title,
       image: product.image || '',
+      // Carry the canonical storefront media straight through so the Product
+      // Detail gallery renders real photos/video (never fabricated demo media).
+      gallery: Array.isArray(product.gallery) && product.gallery.length
+        ? product.gallery
+        : (product.image ? [product.image] : []),
+      videoUrl: (product as { videoUrl?: string }).videoUrl || undefined,
       codSupport: true,
       stock: typeof product.stock === 'number' ? product.stock : 0,
       sellerId: `seller-${(product.brandName || 'platform').toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
@@ -791,6 +802,10 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       publishedAt: product.createdAt,
       productType: (product as { productType?: 'physical' | 'service' }).productType,
       serviceCategory: (product as { serviceCategory?: string }).serviceCategory,
+      warrantyMonths: (product as { warrantyMonths?: number }).warrantyMonths,
+      warrantyType: (product as { warrantyType?: string }).warrantyType,
+      warrantyProvider: (product as { warrantyProvider?: string }).warrantyProvider,
+      warrantyTerms: (product as { warrantyTerms?: string }).warrantyTerms,
     };
   });
 
@@ -850,6 +865,24 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
 
   const clearCart = () => {
     setRetailCart([]);
+  };
+
+  /**
+   * Drop the transient guide LIVE-offer context ({ guideOfferRef, expectedUnitPrice })
+   * from every cart line. Used when the server rejects a stale promotional price
+   * (409 GUIDE_OFFER_PRICE_CHANGED) — the next checkout attempt then prices each
+   * item at the current server-authoritative amount (a still-active offer, or the
+   * canonical price) instead of the expired one.
+   */
+  const clearCartGuideOffers = () => {
+    setRetailCart(prev =>
+      prev.map(item => {
+        const p = item.product as Record<string, unknown>;
+        if (!p || (p.guideOfferRef === undefined && p.expectedUnitPrice === undefined)) return item;
+        const { guideOfferRef: _g, expectedUnitPrice: _e, ...restProduct } = p;
+        return { ...item, product: restProduct as typeof item.product };
+      }),
+    );
   };
 
   const createOrder = (isCOD: boolean): Order | null => {
@@ -1098,6 +1131,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       removeFromCart,
       updateCartQuantity,
       clearCart,
+      clearCartGuideOffers,
       orders,
       createOrder,
       cancelOrder,

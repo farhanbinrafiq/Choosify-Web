@@ -1,5 +1,5 @@
 import React from 'react';
-import { Heart, MessageCircleMore, Star } from 'lucide-react';
+import { Check, Heart, MapPin, MessageCircleMore, Star } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { EmiAiLogo } from '../EmiAiLogo';
 
@@ -32,6 +32,14 @@ interface ProductDetailBuyBoxProps {
   setSelectedSize: (v: string) => void;
   setSelectedRam: (v: string) => void;
   getColorHexClass: (color: string) => string;
+  /** Generic category-schema-driven variant dimensions (canonical). When present
+   *  these replace the legacy Color/Size/RAM blocks entirely. */
+  optionGroups?: Array<{ id: string; name: string; displayType?: string; values: string[] }>;
+  selectedOptions?: Record<string, string>;
+  onSelectOption?: (groupName: string, value: string) => void;
+  isValueAvailable?: (groupName: string, value: string) => boolean;
+  /** The variant row the current selection resolves to (canonical). */
+  resolvedVariant?: any;
   showSizeGuideButton: boolean;
   onOpenSizeChart: () => void;
   qty: number;
@@ -87,13 +95,35 @@ export function ProductDetailBuyBox({
   onAskEmi,
   addonsSlot,
   className,
+  optionGroups,
+  selectedOptions = {},
+  onSelectOption,
+  isValueAvailable,
+  resolvedVariant,
 }: ProductDetailBuyBoxProps) {
-  const priceNum = typeof product.price === 'number' ? product.price : Number(String(product.price).replace(/[^\d.]/g, '')) || 0;
-  const origNum = product.originalPrice || product.mrp || Math.round(priceNum * 1.1);
+  const basePriceNum =
+    typeof product.price === 'number'
+      ? product.price
+      : Number(String(product.price).replace(/[^\d.]/g, '')) || 0;
+  // Selected combination resolves the exact canonical price / MRP / SKU.
+  const priceNum =
+    typeof resolvedVariant?.price === 'number' && resolvedVariant.price >= 0
+      ? resolvedVariant.price
+      : basePriceNum;
+  const origNum =
+    (typeof resolvedVariant?.originalPrice === 'number' && resolvedVariant.originalPrice > 0
+      ? resolvedVariant.originalPrice
+      : undefined) ??
+    product.originalPrice ??
+    product.mrp ??
+    0;
   const saveAmt = Math.max(0, origNum - priceNum);
   const savePct = origNum > 0 ? Math.round((saveAmt / origNum) * 100) : 0;
-  const sizeOptions =
-    uniqueSizes.length > 0 ? uniqueSizes : uniqueRams.length > 0 ? uniqueRams : ['8GB/128GB', '12GB/256GB', '12GB/512GB', '16GB/1TB'];
+  const useGenericVariants = Array.isArray(optionGroups) && optionGroups.length > 0;
+  const sku = resolvedVariant?.sku;
+  const sizeOptions = uniqueSizes.length > 0 ? uniqueSizes : uniqueRams;
+
+  const colorish = (name: string) => /colou?r|shade|finish/i.test(name);
 
   return (
     <div className={cn('w-full pb-10', className)}>
@@ -165,9 +195,7 @@ export function ProductDetailBuyBox({
           </div>
 
           <div className="flex items-baseline gap-3 mb-1.5 flex-wrap">
-            <div className="text-[26px] font-extrabold text-[#EB4501]">
-              BDT {typeof product.price === 'number' ? product.price.toLocaleString() : product.price}
-            </div>
+            <div className="text-[26px] font-extrabold text-[#EB4501]">BDT {priceNum.toLocaleString()}</div>
             {saveAmt > 0 && (
               <>
                 <div className="text-[15px] text-[#9AA0AC] line-through">
@@ -179,11 +207,78 @@ export function ProductDetailBuyBox({
               </>
             )}
           </div>
-          <div className="text-xs text-[#EB4501] mb-5">
+          <div className="text-xs text-[#EB4501] mb-1">
             Get up to ৳ cashback · EMI available on this product
           </div>
+          {sku && (
+            <div className="text-[11px] text-[#9AA0AC] mb-4">SKU: <span className="font-semibold text-[#4B5563]">{sku}</span></div>
+          )}
+          {!sku && <div className="mb-4" />}
 
-          {!isService && uniqueColors.length > 0 && (
+          {/* Generic, category-schema-driven variant dimensions (any names). */}
+          {!isService && useGenericVariants && (
+            <div className="mb-3">
+              {optionGroups!.map((g) => {
+                const current = selectedOptions[g.name] || '';
+                return (
+                  <div key={g.id} className="mb-4">
+                    <div className="text-[11.5px] font-bold text-[#1A1A2E] mb-2">
+                      {g.name.toUpperCase()}: {(current || '—')}
+                    </div>
+                    <div className="flex gap-2.5 flex-wrap">
+                      {g.values.map((val) => {
+                        const isSelected = current === val;
+                        const available = isValueAvailable ? isValueAvailable(g.name, val) : true;
+                        if (colorish(g.name)) {
+                          return (
+                            <button
+                              key={val}
+                              type="button"
+                              onClick={() => onSelectOption?.(g.name, val)}
+                              disabled={!available}
+                              title={available ? val : `${val} — unavailable`}
+                              className={cn(
+                                'w-9 h-9 rounded-full border-2 flex items-center justify-center',
+                                isSelected ? 'border-[#EB4501]' : 'border-transparent hover:border-slate-300',
+                                !available && 'opacity-35 cursor-not-allowed',
+                              )}
+                              aria-label={val}
+                            >
+                              <span className={cn('w-6 h-6 rounded-full block shadow', getColorHexClass(val))} />
+                            </button>
+                          );
+                        }
+                        return (
+                          <button
+                            key={val}
+                            type="button"
+                            onClick={() => onSelectOption?.(g.name, val)}
+                            disabled={!available}
+                            className={cn(
+                              'h-9 px-4 rounded-lg text-[11px] font-bold border transition-colors',
+                              isSelected
+                                ? 'border-[#EB4501] text-[#1A1A2E] bg-[#FFF6EF]'
+                                : 'border-[#E5E7EB] text-[#1A1A2E] hover:border-slate-300',
+                              !available && 'opacity-40 line-through cursor-not-allowed hover:border-[#E5E7EB]',
+                            )}
+                          >
+                            {val}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+              {showSizeGuideButton && (
+                <button type="button" onClick={onOpenSizeChart} className="text-[11px] font-bold text-[#EB4501]">
+                  📏 Size Chart
+                </button>
+              )}
+            </div>
+          )}
+
+          {!isService && !useGenericVariants && uniqueColors.length > 0 && (
             <>
               <div className="text-[11.5px] font-bold text-[#1A1A2E] mb-2">
                 COLOR: {(selectedColor || uniqueColors[0] || '').toUpperCase()}
@@ -210,12 +305,12 @@ export function ProductDetailBuyBox({
             </>
           )}
 
-          {!isService && (
+          {!isService && !useGenericVariants && sizeOptions.length > 0 && (
           <>
           <div className="flex justify-between items-center mb-2">
             <div className="text-[11.5px] font-bold text-[#1A1A2E]">
               {uniqueSizes.length > 0 ? 'SIZE' : 'STORAGE'}:{' '}
-              {selectedSize || selectedStorage || selectedRam || sizeOptions[1] || sizeOptions[0]}
+              {selectedSize || selectedStorage || selectedRam || sizeOptions[0]}
             </div>
             {showSizeGuideButton && (
               <button
@@ -230,10 +325,7 @@ export function ProductDetailBuyBox({
           <div className="flex gap-2.5 flex-wrap mb-5">
             {sizeOptions.map((size) => {
               const isSelected =
-                selectedSize === size ||
-                selectedRam === size ||
-                selectedStorage === size ||
-                (size === '12GB/256GB' && !selectedSize && !selectedRam);
+                selectedSize === size || selectedRam === size || selectedStorage === size;
               return (
                 <button
                   key={size}
@@ -372,10 +464,29 @@ export function ProductDetailBuyBox({
             <div className="bg-white rounded-xl border border-[#E8EDF2] p-5">{addonsSlot}</div>
           )}
 
-          <div className="bg-white rounded-xl border border-[#E8EDF2] p-[18px] text-[12.5px] text-[#4B5563] leading-relaxed">
-            📍 Delivery in <b className="text-[#1A1A2E]">Dhaka, Bangladesh</b>
-            <br />✓ Standard Delivery Available
-          </div>
+          {(() => {
+            const di = product.deliveryInfo || {};
+            const facts: string[] = Array.isArray(di.bullets) && di.bullets.filter(Boolean).length
+              ? di.bullets.filter(Boolean)
+              : ['Cash on Delivery available', 'Standard delivery across Bangladesh'];
+            const region: string = di.region || 'Bangladesh';
+            return (
+              <div className="bg-white rounded-xl border border-[#E8EDF2] p-[18px] text-[12.5px] text-[#4B5563] leading-relaxed">
+                <div className="text-[11px] font-extrabold text-[#9AA0AC] uppercase mb-2">Delivery Information</div>
+                <div className="flex items-center gap-1.5 mb-2 text-[#1A1A2E] font-semibold">
+                  <MapPin size={13} className="text-[#EB4501]" /> {region}
+                </div>
+                <ul className="m-0 p-0 list-none space-y-1">
+                  {facts.map((f) => (
+                    <li key={f} className="flex items-start gap-1.5">
+                      <Check size={13} className="text-[#07DD05] mt-0.5 shrink-0" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            );
+          })()}
         </div>
       </div>
     </div>

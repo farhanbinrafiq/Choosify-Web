@@ -222,7 +222,7 @@ export function BrandDetailPage() {
   const brandNameLower = brand.name.toLowerCase();
   const brandIdStr = String(brand.id);
   const brandCatalogId = String((brand as { catalogId?: string }).catalogId || '').toLowerCase();
-  const brandProducts = productSource.filter((p: any) => {
+  const brandProductsUnsorted = productSource.filter((p: any) => {
     if (p.brandId != null && String(p.brandId) === brandIdStr) return true;
     if (
       p.catalogBrandId != null &&
@@ -236,6 +236,29 @@ export function BrandDetailPage() {
       .trim();
     return Boolean(productBrand) && productBrand === brandNameLower;
   });
+  // Seller-curated spotlight order from Brand Studio — showcase pins
+  // (Products grid) lead, then Deals-section pins. Everything else keeps its
+  // natural order. No-op when the brand has no pins.
+  const brandAny = brand as { pinnedProductIds?: string[]; pinnedShowcaseProductIds?: string[] };
+  const pinnedIds: string[] = Array.from(
+    new Set([
+      ...(Array.isArray(brandAny.pinnedShowcaseProductIds)
+        ? brandAny.pinnedShowcaseProductIds.map(String)
+        : []),
+      ...(Array.isArray(brandAny.pinnedProductIds) ? brandAny.pinnedProductIds.map(String) : []),
+    ]),
+  );
+  const brandProducts = pinnedIds.length
+    ? [...brandProductsUnsorted].sort((a: any, b: any) => {
+        const rank = (p: any) => {
+          const i = pinnedIds.findIndex(
+            (id) => id === String(p.id) || id === String(p.catalogId) || id === String(p.catalogBrandId),
+          );
+          return i === -1 ? Number.POSITIVE_INFINITY : i;
+        };
+        return rank(a) - rank(b);
+      })
+    : brandProductsUnsorted;
 
   // Always expose Products in sticky nav — section renders even when the catalog is empty
   const previewShowProductCatalogSection = true;

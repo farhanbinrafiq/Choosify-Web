@@ -233,6 +233,7 @@ export const ProductCard = memo(function ProductCard({
   imageContainerStyle,
   titleStyle,
   isGuideDetail = false,
+  highlightTags,
 }: {
   product: any;
   variant?: 'grid' | 'list' | 'compact' | 'featured';
@@ -241,6 +242,9 @@ export const ProductCard = memo(function ProductCard({
   imageContainerStyle?: React.CSSProperties;
   titleStyle?: React.CSSProperties;
   isGuideDetail?: boolean;
+  /** Author-defined "why it's good for…" chips from a Guide. Overrides the
+   *  auto-derived recommendation tags when present (max 4). */
+  highlightTags?: string[];
 }) {
   const variant = variantProp === 'compact' ? 'grid' : variantProp;
   const isCompactGrid = variantProp === 'compact';
@@ -553,11 +557,15 @@ export const ProductCard = memo(function ProductCard({
 
         {isGuideDetail &&
           (() => {
-            const recData = getRecommendationData(product);
+            const authored = (highlightTags ?? [])
+              .map((t) => `#${String(t).replace(/^#+/, '').trim().toUpperCase().replace(/\s+/g, '_')}`)
+              .filter((t) => t.length > 1)
+              .slice(0, 4);
+            const tags = authored.length ? authored : getRecommendationData(product).tags;
             return (
               <div className="mb-2 pt-1.5 border-t border-dashed border-[#E8EDF2]">
                 <div className="flex flex-wrap gap-1 max-h-[30px] overflow-hidden">
-                  {recData.tags.map((tag) => (
+                  {tags.map((tag) => (
                     <span
                       key={tag}
                       className="choosify-best-for-tag px-1 py-0.5 text-[6.5px] font-bold rounded-full border"

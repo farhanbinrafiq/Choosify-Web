@@ -9,6 +9,11 @@ export interface PriceAcrossStoreRow {
   price: number;
   availability?: string;
   storeUrl?: string;
+  logoUrl?: string;
+  isFeatured?: boolean;
+  /** true ⇒ Choosify/admin-promoted placement — render a badge, never as organic. */
+  sponsored?: boolean;
+  promoLabel?: string;
 }
 
 export interface PriceAcrossStoresPanelProps {
@@ -33,6 +38,9 @@ export function PriceAcrossStoresPanel({
           price: store.price,
           color: STORE_COLORS[index % STORE_COLORS.length],
           url: store.storeUrl,
+          logoUrl: store.logoUrl,
+          sponsored: store.sponsored === true,
+          promoLabel: store.promoLabel,
         }))
       : [
           { name: 'Daraz BD', delivery: '2–3 days', price: Math.round(fallbackPrice * 0.96), color: '#EB4501' },
@@ -47,14 +55,34 @@ export function PriceAcrossStoresPanel({
       {rows.map((store) => (
         <div
           key={store.name}
-          className="flex items-center gap-2.5 bg-white border border-[#E8EDF2] rounded-[10px] px-3 py-2.5 mb-2.5"
+          className={cn(
+            'flex items-center gap-2.5 border rounded-[10px] px-3 py-2.5 mb-2.5',
+            'sponsored' in store && store.sponsored
+              ? 'bg-[#FAF5FF] border-[#E8D9FF]'
+              : 'bg-white border-[#E8EDF2]',
+          )}
         >
-          <div className="w-8 h-8 rounded-full bg-[#000435] text-white flex items-center justify-center text-[11px] font-extrabold shrink-0">
-            {store.name.charAt(0)}
-          </div>
+          {'logoUrl' in store && store.logoUrl ? (
+            <img
+              src={store.logoUrl}
+              alt=""
+              referrerPolicy="no-referrer"
+              className="w-8 h-8 rounded-full object-contain bg-white border border-[#E8EDF2] shrink-0"
+            />
+          ) : (
+            <div className="w-8 h-8 rounded-full bg-[#000435] text-white flex items-center justify-center text-[11px] font-extrabold shrink-0">
+              {store.name.charAt(0)}
+            </div>
+          )}
           <div className="min-w-0 shrink-0 sm:w-[28%]">
             <div className="text-[11.5px] font-bold text-[#1A1A2E] truncate">{store.name}</div>
-            <div className="text-[10px] text-[#9AA0AC] sm:hidden">🚚 {store.delivery}</div>
+            {'sponsored' in store && store.sponsored ? (
+              <div className="text-[9px] font-extrabold text-[#8A00C4] uppercase tracking-wide">
+                {('promoLabel' in store && store.promoLabel) || 'Promoted by Choosify'}
+              </div>
+            ) : (
+              <div className="text-[10px] text-[#9AA0AC] sm:hidden">🚚 {store.delivery}</div>
+            )}
           </div>
           <div className="hidden sm:block flex-1 min-w-0 text-center text-[10px] text-[#9AA0AC] truncate">
             🚚 {store.delivery}

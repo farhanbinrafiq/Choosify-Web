@@ -2,6 +2,7 @@ import type { ServiceCategory } from '../types/serviceBooking';
 import type {
   BeforeVisitFieldKey,
   BeforeYourVisitData,
+  CustomRelatedInfoData,
   ListingRelatedInfoProduct,
   NearbyCategoryKey,
   NearbyPlaceEntry,
@@ -122,14 +123,41 @@ export interface ResolvedRelatedInfoSection {
   beforeYourVisit?: BeforeYourVisitData;
   beforeVisitFields?: BeforeVisitFieldKey[];
   storeComparisonList?: ListingRelatedInfoProduct['storeComparisonList'];
+  customRelatedInfo?: CustomRelatedInfoData;
+}
+
+export function hasCustomRelatedInfoContent(data?: CustomRelatedInfoData | null): boolean {
+  if (!data) return false;
+  if (String(data.title || '').trim()) return true;
+  return Array.isArray(data.blocks) && data.blocks.some((b) => String(b?.heading || '').trim() || (b?.items || []).some((i) => String(i).trim()));
 }
 
 /** Returns the single sidebar section to render, or null when nothing should show. */
 export function resolveListingRelatedInfoSection(
   product: ListingRelatedInfoProduct | null | undefined,
 ): ResolvedRelatedInfoSection | null {
-  const rule = resolveRelatedInfoRule(product);
-  if (!rule || !product) return null;
+  if (!product) return null;
+
+  // An explicit Product Studio choice wins over the category-derived default.
+  // This lets a seller pick "Custom" (escape hatch) or override the preset.
+  if (product.relatedInfoType === 'custom') {
+    if (!hasCustomRelatedInfoContent(product.customRelatedInfo)) return null;
+    return {
+      kind: 'custom',
+      rule: { kind: 'custom', visibility: 'seller_enabled' },
+      customRelatedInfo: product.customRelatedInfo,
+    };
+  }
+
+  const rule: RelatedInfoSectionRule | null =
+    product.relatedInfoType === 'whats_nearby'
+      ? { kind: 'whats_nearby', visibility: 'optional' }
+      : product.relatedInfoType === 'before_your_visit'
+        ? { kind: 'before_your_visit', visibility: 'optional', beforeVisitFields: BEFORE_VISIT_FIELD_DEFS.map((f) => f.key) }
+        : product.relatedInfoType === 'price_across_stores'
+          ? { kind: 'price_across_stores', visibility: 'seller_enabled' }
+          : resolveRelatedInfoRule(product);
+  if (!rule) return null;
 
   if (rule.kind === 'price_across_stores') {
     if (!shouldShowPriceAcrossStores(product)) return null;

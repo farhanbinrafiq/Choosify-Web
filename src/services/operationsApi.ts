@@ -40,17 +40,28 @@ async function request<T>(path: string, method: HttpMethod = 'GET', body?: unkno
 
   if (!response.ok) {
     const rawError = await response.text();
-    let parsed: { error?: string; message?: string } | null = null;
+    let parsed: { error?: string; message?: string; code?: string; details?: Record<string, unknown> } | null = null;
     try {
-      parsed = JSON.parse(rawError) as { error?: string; message?: string };
+      parsed = JSON.parse(rawError) as {
+        error?: string;
+        message?: string;
+        code?: string;
+        details?: Record<string, unknown>;
+      };
     } catch {
       /* plain text */
     }
     const err = new Error(parsed?.message || parsed?.error || rawError || `Request failed with ${response.status}`) as Error & {
       code?: string;
       status?: number;
+      serverCode?: string;
+      details?: Record<string, unknown>;
     };
     err.code = parsed?.error;
+    // Machine-readable error code + structured details, when the API supplies them
+    // (e.g. { code: 'GUIDE_OFFER_PRICE_CHANGED', details: { actualUnitPrice } }).
+    err.serverCode = parsed?.code;
+    err.details = parsed?.details;
     err.status = response.status;
     throw err;
   }

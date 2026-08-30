@@ -35,9 +35,25 @@ async function request<T>(path: string, method: HttpMethod = 'GET', body?: unkno
 }
 
 export const catalogApi = {
+  /**
+   * The catalog list endpoint pages at 100 rows. Walk every page so the
+   * storefront sees the whole catalog (older behaviour silently dropped
+   * everything past the first 100 products).
+   */
   listProducts: async (): Promise<CatalogProduct[]> => {
-    const result = await request<{ data: CatalogProduct[] }>('/catalog/products');
-    return result.data;
+    const pageSize = 100;
+    const all: CatalogProduct[] = [];
+    for (let offset = 0, total = Infinity; offset < total; offset += pageSize) {
+      const result = await request<{ data: CatalogProduct[]; meta?: { total?: number } }>(
+        `/catalog/products?limit=${pageSize}&offset=${offset}`,
+      );
+      const rows = Array.isArray(result.data) ? result.data : [];
+      all.push(...rows);
+      total = typeof result.meta?.total === 'number' ? result.meta.total : all.length;
+      if (rows.length < pageSize) break;
+      if (offset > 5000) break; // hard safety stop
+    }
+    return all;
   },
   listBrands: async (): Promise<CatalogBrand[]> => {
     const result = await request<{ data: CatalogBrand[] }>('/catalog/brands');

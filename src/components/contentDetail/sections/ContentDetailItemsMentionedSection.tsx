@@ -20,6 +20,7 @@ export function ContentDetailItemsMentionedSection({
 }) {
   const topPickIds = section.data?.topPickIds ?? [];
   const itemIds = section.data?.itemIds;
+  const highlightTags = (section.data?.highlightTags ?? {}) as Record<string, string[]>;
 
   let products = ctx.products;
   if (itemIds?.length) {
@@ -75,7 +76,12 @@ export function ContentDetailItemsMentionedSection({
             id={`prod-sec-${idx}`}
             className="scroll-mt-36"
           >
-            <ProductCard product={product} variant="grid" isGuideDetail={true} />
+            <ProductCard
+              product={product}
+              variant="grid"
+              isGuideDetail={true}
+              highlightTags={highlightTags[String(product.id)]}
+            />
           </div>
         ))}
       </div>
