@@ -293,6 +293,36 @@
   -webkit-backdrop-filter: blur(14px);
 }
 
+/* Every solid brand-orange button/link → the signature warm gradient
+   (parity with the Partner-signup "Submit Partner Application" CTA).
+   Alpha tint variants (bg-…/10) are excluded; Emi keeps its own gradient. */
+button[class*="bg-orange-primary"]:not([class*="bg-orange-primary/"]),
+a[class*="bg-orange-primary"]:not([class*="bg-orange-primary/"]),
+[role="button"][class*="bg-orange-primary"]:not([class*="bg-orange-primary/"]),
+button[class*="bg-orange-deep"]:not([class*="bg-orange-deep/"]),
+a[class*="bg-orange-deep"]:not([class*="bg-orange-deep/"]),
+button[class*="bg-[#FF5B00]"]:not([class*="bg-[#FF5B00]/"]),
+a[class*="bg-[#FF5B00]"]:not([class*="bg-[#FF5B00]/"]),
+[role="button"][class*="bg-[#FF5B00]"]:not([class*="bg-[#FF5B00]/"]),
+button[class*="bg-[#EF3C23]"]:not([class*="bg-[#EF3C23]/"]),
+a[class*="bg-[#EF3C23]"]:not([class*="bg-[#EF3C23]/"]) {
+  background: var(--choosify-gradient-warm) !important;
+  background-image: var(--choosify-gradient-warm) !important;
+  color: #fff !important;
+}
+button[class*="bg-orange-primary"]:not([class*="bg-orange-primary/"]):hover,
+a[class*="bg-orange-primary"]:not([class*="bg-orange-primary/"]):hover,
+[role="button"][class*="bg-orange-primary"]:not([class*="bg-orange-primary/"]):hover,
+button[class*="bg-orange-deep"]:not([class*="bg-orange-deep/"]):hover,
+a[class*="bg-orange-deep"]:not([class*="bg-orange-deep/"]):hover,
+button[class*="bg-[#FF5B00]"]:not([class*="bg-[#FF5B00]/"]):hover,
+a[class*="bg-[#FF5B00]"]:not([class*="bg-[#FF5B00]/"]):hover,
+button[class*="bg-[#EF3C23]"]:not([class*="bg-[#EF3C23]/"]):hover,
+a[class*="bg-[#EF3C23]"]:not([class*="bg-[#EF3C23]/"]):hover {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--choosify-red) 86%, #000) 0%, color-mix(in srgb, var(--choosify-orange) 86%, #000) 100%) !important;
+  background-image: linear-gradient(90deg, color-mix(in srgb, var(--choosify-red) 86%, #000) 0%, color-mix(in srgb, var(--choosify-orange) 86%, #000) 100%) !important;
+}
+
 /** Square flex shell for portrait Emi mascot — avoids side clipping in avatars/FABs */
 .choosify-emi-logo-slot {
   display: inline-flex;
