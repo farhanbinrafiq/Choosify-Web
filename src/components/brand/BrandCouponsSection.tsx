@@ -41,7 +41,7 @@ export function BrandCouponCard({
         className,
       )}
     >
-      <div className="text-[16px] font-extrabold text-[#EB4501] w-11 shrink-0 leading-none">
+      <div className="text-[16px] font-extrabold text-[#FF5B00] w-11 shrink-0 leading-none">
         {coupon.pct}
       </div>
       <div className="min-w-0 flex-1">
@@ -51,7 +51,7 @@ export function BrandCouponCard({
       <button
         type="button"
         onClick={() => copyCouponCode(coupon.code)}
-        className="shrink-0 h-8 px-2.5 rounded-lg border border-[#E8EDF2] hover:border-[#EB4501] bg-[#F4F7F9] hover:bg-[#FFF3EA] text-[10px] font-extrabold uppercase tracking-wider text-[#EB4501] cursor-pointer transition-colors"
+        className="shrink-0 h-8 px-2.5 rounded-lg border border-[#E8EDF2] hover:border-[#FF5B00] bg-[#F4F7F9] hover:bg-[#FFF3EA] text-[10px] font-extrabold uppercase tracking-wider text-[#FF5B00] cursor-pointer transition-colors"
         aria-label={`Copy code ${coupon.code}`}
       >
         Copy
@@ -103,8 +103,8 @@ export function BrandCouponCarouselCard({
       )}
     >
       <div className="h-[170px] shrink-0 bg-[#FFF3EA] flex flex-col items-center justify-center gap-1">
-        <div className="text-[26px] font-extrabold text-[#EB4501] leading-none">{coupon.pct}</div>
-        <div className="text-[10px] font-bold uppercase tracking-wider text-[#EB4501]/70">Off Coupon</div>
+        <div className="text-[26px] font-extrabold text-[#FF5B00] leading-none">{coupon.pct}</div>
+        <div className="text-[10px] font-bold uppercase tracking-wider text-[#FF5B00]/70">Off Coupon</div>
       </div>
       <div className="px-3 pt-[11px] pb-3 flex flex-col flex-1 min-h-0 text-left">
         <div className="text-[12.5px] font-bold text-[#1A1A2E] mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis">
@@ -116,7 +116,7 @@ export function BrandCouponCarouselCard({
         <button
           type="button"
           onClick={() => copyCouponCode(coupon.code)}
-          className="mt-auto w-full h-8 rounded-lg border border-[#E8EDF2] hover:border-[#EB4501] bg-[#F4F7F9] hover:bg-[#FFF3EA] text-[10px] font-extrabold uppercase tracking-wider text-[#EB4501] cursor-pointer transition-colors"
+          className="mt-auto w-full h-8 rounded-lg border border-[#E8EDF2] hover:border-[#FF5B00] bg-[#F4F7F9] hover:bg-[#FFF3EA] text-[10px] font-extrabold uppercase tracking-wider text-[#FF5B00] cursor-pointer transition-colors"
           aria-label={`Copy code ${coupon.code}`}
         >
           Copy Code

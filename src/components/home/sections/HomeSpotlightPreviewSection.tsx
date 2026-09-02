@@ -15,7 +15,7 @@ interface HomeSpotlightPreviewSectionProps {
   productFeed?: SponsoredInjectedEntry<any>[];
 }
 
-const AVATAR_COLORS = ['#EB4501', '#2323FF', '#07A828', '#EB4501', '#000435', '#7C3AED'];
+const AVATAR_COLORS = ['#FF5B00', '#2323FF', '#07A828', '#FF5B00', '#18154C', '#7C3AED'];
 
 function ViralSaveButton({ size, className }: { size: number; className?: string }) {
   const [isSaved, setIsSaved] = useState(false);
@@ -36,9 +36,9 @@ function ViralSaveButton({ size, className }: { size: number; className?: string
     >
       <Heart
         size={size}
-        className="text-[#EB4501]"
+        className="text-[#FF5B00]"
         strokeWidth={2}
-        fill={isSaved ? '#EB4501' : 'none'}
+        fill={isSaved ? '#FF5B00' : 'none'}
       />
     </button>
   );

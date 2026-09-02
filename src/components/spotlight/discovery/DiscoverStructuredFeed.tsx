@@ -89,7 +89,7 @@ function LaneHeader({
       <button
         type="button"
         onClick={onViewAll}
-        className="text-[12px] font-bold text-[#1A1A2E] hover:text-[#CF4400] cursor-pointer bg-transparent border-0 p-0 min-h-[44px] sm:min-h-0"
+        className="text-[12px] font-bold text-[#1A1A2E] hover:text-[#EF3C23] cursor-pointer bg-transparent border-0 p-0 min-h-[44px] sm:min-h-0"
       >
         View All ›
       </button>
@@ -272,7 +272,7 @@ export function DiscoverStructuredFeed({
             <button
               type="button"
               onClick={onClearFilters}
-              className="mt-4 text-xs font-bold uppercase text-[#EB4501] hover:underline min-h-[44px] px-4 cursor-pointer bg-transparent border-0"
+              className="mt-4 text-xs font-bold uppercase text-[#FF5B00] hover:underline min-h-[44px] px-4 cursor-pointer bg-transparent border-0"
             >
               Clear filters
             </button>
@@ -397,7 +397,7 @@ export function DiscoverStructuredFeed({
                   <button
                     type="button"
                     onClick={() => triggerFilter('blogs')}
-                    className="text-[11px] font-bold text-[#1A1A2E] hover:text-[#CF4400] cursor-pointer bg-transparent border-0 p-0 min-h-[44px] sm:min-h-0"
+                    className="text-[11px] font-bold text-[#1A1A2E] hover:text-[#EF3C23] cursor-pointer bg-transparent border-0 p-0 min-h-[44px] sm:min-h-0"
                   >
                     View All ›
                   </button>

@@ -80,7 +80,7 @@ export function EntityCard({
             e.currentTarget.src = PLACEHOLDER_IMAGE;
           }}
         />
-        <span className="absolute top-2 left-2 text-[9px] font-extrabold uppercase tracking-wide px-2 py-0.5 rounded-md bg-white/95 text-[#EB4501] border border-[#EB4501]/20">
+        <span className="absolute top-2 left-2 text-[9px] font-extrabold uppercase tracking-wide px-2 py-0.5 rounded-md bg-white/95 text-[#FF5B00] border border-[#FF5B00]/20">
           {entityTypeLabel(entity.type)}
         </span>
       </div>
@@ -94,13 +94,13 @@ export function EntityCard({
           ) : null}
         </div>
         {display.meta ? (
-          <p className="text-[14px] font-extrabold text-[#EB4501] tabular-nums">
+          <p className="text-[14px] font-extrabold text-[#FF5B00] tabular-nums">
             {display.meta}
           </p>
         ) : null}
         <Link
           to={display.href}
-          className="inline-flex w-full items-center justify-center gap-1.5 min-h-[38px] px-3 rounded-lg bg-[#EB4501] text-white text-[11.5px] font-bold no-underline hover:brightness-110"
+          className="inline-flex w-full items-center justify-center gap-1.5 min-h-[38px] px-3 rounded-lg bg-[#FF5B00] text-white text-[11.5px] font-bold no-underline hover:brightness-110"
         >
           {display.ctaLabel}
           <ExternalLink size={12} />
@@ -166,7 +166,7 @@ export function MessagesDynamicContentRail({
     <aside className="hidden xl:flex w-[260px] shrink-0 flex-col border-l border-[#E8EDF2] bg-white p-[18px] gap-5 overflow-y-auto min-h-0">
       <div>
         <div className="flex items-center gap-1.5 text-[11px] font-extrabold text-[#1A1A2E] mb-3">
-          <Icon size={12} className="text-[#EB4501]" />
+          <Icon size={12} className="text-[#FF5B00]" />
           {copy.title}
         </div>
 
@@ -197,9 +197,9 @@ export function MessagesDynamicContentRail({
           <button
             type="button"
             onClick={onReportProblem}
-            className="w-full inline-flex items-center justify-center gap-1.5 min-h-[38px] px-3 rounded-lg border border-[#E8EDF2] bg-white text-[11.5px] font-bold text-[#1A1A2E] hover:border-[#EB4501] hover:text-[#CF4400] cursor-pointer"
+            className="w-full inline-flex items-center justify-center gap-1.5 min-h-[38px] px-3 rounded-lg border border-[#E8EDF2] bg-white text-[11.5px] font-bold text-[#1A1A2E] hover:border-[#FF5B00] hover:text-[#EF3C23] cursor-pointer"
           >
-            <Flag size={12} className="text-[#EB4501]" />
+            <Flag size={12} className="text-[#FF5B00]" />
             Report to Support
           </button>
         )}

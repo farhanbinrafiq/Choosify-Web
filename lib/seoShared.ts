@@ -7,7 +7,7 @@ export const SITE_DEFAULT_DESCRIPTION =
   "Compare verified brands, discover trusted products, and shop with confidence on Choosify — Bangladesh's product & service discovery platform.";
 export const SITE_TWITTER_HANDLE = '@choosifybd';
 export const SITE_LOCALE = 'en_BD';
-export const SITE_THEME_COLOR = '#000435';
+export const SITE_THEME_COLOR = '#18154C';
 export const SITE_BRAND_ORANGE = '#FF5B00';
 
 /** Default social image size (Open Graph / Twitter large card) */

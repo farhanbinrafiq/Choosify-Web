@@ -50,7 +50,7 @@ export function CategorySubgroupCard({ categoryName, group }: CategorySubgroupCa
       <div className="px-4 pt-5 pb-4 flex-1 flex flex-col">
         <Link
           to={href}
-          className="text-left text-[14px] font-bold text-[#1A1A2E] mb-2 no-underline hover:text-[#CF4400]"
+          className="text-left text-[14px] font-bold text-[#1A1A2E] mb-2 no-underline hover:text-[#EF3C23]"
         >
           {group.name}
         </Link>
@@ -59,7 +59,7 @@ export function CategorySubgroupCard({ categoryName, group }: CategorySubgroupCa
           <Link
             key={item}
             to={leafItemHref(categoryName, group.name, item)}
-            className="block text-left text-[12px] text-[#4B5563] mb-2 truncate no-underline hover:text-[#CF4400] hover:underline"
+            className="block text-left text-[12px] text-[#4B5563] mb-2 truncate no-underline hover:text-[#EF3C23] hover:underline"
           >
             {item}
           </Link>

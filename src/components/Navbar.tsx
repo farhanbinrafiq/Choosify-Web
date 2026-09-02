@@ -155,8 +155,8 @@ export function Navbar() {
       ? location.pathname === '/'
       : location.pathname.startsWith(path);
     return cn(
-      'text-[11.5px] whitespace-nowrap transition-colors hover:text-[#CF4400] cursor-pointer',
-      isActive ? 'text-[#EB4501] font-bold' : 'text-white/80 font-medium',
+      'text-[11.5px] whitespace-nowrap transition-colors hover:text-[#EF3C23] cursor-pointer',
+      isActive ? 'text-[#FF5B00] font-bold' : 'text-white/80 font-medium',
     );
   };
 
@@ -167,7 +167,7 @@ export function Navbar() {
     return cn(
       'flex items-center gap-3 py-2.5 px-4 rounded-xl text-[12.5px] font-semibold transition-all border',
       isActive
-        ? 'text-[#EB4501] bg-[#FFF3EA] border-[#FFD8B8]'
+        ? 'text-[#FF5B00] bg-[#FFF3EA] border-[#FFD8B8]'
         : 'text-[#1A1A2E] hover:bg-[#F4F7F9] border-transparent',
     );
   };
@@ -196,7 +196,7 @@ export function Navbar() {
   return (
     <>
       {siteConfig?.announcementBarEnabled && siteConfig.announcementBarText?.trim() && (
-        <div className="w-full bg-[#EB4501] text-white text-center text-[11px] sm:text-xs py-1.5 px-4 font-semibold tracking-wide">
+        <div className="w-full bg-[#FF5B00] text-white text-center text-[11px] sm:text-xs py-1.5 px-4 font-semibold tracking-wide">
           {siteConfig.announcementBarText}
         </div>
       )}
@@ -284,7 +284,7 @@ export function Navbar() {
             >
               <MessageCircleMore size={19} strokeWidth={2} className="text-white transition-colors" />
               {unreadMsgCount > 0 && (
-                <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 text-white text-[9px] font-bold bg-[#EB4501] rounded-full flex items-center justify-center leading-none">
+                <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 text-white text-[9px] font-bold bg-[#FF5B00] rounded-full flex items-center justify-center leading-none">
                   {unreadMsgCount > 99 ? '99+' : unreadMsgCount}
                 </span>
               )}
@@ -299,7 +299,7 @@ export function Navbar() {
             >
               <ShoppingCart size={19} strokeWidth={2} className="text-white transition-colors" />
               {activeCartCount > 0 && (
-                <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 text-white text-[9px] font-bold bg-[#EB4501] rounded-full flex items-center justify-center leading-none">
+                <span className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 text-white text-[9px] font-bold bg-[#FF5B00] rounded-full flex items-center justify-center leading-none">
                   {activeCartCount > 99 ? '99+' : activeCartCount}
                 </span>
               )}
@@ -324,7 +324,7 @@ export function Navbar() {
                 aria-label="Open account menu"
                 aria-expanded={isUserMenuOpen}
               >
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-center justify-center text-white text-[11px] font-bold shrink-0">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#FF5B00] to-[#2323FF] flex items-center justify-center text-white text-[11px] font-bold shrink-0">
                   {(currentUser?.name || 'F').charAt(0).toUpperCase()}
                 </div>
                 <span className="text-[11.5px] font-semibold hidden lg:block text-white">
@@ -363,7 +363,7 @@ export function Navbar() {
                             <item.icon size={14} className="text-[#9AA0AC]" />
                             <span>{item.label}</span>
                             {item.icon === MessageCircleMore && unreadMsgCount > 0 && (
-                              <span className="ml-auto min-w-[16px] h-4 px-1 bg-[#EB4501] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                              <span className="ml-auto min-w-[16px] h-4 px-1 bg-[#FF5B00] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                                 {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
                               </span>
                             )}
@@ -402,14 +402,14 @@ export function Navbar() {
                 <button
                   type="button"
                   onClick={() => goToLogin('sign-in')}
-                  className="h-8 xl:h-9 px-2.5 xl:px-4 !bg-white text-[#EB4501] text-[8px] xl:text-[9px] uppercase font-black rounded-full tracking-wider xl:tracking-widest transition-all flex items-center justify-center gap-1 italic hover:brightness-110 whitespace-nowrap border-0 shadow-sm shrink-0 cursor-pointer"
+                  className="h-8 xl:h-9 px-2.5 xl:px-4 !bg-white text-[#FF5B00] text-[8px] xl:text-[9px] uppercase font-black rounded-full tracking-wider xl:tracking-widest transition-all flex items-center justify-center gap-1 italic hover:brightness-110 whitespace-nowrap border-0 shadow-sm shrink-0 cursor-pointer"
                 >
                   Sign In
                 </button>
                 <button
                   type="button"
                   onClick={() => goToLogin('sign-up')}
-                  className="h-8 xl:h-9 px-2.5 xl:px-4 bg-[#EB4501] text-white text-[8px] xl:text-[9px] uppercase font-black rounded-full tracking-wider xl:tracking-widest transition-all flex items-center gap-1 italic hover:brightness-110 whitespace-nowrap border-0 cursor-pointer"
+                  className="h-8 xl:h-9 px-2.5 xl:px-4 bg-[#FF5B00] text-white text-[8px] xl:text-[9px] uppercase font-black rounded-full tracking-wider xl:tracking-widest transition-all flex items-center gap-1 italic hover:brightness-110 whitespace-nowrap border-0 cursor-pointer"
                 >
                   Sign Up <LogIn size={12} className="xl:w-[13px] xl:h-[13px]" />
                 </button>
@@ -535,7 +535,7 @@ export function Navbar() {
                 </div>
 
                 <div className="px-5 py-4 bg-[#F4F7F9] border-b border-[#E8EDF2] flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-center justify-center text-white text-[15px] font-bold shrink-0 overflow-hidden">
+                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#FF5B00] to-[#2323FF] flex items-center justify-center text-white text-[15px] font-bold shrink-0 overflow-hidden">
                     {currentUser?.avatar ? (
                       <img
                         src={currentUser.avatar}
@@ -568,7 +568,7 @@ export function Navbar() {
                       <item.icon size={14} className="text-[#9AA0AC] shrink-0" />
                       <span className="flex-1">{item.label}</span>
                       {item.icon === MessageCircleMore && unreadMsgCount > 0 && (
-                        <span className="min-w-[16px] h-4 px-1 bg-[#EB4501] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
+                        <span className="min-w-[16px] h-4 px-1 bg-[#FF5B00] text-white text-[9px] font-bold rounded-full flex items-center justify-center">
                           {unreadMsgCount > 9 ? '9+' : unreadMsgCount}
                         </span>
                       )}
@@ -587,7 +587,7 @@ export function Navbar() {
                       <item.icon size={14} className="text-[#9AA0AC] shrink-0" />
                       <span className="flex-1">{item.label}</span>
                       {item.path === '/messages' && unreadMsgCount > 0 && (
-                        <span className="min-w-[16px] h-4 px-1 bg-[#EB4501] text-white text-[9px] font-bold rounded-full flex items-center justify-center leading-none">
+                        <span className="min-w-[16px] h-4 px-1 bg-[#FF5B00] text-white text-[9px] font-bold rounded-full flex items-center justify-center leading-none">
                           {unreadMsgCount > 99 ? '99+' : unreadMsgCount}
                         </span>
                       )}

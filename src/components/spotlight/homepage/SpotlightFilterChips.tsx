@@ -30,8 +30,8 @@ export function SpotlightFilterChips({ active, onChange }: SpotlightFilterChipsP
           className={cn(
             'px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wide border transition-colors',
             active === f.id
-              ? 'bg-[#EB4501] text-white border-[#EB4501]'
-              : 'bg-white text-gray-500 border-[#e8edf2] hover:border-[#EB4501]/40',
+              ? 'bg-[#FF5B00] text-white border-[#FF5B00]'
+              : 'bg-white text-gray-500 border-[#e8edf2] hover:border-[#FF5B00]/40',
           )}
         >
           {f.label}

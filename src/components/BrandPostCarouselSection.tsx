@@ -41,8 +41,8 @@ export function BrandPostCarouselSection({
       <div className="flex flex-col sm:flex-row items-start sm:items-end justify-between border-b border-gray-100 pb-4 mb-4 gap-3">
         <div className="text-left">
           <div className="flex items-center gap-2 flex-wrap">
-            <Sparkles size={14} className="text-[#EB4501]" />
-            <span className="text-[10px] font-black text-[#EB4501] uppercase tracking-[0.2em]">
+            <Sparkles size={14} className="text-[#FF5B00]" />
+            <span className="text-[10px] font-black text-[#FF5B00] uppercase tracking-[0.2em]">
               {badgeLabel}
             </span>
             {showSponsoredBadge && (
@@ -55,10 +55,10 @@ export function BrandPostCarouselSection({
             {title.includes(' ') ? (
               <>
                 {title.split(' ').slice(0, -1).join(' ')}{' '}
-                <span className="text-[#EB4501]">{title.split(' ').slice(-1)}</span>
+                <span className="text-[#FF5B00]">{title.split(' ').slice(-1)}</span>
               </>
             ) : (
-              <span className="text-[#EB4501]">{title}</span>
+              <span className="text-[#FF5B00]">{title}</span>
             )}
           </h2>
           <p className="text-[11px] text-[#8a9bb0] mt-1 text-left max-w-xl">{subtitle}</p>
@@ -66,7 +66,7 @@ export function BrandPostCarouselSection({
         {viewAllHref && (
           <Link
             to={viewAllHref}
-            className="inline-flex items-center gap-1.5 hover:bg-gray-50 text-[#EB4501] hover:text-[#CF4400] text-xs font-bold uppercase tracking-wider rounded-lg transition-all shrink-0"
+            className="inline-flex items-center gap-1.5 hover:bg-gray-50 text-[#FF5B00] hover:text-[#EF3C23] text-xs font-bold uppercase tracking-wider rounded-lg transition-all shrink-0"
           >
             {viewAllLabel} <ChevronRight size={14} />
           </Link>

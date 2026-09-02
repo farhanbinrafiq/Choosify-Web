@@ -449,7 +449,7 @@ export function ClaimProfileModal({
             {/* Modal CORE HEADER */}
             <div className="flex items-center justify-between p-5 md:p-6 border-b border-gray-100 shrink-0 bg-white">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-orange-50 text-[#F97316] flex items-center justify-center font-bold">
+                <div className="w-10 h-10 rounded-2xl bg-orange-50 text-[#FF5B00] flex items-center justify-center font-bold">
                   <ShieldCheck size={22} className="stroke-[2.5]" />
                 </div>
                 <div>
@@ -457,7 +457,7 @@ export function ClaimProfileModal({
                     Claim {targetType === 'brand' ? 'Brand Ownership' : 'Creator Profile'}
                   </h2>
                   <p className="text-[12px] text-[#9AA0AC] font-medium tracking-tight">
-                    Professional Verification Network For <span className="text-[#F97316]">{targetName}</span>
+                    Professional Verification Network For <span className="text-[#FF5B00]">{targetName}</span>
                   </p>
                 </div>
               </div>
@@ -477,7 +477,7 @@ export function ClaimProfileModal({
               {/* STEP 1: USER ELIGIBILITY GATE */}
               {flowStep === 'user_check' && (
                 <div id="eligibility-gating" className="max-w-md mx-auto py-10 space-y-8 text-center animate-fade-in">
-                  <div className="w-16 h-16 bg-orange-50 stroke-[1.5] rounded-full flex items-center justify-center mx-auto text-[#F97316]">
+                  <div className="w-16 h-16 bg-orange-50 stroke-[1.5] rounded-full flex items-center justify-center mx-auto text-[#FF5B00]">
                     <Lock size={28} />
                   </div>
                   
@@ -492,18 +492,18 @@ export function ClaimProfileModal({
                       <button
                         type="button"
                         onClick={handleLogIn}
-                        className="w-full h-12 rounded-xl bg-white border border-[#E5E7EB] hover:border-[#D1D5DB] font-bold text-[13px] tracking-tight text-[#EB4501] shadow-sm flex items-center justify-center gap-1.5 cursor-pointer transition-all"
+                        className="w-full h-12 rounded-xl bg-white border border-[#E5E7EB] hover:border-[#D1D5DB] font-bold text-[13px] tracking-tight text-[#FF5B00] shadow-sm flex items-center justify-center gap-1.5 cursor-pointer transition-all"
                       >
                         Sign In as Representative{' '}
-                        <ArrowRight size={13} className="text-[#EB4501]" />
+                        <ArrowRight size={13} className="text-[#FF5B00]" />
                       </button>
                     </div>
                   ) : targetType === 'brand' && currentUser.role !== 'seller' ? (
                     <div className="space-y-6">
                       <div className="space-y-2">
-                        <h4 className="text-[12px] font-bold text-[#EB4501] tracking-tight block">Eligibility check</h4>
+                        <h4 className="text-[12px] font-bold text-[#FF5B00] tracking-tight block">Eligibility check</h4>
                         <h3 className="text-lg font-extrabold tracking-tight text-[#1A1A2E]">Seller profile required</h3>
-                        <p className="text-xs text-[#1A1A2E] font-bold leading-relaxed bg-[#F97316]/5 border border-[#F97316]/20 p-3.5 rounded-xl">
+                        <p className="text-xs text-[#1A1A2E] font-bold leading-relaxed bg-[#FF5B00]/5 border border-[#FF5B00]/20 p-3.5 rounded-xl">
                           "Create Seller Profile to continue claiming brands"
                         </p>
                         <p className="text-[11px] text-gray-500 font-semibold leading-relaxed uppercase pt-2">
@@ -514,7 +514,7 @@ export function ClaimProfileModal({
                       <button
                         type="button"
                         onClick={handleCreateSellerProfile}
-                        className="w-full h-12 rounded-xl bg-[#EB4501] text-white hover:brightness-110 font-bold text-[13px] tracking-tight shadow-sm flex items-center justify-center gap-1.5 border-none cursor-pointer transition-all"
+                        className="w-full h-12 rounded-xl bg-[#FF5B00] text-white hover:brightness-110 font-bold text-[13px] tracking-tight shadow-sm flex items-center justify-center gap-1.5 border-none cursor-pointer transition-all"
                       >
                         Create Seller Profile <ArrowRight size={13} />
                       </button>
@@ -522,9 +522,9 @@ export function ClaimProfileModal({
                   ) : targetType === 'creator' && currentUser.role !== 'creator' ? (
                     <div className="space-y-6">
                       <div className="space-y-2">
-                        <h4 className="text-[12px] font-bold text-[#EB4501] tracking-tight block">Eligibility check</h4>
+                        <h4 className="text-[12px] font-bold text-[#FF5B00] tracking-tight block">Eligibility check</h4>
                         <h3 className="text-lg font-extrabold tracking-tight text-[#1A1A2E]">Creator profile required</h3>
-                        <p className="text-xs text-[#1A1A2E] font-bold leading-relaxed bg-[#F97316]/5 border border-[#F97316]/20 p-3.5 rounded-xl">
+                        <p className="text-xs text-[#1A1A2E] font-bold leading-relaxed bg-[#FF5B00]/5 border border-[#FF5B00]/20 p-3.5 rounded-xl">
                           "Create Creator Profile to continue claiming your creator page"
                         </p>
                         <p className="text-[11px] text-gray-500 font-semibold leading-relaxed uppercase pt-2">
@@ -535,7 +535,7 @@ export function ClaimProfileModal({
                       <button
                         type="button"
                         onClick={handleCreateCreatorProfile}
-                        className="w-full h-12 rounded-xl bg-[#EB4501] text-white hover:brightness-110 font-bold text-[13px] tracking-tight shadow-sm flex items-center justify-center gap-1.5 border-none cursor-pointer transition-all"
+                        className="w-full h-12 rounded-xl bg-[#FF5B00] text-white hover:brightness-110 font-bold text-[13px] tracking-tight shadow-sm flex items-center justify-center gap-1.5 border-none cursor-pointer transition-all"
                       >
                         Create Creator Profile <ArrowRight size={13} />
                       </button>
@@ -558,7 +558,7 @@ export function ClaimProfileModal({
                           onClick={() => setActiveSection(sec.key as ActiveSection)}
                           className={`w-full text-left p-3.5 rounded-2xl transition-all border outline-none cursor-pointer flex items-center gap-3 shrink-0 md:shrink ${
                             activeSection === sec.key 
-                              ? 'bg-orange-50 border-[#F97316]/20 text-[#F97316]' 
+                              ? 'bg-orange-50 border-[#FF5B00]/20 text-[#FF5B00]' 
                               : 'bg-white border-gray-200/60 text-gray-500 hover:bg-gray-100 hover:text-[#1A1A2E]'
                           }`}
                         >
@@ -598,7 +598,7 @@ export function ClaimProfileModal({
                                     value={fullName}
                                     onChange={(e) => setFullName(e.target.value)}
                                     placeholder="Farhan Bin Rafiq"
-                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#F97316]"
+                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#FF5B00]"
                                   />
                                 </div>
 
@@ -620,7 +620,7 @@ export function ClaimProfileModal({
                                     value={phoneNumber}
                                     onChange={(e) => setPhoneNumber(e.target.value)}
                                     placeholder="+880 1712-349812"
-                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#F97316]"
+                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#FF5B00]"
                                   />
                                 </div>
 
@@ -647,7 +647,7 @@ export function ClaimProfileModal({
                                         onClick={() => setRoleSelection(opt.value as any)}
                                         className={`p-3 rounded-lg text-[12px] font-bold tracking-tight border text-left transition-all ${
                                           roleSelection === opt.value 
-                                            ? 'bg-orange-50 border-[#F97316] text-[#F97316]' 
+                                            ? 'bg-orange-50 border-[#FF5B00] text-[#FF5B00]' 
                                             : 'bg-white border-gray-200 text-gray-600 hover:bg-gray-50'
                                         }`}
                                       >
@@ -677,7 +677,7 @@ export function ClaimProfileModal({
                                     value={tradeLicenseNo}
                                     onChange={(e) => setTradeLicenseNo(e.target.value)}
                                     placeholder="E.g., TL-23910-NBR"
-                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#F97316]"
+                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#FF5B00]"
                                   />
                                 </div>
 
@@ -685,7 +685,7 @@ export function ClaimProfileModal({
                                   <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Business Registration Document (Upload)</label>
                                   <div 
                                     onClick={() => pickAndUploadFile('Trade License', setLicenseFile)}
-                                    className="border-2 border-dashed border-gray-200 hover:border-[#F97316]/50 bg-white rounded-xl p-5 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1"
+                                    className="border-2 border-dashed border-gray-200 hover:border-[#FF5B00]/50 bg-white rounded-xl p-5 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1"
                                   >
                                     {licenseFile ? (
                                       <>
@@ -713,7 +713,7 @@ export function ClaimProfileModal({
                                       value={websiteUrl}
                                       onChange={(e) => setWebsiteUrl(e.target.value)}
                                       placeholder="www.brandname.com"
-                                      className="w-full h-11 bg-white border border-gray-200 rounded-xl pl-16 pr-3.5 text-xs font-bold focus:outline-none focus:border-[#F97316]"
+                                      className="w-full h-11 bg-white border border-gray-200 rounded-xl pl-16 pr-3.5 text-xs font-bold focus:outline-none focus:border-[#FF5B00]"
                                     />
                                   </div>
                                 </div>
@@ -726,9 +726,9 @@ export function ClaimProfileModal({
                                     value={businessEmail}
                                     onChange={(e) => setBusinessEmail(e.target.value)}
                                     placeholder="executive@branddomain.com"
-                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#F97316]"
+                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#FF5B00]"
                                   />
-                                  <span className="text-[12px] font-medium text-[#EB4501] tracking-tight mt-1 block">
+                                  <span className="text-[12px] font-medium text-[#FF5B00] tracking-tight mt-1 block">
                                     ⚠ Domain verification link will be cross-referenced with your website DNS configuration.
                                   </span>
                                 </div>
@@ -753,7 +753,7 @@ export function ClaimProfileModal({
                                     value={nidNumber}
                                     onChange={(e) => setNidNumber(e.target.value)}
                                     placeholder="National NID card number (e.g. 1992-8812-321)"
-                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#F97316]"
+                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#FF5B00]"
                                   />
                                 </div>
 
@@ -794,8 +794,8 @@ export function ClaimProfileModal({
                                 </div>
 
                                 {/* Dynamic Webcam selfie placeholder UI */}
-                                <div className="bg-orange-50/20 border border-[#F97316]/10 p-4 rounded-xl space-y-2">
-                                  <span className="text-[12px] font-bold text-[#EB4501] tracking-tight block">National Registry Face Matching API</span>
+                                <div className="bg-orange-50/20 border border-[#FF5B00]/10 p-4 rounded-xl space-y-2">
+                                  <span className="text-[12px] font-bold text-[#FF5B00] tracking-tight block">National Registry Face Matching API</span>
                                   <div className="flex flex-col sm:flex-row items-center gap-4">
                                     <div className="w-20 h-20 rounded-full border border-gray-200 bg-white overflow-hidden shrink-0 flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: selfiePreview ? `url(${selfiePreview})` : 'none' }}>
                                       {!selfiePreview && <Camera className="w-6 h-6 text-gray-400" />}
@@ -809,7 +809,7 @@ export function ClaimProfileModal({
                                         type="button"
                                         onClick={handleTakeSelfie}
                                         disabled={isCapturing}
-                                        className="h-9 px-4 mt-1 bg-[#000435] hover:bg-[#1a1a5e] text-white text-[12px] font-sans font-bold tracking-tight rounded-lg cursor-pointer border-none shadow-sm transition-all"
+                                        className="h-9 px-4 mt-1 bg-[#18154C] hover:bg-[#1a1a5e] text-white text-[12px] font-sans font-bold tracking-tight rounded-lg cursor-pointer border-none shadow-sm transition-all"
                                       >
                                         {isCapturing ? 'Acquiring Cam Lens...' : selfieCaptured ? 'Retake Biometric Verification' : 'Initialize Webcam Selfie'}
                                       </button>
@@ -824,7 +824,7 @@ export function ClaimProfileModal({
                                     value={passportDrivingNum}
                                     onChange={(e) => setPassportDrivingNum(e.target.value)}
                                     placeholder="Alternative Government reference identifier"
-                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#F97316]"
+                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#FF5B00]"
                                   />
                                 </div>
                               </div>
@@ -849,7 +849,7 @@ export function ClaimProfileModal({
                                       value={tinNumber}
                                       onChange={(e) => setTinNumber(e.target.value)}
                                       placeholder="Taxpayer identification"
-                                      className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#F97316]"
+                                      className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#FF5B00]"
                                     />
                                   </div>
 
@@ -860,14 +860,14 @@ export function ClaimProfileModal({
                                       value={vatNumber}
                                       onChange={(e) => setVatNumber(e.target.value)}
                                       placeholder="Government VAT certificate"
-                                      className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#F97316]"
+                                      className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#FF5B00]"
                                     />
                                   </div>
                                 </div>
 
                                 <div className="bg-gray-50/75 border border-gray-150 p-4.5 rounded-xl space-y-3">
                                   <div className="flex items-center gap-1.5 text-[#1A1A2E]">
-                                    <Landmark size={15} className="text-[#F97316]" />
+                                    <Landmark size={15} className="text-[#FF5B00]" />
                                     <span className="text-[12px] font-bold tracking-tight">Business Bank Account Details</span>
                                   </div>
 
@@ -956,7 +956,7 @@ export function ClaimProfileModal({
                                     type="checkbox"
                                     checked={checkAuthorized}
                                     onChange={(e) => setCheckAuthorized(e.target.checked)}
-                                    className="mt-0.5 accent-[#F97316] w-4 h-4 shrink-0 rounded"
+                                    className="mt-0.5 accent-[#FF5B00] w-4 h-4 shrink-0 rounded"
                                   />
                                   <div className="text-[10px] text-gray-600 font-extrabold leading-normal uppercase">
                                     I confirm I am authorized representative of this brand
@@ -968,7 +968,7 @@ export function ClaimProfileModal({
                                     type="checkbox"
                                     checked={checkDetailsTrue}
                                     onChange={(e) => setCheckDetailsTrue(e.target.checked)}
-                                    className="mt-0.5 accent-[#F97316] w-4 h-4 shrink-0 rounded"
+                                    className="mt-0.5 accent-[#FF5B00] w-4 h-4 shrink-0 rounded"
                                   />
                                   <div className="text-[10px] text-gray-600 font-extrabold leading-normal uppercase">
                                     All information is accurate and legally valid
@@ -1009,7 +1009,7 @@ export function ClaimProfileModal({
                                     value={creatorDisplayName}
                                     onChange={(e) => setCreatorDisplayName(e.target.value)}
                                     placeholder="E.g., Farhan bin Rafiq Vlogs"
-                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#F97316]"
+                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#FF5B00]"
                                   />
                                 </div>
 
@@ -1021,7 +1021,7 @@ export function ClaimProfileModal({
                                     value={creatorHandle}
                                     onChange={(e) => setCreatorHandle(e.target.value)}
                                     placeholder="farhanvlogs"
-                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#F97316]"
+                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#FF5B00]"
                                   />
                                 </div>
 
@@ -1033,7 +1033,7 @@ export function ClaimProfileModal({
                                     value={creatorEmail}
                                     onChange={(e) => setCreatorEmail(e.target.value)}
                                     placeholder="collabs@creator.com"
-                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#F97316]"
+                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#FF5B00]"
                                   />
                                 </div>
 
@@ -1045,7 +1045,7 @@ export function ClaimProfileModal({
                                     value={creatorPhone}
                                     onChange={(e) => setCreatorPhone(e.target.value)}
                                     placeholder="+880 1712-329812"
-                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#F97316]"
+                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#FF5B00]"
                                   />
                                 </div>
 
@@ -1054,7 +1054,7 @@ export function ClaimProfileModal({
                                   <select 
                                     value={creatorCategory}
                                     onChange={(e) => setCreatorCategory(e.target.value as any)}
-                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#F97316]"
+                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#FF5B00]"
                                   >
                                     <option value="influencer">Influencer / Media Star</option>
                                     <option value="reviewer">Reviewer / Unboxer</option>
@@ -1084,7 +1084,7 @@ export function ClaimProfileModal({
                                     value={ytUrl}
                                     onChange={(e) => setYtUrl(e.target.value)}
                                     placeholder="https://youtube.com/c/yourchannel"
-                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#F97316]"
+                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#FF5B00]"
                                   />
                                 </div>
 
@@ -1097,7 +1097,7 @@ export function ClaimProfileModal({
                                     value={igUrl}
                                     onChange={(e) => setIgUrl(e.target.value)}
                                     placeholder="https://instagram.com/handle"
-                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#F97316]"
+                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#FF5B00]"
                                   />
                                 </div>
 
@@ -1110,7 +1110,7 @@ export function ClaimProfileModal({
                                     value={ttUrl}
                                     onChange={(e) => setTtUrl(e.target.value)}
                                     placeholder="https://tiktok.com/@handle"
-                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#F97316]"
+                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#FF5B00]"
                                   />
                                 </div>
 
@@ -1123,7 +1123,7 @@ export function ClaimProfileModal({
                                     value={fbUrl}
                                     onChange={(e) => setFbUrl(e.target.value)}
                                     placeholder="https://facebook.com/yourpage"
-                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#F97316]"
+                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#FF5B00]"
                                   />
                                 </div>
                               </div>
@@ -1147,7 +1147,7 @@ export function ClaimProfileModal({
                                     value={creatorNid}
                                     onChange={(e) => setCreatorNid(e.target.value)}
                                     placeholder="National NID card value (e.g., 9012-321-8812)"
-                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#F97316]"
+                                    className="w-full h-11 bg-white border border-gray-200 rounded-xl px-3.5 text-xs font-bold focus:outline-none focus:border-[#FF5B00]"
                                   />
                                 </div>
 
@@ -1155,7 +1155,7 @@ export function ClaimProfileModal({
                                   <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight block">Government ID Document (Front Photo / Scan)</label>
                                   <div 
                                     onClick={() => pickAndUploadFile('Government ID', setCreatorGovId)}
-                                    className="border-2 border-dashed border-gray-200 hover:border-[#F97316]/50 bg-white rounded-xl p-5 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1"
+                                    className="border-2 border-dashed border-gray-200 hover:border-[#FF5B00]/50 bg-white rounded-xl p-5 text-center cursor-pointer transition-all flex flex-col items-center justify-center gap-1"
                                   >
                                     {creatorGovId ? (
                                       <>
@@ -1174,8 +1174,8 @@ export function ClaimProfileModal({
                                 </div>
 
                                 {/* Dynamic Webcam selfie placeholder UI */}
-                                <div className="bg-orange-50/20 border border-[#F97316]/10 p-4 rounded-xl space-y-2">
-                                  <span className="text-[12px] font-bold text-[#EB4501] tracking-tight block font-mono">Biometric Presence Matching</span>
+                                <div className="bg-orange-50/20 border border-[#FF5B00]/10 p-4 rounded-xl space-y-2">
+                                  <span className="text-[12px] font-bold text-[#FF5B00] tracking-tight block font-mono">Biometric Presence Matching</span>
                                   <div className="flex flex-col sm:flex-row items-center gap-4">
                                     <div className="w-20 h-20 rounded-full border border-gray-200 bg-white overflow-hidden shrink-0 flex items-center justify-center bg-cover bg-center" style={{ backgroundImage: selfiePreview ? `url(${selfiePreview})` : 'none' }}>
                                       {!selfiePreview && <Camera className="w-6 h-6 text-gray-400" />}
@@ -1189,7 +1189,7 @@ export function ClaimProfileModal({
                                         type="button"
                                         onClick={handleTakeSelfie}
                                         disabled={isCapturing}
-                                        className="h-9 px-4 mt-1 bg-[#000435] hover:bg-[#1a1a5e] text-white text-[12px] font-sans font-bold tracking-tight rounded-lg cursor-pointer border-none shadow-sm transition-all"
+                                        className="h-9 px-4 mt-1 bg-[#18154C] hover:bg-[#1a1a5e] text-white text-[12px] font-sans font-bold tracking-tight rounded-lg cursor-pointer border-none shadow-sm transition-all"
                                       >
                                         {isCapturing ? 'Acquiring Cam Lens...' : selfieCaptured ? 'Retake Biometric Verification' : 'Initialize Webcam Selfie'}
                                       </button>
@@ -1214,7 +1214,7 @@ export function ClaimProfileModal({
                                     type="checkbox"
                                     checked={creatorDeclare}
                                     onChange={(e) => setCreatorDeclare(e.target.checked)}
-                                    className="mt-0.5 accent-[#F97316] w-4 h-4 shrink-0 rounded"
+                                    className="mt-0.5 accent-[#FF5B00] w-4 h-4 shrink-0 rounded"
                                   />
                                   <div className="text-[10px] text-gray-600 font-extrabold leading-normal uppercase">
                                     I confirm I am the original owner of this creator profile
@@ -1268,7 +1268,7 @@ export function ClaimProfileModal({
                     ) : (
                       <button
                         type="submit"
-                        className="px-6 h-11 rounded-xl text-[9px] font-black uppercase bg-[#F97316] text-white hover:bg-[#EA580C] shadow-md transition-all cursor-pointer flex items-center gap-1 border-none"
+                        className="px-6 h-11 rounded-xl text-[9px] font-black uppercase bg-[#FF5B00] text-white hover:bg-[#EF3C23] shadow-md transition-all cursor-pointer flex items-center gap-1 border-none"
                       >
                         Submit {targetType === 'brand' ? 'Brand' : 'Creator'} Claim
                       </button>
@@ -1280,10 +1280,10 @@ export function ClaimProfileModal({
               {/* STEP 4: SUBMITTING / UPLOADING */}
               {flowStep === 'submitting' && (
                 <div id="submitting-processing" className="max-w-md mx-auto py-16 space-y-5 text-center animate-fade-in flex flex-col items-center justify-center">
-                  <div className="w-12 h-12 rounded-full border-3 border-[#F97316] border-t-transparent animate-spin shrink-0" />
+                  <div className="w-12 h-12 rounded-full border-3 border-[#FF5B00] border-t-transparent animate-spin shrink-0" />
                   <div className="space-y-1 shrink-0">
                     <h3 className="text-base font-extrabold tracking-tight text-[#1A1A2E]">Submitting verification…</h3>
-                    <p className="text-[9px] text-[#F97316] font-black uppercase tracking-widest font-mono">Securing corporate credentials network...</p>
+                    <p className="text-[9px] text-[#FF5B00] font-black uppercase tracking-widest font-mono">Securing corporate credentials network...</p>
                   </div>
                   <p className="text-[10.5px] text-gray-500 font-bold max-w-sm leading-relaxed uppercase">
                     Your trade licensing profiles, government national identity details, face vectors, and settlement bank logs are being compiled for secure moderation evaluation.
@@ -1312,7 +1312,7 @@ export function ClaimProfileModal({
                   {/* High contrast static detail index block */}
                   <div className="w-full bg-white border border-gray-150 rounded-2xl p-5 text-left space-y-4">
                     <div className="flex items-center gap-1.5 border-b border-gray-100 pb-2 pb-1.5 shrink-0">
-                      <Award size={13} className="text-[#F97316]" />
+                      <Award size={13} className="text-[#FF5B00]" />
                       <span className="text-[12px] font-bold text-[#1A1A2E] tracking-tight">Registry Processing Track</span>
                     </div>
 

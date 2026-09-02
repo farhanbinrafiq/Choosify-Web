@@ -75,7 +75,7 @@ export function ToPaySection() {
                     onClick={() =>
                       navigate('/checkout', { state: { pendingOrderId: order.orderId } })
                     }
-                    className="px-4 py-2 bg-[#EB4501] hover:brightness-110 text-white text-[12px] font-bold rounded-lg border-0 cursor-pointer"
+                    className="px-4 py-2 bg-[#FF5B00] hover:brightness-110 text-white text-[12px] font-bold rounded-lg border-0 cursor-pointer"
                   >
                     Pay now
                   </button>

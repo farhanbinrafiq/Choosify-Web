@@ -419,13 +419,13 @@ export function FloatingOverlays() {
               whileTap={{ scale: 0.95 }}
                 className={cn(
                 'relative w-[52px] h-[52px] shadow-[0_8px_20px_rgba(0,0,0,0.28)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none',
-                activePanel === 'emi' && 'ring-2 ring-[#EB4501]/60 brightness-105',
+                activePanel === 'emi' && 'ring-2 ring-[#FF5B00]/60 brightness-105',
               )}
               title="Ask Emi — Choosify Assistant"
             >
               <EmiAiLogo size={52} />
               {hasEmiUnread && activePanel !== 'emi' && (
-                <span className="absolute top-0.5 right-0.5 w-3 h-3 rounded-full bg-[#EB4501] border-2 border-white" />
+                <span className="absolute top-0.5 right-0.5 w-3 h-3 rounded-full bg-[#FF5B00] border-2 border-white" />
               )}
             </motion.button>
           )}
@@ -445,16 +445,16 @@ export function FloatingOverlays() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={cn(
-                "relative w-12 h-12 rounded-full bg-white text-[#EB4501] shadow-[0_8px_20px_rgba(0,0,0,0.2)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none",
-                activePanel === 'cart' && "ring-2 ring-[#EB4501]/50 brightness-110",
+                "relative w-12 h-12 rounded-full bg-white text-[#FF5B00] shadow-[0_8px_20px_rgba(0,0,0,0.2)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none",
+                activePanel === 'cart' && "ring-2 ring-[#FF5B00]/50 brightness-110",
               )}
               title="Quick Cart Checklist"
             >
-              <ShoppingCart size={20} strokeWidth={2} className="text-[#EB4501]" />
+              <ShoppingCart size={20} strokeWidth={2} className="text-[#FF5B00]" />
               <motion.span
                 animate={cartBadgeBounce ? { scale: [1, 1.3, 0.9, 1.1, 1] } : { scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#EB4501] text-white text-[9px] font-bold flex items-center justify-center leading-none"
+                className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#FF5B00] text-white text-[9px] font-bold flex items-center justify-center leading-none"
               >
                 {totalCartItems > 99 ? '99+' : totalCartItems}
               </motion.span>
@@ -476,16 +476,16 @@ export function FloatingOverlays() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={cn(
-                "relative w-12 h-12 rounded-full bg-white text-[#EB4501] shadow-[0_8px_20px_rgba(0,0,0,0.2)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none",
-                activePanel === 'messages' && "ring-2 ring-[#EB4501]/50",
+                "relative w-12 h-12 rounded-full bg-white text-[#FF5B00] shadow-[0_8px_20px_rgba(0,0,0,0.2)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none",
+                activePanel === 'messages' && "ring-2 ring-[#FF5B00]/50",
               )}
               title="Merchant Conversations"
             >
-              <MessageCircleMore size={22} strokeWidth={2.25} className="text-[#EB4501]" />
+              <MessageCircleMore size={22} strokeWidth={2.25} className="text-[#FF5B00]" />
               <motion.span
                 animate={inboxBadgeBounce ? { scale: [1, 1.3, 0.9, 1.1, 1] } : { scale: 1 }}
                 transition={{ duration: 0.5 }}
-                className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#EB4501] text-white text-[9px] font-bold flex items-center justify-center leading-none"
+                className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#FF5B00] text-white text-[9px] font-bold flex items-center justify-center leading-none"
               >
                 {unreadCount > 99 ? '99+' : unreadCount}
               </motion.span>
@@ -510,7 +510,7 @@ export function FloatingOverlays() {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className={cn(
-              'fixed z-[218] w-11 h-11 rounded-full border border-[#e8edf2] bg-white text-[#1A1D4E] shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:border-[#EB4501]/40 hover:text-[#CF4400] flex items-center justify-center cursor-pointer pointer-events-auto transition-colors',
+              'fixed z-[218] w-11 h-11 rounded-full border border-[#e8edf2] bg-white text-[#1A1D4E] shadow-[0_4px_20px_rgba(0,0,0,0.08)] hover:border-[#FF5B00]/40 hover:text-[#EF3C23] flex items-center justify-center cursor-pointer pointer-events-auto transition-colors',
               isMobile
                 ? 'bottom-[calc(5rem+env(safe-area-inset-bottom,0px))] right-4'
                 : 'bottom-6 right-20 lg:bottom-8 lg:right-24',
@@ -590,11 +590,11 @@ export function FloatingOverlays() {
               {/* Header */}
               <div className="p-5 border-b border-[#e8edf2] bg-gradient-to-br from-[#FFF8F5]/85 to-[#FFF0E8]/50 flex items-center justify-between shrink-0">
                 <div className="flex items-center gap-3 text-left">
-                  <div className="w-11 h-11 rounded-full bg-[#EB4501]/10 flex items-center justify-center border border-[#e8edf2] shrink-0">
-                    <SlidersHorizontal size={18} className="text-[#EB4501]" />
+                  <div className="w-11 h-11 rounded-full bg-[#FF5B00]/10 flex items-center justify-center border border-[#e8edf2] shrink-0">
+                    <SlidersHorizontal size={18} className="text-[#FF5B00]" />
                   </div>
                   <div>
-                    <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#EB4501]">
+                    <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#FF5B00]">
                       {filterConfig.pageName || 'Page Filters'}
                     </div>
                     <h3 className="text-xs font-black text-[#1A1A2E] leading-tight uppercase">
@@ -606,7 +606,7 @@ export function FloatingOverlays() {
                   {filterConfig.onClearAll && filterConfig.activeFilterCount > 0 && (
                     <button
                       onClick={filterConfig.onClearAll}
-                      className="text-[9px] font-black uppercase tracking-wider text-[#EB4501] bg-[#EB4501]/8 hover:bg-[#CF4400]/15 px-3 py-1.5 rounded-full transition-colors border-0 cursor-pointer flex items-center gap-1"
+                      className="text-[9px] font-black uppercase tracking-wider text-[#FF5B00] bg-[#FF5B00]/8 hover:bg-[#EF3C23]/15 px-3 py-1.5 rounded-full transition-colors border-0 cursor-pointer flex items-center gap-1"
                     >
                       <RotateCcw size={9} /> Clear All
                     </button>
@@ -664,7 +664,7 @@ export function FloatingOverlays() {
                           className={cn(
                             "px-3.5 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wide transition-all cursor-pointer flex items-center gap-1.5 border",
                             qf.active
-                              ? "bg-[#EB4501] text-white border-transparent shadow-sm font-black italic"
+                              ? "bg-[#FF5B00] text-white border-transparent shadow-sm font-black italic"
                               : "bg-white border-[#e8edf2] text-gray-500 hover:border-[#1A1D4E]/25 hover:text-[#1A1D4E]"
                           )}
                         >
@@ -698,7 +698,7 @@ export function FloatingOverlays() {
                 <div className="px-5 py-4 border-t border-[#e8edf2] bg-white shrink-0">
                   <button
                     onClick={() => closeFilterPanel({ scrollToResults: true })}
-                    className="w-full py-3.5 bg-[#EB4501] hover:bg-[#E04E00] text-white text-[11px] font-black uppercase tracking-widest rounded-lg transition-colors cursor-pointer border-0"
+                    className="w-full py-3.5 bg-[#FF5B00] hover:bg-[#E04E00] text-white text-[11px] font-black uppercase tracking-widest rounded-lg transition-colors cursor-pointer border-0"
                   >
                     Show Results
                   </button>
@@ -723,7 +723,7 @@ export function FloatingOverlays() {
           whileTap={{ scale: 0.95 }}
           className={cn(
             'relative w-14 h-14 rounded-full bg-white border border-[#e8edf2] shadow-[0_8px_24px_rgba(0,0,0,0.18)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.22)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none pointer-events-auto',
-            filterOpen && 'ring-2 ring-[#EB4501]/30',
+            filterOpen && 'ring-2 ring-[#FF5B00]/30',
           )}
           aria-label="Open filters"
           title="Filters"
@@ -733,11 +733,11 @@ export function FloatingOverlays() {
             strokeWidth={2}
             className={cn(
               'transition-colors shrink-0',
-              filterOpen ? 'text-[#EB4501]' : 'text-[#8a9bb0] group-hover:text-[#CF4400]',
+              filterOpen ? 'text-[#FF5B00]' : 'text-[#8a9bb0] group-hover:text-[#EF3C23]',
             )}
           />
           {filterConfig.activeFilterCount > 0 && (
-            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#EB4501] text-white text-[9px] font-bold flex items-center justify-center leading-none">
+            <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#FF5B00] text-white text-[9px] font-bold flex items-center justify-center leading-none">
               {filterConfig.activeFilterCount > 9 ? '9+' : filterConfig.activeFilterCount}
             </span>
           )}
@@ -755,7 +755,7 @@ export function FloatingOverlays() {
         data-floating-fab="emi"
         className={cn(
           'fixed z-[219] w-14 h-14 shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden cursor-pointer',
-          activePanel === 'emi' && 'ring-2 ring-[#EB4501]/60 brightness-105',
+          activePanel === 'emi' && 'ring-2 ring-[#FF5B00]/60 brightness-105',
         )}
         style={{
           bottom: 'calc(1rem + env(safe-area-inset-bottom, 0px))',
@@ -766,7 +766,7 @@ export function FloatingOverlays() {
       >
         <EmiAiLogo size={56} />
         {hasEmiUnread && activePanel !== 'emi' && (
-          <span className="absolute top-1 right-1 w-3 h-3 rounded-full bg-[#EB4501] border-2 border-white" />
+          <span className="absolute top-1 right-1 w-3 h-3 rounded-full bg-[#FF5B00] border-2 border-white" />
         )}
       </motion.button>
     )}
@@ -786,7 +786,7 @@ export function FloatingOverlays() {
       >
         <SlidersHorizontal size={22} className="text-[#8a9bb0]" />
         {filterConfig.activeFilterCount > 0 && (
-          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#EB4501] text-white text-[9px] font-bold flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-[#FF5B00] text-white text-[9px] font-bold flex items-center justify-center">
             {filterConfig.activeFilterCount > 9 ? '9+' : filterConfig.activeFilterCount}
           </span>
         )}

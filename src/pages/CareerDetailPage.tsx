@@ -131,7 +131,7 @@ export function CareerDetailPage() {
   return (
     <div className="min-h-screen bg-choosify-feed font-sans">
       <StaticPageHero maxWidthClass="max-w-[1100px]">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#EB4501]/10 via-transparent to-black/20 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/10 via-transparent to-black/20 pointer-events-none" />
         <div className="relative z-10 w-full px-6 sm:px-10 py-10">
           <Link to="/careers" className="inline-flex items-center gap-1.5 text-[12px] font-bold text-white/60 hover:text-white mb-4">
             <ArrowLeft size={14} /> All careers

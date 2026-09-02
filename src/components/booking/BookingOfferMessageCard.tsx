@@ -66,7 +66,7 @@ export function BookingOfferMessageCard({
     <div className="w-full max-w-sm overflow-hidden rounded-[10px] border border-[#E8EDF2] bg-white text-left shadow-sm">
       <div className="flex items-center justify-between gap-2 border-b border-[#E8EDF2] bg-[#F4F7F9] px-4 py-2.5">
         <span className="flex items-center gap-1.5 text-[9px] font-bold uppercase tracking-wider text-[#9AA0AC]">
-          <MessageCircleMore size={11} className="text-[#EB4501]" />
+          <MessageCircleMore size={11} className="text-[#FF5B00]" />
           {offer.isService ? 'Booking request' : 'Product request'} · v{offer.version}
         </span>
         <span
@@ -101,7 +101,7 @@ export function BookingOfferMessageCard({
             {offer.listingTitle}
           </h4>
           <p className="text-[10px] font-medium text-[#9AA0AC]">{offer.sellerName}</p>
-          <p className="mt-2 text-sm font-extrabold text-[#EB4501]">
+          <p className="mt-2 text-sm font-extrabold text-[#FF5B00]">
             BDT {offer.price.toLocaleString()}
           </p>
           {offer.originalPrice && offer.originalPrice !== offer.price ? (
@@ -173,7 +173,7 @@ export function BookingOfferMessageCard({
           <button
             type="button"
             onClick={() => setShowPaymentModal(true)}
-            className="inline-flex items-center gap-1 rounded-lg border-0 bg-[#EB4501] hover:bg-[#CF4400] px-3 py-1.5 text-[9px] font-bold text-white transition-colors cursor-pointer"
+            className="inline-flex items-center gap-1 rounded-lg border-0 bg-[#FF5B00] hover:bg-[#EF3C23] px-3 py-1.5 text-[9px] font-bold text-white transition-colors cursor-pointer"
           >
             <CreditCard size={10} /> Pay &amp; Confirm
           </button>

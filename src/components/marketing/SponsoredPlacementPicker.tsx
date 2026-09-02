@@ -34,14 +34,14 @@ export function SponsoredPlacementPicker({ selected, onChange }: SponsoredPlacem
           key={id}
           className={cn(
             'flex items-center gap-2 p-3 border rounded-lg cursor-pointer text-sm font-semibold transition-colors',
-            selected.includes(id) ? 'border-[#EB4501] bg-[#EB4501]/5 text-[#EB4501]' : 'border-[#e8edf2] text-gray-600',
+            selected.includes(id) ? 'border-[#FF5B00] bg-[#FF5B00]/5 text-[#FF5B00]' : 'border-[#e8edf2] text-gray-600',
           )}
         >
           <input
             type="checkbox"
             checked={selected.includes(id)}
             onChange={() => toggle(id)}
-            className="accent-[#EB4501]"
+            className="accent-[#FF5B00]"
           />
           {label}
         </label>

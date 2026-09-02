@@ -17,7 +17,7 @@ export const BuyingGuidesSection: React.FC<BuyingGuidesSectionProps> = ({ guides
         </div>
         <Link 
           to="/guides" 
-          className="text-xs font-bold text-[#EB4501] uppercase tracking-wider flex items-center gap-1 hover:text-[#CF4400]"
+          className="text-xs font-bold text-[#FF5B00] uppercase tracking-wider flex items-center gap-1 hover:text-[#EF3C23]"
         >
           VIEW ALL GUIDES <ChevronRight size={14} />
         </Link>

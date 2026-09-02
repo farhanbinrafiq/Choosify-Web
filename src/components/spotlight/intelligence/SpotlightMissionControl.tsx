@@ -25,7 +25,7 @@ function Panel({
           {icon} {title}
         </h3>
         {href && (
-          <Link to={href} className="text-[9px] font-bold text-[#EB4501] hover:underline uppercase">
+          <Link to={href} className="text-[9px] font-bold text-[#FF5B00] hover:underline uppercase">
             View all
           </Link>
         )}
@@ -52,17 +52,17 @@ export function SpotlightMissionControl({ data }: SpotlightMissionControlProps) 
     <div className="space-y-4">
       <div className="bg-[#050514] text-white rounded-xl p-5 flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-[10px] font-bold uppercase text-[#EB4501] tracking-widest">Spotlight Mission Control</p>
+          <p className="text-[10px] font-bold uppercase text-[#FF5B00] tracking-widest">Spotlight Mission Control</p>
           <h2 className="text-xl font-extrabold tracking-tight mt-1">Your Spotlight ecosystem at a glance</h2>
           <p className="text-xs text-gray-400 mt-1 max-w-xl">
             What is performing, what needs attention, what is trending, and what is scheduled — the operating system for Spotlight.
           </p>
         </div>
-        <Activity className="h-10 w-10 text-[#EB4501] opacity-80 shrink-0" aria-hidden />
+        <Activity className="h-10 w-10 text-[#FF5B00] opacity-80 shrink-0" aria-hidden />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        <Panel title="Best Performing" icon={<Trophy size={12} className="text-[#EB4501]" />} href="/marketing/intelligence/content">
+        <Panel title="Best Performing" icon={<Trophy size={12} className="text-[#FF5B00]" />} href="/marketing/intelligence/content">
           {data.bestPerforming.map((item) => (
             <Row key={item.label} label={item.value} value={item.metric} href={item.href} accent="text-emerald-600" />
           ))}
@@ -82,7 +82,7 @@ export function SpotlightMissionControl({ data }: SpotlightMissionControlProps) 
           )}
         </Panel>
 
-        <Panel title="Trending Now" icon={<TrendingUp size={12} className="text-[#EB4501]" />} href="/marketing/intelligence/discovery">
+        <Panel title="Trending Now" icon={<TrendingUp size={12} className="text-[#FF5B00]" />} href="/marketing/intelligence/discovery">
           {data.trendingNow.map((item) => (
             <Row key={item.label} label={item.label} value={`${item.score} score`} href={item.href} />
           ))}
@@ -96,13 +96,13 @@ export function SpotlightMissionControl({ data }: SpotlightMissionControlProps) 
           )}
         </Panel>
 
-        <Panel title="Commerce Drivers" icon={<ShoppingBag size={12} className="text-[#EB4501]" />} href="/marketing/intelligence/campaigns">
+        <Panel title="Commerce Drivers" icon={<ShoppingBag size={12} className="text-[#FF5B00]" />} href="/marketing/intelligence/campaigns">
           {data.commerceDrivers.map((item) => (
             <Row key={item.label} label={item.label} value={`${item.clicks} clicks`} href={item.href} />
           ))}
         </Panel>
 
-        <Panel title="Top Creators" icon={<Star size={12} className="text-[#EB4501]" />} href="/marketing/intelligence/creators">
+        <Panel title="Top Creators" icon={<Star size={12} className="text-[#FF5B00]" />} href="/marketing/intelligence/creators">
           {data.topCreators.map((item) => (
             <Row key={item.label} label={item.label} value={`Impact ${item.impact}`} href={item.href} />
           ))}

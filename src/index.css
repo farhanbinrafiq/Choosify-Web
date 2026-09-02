@@ -16,16 +16,49 @@
     var(--emi-gradient-to) 99%
   );
   /*
-   * Dark surface gradient — sourced from footer (.footer-brand-gradient):
-   * layered radials over near-opaque navy (no single linear angle).
-   *   1) radial 1200×500 at 15% 0% — orange hsla(22,100%,50%,0.18) → transparent 65%
-   *   2) radial 900×500 at 90% 20% — deep orange hsla(12,92%,45%,0.14) → transparent 65%
-   *   3) base rgba(10, 10, 31, 0.96)
+   * Dark-surface gradient (.footer-brand-gradient / .choosify-dark-surface) —
+   * now the canonical Choosify brand dark surface: warm red/orange radials
+   * lifting into navy #18154C. Single source: --choosify-gradient-dark below.
    */
-  --gradient-dark-surface:
-    radial-gradient(1200px 500px at 15% 0%, hsla(22, 100%, 50%, 0.18), transparent 65%),
-    radial-gradient(900px 500px at 90% 20%, hsla(12, 92%, 45%, 0.14), transparent 65%),
-    rgba(10, 10, 31, 0.96);
+  --gradient-dark-surface: var(--choosify-gradient-dark);
+
+  /* ──────────────────────────────────────────────────────────────
+   * CHOOSIFY CANONICAL BRAND PALETTE — approved global gradient spec.
+   *   navy #18154C · red/coral #EF3C23 · orange #FF5B00
+   * Balance: ~80% neutral/light · ~15% navy surfaces · ~5% gradient.
+   * The gradient is a signature accent, never a default background.
+   * (Emi AI keeps its own independent gradient — untouched.)
+   * ────────────────────────────────────────────────────────────── */
+  --choosify-navy: #18154C;
+  --choosify-red: #EF3C23;
+  --choosify-orange: #FF5B00;
+
+  /* Signature warm gradient — true high-emphasis CTAs / accents only */
+  --choosify-gradient-warm: linear-gradient(90deg, var(--choosify-red) 0%, var(--choosify-orange) 100%);
+  /* General brand gradient alias */
+  --choosify-gradient: var(--choosify-gradient-warm);
+  /* ── Approved platform-wide dark brand gradient ──────────────────
+     Warm orange bloom (top-left) + coral bloom (upper-right) over
+     canonical navy. Used EVERYWHERE dark & branded: storefront navbar
+     + category bar + footer, every .choosify-dark-surface banner/hero,
+     dark cards. Matches the admin sidebar/topbar 1:1. One recipe. */
+  --choosify-gradient-dark:
+    radial-gradient(1200px 500px at 15% 0%, color-mix(in srgb, var(--choosify-orange) 18%, transparent), transparent 65%),
+    radial-gradient(900px 500px at 90% 20%, color-mix(in srgb, var(--choosify-red) 14%, transparent), transparent 65%),
+    color-mix(in srgb, var(--choosify-navy) 96%, #000);
+  --choosify-gradient-sidebar: var(--choosify-gradient-dark);
+  --choosify-header-gradient:
+    radial-gradient(900px 200px at 15% 0%, color-mix(in srgb, var(--choosify-orange) 16%, transparent), transparent 70%),
+    radial-gradient(700px 200px at 90% 100%, color-mix(in srgb, var(--choosify-red) 12%, transparent), transparent 70%),
+    color-mix(in srgb, var(--choosify-navy) 94%, #000);
+  --choosify-footer-gradient: var(--choosify-gradient-dark);
+  /* Hero — translucent branded wash OVER the image; the photo stays visible */
+  --choosify-hero-overlay:
+    linear-gradient(180deg,
+      color-mix(in srgb, var(--choosify-navy) 30%, transparent) 0%,
+      transparent 34%,
+      color-mix(in srgb, var(--choosify-navy) 14%, transparent) 68%,
+      color-mix(in srgb, var(--choosify-navy) 46%, transparent) 100%);
 }
 
 @theme {
@@ -36,12 +69,12 @@
   --font-dm-sans: "Satoshi", "Helvetica Neue", Arial, sans-serif;
   --font-space: "Satoshi", "Helvetica Neue", Arial, sans-serif;
   
-  --color-navy: #000435;
+  --color-navy: #18154C;            /* canonical Choosify Navy */
   --color-ink: #0A0A1F;
   --color-heading: #1A1D4E;
   --color-green-accent: #07DD05;
-  --color-orange-primary: #EB4501;
-  --color-orange-deep: #EB4501;
+  --color-orange-primary: #FF5B00;  /* canonical Choosify Orange */
+  --color-orange-deep: #EF3C23;     /* canonical Choosify Red/Coral (warm gradient start) */
   --color-blue-grey: #D6E1EC;
   --color-ice-blue: #F0F8FF;
   --color-choosify-feed: #F0F8FF;
@@ -113,13 +146,13 @@
   border-radius: 1rem; /* 16px - rounded-2xl */
   border: 1px solid #e8edf2;
   padding: 1.5rem; /* 24px - p-6 */
-  box-shadow: 0 4px 20px rgba(0, 4, 53, 0.04);
+  box-shadow: 0 4px 20px rgba(24, 21, 76, 0.04);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card-primary:hover {
   border-color: color-mix(in srgb, var(--color-orange-primary) 30%, transparent);
-  box-shadow: 0 10px 30px rgba(0, 4, 53, 0.08);
+  box-shadow: 0 10px 30px rgba(24, 21, 76, 0.08);
 }
 
 .card-secondary {
@@ -127,13 +160,13 @@
   border-radius: 0.75rem; /* 12px - rounded-xl */
   border: 1px solid #e8edf2;
   padding: 1rem; /* 16px - p-4 */
-  box-shadow: 0 2px 10px rgba(0, 4, 53, 0.02);
+  box-shadow: 0 2px 10px rgba(24, 21, 76, 0.02);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card-secondary:hover {
   border-color: color-mix(in srgb, var(--color-orange-primary) 25%, transparent);
-  box-shadow: 0 6px 18px rgba(0, 4, 53, 0.05);
+  box-shadow: 0 6px 18px rgba(24, 21, 76, 0.05);
 }
 
 .card-utility {
@@ -141,12 +174,12 @@
   border-radius: 0.75rem; /* 12px - rounded-xl */
   border: 1px solid #e8edf2;
   padding: 1rem; /* 16px - p-4 */
-  box-shadow: 0 1px 3px rgba(0, 4, 53, 0.01);
+  box-shadow: 0 1px 3px rgba(24, 21, 76, 0.01);
   transition: all 0.2s ease;
 }
 
 .card-utility:hover {
-  border-color: rgba(0, 4, 53, 0.15);
+  border-color: rgba(24, 21, 76, 0.15);
 }
 
 @layer base {
@@ -166,9 +199,9 @@
   background-color: #F0F8FF !important;
 }
 
-/* Master brand gradient token - flowing top (#3A1E22) to bottom (#000435) */
+/* Master brand dark surface — the one approved platform-wide recipe */
 .choosify-dark-gradient {
-  background: linear-gradient(180deg, #3A1E22 0%, #000435 100%) !important;
+  background: var(--choosify-gradient-dark) !important;
 }
 
 .choosify-detail-hero-summary__meta {
@@ -214,7 +247,7 @@
 }
 
 .hero-gradient {
-  background: linear-gradient(180deg, #3A1E22 0%, #000435 100%) !important;
+  background: var(--choosify-gradient-dark) !important;
 }
 
 @keyframes hero-scroll-cue-bounce {
@@ -234,15 +267,15 @@
 }
 
 .button-gradient {
-  background: linear-gradient(90deg, #B4411C 0%, #D15E32 100%);
+  background: var(--choosify-gradient-warm);
 }
 
 .dark-brand-gradient {
-  background: linear-gradient(180deg, #3A1E22 0%, #000435 100%) !important;
+  background: var(--choosify-gradient-dark) !important;
 }
 
 .orange-brand-gradient {
-  background: linear-gradient(90deg, #B4411C 0%, #D15E32 100%);
+  background: var(--choosify-gradient-warm);
 }
 
 .footer-brand-gradient {
@@ -255,10 +288,7 @@
 }
 
 .choosify-chrome-header {
-  background:
-    radial-gradient(900px 200px at 15% 0%, hsla(22, 100%, 50%, 0.16), transparent 70%),
-    radial-gradient(700px 200px at 90% 100%, hsla(12, 92%, 45%, 0.12), transparent 70%),
-    rgba(10, 10, 31, 0.94);
+  background: var(--choosify-header-gradient);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }
@@ -307,11 +337,11 @@
 }
 
 .shadow-soft {
-  box-shadow: 0 2px 10px rgba(0, 4, 53, 0.04);
+  box-shadow: 0 2px 10px rgba(24, 21, 76, 0.04);
 }
 
 .shadow-high-density {
-  box-shadow: 0 4px 20px rgba(0, 4, 53, 0.08);
+  box-shadow: 0 4px 20px rgba(24, 21, 76, 0.08);
 }
 
 /* Choosify toast host — strip react-hot-toast default chrome */
@@ -339,7 +369,7 @@
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #000435;
+  background: var(--choosify-navy);
 }
 
 /* Navbar search — fills space between logo and actions */
@@ -373,12 +403,9 @@
 }
 
 /* Row 2 shares choosify-chrome-header (Header.dc.html) — no solid override */
-/* Categories row — same chrome gradient as header, slightly more translucent */
+/* Categories row — same approved chrome gradient as the header */
 .choosify-navbar-categories {
-  background:
-    radial-gradient(900px 200px at 15% 0%, hsla(22, 100%, 50%, 0.16), transparent 70%),
-    radial-gradient(700px 200px at 90% 100%, hsla(12, 92%, 45%, 0.12), transparent 70%),
-    rgba(10, 10, 31, 0.82) !important;
+  background: var(--choosify-header-gradient) !important;
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
 }

@@ -167,7 +167,7 @@ export function CreatorReviewsPreview({
         <p className="text-sm font-semibold text-[#9AA0AC]">Creator reviews coming soon</p>
         <Link
           to={preview.viewAllHref}
-          className="mt-3 inline-block text-[11.5px] font-extrabold text-[#EB4501] hover:underline"
+          className="mt-3 inline-block text-[11.5px] font-extrabold text-[#FF5B00] hover:underline"
         >
           Browse Spotlight Reviews →
         </Link>
@@ -200,7 +200,7 @@ export function CreatorReviewsPreview({
           {showViewAll && (
             <Link
               to={preview.viewAllHref}
-              className="text-[12px] font-bold text-[#1A1A2E] hover:text-[#CF4400] shrink-0"
+              className="text-[12px] font-bold text-[#1A1A2E] hover:text-[#EF3C23] shrink-0"
             >
               VIEW ALL ›
             </Link>

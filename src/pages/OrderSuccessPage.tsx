@@ -103,7 +103,7 @@ export function OrderSuccessPage() {
           </p>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 px-5 py-3 bg-[#EB4501] hover:bg-[#CF4400] text-white text-[11px] font-bold uppercase tracking-wide rounded-lg transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-3 bg-[#FF5B00] hover:bg-[#EF3C23] text-white text-[11px] font-bold uppercase tracking-wide rounded-lg transition-colors"
           >
             <Home size={14} />
             Back to Home
@@ -161,13 +161,13 @@ export function OrderSuccessPage() {
           className="max-w-[1100px] mx-auto choosify-dark-surface text-white px-5 sm:px-10 pt-6 pb-10 text-center rounded-none overflow-hidden"
         >
           <nav className="text-xs text-white/45 text-left mb-5" aria-label="Breadcrumb">
-            <Link to="/" className="hover:text-[#CF4400] transition-colors">
+            <Link to="/" className="hover:text-[#EF3C23] transition-colors">
               Home
             </Link>
             <span className="mx-1.5">›</span>
             <span>Order Success</span>
             <span className="mx-1.5">›</span>
-            <span className="text-[#EB4501]">{order.orderId}</span>
+            <span className="text-[#FF5B00]">{order.orderId}</span>
           </nav>
 
           <div
@@ -234,7 +234,7 @@ export function OrderSuccessPage() {
           </div>
           <div className="bg-[#FFF6EF] rounded-lg px-4 py-2.5 text-center">
             <div className="text-[10px] text-[#9AA0AC]">You will earn</div>
-            <div className="text-[13px] font-extrabold text-[#EB4501]">{pointsEarned} Choosify Points</div>
+            <div className="text-[13px] font-extrabold text-[#FF5B00]">{pointsEarned} Choosify Points</div>
           </div>
         </div>
 
@@ -244,7 +244,7 @@ export function OrderSuccessPage() {
             {shipping && (
               <div className="bg-white border border-[#E8EDF2] rounded-xl p-5 sm:px-6">
                 <h2 className="text-xs font-extrabold text-[#1A1A2E] mb-3.5 flex items-center gap-1.5">
-                  <MapPin size={14} className="text-[#EB4501]" />
+                  <MapPin size={14} className="text-[#FF5B00]" />
                   DELIVERY DETAILS
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 md:gap-6 text-left">
@@ -289,13 +289,13 @@ export function OrderSuccessPage() {
             <div className="bg-white border border-[#E8EDF2] rounded-xl p-5 sm:px-6 space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h2 className="text-xs font-extrabold text-[#1A1A2E] flex items-center gap-1.5">
-                  <Package size={14} className="text-[#EB4501]" />
+                  <Package size={14} className="text-[#FF5B00]" />
                   ITEMS &amp; INVOICES ({order.subOrders.length} SELLER{order.subOrders.length === 1 ? '' : 'S'})
                 </h2>
                 <button
                   type="button"
                   onClick={handleDownloadInvoice}
-                  className="text-[11px] font-bold text-[#EB4501] bg-transparent border-0 cursor-pointer hover:underline"
+                  className="text-[11px] font-bold text-[#FF5B00] bg-transparent border-0 cursor-pointer hover:underline"
                 >
                   Download Invoice
                 </button>
@@ -320,7 +320,7 @@ export function OrderSuccessPage() {
                           <p className="text-[10.5px] font-mono text-[#9AA0AC]">ID: {sub.invoiceId}</p>
                           <Link
                             to={`/invoice/${order.orderId}/${sub.sellerId}`}
-                            className="text-[10.5px] font-bold text-[#EB4501] hover:underline inline-block mt-1"
+                            className="text-[10.5px] font-bold text-[#FF5B00] hover:underline inline-block mt-1"
                           >
                             View Invoice →
                           </Link>
@@ -329,7 +329,7 @@ export function OrderSuccessPage() {
                           className={cn(
                             'text-[9.5px] font-bold uppercase tracking-wide px-2.5 py-0.5 rounded-xl',
                             sub.trackingStatus === 'pending'
-                              ? 'bg-[#FFF3EC] text-[#EB4501]'
+                              ? 'bg-[#FFF3EC] text-[#FF5B00]'
                               : 'bg-emerald-50 text-emerald-700',
                           )}
                         >
@@ -416,7 +416,7 @@ export function OrderSuccessPage() {
             {/* Payment totals */}
             <div className="bg-white border border-[#E8EDF2] rounded-xl p-5">
               <h2 className="text-xs font-extrabold text-[#1A1A2E] mb-3.5 flex items-center gap-1.5">
-                <CreditCard size={14} className="text-[#EB4501]" />
+                <CreditCard size={14} className="text-[#FF5B00]" />
                 ORDER &amp; PAYMENT SUMMARY
               </h2>
               <div className="space-y-2 text-xs text-[#4B5563] mb-3.5">
@@ -440,7 +440,7 @@ export function OrderSuccessPage() {
                 <div className="space-y-2 mb-3.5">
                   <div className="flex justify-between items-baseline pt-3.5 border-t border-[#F1F1F3]">
                     <span className="text-xs font-bold text-[#1A1A2E]">PAID NOW (DELIVERY FEE)</span>
-                    <span className="text-lg font-extrabold text-[#EB4501]">{formatMoney(deliveryTotal)}</span>
+                    <span className="text-lg font-extrabold text-[#FF5B00]">{formatMoney(deliveryTotal)}</span>
                   </div>
                   <div className="flex justify-between items-baseline">
                     <span className="text-xs font-bold text-[#1A1A2E]">DUE AT YOUR DOORSTEP</span>
@@ -453,7 +453,7 @@ export function OrderSuccessPage() {
                 <div className="space-y-2 mb-3.5">
                   <div className="flex justify-between items-baseline pt-3.5 border-t border-[#F1F1F3]">
                     <span className="text-xs font-bold text-[#1A1A2E]">PAID NOW (DEPOSIT)</span>
-                    <span className="text-lg font-extrabold text-[#EB4501]">
+                    <span className="text-lg font-extrabold text-[#FF5B00]">
                       {formatMoney(order.depositAmount ?? 0)}
                     </span>
                   </div>
@@ -467,7 +467,7 @@ export function OrderSuccessPage() {
               ) : (
                 <div className="flex justify-between items-baseline pt-3.5 border-t border-[#F1F1F3] mb-3.5">
                   <span className="text-xs font-bold text-[#1A1A2E]">TOTAL PAID</span>
-                  <span className="text-lg font-extrabold text-[#EB4501]">{formatMoney(order.overallTotal)}</span>
+                  <span className="text-lg font-extrabold text-[#FF5B00]">{formatMoney(order.overallTotal)}</span>
                 </div>
               )}
               <div className="bg-[#F0FDF4] rounded-lg px-3 py-2.5 flex items-center gap-2">
@@ -494,7 +494,7 @@ export function OrderSuccessPage() {
                   }
                   navigate(`/products/${firstItem.productId}#public-reviews-section`);
                 }}
-                className="bg-[#EB4501] hover:bg-[#CF4400] text-white border-0 px-[18px] py-2.5 rounded-lg text-[11px] font-bold cursor-pointer"
+                className="bg-[#FF5B00] hover:bg-[#EF3C23] text-white border-0 px-[18px] py-2.5 rounded-lg text-[11px] font-bold cursor-pointer"
               >
                 RATE ORDER ★
               </button>
@@ -511,14 +511,14 @@ export function OrderSuccessPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Link
               to="/"
-              className="flex items-center justify-center gap-2 h-11 rounded-lg border border-[#E8EDF2] bg-white hover:border-[#EB4501]/40 hover:text-[#CF4400] text-[11px] font-bold uppercase tracking-wide text-[#1A1A2E] transition-colors"
+              className="flex items-center justify-center gap-2 h-11 rounded-lg border border-[#E8EDF2] bg-white hover:border-[#FF5B00]/40 hover:text-[#EF3C23] text-[11px] font-bold uppercase tracking-wide text-[#1A1A2E] transition-colors"
             >
               <Home size={14} />
               Continue shopping
             </Link>
             <Link
               to="/profile/orders"
-              className="flex items-center justify-center gap-2 h-11 rounded-lg border border-[#E8EDF2] bg-white hover:border-[#EB4501]/40 hover:text-[#CF4400] text-[11px] font-bold uppercase tracking-wide text-[#1A1A2E] transition-colors"
+              className="flex items-center justify-center gap-2 h-11 rounded-lg border border-[#E8EDF2] bg-white hover:border-[#FF5B00]/40 hover:text-[#EF3C23] text-[11px] font-bold uppercase tracking-wide text-[#1A1A2E] transition-colors"
             >
               <ShoppingBag size={14} />
               View my orders
@@ -526,7 +526,7 @@ export function OrderSuccessPage() {
             <button
               type="button"
               onClick={() => navigate('/order-tracking', { state: { order } })}
-              className="flex items-center justify-center gap-2 h-11 rounded-lg border border-[#E8EDF2] bg-white hover:border-[#EB4501]/40 hover:text-[#CF4400] text-[11px] font-bold uppercase tracking-wide text-[#1A1A2E] transition-colors cursor-pointer"
+              className="flex items-center justify-center gap-2 h-11 rounded-lg border border-[#E8EDF2] bg-white hover:border-[#FF5B00]/40 hover:text-[#EF3C23] text-[11px] font-bold uppercase tracking-wide text-[#1A1A2E] transition-colors cursor-pointer"
             >
               <Truck size={14} />
               Track this order
@@ -543,9 +543,9 @@ export function OrderSuccessPage() {
                 const firstSellerId = order.subOrders[0]?.sellerId;
                 navigate(firstSellerId ? `/messages/thread-${firstSellerId}` : '/messages');
               }}
-              className="flex items-center justify-center gap-2 h-11 rounded-lg bg-[#EB4501] hover:bg-[#CF4400] text-white text-[11px] font-bold uppercase tracking-wide transition-colors cursor-pointer border-0"
+              className="flex items-center justify-center gap-2 h-11 rounded-lg bg-[#FF5B00] hover:bg-[#EF3C23] text-white text-[11px] font-bold uppercase tracking-wide transition-colors cursor-pointer border-0"
             >
-              <MessageCircleMore size={14} className="text-[#EB4501]" />
+              <MessageCircleMore size={14} className="text-[#FF5B00]" />
               Message sellers
               <ArrowRight size={14} />
             </button>

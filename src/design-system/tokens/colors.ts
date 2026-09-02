@@ -7,16 +7,16 @@ export const colors = {
   brand: {
     orange: {
       /** Choosify 3.0 primary */
-      primary: '#EB4501',
-      deep: '#EB4501',
+      primary: '#FF5B00',
+      deep: '#FF5B00',
       /** Legacy alias used widely in JSX */
-      legacy: '#EB4501',
-      hover: '#CF4400',
+      legacy: '#FF5B00',
+      hover: '#EF3C23',
       tint: '#FFF0E8',
       surface: '#FFF8F4',
     },
     navy: {
-      DEFAULT: '#000435',
+      DEFAULT: '#18154C',
       heading: '#1A1D4E',
       ink: '#0A0A1F',
       chrome: '#0A0A1F',
@@ -26,7 +26,7 @@ export const colors = {
       royalBlue: '#2323FF',
       alertRed: '#FF000D',
       playRed: '#E02424',
-      discoverGradient: 'linear-gradient(90deg,#6C4CFF,#EB4501)',
+      discoverGradient: 'linear-gradient(90deg,#6C4CFF,#FF5B00)',
     },
   },
   chrome: {

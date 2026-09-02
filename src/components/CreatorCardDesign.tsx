@@ -26,12 +26,12 @@ interface CreatorCardDesignProps {
 }
 
 const AVATAR_COLORS = [
-  '#EB4501',
+  '#FF5B00',
   '#2323FF',
   '#07A828',
   '#6C4CFF',
-  '#000435',
-  '#EB4501',
+  '#18154C',
+  '#FF5B00',
   '#0F766E',
   '#BE123C',
 ];
@@ -96,8 +96,8 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({
         <Heart
           size={11}
           strokeWidth={2}
-          className="text-[#EB4501]"
-          fill={isSaved ? '#EB4501' : 'none'}
+          className="text-[#FF5B00]"
+          fill={isSaved ? '#FF5B00' : 'none'}
         />
       </button>
 

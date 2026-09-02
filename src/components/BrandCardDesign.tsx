@@ -39,11 +39,11 @@ interface BrandCardDesignProps {
 }
 
 const BRAND_COLORS = [
-  '#000435',
-  '#EB4501',
+  '#18154C',
+  '#FF5B00',
   '#2323FF',
   '#07A828',
-  '#EB4501',
+  '#FF5B00',
   '#6C4CFF',
   '#0F766E',
   '#BE123C',
@@ -156,11 +156,11 @@ export const BrandCardDesign = memo(function BrandCardDesign({
       {...(wrapperProps as any)}
       className={cn(
         'block w-full min-w-0 h-full bg-white rounded-[10px] border overflow-hidden relative group select-none',
-        isCurrentInComparison ? 'border-[#EB4501] ring-1 ring-[#EB4501]/30' : 'border-[#E8EDF2]',
+        isCurrentInComparison ? 'border-[#FF5B00] ring-1 ring-[#FF5B00]/30' : 'border-[#E8EDF2]',
       )}
     >
       {isCurrentInComparison && (
-        <span className="absolute top-2 left-2 z-[11] rounded-full bg-[#EB4501] text-white text-[9px] font-black uppercase tracking-wide px-2.5 py-1 leading-none shadow-sm pointer-events-none">
+        <span className="absolute top-2 left-2 z-[11] rounded-full bg-[#FF5B00] text-white text-[9px] font-black uppercase tracking-wide px-2.5 py-1 leading-none shadow-sm pointer-events-none">
           This Brand
         </span>
       )}
@@ -203,8 +203,8 @@ export const BrandCardDesign = memo(function BrandCardDesign({
           <Heart
             size={12}
             strokeWidth={2}
-            className="text-[#EB4501]"
-            fill={isSaved ? '#EB4501' : 'none'}
+            className="text-[#FF5B00]"
+            fill={isSaved ? '#FF5B00' : 'none'}
           />
         </button>
       </div>

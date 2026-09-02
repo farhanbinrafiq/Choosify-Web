@@ -62,7 +62,7 @@ export const ModernCarousel: React.FC = () => {
               </div>
            </div>
            
-           <Link to="/brands" className="hidden md:flex items-center gap-2 px-6 py-3 bg-white border border-[#E8EDF2] rounded-lg text-[#1A1A2E] text-[13px] font-bold tracking-tight hover:bg-[#000435] hover:text-white transition-all shadow-sm">
+           <Link to="/brands" className="hidden md:flex items-center gap-2 px-6 py-3 bg-white border border-[#E8EDF2] rounded-lg text-[#1A1A2E] text-[13px] font-bold tracking-tight hover:bg-[#18154C] hover:text-white transition-all shadow-sm">
              VIEW ALL BRANDS
              <ArrowUpRight size={14} className="text-[#6B4BFF]" />
            </Link>

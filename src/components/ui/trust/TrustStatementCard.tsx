@@ -22,7 +22,7 @@ export const TrustStatementCard: React.FC<TrustStatementCardProps> = ({
   return (
     <div className={cn("bg-white rounded-2xl border border-slate-100 p-6 flex flex-col", className)}>
       {title && (
-        <h3 className="text-sm font-black text-[#000435] uppercase tracking-wider mb-6">
+        <h3 className="text-sm font-black text-[#18154C] uppercase tracking-wider mb-6">
           {title}
         </h3>
       )}
@@ -37,7 +37,7 @@ export const TrustStatementCard: React.FC<TrustStatementCardProps> = ({
               )}
             </div>
             <div className="flex flex-col">
-              <h4 className="text-sm font-extrabold text-[#000435] mb-1">{statement.title}</h4>
+              <h4 className="text-sm font-extrabold text-[#18154C] mb-1">{statement.title}</h4>
               <p className="text-xs font-medium text-slate-500 leading-relaxed">
                 {statement.description}
               </p>

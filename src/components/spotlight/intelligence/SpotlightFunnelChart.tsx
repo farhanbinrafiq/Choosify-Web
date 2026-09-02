@@ -24,7 +24,7 @@ export function SpotlightFunnelChart({ steps, title, className = '' }: Spotlight
             </div>
             <div className="h-8 bg-[#F8FBFD] rounded overflow-hidden border border-[#e8edf2]">
               <div
-                className="h-full bg-[#EB4501] rounded transition-all flex items-center justify-end pr-2"
+                className="h-full bg-[#FF5B00] rounded transition-all flex items-center justify-end pr-2"
                 style={{ width: `${widthPct}%`, opacity: 0.35 + (widthPct / 100) * 0.65 }}
               >
                 {widthPct > 20 && (

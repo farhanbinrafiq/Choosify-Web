@@ -28,7 +28,7 @@ function PlacementCta({
   className?: string;
 }) {
   const classes = cn(
-    'w-full py-2.5 bg-[#EB4501] hover:brightness-110 text-white font-bold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-[filter] cursor-pointer border-0 no-underline',
+    'w-full py-2.5 bg-[#FF5B00] hover:brightness-110 text-white font-bold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-[filter] cursor-pointer border-0 no-underline',
     className,
   );
 

@@ -5,7 +5,7 @@ import { EmiAiLogo } from '../components/EmiAiLogo';
 import { resetPassword } from '../lib/authApi';
 import { toast } from '../lib/notify';
 
-const PRIMARY = '#EB4501';
+const PRIMARY = '#FF5B00';
 
 type Stage = 'form' | 'success' | 'invalid';
 
@@ -57,7 +57,7 @@ export default function ResetPasswordPage() {
               <div className="mx-auto w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center">
                 <CheckCircle2 className="w-7 h-7 text-emerald-500" />
               </div>
-              <h1 className="text-xl font-black text-[#000435]">Password reset</h1>
+              <h1 className="text-xl font-black text-[#18154C]">Password reset</h1>
               <p className="text-sm text-gray-500 leading-relaxed">
                 Your password has been changed and every other active session has been signed out. Sign in with your
                 new password.
@@ -77,7 +77,7 @@ export default function ResetPasswordPage() {
               <div className="mx-auto w-14 h-14 rounded-full bg-rose-50 flex items-center justify-center">
                 <XCircle className="w-7 h-7 text-rose-500" />
               </div>
-              <h1 className="text-xl font-black text-[#000435]">Link expired or invalid</h1>
+              <h1 className="text-xl font-black text-[#18154C]">Link expired or invalid</h1>
               <p className="text-sm text-gray-500 leading-relaxed">
                 This password reset link is no longer valid — it may have already been used, or it's more than an
                 hour old. Request a new one.
@@ -94,7 +94,7 @@ export default function ResetPasswordPage() {
 
           {stage === 'form' && (
             <>
-              <h1 className="text-xl font-black text-[#000435] mb-1">Choose a new password</h1>
+              <h1 className="text-xl font-black text-[#18154C] mb-1">Choose a new password</h1>
               <p className="text-sm text-gray-500 mb-6">Must be at least 8 characters.</p>
               <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
@@ -109,7 +109,7 @@ export default function ResetPasswordPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#EB4501]/30 focus:border-[#EB4501]"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5B00]/30 focus:border-[#FF5B00]"
                     />
                   </div>
                 </div>
@@ -124,7 +124,7 @@ export default function ResetPasswordPage() {
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
                       placeholder="••••••••"
-                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#EB4501]/30 focus:border-[#EB4501]"
+                      className="w-full pl-10 pr-4 py-3 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5B00]/30 focus:border-[#FF5B00]"
                     />
                   </div>
                 </div>
@@ -140,7 +140,7 @@ export default function ResetPasswordPage() {
               <button
                 type="button"
                 onClick={() => navigate('/login')}
-                className="w-full mt-5 inline-flex items-center justify-center gap-1.5 text-sm font-bold text-gray-500 hover:text-[#000435]"
+                className="w-full mt-5 inline-flex items-center justify-center gap-1.5 text-sm font-bold text-gray-500 hover:text-[#18154C]"
               >
                 <ArrowLeft className="w-4 h-4" /> Back to sign in
               </button>

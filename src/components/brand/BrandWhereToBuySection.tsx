@@ -99,7 +99,7 @@ export function BrandWhereToBuySection({
                 href="https://www.google.com/maps"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="shrink-0 bg-white text-[#000435] border border-[#E5E7EB] px-3 py-1.5 rounded-md text-[10.5px] font-bold whitespace-nowrap no-underline hover:border-[#000435]/30 transition-colors"
+                className="shrink-0 bg-white text-[#18154C] border border-[#E5E7EB] px-3 py-1.5 rounded-md text-[10.5px] font-bold whitespace-nowrap no-underline hover:border-[#18154C]/30 transition-colors"
               >
                 View Map
               </a>
@@ -126,7 +126,7 @@ export function BrandWhereToBuySection({
               <a
                 href="#"
                 onClick={(e) => e.preventDefault()}
-                className="shrink-0 bg-white text-[#000435] border border-[#E5E7EB] px-3 py-1.5 rounded-md text-[10.5px] font-bold whitespace-nowrap no-underline hover:border-[#000435]/30 transition-colors"
+                className="shrink-0 bg-white text-[#18154C] border border-[#E5E7EB] px-3 py-1.5 rounded-md text-[10.5px] font-bold whitespace-nowrap no-underline hover:border-[#18154C]/30 transition-colors"
               >
                 Visit Website
               </a>
@@ -149,7 +149,7 @@ export function BrandWhereToBuySection({
                 <div className="text-[11.5px] font-bold text-[#1A1A2E]">{row.name}</div>
                 <div className="text-[10px] text-[#9AA0AC]">{row.location}</div>
               </div>
-              <span className="shrink-0 bg-white text-[#000435] border border-[#E5E7EB] px-3 py-1.5 rounded-md text-[10.5px] font-bold whitespace-nowrap">
+              <span className="shrink-0 bg-white text-[#18154C] border border-[#E5E7EB] px-3 py-1.5 rounded-md text-[10.5px] font-bold whitespace-nowrap">
                 {row.hours}
               </span>
             </div>

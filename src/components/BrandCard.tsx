@@ -104,7 +104,7 @@ export const BrandCard = memo(function BrandCard({ brand, onClick, className }: 
       )}
 
       {/* COVER PHOTO SECTION */}
-      <div className="relative w-full h-[136px] bg-gradient-to-r from-[#000435]/10 to-[#EB4501]/10 overflow-hidden shrink-0">
+      <div className="relative w-full h-[136px] bg-gradient-to-r from-[#18154C]/10 to-[#FF5B00]/10 overflow-hidden shrink-0">
         <img 
           src={coverUrl}
           alt={`${brand.name} cover`}
@@ -127,14 +127,14 @@ export const BrandCard = memo(function BrandCard({ brand, onClick, className }: 
               referrerPolicy="no-referrer"
             />
           ) : (
-            <span className="text-2xl font-black text-[#000435] tracking-tight">{brand.logo || 'B'}</span>
+            <span className="text-2xl font-black text-[#18154C] tracking-tight">{brand.logo || 'B'}</span>
           )}
         </div>
       </div>
 
       {/* BRAND INFO SECTION */}
       <div className="px-4 pt-14 pb-3 flex-1 flex flex-col justify-center min-w-0">
-        <h3 className="text-base font-black text-[#000435] uppercase line-clamp-1 mb-1 leading-tight tracking-tight flex items-center gap-1.5">
+        <h3 className="text-base font-black text-[#18154C] uppercase line-clamp-1 mb-1 leading-tight tracking-tight flex items-center gap-1.5">
           {brand.name}
         </h3>
         
@@ -163,7 +163,7 @@ export const BrandCard = memo(function BrandCard({ brand, onClick, className }: 
               />
             ))}
           </div>
-          <span className="text-xs font-bold text-[#000435]">
+          <span className="text-xs font-bold text-[#18154C]">
             {brand.rating.toFixed(1)}
           </span>
           <span className="text-[11px] text-gray-400">
@@ -180,7 +180,7 @@ export const BrandCard = memo(function BrandCard({ brand, onClick, className }: 
             <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 leading-none">
               Products
             </div>
-            <div className="text-xs font-black text-[#000435] truncate leading-tight">
+            <div className="text-xs font-black text-[#18154C] truncate leading-tight">
               {brand.productsCount !== undefined ? formatNumber(brand.productsCount) : "—"}
             </div>
           </div>
@@ -190,7 +190,7 @@ export const BrandCard = memo(function BrandCard({ brand, onClick, className }: 
             <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 leading-none">
               Rating
             </div>
-            <div className="text-xs font-black text-[#EB4501] truncate leading-tight flex items-center justify-center gap-0.5">
+            <div className="text-xs font-black text-[#FF5B00] truncate leading-tight flex items-center justify-center gap-0.5">
               <span>{brand.rating.toFixed(1)}</span>
               <span className="text-[9px]">★</span>
             </div>
@@ -201,7 +201,7 @@ export const BrandCard = memo(function BrandCard({ brand, onClick, className }: 
             <div className="text-[9px] font-bold text-slate-400 uppercase tracking-wider mb-0.5 leading-none">
               Followers
             </div>
-            <div className="text-xs font-black text-[#000435] truncate leading-tight">
+            <div className="text-xs font-black text-[#18154C] truncate leading-tight">
               {brand.followersCount !== undefined ? formatNumber(brand.followersCount) : "—"}
             </div>
           </div>
@@ -211,7 +211,7 @@ export const BrandCard = memo(function BrandCard({ brand, onClick, className }: 
       {/* CTA BUTTON */}
       <div className="px-4 py-3 shrink-0 bg-white">
         <div 
-          className="w-full py-2 bg-white border-2 border-[#000435] text-[#000435] hover:bg-[#000435] hover:text-white text-[11px] font-black uppercase rounded-[5px] transition-all duration-200 flex items-center justify-center gap-1.5 group cursor-pointer"
+          className="w-full py-2 bg-white border-2 border-[#18154C] text-[#18154C] hover:bg-[#18154C] hover:text-white text-[11px] font-black uppercase rounded-[5px] transition-all duration-200 flex items-center justify-center gap-1.5 group cursor-pointer"
         >
           Visit Brand
           <span className="group-hover:translate-x-1 transition-transform duration-200">→</span>

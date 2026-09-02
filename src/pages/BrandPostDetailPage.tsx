@@ -101,7 +101,7 @@ export function BrandPostDetailPage() {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4 px-4">
         <p className="text-sm font-bold text-[#1A1D4E]">This post could not be found.</p>
-        <Link to="/products" className="text-[#EB4501] text-xs font-black uppercase hover:underline">
+        <Link to="/products" className="text-[#FF5B00] text-xs font-black uppercase hover:underline">
           Browse
         </Link>
       </div>
@@ -119,8 +119,8 @@ export function BrandPostDetailPage() {
           ref={heroRef}
           className="relative max-w-[1440px] mx-auto w-full choosify-dark-surface border border-white/5 rounded-none overflow-hidden"
         >
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(235, 69, 1,0.18),transparent_42%)]" />
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(0,4,53,0.4),transparent_55%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255, 91, 0,0.18),transparent_42%)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_bottom_right,rgba(24,21,76,0.4),transparent_55%)]" />
 
         <div className="relative z-10">
           <div className="max-w-7xl mx-auto px-6 pt-8 pb-4">
@@ -136,12 +136,12 @@ export function BrandPostDetailPage() {
               ))}
               {dateLabel && (
                 <div className="flex items-center gap-2 text-[12px] font-semibold text-white/80 tracking-tight bg-white/5 border border-white/10 px-3.5 py-2 rounded-lg">
-                  <CalendarDays size={14} className="text-[#EB4501]" />
+                  <CalendarDays size={14} className="text-[#FF5B00]" />
                   {dateLabel}
                 </div>
               )}
-              <div className="flex items-center gap-2 text-[12px] font-semibold text-[#EB4501] tracking-tight bg-[#EB4501]/10 px-3.5 py-2 rounded-lg border border-[#EB4501]/20">
-                <Sparkles size={14} className="text-[#EB4501]" />
+              <div className="flex items-center gap-2 text-[12px] font-semibold text-[#FF5B00] tracking-tight bg-[#FF5B00]/10 px-3.5 py-2 rounded-lg border border-[#FF5B00]/20">
+                <Sparkles size={14} className="text-[#FF5B00]" />
                 {statusLabel}
               </div>
             </div>
@@ -225,7 +225,7 @@ export function BrandPostDetailPage() {
                   onClick={() => toast.success('Event saved to your dashboard!')}
                   className={detailHeroSummaryActionSecondaryClass}
                 >
-                  <Heart size={13} className="text-[#EB4501]" strokeWidth={2} />
+                  <Heart size={13} className="text-[#FF5B00]" strokeWidth={2} />
                   Save
                 </button>
                 <button
@@ -260,7 +260,7 @@ export function BrandPostDetailPage() {
           <button
             type="button"
             onClick={() => navigate(-1)}
-            className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-gray-500 hover:text-[#CF4400] mb-6"
+            className="inline-flex items-center gap-1.5 text-[10px] font-black uppercase tracking-wider text-gray-500 hover:text-[#EF3C23] mb-6"
           >
             <ArrowLeft size={14} />
             Back
@@ -288,7 +288,7 @@ export function BrandPostDetailPage() {
                     </div>
                     <div>
                       <p className="text-[10px] font-black uppercase tracking-widest text-[#8a9bb0]">Verified brand partner</p>
-                      <p className="text-base font-bold text-[#1A1D4E] group-hover:text-[#CF4400] transition-colors">
+                      <p className="text-base font-bold text-[#1A1D4E] group-hover:text-[#EF3C23] transition-colors">
                         {post.brandName}
                       </p>
                     </div>
@@ -296,7 +296,7 @@ export function BrandPostDetailPage() {
 
                   {post.location && (
                     <div className="flex items-center gap-1.5 text-[12px] font-semibold text-gray-500">
-                      <MapPin size={15} className="text-[#EB4501]" />
+                      <MapPin size={15} className="text-[#FF5B00]" />
                       {post.location}
                     </div>
                   )}
@@ -309,8 +309,8 @@ export function BrandPostDetailPage() {
                     ))}
                   </div>
 
-                  <div className="rounded-[5px] bg-[#FFF8F5] border border-[#EB4501]/15 p-5 flex items-start gap-3 max-w-4xl">
-                    <Sparkles size={18} className="text-[#EB4501] shrink-0 mt-0.5" />
+                  <div className="rounded-[5px] bg-[#FFF8F5] border border-[#FF5B00]/15 p-5 flex items-start gap-3 max-w-4xl">
+                    <Sparkles size={18} className="text-[#FF5B00] shrink-0 mt-0.5" />
                     <p className="text-[12px] text-gray-600 leading-relaxed">
                       This is a <strong>sponsored brand awareness post</strong>, not an editorial buying guide.
                       Offers and availability are confirmed directly with {post.brandName}.
@@ -351,7 +351,7 @@ export function BrandPostDetailPage() {
                   </div>
                   <Link
                     to="/products"
-                    className="text-[10px] font-black uppercase text-[#EB4501] hover:underline inline-flex items-center gap-1 shrink-0"
+                    className="text-[10px] font-black uppercase text-[#FF5B00] hover:underline inline-flex items-center gap-1 shrink-0"
                   >
                     Browse <ChevronRight size={12} />
                   </Link>

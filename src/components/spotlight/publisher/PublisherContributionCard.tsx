@@ -23,11 +23,11 @@ export function PublisherContributionCard({ contribution }: PublisherContributio
         <div className="flex items-center gap-1.5 flex-wrap">
           <Link
             to={`/publisher/${contribution.publisherId.replace(/^(brand|creator|seller)-/, '')}`}
-            className="text-sm font-bold text-[#1a1a2e] hover:text-[#CF4400]"
+            className="text-sm font-bold text-[#1a1a2e] hover:text-[#EF3C23]"
           >
             {contribution.publisherName}
           </Link>
-          {contribution.isVerified && <BadgeCheck size={12} className="text-[#EB4501]" />}
+          {contribution.isVerified && <BadgeCheck size={12} className="text-[#FF5B00]" />}
         </div>
         <p className="text-[10px] text-gray-400 uppercase tracking-wide mt-0.5">
           {COLLABORATION_ROLE_LABELS[contribution.role]} · {CONTRIBUTION_TYPE_LABELS[contribution.contributionType]}

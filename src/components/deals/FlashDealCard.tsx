@@ -74,7 +74,7 @@ export function FlashDealCard({
           {name}
         </div>
         <div className="flex items-baseline gap-1.5 mb-2">
-          <div className="text-[14px] font-extrabold text-[#EB4501]">
+          <div className="text-[14px] font-extrabold text-[#FF5B00]">
             ৳{price.toLocaleString()}
           </div>
           {originalPrice != null && originalPrice > price && (
@@ -86,7 +86,7 @@ export function FlashDealCard({
         {typeof claimedPct === 'number' && (
           <div className="h-1 rounded bg-[#F1F1F3] overflow-hidden mb-2.5">
             <div
-              className="h-full bg-[#EB4501] rounded"
+              className="h-full bg-[#FF5B00] rounded"
               style={{ width: `${Math.min(100, Math.max(0, claimedPct))}%` }}
             />
           </div>
@@ -232,7 +232,7 @@ export function DealOfTheDayCard({
       aria-label="Deal of the Day"
     >
       <div className="flex justify-between items-center gap-2 mb-3 h-[18px] shrink-0">
-        <div className="text-[12px] font-extrabold text-[#EB4501] flex items-center gap-1 truncate">
+        <div className="text-[12px] font-extrabold text-[#FF5B00] flex items-center gap-1 truncate">
           🏅 DEAL OF THE DAY
         </div>
         <div
@@ -279,7 +279,7 @@ export function DealOfTheDayCard({
             </div>
 
             <div className="flex items-baseline gap-2 h-[22px] shrink-0 overflow-hidden">
-              <div className="text-base font-extrabold text-[#EB4501] truncate">
+              <div className="text-base font-extrabold text-[#FF5B00] truncate">
                 ৳{deal.price.toLocaleString()}
               </div>
               <div
@@ -298,7 +298,7 @@ export function DealOfTheDayCard({
 
             <div className="h-[5px] rounded bg-white/12 overflow-hidden shrink-0">
               <div
-                className="h-full bg-[#EB4501] rounded transition-[width] duration-300"
+                className="h-full bg-[#FF5B00] rounded transition-[width] duration-300"
                 style={{ width: `${claimedPct}%` }}
               />
             </div>
@@ -306,7 +306,7 @@ export function DealOfTheDayCard({
 
           <Link
             to={to}
-            className="relative z-10 block w-full shrink-0 text-center bg-[#EB4501] text-white py-2.5 rounded-lg text-[12px] font-bold no-underline hover:brightness-110"
+            className="relative z-10 block w-full shrink-0 text-center bg-[#FF5B00] text-white py-2.5 rounded-lg text-[12px] font-bold no-underline hover:brightness-110"
           >
             VIEW DEAL
           </Link>

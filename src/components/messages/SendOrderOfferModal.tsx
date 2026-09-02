@@ -139,7 +139,7 @@ export function SendOrderOfferModal({
             <button
               type="button"
               onClick={() => setItems((prev) => [...prev, { productId: '', quantity: '1', price: '' }])}
-              className="mt-2 flex items-center gap-1 text-[11px] font-bold text-[#EB4501] cursor-pointer"
+              className="mt-2 flex items-center gap-1 text-[11px] font-bold text-[#FF5B00] cursor-pointer"
             >
               <Plus size={12} /> Add item
             </button>

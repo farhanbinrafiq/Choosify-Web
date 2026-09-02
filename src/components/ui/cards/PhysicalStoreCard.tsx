@@ -34,7 +34,7 @@ export const PhysicalStoreCard: React.FC<PhysicalStoreCardProps> = ({
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
       </div>
       <div className="p-5 flex flex-col flex-1">
-        <h4 className="text-sm font-extrabold text-[#000435] mb-2">{storeName}</h4>
+        <h4 className="text-sm font-extrabold text-[#18154C] mb-2">{storeName}</h4>
         
         <div className="flex flex-col gap-2 mb-5 flex-1">
           <div className="flex items-start gap-2 text-xs font-medium text-slate-500">

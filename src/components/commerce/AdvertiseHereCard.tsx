@@ -97,7 +97,7 @@ export function AdvertiseHereCard({
     >
       <div
         className={cn(
-          'bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-center justify-center flex-[7] min-h-0 relative',
+          'bg-gradient-to-br from-[#FF5B00] to-[#2323FF] flex items-center justify-center flex-[7] min-h-0 relative',
           variant !== 'product-tile' && 'items-end pb-2.5',
         )}
       >
@@ -135,7 +135,7 @@ export function AdvertiseHereCard({
         <Link
           to={href}
           className={cn(
-            'mt-auto w-full bg-[#EB4501] text-white text-center border-none rounded-md font-extrabold hover:brightness-110 transition-[filter] no-underline',
+            'mt-auto w-full bg-[#FF5B00] text-white text-center border-none rounded-md font-extrabold hover:brightness-110 transition-[filter] no-underline',
             variant === 'product-tile' ? 'py-2 text-[10px] rounded-md' : 'py-2.5 text-[11.5px] font-bold',
           )}
         >
@@ -163,7 +163,7 @@ export function SponsoredProductTile({
   const isExternal = item.isExternal ?? href.startsWith('http');
 
   const ctaClass =
-    'mt-auto w-full bg-[#EB4501] text-white text-center border-none rounded-md font-extrabold hover:brightness-110 transition-[filter] no-underline py-2 text-[10px]';
+    'mt-auto w-full bg-[#FF5B00] text-white text-center border-none rounded-md font-extrabold hover:brightness-110 transition-[filter] no-underline py-2 text-[10px]';
 
   return (
     <div
@@ -172,7 +172,7 @@ export function SponsoredProductTile({
         className,
       )}
     >
-      <div className="flex-[7] min-h-0 bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-center justify-center overflow-hidden relative">
+      <div className="flex-[7] min-h-0 bg-gradient-to-br from-[#FF5B00] to-[#2323FF] flex items-center justify-center overflow-hidden relative">
         {imageUrl ? (
           <img src={imageUrl} alt="" className="absolute inset-0 w-full h-full object-cover opacity-90" loading="lazy" />
         ) : (
@@ -227,7 +227,7 @@ export function ProductsSponsoredBanner({
   const isExternal = href.startsWith('http');
 
   const ctaClass =
-    'bg-[#EB4501] text-white border-none px-[18px] py-2 rounded-[20px] text-[11.5px] font-bold shrink-0 whitespace-nowrap hover:brightness-110 no-underline inline-flex items-center';
+    'bg-[#FF5B00] text-white border-none px-[18px] py-2 rounded-[20px] text-[11.5px] font-bold shrink-0 whitespace-nowrap hover:brightness-110 no-underline inline-flex items-center';
 
   return (
     <div

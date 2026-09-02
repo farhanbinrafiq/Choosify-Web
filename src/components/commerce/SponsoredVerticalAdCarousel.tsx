@@ -52,7 +52,7 @@ export function VerticalAdvertisePlaceholder({ className }: { className?: string
         className,
       )}
     >
-      <div className="flex-[7] min-h-0 bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-end justify-center pb-3 relative">
+      <div className="flex-[7] min-h-0 bg-gradient-to-br from-[#FF5B00] to-[#2323FF] flex items-end justify-center pb-3 relative">
         <SponsoredCardChrome brandName="Advertise" size="md" />
         <span className="text-white text-[12px] font-extrabold text-center px-3 relative z-[1]">
           PROMOTE YOUR DEAL
@@ -65,7 +65,7 @@ export function VerticalAdvertisePlaceholder({ className }: { className?: string
         </div>
         <Link
           to="/advertise"
-          className="mt-auto w-full bg-[#EB4501] text-white text-center border-none py-2.5 rounded-md text-[11.5px] font-extrabold hover:brightness-110 no-underline"
+          className="mt-auto w-full bg-[#FF5B00] text-white text-center border-none py-2.5 rounded-md text-[11.5px] font-extrabold hover:brightness-110 no-underline"
         >
           ADVERTISE HERE →
         </Link>

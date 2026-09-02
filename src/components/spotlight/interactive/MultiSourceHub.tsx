@@ -27,8 +27,8 @@ export function MultiSourceHub({ sources, activeSourceId, onSelect }: MultiSourc
             className={cn(
               'px-3 py-2 rounded-[5px] text-left border text-[10px] font-bold uppercase tracking-wide transition-colors max-w-[200px]',
               activeSourceId === source.sourceId
-                ? 'bg-[#EB4501] text-white border-[#EB4501]'
-                : 'bg-white text-gray-600 border-[#e8edf2] hover:border-[#EB4501]/40',
+                ? 'bg-[#FF5B00] text-white border-[#FF5B00]'
+                : 'bg-white text-gray-600 border-[#e8edf2] hover:border-[#FF5B00]/40',
             )}
           >
             <span className="block truncate">{source.label}</span>

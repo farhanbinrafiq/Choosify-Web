@@ -32,7 +32,7 @@ const STATUS_PILL: Record<
   },
   transit: {
     label: 'OUT FOR DELIVERY',
-    className: 'bg-[#FFF3EC] text-[#EB4501]',
+    className: 'bg-[#FFF3EC] text-[#FF5B00]',
   },
   delivered: {
     label: 'DELIVERED',
@@ -147,7 +147,7 @@ export function OrderTrackingPage() {
     action: React.ReactNode,
   ) => (
     <div className="bg-white border border-[#E8EDF2] rounded-xl p-12 text-center shadow-sm max-w-xl mx-auto space-y-5">
-      <div className="w-14 h-14 bg-[#FFF3EC] rounded-full flex items-center justify-center text-[#EB4501] mx-auto">
+      <div className="w-14 h-14 bg-[#FFF3EC] rounded-full flex items-center justify-center text-[#FF5B00] mx-auto">
         <Package size={28} />
       </div>
       <div>
@@ -174,7 +174,7 @@ export function OrderTrackingPage() {
             {order && (
               <>
                 <span className="mx-1.5">›</span>
-                <span className="text-[#EB4501]">{order.orderId}</span>
+                <span className="text-[#FF5B00]">{order.orderId}</span>
               </>
             )}
           </div>
@@ -182,7 +182,7 @@ export function OrderTrackingPage() {
           <div className="flex justify-between items-center flex-wrap gap-3.5">
             <div>
               <div className="text-[21px] font-extrabold leading-tight flex items-center gap-2">
-                <MapPin size={20} className="text-[#EB4501] shrink-0" />
+                <MapPin size={20} className="text-[#FF5B00] shrink-0" />
                 Track Your Order
               </div>
               {order ? (
@@ -204,7 +204,7 @@ export function OrderTrackingPage() {
               {orders.length > 0 && (
                 <div className="flex gap-2">
                   <input
-                    className="bg-white/5 border border-white/15 rounded-lg h-9 px-3 text-[12px] text-white placeholder:text-white/40 focus:outline-none focus:border-[#EB4501] w-[160px] sm:w-[180px]"
+                    className="bg-white/5 border border-white/15 rounded-lg h-9 px-3 text-[12px] text-white placeholder:text-white/40 focus:outline-none focus:border-[#FF5B00] w-[160px] sm:w-[180px]"
                     placeholder="ORD-XXXXX"
                     value={searchId}
                     onChange={(e) => setSearchId(e.target.value)}
@@ -213,7 +213,7 @@ export function OrderTrackingPage() {
                   <button
                     type="button"
                     onClick={handleSearchOrder}
-                    className="bg-[#EB4501] hover:bg-[#CF4400] text-white text-[11.5px] font-bold px-4 rounded-lg transition-colors h-9 cursor-pointer border-none"
+                    className="bg-[#FF5B00] hover:bg-[#EF3C23] text-white text-[11.5px] font-bold px-4 rounded-lg transition-colors h-9 cursor-pointer border-none"
                   >
                     Search
                   </button>
@@ -239,7 +239,7 @@ export function OrderTrackingPage() {
             'Your placed orders will appear here for tracking.',
             <Link
               to="/products"
-              className="inline-block bg-[#EB4501] hover:bg-[#CF4400] text-white text-[11.5px] font-bold px-6 py-2.5 rounded-lg transition-colors"
+              className="inline-block bg-[#FF5B00] hover:bg-[#EF3C23] text-white text-[11.5px] font-bold px-6 py-2.5 rounded-lg transition-colors"
             >
               Start Shopping
             </Link>,
@@ -251,7 +251,7 @@ export function OrderTrackingPage() {
             <button
               type="button"
               onClick={() => setSelectedOrderId(null)}
-              className="text-[12px] font-bold text-[#EB4501] hover:underline cursor-pointer bg-transparent border-none"
+              className="text-[12px] font-bold text-[#FF5B00] hover:underline cursor-pointer bg-transparent border-none"
             >
               Clear Search
             </button>,
@@ -281,8 +281,8 @@ export function OrderTrackingPage() {
             )}
 
             {remoteShipment && (
-              <div className="rounded-xl border border-[#EB4501]/30 bg-[#FFF6EF] px-4 py-3 text-[12px] text-[#4B5563]">
-                <div className="font-bold text-[#EB4501] text-[11px] mb-1">Live shipment status</div>
+              <div className="rounded-xl border border-[#FF5B00]/30 bg-[#FFF6EF] px-4 py-3 text-[12px] text-[#4B5563]">
+                <div className="font-bold text-[#FF5B00] text-[11px] mb-1">Live shipment status</div>
                 <div>
                   Courier: {remoteShipment.courier} · Tracking: {remoteShipment.trackingNumber}
                 </div>
@@ -326,8 +326,8 @@ export function OrderTrackingPage() {
                             className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-[12px] ${
                               active
                                 ? current
-                                  ? 'bg-[#EB4501] text-white shadow-[0_0_0_4px_#FFF3EC]'
-                                  : 'bg-[#EB4501] text-white'
+                                  ? 'bg-[#FF5B00] text-white shadow-[0_0_0_4px_#FFF3EC]'
+                                  : 'bg-[#FF5B00] text-white'
                                 : 'bg-[#F4F7F9] text-[#9AA0AC] border border-[#E8EDF2]'
                             }`}
                           >
@@ -336,7 +336,7 @@ export function OrderTrackingPage() {
                           {!isLast && (
                             <div
                               className="w-0.5 flex-1 min-h-[34px]"
-                              style={{ background: lineDone || active ? '#EB4501' : '#E8EDF2' }}
+                              style={{ background: lineDone || active ? '#FF5B00' : '#E8EDF2' }}
                             />
                           )}
                         </div>
@@ -379,7 +379,7 @@ export function OrderTrackingPage() {
               <div className="flex flex-col gap-4">
                 <div className="bg-white border border-[#E8EDF2] rounded-xl p-5">
                   <div className="text-[12px] font-extrabold text-[#1A1A2E] mb-3.5 flex items-center gap-1.5">
-                    <Package size={14} className="text-[#EB4501]" />
+                    <Package size={14} className="text-[#FF5B00]" />
                     ITEM IN THIS ORDER
                   </div>
                   <div className="space-y-3">
@@ -416,7 +416,7 @@ export function OrderTrackingPage() {
 
                 <div className="bg-white border border-[#E8EDF2] rounded-xl p-5">
                   <div className="text-[12px] font-extrabold text-[#1A1A2E] mb-3 flex items-center gap-1.5">
-                    <Truck size={14} className="text-[#EB4501]" />
+                    <Truck size={14} className="text-[#FF5B00]" />
                     COURIER DETAILS
                   </div>
                   <div className="text-[12px] text-[#4B5563] leading-[1.8]">
@@ -455,15 +455,15 @@ export function OrderTrackingPage() {
                   }}
                   className="bg-white border border-[#FCA5A5] text-[#FF000D] py-2.5 rounded-lg text-[11.5px] font-bold cursor-pointer hover:bg-[#FEF2F2] transition-colors flex items-center justify-center gap-1.5"
                 >
-                  <MessageCircleMore size={13} className="text-[#EB4501]" />
+                  <MessageCircleMore size={13} className="text-[#FF5B00]" />
                   Need help? Contact Support
                 </button>
               </div>
             </div>
 
             {/* Optional sponsored banner — chrome only */}
-            <div className="bg-[#FFF6EF] rounded-[10px] overflow-hidden border-[1.5px] border-dashed border-[#EB4501] relative">
-              <div className="h-[110px] bg-gradient-to-br from-[#EB4501] to-[#2323FF] flex items-center justify-center text-white text-[12px] font-extrabold text-center px-5 relative">
+            <div className="bg-[#FFF6EF] rounded-[10px] overflow-hidden border-[1.5px] border-dashed border-[#FF5B00] relative">
+              <div className="h-[110px] bg-gradient-to-br from-[#FF5B00] to-[#2323FF] flex items-center justify-center text-white text-[12px] font-extrabold text-center px-5 relative">
                 <SponsoredCardChrome brandName="Choosify" size="sm" />
                 <span className="relative z-[1]">While you wait — deals picked for you</span>
               </div>
@@ -478,7 +478,7 @@ export function OrderTrackingPage() {
                 </div>
                 <Link
                   to="/deals"
-                  className="bg-[#EB4501] hover:bg-[#CF4400] text-white px-[18px] py-2 rounded-lg text-[11.5px] font-bold whitespace-nowrap transition-colors"
+                  className="bg-[#FF5B00] hover:bg-[#EF3C23] text-white px-[18px] py-2 rounded-lg text-[11.5px] font-bold whitespace-nowrap transition-colors"
                 >
                   Shop Now
                 </Link>
@@ -494,7 +494,7 @@ export function OrderTrackingPage() {
                   </div>
                   <Link
                     to="/products"
-                    className="text-[11.5px] font-bold text-[#EB4501] hover:text-[#CF4400]"
+                    className="text-[11.5px] font-bold text-[#FF5B00] hover:text-[#EF3C23]"
                   >
                     View all recommendations →
                   </Link>

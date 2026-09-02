@@ -27,7 +27,7 @@ export function CustomRelatedInfoCard({ data, className }: CustomRelatedInfoCard
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-4 gap-y-3">
         {blocks.map((b) => (
           <div key={b.id}>
-            <div className="text-[10.5px] font-bold text-[#EB4501] uppercase tracking-wide mb-1">
+            <div className="text-[10.5px] font-bold text-[#FF5B00] uppercase tracking-wide mb-1">
               {String(b.heading || 'Details').trim()}
             </div>
             <ul className="m-0 pl-4 list-disc text-[11.5px] text-[#4B5563] leading-relaxed space-y-0.5">

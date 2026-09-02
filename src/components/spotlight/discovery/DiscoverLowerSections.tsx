@@ -131,7 +131,7 @@ function GuideTypeCard({
           <Link
             key={lk}
             to={`/guides?q=${encodeURIComponent(lk)}`}
-            className="block text-[11.5px] text-[#4B5563] mb-1.5 no-underline hover:text-[#CF4400]"
+            className="block text-[11.5px] text-[#4B5563] mb-1.5 no-underline hover:text-[#EF3C23]"
           >
             · {lk}
           </Link>
@@ -140,7 +140,7 @@ function GuideTypeCard({
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
-            className="text-[11px] font-bold text-[#EB4501] mt-2 border-0 bg-transparent p-0 cursor-pointer hover:brightness-110"
+            className="text-[11px] font-bold text-[#FF5B00] mt-2 border-0 bg-transparent p-0 cursor-pointer hover:brightness-110"
           >
             {expanded ? 'Show less' : `VIEW ALL (${count}) ›`}
           </button>
@@ -283,7 +283,7 @@ const TOP_CREATORS = [
     guides: 58,
     followers: '176K',
     initial: 'SA',
-    bg: '#EB4501',
+    bg: '#FF5B00',
   },
   {
     id: 'creator-anika',
@@ -438,7 +438,7 @@ export function DiscoverLowerSections() {
         <div className="text-[13px] font-extrabold text-[#1A1A2E] tracking-[0.4px]">
           TOP CREATORS
         </div>
-        <Link to="/creators" className="text-xs font-bold text-[#1A1A2E] no-underline hover:text-[#CF4400]">
+        <Link to="/creators" className="text-xs font-bold text-[#1A1A2E] no-underline hover:text-[#EF3C23]">
           VIEW ALL CREATORS ›
         </Link>
       </div>
@@ -467,7 +467,7 @@ export function DiscoverLowerSections() {
                 </div>
                 <Link
                   to={`/creators/${tc.id}`}
-                  className="bg-white text-[#1A1A2E] border border-[#E5E7EB] px-4 py-1.5 rounded-full text-[11px] font-bold no-underline hover:border-[#EB4501] hover:text-[#CF4400] transition-colors shrink-0"
+                  className="bg-white text-[#1A1A2E] border border-[#E5E7EB] px-4 py-1.5 rounded-full text-[11px] font-bold no-underline hover:border-[#FF5B00] hover:text-[#EF3C23] transition-colors shrink-0"
                 >
                   View Profile
                 </Link>

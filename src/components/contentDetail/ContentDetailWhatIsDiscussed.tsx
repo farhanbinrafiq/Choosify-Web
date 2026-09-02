@@ -18,7 +18,7 @@ export function ContentDetailWhatIsDiscussed({
     <div id="what-is-discussed" className="scroll-mt-36">
       <div className="bg-white rounded-[10px] p-5 border border-[#E8EDF2]">
         <div className="text-[13px] font-extrabold text-[#1A1A2E] text-center mb-4">
-          WHAT IS <span className="text-[#EB4501]">DISCUSSED?</span>
+          WHAT IS <span className="text-[#FF5B00]">DISCUSSED?</span>
         </div>
         <div className="h-px bg-[#F1F1F3] mb-2.5" />
         <div className="flex flex-col max-h-[360px] overflow-y-auto no-scrollbar">
@@ -46,7 +46,7 @@ export function ContentDetailWhatIsDiscussed({
                   className={cn(
                     'w-[22px] h-[22px] rounded-full shrink-0 flex items-center justify-center text-[11px] font-extrabold',
                     idx === 0
-                      ? 'bg-[#EB4501] text-white'
+                      ? 'bg-[#FF5B00] text-white'
                       : 'bg-[#F4F7F9] text-[#9AA0AC]',
                   )}
                 >

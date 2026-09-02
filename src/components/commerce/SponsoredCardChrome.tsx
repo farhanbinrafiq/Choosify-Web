@@ -50,7 +50,7 @@ export function SponsoredCardChrome({
   const logoPos = size === 'sm' ? 'top-1.5 left-1.5' : 'top-2.5 left-2.5';
   const pillTone =
     tone === 'editorial'
-      ? 'bg-white/95 text-[#EB4501] border border-[#EB4501]/25 shadow-sm'
+      ? 'bg-white/95 text-[#FF5B00] border border-[#FF5B00]/25 shadow-sm'
       : 'bg-[#2323FF] text-white shadow-sm';
 
   return (

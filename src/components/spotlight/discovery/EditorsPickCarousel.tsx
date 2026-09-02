@@ -99,7 +99,7 @@ export function EditorsPickCarousel({
       aria-label="Editor's Pick"
     >
       <div className="flex justify-between items-center gap-2 mb-3 h-[16px] shrink-0">
-        <div className="text-[12px] font-extrabold text-[#EB4501] tracking-[0.3px] truncate">
+        <div className="text-[12px] font-extrabold text-[#FF5B00] tracking-[0.3px] truncate">
           EDITOR&apos;S PICK
         </div>
         <div className="text-[10px] font-bold text-white/50 shrink-0">
@@ -139,7 +139,7 @@ export function EditorsPickCarousel({
 
         <Link
           to={pick.href}
-          className="mt-auto block w-full shrink-0 text-center bg-[#EB4501] text-white py-2.5 rounded-lg text-[12px] font-bold no-underline hover:brightness-110 transition-[filter]"
+          className="mt-auto block w-full shrink-0 text-center bg-[#FF5B00] text-white py-2.5 rounded-lg text-[12px] font-bold no-underline hover:brightness-110 transition-[filter]"
         >
           {resolveEditorsPickCtaLabel(pick)}
         </Link>

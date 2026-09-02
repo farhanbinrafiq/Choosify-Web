@@ -60,7 +60,7 @@ export const CategoryCard = memo(function CategoryCard({
         
         {/* Discount Badge */}
         {discount && (
-          <div className="absolute top-4 left-4 z-10 bg-[#FFF0F0] text-[#EB4501] text-[10px] font-extrabold px-2.5 py-0.5 rounded-full tracking-wide shadow-xs border border-[#EB4501]/10 uppercase">
+          <div className="absolute top-4 left-4 z-10 bg-[#FFF0F0] text-[#FF5B00] text-[10px] font-extrabold px-2.5 py-0.5 rounded-full tracking-wide shadow-xs border border-[#FF5B00]/10 uppercase">
             {discount}
           </div>
         )}
@@ -74,8 +74,8 @@ export const CategoryCard = memo(function CategoryCard({
           <Heart 
             strokeWidth={2}
             className={cn(
-              "w-3.5 h-3.5 transition-colors text-[#EB4501]",
-              activeLiked && "fill-[#EB4501]"
+              "w-3.5 h-3.5 transition-colors text-[#FF5B00]",
+              activeLiked && "fill-[#FF5B00]"
             )} 
           />
         </button>
@@ -93,7 +93,7 @@ export const CategoryCard = memo(function CategoryCard({
       <div className="p-5 flex-grow flex flex-col justify-between">
         <div className="mb-4">
           {/* Main Title */}
-          <h3 className="text-base font-bold text-[#000435] tracking-tight mb-1 hover:text-[#CF4400] transition-colors leading-tight">
+          <h3 className="text-base font-bold text-[#18154C] tracking-tight mb-1 hover:text-[#EF3C23] transition-colors leading-tight">
             {title}
           </h3>
           
@@ -110,7 +110,7 @@ export const CategoryCard = memo(function CategoryCard({
               e.stopPropagation();
               handleCardClick();
             }}
-            className="w-full btn-outline py-2.5 text-xs font-bold transition-all flex items-center justify-center gap-1 shadow-sm border border-slate-200 hover:bg-slate-50 cursor-pointer text-[#000435] rounded-xl"
+            className="w-full btn-outline py-2.5 text-xs font-bold transition-all flex items-center justify-center gap-1 shadow-sm border border-slate-200 hover:bg-slate-50 cursor-pointer text-[#18154C] rounded-xl"
           >
             Explore Category
           </button>

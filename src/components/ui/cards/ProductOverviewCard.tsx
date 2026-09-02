@@ -33,7 +33,7 @@ export const ProductOverviewCard: React.FC<ProductOverviewCardProps> = ({
   return (
     <div className={cn("bg-white rounded-2xl border border-slate-100 p-6 md:p-8 flex flex-col shadow-[0_8px_30px_rgb(0,0,0,0.03)]", className)}>
       {title && (
-        <h3 className="text-sm font-black text-[#000435] uppercase tracking-wider mb-6">
+        <h3 className="text-sm font-black text-[#18154C] uppercase tracking-wider mb-6">
           {title}
         </h3>
       )}
@@ -49,7 +49,7 @@ export const ProductOverviewCard: React.FC<ProductOverviewCardProps> = ({
           {sections.map((section, idx) => (
             <div key={idx} className="flex flex-col gap-5">
               {section.title && (
-                <h4 className="text-lg font-extrabold text-[#000435]">{section.title}</h4>
+                <h4 className="text-lg font-extrabold text-[#18154C]">{section.title}</h4>
               )}
               
               {section.image && (
@@ -80,7 +80,7 @@ export const ProductOverviewCard: React.FC<ProductOverviewCardProps> = ({
                   "bg-slate-50 border-slate-100"
                 )}>
                   <div className="flex items-center gap-2 mb-2 flex-wrap">
-                    <h4 className="text-[#000435] font-extrabold text-sm uppercase tracking-wider">
+                    <h4 className="text-[#18154C] font-extrabold text-sm uppercase tracking-wider">
                       {section.callout.title}
                     </h4>
                     {section.callout.label && (

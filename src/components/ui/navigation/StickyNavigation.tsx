@@ -60,7 +60,7 @@ export const StickyNavigation: React.FC<StickyNavigationProps> = ({
                 className={cn(
                   'h-full flex items-center text-sm font-bold uppercase tracking-wider transition-colors border-b-2 whitespace-nowrap px-1',
                   activeId === item.id
-                    ? 'border-[#000435] text-[#000435]'
+                    ? 'border-[#18154C] text-[#18154C]'
                     : 'border-transparent text-slate-400 hover:text-slate-600'
                 )}
               >
@@ -81,7 +81,7 @@ export const StickyNavigation: React.FC<StickyNavigationProps> = ({
               <div className="flex items-center gap-3">
                 <img src={productInfo.image} alt={productInfo.title} className="w-10 h-10 object-contain bg-slate-50 rounded-lg p-1 border border-slate-100" />
                 <div className="flex flex-col justify-center">
-                  <span className="text-xs font-bold text-[#000435] leading-none">{productInfo.title}</span>
+                  <span className="text-xs font-bold text-[#18154C] leading-none">{productInfo.title}</span>
                   <span className="text-xs font-bold text-slate-500 mt-1">{productInfo.price}</span>
                 </div>
               </div>

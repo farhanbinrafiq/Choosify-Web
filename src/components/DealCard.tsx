@@ -119,7 +119,7 @@ export const DealCard = memo(function DealCard({
             <span className="text-[10px] font-black text-blue-600 uppercase tracking-widest block">
               {product?.brand || product?.brandName || 'Brand'}
             </span>
-            <h4 className="font-bold text-[13px] text-[#050B2C] tracking-tight leading-snug group-hover:text-[#CF4400] transition-colors line-clamp-2 mt-1">
+            <h4 className="font-bold text-[13px] text-[#050B2C] tracking-tight leading-snug group-hover:text-[#EF3C23] transition-colors line-clamp-2 mt-1">
               {product.title}
             </h4>
           </div>
@@ -127,7 +127,7 @@ export const DealCard = memo(function DealCard({
           {/* Pricing, progress claimed */}
           <div className="min-w-0">
             <div className="flex items-baseline gap-2 flex-wrap">
-              <span className="text-base font-black text-[#EB4501]">
+              <span className="text-base font-black text-[#FF5B00]">
                 BDT {product.price.toLocaleString()}
               </span>
               <span className="text-xs font-bold text-gray-400 line-through">
@@ -154,7 +154,7 @@ export const DealCard = memo(function DealCard({
             )}
 
             <div className="flex items-center gap-1 mt-1 select-none">
-              <Star className="w-3.5 h-3.5 fill-[#EB4501] text-[#EB4501]" />
+              <Star className="w-3.5 h-3.5 fill-[#FF5B00] text-[#FF5B00]" />
               <span className="text-xs font-bold text-gray-800">{product.rating}</span>
               <span className="text-xs font-medium text-gray-400">({product.reviewsText})</span>
             </div>
@@ -176,12 +176,12 @@ export const DealCard = memo(function DealCard({
               }}
               className={`h-8 px-3 rounded-xl border flex items-center gap-1 text-[11px] font-bold transition-all cursor-pointer ${
                 isLiked 
-                  ? 'border-[#EB4501] text-[#EB4501] bg-white' 
-                  : 'border-[#E5E7EB] text-[#EB4501] bg-white hover:text-[#EB4501]'
+                  ? 'border-[#FF5B00] text-[#FF5B00] bg-white' 
+                  : 'border-[#E5E7EB] text-[#FF5B00] bg-white hover:text-[#FF5B00]'
               }`}
             >
               <Heart
-                className={`w-3.5 h-3.5 text-[#EB4501] ${isLiked ? 'fill-[#EB4501]' : ''}`}
+                className={`w-3.5 h-3.5 text-[#FF5B00] ${isLiked ? 'fill-[#FF5B00]' : ''}`}
                 strokeWidth={2}
               />
               <span>{product.likes + (isLiked ? 1 : 0)}</span>
@@ -216,7 +216,7 @@ export const DealCard = memo(function DealCard({
       <div 
         id={`deal-promo-card`}
         onClick={handlePromoClick}
-        className={`${deal.bg || 'bg-gradient-to-br from-[#EB4501] to-[#CF4400]'} rounded-3xl p-8 text-white relative overflow-hidden cursor-pointer hover:-translate-y-1 transition-all duration-300 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-transparent w-full`}
+        className={`${deal.bg || 'bg-gradient-to-br from-[#FF5B00] to-[#EF3C23]'} rounded-3xl p-8 text-white relative overflow-hidden cursor-pointer hover:-translate-y-1 transition-all duration-300 shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-transparent w-full`}
       >
         <div className="relative z-10 flex flex-col h-full text-left">
           <span

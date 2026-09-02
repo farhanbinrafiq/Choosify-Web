@@ -42,7 +42,7 @@ function NavButton({
       className={cn(
         'shrink-0 px-4 py-2.5 sm:py-2 rounded-none text-[12px] font-bold transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap relative touch-manipulation min-h-[40px] sm:min-h-0 border-0',
         active
-          ? 'bg-[#FFF3EA] text-[#EB4501]'
+          ? 'bg-[#FFF3EA] text-[#FF5B00]'
           : 'bg-transparent text-[#4B5563] hover:bg-[#F4F7F9] hover:text-[#1A1A2E]',
       )}
     >

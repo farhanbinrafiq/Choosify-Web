@@ -7,7 +7,7 @@ const COLORS: Record<EmiConfidenceLevel, string> = {
   high: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   medium: 'choosify-emi-gradient text-white border-transparent',
   low: 'choosify-emi-gradient text-white border-transparent',
-  placeholder: 'bg-[#FFF0E8] text-[#EB4501]/80 border-[#EB4501]/20',
+  placeholder: 'bg-[#FFF0E8] text-[#FF5B00]/80 border-[#FF5B00]/20',
 };
 
 interface EmiConfidenceBadgeProps {

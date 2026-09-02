@@ -76,12 +76,12 @@ export function ProductQuickComparison({ productId }: { productId: string }) {
             <div
               key={card.id}
               className={`rounded-xl border p-3 flex flex-col gap-2 ${
-                card.isCurrent ? 'border-[#EB4501] bg-[#FFF6F2] ring-1 ring-[#EB4501]/30' : 'border-[#E8EDF2] bg-white'
+                card.isCurrent ? 'border-[#FF5B00] bg-[#FFF6F2] ring-1 ring-[#FF5B00]/30' : 'border-[#E8EDF2] bg-white'
               }`}
               data-testid={card.isCurrent ? 'comparison-current-card' : 'comparison-candidate-card'}
             >
               {card.isCurrent && (
-                <span className="self-start text-[9px] font-black uppercase tracking-wide bg-[#EB4501] text-white px-2 py-0.5 rounded-full">
+                <span className="self-start text-[9px] font-black uppercase tracking-wide bg-[#FF5B00] text-white px-2 py-0.5 rounded-full">
                   Viewing Now
                 </span>
               )}
@@ -97,7 +97,7 @@ export function ProductQuickComparison({ productId }: { productId: string }) {
                 {card.rating ? card.rating.toFixed(1) : '—'}
                 <span className="text-[#9AA0AC]">({card.reviewCount})</span>
               </div>
-              <div className="text-[13px] font-black text-[#EB4501]">৳{card.price.toLocaleString()}</div>
+              <div className="text-[13px] font-black text-[#FF5B00]">৳{card.price.toLocaleString()}</div>
               {card.isCurrent ? (
                 <button
                   disabled

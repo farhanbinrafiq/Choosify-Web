@@ -32,7 +32,7 @@ export const TrustScoreCard: React.FC<TrustScoreCardProps> = ({
         <div className="flex flex-col">
           <h3 className="text-xs font-bold text-slate-500 uppercase tracking-wider">{label}</h3>
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-[#000435]">{overallScore.toFixed(1)}</span>
+            <span className="text-3xl font-black text-[#18154C]">{overallScore.toFixed(1)}</span>
             <span className="text-sm font-bold text-slate-400">/10</span>
           </div>
           <span className="text-sm font-bold text-[#2323FF] mt-1">{ratingText}</span>
@@ -47,7 +47,7 @@ export const TrustScoreCard: React.FC<TrustScoreCardProps> = ({
             <div key={idx} className="flex flex-col gap-1.5">
               <div className="flex justify-between items-end">
                 <span className="text-xs font-bold text-slate-600">{category.label}</span>
-                <span className="text-xs font-black text-[#000435]">{category.score.toFixed(1)}</span>
+                <span className="text-xs font-black text-[#18154C]">{category.score.toFixed(1)}</span>
               </div>
               <div className="h-2 w-full bg-slate-100 rounded-full overflow-hidden">
                 <div 

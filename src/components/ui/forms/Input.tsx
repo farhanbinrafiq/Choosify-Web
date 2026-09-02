@@ -23,7 +23,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
             leftIcon && "pl-11",
             error 
               ? "border-red-500 focus:border-red-500 focus:ring-red-500" 
-              : "border-slate-200 focus:border-[#000435] focus:ring-[#000435]",
+              : "border-slate-200 focus:border-[#18154C] focus:ring-[#18154C]",
             className
           )}
           {...props}
@@ -66,7 +66,7 @@ export const SearchInput = forwardRef<HTMLInputElement, Omit<InputProps, 'type'>
       <Input
         type="text"
         leftIcon={<Search className="w-5 h-5" />}
-        className={cn("bg-slate-50 border-transparent focus:bg-white focus:border-[#000435]", className)}
+        className={cn("bg-slate-50 border-transparent focus:bg-white focus:border-[#18154C]", className)}
         ref={ref}
         {...props}
       />
@@ -89,7 +89,7 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
             "w-full rounded-xl border bg-white p-4 text-sm font-medium text-slate-900 transition-colors focus:outline-none focus:ring-1 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500 resize-y",
             error 
               ? "border-red-500 focus:border-red-500 focus:ring-red-500" 
-              : "border-slate-200 focus:border-[#000435] focus:ring-[#000435]",
+              : "border-slate-200 focus:border-[#18154C] focus:ring-[#18154C]",
             className
           )}
           {...props}
@@ -108,7 +108,7 @@ export const Checkbox = forwardRef<HTMLInputElement, React.InputHTMLAttributes<H
         type="checkbox"
         ref={ref}
         className={cn(
-          "w-4 h-4 rounded border-slate-300 text-[#000435] focus:ring-[#000435] transition-colors cursor-pointer",
+          "w-4 h-4 rounded border-slate-300 text-[#18154C] focus:ring-[#18154C] transition-colors cursor-pointer",
           className
         )}
         {...props}
@@ -125,7 +125,7 @@ export const Radio = forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTML
         type="radio"
         ref={ref}
         className={cn(
-          "w-4 h-4 border-slate-300 text-[#000435] focus:ring-[#000435] transition-colors cursor-pointer",
+          "w-4 h-4 border-slate-300 text-[#18154C] focus:ring-[#18154C] transition-colors cursor-pointer",
           className
         )}
         {...props}

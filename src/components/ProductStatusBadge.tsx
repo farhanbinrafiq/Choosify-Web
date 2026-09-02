@@ -6,7 +6,7 @@ import type { SiteProductBadge } from '../types/catalog';
 export type ProductBadgeTone = 'hot' | 'new' | 'featured' | 'sale' | 'event' | 'promo' | 'outOfStock' | 'default';
 
 const TONE_STYLES: Record<ProductBadgeTone, string> = {
-  hot: 'bg-gradient-to-r from-[#EB4501] to-[#CF4400] text-white border-[#FF8A4C]/40 shadow-[0_2px_8px_rgba(235, 69, 1,0.35)]',
+  hot: 'bg-gradient-to-r from-[#FF5B00] to-[#EF3C23] text-white border-[#FF8A4C]/40 shadow-[0_2px_8px_rgba(255, 91, 0,0.35)]',
   new: 'bg-gradient-to-r from-emerald-600 to-teal-500 text-white border-emerald-300/40 shadow-[0_2px_8px_rgba(16,185,129,0.28)]',
   featured: 'bg-gradient-to-r from-[#1A1D4E] to-[#2d3278] text-white border-[#4b55c4]/35 shadow-[0_2px_8px_rgba(26,29,78,0.28)]',
   sale: 'bg-gradient-to-r from-rose-600 to-red-500 text-white border-rose-300/40 shadow-[0_2px_8px_rgba(225,29,72,0.28)]',
@@ -15,7 +15,7 @@ const TONE_STYLES: Record<ProductBadgeTone, string> = {
   // Deliberately muted/gray, not a vibrant promo gradient -- this is a
   // negative status, not something to draw the eye to.
   outOfStock: 'bg-gray-600/95 text-white border-gray-400/40 shadow-[0_2px_8px_rgba(75,85,99,0.28)]',
-  default: 'bg-gradient-to-r from-[#EB4501] to-[#CF4400] text-white border-orange-200/40 shadow-[0_2px_8px_rgba(235, 69, 1,0.25)]',
+  default: 'bg-gradient-to-r from-[#FF5B00] to-[#EF3C23] text-white border-orange-200/40 shadow-[0_2px_8px_rgba(255, 91, 0,0.25)]',
 };
 
 function resolveTone(label: string): ProductBadgeTone {

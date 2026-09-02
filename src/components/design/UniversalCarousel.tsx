@@ -103,7 +103,7 @@ export function UniversalCarousel<T>({
             disabled={!canScrollLeft}
             className={cn(
               'absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white border border-[#e8edf2] shadow-md flex items-center justify-center text-[#1A1D4E] transition-opacity',
-              canScrollLeft ? 'opacity-100 hover:border-[#EB4501]/40' : 'opacity-0 pointer-events-none',
+              canScrollLeft ? 'opacity-100 hover:border-[#FF5B00]/40' : 'opacity-0 pointer-events-none',
             )}
             aria-label="Scroll left"
           >
@@ -115,7 +115,7 @@ export function UniversalCarousel<T>({
             disabled={!canScrollRight}
             className={cn(
               'absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white border border-[#e8edf2] shadow-md flex items-center justify-center text-[#1A1D4E] transition-opacity',
-              canScrollRight ? 'opacity-100 hover:border-[#EB4501]/40' : 'opacity-0 pointer-events-none',
+              canScrollRight ? 'opacity-100 hover:border-[#FF5B00]/40' : 'opacity-0 pointer-events-none',
             )}
             aria-label="Scroll right"
           >

@@ -11,8 +11,8 @@ import fs from 'fs';
 import path from 'path';
 import sharp from 'sharp';
 
-const SITE_THEME_COLOR = '#000435';
-const SITE_BRAND_ORANGE = '#EB4501';
+const SITE_THEME_COLOR = '#18154C';
+const SITE_BRAND_ORANGE = '#FF5B00';
 const SITE_URL = 'https://www.choosify.bd';
 const SITE_NAME = 'Choosify';
 const OG_IMAGE_WIDTH = 1200;

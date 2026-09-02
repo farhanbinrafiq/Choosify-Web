@@ -57,15 +57,15 @@ export const ProductHeroCTACard: React.FC<ProductHeroCTACardProps> = ({
             {discountBadge}
           </Badge>
         )}
-        <button onClick={onWishlist} className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-[#EB4501] hover:text-[#CF4400] transition-colors">
-          <Heart className="w-5 h-5 text-[#EB4501]" strokeWidth={2} />
+        <button onClick={onWishlist} className="absolute top-4 right-4 w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-sm text-[#FF5B00] hover:text-[#EF3C23] transition-colors">
+          <Heart className="w-5 h-5 text-[#FF5B00]" strokeWidth={2} />
         </button>
         <img src={image} alt={title} className="max-w-full max-h-[400px] object-contain drop-shadow-2xl" />
       </div>
 
       {/* Product Info Area */}
       <div className="w-full md:w-1/2 flex flex-col justify-center">
-        <h1 className="text-3xl md:text-4xl font-black text-[#000435] leading-tight tracking-tight mb-2">
+        <h1 className="text-3xl md:text-4xl font-black text-[#18154C] leading-tight tracking-tight mb-2">
           {title}
         </h1>
         {subtitle && (
@@ -83,7 +83,7 @@ export const ProductHeroCTACard: React.FC<ProductHeroCTACardProps> = ({
         {/* Pricing */}
         <div className="mb-6">
           <div className="flex items-baseline gap-3">
-            <span className="text-3xl font-black text-[#000435]">{price}</span>
+            <span className="text-3xl font-black text-[#18154C]">{price}</span>
             {originalPrice && (
               <span className="text-lg font-bold text-slate-400 line-through decoration-slate-300">
                 {originalPrice}
@@ -96,8 +96,8 @@ export const ProductHeroCTACard: React.FC<ProductHeroCTACardProps> = ({
             )}
           </div>
           {cashbackText && (
-            <p className="text-xs font-bold text-[#EB4501] mt-2 flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#EB4501]"></span>
+            <p className="text-xs font-bold text-[#FF5B00] mt-2 flex items-center gap-1">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#FF5B00]"></span>
               {cashbackText}
             </p>
           )}
@@ -114,7 +114,7 @@ export const ProductHeroCTACard: React.FC<ProductHeroCTACardProps> = ({
                   onClick={() => setSelectedColor(color.value)}
                   className={cn(
                     "w-8 h-8 rounded-full border-2 transition-all duration-200 shadow-sm",
-                    selectedColor === color.value ? "border-[#EB4501] scale-110" : "border-transparent hover:scale-105"
+                    selectedColor === color.value ? "border-[#FF5B00] scale-110" : "border-transparent hover:scale-105"
                   )}
                   style={{ backgroundColor: color.colorHex }}
                   title={color.label}
@@ -137,7 +137,7 @@ export const ProductHeroCTACard: React.FC<ProductHeroCTACardProps> = ({
                   className={cn(
                     "px-4 py-2 rounded-xl text-xs font-bold border transition-all duration-200",
                     selectedStorage === storage.value 
-                      ? "border-[#000435] bg-[#000435] text-white" 
+                      ? "border-[#18154C] bg-[#18154C] text-white" 
                       : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
                   )}
                 >
@@ -150,7 +150,7 @@ export const ProductHeroCTACard: React.FC<ProductHeroCTACardProps> = ({
 
         {/* Action Buttons */}
         <div className="flex flex-wrap items-center gap-3 mt-auto">
-          <Button variant="outline" onClick={onWishlist} leftIcon={<Heart className="w-4 h-4 text-[#EB4501]" strokeWidth={2} />}>
+          <Button variant="outline" onClick={onWishlist} leftIcon={<Heart className="w-4 h-4 text-[#FF5B00]" strokeWidth={2} />}>
             Add to Wishlist
           </Button>
           <Button

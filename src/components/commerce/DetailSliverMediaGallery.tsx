@@ -742,7 +742,7 @@ export function DetailSliverMediaGallery({
                 <a
                   href="#spotlight-content-hero"
                   onClick={(e) => e.stopPropagation()}
-                  className="inline-flex items-center justify-center min-h-[32px] px-3 py-1.5 bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-wider rounded-full hover:bg-[#CF4400] no-underline shadow-md"
+                  className="inline-flex items-center justify-center min-h-[32px] px-3 py-1.5 bg-[#FF5B00] text-white text-[10px] font-black uppercase tracking-wider rounded-full hover:bg-[#EF3C23] no-underline shadow-md"
                 >
                   {liveBadge.ctaLabel}
                 </a>
@@ -817,7 +817,7 @@ export function DetailSliverMediaGallery({
             onClick={() => goToSlide(i)}
             className={cn(
               'rounded-full border-0 p-0 cursor-pointer transition-all duration-300 ease-out',
-              i === activeIndex ? 'w-5 h-2 bg-[#EB4501]' : 'w-2 h-2 bg-white/35 hover:bg-white/55',
+              i === activeIndex ? 'w-5 h-2 bg-[#FF5B00]' : 'w-2 h-2 bg-white/35 hover:bg-white/55',
             )}
             aria-label={`Go to slide ${i + 1}`}
             aria-current={i === activeIndex}

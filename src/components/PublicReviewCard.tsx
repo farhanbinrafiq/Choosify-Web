@@ -119,7 +119,7 @@ export function PublicReviewCard({
               />
             </div>
           ) : (
-            <div className="w-10 h-10 rounded-full bg-[#EB4501] text-white flex items-center justify-center text-[13px] font-extrabold shrink-0">
+            <div className="w-10 h-10 rounded-full bg-[#FF5B00] text-white flex items-center justify-center text-[13px] font-extrabold shrink-0">
               {initial}
             </div>
           )}
@@ -211,7 +211,7 @@ export function PublicReviewCard({
               <button
                 type="button"
                 onClick={onEditClick}
-                className="text-[12px] font-bold text-[#EB4501] bg-transparent border-0 cursor-pointer p-0"
+                className="text-[12px] font-bold text-[#FF5B00] bg-transparent border-0 cursor-pointer p-0"
               >
                 Edit Review
               </button>

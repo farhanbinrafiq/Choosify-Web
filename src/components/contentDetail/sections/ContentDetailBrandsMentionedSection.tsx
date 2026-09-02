@@ -60,7 +60,7 @@ export function ContentDetailBrandsMentionedSection({
           <Link
             key={brand.id}
             to={`/brands/${brand.id}`}
-            className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 text-center hover:border-[#EB4501]/40 transition-colors no-underline"
+            className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 text-center hover:border-[#FF5B00]/40 transition-colors no-underline"
           >
             <div className="w-14 h-14 mx-auto mb-2.5 rounded-full bg-[#F4F7F9] overflow-hidden flex items-center justify-center">
               {brand.logo || brand.image ? (
@@ -70,7 +70,7 @@ export function ContentDetailBrandsMentionedSection({
                   className="w-full h-full object-contain"
                 />
               ) : (
-                <span className="text-[16px] font-extrabold text-[#EB4501]">
+                <span className="text-[16px] font-extrabold text-[#FF5B00]">
                   {String(brand.name || 'B').charAt(0)}
                 </span>
               )}

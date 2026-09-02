@@ -23,7 +23,7 @@ export function PrescriptionUploadModule({ data, onOpenModal, onClear }: Prescri
   return (
     <div className="w-full text-left mt-4 pt-4 border-t border-[#F1F1F3]">
       <div className="flex items-center gap-1.5 text-[13px] font-extrabold text-[#1A1A2E] mb-2.5">
-        <Eye size={14} className="text-[#EB4501]" />
+        <Eye size={14} className="text-[#FF5B00]" />
         Upload Prescription
       </div>
 
@@ -39,7 +39,7 @@ export function PrescriptionUploadModule({ data, onOpenModal, onClear }: Prescri
           <button
             type="button"
             onClick={onOpenModal}
-            className="shrink-0 h-7 px-2.5 rounded-md border border-[#E5E7EB] bg-white text-[10px] font-bold text-[#1A1A2E] hover:border-[#EB4501] hover:text-[#CF4400] cursor-pointer inline-flex items-center gap-1"
+            className="shrink-0 h-7 px-2.5 rounded-md border border-[#E5E7EB] bg-white text-[10px] font-bold text-[#1A1A2E] hover:border-[#FF5B00] hover:text-[#EF3C23] cursor-pointer inline-flex items-center gap-1"
           >
             <Pencil size={10} />
             Edit
@@ -57,9 +57,9 @@ export function PrescriptionUploadModule({ data, onOpenModal, onClear }: Prescri
         <button
           type="button"
           onClick={onOpenModal}
-          className="w-full flex items-center gap-2.5 rounded-lg border-[1.5px] border-dashed border-[#EB4501]/40 bg-[#FFF6EF] px-3.5 py-3 cursor-pointer hover:border-[#EB4501] transition-colors text-left"
+          className="w-full flex items-center gap-2.5 rounded-lg border-[1.5px] border-dashed border-[#FF5B00]/40 bg-[#FFF6EF] px-3.5 py-3 cursor-pointer hover:border-[#FF5B00] transition-colors text-left"
         >
-          <div className="w-8 h-8 rounded-full bg-white text-[#EB4501] flex items-center justify-center shrink-0 border border-[#EB4501]/20">
+          <div className="w-8 h-8 rounded-full bg-white text-[#FF5B00] flex items-center justify-center shrink-0 border border-[#FF5B00]/20">
             <UploadCloud size={15} />
           </div>
           <div className="flex-1 min-w-0">

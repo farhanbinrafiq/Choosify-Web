@@ -240,7 +240,7 @@ export function SpotlightMixedFeed({
 
         <div ref={sentinelRef} className="py-10 flex justify-center" aria-hidden>
 
-          <div className="h-8 w-8 rounded-full border-2 border-[#EB4501]/30 border-t-[#EB4501] animate-spin" />
+          <div className="h-8 w-8 rounded-full border-2 border-[#FF5B00]/30 border-t-[#FF5B00] animate-spin" />
 
         </div>
 

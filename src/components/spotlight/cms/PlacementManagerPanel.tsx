@@ -25,14 +25,14 @@ export function PlacementManagerPanel({ selected, onChange }: PlacementManagerPa
             key={key}
             className={cn(
               'flex items-center gap-3 p-4 border rounded-lg cursor-pointer transition-colors',
-              selected.includes(key) ? 'border-[#EB4501] bg-[#EB4501]/5' : 'border-[#e8edf2]',
+              selected.includes(key) ? 'border-[#FF5B00] bg-[#FF5B00]/5' : 'border-[#e8edf2]',
             )}
           >
             <input
               type="checkbox"
               checked={selected.includes(key)}
               onChange={() => toggle(key)}
-              className="accent-[#EB4501]"
+              className="accent-[#FF5B00]"
             />
             <div>
               <p className="text-sm font-semibold">{meta.label}</p>

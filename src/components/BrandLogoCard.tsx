@@ -41,7 +41,7 @@ export const BrandLogoCard = memo(function BrandLogoCard({ brand, onClick, class
             referrerPolicy="no-referrer"
           />
         ) : (
-          <span className="text-2xl font-black text-[#000435] tracking-tight">
+          <span className="text-2xl font-black text-[#18154C] tracking-tight">
             {brand.logo || brand.name.charAt(0)}
           </span>
         )}
@@ -49,7 +49,7 @@ export const BrandLogoCard = memo(function BrandLogoCard({ brand, onClick, class
 
       {/* Brand Wordmark Style Name & Rating Info */}
       <div className="flex flex-col items-center min-w-0">
-        <h3 className="text-sm font-black text-[#000435] uppercase line-clamp-1 mb-1 tracking-tight group-hover:text-[#CF4400] transition-colors">
+        <h3 className="text-sm font-black text-[#18154C] uppercase line-clamp-1 mb-1 tracking-tight group-hover:text-[#EF3C23] transition-colors">
           {brand.name}
         </h3>
         
@@ -63,13 +63,13 @@ export const BrandLogoCard = memo(function BrandLogoCard({ brand, onClick, class
                 className={cn(
                   "shrink-0",
                   star <= Math.round(brand.rating) 
-                    ? "fill-[#EB4501] text-[#EB4501]" 
+                    ? "fill-[#FF5B00] text-[#FF5B00]" 
                     : "text-slate-200"
                 )}
               />
             ))}
           </div>
-          <span className="text-[11px] font-bold text-[#000435] leading-none">
+          <span className="text-[11px] font-bold text-[#18154C] leading-none">
             {brand.rating.toFixed(1)}
           </span>
           <span className="text-[10px] text-slate-400 font-medium leading-none">

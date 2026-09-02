@@ -20,10 +20,10 @@ export function FAQPage() {
               Home
             </Link>
             <span>›</span>
-            <span className="text-[#EB4501]">FAQ</span>
+            <span className="text-[#FF5B00]">FAQ</span>
           </div>
           <div className="flex items-start gap-3.5">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#EB4501]/15 text-[#EB4501] shrink-0">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#FF5B00]/15 text-[#FF5B00] shrink-0">
               <HelpCircle className="h-5 w-5" />
             </div>
             <div>

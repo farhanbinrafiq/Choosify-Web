@@ -25,7 +25,7 @@ export function HomeRecentlyViewedSection({ products }: HomeRecentlyViewedSectio
           <Link
             key={product.id}
             to={`/products/${product.slug ?? product.id}`}
-            className="bg-white rounded-[10px] overflow-hidden border border-[#E8EDF2] hover:border-[#EB4501]/35 transition-colors"
+            className="bg-white rounded-[10px] overflow-hidden border border-[#E8EDF2] hover:border-[#FF5B00]/35 transition-colors"
           >
             <div className="relative h-[150px] bg-[#F4F7F9] overflow-hidden">
               <img
@@ -34,12 +34,12 @@ export function HomeRecentlyViewedSection({ products }: HomeRecentlyViewedSectio
                 className="w-full h-full object-cover object-center"
                 loading="lazy"
               />
-              <span className="absolute top-2 right-2 w-[26px] h-[26px] rounded-full bg-white flex items-center justify-center text-[#EB4501] shadow-sm">
-                <Heart size={13} className="text-[#EB4501]" strokeWidth={2} />
+              <span className="absolute top-2 right-2 w-[26px] h-[26px] rounded-full bg-white flex items-center justify-center text-[#FF5B00] shadow-sm">
+                <Heart size={13} className="text-[#FF5B00]" strokeWidth={2} />
               </span>
             </div>
             <div className="px-3 py-2.5 pb-3.5">
-              <div className="text-[13px] font-extrabold text-[#EB4501]">
+              <div className="text-[13px] font-extrabold text-[#FF5B00]">
                 {typeof product.price === 'number'
                   ? `BDT ${product.price.toLocaleString()}`
                   : product.price || '—'}

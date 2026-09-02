@@ -67,9 +67,9 @@ export function ListingBrowseControls({
           </div>
           <form
             onSubmit={submit}
-            className="flex items-center bg-white rounded-[5px] border border-[#e8edf2] overflow-hidden focus-within:border-[#EB4501]/40 transition-all"
+            className="flex items-center bg-white rounded-[5px] border border-[#e8edf2] overflow-hidden focus-within:border-[#FF5B00]/40 transition-all"
           >
-            <div className="pl-3.5 text-[#EB4501] shrink-0">
+            <div className="pl-3.5 text-[#FF5B00] shrink-0">
               <Search className="w-4 h-4" aria-hidden />
             </div>
             <input
@@ -81,7 +81,7 @@ export function ListingBrowseControls({
             />
             <button
               type="submit"
-              className="shrink-0 h-11 px-3.5 bg-[#EB4501] text-white text-[10px] font-black uppercase tracking-wider border-0 cursor-pointer hover:brightness-110"
+              className="shrink-0 h-11 px-3.5 bg-[#FF5B00] text-white text-[10px] font-black uppercase tracking-wider border-0 cursor-pointer hover:brightness-110"
             >
               Go
             </button>
@@ -104,7 +104,7 @@ export function ListingBrowseControls({
                   onChipClick?.(chip);
                   onSearch?.(chip);
                 }}
-                className="bg-white border border-[#E5E7EB] text-[#1A1A2E] text-[11px] font-semibold px-3 py-1.5 rounded-full hover:border-[#EB4501]/40 transition-colors cursor-pointer"
+                className="bg-white border border-[#E5E7EB] text-[#1A1A2E] text-[11px] font-semibold px-3 py-1.5 rounded-full hover:border-[#FF5B00]/40 transition-colors cursor-pointer"
               >
                 {chip}
               </button>
@@ -130,14 +130,14 @@ export function ListingBrowseControls({
                     className={cn(
                       'flex items-center gap-3 w-full text-left rounded-xl border px-3 py-2.5 transition-colors cursor-pointer',
                       active
-                        ? 'bg-[#FFF3EA] border-[#EB4501]/35'
-                        : 'bg-white border-[#E8EDF2] hover:border-[#EB4501]/25',
+                        ? 'bg-[#FFF3EA] border-[#FF5B00]/35'
+                        : 'bg-white border-[#E8EDF2] hover:border-[#FF5B00]/25',
                     )}
                   >
                     <div
                       className={cn(
                         'w-9 h-9 rounded-full flex items-center justify-center text-sm shrink-0 font-extrabold',
-                        active ? 'text-[#EB4501]' : 'text-[#1A1A2E]',
+                        active ? 'text-[#FF5B00]' : 'text-[#1A1A2E]',
                       )}
                       style={{ background: item.bg || (active ? '#FFF3EA' : '#F4F7F9') }}
                     >
@@ -147,7 +147,7 @@ export function ListingBrowseControls({
                       <div
                         className={cn(
                           'text-[12.5px] font-bold leading-tight',
-                          active ? 'text-[#EB4501]' : 'text-[#1A1A2E]',
+                          active ? 'text-[#FF5B00]' : 'text-[#1A1A2E]',
                         )}
                       >
                         {item.name}

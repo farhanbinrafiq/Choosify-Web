@@ -29,7 +29,7 @@ export type AdSlotCarouselProps<T> = {
 const SWIPE_PX = 48;
 const MANUAL_RESUME_MS = 13000;
 const WHEEL_COOLDOWN_MS = 450;
-const AVATAR_COLORS = ['#EB4501', '#2323FF', '#07A828', '#7C3AED', '#0EA5E9', '#1A1A2E'];
+const AVATAR_COLORS = ['#FF5B00', '#2323FF', '#07A828', '#7C3AED', '#0EA5E9', '#1A1A2E'];
 
 function initialsFor(label: string): string {
   return (
@@ -97,7 +97,7 @@ export function AdSlotPaginationRail({
             className={cn(
               'shrink-0 w-7 h-7 rounded-full overflow-hidden cursor-pointer transition-all duration-300 flex items-center justify-center border-0 p-0',
               active
-                ? cn('ring-2 ring-[#EB4501] ring-offset-1', ringOffsetClassName)
+                ? cn('ring-2 ring-[#FF5B00] ring-offset-1', ringOffsetClassName)
                 : 'opacity-55 hover:opacity-85 grayscale-[30%]',
             )}
           >
@@ -275,11 +275,11 @@ export function AdSlotCarousel<T>({
               className={cn(
                 'rounded-full transition-all duration-300 cursor-pointer border-0 p-0 flex items-center justify-center',
                 active
-                  ? 'w-3.5 h-3.5 border border-[#EB4501] bg-transparent'
+                  ? 'w-3.5 h-3.5 border border-[#FF5B00] bg-transparent'
                   : 'w-2 h-2 bg-[#D1D5DB] hover:bg-[#9AA0AC]',
               )}
             >
-              {active ? <span className="w-1.5 h-1.5 rounded-full bg-[#EB4501]" /> : null}
+              {active ? <span className="w-1.5 h-1.5 rounded-full bg-[#FF5B00]" /> : null}
             </button>
           );
         })}

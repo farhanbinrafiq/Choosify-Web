@@ -98,9 +98,9 @@ export function ContentDetailVerdictSection({
         />
         <ListCard
           title="What to consider"
-          icon={<Info size={12} className="text-[#EB4501]" />}
-          colorClass="text-[#EB4501]"
-          dotClass="bg-[#EB4501]/50"
+          icon={<Info size={12} className="text-[#FF5B00]" />}
+          colorClass="text-[#FF5B00]"
+          dotClass="bg-[#FF5B00]/50"
           items={whatToConsider}
         />
       </div>

@@ -30,7 +30,7 @@ const DC = {
   ink: '#1A1A2E',
   muted: '#6B7280',
   mutedLight: '#9AA0AC',
-  orange: '#EB4501',
+  orange: '#FF5B00',
   ratingGreen: '#07A828',
   officialBlue: '#2323FF',
   footerBorder: '#F1F1F3',
@@ -375,12 +375,12 @@ export const ProductCard = memo(function ProductCard({
         <div className="relative z-10 flex-1 flex flex-col justify-center py-2 px-1">
           <div className="flex items-center gap-2 mb-3">
             <span className="text-[12px] font-semibold text-[#9AA0AC]">{brandName}</span>
-            <span className="bg-[#EB4501]/10 text-[#EB4501] text-[11px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+            <span className="bg-[#FF5B00]/10 text-[#FF5B00] text-[11px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
               <Star size={11} className="fill-current" /> Featured
             </span>
           </div>
           <h3
-            className="text-xl md:text-2xl font-extrabold text-[#1A1A2E] tracking-tight leading-snug mb-4 group-hover:text-[#CF4400] transition-colors line-clamp-2"
+            className="text-xl md:text-2xl font-extrabold text-[#1A1A2E] tracking-tight leading-snug mb-4 group-hover:text-[#EF3C23] transition-colors line-clamp-2"
             style={titleStyle}
           >
             {product.title}
@@ -404,7 +404,7 @@ export const ProductCard = memo(function ProductCard({
   if (variant === 'list') {
     return (
       <div
-        className="bg-white rounded-[10px] border border-[#E8EDF2] hover:border-[#EB4501]/30 transition-all flex gap-5 p-4 group cursor-pointer text-left"
+        className="bg-white rounded-[10px] border border-[#E8EDF2] hover:border-[#FF5B00]/30 transition-all flex gap-5 p-4 group cursor-pointer text-left"
         onClick={openProduct}
       >
         <div className="w-36 md:w-40 h-[170px] flex-shrink-0 bg-[#F4F7F9] rounded-[10px] relative overflow-hidden">
@@ -428,7 +428,7 @@ export const ProductCard = memo(function ProductCard({
         </div>
         <div className="flex-1 flex flex-col justify-between min-w-0 py-0.5">
           <div>
-            <h3 className="text-[12.5px] font-bold text-[#1A1A2E] leading-snug truncate mb-1 group-hover:text-[#CF4400] transition-colors">
+            <h3 className="text-[12.5px] font-bold text-[#1A1A2E] leading-snug truncate mb-1 group-hover:text-[#EF3C23] transition-colors">
               {product.title}
             </h3>
             <p className="text-[10px] text-[#6B7280] truncate mb-2">{variantLine}</p>
@@ -440,7 +440,7 @@ export const ProductCard = memo(function ProductCard({
             </div>
             {cashback && (
               <p className="text-[10px] text-[#6B7280]">
-                Up to <span className="text-[#EB4501] font-bold">{cashback}</span> cashback
+                Up to <span className="text-[#FF5B00] font-bold">{cashback}</span> cashback
               </p>
             )}
           </div>
@@ -512,8 +512,8 @@ export const ProductCard = memo(function ProductCard({
           <Heart
             size={12}
             strokeWidth={2}
-            className="text-[#EB4501]"
-            fill={isSaved ? '#EB4501' : 'none'}
+            className="text-[#FF5B00]"
+            fill={isSaved ? '#FF5B00' : 'none'}
           />
         </button>
 
@@ -528,7 +528,7 @@ export const ProductCard = memo(function ProductCard({
       <div className={cn('px-3 flex flex-col flex-1 min-h-0 text-left', isCompactGrid ? 'pt-2 pb-2.5' : 'pt-[11px] pb-3')}>
         <div
           className={cn(
-            'font-bold text-[#1A1A2E] mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis group-hover:text-[#CF4400] transition-colors',
+            'font-bold text-[#1A1A2E] mb-0.5 whitespace-nowrap overflow-hidden text-ellipsis group-hover:text-[#EF3C23] transition-colors',
             isCompactGrid ? 'text-[11px]' : 'text-[12.5px]',
           )}
           style={titleStyle}
@@ -551,7 +551,7 @@ export const ProductCard = memo(function ProductCard({
 
         {cashback && (
           <div className="text-[10px] text-[#6B7280] mb-2 whitespace-nowrap overflow-hidden text-ellipsis">
-            Up to <span className="text-[#EB4501] font-bold">{cashback}</span> cashback
+            Up to <span className="text-[#FF5B00] font-bold">{cashback}</span> cashback
           </div>
         )}
 

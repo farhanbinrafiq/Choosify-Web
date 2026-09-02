@@ -321,7 +321,7 @@ export function BrandStorySection({
                   Math.min(n + BROWSE_MORE_VISUAL_ROWS, feedVisualRows),
                 )
               }
-              className="text-[12.5px] font-bold text-[#EB4501] hover:text-[#CF4400] bg-transparent border border-[#E8EDF2] hover:border-[#EB4501]/40 rounded-lg px-5 py-2.5 cursor-pointer transition-colors min-h-[44px]"
+              className="text-[12.5px] font-bold text-[#FF5B00] hover:text-[#EF3C23] bg-transparent border border-[#E8EDF2] hover:border-[#FF5B00]/40 rounded-lg px-5 py-2.5 cursor-pointer transition-colors min-h-[44px]"
             >
               Browse More
             </button>

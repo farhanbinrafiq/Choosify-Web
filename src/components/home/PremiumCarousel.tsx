@@ -251,11 +251,11 @@ export function PremiumCarousel({
                     className={cn(
                       'rounded-full transition-all duration-300 cursor-pointer border-0 p-0 flex items-center justify-center',
                       active
-                        ? 'w-3.5 h-3.5 border border-[#EB4501] bg-transparent'
+                        ? 'w-3.5 h-3.5 border border-[#FF5B00] bg-transparent'
                         : 'w-2 h-2 bg-[#D1D5DB] hover:bg-[#9AA0AC]',
                     )}
                   >
-                    {active ? <span className="w-1.5 h-1.5 rounded-full bg-[#EB4501]" /> : null}
+                    {active ? <span className="w-1.5 h-1.5 rounded-full bg-[#FF5B00]" /> : null}
                   </button>
                 );
               }
@@ -266,7 +266,7 @@ export function PremiumCarousel({
                   onClick={() => goToPaginated(i)}
                   className={cn(
                     'h-1.5 rounded-full transition-all duration-300 cursor-pointer border-0',
-                    active ? 'w-5 bg-[#EB4501]' : 'w-1.5 bg-gray-200 hover:bg-gray-300',
+                    active ? 'w-5 bg-[#FF5B00]' : 'w-1.5 bg-gray-200 hover:bg-gray-300',
                   )}
                   title={`Go to slide ${i + 1}`}
                 />
@@ -281,7 +281,7 @@ export function PremiumCarousel({
               type="button"
               onClick={prev}
               disabled={currentIndex === 0}
-              className="w-8 h-8 rounded-full border border-gray-100 bg-white flex items-center justify-center hover:bg-[#CF4400] hover:text-white hover:border-[#EB4501]/30 transition-all active:scale-90 shadow-xs cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
+              className="w-8 h-8 rounded-full border border-gray-100 bg-white flex items-center justify-center hover:bg-[#EF3C23] hover:text-white hover:border-[#FF5B00]/30 transition-all active:scale-90 shadow-xs cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
               title="Previous Slide"
             >
               <ChevronLeft size={16} />
@@ -290,7 +290,7 @@ export function PremiumCarousel({
               type="button"
               onClick={next}
               disabled={currentIndex >= maxIndex}
-              className="w-8 h-8 rounded-full border border-gray-100 bg-white flex items-center justify-center hover:bg-[#CF4400] hover:text-white hover:border-[#EB4501]/30 transition-all active:scale-90 shadow-xs cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
+              className="w-8 h-8 rounded-full border border-gray-100 bg-white flex items-center justify-center hover:bg-[#EF3C23] hover:text-white hover:border-[#FF5B00]/30 transition-all active:scale-90 shadow-xs cursor-pointer disabled:opacity-40 disabled:pointer-events-none"
               title="Next Slide"
             >
               <ChevronRight size={16} />

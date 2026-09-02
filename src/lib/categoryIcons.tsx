@@ -78,8 +78,8 @@ export function CategoryIconGradientDefs() {
     <svg width="0" height="0" className="absolute" aria-hidden focusable="false">
       <defs>
         <linearGradient id={CATEGORY_ICON_GRADIENT_ID} x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#EB4501" />
-          <stop offset="55%" stopColor="#CF4400" />
+          <stop offset="0%" stopColor="#FF5B00" />
+          <stop offset="55%" stopColor="#EF3C23" />
           <stop offset="100%" stopColor="#1A1D4E" />
         </linearGradient>
       </defs>

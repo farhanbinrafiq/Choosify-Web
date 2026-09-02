@@ -37,7 +37,7 @@ const pillBase =
 
 /** Idle sticky filter pills */
 const pillSurface =
-  'bg-white text-[#1A1A2E] border-[#E5E7EB] hover:border-[#EB4501]/40';
+  'bg-white text-[#1A1A2E] border-[#E5E7EB] hover:border-[#FF5B00]/40';
 
 /** Selected — same dark surface as the site footer */
 const pillActive =
@@ -86,10 +86,10 @@ export function ListingFilterPills({
                 onClick={toggleFilters}
                 className={cn(
                   pillBase,
-                  'inline-flex items-center gap-1.5 bg-white text-[#1A1A2E] border-[#E5E7EB] hover:border-[#EB4501]/40',
+                  'inline-flex items-center gap-1.5 bg-white text-[#1A1A2E] border-[#E5E7EB] hover:border-[#FF5B00]/40',
                 )}
               >
-                <SlidersHorizontal size={14} strokeWidth={2.25} className="text-[#EB4501] shrink-0" />
+                <SlidersHorizontal size={14} strokeWidth={2.25} className="text-[#FF5B00] shrink-0" />
                 Filters
               </button>
             )}
@@ -120,7 +120,7 @@ export function ListingFilterPills({
                 onClick={onClearFilters}
                 className={cn(
                   pillBase,
-                  'rounded-full bg-white text-[#EB4501] border-[#EB4501]/40 hover:bg-[#EB4501]/5 hover:border-[#EB4501]',
+                  'rounded-full bg-white text-[#FF5B00] border-[#FF5B00]/40 hover:bg-[#FF5B00]/5 hover:border-[#FF5B00]',
                 )}
               >
                 Clear Filters

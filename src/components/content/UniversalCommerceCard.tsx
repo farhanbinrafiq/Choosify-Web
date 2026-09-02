@@ -34,7 +34,7 @@ const MEDIA_ASPECT: Record<CommerceCardVariant, string> = {
   square: 'aspect-square',
 };
 
-const AVATAR_COLORS = ['#EB4501', '#2323FF', '#07A828', '#EB4501', '#000435', '#6C4CFF'];
+const AVATAR_COLORS = ['#FF5B00', '#2323FF', '#07A828', '#FF5B00', '#18154C', '#6C4CFF'];
 
 function avatarColor(seed: string): string {
   let h = 0;
@@ -203,9 +203,9 @@ function CommerceCardMedia({
           >
             <Heart
               size={isReel ? 10 : 11}
-              className="text-[#EB4501]"
+              className="text-[#FF5B00]"
               strokeWidth={2}
-              fill={isSaved ? '#EB4501' : 'none'}
+              fill={isSaved ? '#FF5B00' : 'none'}
             />
           </button>
         </>
@@ -385,16 +385,16 @@ export function UniversalCommerceCard({
               >
                 <Heart
                   size={11}
-                  className="text-[#EB4501]"
+                  className="text-[#FF5B00]"
                   strokeWidth={2}
-                  fill={isSaved ? '#EB4501' : 'none'}
+                  fill={isSaved ? '#FF5B00' : 'none'}
                 />
               </button>
             </>
           )}
         </div>
         <div className="w-[60%] min-w-0 flex flex-col justify-center gap-1 py-0.5 self-stretch">
-          <div className="text-[12px] font-bold text-[#1A1A2E] leading-snug line-clamp-3 group-hover:text-[#CF4400] transition-colors">
+          <div className="text-[12px] font-bold text-[#1A1A2E] leading-snug line-clamp-3 group-hover:text-[#EF3C23] transition-colors">
             {model.title}
           </div>
           <div className="text-[10.5px] text-[#9AA0AC]">

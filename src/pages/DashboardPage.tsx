@@ -281,16 +281,16 @@ const SidebarItem = ({
     className={cn(
       'w-full flex items-center justify-between gap-2 px-3 py-2.5 rounded-lg text-[12.5px] font-semibold transition-colors border-none text-left cursor-pointer',
       active
-        ? 'bg-[#FFF3EA] text-[#EB4501]'
+        ? 'bg-[#FFF3EA] text-[#FF5B00]'
         : 'bg-transparent text-[#4B5563] hover:bg-[#F4F7F9]',
     )}
   >
     <span className="flex items-center gap-2.5 min-w-0">
-      <Icon size={15} className={cn('shrink-0', active ? 'text-[#EB4501]' : 'text-[#9AA0AC]')} />
+      <Icon size={15} className={cn('shrink-0', active ? 'text-[#FF5B00]' : 'text-[#9AA0AC]')} />
       <span className="truncate">{label}</span>
     </span>
     {badge != null && badge !== '' ? (
-      <span className="shrink-0 bg-[#EB4501] text-white text-[10px] font-extrabold rounded-lg px-1.5 py-0.5 leading-none">
+      <span className="shrink-0 bg-[#FF5B00] text-white text-[10px] font-extrabold rounded-lg px-1.5 py-0.5 leading-none">
         {badge}
       </span>
     ) : count != null && count !== '' ? (
@@ -492,15 +492,15 @@ const OverviewSection = ({
                 key={card.id}
                 type="button"
                 onClick={() => onTabChange?.(card.id)}
-                className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 text-left hover:border-[#EB4501]/40 transition-colors cursor-pointer flex items-start gap-3"
+                className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 text-left hover:border-[#FF5B00]/40 transition-colors cursor-pointer flex items-start gap-3"
               >
-                <div className="w-10 h-10 rounded-xl bg-[#EB4501]/10 flex items-center justify-center shrink-0">
-                  <Icon size={18} className="text-[#EB4501]" />
+                <div className="w-10 h-10 rounded-xl bg-[#FF5B00]/10 flex items-center justify-center shrink-0">
+                  <Icon size={18} className="text-[#FF5B00]" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="text-[13px] font-extrabold text-[#1A1A2E]">{card.title}</div>
                   <p className="text-[11.5px] text-[#6B7280] mt-0.5">{card.detail}</p>
-                  <span className="text-[11.5px] font-bold text-[#EB4501] mt-2 inline-block">
+                  <span className="text-[11.5px] font-bold text-[#FF5B00] mt-2 inline-block">
                     Open →
                   </span>
                 </div>
@@ -524,7 +524,7 @@ const OverviewSection = ({
                   <button
                     type="button"
                     onClick={() => onTabChange?.('my-reviews')}
-                    className="text-[11.5px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer p-0"
+                    className="text-[11.5px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer p-0"
                   >
                     Score Details →
                   </button>
@@ -548,7 +548,7 @@ const OverviewSection = ({
               <button
                 type="button"
                 onClick={() => onTabChange?.('orders')}
-                className="text-[11.5px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer p-0 text-left"
+                className="text-[11.5px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer p-0 text-left"
               >
                 View All Orders →
               </button>
@@ -565,7 +565,7 @@ const OverviewSection = ({
               <button
                 type="button"
                 onClick={() => onTabChange?.('orders')}
-                className="text-[11.5px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer p-0 text-left"
+                className="text-[11.5px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer p-0 text-left"
               >
                 View Spending →
               </button>
@@ -582,7 +582,7 @@ const OverviewSection = ({
               <button
                 type="button"
                 onClick={() => onTabChange?.('orders')}
-                className="text-[11.5px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer p-0 text-left"
+                className="text-[11.5px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer p-0 text-left"
               >
                 View My Savings →
               </button>
@@ -592,13 +592,13 @@ const OverviewSection = ({
           <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 sm:p-5 min-w-0 overflow-hidden">
             <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
               <h3 className="text-[14px] font-extrabold text-[#1A1A2E] flex items-center gap-2 min-w-0">
-                <Package className="text-[#EB4501] shrink-0" size={16} />
+                <Package className="text-[#FF5B00] shrink-0" size={16} />
                 <span className="truncate">Recent Orders</span>
               </h3>
               <button
                 type="button"
                 onClick={() => onTabChange?.('orders')}
-                className="text-[11.5px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer shrink-0 whitespace-nowrap"
+                className="text-[11.5px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer shrink-0 whitespace-nowrap"
               >
                 View All →
               </button>
@@ -653,7 +653,7 @@ const OverviewSection = ({
                         <button
                           type="button"
                           onClick={() => onTabChange?.('orders')}
-                          className="text-[11.5px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer p-0 whitespace-nowrap"
+                          className="text-[11.5px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer p-0 whitespace-nowrap"
                         >
                           View Details
                         </button>
@@ -667,7 +667,7 @@ const OverviewSection = ({
                 <p className="text-[12px] font-semibold text-[#9AA0AC]">No orders yet</p>
                 <Link
                   to="/products"
-                  className="mt-3 text-[11.5px] font-bold text-[#EB4501] hover:underline"
+                  className="mt-3 text-[11.5px] font-bold text-[#FF5B00] hover:underline"
                 >
                   Start shopping →
                 </Link>
@@ -678,12 +678,12 @@ const OverviewSection = ({
           <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 sm:p-5 min-w-0 overflow-hidden">
             <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
               <h3 className="text-[14px] font-extrabold text-[#1A1A2E] flex items-center gap-2 min-w-0">
-                <Gift className="text-[#EB4501] shrink-0" size={16} />
+                <Gift className="text-[#FF5B00] shrink-0" size={16} />
                 <span className="truncate">Recommended For You</span>
               </h3>
               <Link
                 to="/products"
-                className="text-[11.5px] font-bold text-[#EB4501] hover:underline shrink-0 whitespace-nowrap"
+                className="text-[11.5px] font-bold text-[#FF5B00] hover:underline shrink-0 whitespace-nowrap"
               >
                 Browse more →
               </Link>
@@ -704,7 +704,7 @@ const OverviewSection = ({
           >
             {OVERVIEW_TRUST.map(({ id, label, icon: Icon }) => (
               <div key={id} className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-full bg-[#EB4501]/10 text-[#EB4501] flex items-center justify-center shrink-0">
+                <div className="w-8 h-8 rounded-full bg-[#FF5B00]/10 text-[#FF5B00] flex items-center justify-center shrink-0">
                   <Icon size={15} aria-hidden />
                 </div>
                 <span className="text-[11.5px] font-bold text-[#1A1A2E] leading-snug break-words">
@@ -734,7 +734,7 @@ const OverviewSection = ({
 
           <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 min-w-0 overflow-hidden">
             <h3 className="text-[13px] font-extrabold text-[#1A1A2E] mb-1 flex items-center gap-2">
-              <Award className="text-[#EB4501] shrink-0" size={15} /> Your Score / Benefits
+              <Award className="text-[#FF5B00] shrink-0" size={15} /> Your Score / Benefits
             </h3>
             <p className="text-[11.5px] text-[#9AA0AC] mb-3 break-words">
               Score {choosifyScore}/100 unlocks these perks
@@ -768,7 +768,7 @@ const OverviewSection = ({
               <button
                 type="button"
                 onClick={() => onTabChange?.('settings')}
-                className="text-[11px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer p-0 shrink-0"
+                className="text-[11px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer p-0 shrink-0"
               >
                 View All
               </button>
@@ -778,7 +778,7 @@ const OverviewSection = ({
                 <div
                   key={b.id}
                   title={b.label}
-                  className="w-10 h-10 rounded-full bg-[#F4F7F9] border border-[#E8EDF2] flex items-center justify-center text-[13px] font-extrabold text-[#EB4501]"
+                  className="w-10 h-10 rounded-full bg-[#F4F7F9] border border-[#E8EDF2] flex items-center justify-center text-[13px] font-extrabold text-[#FF5B00]"
                 >
                   {b.emoji}
                 </div>
@@ -795,7 +795,7 @@ const OverviewSection = ({
               <button
                 type="button"
                 onClick={() => onTabChange?.('saved-items')}
-                className="text-[11px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer p-0 shrink-0"
+                className="text-[11px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer p-0 shrink-0"
               >
                 View All
               </button>
@@ -865,7 +865,7 @@ const SavedProductsSection = () => {
                   addToCart(p, 1);
                   notify.cartAdded({ productId: p.id, title: p.title, quantity: 1 });
                 }}
-                className="absolute top-6 right-18 z-30 w-10 h-10 rounded-full bg-[#EB4501]/10 text-[#EB4501] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border border-[#EB4501]/20 hover:bg-[#CF4400] hover:text-white cursor-pointer"
+                className="absolute top-6 right-18 z-30 w-10 h-10 rounded-full bg-[#FF5B00]/10 text-[#FF5B00] flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all border border-[#FF5B00]/20 hover:bg-[#EF3C23] hover:text-white cursor-pointer"
                 title="Add to Cart"
               >
                 <ShoppingBag size={18} />
@@ -887,7 +887,7 @@ const SavedProductsSection = () => {
           </div>
           <h3 className="text-lg font-extrabold text-[#1A1A2E] mb-2">No saved products yet</h3>
           <p className="text-[#9AA0AC] text-[12.5px] mb-8 max-w-sm">Start exploring Choosify.bd and save products you love.</p>
-          <Link to="/products" className="px-8 py-3 bg-[#EB4501] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110 transition-all">Start browsing</Link>
+          <Link to="/products" className="px-8 py-3 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110 transition-all">Start browsing</Link>
         </div>
       )}
     </div>
@@ -936,7 +936,7 @@ const SavedGuidesSection = () => {
           </p>
           <Link
             to="/spotlight"
-            className="px-8 py-3 bg-[#EB4501] text-white rounded-xl text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110 transition-all"
+            className="px-8 py-3 bg-[#FF5B00] text-white rounded-xl text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110 transition-all"
           >
             Browse Spotlight
           </Link>
@@ -970,7 +970,7 @@ const SavedBrandsSection = () => {
         <div className="py-32 flex flex-col items-center text-center opacity-80">
           <Store size={64} className="mb-8 text-gray-300" />
           <p className="text-[13px] font-semibold text-[#1A1A2E] tracking-tight leading-relaxed">No Saved Brands yet</p>
-          <Link to="/brands" className="mt-6 px-6 py-2.5 bg-[#EB4501] text-white rounded-xl text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Browse all brands</Link>
+          <Link to="/brands" className="mt-6 px-6 py-2.5 bg-[#FF5B00] text-white rounded-xl text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Browse all brands</Link>
         </div>
       )}
     </div>
@@ -998,7 +998,7 @@ const SavedItemsSection = () => {
           <h3 id="saved-products-heading" className="text-[15px] font-extrabold text-[#1A1A2E]">
             Saved Products <span className="text-[#9AA0AC]">({savedProducts.length})</span>
           </h3>
-          <Link to="/products" className="text-[11.5px] font-bold text-[#EB4501] hover:underline">
+          <Link to="/products" className="text-[11.5px] font-bold text-[#FF5B00] hover:underline">
             Browse →
           </Link>
         </div>
@@ -1020,7 +1020,7 @@ const SavedItemsSection = () => {
           <h3 id="saved-brands-heading" className="text-[15px] font-extrabold text-[#1A1A2E]">
             Saved Brands <span className="text-[#9AA0AC]">({savedBrands.length})</span>
           </h3>
-          <Link to="/brands" className="text-[11.5px] font-bold text-[#EB4501] hover:underline">
+          <Link to="/brands" className="text-[11.5px] font-bold text-[#FF5B00] hover:underline">
             Browse brands →
           </Link>
         </div>
@@ -1043,7 +1043,7 @@ const SavedItemsSection = () => {
             Saved Guides &amp; Content{' '}
             <span className="text-[#9AA0AC]">({savedGuides.length})</span>
           </h3>
-          <Link to="/spotlight" className="text-[11.5px] font-bold text-[#EB4501] hover:underline">
+          <Link to="/spotlight" className="text-[11.5px] font-bold text-[#FF5B00] hover:underline">
             Browse Spotlight →
           </Link>
         </div>
@@ -1093,7 +1093,7 @@ const LovedBrandsSection = () => {
               <button
                 type="button"
                 onClick={() => toggleLoveBrand(brand)}
-                className="text-[12px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer self-center"
+                className="text-[12px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer self-center"
               >
                 Remove from Loved
               </button>
@@ -1104,7 +1104,7 @@ const LovedBrandsSection = () => {
         <div className="py-32 flex flex-col items-center text-center opacity-80">
           <Heart size={64} className="mb-8 text-rose-500" />
           <p className="text-[13px] font-semibold text-[#1A1A2E] tracking-tight leading-relaxed">No Loved Brands yet</p>
-          <Link to="/brands" className="mt-6 px-6 py-2.5 bg-[#EB4501] text-white rounded-xl text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Explore brands</Link>
+          <Link to="/brands" className="mt-6 px-6 py-2.5 bg-[#FF5B00] text-white rounded-xl text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Explore brands</Link>
         </div>
       )}
     </div>
@@ -1148,7 +1148,7 @@ const FollowedBrandsSection = () => {
           <h3 id="following-brands-heading" className="text-[15px] font-extrabold text-[#1A1A2E]">
             Brands <span className="text-[#9AA0AC]">({brandRows.length})</span>
           </h3>
-          <Link to="/brands" className="text-[11.5px] font-bold text-[#EB4501] hover:underline">
+          <Link to="/brands" className="text-[11.5px] font-bold text-[#FF5B00] hover:underline">
             Explore brands →
           </Link>
         </div>
@@ -1162,7 +1162,7 @@ const FollowedBrandsSection = () => {
                   onClick={() =>
                     source === 'followed' ? toggleFollowBrand(brand) : toggleLoveBrand(brand)
                   }
-                  className="text-[12px] font-bold text-[#9AA0AC] hover:text-[#CF4400] bg-transparent border-none cursor-pointer self-center"
+                  className="text-[12px] font-bold text-[#9AA0AC] hover:text-[#EF3C23] bg-transparent border-none cursor-pointer self-center"
                 >
                   {source === 'followed' ? 'Unfollow' : 'Remove from Loved'}
                 </button>
@@ -1181,7 +1181,7 @@ const FollowedBrandsSection = () => {
           <h3 id="following-creators-heading" className="text-[15px] font-extrabold text-[#1A1A2E]">
             Creators <span className="text-[#9AA0AC]">({followedCreators.length})</span>
           </h3>
-          <Link to="/creators" className="text-[11.5px] font-bold text-[#EB4501] hover:underline">
+          <Link to="/creators" className="text-[11.5px] font-bold text-[#FF5B00] hover:underline">
             Explore creators →
           </Link>
         </div>
@@ -1200,7 +1200,7 @@ const FollowedBrandsSection = () => {
                   <button
                     type="button"
                     onClick={() => toggleFollowBrand(creator)}
-                    className="text-[12px] font-bold text-[#9AA0AC] hover:text-[#CF4400] bg-transparent border-none cursor-pointer self-center"
+                    className="text-[12px] font-bold text-[#9AA0AC] hover:text-[#EF3C23] bg-transparent border-none cursor-pointer self-center"
                   >
                     Unfollow
                   </button>
@@ -1255,10 +1255,10 @@ const RecentlyViewedSection = () => {
         </div>
       ) : (
         <div className="py-32 flex flex-col items-center text-center opacity-80">
-          <Clock size={64} className="mb-8 text-[#EB4501]" />
+          <Clock size={64} className="mb-8 text-[#FF5B00]" />
           <p className="text-[13px] font-semibold text-[#1A1A2E] tracking-tight leading-relaxed">No recently viewed products</p>
           <p className="text-[10px] font-bold text-gray-405 uppercase mt-2 italic">Product views will automatically populate this section.</p>
-          <Link to="/products" className="mt-6 px-6 py-2.5 bg-[#EB4501] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Browse Products & Services</Link>
+          <Link to="/products" className="mt-6 px-6 py-2.5 bg-[#FF5B00] text-white rounded-lg text-[13px] font-bold tracking-tight shadow-sm hover:brightness-110">Browse Products & Services</Link>
         </div>
       )}
     </div>
@@ -1289,7 +1289,7 @@ const MessagesSection = () => {
             <h2 className="text-lg md:text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-4">Inbox</h2>
             <div className="relative">
                <Search size={14} className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
-               <input className="w-full h-10 pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-xl text-[10px] font-bold text-navy placeholder:text-gray-400 focus:outline-none focus:border-[#EB4501]/30 transition-all" placeholder="Search chats..." />
+               <input className="w-full h-10 pl-10 pr-4 bg-gray-50 border border-gray-200 rounded-xl text-[10px] font-bold text-navy placeholder:text-gray-400 focus:outline-none focus:border-[#FF5B00]/30 transition-all" placeholder="Search chats..." />
             </div>
          </div>
          <div className="flex-1 overflow-y-auto no-scrollbar">
@@ -1297,7 +1297,7 @@ const MessagesSection = () => {
               <button 
                 key={i} 
                 onClick={() => setActiveChat(i)}
-                className={cn("w-full p-6 flex gap-4 text-left border-b border-gray-100 transition-all hover:bg-gray-50 bg-transparent border-none cursor-pointer", i === 1 && "bg-gray-50/50 border-r-2 border-[#EB4501]")}
+                className={cn("w-full p-6 flex gap-4 text-left border-b border-gray-100 transition-all hover:bg-gray-50 bg-transparent border-none cursor-pointer", i === 1 && "bg-gray-50/50 border-r-2 border-[#FF5B00]")}
               >
                  <div className="relative">
                     <img src={`https://i.pravatar.cc/150?u=${i + 20}`} className="w-12 h-12 rounded-full object-cover" alt="" />
@@ -1342,7 +1342,7 @@ const MessagesSection = () => {
               <div key={m.id} className={cn("flex flex-col max-w-[90%] md:max-w-[80%]", m.sender === 'user' ? "ml-auto items-end" : "mr-auto items-start")}>
                  <div className={cn(
                    "px-5 py-3 md:px-6 md:py-4 rounded-[16px] md:rounded-[20px] mb-2 text-[11px] md:text-xs font-bold leading-relaxed",
-                   m.sender === 'user' ? "bg-[#EB4501] text-white rounded-tr-none shadow-md shadow-[#EB4501]/10 italic" : "bg-white text-navy rounded-tl-none border border-gray-200"
+                   m.sender === 'user' ? "bg-[#FF5B00] text-white rounded-tr-none shadow-md shadow-[#FF5B00]/10 italic" : "bg-white text-navy rounded-tl-none border border-gray-200"
                  )}>
                     {m.text}
                  </div>
@@ -1357,12 +1357,12 @@ const MessagesSection = () => {
                  value={inputText}
                  onChange={(e) => setInputText(e.target.value)}
                  onKeyPress={(e) => e.key === 'Enter' && handleSend()}
-                 className="w-full h-12 md:h-14 bg-gray-50 border border-gray-200 rounded-xl md:rounded-2xl pl-6 pr-14 md:pr-16 text-xs font-bold text-navy placeholder:text-gray-400 focus:outline-none focus:border-[#EB4501]/30 transition-all" 
+                 className="w-full h-12 md:h-14 bg-gray-50 border border-gray-200 rounded-xl md:rounded-2xl pl-6 pr-14 md:pr-16 text-xs font-bold text-navy placeholder:text-gray-400 focus:outline-none focus:border-[#FF5B00]/30 transition-all" 
                  placeholder="Type message..." 
                />
                <button 
                  onClick={handleSend}
-                 className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-[#EB4501] text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#EB4501]/10 border-none cursor-pointer"
+                 className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 md:w-10 md:h-10 rounded-lg md:rounded-xl bg-[#FF5B00] text-white flex items-center justify-center hover:scale-105 active:scale-95 transition-all shadow-lg shadow-[#FF5B00]/10 border-none cursor-pointer"
                >
                   <Send size={16} />
                </button>
@@ -1435,7 +1435,7 @@ const NotificationsSection = () => {
           </button>
           <button
             onClick={markAllAsRead}
-            className="text-[12px] font-bold text-[#EB4501] tracking-tight hover:underline border-none bg-transparent cursor-pointer"
+            className="text-[12px] font-bold text-[#FF5B00] tracking-tight hover:underline border-none bg-transparent cursor-pointer"
           >
             Mark all as read
           </button>
@@ -1465,18 +1465,18 @@ const NotificationsSection = () => {
                 tabIndex={0}
                 className={cn(
                   'p-8 bg-white border border-[#e8edf2] rounded-[5px] flex items-start gap-6 transition-all hover:bg-gray-50 relative overflow-hidden group shadow-sm cursor-pointer',
-                  !n.read && 'border-[#EB4501]/30 bg-[#EB4501]/5',
+                  !n.read && 'border-[#FF5B00]/30 bg-[#FF5B00]/5',
                 )}
               >
-                {!n.read && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#EB4501]" />}
+                {!n.read && <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-[#FF5B00]" />}
                 <div
                   className={cn(
                     'w-12 h-12 rounded-lg flex items-center justify-center shrink-0 shadow-sm',
-                    n.category === 'seller' ? 'bg-[#059669]/10 text-[#059669]' : 'bg-[#EB4501]/15 text-[#EB4501]',
+                    n.category === 'seller' ? 'bg-[#059669]/10 text-[#059669]' : 'bg-[#FF5B00]/15 text-[#FF5B00]',
                   )}
                 >
                   {n.type.includes('message') ? (
-                    <MessageCircleMore size={24} className="text-[#EB4501]" />
+                    <MessageCircleMore size={24} className="text-[#FF5B00]" />
                   ) : (
                     <Bell size={24} />
                   )}
@@ -1625,7 +1625,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
           <button
             onClick={handleSave}
             disabled={isSavingProfile}
-            className="px-5 py-2.5 bg-[#EB4501] hover:brightness-110 text-white text-[13px] font-bold tracking-tight rounded-xl transition-all cursor-pointer border-0 shadow-sm flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+            className="px-5 py-2.5 bg-[#FF5B00] hover:brightness-110 text-white text-[13px] font-bold tracking-tight rounded-xl transition-all cursor-pointer border-0 shadow-sm flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
           >
             {isSavingProfile ? 'Saving…' : 'Save Changes'}
           </button>
@@ -1641,7 +1641,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
             className={cn(
               'min-h-[40px] px-4 py-2 text-[12.5px] font-bold rounded-xl transition-all border-0 cursor-pointer',
               settingsSubTab === tab.id
-                ? 'bg-white text-[#EB4501] shadow-sm'
+                ? 'bg-white text-[#FF5B00] shadow-sm'
                 : 'bg-transparent text-[#6B7280] hover:text-[#1A1A2E]',
             )}
           >
@@ -1654,11 +1654,11 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div className="space-y-6">
             <div className="flex flex-col items-center p-8 bg-white border border-[#E8EDF2] rounded-[10px] relative overflow-hidden group">
-              <div className="absolute inset-0 bg-gradient-to-b from-[#EB4501]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+              <div className="absolute inset-0 bg-gradient-to-b from-[#FF5B00]/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
               <div className="relative w-28 h-28 mb-4">
                 <img
                   src={avatar || DEFAULT_AVATAR}
-                  className="w-full h-full rounded-full object-cover border-4 border-[#EB4501]/25"
+                  className="w-full h-full rounded-full object-cover border-4 border-[#FF5B00]/25"
                   alt="Profile"
                 />
                 <button
@@ -1666,7 +1666,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
                   onClick={handleUploadClick}
                   disabled={isUploadingAvatar}
                   aria-label="Upload new photo"
-                  className="absolute bottom-0 right-0 w-9 h-9 rounded-full bg-[#EB4501] text-white border-2 border-white flex items-center justify-center cursor-pointer shadow-sm hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="absolute bottom-0 right-0 w-9 h-9 rounded-full bg-[#FF5B00] text-white border-2 border-white flex items-center justify-center cursor-pointer shadow-sm hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <Camera size={16} />
                 </button>
@@ -1683,7 +1683,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
                   type="button"
                   onClick={handleUploadClick}
                   disabled={isUploadingAvatar}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-bold text-[#EB4501] bg-[#EB4501]/10 hover:bg-[#EB4501]/15 border border-[#EB4501]/25 rounded-lg cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-bold text-[#FF5B00] bg-[#FF5B00]/10 hover:bg-[#FF5B00]/15 border border-[#FF5B00]/25 rounded-lg cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <Upload size={14} />
                   {isUploadingAvatar ? 'Uploading…' : 'Upload new photo'}
@@ -1710,7 +1710,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
                     Full Display Name
                   </label>
                   <input
-                    className="w-full h-12 bg-slate-50 border border-slate-200/60 rounded-2xl px-5 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#EB4501]/10 focus:border-[#EB4501]/40 focus:bg-white transition-all"
+                    className="w-full h-12 bg-slate-50 border border-slate-200/60 rounded-2xl px-5 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:ring-2 focus:ring-[#FF5B00]/10 focus:border-[#FF5B00]/40 focus:bg-white transition-all"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="Your full name"
@@ -1759,7 +1759,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
               <button
                 type="button"
                 onClick={() => setSettingsSubTab('addresses')}
-                className="text-[12.5px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer p-0"
+                className="text-[12.5px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer p-0"
               >
                 Go to Addresses →
               </button>

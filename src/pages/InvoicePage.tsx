@@ -49,11 +49,11 @@ export function InvoicePage() {
   if (!isLoggedIn) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center text-center px-6 bg-[#F0F8FF]">
-        <ShieldCheck className="w-10 h-10 text-[#EB4501] mb-3" />
+        <ShieldCheck className="w-10 h-10 text-[#FF5B00] mb-3" />
         <p className="text-sm font-bold text-[#1A1A2E] mb-4">Sign in to view this invoice.</p>
         <button
           onClick={() => navigate('/login')}
-          className="px-4 py-2 bg-[#EB4501] text-white rounded-lg text-xs font-bold uppercase tracking-wider"
+          className="px-4 py-2 bg-[#FF5B00] text-white rounded-lg text-xs font-bold uppercase tracking-wider"
         >
           Log in
         </button>
@@ -74,7 +74,7 @@ export function InvoicePage() {
       <div className="min-h-screen flex flex-col items-center justify-center text-center px-6">
         <p className="text-sm font-bold text-[#1A1A2E] mb-2">Couldn&apos;t load this invoice.</p>
         <p className="text-xs text-[#6B7280] mb-4">{loadError || 'Invoice not found.'}</p>
-        <Link to="/profile/orders" className="text-xs font-bold text-[#EB4501] underline">
+        <Link to="/profile/orders" className="text-xs font-bold text-[#FF5B00] underline">
           Back to My Orders
         </Link>
       </div>
@@ -135,13 +135,13 @@ export function InvoicePage() {
       <div className="max-w-[840px] mx-auto mb-6 flex items-center justify-between gap-4 no-print">
         <button
           onClick={() => navigate(-1)}
-          className="flex items-center gap-1.5 px-3 py-2 bg-white border border-[#E8EDF2] rounded-lg text-xs font-bold text-[#6B7280] hover:text-[#EB4501] hover:border-[#EB4501]/40 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-2 bg-white border border-[#E8EDF2] rounded-lg text-xs font-bold text-[#6B7280] hover:text-[#FF5B00] hover:border-[#FF5B00]/40 transition-colors"
         >
           <ArrowLeft size={14} /> Back
         </button>
         <button
           onClick={() => window.print()}
-          className="flex items-center gap-1.5 px-4 py-2 bg-[#EB4501] hover:bg-[#CF4400] text-white rounded-lg text-xs font-bold uppercase tracking-wider transition-colors"
+          className="flex items-center gap-1.5 px-4 py-2 bg-[#FF5B00] hover:bg-[#EF3C23] text-white rounded-lg text-xs font-bold uppercase tracking-wider transition-colors"
         >
           <Printer size={14} /> Print / Save as PDF
         </button>
@@ -174,7 +174,7 @@ export function InvoicePage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
             <div>
               <div className="text-[11px] font-bold text-slate-400 tracking-wider uppercase mb-2">Billed To</div>
-              <div className="text-base font-extrabold text-[#000435]">{order.shipping?.fullName || currentUser?.name || 'Buyer'}</div>
+              <div className="text-base font-extrabold text-[#18154C]">{order.shipping?.fullName || currentUser?.name || 'Buyer'}</div>
               <div className="text-xs text-slate-500 mt-1.5 leading-relaxed font-medium">
                 {order.shipping?.address || '—'}{order.shipping?.region ? `, ${order.shipping.region}` : ''}<br />
                 Phone: {order.shipping?.phone || '—'}
@@ -183,10 +183,10 @@ export function InvoicePage() {
             <div className="flex flex-col md:items-end">
               <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs text-left md:text-right">
                 <div className="text-slate-400 uppercase tracking-wider font-semibold">Invoice Number</div>
-                <div className="font-extrabold text-[#000435]">#{sub.invoiceId}</div>
+                <div className="font-extrabold text-[#18154C]">#{sub.invoiceId}</div>
 
                 <div className="text-slate-400 uppercase tracking-wider font-semibold self-center">Invoice Amount</div>
-                <div className="text-[26px] font-black text-[#EB4501] leading-none">৳ {total.toLocaleString()}</div>
+                <div className="text-[26px] font-black text-[#FF5B00] leading-none">৳ {total.toLocaleString()}</div>
 
                 <div className="text-slate-400 uppercase tracking-wider font-semibold">Order Reference</div>
                 <div className="font-semibold text-slate-800">{order.orderId}</div>
@@ -205,7 +205,7 @@ export function InvoicePage() {
               <div className="text-[10px] font-bold text-slate-400 tracking-wider uppercase mb-0.5">Sold By</div>
               <div className="font-extrabold text-slate-900 text-sm">{sub.sellerBusinessName || 'Choosify Marketplace Seller'}</div>
             </div>
-            <span className="text-[9.5px] font-black text-[#EB4501] bg-orange-50 border border-orange-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider shrink-0">
+            <span className="text-[9.5px] font-black text-[#FF5B00] bg-orange-50 border border-orange-200 px-2.5 py-0.5 rounded-full uppercase tracking-wider shrink-0">
               Marketplace Seller
             </span>
           </div>
@@ -225,7 +225,7 @@ export function InvoicePage() {
                 {sub.items.map((item, idx) => (
                   <tr key={item.itemId || idx} className="border-b border-slate-100">
                     <td className="py-4">
-                      <div className="font-bold text-[#000435] text-sm">{item.productTitle}</div>
+                      <div className="font-bold text-[#18154C] text-sm">{item.productTitle}</div>
                       {item.productType === 'service' && item.serviceCategory && (
                         <div className="text-[11px] text-slate-400 mt-1">{item.serviceCategory}</div>
                       )}
@@ -250,12 +250,12 @@ export function InvoicePage() {
                 <span>Delivery Fee:</span>
                 <span>৳ {sub.deliveryFee.toLocaleString()}</span>
               </div>
-              <div className="flex justify-between font-extrabold text-sm text-[#EB4501] border-t border-slate-100 pt-2.5">
+              <div className="flex justify-between font-extrabold text-sm text-[#FF5B00] border-t border-slate-100 pt-2.5">
                 <span>Total:</span>
                 <span className="text-base font-black">৳ {total.toLocaleString()}</span>
               </div>
               <div className="text-right space-y-1">
-                <span className="inline-block mt-2 text-[10px] font-bold text-white bg-[#000435] px-2.5 py-0.5 rounded uppercase tracking-wider">
+                <span className="inline-block mt-2 text-[10px] font-bold text-white bg-[#18154C] px-2.5 py-0.5 rounded uppercase tracking-wider">
                   {paymentLabel}
                 </span>
                 <div className="text-[10.5px] text-slate-500">{paidLabel}</div>
@@ -265,9 +265,9 @@ export function InvoicePage() {
         </div>
 
         {/* Footer */}
-        <div className="border-t-2 border-[#EB4501] pt-5 flex justify-between items-start">
+        <div className="border-t-2 border-[#FF5B00] pt-5 flex justify-between items-start">
           <div className="max-w-[80%]">
-            <div className="text-lg font-extrabold text-[#000435] mb-1">Thanks for shopping with Choosify.</div>
+            <div className="text-lg font-extrabold text-[#18154C] mb-1">Thanks for shopping with Choosify.</div>
             <div className="text-[10px] text-slate-400 leading-relaxed">
               This is a system-generated invoice — no signature required. Powered by Choosify.bd
             </div>

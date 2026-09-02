@@ -35,7 +35,7 @@ export function CartIconButton({
       type="button"
       onClick={onClick}
       className={cn(
-        'relative rounded-full bg-[#EB4501] text-white flex items-center justify-center border-0 cursor-pointer shrink-0 hover:brightness-110 active:scale-95 transition-all p-0',
+        'relative rounded-full bg-[#FF5B00] text-white flex items-center justify-center border-0 cursor-pointer shrink-0 hover:brightness-110 active:scale-95 transition-all p-0',
         className,
       )}
       style={{ width: size, height: size }}

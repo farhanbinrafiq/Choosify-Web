@@ -68,7 +68,7 @@ function shouldShowTimeDivider(prev: ThreadMessage | undefined, curr: ThreadMess
 function StatusLabel({ status }: { status: MessageDeliveryStatus }) {
   if (status === 'seen') {
     return (
-      <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-[#EB4501]">
+      <span className="inline-flex items-center gap-0.5 text-[10px] font-medium text-[#FF5B00]">
         <CheckCheck size={12} strokeWidth={2.5} aria-hidden />
         Seen
       </span>
@@ -168,7 +168,7 @@ export function MessageThreadExchange({
                   cn(
                     'cursor-pointer rounded-2xl p-0.5 transition-shadow',
                     focusedAnnouncementId === m.id
-                      ? 'ring-2 ring-[#EB4501]/35'
+                      ? 'ring-2 ring-[#FF5B00]/35'
                       : 'hover:ring-1 hover:ring-[#E8EDF2]',
                   ),
               )}
@@ -234,7 +234,7 @@ export function MessageThreadExchange({
                   <div className="w-full max-w-sm rounded-[14px] overflow-hidden border border-[#E8EDF2] mb-2 text-left bg-white shadow-sm">
                     <div className="px-4 py-2 border-b border-[#E8EDF2] flex items-center justify-between bg-[#F4F7F9]">
                       <span className="text-[9px] font-bold uppercase text-[#9AA0AC] tracking-wider flex items-center gap-1.5">
-                        <Package size={11} className="text-[#EB4501]" />
+                        <Package size={11} className="text-[#FF5B00]" />
                         Order offer
                       </span>
                       <span
@@ -285,7 +285,7 @@ export function MessageThreadExchange({
 
                     <div className="px-4 py-3 bg-[#F4F7F9]/80 border-t border-[#E8EDF2] text-[10px] flex items-center justify-between">
                       <span className="text-[#9AA0AC] font-medium">Total</span>
-                      <span className="text-xs font-extrabold text-[#EB4501]">
+                      <span className="text-xs font-extrabold text-[#FF5B00]">
                         ৳{m.orderOffer.overallTotal.toLocaleString()}
                       </span>
                     </div>
@@ -321,7 +321,7 @@ export function MessageThreadExchange({
                   <div className="w-full max-w-sm rounded-[14px] overflow-hidden border border-[#E8EDF2] mb-2 text-left bg-white shadow-sm">
                     <div className="px-4 py-2 border-b border-[#E8EDF2] flex items-center justify-between bg-[#F4F7F9]">
                       <span className="text-[9px] font-bold uppercase text-[#9AA0AC] tracking-wider flex items-center gap-1.5">
-                        <Package size={11} className="text-[#EB4501]" />
+                        <Package size={11} className="text-[#FF5B00]" />
                         Sourcing request
                       </span>
                       {(() => {
@@ -377,7 +377,7 @@ export function MessageThreadExchange({
                           </p>
                           <p>
                             Qty:{' '}
-                            <span className="text-[#EB4501] font-bold">{m.productCard.quantity}</span>
+                            <span className="text-[#FF5B00] font-bold">{m.productCard.quantity}</span>
                           </p>
                         </div>
                       </div>
@@ -398,7 +398,7 @@ export function MessageThreadExchange({
                               ৳{(m.productCard.price * m.productCard.quantity).toLocaleString()}
                             </span>
                           )}
-                          <span className="text-xs font-extrabold text-[#EB4501] block">
+                          <span className="text-xs font-extrabold text-[#FF5B00] block">
                             ৳
                             {(
                               (m.productCard.counterPrice || m.productCard.price) *
@@ -442,7 +442,7 @@ export function MessageThreadExchange({
                       <div className="flex justify-end pt-1.5 border-t border-[#E8EDF2]">
                         <Link
                           to={m.productCard.link}
-                          className="px-3 py-1.5 bg-white hover:bg-[#FFF3EC] text-[#4B5563] hover:text-[#CF4400] border border-[#E5E7EB] text-[9px] font-bold rounded-lg transition-all flex items-center gap-1.5"
+                          className="px-3 py-1.5 bg-white hover:bg-[#FFF3EC] text-[#4B5563] hover:text-[#EF3C23] border border-[#E5E7EB] text-[9px] font-bold rounded-lg transition-all flex items-center gap-1.5"
                         >
                           View product <ExternalLink size={10} />
                         </Link>
@@ -456,7 +456,7 @@ export function MessageThreadExchange({
                     className={cn(
                       'px-3.5 py-2.5 text-[13px] font-medium leading-relaxed whitespace-pre-line break-words',
                       isOutgoing
-                        ? 'bg-[#EB4501] text-white rounded-[18px] rounded-br-md'
+                        ? 'bg-[#FF5B00] text-white rounded-[18px] rounded-br-md'
                         : isAnnouncementMessage
                           ? 'bg-white text-[#1A1A2E] border border-[#E8EDF2] rounded-[18px] rounded-bl-md shadow-sm'
                           : 'bg-[#F1F1F3] text-[#1A1A2E] rounded-[18px] rounded-bl-md',

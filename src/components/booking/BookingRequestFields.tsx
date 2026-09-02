@@ -14,7 +14,7 @@ export function BookingRequestFields({
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
       {fields.map((field) => {
         const commonClass =
-          'w-full bg-white border border-[#E5E7EB] rounded-xl px-3.5 py-2.5 text-xs text-[#1A1A2E] outline-none focus:border-[#EB4501] transition-colors';
+          'w-full bg-white border border-[#E5E7EB] rounded-xl px-3.5 py-2.5 text-xs text-[#1A1A2E] outline-none focus:border-[#FF5B00] transition-colors';
         const value = values[field.key] ?? '';
         return (
           <label
@@ -23,7 +23,7 @@ export function BookingRequestFields({
           >
             <span className="block text-[11px] font-bold text-[#4B5563] mb-1.5">
               {field.label}
-              {field.required ? <span className="text-[#EB4501]"> *</span> : null}
+              {field.required ? <span className="text-[#FF5B00]"> *</span> : null}
             </span>
             {field.type === 'select' ? (
               <select

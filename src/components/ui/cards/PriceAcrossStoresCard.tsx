@@ -27,7 +27,7 @@ export const PriceAcrossStoresCard: React.FC<PriceAcrossStoresCardProps> = ({
   return (
     <div className={cn("bg-white rounded-2xl border border-slate-100 p-6 flex flex-col", className)}>
       {title && (
-        <h3 className="text-sm font-black text-[#000435] uppercase tracking-wider mb-6">
+        <h3 className="text-sm font-black text-[#18154C] uppercase tracking-wider mb-6">
           {title}
         </h3>
       )}
@@ -47,7 +47,7 @@ export const PriceAcrossStoresCard: React.FC<PriceAcrossStoresCardProps> = ({
             </div>
             
             <div className="flex flex-col items-end">
-              <span className="text-sm font-black text-[#000435]">{store.price}</span>
+              <span className="text-sm font-black text-[#18154C]">{store.price}</span>
               {store.cashback && (
                 <span className="text-[10px] font-bold text-[#07D005]">
                   Cashback {store.cashback}
@@ -60,7 +60,7 @@ export const PriceAcrossStoresCard: React.FC<PriceAcrossStoresCardProps> = ({
 
       {onViewAllStores && (
         <div className="mt-6 pt-4 border-t border-slate-100 text-center">
-          <Button variant="ghost" size="sm" onClick={onViewAllStores} className="w-full text-[#EB4501] hover:text-[#000435]">
+          <Button variant="ghost" size="sm" onClick={onViewAllStores} className="w-full text-[#FF5B00] hover:text-[#18154C]">
             View All Stores ({stores.length})
           </Button>
         </div>

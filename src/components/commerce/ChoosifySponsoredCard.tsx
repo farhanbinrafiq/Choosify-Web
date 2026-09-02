@@ -46,7 +46,7 @@ function SponsoredCompactCard({ item }: { item: SponsoredPlacementItem }) {
           <p className="text-[10px] text-white/50 line-clamp-1 mb-2">{item.subtitle}</p>
         )}
         <div className="mt-auto">
-          <span className="block w-full text-center bg-[#EB4501] text-white py-2 rounded-lg text-[10px] font-bold group-hover:brightness-110 transition-[filter]">
+          <span className="block w-full text-center bg-[#FF5B00] text-white py-2 rounded-lg text-[10px] font-bold group-hover:brightness-110 transition-[filter]">
             {item.ctaLabel || 'Shop Now'}
           </span>
         </div>

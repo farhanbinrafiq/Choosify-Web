@@ -4,7 +4,7 @@ import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
 import { EmiAiLogo } from '../components/EmiAiLogo';
 import { verifyEmail } from '../lib/authApi';
 
-const PRIMARY = '#EB4501';
+const PRIMARY = '#FF5B00';
 
 type Stage = 'checking' | 'success' | 'invalid';
 
@@ -43,7 +43,7 @@ export default function VerifyEmailPage() {
           {stage === 'checking' && (
             <>
               <Loader2 className="w-8 h-8 mx-auto animate-spin" style={{ color: PRIMARY }} />
-              <h1 className="text-xl font-black text-[#000435]">Verifying your email…</h1>
+              <h1 className="text-xl font-black text-[#18154C]">Verifying your email…</h1>
             </>
           )}
           {stage === 'success' && (
@@ -51,7 +51,7 @@ export default function VerifyEmailPage() {
               <div className="mx-auto w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center">
                 <CheckCircle2 className="w-7 h-7 text-emerald-500" />
               </div>
-              <h1 className="text-xl font-black text-[#000435]">Email verified</h1>
+              <h1 className="text-xl font-black text-[#18154C]">Email verified</h1>
               <p className="text-sm text-gray-500 leading-relaxed">Your email address has been confirmed.</p>
               <Link
                 to="/dashboard"
@@ -67,7 +67,7 @@ export default function VerifyEmailPage() {
               <div className="mx-auto w-14 h-14 rounded-full bg-rose-50 flex items-center justify-center">
                 <XCircle className="w-7 h-7 text-rose-500" />
               </div>
-              <h1 className="text-xl font-black text-[#000435]">Link expired or invalid</h1>
+              <h1 className="text-xl font-black text-[#18154C]">Link expired or invalid</h1>
               <p className="text-sm text-gray-500 leading-relaxed">
                 This verification link is no longer valid. You can request a fresh one from your account settings
                 after signing in.

@@ -23,7 +23,7 @@ export const SpecificationCard: React.FC<SpecificationCardProps> = ({
   return (
     <div className={cn("bg-white rounded-2xl border border-slate-100 p-6 flex flex-col", className)}>
       {title && (
-        <h3 className="text-sm font-black text-[#000435] uppercase tracking-wider mb-6">
+        <h3 className="text-sm font-black text-[#18154C] uppercase tracking-wider mb-6">
           {title}
         </h3>
       )}
@@ -32,14 +32,14 @@ export const SpecificationCard: React.FC<SpecificationCardProps> = ({
         {specs.map((spec, idx) => (
           <div key={idx} className="grid grid-cols-3 gap-4 border-b border-slate-50 pb-3 last:border-0 last:pb-0 items-start">
             <span className="col-span-1 text-xs font-bold text-slate-500">{spec.label}</span>
-            <span className="col-span-2 text-xs font-bold text-[#000435]">{spec.value}</span>
+            <span className="col-span-2 text-xs font-bold text-[#18154C]">{spec.value}</span>
           </div>
         ))}
       </div>
 
       {onViewAll && (
         <div className="mt-6 pt-4 border-t border-slate-100 text-center">
-          <Button variant="ghost" size="sm" onClick={onViewAll} className="w-full text-[#EB4501] hover:text-[#000435]">
+          <Button variant="ghost" size="sm" onClick={onViewAll} className="w-full text-[#FF5B00] hover:text-[#18154C]">
             View All Specifications
           </Button>
         </div>

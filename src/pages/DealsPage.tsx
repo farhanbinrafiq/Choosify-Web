@@ -318,14 +318,14 @@ export function DealsPage() {
     renderSearch: () => (
       <div className="relative">
         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-          <Search size={13} className="text-[#EB4501]" />
+          <Search size={13} className="text-[#FF5B00]" />
         </div>
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search brand deals..."
-          className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#EB4501]/50 transition-colors"
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#FF5B00]/50 transition-colors"
         />
       </div>
     ),
@@ -507,14 +507,14 @@ export function DealsPage() {
              {/* LEFT COLUMN SEARCH BAR */}
              <div className="relative mb-2">
                <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                 <Search size={13} className="text-[#EB4501]" />
+                 <Search size={13} className="text-[#FF5B00]" />
                </div>
                <input
                  type="text"
                  value={searchQuery}
                  onChange={(e) => setSearchQuery(e.target.value)}
                  placeholder="Search brand deals..."
-                 className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#EB4501]/50 transition-colors shadow-sm"
+                 className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#FF5B00]/50 transition-colors shadow-sm"
                />
              </div>
              
@@ -620,15 +620,15 @@ export function DealsPage() {
                className="bg-white rounded-2xl border border-[#eef2f6] p-5 relative overflow-hidden flex flex-col justify-between text-center shrink-0 w-full shadow-sm" 
                style={{ height: '410px' }}
              >
-               <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-br from-[#EB4501]/5 to-[#1A1D4E]/5 rounded-full blur-2xl pointer-events-none" />
+               <div className="absolute top-0 right-0 w-36 h-36 bg-gradient-to-br from-[#FF5B00]/5 to-[#1A1D4E]/5 rounded-full blur-2xl pointer-events-none" />
                
                <div className="flex flex-col items-center">
-                 <div className="w-10 h-10 rounded-full bg-[#EB4501]/10 text-[#EB4501] flex items-center justify-center mb-3 border border-[#EB4501]/5 shrink-0 shadow-sm">
+                 <div className="w-10 h-10 rounded-full bg-[#FF5B00]/10 text-[#FF5B00] flex items-center justify-center mb-3 border border-[#FF5B00]/5 shrink-0 shadow-sm">
                    <Star className="w-4 h-4 fill-current" />
                  </div>
                  
                  <h3 className="font-sans text-sm font-semibold uppercase tracking-tight text-[#1A1D4E] leading-snug">
-                   For Business <span className="text-[#EB4501]">& Sellers</span>
+                   For Business <span className="text-[#FF5B00]">& Sellers</span>
                  </h3>
                  
                  <p className="text-[11px] text-gray-400 font-semibold mt-2 px-1 leading-relaxed max-w-[220px]">
@@ -636,7 +636,7 @@ export function DealsPage() {
                  </p>
                </div>
 
-               <div className="border border-dashed border-[#EB4501]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-2xl p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
+               <div className="border border-dashed border-[#FF5B00]/20 bg-gradient-to-b from-[#FFF0E8]/20 to-white rounded-2xl p-4 text-center flex flex-col items-center justify-center my-2 flex-1">
                  <h4 className="font-sans font-semibold text-gray-900 text-xs uppercase tracking-wider mb-1 leading-none">BOOST SALES TODAY</h4>
                  <p className="text-[10px] text-gray-500 mb-4 leading-relaxed max-w-[210px] font-semibold">
                    Gain entry to featured deal slots, exposure metrics, and buyer engagement streams.
@@ -645,14 +645,14 @@ export function DealsPage() {
                  <button 
                    type="button"
                    onClick={() => navigate('/post-offer')}
-                   className="w-full py-2.5 bg-[#EB4501] hover:bg-[#CF4400] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0"
+                   className="w-full py-2.5 bg-[#FF5B00] hover:bg-[#EF3C23] text-white font-semibold rounded-lg text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 transition-colors shadow-sm cursor-pointer border-0"
                  >
                    POST OFFER <ArrowRight className="w-3.5 h-3.5" />
                  </button>
                </div>
 
                <div className="flex items-center justify-center gap-1.5 text-[8.5px] font-semibold text-[#8a9bb0] uppercase font-mono tracking-widest shrink-0">
-                 <Star className="w-3.5 h-3.5 text-[#EB4501] fill-current" /> 100k+ shopper log Daily
+                 <Star className="w-3.5 h-3.5 text-[#FF5B00] fill-current" /> 100k+ shopper log Daily
                </div>
              </div>
           </aside>

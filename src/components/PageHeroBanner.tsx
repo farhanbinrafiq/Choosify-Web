@@ -350,8 +350,8 @@ export function PageHeroBanner({ pageKey, className, hidden = false }: PageHeroB
                 }
               />
             )}
-            <div className="absolute inset-0 bg-gradient-to-r from-[#000435]/85 via-[#000435]/45 to-transparent" />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#000435]/40 via-transparent to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#18154C]/85 via-[#18154C]/45 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#18154C]/40 via-transparent to-transparent" />
 
             {slideLink && slideLinkIsExternal && (
               <a
@@ -376,7 +376,7 @@ export function PageHeroBanner({ pageKey, className, hidden = false }: PageHeroB
                   className={
                     String(current.sponsorBadge).toLowerCase() === 'promoted'
                       ? 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#2323FF] text-white text-[9px] font-bold uppercase tracking-wider mb-2'
-                      : 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#EB4501]/20 text-[#FF8A50] text-[9px] font-bold uppercase tracking-wider border border-[#EB4501]/30 mb-2'
+                      : 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#FF5B00]/20 text-[#FF8A50] text-[9px] font-bold uppercase tracking-wider border border-[#FF5B00]/30 mb-2'
                   }
                 >
                   <Sparkles className="w-3 h-3" />

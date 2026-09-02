@@ -27,7 +27,7 @@ export function HeroStats({ stats, className, light = true }: HeroStatsProps) {
             <div
               className={cn(
                 'w-10 h-10 rounded-xl flex items-center justify-center mb-3 group-hover:scale-105 transition-transform',
-                light ? 'bg-[#EB4501]/20 text-[#FF8A50]' : 'bg-[#FFF0E8] text-[#EB4501]',
+                light ? 'bg-[#FF5B00]/20 text-[#FF8A50]' : 'bg-[#FFF0E8] text-[#FF5B00]',
               )}
             >
               <Icon size={18} aria-hidden />

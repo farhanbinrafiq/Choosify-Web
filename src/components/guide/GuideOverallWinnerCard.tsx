@@ -61,7 +61,7 @@ export function GuideOverallWinnerCard({
         <div className="text-[11px] font-extrabold text-[#FBBF24] tracking-wide mb-2">
           🏆 OVERALL WINNER
         </div>
-        <div className="bg-[#EB4501] text-white text-[9px] font-extrabold px-2.5 py-0.5 rounded inline-block mb-2">
+        <div className="bg-[#FF5B00] text-white text-[9px] font-extrabold px-2.5 py-0.5 rounded inline-block mb-2">
           {badge}
         </div>
         <div className="text-[17px] font-extrabold mb-1 leading-snug">{name}</div>
@@ -84,7 +84,7 @@ export function GuideOverallWinnerCard({
 
       <div className="bg-white/[0.06] rounded-[10px] px-[14px] py-[14px] sm:px-[22px] text-center min-w-[100px] w-full sm:w-auto">
         <div className="text-[10px] text-white/50 mb-1">CHOOSIFY RATING</div>
-        <div className="text-[26px] font-extrabold text-[#EB4501] leading-none mb-1">
+        <div className="text-[26px] font-extrabold text-[#FF5B00] leading-none mb-1">
           {scoreText}
         </div>
         <div className="text-[9.5px] text-white/40 mb-2">Out of 10</div>
@@ -93,7 +93,7 @@ export function GuideOverallWinnerCard({
         </div>
         <Link
           to={shopHref}
-          className="block w-full bg-[#EB4501] hover:bg-[#CF4400] text-white border-0 py-2 rounded-md text-[11px] font-extrabold transition-colors"
+          className="block w-full bg-[#FF5B00] hover:bg-[#EF3C23] text-white border-0 py-2 rounded-md text-[11px] font-extrabold transition-colors"
         >
           SHOP NOW
         </Link>

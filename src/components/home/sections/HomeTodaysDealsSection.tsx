@@ -172,7 +172,7 @@ export function HomeTodaysDealsSection({ banners: bannersProp }: HomeTodaysDeals
           return (
             <BannerCardLink
               href={href}
-              className="relative block w-full rounded-xl min-h-[120px] h-[120px] overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#EB4501]/50"
+              className="relative block w-full rounded-xl min-h-[120px] h-[120px] overflow-hidden cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5B00]/50"
             >
               <img
                 src={banner.image}

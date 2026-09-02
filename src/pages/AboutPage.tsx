@@ -34,7 +34,7 @@ export function AboutPage() {
   const navLinkClass = (id: string) =>
     cn(
       'flex items-center gap-2 px-3 py-2 rounded-lg text-[12.5px] font-semibold transition-colors',
-      activeHash === id ? 'bg-[#FFF3EA] text-[#EB4501]' : 'text-[#4B5563] hover:bg-[#F4F7F9]',
+      activeHash === id ? 'bg-[#FFF3EA] text-[#FF5B00]' : 'text-[#4B5563] hover:bg-[#F4F7F9]',
     );
 
   return (
@@ -68,7 +68,7 @@ export function AboutPage() {
           </div>
           <div className="bg-[#F4F7F9] rounded-xl p-4">
             <div className="flex items-center gap-2.5 mb-2.5">
-              <div className="w-[34px] h-[34px] rounded-lg bg-[#000435] flex items-center justify-center text-[15px] shrink-0">
+              <div className="w-[34px] h-[34px] rounded-lg bg-[#18154C] flex items-center justify-center text-[15px] shrink-0">
                 🤖
               </div>
               <div>
@@ -111,7 +111,7 @@ export function AboutPage() {
                 ))}
               </div>
             </div>
-            <div className="w-full h-[200px] md:h-[220px] rounded-xl overflow-hidden bg-[#000435]">
+            <div className="w-full h-[200px] md:h-[220px] rounded-xl overflow-hidden bg-[#18154C]">
               <img
                 src={content.heroImageUrl}
                 alt=""

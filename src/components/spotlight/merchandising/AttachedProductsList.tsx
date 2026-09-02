@@ -70,9 +70,9 @@ export function AttachedProductsList({
               </span>
             )}
             <button type="button" onClick={() => onPin(link.productId)} title="Pin">
-              <Pin size={14} className={link.pinned ? 'text-[#EB4501]' : 'text-gray-300'} />
+              <Pin size={14} className={link.pinned ? 'text-[#FF5B00]' : 'text-gray-300'} />
             </button>
-            {link.role === 'hero' && <Star size={14} className="text-[#EB4501] fill-[#EB4501]" />}
+            {link.role === 'hero' && <Star size={14} className="text-[#FF5B00] fill-[#FF5B00]" />}
             <button type="button" onClick={() => onRemove(link.productId)} className="text-gray-400 hover:text-red-500 text-xs">
               Remove
             </button>

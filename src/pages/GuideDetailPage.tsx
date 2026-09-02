@@ -839,7 +839,7 @@ export function GuideDetailPage({
         {backHref && (
           <Link
             to={backHref}
-            className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#9AA0AC] hover:text-[#CF4400] mb-2"
+            className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#9AA0AC] hover:text-[#EF3C23] mb-2"
           >
             <ArrowLeft size={14} /> {backLabel}
           </Link>
@@ -914,7 +914,7 @@ export function GuideDetailPage({
             </button>
           </div>
           <div>
-            <div className="text-[15px] font-extrabold text-[#EB4501] tabular-nums">
+            <div className="text-[15px] font-extrabold text-[#FF5B00] tabular-nums">
               {metricLabel(interactions.purchases)}
             </div>
             <button
@@ -922,7 +922,7 @@ export function GuideDetailPage({
               onClick={() => toggleInteraction("isPurchased")}
               className={cn(
                 "mt-1 bg-[#F4F7F9] border-0 text-[9.5px] font-bold px-2.5 py-0.5 rounded-[10px] cursor-pointer inline-flex items-center gap-1",
-                interactions.isPurchased ? "text-[#EB4501]" : "text-[#4B5563]",
+                interactions.isPurchased ? "text-[#FF5B00]" : "text-[#4B5563]",
               )}
             >
               <ShoppingBag size={11} />
@@ -932,7 +932,7 @@ export function GuideDetailPage({
         </div>
 
         <div className="bg-white rounded-xl border border-[#E8EDF2] p-[26px] mb-4 text-left">
-          <span className="inline-block bg-[#EB4501] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-[5px] mb-3.5 uppercase tracking-wide">
+          <span className="inline-block bg-[#FF5B00] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-[5px] mb-3.5 uppercase tracking-wide">
             {guideKindLabel}
           </span>
           <h1 className="text-2xl font-extrabold text-[#1A1A2E] mb-2 leading-snug">
@@ -950,7 +950,7 @@ export function GuideDetailPage({
                 className="w-[34px] h-[34px] rounded-full object-cover shrink-0"
               />
             ) : (
-              <div className="w-[34px] h-[34px] rounded-full bg-[#EB4501] flex items-center justify-center text-white text-xs font-extrabold shrink-0">
+              <div className="w-[34px] h-[34px] rounded-full bg-[#FF5B00] flex items-center justify-center text-white text-xs font-extrabold shrink-0">
                 {authorInitial}
               </div>
             )}
@@ -972,7 +972,7 @@ export function GuideDetailPage({
               onClick={() =>
                 openEmiPanel(`Tell me about this buying guide: ${guide.title}`)
               }
-              className="inline-flex items-center gap-1.5 bg-[linear-gradient(90deg,#6C4CFF,#EB4501)] text-white border-0 px-[18px] py-[11px] rounded-lg text-xs font-bold cursor-pointer hover:brightness-110 transition-all"
+              className="inline-flex items-center gap-1.5 bg-[linear-gradient(90deg,#6C4CFF,#FF5B00)] text-white border-0 px-[18px] py-[11px] rounded-lg text-xs font-bold cursor-pointer hover:brightness-110 transition-all"
             >
               <EmiAiLogo size={20} />
               Ask Emi about this Discovery
@@ -997,16 +997,16 @@ export function GuideDetailPage({
                 className={cn(
                   'inline-flex items-center gap-1.5 border-0 px-[18px] py-[11px] rounded-lg text-xs font-bold cursor-pointer transition-colors',
                   isGuideSaved
-                    ? 'bg-[#FFF3EA] text-[#EB4501]'
+                    ? 'bg-[#FFF3EA] text-[#FF5B00]'
                     : 'bg-[#F4F7F9] text-[#1A1A2E] hover:bg-[#E8EDF2]',
                 )}
                 aria-pressed={isGuideSaved}
               >
                 <Heart
                   size={14}
-                  className="text-[#EB4501]"
+                  className="text-[#FF5B00]"
                   strokeWidth={2}
-                  fill={isGuideSaved ? '#EB4501' : 'none'}
+                  fill={isGuideSaved ? '#FF5B00' : 'none'}
                 />
                 {isGuideSaved ? 'Saved' : 'Save'}
               </button>
@@ -1061,7 +1061,7 @@ export function GuideDetailPage({
                   </div>
                   <div className="bg-white rounded-2xl border border-[#e8edf2] p-5 shadow-sm text-left flex flex-wrap items-center justify-between gap-4">
                     <div>
-                      <p className="text-[11px] font-bold text-[#EB4501] mb-1">Limited offer</p>
+                      <p className="text-[11px] font-bold text-[#FF5B00] mb-1">Limited offer</p>
                       <p className="text-sm font-bold text-[#1a1a2e]">{spotlightContent.headline}</p>
                       {spotlightContent.endsAt && (
                         <p className="text-[11px] text-[#9AA0AC] mt-1">
@@ -1115,14 +1115,14 @@ export function GuideDetailPage({
                   return (
                     <section id="winner" className="scroll-mt-36 mt-9 w-full text-left">
                       <div className="text-[11px] font-extrabold text-[#1A1A2E] tracking-wide mb-3.5 flex items-center gap-1.5">
-                        <Award size={14} className="text-[#EB4501]" /> OVERALL WINNER
+                        <Award size={14} className="text-[#FF5B00]" /> OVERALL WINNER
                       </div>
                       {overall && (
                         <a
                           href={(overall as any).href || (overall as any).external?.externalUrl || '#'}
                           target={(overall as any).external ? '_blank' : undefined}
                           rel={(overall as any).external ? 'noopener noreferrer' : undefined}
-                          className="flex items-center gap-3 bg-white border border-[#E8EDF2] rounded-[10px] p-3 max-w-md hover:border-[#EB4501]/40 transition-colors"
+                          className="flex items-center gap-3 bg-white border border-[#E8EDF2] rounded-[10px] p-3 max-w-md hover:border-[#FF5B00]/40 transition-colors"
                         >
                           <div className="w-16 h-16 rounded-lg bg-[#F4F7F9] overflow-hidden shrink-0">
                             {overall.image ? (
@@ -1137,7 +1137,7 @@ export function GuideDetailPage({
                             ) : null}
                             <div className="text-[13px] font-extrabold text-[#1A1A2E] line-clamp-2">{overall.title}</div>
                             {'price' in overall && overall.price ? (
-                              <div className="text-[12px] font-bold text-[#EB4501]">৳{Number(overall.price).toLocaleString()}</div>
+                              <div className="text-[12px] font-bold text-[#FF5B00]">৳{Number(overall.price).toLocaleString()}</div>
                             ) : null}
                           </div>
                         </a>
@@ -1149,12 +1149,12 @@ export function GuideDetailPage({
                             if (!r) return null;
                             return (
                               <div key={a.id}>
-                                <div className="text-[9px] font-extrabold text-[#EB4501] uppercase tracking-wide mb-1">{a.label}</div>
+                                <div className="text-[9px] font-extrabold text-[#FF5B00] uppercase tracking-wide mb-1">{a.label}</div>
                                 <a
                                   href={(r as any).href || (r as any).external?.externalUrl || '#'}
                                   target={(r as any).external ? '_blank' : undefined}
                                   rel={(r as any).external ? 'noopener noreferrer' : undefined}
-                                  className="flex items-center gap-2 bg-white border border-[#E8EDF2] rounded-[10px] p-2 hover:border-[#EB4501]/40 transition-colors"
+                                  className="flex items-center gap-2 bg-white border border-[#E8EDF2] rounded-[10px] p-2 hover:border-[#FF5B00]/40 transition-colors"
                                 >
                                   <div className="w-10 h-10 rounded-md bg-[#F4F7F9] overflow-hidden shrink-0">
                                     {r.image ? <img src={r.image} alt="" className="w-full h-full object-cover" referrerPolicy="no-referrer" /> : null}
@@ -1235,7 +1235,7 @@ export function GuideDetailPage({
                               <div className="min-w-0">
                                 <div className="flex items-center gap-1.5 mb-0.5">
                                   {o.isActive ? (
-                                    <span className="inline-flex items-center gap-1 text-[8.5px] font-extrabold text-white bg-[#EB4501] rounded px-1.5 py-0.5 uppercase tracking-wide">
+                                    <span className="inline-flex items-center gap-1 text-[8.5px] font-extrabold text-white bg-[#FF5B00] rounded px-1.5 py-0.5 uppercase tracking-wide">
                                       <Zap size={9} /> LIVE offer
                                     </span>
                                   ) : o.isUpcoming ? (
@@ -1251,7 +1251,7 @@ export function GuideDetailPage({
                                 <div className="text-[12.5px] font-bold text-[#1A1A2E] truncate">{o.product.title}</div>
                                 {o.isActive ? (
                                   <div className="text-[11px] mt-0.5">
-                                    <span className="font-extrabold text-[#EB4501] text-[13px]">৳{Number(o.promo).toLocaleString()}</span>{' '}
+                                    <span className="font-extrabold text-[#FF5B00] text-[13px]">৳{Number(o.promo).toLocaleString()}</span>{' '}
                                     <span className="line-through text-[#9AA0AC]">৳{Number(o.base).toLocaleString()}</span>{' '}
                                     <span className="font-bold text-[#059669]">
                                       save ৳{Number(o.savings).toLocaleString()}
@@ -1368,7 +1368,7 @@ export function GuideDetailPage({
                           href={l.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 rounded-full border border-[#E8EDF2] bg-white px-3.5 py-2 text-[11px] font-bold text-[#1A1A2E] hover:border-[#EB4501]/40"
+                          className="inline-flex items-center gap-1.5 rounded-full border border-[#E8EDF2] bg-white px-3.5 py-2 text-[11px] font-bold text-[#1A1A2E] hover:border-[#FF5B00]/40"
                         >
                           {l.label || `Continue on ${l.platform}`} <Globe size={12} />
                         </a>
@@ -1433,7 +1433,7 @@ export function GuideDetailPage({
                             className="w-full h-full rounded-full object-cover"
                           />
                         ) : (
-                          <div className="w-full h-full rounded-full bg-[#EB4501] flex items-center justify-center text-white text-[20px] font-extrabold">
+                          <div className="w-full h-full rounded-full bg-[#FF5B00] flex items-center justify-center text-white text-[20px] font-extrabold">
                             {authorInitial}
                           </div>
                         )}
@@ -1532,7 +1532,7 @@ export function GuideDetailPage({
             </h3>
             <Link
               to="/guides"
-              className="text-[12px] font-bold text-[#1A1A2E] hover:text-[#CF4400] shrink-0"
+              className="text-[12px] font-bold text-[#1A1A2E] hover:text-[#EF3C23] shrink-0"
             >
               View All Guides ›
             </Link>
@@ -1552,8 +1552,8 @@ export function GuideDetailPage({
                 className={cn(
                   'px-3 py-1.5 rounded-full text-[10px] font-bold border cursor-pointer transition-colors',
                   relatedPlatformFilter === opt.id
-                    ? 'bg-[#EB4501] text-white border-transparent'
-                    : 'bg-white text-[#4B5563] border-[#E8EDF2] hover:border-[#EB4501]/40',
+                    ? 'bg-[#FF5B00] text-white border-transparent'
+                    : 'bg-white text-[#4B5563] border-[#E8EDF2] hover:border-[#FF5B00]/40',
                 )}
               >
                 {opt.label}
@@ -1571,7 +1571,7 @@ export function GuideDetailPage({
                     className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform duration-500"
                     loading="lazy"
                   />
-                  <span className="absolute top-1.5 left-1.5 bg-[#EB4501] text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-sm pointer-events-none">
+                  <span className="absolute top-1.5 left-1.5 bg-[#FF5B00] text-white text-[8px] font-extrabold px-1.5 py-0.5 rounded-sm pointer-events-none">
                     {g.type === 'video'
                       ? 'VIDEO'
                       : g.type === 'reels' || g.type === 'shorts'

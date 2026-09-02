@@ -12,11 +12,11 @@ interface HomeFeaturedBrandsSectionProps {
 
 const BRAND_COLORS = [
   '#1A1A2E',
-  '#EB4501',
+  '#FF5B00',
   '#2323FF',
   '#07A828',
-  '#EB4501',
-  '#000435',
+  '#FF5B00',
+  '#18154C',
   '#7C3AED',
   '#0EA5E9',
 ];
@@ -56,7 +56,7 @@ export function HomeFeaturedBrandsSection({
             <Link
               key={b.id ?? name}
               to={href}
-              className={`group bg-white border border-[#E8EDF2] rounded-[10px] ${BRAND_TILE_ASPECT} w-full min-w-0 flex items-center justify-center px-2.5 hover:border-[#EB4501]/40 transition-colors`}
+              className={`group bg-white border border-[#E8EDF2] rounded-[10px] ${BRAND_TILE_ASPECT} w-full min-w-0 flex items-center justify-center px-2.5 hover:border-[#FF5B00]/40 transition-colors`}
               title={name}
             >
               {logo ? (

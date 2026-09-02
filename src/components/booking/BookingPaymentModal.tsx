@@ -91,11 +91,11 @@ export function BookingPaymentModal({
                 type="button"
                 onClick={() => setPaymentType('full')}
                 className={`w-full flex items-center justify-between gap-3 rounded-xl border px-3.5 py-2.5 text-left transition-colors cursor-pointer ${
-                  paymentType === 'full' ? 'border-[#EB4501] bg-[#EB4501]/5' : 'border-[#E8EDF2] bg-white'
+                  paymentType === 'full' ? 'border-[#FF5B00] bg-[#FF5B00]/5' : 'border-[#E8EDF2] bg-white'
                 }`}
               >
                 <span className="text-[11.5px] font-bold text-[#1A1A2E]">Pay in full</span>
-                <span className="text-[12.5px] font-extrabold text-[#EB4501]">
+                <span className="text-[12.5px] font-extrabold text-[#FF5B00]">
                   BDT {offer.price.toLocaleString()}
                 </span>
               </button>
@@ -103,7 +103,7 @@ export function BookingPaymentModal({
                 type="button"
                 onClick={() => setPaymentType('partial')}
                 className={`w-full flex items-center justify-between gap-3 rounded-xl border px-3.5 py-2.5 text-left transition-colors cursor-pointer ${
-                  paymentType === 'partial' ? 'border-[#EB4501] bg-[#EB4501]/5' : 'border-[#E8EDF2] bg-white'
+                  paymentType === 'partial' ? 'border-[#FF5B00] bg-[#FF5B00]/5' : 'border-[#E8EDF2] bg-white'
                 }`}
               >
                 <span className="min-w-0">
@@ -114,7 +114,7 @@ export function BookingPaymentModal({
                     Rest (BDT {(offer.price - depositAmount).toLocaleString()}) due at check-in
                   </span>
                 </span>
-                <span className="text-[12.5px] font-extrabold text-[#EB4501] shrink-0">
+                <span className="text-[12.5px] font-extrabold text-[#FF5B00] shrink-0">
                   BDT {depositAmount.toLocaleString()}
                 </span>
               </button>
@@ -125,7 +125,7 @@ export function BookingPaymentModal({
             <span className="text-[11px] font-semibold text-[#4B5563]">
               {canPartialPay && paymentType === 'partial' ? 'Deposit due now' : 'Amount to pay'}
             </span>
-            <span className="text-base font-extrabold text-[#EB4501]">
+            <span className="text-base font-extrabold text-[#FF5B00]">
               BDT {payingNow.toLocaleString()}
             </span>
           </div>
@@ -141,7 +141,7 @@ export function BookingPaymentModal({
             type="button"
             onClick={handlePay}
             disabled={isPaying}
-            className="w-full py-3 rounded-xl bg-[#EB4501] hover:bg-[#CF4400] disabled:opacity-60 text-white text-[12.5px] font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer border-0"
+            className="w-full py-3 rounded-xl bg-[#FF5B00] hover:bg-[#EF3C23] disabled:opacity-60 text-white text-[12.5px] font-bold flex items-center justify-center gap-2 transition-colors cursor-pointer border-0"
           >
             {isPaying ? (
               <>

@@ -12,7 +12,7 @@ function PreviewUnavailable({ message = 'Preview unavailable' }: { message?: str
   return (
     <div className="min-h-[50vh] flex items-center justify-center bg-[#F4F7F9] px-6">
       <div className="text-center space-y-2 max-w-md">
-        <p className="text-sm font-extrabold uppercase tracking-widest text-[#EB4501]">
+        <p className="text-sm font-extrabold uppercase tracking-widest text-[#FF5B00]">
           CMS Draft Preview
         </p>
         <h1 className="text-xl font-extrabold text-[#1A1A2E]">{message}</h1>

@@ -22,7 +22,7 @@ export interface PriceAcrossStoresPanelProps {
   className?: string;
 }
 
-const STORE_COLORS = ['#EB4501', '#07A828', '#2323FF', '#1A1A2E'];
+const STORE_COLORS = ['#FF5B00', '#07A828', '#2323FF', '#1A1A2E'];
 
 /** Sidebar "Price Across Stores" — unchanged DC styling, seller/CMS-driven rows. */
 export function PriceAcrossStoresPanel({
@@ -43,7 +43,7 @@ export function PriceAcrossStoresPanel({
           promoLabel: store.promoLabel,
         }))
       : [
-          { name: 'Daraz BD', delivery: '2–3 days', price: Math.round(fallbackPrice * 0.96), color: '#EB4501' },
+          { name: 'Daraz BD', delivery: '2–3 days', price: Math.round(fallbackPrice * 0.96), color: '#FF5B00' },
           { name: 'Official Store', delivery: 'Official · 1–2 days', price: fallbackPrice, color: '#07A828' },
           { name: 'Pickaboo', delivery: 'Nationwide', price: Math.round(fallbackPrice * 1.02), color: '#2323FF' },
           { name: 'Ryans', delivery: 'Express available', price: Math.round(fallbackPrice * 0.99), color: '#1A1A2E' },
@@ -70,7 +70,7 @@ export function PriceAcrossStoresPanel({
               className="w-8 h-8 rounded-full object-contain bg-white border border-[#E8EDF2] shrink-0"
             />
           ) : (
-            <div className="w-8 h-8 rounded-full bg-[#000435] text-white flex items-center justify-center text-[11px] font-extrabold shrink-0">
+            <div className="w-8 h-8 rounded-full bg-[#18154C] text-white flex items-center justify-center text-[11px] font-extrabold shrink-0">
               {store.name.charAt(0)}
             </div>
           )}
@@ -99,13 +99,13 @@ export function PriceAcrossStoresPanel({
               }
               toast.success(`Opening ${store.name}…`);
             }}
-            className="bg-[#EB4501] text-white border-0 px-3.5 py-1.5 rounded-2xl text-[10.5px] font-bold cursor-pointer shrink-0 whitespace-nowrap"
+            className="bg-[#FF5B00] text-white border-0 px-3.5 py-1.5 rounded-2xl text-[10.5px] font-bold cursor-pointer shrink-0 whitespace-nowrap"
           >
             Shop Now
           </button>
         </div>
       ))}
-      <Link to="/deals" className="text-[11px] font-bold text-[#EB4501] hover:underline">
+      <Link to="/deals" className="text-[11px] font-bold text-[#FF5B00] hover:underline">
         View more stores →
       </Link>
     </div>

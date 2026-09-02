@@ -110,7 +110,7 @@ export function MyPaymentOptionsSection() {
         <button
           type="button"
           onClick={() => setShowAdd((v) => !v)}
-          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#EB4501] hover:brightness-110 text-white text-[13px] font-bold rounded-xl border-0 cursor-pointer"
+          className="inline-flex items-center gap-2 px-4 py-2.5 bg-[#FF5B00] hover:brightness-110 text-white text-[13px] font-bold rounded-xl border-0 cursor-pointer"
         >
           <Plus size={16} />
           Add method
@@ -129,7 +129,7 @@ export function MyPaymentOptionsSection() {
                 className={cn(
                   'px-3 py-2 text-[12px] font-bold rounded-lg border cursor-pointer',
                   kind === k
-                    ? 'bg-[#EB4501]/10 border-[#EB4501] text-[#EB4501]'
+                    ? 'bg-[#FF5B00]/10 border-[#FF5B00] text-[#FF5B00]'
                     : 'bg-white border-[#E8EDF2] text-[#6B7280]',
                 )}
               >
@@ -142,13 +142,13 @@ export function MyPaymentOptionsSection() {
               value={label}
               onChange={(e) => setLabel(e.target.value)}
               placeholder={kind === 'card' ? 'e.g. Personal Visa' : 'e.g. bKash Personal'}
-              className="h-11 bg-slate-50 border border-slate-200/60 rounded-xl px-4 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:border-[#EB4501]/40"
+              className="h-11 bg-slate-50 border border-slate-200/60 rounded-xl px-4 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:border-[#FF5B00]/40"
             />
             <input
               value={account}
               onChange={(e) => setAccount(e.target.value)}
               placeholder={kind === 'card' ? 'Card number' : 'Mobile number'}
-              className="h-11 bg-slate-50 border border-slate-200/60 rounded-xl px-4 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:border-[#EB4501]/40"
+              className="h-11 bg-slate-50 border border-slate-200/60 rounded-xl px-4 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:border-[#FF5B00]/40"
             />
             {kind === 'card' && (
               <>
@@ -156,13 +156,13 @@ export function MyPaymentOptionsSection() {
                   value={expiryMonth}
                   onChange={(e) => setExpiryMonth(e.target.value)}
                   placeholder="MM"
-                  className="h-11 bg-slate-50 border border-slate-200/60 rounded-xl px-4 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:border-[#EB4501]/40"
+                  className="h-11 bg-slate-50 border border-slate-200/60 rounded-xl px-4 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:border-[#FF5B00]/40"
                 />
                 <input
                   value={expiryYear}
                   onChange={(e) => setExpiryYear(e.target.value)}
                   placeholder="YYYY"
-                  className="h-11 bg-slate-50 border border-slate-200/60 rounded-xl px-4 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:border-[#EB4501]/40"
+                  className="h-11 bg-slate-50 border border-slate-200/60 rounded-xl px-4 text-xs font-bold text-[#1a1a2e] focus:outline-none focus:border-[#FF5B00]/40"
                 />
               </>
             )}
@@ -171,7 +171,7 @@ export function MyPaymentOptionsSection() {
             <button
               type="button"
               onClick={handleAdd}
-              className="px-4 py-2.5 bg-[#EB4501] text-white text-[12.5px] font-bold rounded-xl border-0 cursor-pointer"
+              className="px-4 py-2.5 bg-[#FF5B00] text-white text-[12.5px] font-bold rounded-xl border-0 cursor-pointer"
             >
               Save method
             </button>
@@ -204,7 +204,7 @@ export function MyPaymentOptionsSection() {
                 className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 flex flex-col sm:flex-row sm:items-center gap-3"
               >
                 <div className="w-11 h-11 rounded-xl bg-[#F4F7F9] border border-[#E8EDF2] flex items-center justify-center shrink-0">
-                  <Icon size={18} className="text-[#EB4501]" />
+                  <Icon size={18} className="text-[#FF5B00]" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
@@ -212,7 +212,7 @@ export function MyPaymentOptionsSection() {
                       {method.label}
                     </h3>
                     {method.isDefault && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-[#EB4501]/10 text-[#EB4501] border-[#EB4501]/25">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full border bg-[#FF5B00]/10 text-[#FF5B00] border-[#FF5B00]/25">
                         Default
                       </span>
                     )}

@@ -33,7 +33,7 @@ export const WriteReviewCard: React.FC<WriteReviewCardProps> = ({
 
   return (
     <div className={cn("bg-white rounded-2xl border border-slate-100 p-6 md:p-8 flex flex-col", className)}>
-      <h3 className="text-lg font-extrabold text-[#000435] mb-6">Write your review</h3>
+      <h3 className="text-lg font-extrabold text-[#18154C] mb-6">Write your review</h3>
       
       <form onSubmit={handleSubmit} className="space-y-6">
         {/* Rating */}
@@ -45,7 +45,7 @@ export const WriteReviewCard: React.FC<WriteReviewCardProps> = ({
                 key={star}
                 className={cn(
                   "w-8 h-8 cursor-pointer transition-colors",
-                  (hoverRating || rating) >= star ? "fill-[#EB4501] text-[#EB4501]" : "text-slate-200"
+                  (hoverRating || rating) >= star ? "fill-[#FF5B00] text-[#FF5B00]" : "text-slate-200"
                 )}
                 onMouseEnter={() => setHoverRating(star)}
                 onMouseLeave={() => setHoverRating(0)}
@@ -62,7 +62,7 @@ export const WriteReviewCard: React.FC<WriteReviewCardProps> = ({
             value={review}
             onChange={(e) => setReview(e.target.value)}
             placeholder="Share your experience..."
-            className="w-full min-h-[120px] rounded-xl border border-slate-200 p-4 text-sm font-medium focus:border-[#000435] focus:ring-1 focus:ring-[#000435] outline-none transition-all resize-y"
+            className="w-full min-h-[120px] rounded-xl border border-slate-200 p-4 text-sm font-medium focus:border-[#18154C] focus:ring-1 focus:ring-[#18154C] outline-none transition-all resize-y"
             required
           />
         </div>
@@ -76,7 +76,7 @@ export const WriteReviewCard: React.FC<WriteReviewCardProps> = ({
                 <img src={URL.createObjectURL(photo)} alt="Upload preview" className="w-full h-full object-cover" />
               </div>
             ))}
-            <label className="w-20 h-20 rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:border-[#EB4501] hover:bg-orange-50 transition-colors shrink-0">
+            <label className="w-20 h-20 rounded-xl border-2 border-dashed border-slate-200 flex flex-col items-center justify-center cursor-pointer hover:border-[#FF5B00] hover:bg-orange-50 transition-colors shrink-0">
               <Plus className="w-6 h-6 text-slate-400" />
               <input 
                 type="file" 

@@ -142,7 +142,7 @@ export function SectionEditorPanel({
               <button
                 type="button"
                 onClick={() => toggleEnabled(section.id)}
-                className="p-1.5 rounded text-gray-400 hover:text-[#CF4400]"
+                className="p-1.5 rounded text-gray-400 hover:text-[#EF3C23]"
                 title={section.enabled ? 'Disable section' : 'Enable section'}
               >
                 {section.enabled ? <Eye size={16} /> : <EyeOff size={16} />}
@@ -162,7 +162,7 @@ export function SectionEditorPanel({
                   key={id}
                   type="button"
                   onClick={() => addOptional(id)}
-                  className="px-2 py-1 text-[10px] font-bold uppercase border border-[#e8edf2] rounded hover:border-[#EB4501]/40"
+                  className="px-2 py-1 text-[10px] font-bold uppercase border border-[#e8edf2] rounded hover:border-[#FF5B00]/40"
                 >
                   {CONTENT_DETAIL_OPTIONAL_SECTION_LABELS[id]}
                 </button>

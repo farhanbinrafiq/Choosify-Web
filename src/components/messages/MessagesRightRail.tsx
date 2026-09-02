@@ -228,7 +228,7 @@ export function BuyerSellerInfoPanel({
       {/* Transaction details */}
       <div>
         <div className="flex items-center gap-1.5 text-[11px] font-extrabold text-[#1A1A2E] mb-3">
-          <Package size={12} className="text-[#EB4501]" />
+          <Package size={12} className="text-[#FF5B00]" />
           Transaction details
         </div>
         <div className="flex flex-col gap-3 text-[11px]">
@@ -245,13 +245,13 @@ export function BuyerSellerInfoPanel({
           <DetailRow label="Order date" value={orderDate} />
           <DetailRow label="Payment method" value={paymentMethod} />
           <DetailRow label="Status" value={orderStatus} />
-          <DetailRow label="Total" value={totalAmount} valueClassName="text-[#EB4501]" />
+          <DetailRow label="Total" value={totalAmount} valueClassName="text-[#FF5B00]" />
         </div>
         {linkedOrder && onViewOrder && (
           <button
             type="button"
             onClick={onViewOrder}
-            className="mt-3 w-full min-h-[36px] rounded-lg border border-[#E5E7EB] bg-white text-[11px] font-bold text-[#1A1A2E] hover:border-[#EB4501] hover:text-[#CF4400] cursor-pointer"
+            className="mt-3 w-full min-h-[36px] rounded-lg border border-[#E5E7EB] bg-white text-[11px] font-bold text-[#1A1A2E] hover:border-[#FF5B00] hover:text-[#EF3C23] cursor-pointer"
           >
             View order tracking →
           </button>
@@ -261,7 +261,7 @@ export function BuyerSellerInfoPanel({
       {/* Seller profile */}
       <div>
           <div className="flex items-center gap-1.5 text-[11px] font-extrabold text-[#1A1A2E] mb-3">
-            <User size={12} className="text-[#EB4501]" />
+            <User size={12} className="text-[#FF5B00]" />
             Seller profile
           </div>
           <div className="flex items-center gap-2.5 mb-3">
@@ -272,7 +272,7 @@ export function BuyerSellerInfoPanel({
                 className="w-10 h-10 rounded-full object-cover border border-[#E8EDF2]"
               />
             ) : (
-              <div className="w-10 h-10 rounded-full bg-[#FFF3EC] text-[#EB4501] flex items-center justify-center text-[12px] font-extrabold">
+              <div className="w-10 h-10 rounded-full bg-[#FFF3EC] text-[#FF5B00] flex items-center justify-center text-[12px] font-extrabold">
                 {sellerInitials}
               </div>
             )}
@@ -307,7 +307,7 @@ export function BuyerSellerInfoPanel({
           </div>
           <Link
             to="/brands"
-            className="block w-full mt-3 bg-white border border-[#E5E7EB] text-[#1A1A2E] text-center py-2 rounded-lg text-[11px] font-bold hover:border-[#EB4501] hover:text-[#CF4400] transition-colors"
+            className="block w-full mt-3 bg-white border border-[#E5E7EB] text-[#1A1A2E] text-center py-2 rounded-lg text-[11px] font-bold hover:border-[#FF5B00] hover:text-[#EF3C23] transition-colors"
           >
             Browse brands →
           </Link>
@@ -316,7 +316,7 @@ export function BuyerSellerInfoPanel({
       {/* Support shortcuts */}
       <div>
         <div className="flex items-center gap-1.5 text-[11px] font-extrabold text-[#1A1A2E] mb-3">
-          <Link2 size={12} className="text-[#EB4501]" />
+          <Link2 size={12} className="text-[#FF5B00]" />
           Support shortcuts
         </div>
         <div className="flex flex-col gap-2">
@@ -324,10 +324,10 @@ export function BuyerSellerInfoPanel({
             <button
               type="button"
               onClick={onReportProblem}
-              className="flex justify-between items-center text-[11.5px] text-[#4B5563] hover:text-[#CF4400] transition-colors bg-transparent border-none cursor-pointer p-0 text-left"
+              className="flex justify-between items-center text-[11.5px] text-[#4B5563] hover:text-[#EF3C23] transition-colors bg-transparent border-none cursor-pointer p-0 text-left"
             >
               <span className="inline-flex items-center gap-1.5">
-                <Flag size={11} className="text-[#EB4501]" />
+                <Flag size={11} className="text-[#FF5B00]" />
                 Report to Support
                 {conversationClosed ? ' (closed chat)' : ''}
               </span>
@@ -338,7 +338,7 @@ export function BuyerSellerInfoPanel({
             <Link
               key={s.to}
               to={s.to}
-              className="flex justify-between items-center text-[11.5px] text-[#4B5563] hover:text-[#CF4400] transition-colors"
+              className="flex justify-between items-center text-[11.5px] text-[#4B5563] hover:text-[#EF3C23] transition-colors"
             >
               {s.label}
               <span className="text-[#9AA0AC]">›</span>
@@ -370,7 +370,7 @@ function DetailRow({
           <button
             type="button"
             onClick={onCopy}
-            className="shrink-0 p-0.5 text-[#9AA0AC] hover:text-[#CF4400] border-none bg-transparent cursor-pointer"
+            className="shrink-0 p-0.5 text-[#9AA0AC] hover:text-[#EF3C23] border-none bg-transparent cursor-pointer"
             title={`Copy ${label}`}
           >
             <Copy size={11} />

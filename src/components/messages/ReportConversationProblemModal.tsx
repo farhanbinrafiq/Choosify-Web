@@ -90,8 +90,8 @@ export function ReportConversationProblemModal({
       <div className="relative w-full max-w-md bg-white rounded-2xl border border-[#E8EDF2] shadow-xl p-5 space-y-4">
         <div className="flex items-start justify-between gap-3">
           <div className="flex items-start gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-[#EB4501]/10 border border-[#EB4501]/20 flex items-center justify-center shrink-0">
-              <Flag size={16} className="text-[#EB4501]" />
+            <div className="w-9 h-9 rounded-xl bg-[#FF5B00]/10 border border-[#FF5B00]/20 flex items-center justify-center shrink-0">
+              <Flag size={16} className="text-[#FF5B00]" />
             </div>
             <div>
               <h3 className="text-[15px] font-extrabold text-[#1A1A2E]">Report to Support</h3>
@@ -163,7 +163,7 @@ export function ReportConversationProblemModal({
             type="button"
             disabled={submitting}
             onClick={() => void handleSubmit()}
-            className="px-4 py-2.5 text-[12.5px] font-bold rounded-lg border-0 bg-[#EB4501] text-white cursor-pointer disabled:opacity-60"
+            className="px-4 py-2.5 text-[12.5px] font-bold rounded-lg border-0 bg-[#FF5B00] text-white cursor-pointer disabled:opacity-60"
           >
             {submitting ? 'Submitting…' : 'Submit'}
           </button>

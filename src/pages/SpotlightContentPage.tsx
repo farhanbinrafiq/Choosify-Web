@@ -69,7 +69,7 @@ export function SpotlightContentPage() {
         <Megaphone size={32} className="text-[#9AA0AC] mb-4" />
         <h1 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-2">Content not found</h1>
         <p className="text-sm text-[#9AA0AC] mb-6">This Spotlight content may have moved or is no longer available.</p>
-        <Link to="/spotlight" className="text-[#EB4501] text-sm font-bold hover:underline">
+        <Link to="/spotlight" className="text-[#FF5B00] text-sm font-bold hover:underline">
           Browse Spotlight
         </Link>
       </div>

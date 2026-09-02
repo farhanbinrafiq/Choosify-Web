@@ -125,7 +125,7 @@ export function PrescriptionDetailsModal({
               value={eye[field]}
               onChange={(e) => setEye({ ...eye, [field]: e.target.value })}
               placeholder="0.00"
-              className="w-full h-9 px-2.5 rounded-lg border border-[#E5E7EB] text-[12px] font-medium text-[#1A1A2E] focus:outline-none focus:border-[#EB4501] transition-colors"
+              className="w-full h-9 px-2.5 rounded-lg border border-[#E5E7EB] text-[12px] font-medium text-[#1A1A2E] focus:outline-none focus:border-[#FF5B00] transition-colors"
             />
           </div>
         ))}
@@ -162,7 +162,7 @@ export function PrescriptionDetailsModal({
             </button>
 
             <div className="flex items-center gap-2 mb-1 pr-10">
-              <div className="w-9 h-9 rounded-full bg-[#FFF0E8] text-[#EB4501] flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-full bg-[#FFF0E8] text-[#FF5B00] flex items-center justify-center shrink-0">
                 <Eye size={16} />
               </div>
               <div>
@@ -189,7 +189,7 @@ export function PrescriptionDetailsModal({
                   value={pd}
                   onChange={(e) => setPd(e.target.value)}
                   placeholder="e.g. 62"
-                  className="w-full h-9 px-2.5 rounded-lg border border-[#E5E7EB] text-[12px] font-medium text-[#1A1A2E] focus:outline-none focus:border-[#EB4501] transition-colors max-w-[140px]"
+                  className="w-full h-9 px-2.5 rounded-lg border border-[#E5E7EB] text-[12px] font-medium text-[#1A1A2E] focus:outline-none focus:border-[#FF5B00] transition-colors max-w-[140px]"
                 />
               </div>
 
@@ -208,7 +208,7 @@ export function PrescriptionDetailsModal({
                     {fileDataUrl ? (
                       <img src={fileDataUrl} alt="" className="w-10 h-10 rounded-md object-cover shrink-0 border border-[#E8EDF2]" />
                     ) : (
-                      <FileText size={18} className="text-[#EB4501] shrink-0" />
+                      <FileText size={18} className="text-[#FF5B00] shrink-0" />
                     )}
                     <span className="text-[11.5px] font-semibold text-[#1A1A2E] truncate flex-1">{fileName}</span>
                     <button
@@ -224,7 +224,7 @@ export function PrescriptionDetailsModal({
                     </button>
                   </div>
                 ) : (
-                  <label className="flex flex-col items-center justify-center gap-1.5 rounded-lg border-[1.5px] border-dashed border-[#D1D5DB] hover:border-[#EB4501]/50 bg-[#FAFAFB] py-5 cursor-pointer transition-colors">
+                  <label className="flex flex-col items-center justify-center gap-1.5 rounded-lg border-[1.5px] border-dashed border-[#D1D5DB] hover:border-[#FF5B00]/50 bg-[#FAFAFB] py-5 cursor-pointer transition-colors">
                     <UploadCloud size={20} className="text-[#9AA0AC]" />
                     <span className="text-[11.5px] font-bold text-[#1A1A2E]">Click to upload</span>
                     <span className="text-[10px] text-[#9AA0AC]">JPG, PNG or PDF · up to 8MB</span>
@@ -247,7 +247,7 @@ export function PrescriptionDetailsModal({
                   onChange={(e) => setNotes(e.target.value)}
                   rows={2}
                   placeholder="Any additional detail about your prescription…"
-                  className="w-full px-2.5 py-2 rounded-lg border border-[#E5E7EB] text-[12px] font-medium text-[#1A1A2E] focus:outline-none focus:border-[#EB4501] transition-colors resize-none"
+                  className="w-full px-2.5 py-2 rounded-lg border border-[#E5E7EB] text-[12px] font-medium text-[#1A1A2E] focus:outline-none focus:border-[#FF5B00] transition-colors resize-none"
                 />
               </div>
             </div>
@@ -264,7 +264,7 @@ export function PrescriptionDetailsModal({
                 type="button"
                 onClick={handleSave}
                 disabled={!canSave}
-                className="flex-1 h-11 rounded-lg bg-[#EB4501] text-white text-[12.5px] font-bold hover:bg-[#CF4400] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer border-none"
+                className="flex-1 h-11 rounded-lg bg-[#FF5B00] text-white text-[12.5px] font-bold hover:bg-[#EF3C23] disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer border-none"
               >
                 Save Prescription
               </button>

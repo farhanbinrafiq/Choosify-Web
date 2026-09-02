@@ -61,7 +61,7 @@ export function SpotlightCampaignsPage() {
           </div>
           <Link
             to="/marketing/studio/new"
-            className="inline-flex items-center gap-2 px-4 py-2 bg-[#EB4501] text-white text-xs font-bold uppercase rounded"
+            className="inline-flex items-center gap-2 px-4 py-2 bg-[#FF5B00] text-white text-xs font-bold uppercase rounded"
           >
             <Plus size={14} /> Create Spotlight Content
           </Link>
@@ -131,7 +131,7 @@ export function SpotlightCampaignsPage() {
             {campaigns.map((c) => (
               <article
                 key={c.campaignId}
-                className="bg-white border border-[#e8edf2] rounded-lg p-4 hover:border-[#EB4501]/30 cursor-pointer"
+                className="bg-white border border-[#e8edf2] rounded-lg p-4 hover:border-[#FF5B00]/30 cursor-pointer"
                 onClick={() => navigate(`/marketing/studio/${c.campaignId}`)}
               >
                 <div className="flex justify-between items-start mb-2">
@@ -148,7 +148,7 @@ export function SpotlightCampaignsPage() {
                   <button
                     type="button"
                     onClick={(e) => { e.stopPropagation(); handleDuplicate(c.campaignId); }}
-                    className="text-xs text-gray-500 hover:text-[#CF4400] flex items-center gap-1"
+                    className="text-xs text-gray-500 hover:text-[#EF3C23] flex items-center gap-1"
                   >
                     <Copy size={12} /> Duplicate
                   </button>
@@ -185,7 +185,7 @@ export function SpotlightCampaignsPage() {
                       <button
                         type="button"
                         onClick={(e) => { e.stopPropagation(); handleDuplicate(c.campaignId); }}
-                        className="text-xs text-[#EB4501]"
+                        className="text-xs text-[#FF5B00]"
                       >
                         Duplicate
                       </button>
@@ -200,7 +200,7 @@ export function SpotlightCampaignsPage() {
         {campaigns.length === 0 && (
           <div className="text-center py-16 text-gray-400">
             <p>No campaigns yet.</p>
-            <Link to="/marketing/studio/new" className="text-[#EB4501] font-bold text-sm mt-2 inline-block">
+            <Link to="/marketing/studio/new" className="text-[#FF5B00] font-bold text-sm mt-2 inline-block">
               Create your first campaign
             </Link>
           </div>
@@ -215,7 +215,7 @@ export function SpotlightCampaignsPage() {
                 onClick={() => setQuery((q) => ({ ...q, page: p }))}
                 className={cn(
                   'px-3 py-1 rounded text-sm',
-                  query.page === p ? 'bg-[#EB4501] text-white' : 'bg-white border',
+                  query.page === p ? 'bg-[#FF5B00] text-white' : 'bg-white border',
                 )}
               >
                 {p}

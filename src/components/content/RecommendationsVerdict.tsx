@@ -6,7 +6,7 @@ export const RecommendationsVerdict = ({ verdict }: { verdict: any }) => {
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.5fr] gap-8 mb-16 items-start">
       {/* Left Panel */}
       <div>
-        <h2 className="text-2xl font-extrabold text-[#000435] uppercase tracking-wider mb-6">RECOMMENDATIONS &<br/>QUICK VERDICT</h2>
+        <h2 className="text-2xl font-extrabold text-[#18154C] uppercase tracking-wider mb-6">RECOMMENDATIONS &<br/>QUICK VERDICT</h2>
         
         <div className="space-y-4">
           <div className="bg-white rounded-[20px] p-6 shadow-soft ">
@@ -41,9 +41,9 @@ export const RecommendationsVerdict = ({ verdict }: { verdict: any }) => {
 
       {/* Right Panel */}
       <div>
-        <h2 className="text-2xl font-extrabold text-[#000435] uppercase tracking-wider mb-6">WHY THIS WON</h2>
+        <h2 className="text-2xl font-extrabold text-[#18154C] uppercase tracking-wider mb-6">WHY THIS WON</h2>
         <div className="choosify-dark-surface text-white rounded-xl p-8 md:p-10 shadow-xl ">
-          <h3 className="text-[#EB4501] font-extrabold uppercase tracking-widest mb-4">THE VERDICT</h3>
+          <h3 className="text-[#FF5B00] font-extrabold uppercase tracking-widest mb-4">THE VERDICT</h3>
           <p className="text-xl md:text-2xl font-medium leading-relaxed mb-10 text-white/90">
             {verdict.summary}
           </p>

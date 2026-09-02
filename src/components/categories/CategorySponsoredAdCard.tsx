@@ -30,7 +30,7 @@ export function CategorySponsoredAdCard({ item }: { item: SponsoredPlacementItem
           <span className="text-[11px] text-white/50 line-clamp-2 mb-3">{item.subtitle}</span>
         )}
 
-        <span className="mt-auto block w-full text-center bg-[#EB4501] text-white py-2.5 rounded-lg text-[11.5px] font-bold hover:brightness-110 transition-[filter]">
+        <span className="mt-auto block w-full text-center bg-[#FF5B00] text-white py-2.5 rounded-lg text-[11.5px] font-bold hover:brightness-110 transition-[filter]">
           {item.ctaLabel || 'Shop Now'}
         </span>
       </div>

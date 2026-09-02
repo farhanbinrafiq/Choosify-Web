@@ -192,8 +192,8 @@ export function MobileVerticalNavDock({
             className={cn(
               'pointer-events-auto shrink-0 w-9 h-9 rounded-full border shadow-[0_6px_18px_rgba(0,0,0,0.12)] flex items-center justify-center cursor-pointer transition-colors touch-manipulation',
               minimized
-                ? 'border-[#EB4501]/40 bg-[#EB4501] text-white hover:brightness-110'
-                : 'border-[#E8EDF2] bg-white/95 backdrop-blur-sm text-[#8a9bb0] hover:text-[#EB4501] hover:border-[#EB4501]/35',
+                ? 'border-[#FF5B00]/40 bg-[#FF5B00] text-white hover:brightness-110'
+                : 'border-[#E8EDF2] bg-white/95 backdrop-blur-sm text-[#8a9bb0] hover:text-[#FF5B00] hover:border-[#FF5B00]/35',
             )}
           >
             {minimized ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
@@ -225,8 +225,8 @@ export function MobileVerticalNavDock({
                         'group flex items-center gap-2 h-11 min-w-11 rounded-full border shadow-[0_6px_18px_rgba(0,0,0,0.12)] transition-all duration-200 ease-out touch-manipulation cursor-pointer shrink-0',
                         showLabel ? 'pl-1.5 pr-3.5' : 'px-0 justify-center w-11',
                         active
-                          ? 'bg-[#EB4501] border-[#EB4501] text-white'
-                          : 'bg-white/95 backdrop-blur-sm border-[#E8EDF2] text-[#1A1A2E] hover:border-[#EB4501]/35',
+                          ? 'bg-[#FF5B00] border-[#FF5B00] text-white'
+                          : 'bg-white/95 backdrop-blur-sm border-[#E8EDF2] text-[#1A1A2E] hover:border-[#FF5B00]/35',
                       )}
                     >
                       <span
@@ -261,7 +261,7 @@ export function MobileVerticalNavDock({
                             <span
                               className={cn(
                                 'ml-1 inline-flex min-w-[14px] h-3.5 px-1 rounded-full text-[8px] font-black items-center justify-center align-middle',
-                                active ? 'bg-white/25 text-white' : 'bg-[#EB4501] text-white',
+                                active ? 'bg-white/25 text-white' : 'bg-[#FF5B00] text-white',
                               )}
                             >
                               {item.badge}

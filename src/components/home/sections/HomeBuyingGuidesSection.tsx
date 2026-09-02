@@ -57,7 +57,7 @@ export function HomeBuyingGuidesSection({ guideSlides }: HomeBuyingGuidesSection
           <Link
             key={String(guide.id)}
             to={guideHref(guide)}
-            className="group cursor-pointer min-w-0 w-full flex flex-col bg-white rounded-[10px] overflow-hidden border border-[#E8EDF2] hover:border-[#EB4501]/35 transition-colors"
+            className="group cursor-pointer min-w-0 w-full flex flex-col bg-white rounded-[10px] overflow-hidden border border-[#E8EDF2] hover:border-[#FF5B00]/35 transition-colors"
           >
             <div className={`${GUIDE_IMAGE_ASPECT} w-full shrink-0 overflow-hidden bg-[#F4F7F9]`}>
               <img

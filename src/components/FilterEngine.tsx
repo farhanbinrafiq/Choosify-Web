@@ -592,7 +592,7 @@ export function QuickFilterBar({ filters, onOpenFullFilters, title = "Quick Filt
       <div className="max-w-[1440px] mx-auto px-6 w-full flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <span className="text-[10px] font-black uppercase tracking-[0.18em] text-[#8a9bb0] whitespace-nowrap">{title}</span>
-          <span className="w-1.5 h-1.5 rounded-full bg-[#EB4501]" />
+          <span className="w-1.5 h-1.5 rounded-full bg-[#FF5B00]" />
         </div>
 
         <div className="flex-1 min-w-0 pr-2">
@@ -605,7 +605,7 @@ export function QuickFilterBar({ filters, onOpenFullFilters, title = "Quick Filt
                   className={cn(
                     "px-4 py-2 rounded-full text-[10.5px] font-bold uppercase tracking-wider transition-all cursor-pointer flex items-center gap-1.5 border shrink-0 hover:scale-[1.02] active:scale-[0.98]",
                     filter.active
-                      ? "bg-[#EB4501] text-white border-transparent shadow-xs font-black italic"
+                      ? "bg-[#FF5B00] text-white border-transparent shadow-xs font-black italic"
                       : "bg-white border-[#e8edf2] text-gray-550 hover:border-[#1A1D4E]/25 hover:text-[#1A1D4E]"
                   )}
                 >
@@ -618,7 +618,7 @@ export function QuickFilterBar({ filters, onOpenFullFilters, title = "Quick Filt
             {onOpenFullFilters && (
               <button
                 onClick={onOpenFullFilters}
-                className="px-4 py-2 rounded-full text-[10.5px] font-black uppercase tracking-widest text-[#EB4501] bg-orange-primary/5 hover:bg-orange-primary/10 border border-dashed border-[#EB4501]/30 flex items-center gap-1 shrink-0 cursor-pointer"
+                className="px-4 py-2 rounded-full text-[10.5px] font-black uppercase tracking-widest text-[#FF5B00] bg-orange-primary/5 hover:bg-orange-primary/10 border border-dashed border-[#FF5B00]/30 flex items-center gap-1 shrink-0 cursor-pointer"
               >
                 <span>More Filters</span>
                 <span className="font-mono text-xs">▼</span>
@@ -657,7 +657,7 @@ export function ActiveFilterChips({ chips, onClearAll }: ActiveFilterChipsProps)
           {chips.map((chip, idx) => (
             <div
               key={`${chip.id}-${idx}`}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#EB4501] border-0 rounded-full text-[10px] font-black text-white uppercase tracking-wider shadow-2xs transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#FF5B00] border-0 rounded-full text-[10px] font-black text-white uppercase tracking-wider shadow-2xs transition-all"
             >
               <span>{chip.label}</span>
               <button
@@ -676,7 +676,7 @@ export function ActiveFilterChips({ chips, onClearAll }: ActiveFilterChipsProps)
           <button
             type="button"
             onClick={onClearAll}
-            className="text-[10px] font-extrabold text-[#EB4501] uppercase tracking-widest hover:text-[#CF4400] ml-3 transition-colors cursor-pointer border-none bg-transparent hover:underline"
+            className="text-[10px] font-extrabold text-[#FF5B00] uppercase tracking-widest hover:text-[#EF3C23] ml-3 transition-colors cursor-pointer border-none bg-transparent hover:underline"
           >
             Clear All
           </button>
@@ -749,7 +749,7 @@ export function CategorySmartFilters({ category, activeSpecs, onSpecChange }: Sm
     return (
       <div className="flex flex-col gap-3 font-sans">
         <div className="py-2.5 px-3 bg-gradient-to-r from-orange-primary/5 to-transparent rounded-[4px] border-l-2 border-orange-primary">
-          <span className="text-[12px] font-bold tracking-tight text-[#EB4501] block">Smartphone specs</span>
+          <span className="text-[12px] font-bold tracking-tight text-[#FF5B00] block">Smartphone specs</span>
           <span className="text-[8.5px] text-gray-400 font-semibold uppercase tracking-wide block mt-0.5">Custom filters synced with Smartphone directory</span>
         </div>
         {specs.map((spec) => (
@@ -831,7 +831,7 @@ export function CategorySmartFilters({ category, activeSpecs, onSpecChange }: Sm
     return (
       <div className="flex flex-col gap-3 font-sans">
         <div className="py-2.5 px-3 bg-gradient-to-r from-orange-primary/5 to-transparent rounded-[4px] border-l-2 border-orange-primary">
-          <span className="text-[12px] font-bold tracking-tight text-[#EB4501] block">Fashion specs</span>
+          <span className="text-[12px] font-bold tracking-tight text-[#FF5B00] block">Fashion specs</span>
           <span className="text-[8.5px] text-gray-400 font-semibold uppercase tracking-wide block mt-0.5">Custom apparel scopes</span>
         </div>
         {specs.map((spec) => (
@@ -903,7 +903,7 @@ export function CategorySmartFilters({ category, activeSpecs, onSpecChange }: Sm
     return (
       <div className="flex flex-col gap-3 font-sans">
         <div className="py-2.5 px-3 bg-gradient-to-r from-orange-primary/5 to-transparent rounded-[4px] border-l-2 border-orange-primary">
-          <span className="text-[12px] font-bold tracking-tight text-[#EB4501] block">Eyewear specs</span>
+          <span className="text-[12px] font-bold tracking-tight text-[#FF5B00] block">Eyewear specs</span>
           <span className="text-[8.5px] text-gray-400 font-semibold uppercase tracking-wide block mt-0.5">Optimized dimensions for eyeglasses</span>
         </div>
         {specs.map((spec) => (
@@ -1067,7 +1067,7 @@ export function FullSidebarFilterPanel({
         {onReset && (
           <button
             onClick={onReset}
-            className="text-[9px] font-bold text-[#EB4501] hover:text-[#CF4400] uppercase tracking-wider transition-colors border-none bg-none cursor-pointer"
+            className="text-[9px] font-bold text-[#FF5B00] hover:text-[#EF3C23] uppercase tracking-wider transition-colors border-none bg-none cursor-pointer"
           >
             Reset All
           </button>
@@ -1435,8 +1435,8 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                             className={cn(
                               'shrink-0 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap',
                               activeFiltersData.sectionNav.activeId === (activeFiltersData.sectionNav.allId || 'all')
-                                ? 'bg-[#EB4501] text-white border border-[#EB4501] shadow-md shadow-[#EB4501]/20'
-                                : 'bg-white text-[#1A1D4E] border border-[#e8edf2] hover:border-[#EB4501]/30 hover:text-[#CF4400]',
+                                ? 'bg-[#FF5B00] text-white border border-[#FF5B00] shadow-md shadow-[#FF5B00]/20'
+                                : 'bg-white text-[#1A1D4E] border border-[#e8edf2] hover:border-[#FF5B00]/30 hover:text-[#EF3C23]',
                             )}
                           >
                             {activeFiltersData.sectionNav.allLabel || 'Overview'}
@@ -1451,8 +1451,8 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                                 className={cn(
                                   'shrink-0 px-4 py-2 rounded-full text-[10px] font-black uppercase tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer whitespace-nowrap',
                                   activeFiltersData.sectionNav?.activeId === item.id
-                                    ? 'bg-[#EB4501] text-white border border-[#EB4501] shadow-md shadow-[#EB4501]/20'
-                                    : 'bg-white text-[#1A1D4E] border border-[#e8edf2] hover:border-[#EB4501]/30 hover:text-[#CF4400]',
+                                    ? 'bg-[#FF5B00] text-white border border-[#FF5B00] shadow-md shadow-[#FF5B00]/20'
+                                    : 'bg-white text-[#1A1D4E] border border-[#e8edf2] hover:border-[#FF5B00]/30 hover:text-[#EF3C23]',
                                 )}
                               >
                                 {item.icon}
@@ -1528,7 +1528,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
             whileTap={{ scale: 0.95 }}
             className={cn(
               'absolute bottom-0 left-0 z-[1] w-14 h-14 rounded-full bg-white border border-[#e8edf2] shadow-[0_8px_24px_rgba(0,0,0,0.18)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.22)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none pointer-events-auto',
-              isOpen && 'ring-2 ring-[#EB4501]/30',
+              isOpen && 'ring-2 ring-[#FF5B00]/30',
             )}
             aria-label={isOpen ? 'Close filters' : 'Open filters'}
             title="Filters"
@@ -1538,7 +1538,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
               strokeWidth={2}
               className={cn(
                 'transition-colors shrink-0',
-                isOpen ? 'text-[#EB4501]' : 'text-[#8a9bb0] group-hover:text-[#CF4400]',
+                isOpen ? 'text-[#FF5B00]' : 'text-[#8a9bb0] group-hover:text-[#EF3C23]',
               )}
             />
           </motion.button>

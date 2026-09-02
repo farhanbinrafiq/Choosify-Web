@@ -177,7 +177,7 @@ export function MyWarrantySection() {
                   {canClaim && !item.claim && (
                     <button
                       onClick={() => setClaimTarget(item)}
-                      className="mt-2 text-[11px] font-black uppercase px-3 py-1.5 rounded-lg bg-[#EB4501] text-white hover:brightness-105"
+                      className="mt-2 text-[11px] font-black uppercase px-3 py-1.5 rounded-lg bg-[#FF5B00] text-white hover:brightness-105"
                       data-testid="claim-warranty-btn"
                     >
                       Claim Warranty
@@ -310,7 +310,7 @@ function ClaimWarrantyModal({
         <button
           onClick={submit}
           disabled={submitting}
-          className="w-full py-3 rounded-xl text-white text-sm font-bold bg-[#EB4501] disabled:opacity-60"
+          className="w-full py-3 rounded-xl text-white text-sm font-bold bg-[#FF5B00] disabled:opacity-60"
         >
           {submitting ? 'Submitting…' : 'Submit Claim'}
         </button>

@@ -32,7 +32,7 @@ const POPULAR_DEAL_CATS = [
 const BRAND_DEALS_ROW = [
   { name: 'SAMSUNG', off: 'Up to 20% Off', color: '#1428A0' },
   { name: 'Apple', off: 'Up to 15% Off', color: '#1A1A2E' },
-  { name: 'mi', off: 'Up to 18% Off', color: '#EB4501' },
+  { name: 'mi', off: 'Up to 18% Off', color: '#FF5B00' },
   { name: 'SONY', off: 'Up to 25% Off', color: '#1A1A2E' },
   { name: 'DELL', off: 'Up to 20% Off', color: '#2323FF' },
   { name: 'ASUS', off: 'Up to 20% Off', color: '#1A1A2E' },
@@ -71,7 +71,7 @@ export function DealsTopCouponsCard({
         <button
           type="button"
           onClick={handleViewAll}
-          className="text-[11px] font-bold text-[#1A1A2E] hover:text-[#CF4400] cursor-pointer bg-transparent border-0 p-0 min-h-[44px] sm:min-h-0"
+          className="text-[11px] font-bold text-[#1A1A2E] hover:text-[#EF3C23] cursor-pointer bg-transparent border-0 p-0 min-h-[44px] sm:min-h-0"
         >
           VIEW ALL COUPONS ›
         </button>
@@ -82,7 +82,7 @@ export function DealsTopCouponsCard({
             key={cp.code}
             className="flex items-center gap-3 border border-dashed border-[#E5E7EB] rounded-lg px-3 py-2.5"
           >
-            <div className="text-sm font-extrabold text-[#EB4501] w-[38px] shrink-0">{cp.pct}</div>
+            <div className="text-sm font-extrabold text-[#FF5B00] w-[38px] shrink-0">{cp.pct}</div>
             <div className="flex-1 min-w-0">
               <div className="text-[11px] font-bold text-[#1A1A2E]">Use Code: {cp.code}</div>
               <div className="text-[9.5px] text-[#9AA0AC]">{cp.min}</div>
@@ -104,7 +104,7 @@ export function DealsTopCouponsCard({
       <button
         type="button"
         onClick={handleViewAll}
-        className="text-[11.5px] font-bold text-center block w-full text-[#1A1A2E] hover:text-[#CF4400] cursor-pointer bg-transparent border-0 p-0"
+        className="text-[11.5px] font-bold text-center block w-full text-[#1A1A2E] hover:text-[#EF3C23] cursor-pointer bg-transparent border-0 p-0"
       >
         MORE COUPONS ›
       </button>
@@ -154,7 +154,7 @@ export function DealsPopularCategoriesCard({
         <div className="text-[13px] font-extrabold text-[#1A1A2E]">POPULAR DEAL CATEGORIES</div>
         <Link
           to="/categories"
-          className="text-[11px] font-bold text-[#1A1A2E] no-underline hover:text-[#CF4400]"
+          className="text-[11px] font-bold text-[#1A1A2E] no-underline hover:text-[#EF3C23]"
         >
           VIEW ALL ›
         </Link>
@@ -182,7 +182,7 @@ export function DealsBrandDealsCard({ className }: { className?: string }) {
         <div className="text-[13px] font-extrabold text-[#1A1A2E]">BRAND DEALS</div>
         <Link
           to="/brands"
-          className="text-[11px] font-bold text-[#1A1A2E] no-underline hover:text-[#CF4400]"
+          className="text-[11px] font-bold text-[#1A1A2E] no-underline hover:text-[#EF3C23]"
         >
           VIEW ALL BRANDS ›
         </Link>
@@ -192,7 +192,7 @@ export function DealsBrandDealsCard({ className }: { className?: string }) {
           <Link
             key={bd.name}
             to="/brands"
-            className="border border-[#E8EDF2] rounded-lg px-2 py-3 text-center no-underline hover:border-[#EB4501]/40 transition-colors"
+            className="border border-[#E8EDF2] rounded-lg px-2 py-3 text-center no-underline hover:border-[#FF5B00]/40 transition-colors"
           >
             <div className="text-xs font-extrabold mb-2" style={{ color: bd.color }}>
               {bd.name}
@@ -237,7 +237,7 @@ export function DealsSubscribeBanner({ className }: { className?: string }) {
         />
         <button
           type="submit"
-          className="bg-[#EB4501] text-white border-0 px-[22px] rounded-lg text-xs font-bold cursor-pointer hover:brightness-110 shrink-0"
+          className="bg-[#FF5B00] text-white border-0 px-[22px] rounded-lg text-xs font-bold cursor-pointer hover:brightness-110 shrink-0"
         >
           SUBSCRIBE
         </button>

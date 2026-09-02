@@ -187,7 +187,7 @@ export function SpotlightDiscoverPage() {
           <div className="mt-12 text-center">
             <Link
               to="/"
-              className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#EB4501] hover:underline min-h-[44px]"
+              className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#FF5B00] hover:underline min-h-[44px]"
             >
               Back to Home
               <ChevronRight size={14} />

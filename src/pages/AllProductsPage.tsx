@@ -203,7 +203,7 @@ export function AllProductsPage() {
     renderSearch: () => (
       <div className="relative">
         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-          <Search size={13} className="text-[#EB4501]" />
+          <Search size={13} className="text-[#FF5B00]" />
         </div>
         <input
           type="text"
@@ -211,7 +211,7 @@ export function AllProductsPage() {
           onChange={(e) => setSidebarSearch(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && executeSearch(sidebarSearch)}
           placeholder="Search products, brands or details..."
-          className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#EB4501]/50 transition-colors"
+          className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#FF5B00]/50 transition-colors"
         />
       </div>
     ),
@@ -654,7 +654,7 @@ export function AllProductsPage() {
           {/* LEFT COLUMN SEARCH BAR */}
           <div className="relative">
             <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-              <Search size={13} className="text-[#EB4501]" />
+              <Search size={13} className="text-[#FF5B00]" />
             </div>
             <input
               type="text"
@@ -662,7 +662,7 @@ export function AllProductsPage() {
               onChange={(e) => setSidebarSearch(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && executeSearch(sidebarSearch)}
               placeholder="Search products, brands or details..."
-              className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#EB4501]/50 transition-colors shadow-sm"
+              className="w-full h-9 pl-8 pr-3 bg-white border border-[#eef2f6] rounded-2xl text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#FF5B00]/50 transition-colors shadow-sm"
             />
           </div>
           
@@ -936,31 +936,31 @@ export function AllProductsPage() {
               {/* Active Chip Overviews */}
               <div className="flex flex-wrap items-center gap-3">
                 {selectedCategory && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-[#EB4501] border-0 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-[#FF5B00] border-0 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
                     Cat: {selectedCategory} 
                     <X size={12} className="text-white cursor-pointer" onClick={() => setSelectedCategory(null)} />
                   </div>
                 )}
                 {selectedBrand && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-[#EB4501] border-0 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-[#FF5B00] border-0 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
                     Brand: {selectedBrand} 
                     <X size={12} className="text-white cursor-pointer" onClick={() => setSelectedBrand(null)} />
                   </div>
                 )}
                 {retailPriceLimit < 30000 && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-[#EB4501] border-0 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-[#FF5B00] border-0 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
                     Max Price: ৳{retailPriceLimit} 
                     <X size={12} className="text-white cursor-pointer" onClick={() => setRetailPriceLimit(30000)} />
                   </div>
                 )}
                 {ratingFilter !== null && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-[#EB4501] border-0 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-[#FF5B00] border-0 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
                     Rating: {ratingFilter}.0+ Stars 
                     <X size={12} className="text-white cursor-pointer" onClick={() => setRatingFilter(null)} />
                   </div>
                 )}
                 {availabilityFilter !== 'all' && (
-                  <div className="flex items-center gap-2 px-4 py-2 bg-[#EB4501] border-0 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
+                  <div className="flex items-center gap-2 px-4 py-2 bg-[#FF5B00] border-0 rounded-xl text-[10px] font-black text-white uppercase tracking-widest shadow-sm">
                     Status: {availabilityFilter === 'in-stock' ? 'In Stock' : 'Out of Stock'} 
                     <X size={12} className="text-white cursor-pointer" onClick={() => setAvailabilityFilter('all')} />
                   </div>
@@ -1030,7 +1030,7 @@ export function AllProductsPage() {
               <SlidersHorizontal size={40} className="stroke-1 text-gray-300" />
               <div className="text-sm font-semibold tracking-tight text-[#1A1A2E]">No products matched active filters.</div>
               <p className="text-[10px] max-w-sm leading-relaxed font-bold">Try lowering your minimum order quantity filter or clearing search queries to explore the full authorized selection.</p>
-              <button onClick={handleResetFilters} className="px-5 py-2.5 bg-[#EB4501] text-white text-[13px] font-bold tracking-tight rounded-lg shadow-sm hover:brightness-110">Clear Filters</button>
+              <button onClick={handleResetFilters} className="px-5 py-2.5 bg-[#FF5B00] text-white text-[13px] font-bold tracking-tight rounded-lg shadow-sm hover:brightness-110">Clear Filters</button>
             </div>
           ) : (
             <div className={cn(
@@ -1091,7 +1091,7 @@ export function AllProductsPage() {
                       <Link 
                          to={`/recommendations/${item.id}`}
                          key={item.id} 
-                         className="flex items-start gap-3 bg-white border border-[#eef2f6]/60 rounded-2xl p-2 hover:shadow-soft hover:border-[#EB4501]/10 transition-all duration-300 group cursor-pointer"
+                         className="flex items-start gap-3 bg-white border border-[#eef2f6]/60 rounded-2xl p-2 hover:shadow-soft hover:border-[#FF5B00]/10 transition-all duration-300 group cursor-pointer"
                       >
                          <div className="w-12 h-12 rounded-lg overflow-hidden shrink-0 border border-gray-100 bg-gray-50 flex items-center justify-center relative">
                             <img 
@@ -1103,8 +1103,8 @@ export function AllProductsPage() {
                             <SponsoredCardChrome brandName={item.author || item.title} logoUrl={item.image} size="sm" />
                          </div>
                          <div className="flex-1 min-w-0 flex flex-col justify-center text-left">
-                            <span className="text-[7.5px] font-black text-[#EB4501] uppercase tracking-widest leading-none block mb-0.5">{item.category}</span>
-                            <h4 className="font-sans text-[11px] font-bold tracking-tight text-[#1A1D4E] group-hover:text-[#CF4400] transition-colors line-clamp-2 leading-tight">
+                            <span className="text-[7.5px] font-black text-[#FF5B00] uppercase tracking-widest leading-none block mb-0.5">{item.category}</span>
+                            <h4 className="font-sans text-[11px] font-bold tracking-tight text-[#1A1D4E] group-hover:text-[#EF3C23] transition-colors line-clamp-2 leading-tight">
                                {item.title}
                             </h4>
                             <p className="text-[8px] font-bold text-gray-450 truncate mt-0.5 uppercase tracking-wide">

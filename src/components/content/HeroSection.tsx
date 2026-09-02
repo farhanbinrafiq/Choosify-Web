@@ -40,7 +40,7 @@ export const HeroSection = ({ content, isSaved, isFollowing, handleSave, setIsFo
           
           {/* Left Content */}
           <div className="max-w-2xl">
-            <span className="inline-block bg-[#EB4501] text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-6">
+            <span className="inline-block bg-[#FF5B00] text-white text-xs font-bold uppercase tracking-wider px-3 py-1 rounded-full mb-6">
               {content.type}
             </span>
             
@@ -76,7 +76,7 @@ export const HeroSection = ({ content, isSaved, isFollowing, handleSave, setIsFo
             <div className="flex flex-wrap items-center gap-4">
               <button 
                 onClick={() => setIsPlayingVideo(true)}
-                className="bg-[#EB4501] hover:bg-[#CF4400] text-white px-8 py-3.5 rounded-full font-bold transition-all flex items-center gap-2 shadow-lg shadow-[#EB4501]/20"
+                className="bg-[#FF5B00] hover:bg-[#EF3C23] text-white px-8 py-3.5 rounded-full font-bold transition-all flex items-center gap-2 shadow-lg shadow-[#FF5B00]/20"
               >
                 <Play className="w-5 h-5 fill-white" /> Watch Video
               </button>
@@ -84,13 +84,13 @@ export const HeroSection = ({ content, isSaved, isFollowing, handleSave, setIsFo
                 onClick={handleSave}
                 className={cn(
                   "px-6 py-3.5 rounded-full font-bold transition-all flex items-center gap-2 border border-white/10",
-                  isSaved ? "bg-white text-[#000435]" : "bg-white/10 text-white hover:bg-white/20"
+                  isSaved ? "bg-white text-[#18154C]" : "bg-white/10 text-white hover:bg-white/20"
                 )}
               >
                 <Heart
-                  className="w-5 h-5 text-[#EB4501]"
+                  className="w-5 h-5 text-[#FF5B00]"
                   strokeWidth={2}
-                  fill={isSaved ? '#EB4501' : 'none'}
+                  fill={isSaved ? '#FF5B00' : 'none'}
                 />
                 {isSaved ? 'Saved' : 'Save'}
               </button>
@@ -132,7 +132,7 @@ export const HeroSection = ({ content, isSaved, isFollowing, handleSave, setIsFo
                   <div className="absolute inset-0 bg-black/20 group-hover:bg-black/35 transition-colors" />
                   <button 
                     onClick={() => setIsPlayingVideo(true)}
-                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-white/25 backdrop-blur-md text-white border border-white/30 rounded-full flex items-center justify-center hover:scale-110 hover:bg-[#CF4400] transition-all duration-300 shadow-xl shadow-black/20"
+                    className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-white/25 backdrop-blur-md text-white border border-white/30 rounded-full flex items-center justify-center hover:scale-110 hover:bg-[#EF3C23] transition-all duration-300 shadow-xl shadow-black/20"
                   >
                     <Play className="w-8 h-8 text-white ml-1 fill-white" />
                   </button>

@@ -17,7 +17,7 @@ const DEFAULT_CHIPS = [
   {
     text: 'Double-Inspected Sourcing Trust',
     icon: '🛡️',
-    color: 'bg-[#EB4501]/10 border-[#EB4501]/20 text-[#EB4501]',
+    color: 'bg-[#FF5B00]/10 border-[#FF5B00]/20 text-[#FF5B00]',
   },
   {
     text: 'Zero Interest Monthly EMI Approved',

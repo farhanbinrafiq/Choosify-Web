@@ -149,7 +149,7 @@ export function PaymentReturnPage() {
           {orderId && (
             <Link
               to={`/order-success/${orderId}`}
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#EB4501] hover:bg-[#CF4400] text-white text-[11px] font-bold uppercase tracking-wide rounded-lg transition-colors"
+              className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-[#FF5B00] hover:bg-[#EF3C23] text-white text-[11px] font-bold uppercase tracking-wide rounded-lg transition-colors"
             >
               <Package size={14} />
               View order

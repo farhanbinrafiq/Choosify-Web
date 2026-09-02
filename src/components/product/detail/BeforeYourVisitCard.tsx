@@ -26,7 +26,7 @@ export function BeforeYourVisitCard({ data, fields, className }: BeforeYourVisit
           const value = String(data?.[field.key] || '').trim();
           return (
             <div key={field.key}>
-              <div className="text-[10.5px] font-bold text-[#EB4501] uppercase tracking-wide mb-1">
+              <div className="text-[10.5px] font-bold text-[#FF5B00] uppercase tracking-wide mb-1">
                 {field.label}
               </div>
               <p className="text-[11.5px] text-[#4B5563] leading-relaxed m-0">
@@ -37,7 +37,7 @@ export function BeforeYourVisitCard({ data, fields, className }: BeforeYourVisit
         })}
         {customFields.map((field) => (
           <div key={field.id}>
-            <div className="text-[10.5px] font-bold text-[#EB4501] uppercase tracking-wide mb-1">
+            <div className="text-[10.5px] font-bold text-[#FF5B00] uppercase tracking-wide mb-1">
               {String(field.label || 'Detail').trim()}
             </div>
             <p className="text-[11.5px] text-[#4B5563] leading-relaxed m-0">

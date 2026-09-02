@@ -325,7 +325,7 @@ export function BrandDetailPage() {
       renderSearch: () => (
         <div className="relative">
           <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-            <Search size={13} className="text-[#EB4501]" />
+            <Search size={13} className="text-[#FF5B00]" />
           </div>
           <input
             type="text"
@@ -335,7 +335,7 @@ export function BrandDetailPage() {
               if (e.key === "Enter") setSearchFilter(currentSearchInput);
             }}
             placeholder="Search products of this brand..."
-            className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#EB4501]/50 transition-colors"
+            className="w-full h-9 pl-8 pr-3 bg-white border border-[#e8edf2] rounded-[5px] text-[11px] font-semibold text-[#1A1D4E] placeholder-gray-400 focus:outline-none focus:border-[#FF5B00]/50 transition-colors"
           />
         </div>
       ),
@@ -1678,7 +1678,7 @@ export function BrandDetailPage() {
                 </h2>
                 <Link
                   to="/deals"
-                  className="text-[12px] font-bold text-[#1A1A2E] no-underline hover:text-[#CF4400] shrink-0"
+                  className="text-[12px] font-bold text-[#1A1A2E] no-underline hover:text-[#EF3C23] shrink-0"
                 >
                   VIEW ALL DEALS ›
                 </Link>
@@ -1720,7 +1720,7 @@ export function BrandDetailPage() {
                 </h2>
                 <Link
                   to={`/brands/${brand.id}/products`}
-                  className="text-[12px] font-bold text-[#1A1A2E] no-underline hover:text-[#CF4400] shrink-0"
+                  className="text-[12px] font-bold text-[#1A1A2E] no-underline hover:text-[#EF3C23] shrink-0"
                 >
                   VIEW ALL PRODUCTS ›
                 </Link>
@@ -1749,7 +1749,7 @@ export function BrandDetailPage() {
                   {brandProducts.length > 0 && (
                     <button
                       onClick={clearAllFilters}
-                      className="text-[#EB4501] underline hover:text-[#ff5d14] text-[10px] cursor-pointer bg-transparent border-0"
+                      className="text-[#FF5B00] underline hover:text-[#ff5d14] text-[10px] cursor-pointer bg-transparent border-0"
                     >
                       Clear Selections
                     </button>
@@ -1873,7 +1873,7 @@ export function BrandDetailPage() {
                 { value: "4.3/5", label: "Brand Score" },
               ].map((ts) => (
                 <div key={ts.label}>
-                  <div className="text-[20px] font-extrabold text-[#EB4501]">
+                  <div className="text-[20px] font-extrabold text-[#FF5B00]">
                     {ts.value}
                   </div>
                   <div className="text-[10.5px] text-white/50">{ts.label}</div>

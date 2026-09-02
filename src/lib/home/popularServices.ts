@@ -66,7 +66,7 @@ export const POPULAR_SERVICE_TILES: PopularServiceTile[] = [
     letter: 'R',
     href: productsHrefForService('restaurants', 'Restaurants'),
     bg: '#FFE8DC',
-    fg: '#EB4501',
+    fg: '#FF5B00',
     icon: Utensils,
   },
   {

@@ -32,7 +32,7 @@ export function SpotlightCampaignBadges({ badges, campaignType, className }: Spo
         <span
           className={cn(
             'px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider text-white',
-            primary === 'sponsored' ? 'bg-[#2323FF]' : 'bg-[#EB4501]',
+            primary === 'sponsored' ? 'bg-[#2323FF]' : 'bg-[#FF5B00]',
           )}
         >
           {BADGE_LABELS[primary]}

@@ -146,7 +146,7 @@ export function SpotlightFilterBar({
       <button
         type="button"
         onClick={onReset}
-        className="text-[10px] font-bold uppercase text-gray-400 hover:text-[#CF4400] ml-auto"
+        className="text-[10px] font-bold uppercase text-gray-400 hover:text-[#EF3C23] ml-auto"
       >
         Reset Filters
       </button>

@@ -40,12 +40,12 @@ export const ChecklistCard: React.FC<ChecklistCardProps> = ({
     <div className={cn("bg-white rounded-3xl p-6 sm:p-8 border border-slate-100 shadow-sm", className)}>
       {title && (
         <div className="mb-6">
-          <h3 className="text-xl font-black text-[#000435] mb-2">{title}</h3>
+          <h3 className="text-xl font-black text-[#18154C] mb-2">{title}</h3>
           
           <div className="flex items-center gap-3">
             <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
               <div 
-                className="h-full bg-[#000435] rounded-full transition-all duration-500 ease-out" 
+                className="h-full bg-[#18154C] rounded-full transition-all duration-500 ease-out" 
                 style={{ width: `${progress}%` }} 
               />
             </div>
@@ -75,7 +75,7 @@ export const ChecklistCard: React.FC<ChecklistCardProps> = ({
             </div>
             <span className={cn(
               "text-sm font-semibold leading-relaxed transition-colors",
-              item.completed ? "text-slate-400 line-through" : "text-[#000435]"
+              item.completed ? "text-slate-400 line-through" : "text-[#18154C]"
             )}>
               {item.text}
             </span>

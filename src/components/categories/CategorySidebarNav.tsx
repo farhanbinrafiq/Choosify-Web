@@ -38,7 +38,7 @@ export function CategorySidebarNav({
                   'shrink-0 inline-flex items-center gap-1.5 pl-2.5 pr-3.5 py-2 rounded-full text-[12px] font-bold border transition-all cursor-pointer whitespace-nowrap',
                   active
                     ? 'footer-brand-gradient text-white border-transparent'
-                    : 'bg-white text-[#1A1A2E] border-[#E5E7EB] hover:border-[#EB4501]/40',
+                    : 'bg-white text-[#1A1A2E] border-[#E5E7EB] hover:border-[#FF5B00]/40',
                 )}
               >
                 <span className="shrink-0 flex items-center justify-center w-4 h-4 [&>svg]:w-full [&>svg]:h-full">

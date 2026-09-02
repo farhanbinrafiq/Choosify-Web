@@ -65,7 +65,7 @@ function PickCard({ pick }: { pick: EmiCatalogPick }) {
     return (
       <Link
         to={pick.url}
-        className="flex items-center gap-2 p-2 rounded-lg border border-[#e8edf2] bg-white hover:border-[#EB4501]/35 transition-colors text-left"
+        className="flex items-center gap-2 p-2 rounded-lg border border-[#e8edf2] bg-white hover:border-[#FF5B00]/35 transition-colors text-left"
       >
         <div className="min-w-0 flex-1">
           <p className="text-[10px] font-bold text-[#1A1A2E] truncate">{pick.title}</p>
@@ -81,7 +81,7 @@ function PickCard({ pick }: { pick: EmiCatalogPick }) {
             ) : null}
           </p>
         </div>
-        <ArrowRight size={12} className="text-[#EB4501] shrink-0" stroke="url(#choosify-emi-icon-grad)" />
+        <ArrowRight size={12} className="text-[#FF5B00] shrink-0" stroke="url(#choosify-emi-icon-grad)" />
       </Link>
     );
   }
@@ -89,7 +89,7 @@ function PickCard({ pick }: { pick: EmiCatalogPick }) {
     return (
       <Link
         to={pick.url}
-        className="flex items-center gap-2 p-2 rounded-lg border border-[#e8edf2] bg-white hover:border-[#EB4501]/35 transition-colors text-left"
+        className="flex items-center gap-2 p-2 rounded-lg border border-[#e8edf2] bg-white hover:border-[#FF5B00]/35 transition-colors text-left"
       >
         <p className="text-[10px] font-bold text-[#1A1A2E] truncate flex-1">{pick.name}</p>
         <ArrowRight size={12} className="shrink-0" stroke="url(#choosify-emi-icon-grad)" />
@@ -99,7 +99,7 @@ function PickCard({ pick }: { pick: EmiCatalogPick }) {
   return (
     <Link
       to={pick.url}
-      className="flex items-center gap-2 p-2 rounded-lg border border-[#e8edf2] bg-white hover:border-[#EB4501]/35 transition-colors text-left"
+      className="flex items-center gap-2 p-2 rounded-lg border border-[#e8edf2] bg-white hover:border-[#FF5B00]/35 transition-colors text-left"
     >
       <p className="text-[10px] font-bold text-[#1A1A2E] truncate flex-1">{pick.title}</p>
       <ArrowRight size={12} className="shrink-0" stroke="url(#choosify-emi-icon-grad)" />
@@ -250,8 +250,8 @@ export function EmiChatPanel({
                   msg.role === 'user'
                     ? 'bg-white border border-[#e8edf2] text-[#1A1A2E] shadow-sm cursor-default'
                     : 'bg-white border border-[#e8edf2] text-[#1A1A2E] shadow-sm',
-                  canFocus && 'cursor-pointer hover:border-[#EB4501]/35',
-                  isFocused && 'ring-2 ring-[#EB4501]/35 border-[#EB4501]/40',
+                  canFocus && 'cursor-pointer hover:border-[#FF5B00]/35',
+                  isFocused && 'ring-2 ring-[#FF5B00]/35 border-[#FF5B00]/40',
                 )}
               >
                 {renderInlineMarkdown(msg.content)}
@@ -274,7 +274,7 @@ export function EmiChatPanel({
         })}
         {isLoading ? (
           <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-[#8a9bb0]">
-            <Loader2 size={14} className="animate-spin text-[#EB4501]" />
+            <Loader2 size={14} className="animate-spin text-[#FF5B00]" />
             Emi is thinking…
           </div>
         ) : null}
@@ -304,7 +304,7 @@ export function EmiChatPanel({
           onKeyDown={(e) => e.key === 'Enter' && !e.shiftKey && handleSend()}
           placeholder="Ask Emi anything about Choosify…"
           disabled={isLoading}
-          className="flex-1 h-11 px-3 rounded-lg border border-[#e8edf2] text-xs outline-none focus:border-[#EB4501]/40 disabled:opacity-60"
+          className="flex-1 h-11 px-3 rounded-lg border border-[#e8edf2] text-xs outline-none focus:border-[#FF5B00]/40 disabled:opacity-60"
         />
         <button
           type="button"
@@ -322,7 +322,7 @@ export function EmiChatPanel({
           <Link
             to={EMI_MESSAGES_PATH}
             onClick={onClose}
-            className="text-[9px] font-black uppercase tracking-wider text-[#8a9bb0] hover:text-[#CF4400] flex items-center justify-center gap-1"
+            className="text-[9px] font-black uppercase tracking-wider text-[#8a9bb0] hover:text-[#EF3C23] flex items-center justify-center gap-1"
           >
             <span className="choosify-emi-gradient-text">Open full chat</span>
             <ArrowRight size={10} stroke="url(#choosify-emi-icon-grad)" />

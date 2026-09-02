@@ -63,7 +63,7 @@ export function SpotlightDetailsServicesSection({
               key={serviceId}
               className="rounded-[5px] border border-[#e8edf2] bg-[#fafbfc] p-4 flex items-center gap-3"
             >
-              <span className="w-10 h-10 rounded-[5px] bg-[#EB4501]/10 text-[#EB4501] flex items-center justify-center shrink-0">
+              <span className="w-10 h-10 rounded-[5px] bg-[#FF5B00]/10 text-[#FF5B00] flex items-center justify-center shrink-0">
                 <Briefcase size={18} />
               </span>
               <div className="min-w-0 flex-1">
@@ -72,7 +72,7 @@ export function SpotlightDetailsServicesSection({
               </div>
               <Link
                 to={`/search?q=${encodeURIComponent(label)}`}
-                className="shrink-0 inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide text-[#EB4501] hover:underline"
+                className="shrink-0 inline-flex items-center gap-1 text-[9px] font-black uppercase tracking-wide text-[#FF5B00] hover:underline"
               >
                 View
                 <ArrowRight size={10} />

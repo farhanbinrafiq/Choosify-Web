@@ -21,7 +21,7 @@ export function ContentDetailTakeawaysSection({
         </h2>
       </div>
       <div className="bg-white text-[#1A1A2E] rounded-[10px] p-6 text-left border border-[#E8EDF2]">
-        <p className="text-[13px] font-extrabold text-[#EB4501] mb-2 leading-none">{title}</p>
+        <p className="text-[13px] font-extrabold text-[#FF5B00] mb-2 leading-none">{title}</p>
         <p className="text-[13px] font-bold text-[#4B5563] leading-relaxed max-w-2xl text-left">
           {body}
         </p>

@@ -32,7 +32,7 @@ export function WhatsNearbyCard({ data, className }: WhatsNearbyCardProps) {
           const CategoryIcon = NEARBY_CATEGORY_ICONS[category.key];
           return (
             <div key={category.key}>
-              <div className="flex items-center gap-1.5 text-[10.5px] font-bold text-[#EB4501] uppercase tracking-wide mb-1.5">
+              <div className="flex items-center gap-1.5 text-[10.5px] font-bold text-[#FF5B00] uppercase tracking-wide mb-1.5">
                 <CategoryIcon size={13} className="shrink-0" aria-hidden />
                 {category.label}
               </div>

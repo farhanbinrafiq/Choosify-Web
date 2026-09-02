@@ -9,10 +9,10 @@ interface SpotlightHeatmapCardProps {
 }
 
 function cellColor(value: number): string {
-  if (value >= 80) return 'bg-[#EB4501]';
-  if (value >= 60) return 'bg-[#EB4501]/70';
-  if (value >= 40) return 'bg-[#EB4501]/45';
-  if (value >= 20) return 'bg-[#EB4501]/25';
+  if (value >= 80) return 'bg-[#FF5B00]';
+  if (value >= 60) return 'bg-[#FF5B00]/70';
+  if (value >= 40) return 'bg-[#FF5B00]/45';
+  if (value >= 20) return 'bg-[#FF5B00]/25';
   return 'bg-[#F8FBFD]';
 }
 

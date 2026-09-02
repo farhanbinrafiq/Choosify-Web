@@ -63,12 +63,12 @@ export function PartnershipPage() {
     <div className="min-h-screen bg-choosify-feed font-sans">
       {/* 1. HERO SECTION */}
       <StaticPageHero maxWidthClass="max-w-[1440px]">
-        <div className="absolute inset-0 bg-gradient-to-r from-[#EB4501]/10 via-transparent to-black/30 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#FF5B00]/10 via-transparent to-black/30 pointer-events-none" />
         <div className="max-w-[1440px] mx-auto px-6 md:px-[64px] relative z-10 w-full">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
             {/* Left Column */}
             <div className="lg:col-span-7 space-y-4 text-left">
-              <span className="inline-block bg-[#EB4501]/10 text-orange-primary text-[9px] font-mono font-black uppercase tracking-[0.25em] px-3.5 py-1 rounded-full border border-orange-primary/10">
+              <span className="inline-block bg-[#FF5B00]/10 text-orange-primary text-[9px] font-mono font-black uppercase tracking-[0.25em] px-3.5 py-1 rounded-full border border-orange-primary/10">
                 {content.hero.badge}
               </span>
               <h1 className="text-2xl sm:text-3xl md:text-[2.5rem] font-extrabold text-white tracking-tight leading-tight">
@@ -163,7 +163,7 @@ export function PartnershipPage() {
           {/* Proposal Submission Form (Right) */}
           <div className="lg:col-span-5">
             <div className="bg-white border border-[#e8edf2] rounded-[5px] p-6 md:p-8 shadow-xs text-left relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#EB4501] to-[#CF4400]" />
+              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#FF5B00] to-[#EF3C23]" />
               
               <AnimatePresence mode="wait">
                 {!submitted ? (

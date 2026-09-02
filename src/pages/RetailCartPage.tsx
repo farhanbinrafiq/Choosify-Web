@@ -106,7 +106,7 @@ export function RetailCartPage() {
               Home
             </Link>
             <span className="mx-1.5">›</span>
-            <span className="text-[#EB4501]">Shopping Cart</span>
+            <span className="text-[#FF5B00]">Shopping Cart</span>
           </nav>
           <h1 className="text-[22px] sm:text-[26px] font-extrabold tracking-tight mb-1">
             Shopping Cart
@@ -120,7 +120,7 @@ export function RetailCartPage() {
       <div className="max-w-[1100px] mx-auto w-full px-5 sm:px-8 py-8 flex-1">
         {retailCart.length === 0 ? (
           <div className="bg-white border border-[#E8EDF2] rounded-xl p-12 sm:p-16 text-center shadow-sm max-w-xl mx-auto flex flex-col items-center gap-5">
-            <div className="w-20 h-20 bg-[#FFF3EA] rounded-full flex items-center justify-center text-[#EB4501]">
+            <div className="w-20 h-20 bg-[#FFF3EA] rounded-full flex items-center justify-center text-[#FF5B00]">
               <ShoppingCart size={36} strokeWidth={2} />
             </div>
             <div>
@@ -133,7 +133,7 @@ export function RetailCartPage() {
             </div>
             <Link
               to="/products"
-              className="inline-flex items-center gap-2 bg-[#EB4501] hover:bg-[#CF4400] text-white text-xs font-bold px-6 py-3 rounded-lg transition-colors"
+              className="inline-flex items-center gap-2 bg-[#FF5B00] hover:bg-[#EF3C23] text-white text-xs font-bold px-6 py-3 rounded-lg transition-colors"
             >
               Browse Products & Services <ArrowRight size={14} />
             </Link>
@@ -153,7 +153,7 @@ export function RetailCartPage() {
                   >
                     <div className="bg-white border-b border-[#E8EDF2] px-5 py-3.5 flex items-center justify-between gap-3">
                       <div className="flex items-center gap-2.5 min-w-0">
-                        <div className="w-8 h-8 rounded-full bg-[#FFF3EA] flex items-center justify-center text-[#EB4501] shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-[#FFF3EA] flex items-center justify-center text-[#FF5B00] shrink-0">
                           <Store size={14} />
                         </div>
                         <div className="min-w-0">
@@ -207,7 +207,7 @@ export function RetailCartPage() {
                                 <div className="flex justify-between items-start gap-2 mb-1">
                                   <Link
                                     to={`/products/${product.id}`}
-                                    className="text-[13px] font-bold text-[#1A1A2E] hover:text-[#CF4400] transition-colors line-clamp-2"
+                                    className="text-[13px] font-bold text-[#1A1A2E] hover:text-[#EF3C23] transition-colors line-clamp-2"
                                   >
                                     {product.title}
                                   </Link>
@@ -227,7 +227,7 @@ export function RetailCartPage() {
                                       ([key, value]) => (
                                         <span
                                           key={key}
-                                          className="bg-[#FFF3EA] text-[#EB4501] text-[10px] font-bold px-2 py-0.5 rounded"
+                                          className="bg-[#FFF3EA] text-[#FF5B00] text-[10px] font-bold px-2 py-0.5 rounded"
                                         >
                                           {key}: {value as string}
                                         </span>
@@ -284,7 +284,7 @@ export function RetailCartPage() {
                                   <span className="text-[10px] font-bold text-[#9AA0AC] block leading-none mb-1">
                                     Line total
                                   </span>
-                                  <span className="text-[14px] font-extrabold text-[#EB4501]">
+                                  <span className="text-[14px] font-extrabold text-[#FF5B00]">
                                     ৳{(itemPrice * item.quantity).toLocaleString()}
                                   </span>
                                   <span className="text-[10.5px] text-[#9AA0AC] block mt-0.5">
@@ -299,7 +299,7 @@ export function RetailCartPage() {
                     </div>
 
                     <div className="bg-[#F4F7F9] border-t border-[#E8EDF2] px-5 py-3 flex items-center gap-2 text-[11.5px] font-semibold text-[#4B5563]">
-                      <Truck size={14} className="text-[#000435]" />
+                      <Truck size={14} className="text-[#18154C]" />
                       <span>Delivery: Paperfly dispatch (৳{DELIVERY_FEE_PER_SELLER})</span>
                     </div>
                   </div>
@@ -309,7 +309,7 @@ export function RetailCartPage() {
               <div className="flex items-center justify-between pt-1">
                 <Link
                   to="/products"
-                  className="text-[12.5px] font-bold text-[#1A1A2E] hover:text-[#CF4400] transition-colors"
+                  className="text-[12.5px] font-bold text-[#1A1A2E] hover:text-[#EF3C23] transition-colors"
                 >
                   ← Continue shopping
                 </Link>
@@ -383,7 +383,7 @@ export function RetailCartPage() {
 
                   <div className="border-t border-[#E8EDF2] pt-3.5 flex justify-between items-center">
                     <span className="text-[12.5px] font-bold text-[#1A1A2E]">Grand total</span>
-                    <span className="text-2xl font-extrabold text-[#EB4501] tracking-tight">
+                    <span className="text-2xl font-extrabold text-[#FF5B00] tracking-tight">
                       ৳{aggregateTotal.toLocaleString()}
                     </span>
                   </div>
@@ -392,7 +392,7 @@ export function RetailCartPage() {
                 <button
                   type="button"
                   onClick={handleProceedToCheckout}
-                  className="w-full h-12 bg-[#EB4501] hover:bg-[#CF4400] text-white text-[13px] font-bold rounded-lg flex items-center justify-between px-5 transition-colors cursor-pointer border-0"
+                  className="w-full h-12 bg-[#FF5B00] hover:bg-[#EF3C23] text-white text-[13px] font-bold rounded-lg flex items-center justify-between px-5 transition-colors cursor-pointer border-0"
                 >
                   <span>Proceed to checkout</span>
                   <ArrowRight size={16} />
@@ -404,7 +404,7 @@ export function RetailCartPage() {
               </div>
 
               <div className="bg-white border border-[#E8EDF2] shadow-sm p-5 rounded-xl flex gap-3.5 items-center">
-                <ShieldCheck size={28} className="text-[#EB4501] shrink-0" />
+                <ShieldCheck size={28} className="text-[#FF5B00] shrink-0" />
                 <div>
                   <h4 className="text-[12.5px] font-extrabold text-[#1A1A2E] leading-none mb-1.5">
                     Choosify secure guarantee

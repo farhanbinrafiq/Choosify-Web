@@ -185,7 +185,7 @@ export function ContentDetailsPage() {
   };
 
   return (
-    <div id="choosify_universal_details_page" className="bg-[#F8F9FC] min-h-screen font-sans antialiased text-[#000435] pb-24">
+    <div id="choosify_universal_details_page" className="bg-[#F8F9FC] min-h-screen font-sans antialiased text-[#18154C] pb-24">
       <ReadingProgressBar isSticky={true} />
 
       {/* 1. HERO */}
@@ -246,8 +246,8 @@ export function ContentDetailsPage() {
             {/* MEDIA / VIDEO */}
             {content.videoUrl && (
               <section id="media" className="space-y-6">
-                <h2 className="text-2xl font-black text-[#000435] uppercase tracking-wider mb-6 flex items-center gap-2">
-                  <span className="w-2 h-6 bg-[#EB4501] rounded-full" /> MEDIA EXCLUSIVE
+                <h2 className="text-2xl font-black text-[#18154C] uppercase tracking-wider mb-6 flex items-center gap-2">
+                  <span className="w-2 h-6 bg-[#FF5B00] rounded-full" /> MEDIA EXCLUSIVE
                 </h2>
                 <VideoEmbedCard
                   url={content.videoUrl}
@@ -266,8 +266,8 @@ export function ContentDetailsPage() {
             {/* GALLERY */}
             {gallery && gallery.length > 0 && (
               <section id="gallery" className="space-y-6">
-                <h2 className="text-2xl font-black text-[#000435] uppercase tracking-wider mb-6 flex items-center gap-2">
-                  <span className="w-2 h-6 bg-[#EB4501] rounded-full" /> GALLERY
+                <h2 className="text-2xl font-black text-[#18154C] uppercase tracking-wider mb-6 flex items-center gap-2">
+                  <span className="w-2 h-6 bg-[#FF5B00] rounded-full" /> GALLERY
                 </h2>
                 <GalleryGrid images={gallery} />
               </section>
@@ -276,8 +276,8 @@ export function ContentDetailsPage() {
             {/* CALLOUTS */}
             {callouts && callouts.length > 0 && (
               <section id="callouts" className="space-y-4">
-                <h2 className="text-2xl font-black text-[#000435] uppercase tracking-wider mb-6 flex items-center gap-2">
-                  <span className="w-2 h-6 bg-[#EB4501] rounded-full" /> SHOPPING TIPS & WARNINGS
+                <h2 className="text-2xl font-black text-[#18154C] uppercase tracking-wider mb-6 flex items-center gap-2">
+                  <span className="w-2 h-6 bg-[#FF5B00] rounded-full" /> SHOPPING TIPS & WARNINGS
                 </h2>
                 {callouts.map((callout: any, idx: number) => (
                   <CalloutCard key={idx} variant={callout.variant || 'info'} title={callout.title} content={callout.content} />
@@ -288,8 +288,8 @@ export function ContentDetailsPage() {
             {/* SHOPPING INTELLIGENCE & CAMPAIGN */}
             {(deals.length > 0 || content.campaignBlock || (trustStatement && trustStatement.length > 0)) && (
               <section id="shopping-intelligence" className="space-y-6">
-                <h2 className="text-2xl font-black text-[#000435] uppercase tracking-wider mb-6 flex items-center gap-2">
-                  <span className="w-2 h-6 bg-[#EB4501] rounded-full" /> SHOPPING INTELLIGENCE
+                <h2 className="text-2xl font-black text-[#18154C] uppercase tracking-wider mb-6 flex items-center gap-2">
+                  <span className="w-2 h-6 bg-[#FF5B00] rounded-full" /> SHOPPING INTELLIGENCE
                 </h2>
                 {content.campaignBlock && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
@@ -429,8 +429,8 @@ export function ContentDetailsPage() {
             {/* RELATED BRANDS */}
             {content.relatedBrands && content.relatedBrands.length > 0 && (
               <section id="brands">
-                <h2 className="text-2xl font-black text-[#000435] uppercase tracking-wider mb-6 flex items-center gap-2">
-                  <span className="w-2 h-6 bg-[#EB4501] rounded-full" /> RELATED BRANDS
+                <h2 className="text-2xl font-black text-[#18154C] uppercase tracking-wider mb-6 flex items-center gap-2">
+                  <span className="w-2 h-6 bg-[#FF5B00] rounded-full" /> RELATED BRANDS
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {content.relatedBrands.map((brand: any) => (
@@ -442,8 +442,8 @@ export function ContentDetailsPage() {
 
                         {/* RELATED BRANDS */}
             <section id="brands">
-              <h2 className="text-2xl font-black text-[#000435] uppercase tracking-wider mb-6 flex items-center gap-2">
-                <span className="w-2 h-6 bg-[#EB4501] rounded-full" /> FEATURED BRANDS
+              <h2 className="text-2xl font-black text-[#18154C] uppercase tracking-wider mb-6 flex items-center gap-2">
+                <span className="w-2 h-6 bg-[#FF5B00] rounded-full" /> FEATURED BRANDS
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <BrandCard brand={{
@@ -492,8 +492,8 @@ export function ContentDetailsPage() {
             {/* RELATED PRODUCTS */}
             {relatedProducts && relatedProducts.length > 0 && (
               <section id="products" className="space-y-6">
-                <h2 className="text-2xl font-black text-[#000435] uppercase tracking-wider mb-6 flex items-center gap-2">
-                  <span className="w-2 h-6 bg-[#EB4501] rounded-full" /> FEATURED PRODUCTS
+                <h2 className="text-2xl font-black text-[#18154C] uppercase tracking-wider mb-6 flex items-center gap-2">
+                  <span className="w-2 h-6 bg-[#FF5B00] rounded-full" /> FEATURED PRODUCTS
                 </h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 items-start">
                   {relatedProducts.map((product: any) => (
@@ -505,13 +505,13 @@ export function ContentDetailsPage() {
 
             {/* PUBLIC REVIEWS / COMMENTS */}
             <section id="comments" className="space-y-6">
-              <h2 className="text-2xl font-black text-[#000435] uppercase tracking-wider mb-6 flex items-center gap-2">
-                <span className="w-2 h-6 bg-[#EB4501] rounded-full" /> COMMUNITY DISCUSSION
+              <h2 className="text-2xl font-black text-[#18154C] uppercase tracking-wider mb-6 flex items-center gap-2">
+                <span className="w-2 h-6 bg-[#FF5B00] rounded-full" /> COMMUNITY DISCUSSION
               </h2>
               
               {/* Comment Input Form using Design System Button */}
               <form onSubmit={handlePostComment} className="bg-white border border-slate-100 rounded-2xl p-6 space-y-4 shadow-xs">
-                <h3 className="text-sm font-extrabold text-[#000435] uppercase tracking-wider">Write a community review</h3>
+                <h3 className="text-sm font-extrabold text-[#18154C] uppercase tracking-wider">Write a community review</h3>
                 <div className="flex items-center gap-2">
                   <span className="text-xs font-bold text-slate-500">Your Rating:</span>
                   <div className="flex gap-1">
@@ -522,7 +522,7 @@ export function ContentDetailsPage() {
                         onClick={() => setNewCommentRating(star)}
                         className="p-0.5 focus:outline-none"
                       >
-                        <Star className={cn("w-5 h-5", star <= newCommentRating ? "fill-[#EB4501] text-[#EB4501]" : "text-slate-300")} />
+                        <Star className={cn("w-5 h-5", star <= newCommentRating ? "fill-[#FF5B00] text-[#FF5B00]" : "text-slate-300")} />
                       </button>
                     ))}
                   </div>
@@ -532,7 +532,7 @@ export function ContentDetailsPage() {
                     value={newCommentText}
                     onChange={(e) => setNewCommentText(e.target.value)}
                     placeholder="Share your experience with this product in Bangladesh..."
-                    className="w-full min-h-[100px] border border-slate-200 rounded-xl p-4 text-sm font-medium focus:ring-2 focus:ring-[#EB4501]/20 focus:border-[#EB4501] focus:outline-none transition-all placeholder:text-slate-400"
+                    className="w-full min-h-[100px] border border-slate-200 rounded-xl p-4 text-sm font-medium focus:ring-2 focus:ring-[#FF5B00]/20 focus:border-[#FF5B00] focus:outline-none transition-all placeholder:text-slate-400"
                   />
                 </div>
                 <div className="flex justify-end">
@@ -563,8 +563,8 @@ export function ContentDetailsPage() {
             {/* FAQ */}
             {content.faqs && content.faqs.length > 0 && (
               <section id="faqs" className="space-y-6">
-                <h2 className="text-2xl font-black text-[#000435] uppercase tracking-wider mb-6 flex items-center gap-2">
-                  <span className="w-2 h-6 bg-[#EB4501] rounded-full" /> FREQUENTLY ASKED QUESTIONS
+                <h2 className="text-2xl font-black text-[#18154C] uppercase tracking-wider mb-6 flex items-center gap-2">
+                  <span className="w-2 h-6 bg-[#FF5B00] rounded-full" /> FREQUENTLY ASKED QUESTIONS
                 </h2>
                 <div className="flex flex-wrap gap-2 mb-6">
                   {['General', 'Warranty', 'Returns', 'Payment'].map((category) => (
@@ -612,8 +612,8 @@ export function ContentDetailsPage() {
             {/* RELATED CONTENT */}
             {content.relatedGuides && content.relatedGuides.length > 0 && (
               <section id="related-content">
-                <h2 className="text-2xl font-black text-[#000435] uppercase tracking-wider mb-6 flex items-center gap-2">
-                  <span className="w-2 h-6 bg-[#EB4501] rounded-full" /> YOU MAY ALSO LIKE
+                <h2 className="text-2xl font-black text-[#18154C] uppercase tracking-wider mb-6 flex items-center gap-2">
+                  <span className="w-2 h-6 bg-[#FF5B00] rounded-full" /> YOU MAY ALSO LIKE
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {content.relatedGuides.map((guide: any) => (
@@ -663,7 +663,7 @@ export function ContentDetailsPage() {
                 <h3 className="text-[10px] font-extrabold text-slate-400 uppercase tracking-widest mb-4">Popular searches</h3>
                 <div className="flex flex-wrap gap-2">
                   {content.tags.map((tag: string, idx: number) => (
-                    <Badge key={idx} variant="outline" className="text-slate-600 border-slate-200 cursor-pointer hover:border-[#EB4501] hover:text-[#CF4400]">
+                    <Badge key={idx} variant="outline" className="text-slate-600 border-slate-200 cursor-pointer hover:border-[#FF5B00] hover:text-[#EF3C23]">
                       #{tag}
                     </Badge>
                   ))}

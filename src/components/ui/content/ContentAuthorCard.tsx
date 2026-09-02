@@ -47,12 +47,12 @@ export const ContentAuthorCard: React.FC<ContentAuthorCardProps> = ({
       <div className="flex-1 space-y-3">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h3 className="text-xl font-black text-[#000435] flex items-center gap-2">
+            <h3 className="text-xl font-black text-[#18154C] flex items-center gap-2">
               {author.name}
             </h3>
             {(author.role || author.organization) && (
               <p className="text-sm font-bold text-slate-500 mt-1">
-                {author.role} {author.organization && <span className="text-[#EB4501]">@ {author.organization}</span>}
+                {author.role} {author.organization && <span className="text-[#FF5B00]">@ {author.organization}</span>}
               </p>
             )}
           </div>
@@ -60,7 +60,7 @@ export const ContentAuthorCard: React.FC<ContentAuthorCardProps> = ({
             <Button 
               onClick={onFollow}
               variant={isFollowing ? "outline" : "primary"} 
-              className={cn("shrink-0 gap-2", isFollowing ? "border-slate-200 text-slate-700" : "bg-[#000435] text-white hover:bg-[#CF4400]")}
+              className={cn("shrink-0 gap-2", isFollowing ? "border-slate-200 text-slate-700" : "bg-[#18154C] text-white hover:bg-[#EF3C23]")}
             >
               <UserPlus size={16} /> {isFollowing ? 'Following' : 'Follow Author'}
             </Button>
@@ -76,7 +76,7 @@ export const ContentAuthorCard: React.FC<ContentAuthorCardProps> = ({
         {author.socials && Object.values(author.socials).some(Boolean) && (
           <div className="flex items-center gap-3 pt-2">
             {author.socials.website && (
-              <a href={author.socials.website} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-[#CF4400] hover:bg-orange-50 transition-colors">
+              <a href={author.socials.website} target="_blank" rel="noopener noreferrer" className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-400 hover:text-[#EF3C23] hover:bg-orange-50 transition-colors">
                 <Globe size={14} />
               </a>
             )}

@@ -55,7 +55,7 @@ function BlockContent({ block, editable, onUpdate }: { block: SpotlightBlock; ed
   if (block.type === 'cta' || block.type === 'button') {
     return (
       <div className="inline-flex items-center gap-2">
-        <span className="px-4 py-2 bg-[#EB4501] text-white text-xs font-bold uppercase rounded">
+        <span className="px-4 py-2 bg-[#FF5B00] text-white text-xs font-bold uppercase rounded">
           {String(block.data.label ?? 'CTA')}
         </span>
         {editable && (
@@ -143,7 +143,7 @@ export function SpotlightBlockRenderer({
             key={block.blockId}
             className={cn(
               'group relative border rounded-lg p-4 bg-white transition-shadow',
-              selected ? 'border-[#EB4501] shadow-md' : 'border-[#e8edf2] hover:border-[#EB4501]/30',
+              selected ? 'border-[#FF5B00] shadow-md' : 'border-[#e8edf2] hover:border-[#FF5B00]/30',
             )}
             onClick={() => onSelect?.(block.blockId)}
             role="button"

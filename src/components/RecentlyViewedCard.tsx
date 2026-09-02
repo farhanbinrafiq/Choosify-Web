@@ -54,10 +54,10 @@ export const RecentlyViewedCard = memo(function RecentlyViewedCard({ product, cl
             {product.brand}
           </span>
         )}
-        <h4 className="text-[11px] font-bold text-[#000435] leading-snug line-clamp-1 group-hover:text-[#CF4400] transition-colors">
+        <h4 className="text-[11px] font-bold text-[#18154C] leading-snug line-clamp-1 group-hover:text-[#EF3C23] transition-colors">
           {product.title}
         </h4>
-        <div className="text-[11px] font-black text-[#EB4501] mt-1">
+        <div className="text-[11px] font-black text-[#FF5B00] mt-1">
           {displayPrice}
         </div>
       </div>

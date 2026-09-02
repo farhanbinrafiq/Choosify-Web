@@ -22,7 +22,7 @@ function resolveVariant(toast: Toast, explicit?: ChoosifyToastVariant): Choosify
 
 function Icon({ variant }: { variant: ChoosifyToastVariant }) {
   if (variant === 'loading') {
-    return <Loader2 size={18} className="text-[#EB4501] animate-spin shrink-0" aria-hidden />;
+    return <Loader2 size={18} className="text-[#FF5B00] animate-spin shrink-0" aria-hidden />;
   }
   if (variant === 'error') {
     return <AlertCircle size={18} className="text-[#FF000D] shrink-0" aria-hidden />;
