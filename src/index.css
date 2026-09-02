@@ -323,6 +323,34 @@ a[class*="bg-[#EF3C23]"]:not([class*="bg-[#EF3C23]/"]):hover {
   background-image: linear-gradient(90deg, color-mix(in srgb, var(--choosify-red) 86%, #000) 0%, color-mix(in srgb, var(--choosify-orange) 86%, #000) 100%) !important;
 }
 
+/* ── Auth page atmospheric composition (decorative only, presentation-layer) ── */
+.auth-dot-grid {
+  background-image: radial-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 1px);
+  background-size: 42px 42px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 65% at 50% 45%, #000 30%, transparent 80%);
+  mask-image: radial-gradient(ellipse 80% 65% at 50% 45%, #000 30%, transparent 80%);
+}
+.auth-orbit {
+  border: 1px dashed rgba(255, 255, 255, 0.06);
+  animation: auth-orbit-spin 90s linear infinite;
+}
+.auth-orbit--wide {
+  border-color: rgba(255, 255, 255, 0.045);
+  animation-duration: 140s;
+  animation-direction: reverse;
+}
+@keyframes auth-orbit-spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .auth-orbit,
+  .auth-orbit--wide {
+    animation: none !important;
+  }
+}
+
 /** Square flex shell for portrait Emi mascot — avoids side clipping in avatars/FABs */
 .choosify-emi-logo-slot {
   display: inline-flex;

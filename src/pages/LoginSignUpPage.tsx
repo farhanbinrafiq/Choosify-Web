@@ -1,12 +1,20 @@
 import React, { useEffect, useState } from 'react';
 import {
   ArrowRight,
-  BadgeCheck,
   Check,
+  Eye,
+  EyeOff,
+  Footprints,
+  GitCompareArrows,
+  Headphones,
   Lock,
   Mail,
   Shield,
   ShieldCheck,
+  ShoppingBag,
+  Star,
+  User,
+  Watch,
 } from 'lucide-react';
 import { IconBrandApple } from '@tabler/icons-react';
 
@@ -15,6 +23,7 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from '../lib/notify';
 import { cn } from '../lib/utils';
 import { EmiAiLogo } from '../components/EmiAiLogo';
+import { ChoosifyWordmarkLogo } from '../components/ChoosifyWordmarkLogo';
 import {
   firebaseAuthErrorMessage,
   registerWithEmailPassword,
@@ -27,51 +36,162 @@ type AuthTab = 'sign-in' | 'sign-up';
 const PAGE_BG = '#18154C';
 const PRIMARY = '#FF5B00';
 
+/** Strongest three only — the full list lives on the marketing site. */
 const SIGNIN_FEATURES = [
-  'Save unlimited products & brands',
-  'Track your reviews & comparisons',
-  'Personalised price drop alerts',
-  'Verified-buyer badge on reviews',
-  'AI-powered shopping assistant',
+  'Save products & brands',
+  'Track reviews & comparisons',
+  'Get personalized recommendations',
 ];
 
+/** Bottom trust strip — integrated with the background, not another card. */
 const TRUST_POINTS = [
   {
-    icon: Shield,
-    title: 'Trust You Can Rely On',
-    sub: 'We verify brands and sellers so you can shop with complete confidence.',
-    bg: 'rgba(255, 91, 0,0.18)',
+    icon: Lock,
+    title: 'Secure sign-in',
+    sub: 'Your account is protected',
     iconColor: PRIMARY,
   },
   {
     icon: ShieldCheck,
-    title: 'Safe & Secure Platform',
-    sub: 'Your data and payments are protected with enterprise-grade security.',
-    bg: 'rgba(35,35,255,0.18)',
+    title: 'Verified seller ecosystem',
+    sub: 'Only trusted brands',
     iconColor: '#2323FF',
   },
   {
-    icon: BadgeCheck,
-    title: 'Genuine Products Only',
-    sub: 'All products are authentic, quality-checked and 100% reliable.',
-    bg: 'rgba(7,168,40,0.18)',
+    icon: Shield,
+    title: 'Privacy protected',
+    sub: 'Your data stays private',
     iconColor: '#07A828',
   },
 ];
 
-/** Decorative blurred collage tiles (optional backdrop). */
-const BACKDROP_TILES = [
-  { name: 'Wireless Earbuds', price: '৳2,499', hue: 'from-[#1A1D4E] to-[#2D1B4E]' },
-  { name: 'Leather Tote', price: '৳4,890', hue: 'from-[#2D1B4E] to-[#18154C]' },
-  { name: 'Smart Watch', price: '৳12,999', hue: 'from-[#0F2A4A] to-[#1A1030]' },
-  { name: 'Cotton Panjabi', price: '৳1,850', hue: 'from-[#1E3A2F] to-[#18154C]' },
-  { name: 'Running Shoes', price: '৳6,450', hue: 'from-[#2D1B4E] to-[#1A1030]' },
-  { name: 'Perfume Set', price: '৳3,200', hue: 'from-[#2A1848] to-[#18154C]' },
-  { name: 'Kitchen Blender', price: '৳5,990', hue: 'from-[#1A2A4E] to-[#0A0A1F]' },
-  { name: 'Skincare Kit', price: '৳2,150', hue: 'from-[#3A2040] to-[#1a1030]' },
-  { name: 'Laptop Stand', price: '৳1,299', hue: 'from-[#0F2840] to-[#18154C]' },
-  { name: 'Denim Jacket', price: '৳3,750', hue: 'from-[#1A254E] to-[#2D1B4E]' },
+/**
+ * Decorative product-ecosystem cards for the empty outer space on large
+ * desktop only. NOT catalog data — no images fetched, no API calls, no records.
+ */
+type EcoCard = {
+  name: string;
+  price: string;
+  rating: string;
+  icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
+  /** absolute-position + rotation classes */
+  pos: string;
+  rotate: string;
+};
+
+const ECOSYSTEM_LEFT: EcoCard[] = [
+  {
+    name: 'Wireless Earbuds',
+    price: '৳2,499',
+    rating: '4.8',
+    icon: Headphones,
+    pos: 'left-[3%] top-[16%] min-[1600px]:left-[5%]',
+    rotate: '-rotate-[5deg]',
+  },
+  {
+    name: 'Leather Tote',
+    price: '৳4,890',
+    rating: '4.7',
+    icon: ShoppingBag,
+    pos: 'left-[2%] top-[52%] min-[1600px]:left-[4%]',
+    rotate: 'rotate-[4deg]',
+  },
 ];
+
+const ECOSYSTEM_RIGHT: EcoCard[] = [
+  {
+    name: 'Running Shoes',
+    price: '৳6,490',
+    rating: '4.6',
+    icon: Footprints,
+    pos: 'right-[3%] top-[13%] min-[1600px]:right-[5%]',
+    rotate: 'rotate-[5deg]',
+  },
+  {
+    name: 'Classic Watch',
+    price: '৳3,250',
+    rating: '4.7',
+    icon: Watch,
+    pos: 'right-[2%] top-[50%] min-[1600px]:right-[4%]',
+    rotate: '-rotate-[4deg]',
+  },
+];
+
+/** Decorative floating chips around the central composition. */
+const FEATURE_CHIPS: {
+  label: string;
+  icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
+  pos: string;
+}[] = [
+  { label: 'Verified Sellers', icon: ShieldCheck, pos: 'left-[16%] top-[30%]' },
+  { label: 'Compare Easily', icon: GitCompareArrows, pos: 'left-[15%] top-[52%]' },
+  { label: 'Best Match', icon: Star, pos: 'right-[16%] top-[28%]' },
+  { label: 'Secure & Safe', icon: Lock, pos: 'right-[15%] top-[50%]' },
+];
+
+/** A handful of tiny brand-tinted nodes drifting along the orbital band. */
+const ORBIT_NODES: { pos: string; cls: string }[] = [
+  { pos: 'left-[19%] top-[22%]', cls: 'h-1.5 w-1.5 bg-[#FF5B00]/50 shadow-[0_0_10px_2px_rgba(255,91,0,0.22)]' },
+  { pos: 'right-[20%] top-[18%]', cls: 'h-1 w-1 bg-[#7A3CFF]/55' },
+  { pos: 'right-[13%] top-[58%]', cls: 'h-1.5 w-1.5 bg-[#EF3C23]/45 shadow-[0_0_10px_2px_rgba(239,60,35,0.18)]' },
+  { pos: 'left-[12%] top-[62%]', cls: 'h-1 w-1 bg-white/25' },
+  { pos: 'left-[30%] top-[12%]', cls: 'h-1 w-1 bg-[#7A3CFF]/45' },
+  { pos: 'right-[31%] top-[70%]', cls: 'h-1 w-1 bg-white/20' },
+];
+
+function EcosystemCard({ card }: { card: EcoCard }) {
+  const Icon = card.icon;
+  return (
+    <div
+      aria-hidden
+      className={cn(
+        'absolute w-[150px] rounded-2xl border border-white/10 bg-white/[0.045] p-3.5 text-left',
+        'shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)] backdrop-blur-[3px] pointer-events-none select-none',
+        card.pos,
+        card.rotate,
+      )}
+    >
+      <span className="absolute -inset-px rounded-2xl bg-gradient-to-br from-white/[0.06] to-transparent" />
+      <div className="relative">
+        <div className="mb-2 flex items-center justify-between">
+          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/[0.06] text-white/70">
+            <Icon size={15} strokeWidth={2} />
+          </span>
+          <span className="flex items-center gap-0.5 text-[9.5px] font-bold text-white/60">
+            <Star size={9} className="fill-[#FF5B00] text-[#FF5B00]" /> {card.rating}
+          </span>
+        </div>
+        <div className="text-[11px] font-bold text-white/85">{card.name}</div>
+        <div className="text-[10px] font-extrabold text-[#FF5B00]">{card.price}</div>
+      </div>
+    </div>
+  );
+}
+
+function FeatureChip({
+  label,
+  icon: Icon,
+  pos,
+}: {
+  label: string;
+  icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
+  pos: string;
+}) {
+  return (
+    <div
+      aria-hidden
+      className={cn(
+        'absolute flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.05]',
+        'px-3 py-1.5 text-[10.5px] font-semibold text-white/70 backdrop-blur-[3px]',
+        'shadow-[0_10px_30px_-15px_rgba(0,0,0,0.6)] pointer-events-none select-none',
+        pos,
+      )}
+    >
+      <Icon size={12} strokeWidth={2} className="text-[#FF5B00]" />
+      {label}
+    </div>
+  );
+}
 
 function GoogleLogo() {
   return (
@@ -114,6 +234,7 @@ function AuthField({
   autoComplete,
   icon: Icon,
   placeholder,
+  rightSlot,
 }: {
   id: string;
   label: string;
@@ -123,6 +244,7 @@ function AuthField({
   autoComplete?: string;
   icon?: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
   placeholder?: string;
+  rightSlot?: React.ReactNode;
 }) {
   return (
     <div className="space-y-1.5">
@@ -147,9 +269,13 @@ function AuthField({
           className={cn(
             'w-full h-[42px] rounded-lg border border-[#E5E7EB] bg-white text-[13px] font-medium text-[#1A1A2E] outline-none transition-colors box-border',
             'placeholder:text-[#9AA0AC] focus:border-[#FF5B00] focus:ring-2 focus:ring-[#FF5B00]/15',
-            Icon ? 'pl-10 pr-3.5' : 'px-3.5',
+            Icon ? 'pl-10' : 'pl-3.5',
+            rightSlot ? 'pr-10' : 'pr-3.5',
           )}
         />
+        {rightSlot ? (
+          <div className="absolute right-2 top-1/2 -translate-y-1/2">{rightSlot}</div>
+        ) : null}
       </div>
     </div>
   );
@@ -160,6 +286,7 @@ export function LoginSignUpPage() {
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const { setIsLoggedIn, updateCurrentUser, currentUser } = useGlobalState();
   const location = useLocation();
@@ -234,267 +361,317 @@ export function LoginSignUpPage() {
   const isSignUp = activeTab === 'sign-up';
 
   return (
-    <div className="min-h-screen font-sans relative overflow-hidden choosify-dark-surface">
-      {/* Optional blurred product collage backdrop — gap-x-0 avoids continuous vertical gutters that read as a center divider */}
-      <div
-        className="absolute inset-0 grid grid-cols-5 gap-x-0 gap-y-3.5 px-6 pt-[100px] pb-6 opacity-30 blur-[1px] pointer-events-none"
-        aria-hidden
-      >
-        {BACKDROP_TILES.map((tile) => (
-          <div key={tile.name} className="rounded-[10px] overflow-hidden relative h-[180px]">
-            <div className={cn('absolute inset-0 bg-gradient-to-br', tile.hue)} />
-            <div className="absolute bottom-2 left-2 right-2 text-[10px] text-white font-bold [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">
-              {tile.name}
-              <div className="text-[9px] font-extrabold text-[#FF5B00]">{tile.price}</div>
-            </div>
-          </div>
+    <div
+      className="auth-shell relative min-h-screen overflow-hidden font-sans choosify-dark-surface"
+      style={{ backgroundColor: PAGE_BG }}
+    >
+      {/* ── Atmospheric depth (decorative, non-interactive) ───────────────── */}
+      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
+        <div className="auth-dot-grid absolute inset-0 opacity-[0.5]" />
+        <div className="absolute -left-[12%] top-[8%] h-[520px] w-[520px] rounded-full bg-[#FF5B00]/10 blur-[130px]" />
+        <div className="absolute -right-[14%] top-[24%] h-[560px] w-[560px] rounded-full bg-[#7A3CFF]/14 blur-[150px]" />
+        <div className="absolute bottom-[-18%] left-1/2 h-[460px] w-[720px] -translate-x-1/2 rounded-full bg-[#EF3C23]/8 blur-[150px]" />
+        {/* subtle dotted orbital paths — centred on the auth composition (large desktop only) */}
+        <div className="hidden xl:block auth-orbit absolute left-1/2 top-1/2 h-[740px] w-[740px] -translate-x-1/2 translate-y-[calc(-50%_-_1.25rem)] rounded-full" />
+        <div className="hidden min-[1600px]:block auth-orbit auth-orbit--wide absolute left-1/2 top-1/2 h-[1040px] w-[1160px] -translate-x-1/2 translate-y-[calc(-50%_-_1.25rem)] rounded-full" />
+        {/* tiny brand-tinted orbital nodes */}
+        {ORBIT_NODES.map((n, i) => (
+          <span key={i} className={cn('absolute hidden rounded-full xl:block', n.pos, n.cls)} />
         ))}
       </div>
       <div
-        className="absolute inset-0 pointer-events-none bg-gradient-to-b from-black/20 via-transparent to-black/35"
+        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/35"
         aria-hidden
       />
 
-      <div className="relative z-[2] flex flex-col min-h-screen">
-        {/* Top bar — logo lives in Navbar only; keep help + Ask EMI here */}
-        <div className="flex justify-end items-center px-6 sm:px-10 py-6">
-          <div className="flex items-center gap-4">
-            <Link
-              to="/contact"
-              className="text-[12.5px] text-white/60 hover:text-white/85 transition-colors hidden sm:inline"
-            >
-              Need help?
-            </Link>
-            <Link
-              to="/messages/thread-emi-ai"
-              className="flex items-center gap-1.5 choosify-emi-gradient rounded-full py-1.5 pl-1.5 pr-3.5 hover:brightness-110 transition-all border-0"
-            >
-              <EmiAiLogo size={22} />
-              <span className="text-xs font-bold text-white">Ask EMI</span>
-            </Link>
-          </div>
+      {/* ── Decorative product ecosystem — large desktop only ─────────────── */}
+      <div className="pointer-events-none absolute inset-0 hidden xl:block" aria-hidden>
+        {ECOSYSTEM_LEFT.map((c) => (
+          <EcosystemCard key={c.name} card={c} />
+        ))}
+        {ECOSYSTEM_RIGHT.map((c) => (
+          <EcosystemCard key={c.name} card={c} />
+        ))}
+        <div className="hidden min-[1600px]:block">
+          {FEATURE_CHIPS.map((chip) => (
+            <FeatureChip key={chip.label} {...chip} />
+          ))}
+        </div>
+      </div>
+
+      <div className="relative z-[2] flex min-h-screen flex-col">
+        {/* Ask EMI — floats independently in the upper-right, no header chrome */}
+        <div className="absolute right-6 top-6 z-[3] flex items-center gap-4 sm:right-10">
+          <Link
+            to="/contact"
+            className="hidden text-[12.5px] text-white/60 transition-colors hover:text-white/85 sm:inline"
+          >
+            Need help?
+          </Link>
+          <Link
+            to="/messages/thread-emi-ai"
+            className="flex items-center gap-1.5 rounded-full border-0 py-1.5 pl-1.5 pr-3.5 transition-all hover:brightness-110 choosify-emi-gradient"
+          >
+            <EmiAiLogo size={22} />
+            <span className="text-xs font-bold text-white">Ask EMI</span>
+          </Link>
         </div>
 
-        {/* Merged marketing + auth card — one shell, flush panels, outer radius only */}
-        <div className="flex-1 flex items-center justify-center px-6 sm:px-10 py-5">
-          <div className="flex flex-col lg:flex-row w-full max-w-[780px] rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
-          {/* Left marketing copy — dark surface gradient */}
-          <div className="flex-1 min-w-0 choosify-dark-surface p-7 sm:p-8">
-            <div className="inline-block bg-[rgba(255,90,44,0.15)] text-[#FF5B00] text-[11px] font-bold px-3.5 py-1.5 rounded-full mb-5">
-              ✦ Join 100,000+ SHOPPERS
-            </div>
-            <h1 className="text-[28px] sm:text-[34px] font-extrabold text-white leading-[1.2] mb-[18px]">
-              Verify Brands.
-              <br />
-              Compare Easily.
-              <br />
-              Choose With <span className="choosify-emi-gradient-text">Confidence</span>
-            </h1>
-            <p className="text-[13.5px] text-white/55 leading-[1.7] m-0 mb-6">
-              Bookmark products, track your reviews, and get personalized picks from Bangladesh&apos;s
-              #1 discovery platform.
-            </p>
-            <ul className="space-y-3.5 list-none p-0 m-0">
-              {SIGNIN_FEATURES.map((feature) => (
-                <li
-                  key={feature}
-                  className="flex items-center gap-2.5 text-[13px] text-white/85"
-                >
-                  <span className="w-5 h-5 flex items-center justify-center shrink-0">
-                    <Check size={14} strokeWidth={3} stroke="url(#choosify-emi-icon-grad)" />
-                  </span>
-                  {feature}
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Right auth panel — flat join on the left; outer radius from parent shell */}
-          <div className="bg-white p-8 sm:p-9 w-full lg:w-[380px] lg:shrink-0">
-            <h2 className="text-[22px] font-extrabold text-[#1A1A2E] mb-1">
-              {isSignUp ? 'Create your account' : 'Welcome back'}
-            </h2>
-            <p className="text-[12.5px] text-[#9AA0AC] mb-5">
-              {isSignUp
-                ? 'Join Choosify to save products and compare brands'
-                : 'Sign in to continue to Choosify'}
-            </p>
-
-            {/* Segmented tabs */}
-            <div className="flex bg-[#F1F1F3] rounded-lg p-1 mb-5">
-              <button
-                type="button"
-                onClick={() => setActiveTab('sign-in')}
-                className={cn(
-                  'flex-1 text-center py-2.5 rounded-md text-[12.5px] font-bold transition-all',
-                  !isSignUp
-                    ? 'bg-white text-[#1A1A2E] shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
-                    : 'bg-transparent text-[#9AA0AC] hover:text-[#1A1A2E]',
-                )}
-              >
-                Sign in
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('sign-up')}
-                className={cn(
-                  'flex-1 text-center py-2.5 rounded-md text-[12.5px] font-bold transition-all',
-                  isSignUp
-                    ? 'bg-white text-[#1A1A2E] shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
-                    : 'bg-transparent text-[#9AA0AC] hover:text-[#1A1A2E]',
-                )}
-              >
-                Sign up
-              </button>
-            </div>
-
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {isSignUp && (
-                <AuthField
-                  id="full-name"
-                  label="Full Name"
-                  value={fullName}
-                  onChange={setFullName}
-                  autoComplete="name"
-                  placeholder="Your full name"
-                />
-              )}
-
-              <AuthField
-                id="email"
-                label="Email address"
-                type="email"
-                value={email}
-                onChange={setEmail}
-                autoComplete="email"
-                icon={Mail}
-                placeholder="Enter your email"
-              />
-
-              <AuthField
-                id="password"
-                label="Password"
-                type="password"
-                value={password}
-                onChange={setPassword}
-                autoComplete={isSignUp ? 'new-password' : 'current-password'}
-                icon={Lock}
-                placeholder="Enter your password"
-              />
-
-              {!isSignUp && (
-                <div className="flex items-center justify-between gap-3">
-                  <label className="flex cursor-pointer items-center gap-1.5 text-xs text-[#4B5563]">
-                    <input
-                      type="checkbox"
-                      checked={rememberMe}
-                      onChange={(e) => setRememberMe(e.target.checked)}
-                      className="h-3.5 w-3.5 rounded accent-[#FF5B00]"
-                    />
-                    Remember me
-                  </label>
-                  <button
-                    type="button"
-                    onClick={handleForgotPassword}
-                    className="text-xs font-bold text-[#FF5B00] hover:underline"
-                  >
-                    Forgot password?
-                  </button>
+        {/* Central composition — card + trust strip as one group, slightly above centre */}
+        <div className="flex flex-1 items-center justify-center px-6 py-10 sm:px-10">
+          <div className="w-full max-w-[920px] lg:-translate-y-4 min-[1600px]:max-w-[980px] min-[1600px]:-translate-y-8">
+            <div className="flex w-full flex-col overflow-hidden rounded-2xl shadow-[0_28px_80px_-24px_rgba(0,0,0,0.65)] lg:flex-row">
+              {/* Left marketing copy */}
+              <div className="flex min-w-0 flex-1 flex-col p-7 choosify-dark-surface sm:p-9 min-[1600px]:p-11">
+                <ChoosifyWordmarkLogo height={26} className="mb-6 h-[26px] w-auto" tone="white" />
+                <div className="mb-5 inline-block w-max rounded-full bg-[rgba(255,90,44,0.15)] px-3.5 py-1.5 text-[11px] font-bold text-[#FF5B00]">
+                  ✦ Join 100,000+ SHOPPERS
                 </div>
-              )}
+                <h1 className="mb-6 text-[28px] font-extrabold leading-[1.2] text-white sm:text-[34px] sm:mb-7">
+                  Verify Brands.
+                  <br />
+                  Compare Easily.
+                  <br />
+                  Choose With{' '}
+                  <span className="choosify-emi-gradient-text">Confidence.</span>
+                </h1>
+                <p className="m-0 mb-8 text-[13.5px] leading-[1.7] text-white/55">
+                  Bookmark products, track reviews, and get personalized picks from
+                  Bangladesh&apos;s #1 discovery platform.
+                </p>
+                <ul className="m-0 list-none space-y-3.5 p-0">
+                  {SIGNIN_FEATURES.map((feature) => (
+                    <li key={feature} className="flex items-center gap-2.5 text-[13px] text-white/85">
+                      <span className="flex h-5 w-5 shrink-0 items-center justify-center">
+                        <Check size={14} strokeWidth={3} stroke="url(#choosify-emi-icon-grad)" />
+                      </span>
+                      {feature}
+                    </li>
+                  ))}
+                </ul>
 
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className={cn(
-                  'w-full py-3.5 rounded-lg text-[13px] font-bold cursor-pointer active:scale-[0.99] transition-all flex items-center justify-center gap-2',
-                  isSignUp
-                    ? 'bg-[#FF5B00] text-white border-none hover:brightness-105'
-                    : 'bg-white border border-[#E5E7EB] text-[#FF5B00] hover:border-[#D1D5DB]',
-                  isSubmitting && 'opacity-60 cursor-not-allowed',
-                )}
-              >
-                {isSubmitting
-                  ? isSignUp
-                    ? 'Creating account…'
-                    : 'Signing in…'
-                  : isSignUp
-                    ? 'Create account'
-                    : 'Sign in to Choosify'}
-                {!isSubmitting && <ArrowRight size={16} strokeWidth={2.4} className="text-current" />}
-              </button>
-            </form>
-
-            <div className="my-5 flex items-center gap-3">
-              <div className="h-px flex-1 bg-[#E8EDF2]" />
-              <span className="text-[11px] text-[#9AA0AC]">OR</span>
-              <div className="h-px flex-1 bg-[#E8EDF2]" />
-            </div>
-
-            <div className="flex gap-2.5 mb-5">
-              <button
-                type="button"
-                onClick={() => handleSocialLogin('Google')}
-                className="flex-1 border border-[#E5E7EB] bg-white py-2.5 px-1.5 rounded-lg text-[11px] font-semibold cursor-pointer flex items-center justify-center gap-1.5 text-[#1A1A2E] hover:bg-[#F9FAFB] transition-colors"
-                aria-label="Continue with Google"
-              >
-                <GoogleLogo />
-                Google
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSocialLogin('Facebook')}
-                className="flex-1 border border-[#E5E7EB] bg-white py-2.5 px-1.5 rounded-lg text-[11px] font-semibold cursor-pointer flex items-center justify-center gap-1.5 text-[#1877F2] hover:bg-[#F9FAFB] transition-colors"
-                aria-label="Continue with Facebook"
-              >
-                <FacebookLogo />
-                Facebook
-              </button>
-              <button
-                type="button"
-                onClick={() => handleSocialLogin('Apple')}
-                className="flex-1 border border-[#E5E7EB] bg-white py-2.5 px-1.5 rounded-lg text-[11px] font-semibold cursor-pointer flex items-center justify-center gap-1.5 text-[#1A1A2E] hover:bg-[#F9FAFB] transition-colors"
-                aria-label="Continue with Apple"
-              >
-                <AppleLogo />
-                Apple
-              </button>
-            </div>
-
-            <p className="text-center text-[12.5px] text-[#9AA0AC] m-0">
-              {isSignUp ? 'Already have an account?' : 'New to Choosify?'}{' '}
-              <button
-                type="button"
-                onClick={() => setActiveTab(isSignUp ? 'sign-in' : 'sign-up')}
-                className="text-[#FF5B00] font-bold hover:underline"
-              >
-                {isSignUp ? 'Sign in' : 'Sign up'}
-              </button>
-            </p>
-          </div>
-          </div>
-        </div>
-
-        {/* Bottom trust strip */}
-        <div className="max-w-[1100px] mx-auto w-full px-6 sm:px-10 pb-10">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 border border-white/12 rounded-[10px] px-5 sm:px-[30px] py-[26px]">
-            {TRUST_POINTS.map((point) => {
-              const Icon = point.icon;
-              return (
-                <article key={point.title} className="flex items-start gap-3">
-                  <div
-                    className="w-[38px] h-[38px] rounded-[10px] flex items-center justify-center shrink-0"
-                    style={{ background: point.bg, color: point.iconColor }}
-                  >
-                    <Icon size={18} strokeWidth={2.1} />
+                {/* Community / social proof */}
+                <div className="mt-9 flex items-center gap-3 sm:mt-10">
+                  <div className="flex -space-x-2">
+                    {['from-[#FF5B00] to-[#EF3C23]', 'from-[#7A3CFF] to-[#2323FF]', 'from-[#0EA5A5] to-[#07A828]'].map(
+                      (g, i) => (
+                        <span
+                          key={i}
+                          aria-hidden
+                          className={cn(
+                            'flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1B1750] bg-gradient-to-br',
+                            g,
+                          )}
+                        >
+                          <User size={12} strokeWidth={2.4} className="text-white/90" />
+                        </span>
+                      ),
+                    )}
                   </div>
                   <div>
-                    <h3 className="text-[13px] font-bold text-white mb-1">{point.title}</h3>
-                    <p className="text-[11.5px] text-white/50 leading-normal m-0">{point.sub}</p>
+                    <div className="flex items-center gap-0.5 text-[#FF5B00]">
+                      {[0, 1, 2, 3, 4].map((i) => (
+                        <Star key={i} size={11} className="fill-current" />
+                      ))}
+                    </div>
+                    <p className="m-0 text-[11px] text-white/55">Trusted by 100,000+ smart shoppers</p>
                   </div>
-                </article>
-              );
-            })}
+                </div>
+              </div>
+
+              {/* Right auth panel — form + handlers unchanged */}
+              <div className="w-full bg-white p-8 sm:p-9 lg:w-[400px] lg:shrink-0">
+                <h2 className="mb-1 text-[22px] font-extrabold text-[#1A1A2E]">
+                  {isSignUp ? 'Create your account' : 'Welcome back'}
+                </h2>
+                <p className="mb-5 text-[12.5px] text-[#9AA0AC]">
+                  {isSignUp
+                    ? 'Join Choosify to save products and compare brands'
+                    : 'Sign in to continue to Choosify'}
+                </p>
+
+                {/* Segmented tabs */}
+                <div className="mb-5 flex rounded-lg bg-[#F1F1F3] p-1">
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('sign-in')}
+                    className={cn(
+                      'flex-1 rounded-md py-2.5 text-center text-[12.5px] font-bold transition-all',
+                      !isSignUp
+                        ? 'bg-white text-[#1A1A2E] shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
+                        : 'bg-transparent text-[#9AA0AC] hover:text-[#1A1A2E]',
+                    )}
+                  >
+                    Sign in
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab('sign-up')}
+                    className={cn(
+                      'flex-1 rounded-md py-2.5 text-center text-[12.5px] font-bold transition-all',
+                      isSignUp
+                        ? 'bg-white text-[#1A1A2E] shadow-[0_1px_3px_rgba(0,0,0,0.1)]'
+                        : 'bg-transparent text-[#9AA0AC] hover:text-[#1A1A2E]',
+                    )}
+                  >
+                    Sign up
+                  </button>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  {isSignUp && (
+                    <AuthField
+                      id="full-name"
+                      label="Full Name"
+                      value={fullName}
+                      onChange={setFullName}
+                      autoComplete="name"
+                      placeholder="Your full name"
+                    />
+                  )}
+
+                  <AuthField
+                    id="email"
+                    label="Email address"
+                    type="email"
+                    value={email}
+                    onChange={setEmail}
+                    autoComplete="email"
+                    icon={Mail}
+                    placeholder="Enter your email"
+                  />
+
+                  <AuthField
+                    id="password"
+                    label="Password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={setPassword}
+                    autoComplete={isSignUp ? 'new-password' : 'current-password'}
+                    icon={Lock}
+                    placeholder="Enter your password"
+                    rightSlot={
+                      <button
+                        type="button"
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        aria-pressed={showPassword}
+                        onClick={() => setShowPassword((v) => !v)}
+                        className="rounded-md p-1.5 text-[#9AA0AC] outline-none transition-colors hover:text-[#1A1A2E] focus-visible:ring-2 focus-visible:ring-[#FF5B00]/40"
+                      >
+                        {showPassword ? <EyeOff size={16} strokeWidth={2} /> : <Eye size={16} strokeWidth={2} />}
+                      </button>
+                    }
+                  />
+
+                  {!isSignUp && (
+                    <div className="flex items-center justify-between gap-3">
+                      <label className="flex cursor-pointer items-center gap-1.5 text-xs text-[#4B5563]">
+                        <input
+                          type="checkbox"
+                          checked={rememberMe}
+                          onChange={(e) => setRememberMe(e.target.checked)}
+                          className="h-3.5 w-3.5 rounded accent-[#FF5B00]"
+                        />
+                        Remember me
+                      </label>
+                      <button
+                        type="button"
+                        onClick={handleForgotPassword}
+                        className="text-xs font-bold text-[#FF5B00] hover:underline"
+                      >
+                        Forgot password?
+                      </button>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className={cn(
+                      'flex w-full items-center justify-center gap-2 rounded-lg border-none bg-[#FF5B00] py-3.5 text-[13px] font-bold text-white transition-all hover:brightness-105 active:scale-[0.99]',
+                      isSubmitting && 'cursor-not-allowed opacity-60',
+                    )}
+                  >
+                    {isSubmitting
+                      ? isSignUp
+                        ? 'Creating account…'
+                        : 'Signing in…'
+                      : isSignUp
+                        ? 'Create account'
+                        : 'Sign in to Choosify'}
+                    {!isSubmitting && <ArrowRight size={16} strokeWidth={2.4} className="text-current" />}
+                  </button>
+                </form>
+
+                <div className="my-5 flex items-center gap-3">
+                  <div className="h-px flex-1 bg-[#E8EDF2]" />
+                  <span className="text-[11px] text-[#9AA0AC]">OR</span>
+                  <div className="h-px flex-1 bg-[#E8EDF2]" />
+                </div>
+
+                <div className="mb-5 flex gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => handleSocialLogin('Google')}
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-[#E5E7EB] bg-white px-1.5 py-2.5 text-[11px] font-semibold text-[#1A1A2E] transition-colors hover:bg-[#F9FAFB]"
+                    aria-label="Continue with Google"
+                  >
+                    <GoogleLogo />
+                    Google
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSocialLogin('Facebook')}
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-[#E5E7EB] bg-white px-1.5 py-2.5 text-[11px] font-semibold text-[#1877F2] transition-colors hover:bg-[#F9FAFB]"
+                    aria-label="Continue with Facebook"
+                  >
+                    <FacebookLogo />
+                    Facebook
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSocialLogin('Apple')}
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-[#E5E7EB] bg-white px-1.5 py-2.5 text-[11px] font-semibold text-[#1A1A2E] transition-colors hover:bg-[#F9FAFB]"
+                    aria-label="Continue with Apple"
+                  >
+                    <AppleLogo />
+                    Apple
+                  </button>
+                </div>
+
+                <p className="m-0 text-center text-[12.5px] text-[#9AA0AC]">
+                  {isSignUp ? 'Already have an account?' : 'New to Choosify?'}{' '}
+                  <button
+                    type="button"
+                    onClick={() => setActiveTab(isSignUp ? 'sign-in' : 'sign-up')}
+                    className="font-bold text-[#FF5B00] hover:underline"
+                  >
+                    {isSignUp ? 'Sign in' : 'Sign up'}
+                  </button>
+                </p>
+              </div>
+            </div>
+
+            {/* Trust strip — integrated with the background, not a card */}
+            <div className="mt-8 hidden grid-cols-3 gap-6 px-2 sm:grid">
+              {TRUST_POINTS.map((point) => {
+                const Icon = point.icon;
+                return (
+                  <div key={point.title} className="flex items-start gap-2.5">
+                    <Icon
+                      size={16}
+                      strokeWidth={2.1}
+                      className="mt-0.5 shrink-0"
+                      style={{ color: point.iconColor }}
+                    />
+                    <div>
+                      <h3 className="m-0 text-[12px] font-bold text-white/85">{point.title}</h3>
+                      <p className="m-0 text-[11px] leading-normal text-white/45">{point.sub}</p>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
           </div>
         </div>
       </div>

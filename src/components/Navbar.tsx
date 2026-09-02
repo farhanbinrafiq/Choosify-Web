@@ -172,25 +172,15 @@ export function Navbar() {
     );
   };
 
-  /** Logo-only chrome on auth flows — hide search, nav links, cart, and Sign In/Up. */
+  /**
+   * Auth flows render no global chrome at all — the auth page owns its own
+   * full-bleed composition and its canonical branding is the wordmark inside
+   * the central card. No full-width header, logo, or divider here.
+   */
   const isAuthChrome = location.pathname === '/login' || location.pathname.startsWith('/login/');
 
   if (isAuthChrome) {
-    return (
-      <header
-        className="w-full min-w-0 z-50 sticky top-0 shadow-2xl border-b border-white/[0.07]"
-        id="main-navbar"
-      >
-        <nav className="choosify-chrome-header text-white h-16 sm:h-[4.5rem] flex items-center px-3 sm:px-4 lg:px-6 xl:px-8 relative z-[40]">
-          <Link to="/" className="flex items-center group" aria-label="Choosify Home">
-            <ChoosifyWordmarkLogo
-              fluid
-              className="h-9 sm:h-[3.25rem] w-auto max-w-[min(148px,38vw)] sm:max-w-[min(300px,64vw)] group-hover:opacity-95 transition-opacity"
-            />
-          </Link>
-        </nav>
-      </header>
-    );
+    return null;
   }
 
   return (
