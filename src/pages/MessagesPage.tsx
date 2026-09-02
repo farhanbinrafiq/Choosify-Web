@@ -817,63 +817,67 @@ export function MessagesPage({
           : 'flex flex-col bg-choosify-feed text-[#1A1A2E] h-[calc(100dvh-var(--choosify-navbar-height,4rem))] max-h-[calc(100dvh-var(--choosify-navbar-height,4rem))] overflow-hidden'
       }
     >
-      {/* Messages Header bar — constrained to feed silhouette. Hidden on mobile once a thread is open (thread header takes over, WhatsApp-style). */}
+      {/* Compact Inbox toolbar — replaces the old dark hero to give the
+          conversation workspace more vertical room. Presentation only.
+          Hidden on mobile once a thread is open (thread header takes over). */}
       {!embedded && (
-      <div className={`w-full px-5 sm:px-10 pt-3 shrink-0 ${threadId ? 'hidden md:block' : ''}`}>
-        <div className="max-w-[1400px] mx-auto w-full choosify-dark-surface text-white px-5 sm:px-10 py-5 flex items-center justify-between gap-3.5 flex-wrap rounded-none overflow-hidden">
-        <div className="flex items-center gap-3 min-w-0">
-          <button
-            type="button"
-            onClick={() => {
-              if (threadId && window.innerWidth < 768) {
-                selectThread(undefined);
-              } else {
-                navigate('/dashboard');
-              }
-            }}
-            className="w-9 h-9 rounded-lg bg-white/8 flex items-center justify-center text-white/70 hover:text-white transition-colors border-none cursor-pointer shrink-0"
-          >
-            <ArrowLeft size={16} />
-          </button>
-          <div className="min-w-0">
-            <div className="text-[10.5px] font-bold text-[#EB4501] tracking-[0.4px] mb-1">
-              CUSTOMER SUPPORT CENTER
+      <div
+        className={`w-full shrink-0 border-b border-[#E8EDF2] bg-white ${threadId ? 'hidden md:block' : ''}`}
+      >
+        <div className="max-w-[1400px] mx-auto w-full px-5 sm:px-10 h-[64px] flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5 min-w-0">
+            <button
+              type="button"
+              onClick={() => {
+                if (threadId && window.innerWidth < 768) {
+                  selectThread(undefined);
+                } else {
+                  navigate('/dashboard');
+                }
+              }}
+              className="w-8 h-8 rounded-lg border border-[#E8EDF2] flex items-center justify-center text-[#4B5563] hover:text-[#1A1A2E] hover:border-[#FF5B00]/40 transition-colors bg-white cursor-pointer shrink-0"
+              aria-label="Back"
+            >
+              <ArrowLeft size={15} />
+            </button>
+            <div className="min-w-0">
+              <h1 className="text-[15px] font-extrabold text-[#1A1A2E] leading-tight tracking-tight m-0">
+                Messages
+              </h1>
+              <p className="hidden sm:block text-[11px] text-[#9AA0AC] leading-tight m-0 mt-0.5">
+                Customer support &amp; order conversations
+              </p>
             </div>
-            <h1 className="text-[19px] font-extrabold leading-tight flex items-center gap-2">
-              <MessageCircleMore size={18} className="text-[#EB4501] shrink-0" />
-              Real-time support
-            </h1>
-            <p className="text-[11.5px] text-white/50 mt-0.5">We&apos;re here to help, 24/7</p>
           </div>
-        </div>
 
-        <div className="flex items-center gap-2.5 flex-wrap">
-          <button
-            type="button"
-            onClick={handleMarkAllAsRead}
-            className="px-4 py-2.5 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1.5 border-none bg-white/8 hover:bg-white/12 text-white cursor-pointer"
-            title="Mark all conversations as read"
-          >
-            <CheckSquare size={12} />
-            Mark all as read
-          </button>
-          <Link
-            to="/dashboard"
-            state={{ activeTab: 'overview' }}
-            className="px-4 py-2.5 bg-white/8 hover:bg-white/12 rounded-lg text-[11px] font-bold text-white transition-all flex items-center gap-1.5"
-          >
-            <LayoutDashboard size={12} className="text-[#EB4501]" />
-            Dashboard
-          </Link>
-          <Link
-            to="/dashboard"
-            state={{ activeTab: 'orders' }}
-            className="px-4 py-2.5 bg-[#EB4501] hover:bg-[#CF4400] rounded-lg text-[11px] font-bold text-white transition-all flex items-center gap-1.5"
-          >
-            <Package size={12} />
-            My Orders
-          </Link>
-        </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <button
+              type="button"
+              onClick={handleMarkAllAsRead}
+              disabled={tabCounts.unread === 0}
+              className="hidden sm:inline-flex items-center gap-1.5 px-2.5 h-8 rounded-lg text-[11px] font-bold transition-colors text-[#9AA0AC] hover:text-[#1A1A2E] disabled:opacity-40 disabled:cursor-default cursor-pointer bg-transparent border-none"
+              title="Mark all conversations as read"
+            >
+              <CheckSquare size={12} />
+              Mark all as read
+            </button>
+            <Link
+              to="/dashboard"
+              state={{ activeTab: 'overview' }}
+              className="hidden sm:inline-flex items-center gap-1.5 px-3 h-8 rounded-lg text-[11px] font-bold text-[#1A1A2E] border border-[#E8EDF2] hover:border-[#FF5B00]/40 transition-colors no-underline"
+            >
+              <LayoutDashboard size={12} className="text-[#FF5B00]" />
+              Dashboard
+            </Link>
+            <Link
+              to="/dashboard"
+              state={{ activeTab: 'orders' }}
+              className="inline-flex items-center gap-1.5 px-3 h-8 rounded-lg text-[11px] font-bold text-white bg-[#FF5B00] hover:bg-[#EF3C23] transition-colors no-underline"
+            >
+              <Package size={12} />
+              My Orders
+            </Link>
+          </div>
         </div>
       </div>
       )}
@@ -887,7 +891,7 @@ export function MessagesPage({
           <button
             type="button"
             onClick={handleMarkAllAsRead}
-            className="px-3 py-2 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1.5 border border-[#E8EDF2] bg-[#F4F7F9] text-[#1A1A2E] cursor-pointer hover:border-[#EB4501]/40"
+            className="px-3 py-2 rounded-lg text-[11px] font-bold transition-all flex items-center gap-1.5 border border-[#E8EDF2] bg-[#F4F7F9] text-[#1A1A2E] cursor-pointer hover:border-[#FF5B00]/40"
             title="Mark all conversations as read"
           >
             <CheckSquare size={12} />
@@ -912,7 +916,7 @@ export function MessagesPage({
               <button
                 type="button"
                 onClick={handleNewConversation}
-                className="w-full box-border px-3 py-2 rounded-lg bg-[#EB4501] text-white flex items-center justify-center gap-1.5 text-[10.5px] font-bold border-none cursor-pointer hover:bg-[#CF4400] transition-colors"
+                className="w-full box-border px-3 py-2 rounded-lg bg-[#FF5B00] text-white flex items-center justify-center gap-1.5 text-[10.5px] font-bold border-none cursor-pointer hover:bg-[#EF3C23] transition-colors"
                 title="Start a new conversation with Choosify Support"
               >
                 <MessageCircleMore size={12} strokeWidth={2.5} />
@@ -924,7 +928,7 @@ export function MessagesPage({
               <input
                 onChange={(e) => setSearchQuery(e.target.value)}
                 value={searchQuery}
-                className="w-full h-9 pl-9 pr-3 bg-white border border-[#E5E7EB] rounded-lg text-[11.5px] font-medium text-[#1A1A2E] placeholder:text-[#9AA0AC] focus:outline-none focus:border-[#EB4501] transition-all"
+                className="w-full h-9 pl-9 pr-3 bg-white border border-[#E5E7EB] rounded-lg text-[11.5px] font-medium text-[#1A1A2E] placeholder:text-[#9AA0AC] focus:outline-none focus:border-[#FF5B00] transition-all"
                 placeholder="Search transactions / order references..."
               />
             </div>
@@ -940,7 +944,7 @@ export function MessagesPage({
                     onClick={() => setConversationTab(tab.id)}
                     className={`shrink-0 pb-1.5 border-b-2 transition-colors border-none bg-transparent cursor-pointer ${
                       active
-                        ? 'text-[#EB4501] border-[#EB4501]'
+                        ? 'text-[#FF5B00] border-[#FF5B00]'
                         : 'border-transparent hover:text-[#1A1A2E]'
                     }`}
                   >
@@ -948,7 +952,7 @@ export function MessagesPage({
                     <span
                       className={
                         active
-                          ? 'bg-[#EB4501] text-white rounded-lg px-1.5 py-px text-[9.5px]'
+                          ? 'bg-[#FF5B00] text-white rounded-lg px-1.5 py-px text-[9.5px]'
                           : 'text-[#1A1A2E]'
                       }
                     >
@@ -998,7 +1002,7 @@ export function MessagesPage({
                         alt=""
                       />
                       {t.unread && !isActive && (
-                        <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#EB4501] border-2 border-white rounded-full" />
+                        <div className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-[#FF5B00] border-2 border-white rounded-full" />
                       )}
                     </div>
                     <div className="flex-1 min-w-0">
@@ -1013,7 +1017,7 @@ export function MessagesPage({
                       </p>
                       <div className="flex flex-wrap items-center gap-1">
                         {t.id === EMI_MESSAGES_THREAD_ID && (
-                          <span className="inline-flex text-[9px] font-bold bg-[#FFF3EC] text-[#EB4501] px-2 py-0.5 rounded">
+                          <span className="inline-flex text-[9px] font-bold bg-[#FFF3EC] text-[#FF5B00] px-2 py-0.5 rounded">
                             Emi AI
                           </span>
                         )}
@@ -1023,7 +1027,7 @@ export function MessagesPage({
                           </span>
                         )}
                         {t.orderRef && (
-                          <span className="inline-flex text-[9px] font-bold bg-[#FFF3EC] text-[#EB4501] px-2 py-0.5 rounded-xl">
+                          <span className="inline-flex text-[9px] font-bold bg-[#FFF3EC] text-[#FF5B00] px-2 py-0.5 rounded-xl">
                             ORDER: {t.orderRef}
                           </span>
                         )}
@@ -1053,7 +1057,7 @@ export function MessagesPage({
                       </div>
                     </div>
                     {t.unread && (
-                      <div className="w-4 h-4 rounded-full bg-[#EB4501] text-white text-[9px] font-bold flex items-center justify-center shrink-0 self-center">
+                      <div className="w-4 h-4 rounded-full bg-[#FF5B00] text-white text-[9px] font-bold flex items-center justify-center shrink-0 self-center">
                         1
                       </div>
                     )}
@@ -1068,7 +1072,7 @@ export function MessagesPage({
               <button
                 type="button"
                 onClick={() => setConversationTab('all')}
-                className="block w-full text-center text-[11.5px] font-bold text-[#EB4501] border-none bg-transparent cursor-pointer hover:underline"
+                className="block w-full text-center text-[11.5px] font-bold text-[#FF5B00] border-none bg-transparent cursor-pointer hover:underline"
               >
                 View all conversations →
               </button>
@@ -1106,12 +1110,12 @@ export function MessagesPage({
                     </h2>
                     {isAnnouncementsThread ? (
                       <span className="text-[10.5px] font-medium text-[#4B5563] flex items-center gap-1">
-                        <Megaphone size={10} className="text-[#EB4501]" />
+                        <Megaphone size={10} className="text-[#FF5B00]" />
                         Platform updates
                       </span>
                     ) : isEmiThread ? (
                       <span className="text-[10.5px] font-medium text-[#4B5563] flex items-center gap-1">
-                        <Sparkles size={10} className="text-[#EB4501]" />
+                        <Sparkles size={10} className="text-[#FF5B00]" />
                         Shopping assistant
                       </span>
                     ) : (
@@ -1124,7 +1128,7 @@ export function MessagesPage({
 
                 <div className="flex items-center gap-2 shrink-0">
                   {activeThread.orderRef && (
-                    <span className="hidden sm:inline-flex bg-[#FFF3EC] text-[#EB4501] text-[10px] font-bold px-2.5 py-1 rounded-xl">
+                    <span className="hidden sm:inline-flex bg-[#FFF3EC] text-[#FF5B00] text-[10px] font-bold px-2.5 py-1 rounded-xl">
                       ORDER: {activeThread.orderRef}
                     </span>
                   )}
@@ -1132,7 +1136,7 @@ export function MessagesPage({
                     <button
                       type="button"
                       onClick={() => setShowReportModal(true)}
-                      className="hidden sm:inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg bg-[#F4F7F9] border border-[#E8EDF2] text-[11px] font-bold text-[#4B5563] hover:text-[#EB4501] hover:border-[#EB4501]/30 cursor-pointer"
+                      className="hidden sm:inline-flex items-center gap-1.5 h-9 px-2.5 rounded-lg bg-[#F4F7F9] border border-[#E8EDF2] text-[11px] font-bold text-[#4B5563] hover:text-[#FF5B00] hover:border-[#FF5B00]/30 cursor-pointer"
                       title="Report to Support"
                     >
                       <Flag size={13} />
@@ -1229,7 +1233,7 @@ export function MessagesPage({
                       </span>
                       <span
                         className={`text-[9.5px] font-bold px-2.5 py-0.5 rounded-xl flex items-center gap-1
-                        ${linkedSubOrder.trackingStatus === 'pending' ? 'bg-[#FFF3EC] text-[#EB4501]' : ''}
+                        ${linkedSubOrder.trackingStatus === 'pending' ? 'bg-[#FFF3EC] text-[#FF5B00]' : ''}
                         ${linkedSubOrder.trackingStatus === 'dispatched' ? 'bg-[#3867ff]/10 text-[#3867ff]' : ''}
                         ${linkedSubOrder.trackingStatus === 'transit' ? 'bg-purple-100 text-purple-600' : ''}
                         ${linkedSubOrder.trackingStatus === 'delivered' ? 'bg-[#07DD05]/10 text-[#07DD05]' : ''}
@@ -1260,7 +1264,7 @@ export function MessagesPage({
                             </div>
                           </div>
                           <div className="text-right shrink-0">
-                            <div className="text-[13px] font-extrabold text-[#EB4501]">
+                            <div className="text-[13px] font-extrabold text-[#FF5B00]">
                               ৳{((item.price ?? 0) * (item.quantity ?? 1)).toLocaleString()}
                             </div>
                             <div className="text-[9.5px] text-[#9AA0AC]">
@@ -1286,7 +1290,7 @@ export function MessagesPage({
                       <button
                         type="button"
                         onClick={() => navigate('/order-tracking', { state: { order: linkedOrder } })}
-                        className="px-4 py-2 bg-[#F4F7F9] hover:bg-[#CF4400] hover:text-white border border-[#E5E7EB] hover:border-[#EB4501] rounded-lg text-[11px] font-bold text-[#4B5563] transition-all flex items-center gap-2 cursor-pointer"
+                        className="px-4 py-2 bg-[#F4F7F9] hover:bg-[#EF3C23] hover:text-white border border-[#E5E7EB] hover:border-[#FF5B00] rounded-lg text-[11px] font-bold text-[#4B5563] transition-all flex items-center gap-2 cursor-pointer"
                       >
                         <Truck size={12} />
                         View live tracking
@@ -1300,7 +1304,7 @@ export function MessagesPage({
                     <button
                       type="button"
                       onClick={() => setShowSendOfferModal(true)}
-                      className="px-3 py-1.5 bg-white hover:bg-[#FFF3EC] text-[#4B5563] hover:text-[#CF4400] border border-[#E5E7EB] hover:border-[#EB4501] rounded-lg text-[11px] font-bold transition-all cursor-pointer"
+                      className="px-3 py-1.5 bg-white hover:bg-[#FFF3EC] text-[#4B5563] hover:text-[#EF3C23] border border-[#E5E7EB] hover:border-[#FF5B00] rounded-lg text-[11px] font-bold transition-all cursor-pointer"
                     >
                       + Send Order Offer
                     </button>
@@ -1428,7 +1432,7 @@ export function MessagesPage({
                     <button
                       type="button"
                       onClick={() => setShowReportModal(true)}
-                      className="text-[11px] font-bold text-[#EB4501] hover:underline bg-transparent border-none cursor-pointer inline-flex items-center gap-1"
+                      className="text-[11px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer inline-flex items-center gap-1"
                     >
                       <Flag size={11} />
                       Report to Support
@@ -1463,7 +1467,7 @@ export function MessagesPage({
                       onClick={() => setShowReportModal(true)}
                       className="px-3.5 py-1.5 bg-white hover:bg-[#F4F7F9] border border-[#E5E7EB] rounded-2xl text-[11px] font-semibold text-[#4B5563] transition-all flex items-center gap-1.5 cursor-pointer"
                     >
-                      <Flag size={12} className="text-[#EB4501]" />
+                      <Flag size={12} className="text-[#FF5B00]" />
                       Report to Support
                     </button>
                   </div>
@@ -1473,13 +1477,13 @@ export function MessagesPage({
                       value={inputText}
                       onChange={(e) => setInputText(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && void handleSendMessage()}
-                      className="flex-1 h-[42px] bg-white border border-[#E5E7EB] rounded-lg px-3.5 text-[12.5px] font-medium text-[#1A1A2E] placeholder:text-[#9AA0AC] focus:outline-none focus:border-[#EB4501] transition-all"
+                      className="flex-1 h-[42px] bg-white border border-[#E5E7EB] rounded-lg px-3.5 text-[12.5px] font-medium text-[#1A1A2E] placeholder:text-[#9AA0AC] focus:outline-none focus:border-[#FF5B00] transition-all"
                       placeholder="Type your message..."
                     />
                     <button
                       type="button"
                       onClick={() => void handleSendMessage()}
-                      className="w-[42px] h-[42px] rounded-lg bg-[#EB4501] text-white flex items-center justify-center hover:bg-[#CF4400] transition-colors shrink-0 cursor-pointer border-none"
+                      className="w-[42px] h-[42px] rounded-lg bg-[#FF5B00] text-white flex items-center justify-center hover:bg-[#EF3C23] transition-colors shrink-0 cursor-pointer border-none"
                       title="Send message"
                     >
                       <Send size={15} />
@@ -1497,7 +1501,7 @@ export function MessagesPage({
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center p-12 text-center max-w-lg mx-auto space-y-3">
               <div className="w-16 h-16 bg-white rounded-full border border-[#E8EDF2] flex items-center justify-center text-[#9AA0AC] mb-2">
-                <MessageCircleMore size={28} className="text-[#EB4501]" />
+                <MessageCircleMore size={28} className="text-[#FF5B00]" />
               </div>
               <h3 className="text-base font-extrabold text-[#1A1A2E]">No conversation selected</h3>
               <p className="text-[11.5px] text-[#9AA0AC] leading-relaxed font-medium">

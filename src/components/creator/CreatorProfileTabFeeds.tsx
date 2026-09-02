@@ -168,6 +168,14 @@ export function CreatorReviewsTab({ community, latestProducts }: CreatorReviewsT
     });
   }, [latestProducts, nowMs]);
 
+  if (rankedProducts.length === 0 && community.length === 0) {
+    return (
+      <div className="bg-white border border-dashed border-[#E8EDF2] rounded-[10px] px-5 py-12 text-center">
+        <p className="text-[13px] font-medium text-[#9AA0AC] m-0">No reviews yet.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col gap-8 text-left">
       <section>
@@ -204,7 +212,7 @@ export function CreatorReviewsTab({ community, latestProducts }: CreatorReviewsT
             <div key={cs.name} className="bg-white border border-[#E8EDF2] rounded-[10px] p-4">
               <div className="flex items-center justify-between mb-2.5">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-[#EB4501] text-white flex items-center justify-center text-[11px] font-extrabold shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-[#FF5B00] text-white flex items-center justify-center text-[11px] font-extrabold shrink-0">
                     {cs.initial}
                   </div>
                   <div>

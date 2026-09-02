@@ -100,7 +100,7 @@ export function buildUserFromAuth(input: {
       input.avatarUrl ||
       (prev?.id === input.uid && prev.avatar
         ? prev.avatar
-        : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=EB4501&color=fff`),
+        : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=FF5B00&color=fff`),
     address: prev?.id === input.uid ? prev.address || '' : '',
     reputation_score: prev?.id === input.uid ? prev.reputation_score : 50,
     orderStats:

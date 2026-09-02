@@ -49,13 +49,15 @@ const SOCIAL_ICON_BY_KEY: Record<string, string> = {
 
 /** Map catalog `socialLinks` object → ProfileSocialPills links; falls back to defaults when empty. */
 export function profileSocialLinksFromCatalog(
-  socialLinks?: Record<string, string | undefined> | null,
+  socialLinks?:
+    | (Record<string, string | undefined> & { custom?: Array<{ label?: string; url?: string }> })
+    | null,
   fallback: ProfileSocialLink[] = DEFAULT_PROFILE_SOCIAL_LINKS,
 ): ProfileSocialLink[] {
   if (!socialLinks || typeof socialLinks !== 'object') return fallback;
   const mapped: ProfileSocialLink[] = [];
   (['facebook', 'instagram', 'youtube', 'linkedin', 'tiktok'] as const).forEach((key) => {
-    const href = socialLinks[key]?.trim();
+    const href = (socialLinks[key] as string | undefined)?.trim();
     if (!href) return;
     mapped.push({
       name: key.charAt(0).toUpperCase() + key.slice(1),
@@ -63,6 +65,15 @@ export function profileSocialLinksFromCatalog(
       iconSrc: SOCIAL_ICON_BY_KEY[key],
     });
   });
+  // Creator-defined extra links (Twitch, Threads, personal site, …) — no sprite
+  // icon, so the pill renders the label only.
+  if (Array.isArray(socialLinks.custom)) {
+    for (const c of socialLinks.custom) {
+      const href = c?.url?.trim();
+      const name = c?.label?.trim();
+      if (href && name) mapped.push({ name, href });
+    }
+  }
   return mapped.length ? mapped : fallback;
 }
 
@@ -116,7 +127,7 @@ export function ProfileSocialPills({
         );
 
         const pillClass =
-          'inline-flex items-center gap-1.5 bg-white border border-[#E8EDF2] rounded-full pl-1 pr-3 py-1 no-underline hover:border-[#EB4501]/40 transition-colors';
+          'inline-flex items-center gap-1.5 bg-white border border-[#E8EDF2] rounded-full pl-1 pr-3 py-1 no-underline hover:border-[#FF5B00]/40 transition-colors';
 
         if (sl.href) {
           return (

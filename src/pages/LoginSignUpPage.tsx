@@ -24,8 +24,8 @@ import {
 
 type AuthTab = 'sign-in' | 'sign-up';
 
-const PAGE_BG = '#000435';
-const PRIMARY = '#EB4501';
+const PAGE_BG = '#18154C';
+const PRIMARY = '#FF5B00';
 
 const SIGNIN_FEATURES = [
   'Save unlimited products & brands',
@@ -40,7 +40,7 @@ const TRUST_POINTS = [
     icon: Shield,
     title: 'Trust You Can Rely On',
     sub: 'We verify brands and sellers so you can shop with complete confidence.',
-    bg: 'rgba(235, 69, 1,0.18)',
+    bg: 'rgba(255, 91, 0,0.18)',
     iconColor: PRIMARY,
   },
   {
@@ -61,16 +61,16 @@ const TRUST_POINTS = [
 
 /** Decorative blurred collage tiles (optional backdrop). */
 const BACKDROP_TILES = [
-  { name: 'Wireless Earbuds', price: '৳2,499', hue: 'from-[#1A1D4E] to-[#3A1E22]' },
-  { name: 'Leather Tote', price: '৳4,890', hue: 'from-[#2D1B4E] to-[#000435]' },
+  { name: 'Wireless Earbuds', price: '৳2,499', hue: 'from-[#1A1D4E] to-[#2D1B4E]' },
+  { name: 'Leather Tote', price: '৳4,890', hue: 'from-[#2D1B4E] to-[#18154C]' },
   { name: 'Smart Watch', price: '৳12,999', hue: 'from-[#0F2A4A] to-[#1A1030]' },
-  { name: 'Cotton Panjabi', price: '৳1,850', hue: 'from-[#1E3A2F] to-[#000435]' },
-  { name: 'Running Shoes', price: '৳6,450', hue: 'from-[#3A1E22] to-[#1A1030]' },
-  { name: 'Perfume Set', price: '৳3,200', hue: 'from-[#2A1848] to-[#000435]' },
+  { name: 'Cotton Panjabi', price: '৳1,850', hue: 'from-[#1E3A2F] to-[#18154C]' },
+  { name: 'Running Shoes', price: '৳6,450', hue: 'from-[#2D1B4E] to-[#1A1030]' },
+  { name: 'Perfume Set', price: '৳3,200', hue: 'from-[#2A1848] to-[#18154C]' },
   { name: 'Kitchen Blender', price: '৳5,990', hue: 'from-[#1A2A4E] to-[#0A0A1F]' },
   { name: 'Skincare Kit', price: '৳2,150', hue: 'from-[#3A2040] to-[#1a1030]' },
-  { name: 'Laptop Stand', price: '৳1,299', hue: 'from-[#0F2840] to-[#000435]' },
-  { name: 'Denim Jacket', price: '৳3,750', hue: 'from-[#1A254E] to-[#3A1E22]' },
+  { name: 'Laptop Stand', price: '৳1,299', hue: 'from-[#0F2840] to-[#18154C]' },
+  { name: 'Denim Jacket', price: '৳3,750', hue: 'from-[#1A254E] to-[#2D1B4E]' },
 ];
 
 function GoogleLogo() {
@@ -146,7 +146,7 @@ function AuthField({
           placeholder={placeholder}
           className={cn(
             'w-full h-[42px] rounded-lg border border-[#E5E7EB] bg-white text-[13px] font-medium text-[#1A1A2E] outline-none transition-colors box-border',
-            'placeholder:text-[#9AA0AC] focus:border-[#EB4501] focus:ring-2 focus:ring-[#EB4501]/15',
+            'placeholder:text-[#9AA0AC] focus:border-[#FF5B00] focus:ring-2 focus:ring-[#FF5B00]/15',
             Icon ? 'pl-10 pr-3.5' : 'px-3.5',
           )}
         />
@@ -204,7 +204,11 @@ export function LoginSignUpPage() {
       updateCurrentUser(user);
       setIsLoggedIn(true);
       toast.success(activeTab === 'sign-up' ? 'Account created! Welcome to Choosify.' : 'Welcome back!');
-      const from = (location.state as { from?: string } | null)?.from;
+      // Return-to-order: honour ?next= (survives a signup reload) then state.from.
+      const nextParam = new URLSearchParams(location.search).get('next');
+      const from =
+        (nextParam && nextParam.startsWith('/') ? nextParam : undefined) ||
+        (location.state as { from?: string } | null)?.from;
       const dest =
         from && from !== '/login' && !from.startsWith('/login/')
           ? from
@@ -241,7 +245,7 @@ export function LoginSignUpPage() {
             <div className={cn('absolute inset-0 bg-gradient-to-br', tile.hue)} />
             <div className="absolute bottom-2 left-2 right-2 text-[10px] text-white font-bold [text-shadow:0_1px_4px_rgba(0,0,0,0.8)]">
               {tile.name}
-              <div className="text-[9px] font-extrabold text-[#EB4501]">{tile.price}</div>
+              <div className="text-[9px] font-extrabold text-[#FF5B00]">{tile.price}</div>
             </div>
           </div>
         ))}
@@ -276,7 +280,7 @@ export function LoginSignUpPage() {
           <div className="flex flex-col lg:flex-row w-full max-w-[780px] rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(0,0,0,0.5)]">
           {/* Left marketing copy — dark surface gradient */}
           <div className="flex-1 min-w-0 choosify-dark-surface p-7 sm:p-8">
-            <div className="inline-block bg-[rgba(255,90,44,0.15)] text-[#EB4501] text-[11px] font-bold px-3.5 py-1.5 rounded-full mb-5">
+            <div className="inline-block bg-[rgba(255,90,44,0.15)] text-[#FF5B00] text-[11px] font-bold px-3.5 py-1.5 rounded-full mb-5">
               ✦ Join 100,000+ SHOPPERS
             </div>
             <h1 className="text-[28px] sm:text-[34px] font-extrabold text-white leading-[1.2] mb-[18px]">
@@ -385,14 +389,14 @@ export function LoginSignUpPage() {
                       type="checkbox"
                       checked={rememberMe}
                       onChange={(e) => setRememberMe(e.target.checked)}
-                      className="h-3.5 w-3.5 rounded accent-[#EB4501]"
+                      className="h-3.5 w-3.5 rounded accent-[#FF5B00]"
                     />
                     Remember me
                   </label>
                   <button
                     type="button"
                     onClick={handleForgotPassword}
-                    className="text-xs font-bold text-[#EB4501] hover:underline"
+                    className="text-xs font-bold text-[#FF5B00] hover:underline"
                   >
                     Forgot password?
                   </button>
@@ -405,8 +409,8 @@ export function LoginSignUpPage() {
                 className={cn(
                   'w-full py-3.5 rounded-lg text-[13px] font-bold cursor-pointer active:scale-[0.99] transition-all flex items-center justify-center gap-2',
                   isSignUp
-                    ? 'bg-[#EB4501] text-white border-none hover:brightness-105'
-                    : 'bg-white border border-[#E5E7EB] text-[#EB4501] hover:border-[#D1D5DB]',
+                    ? 'bg-[#FF5B00] text-white border-none hover:brightness-105'
+                    : 'bg-white border border-[#E5E7EB] text-[#FF5B00] hover:border-[#D1D5DB]',
                   isSubmitting && 'opacity-60 cursor-not-allowed',
                 )}
               >
@@ -462,7 +466,7 @@ export function LoginSignUpPage() {
               <button
                 type="button"
                 onClick={() => setActiveTab(isSignUp ? 'sign-in' : 'sign-up')}
-                className="text-[#EB4501] font-bold hover:underline"
+                className="text-[#FF5B00] font-bold hover:underline"
               >
                 {isSignUp ? 'Sign in' : 'Sign up'}
               </button>

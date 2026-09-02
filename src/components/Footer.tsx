@@ -185,6 +185,41 @@ function FooterLink({
   );
 }
 
+/*
+  An anonymous visitor has no reason to create a buyer account first just to
+  reach seller/creator signup -- these go straight to
+  dashboard.choosify.bd/signup?type=... regardless of whether the visitor has
+  any Choosify account at all. Rendered directly under the Discover column so
+  the "become a partner" path sits with the other discovery links.
+*/
+function SellOrCreateWithUs() {
+  return (
+    <div>
+      <FooterHeading>Sell Or Create With Us</FooterHeading>
+      <div className="flex flex-col gap-2">
+        <a
+          href={SELLER_SIGNUP_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 text-[13px] font-semibold text-white/70 hover:text-white transition-colors"
+        >
+          <Store size={14} className="text-orange-primary shrink-0" />
+          Sign Up As A Seller
+        </a>
+        <a
+          href={CREATOR_SIGNUP_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2 text-[13px] font-semibold text-white/70 hover:text-white transition-colors"
+        >
+          <Award size={14} className="text-orange-primary shrink-0" />
+          Join As A Creator
+        </a>
+      </div>
+    </div>
+  );
+}
+
 export function Footer() {
   const { siteConfig } = useGlobalState();
   const footer = siteConfig?.footer;
@@ -198,6 +233,15 @@ export function Footer() {
     () => (footer?.columns?.length ? footer.columns : DEFAULT_FOOTER_COLUMNS),
     [footer?.columns],
   );
+
+  // "Sell Or Create With Us" hangs under the Discover column; fall back to the
+  // first column when a CMS-configured footer has no column called "Discover".
+  const sellCreateColumnId = useMemo(() => {
+    const match = footerColumns.find(
+      (c) => c.id === 'discover' || c.title.trim().toLowerCase() === 'discover',
+    );
+    return match?.id ?? footerColumns[0]?.id;
+  }, [footerColumns]);
 
   const officeAddresses = useMemo(() => {
     const fromCms = [footer?.usaOffice, footer?.bangladeshOffice]
@@ -294,10 +338,9 @@ export function Footer() {
           </div>
 
           {/*
-            Sits beside Contact Us rather than stacked under it -- the brand
-            block above is capped at max-w-sm (logo/tagline read better
-            narrow), which leaves this row free to use the blank space next
-            to it, still within this same first grid column.
+            The brand block above is capped at max-w-sm (logo/tagline read
+            better narrow), which leaves this row free to use the blank space
+            next to it, still within this same first grid column.
           */}
           <div className="flex flex-wrap gap-x-10 gap-y-6 sm:gap-x-16 mt-6">
             <div>
@@ -317,36 +360,6 @@ export function Footer() {
                 </a>
               </div>
             </div>
-
-            {/*
-              A visitor browsing anonymously has no reason to create a buyer
-              account first just to reach seller/creator signup -- these go
-              straight to dashboard.choosify.bd/signup?type=... regardless of
-              whether the visitor has any Choosify account at all.
-            */}
-            <div>
-              <FooterHeading>Sell Or Create With Us</FooterHeading>
-              <div className="flex flex-col gap-2">
-                <a
-                  href={SELLER_SIGNUP_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-[13px] font-semibold text-white/70 hover:text-white transition-colors"
-                >
-                  <Store size={14} className="text-orange-primary shrink-0" />
-                  Sign Up As A Seller
-                </a>
-                <a
-                  href={CREATOR_SIGNUP_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 text-[13px] font-semibold text-white/70 hover:text-white transition-colors"
-                >
-                  <Award size={14} className="text-orange-primary shrink-0" />
-                  Join As A Creator
-                </a>
-              </div>
-            </div>
           </div>
           </div>
 
@@ -363,6 +376,11 @@ export function Footer() {
                     />
                   ))}
                 </div>
+                {column.id === sellCreateColumnId && (
+                  <div className="mt-8">
+                    <SellOrCreateWithUs />
+                  </div>
+                )}
               </div>
             ))}
 

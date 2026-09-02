@@ -110,8 +110,8 @@ const CREATOR_FEED_GRID =
 function OverviewCardHeader({ title, accentColor }: { title: string; accentColor?: string }) {
   return (
     <div className="flex items-center gap-2.5 mb-4 border-b border-[#F1F1F3] pb-3">
-      <div className="w-8 h-8 rounded-lg bg-[#FFF3EA] text-[#EB4501] flex items-center justify-center shrink-0">
-        <CheckCircle2 size={16} fill="currentColor" className="text-[#EB4501] stroke-white" />
+      <div className="w-8 h-8 rounded-lg bg-[#FFF3EA] text-[#FF5B00] flex items-center justify-center shrink-0">
+        <CheckCircle2 size={16} fill="currentColor" className="text-[#FF5B00] stroke-white" />
       </div>
       <h3
         className="text-[11px] font-extrabold uppercase tracking-wider"
@@ -207,7 +207,7 @@ export function CreatorOverviewFeed({
           <button
             type="button"
             onClick={onViewAllContent}
-            className="text-[11.5px] font-bold text-[#1A1A2E] hover:text-[#CF4400] bg-transparent border-0 cursor-pointer"
+            className="text-[11.5px] font-bold text-[#1A1A2E] hover:text-[#EF3C23] bg-transparent border-0 cursor-pointer"
           >
             VIEW ALL CONTENT →
           </button>
@@ -254,31 +254,13 @@ export function CreatorOverviewFeed({
             <button
               type="button"
               onClick={onViewAllReviews}
-              className="text-[11px] font-bold text-[#1A1A2E] hover:text-[#CF4400] bg-transparent border-0 cursor-pointer"
+              className="text-[11px] font-bold text-[#1A1A2E] hover:text-[#EF3C23] bg-transparent border-0 cursor-pointer"
             >
               VIEW ALL REVIEWS →
             </button>
           </div>
-          {[
-            { name: 'Samsung Galaxy S24 Ultra', date: 'May 5, 2025', rating: '4.9', rank: 1, image: 'https://images.unsplash.com/photo-1610945415295-d9bbf067e59c?w=100&h=100&fit=crop' },
-            { name: 'Sony WH-1000XM5 Headphones', date: 'Apr 28, 2025', rating: '4.8', rank: 2, image: 'https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=100&h=100&fit=crop' },
-            { name: 'Dell XPS 15 (2024)', date: 'Apr 20, 2025', rating: '4.7', rank: 3, image: 'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=100&h=100&fit=crop' },
-          ].map((lr, i, arr) => (
-            <div
-              key={lr.name}
-              className={cn('flex items-center gap-2.5 py-2.5', i < arr.length - 1 && 'border-b border-[#F1F1F3]')}
-            >
-              <div className="text-[11px] font-bold text-[#9AA0AC] w-3.5">{lr.rank}</div>
-              <div className="w-[34px] h-[34px] rounded-md overflow-hidden shrink-0 bg-[#F4F7F9]">
-                {lr.image ? <img src={lr.image} alt="" className="w-full h-full object-cover" /> : null}
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="text-[11.5px] font-bold text-[#1A1A2E] truncate">{lr.name}</div>
-                <div className="text-[10px] text-[#9AA0AC]">{lr.date}</div>
-              </div>
-              <div className="text-[11px] font-bold text-[#1A1A2E]">★ {lr.rating}</div>
-            </div>
-          ))}
+          {/* No canonical Creator-review feed yet — never fabricate. */}
+          <p className="text-[12px] text-[#9AA0AC] py-3 m-0">No reviews yet.</p>
         </div>
       </section>
 
@@ -362,7 +344,7 @@ export function CreatorOverviewFeed({
           <button
             type="button"
             onClick={onViewAllReviews}
-            className="text-[11.5px] font-bold text-[#1A1A2E] hover:text-[#CF4400] bg-transparent border-0 cursor-pointer"
+            className="text-[11.5px] font-bold text-[#1A1A2E] hover:text-[#EF3C23] bg-transparent border-0 cursor-pointer"
           >
             VIEW ALL REVIEWS →
           </button>
@@ -372,7 +354,7 @@ export function CreatorOverviewFeed({
             <div key={cs.name} className="bg-white border border-[#E8EDF2] rounded-[10px] p-4">
               <div className="flex items-center justify-between mb-2.5">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-[#EB4501] text-white flex items-center justify-center text-[11px] font-extrabold shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-[#FF5B00] text-white flex items-center justify-center text-[11px] font-extrabold shrink-0">
                     {cs.initial}
                   </div>
                   <div>

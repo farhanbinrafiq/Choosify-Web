@@ -66,21 +66,22 @@ export function CreatorProfilePage() {
     setLocalClaimStatus(getCreatorClaimStatus(creator.id));
   }, [creator.id, creatorClaimStatuses]);
 
-  // Augmented details matching standard rating system
-  const rating = creator.id === 'creator-farhan' ? 4.9 :
-                 creator.id === 'creator-sarah' ? 4.8 :
-                 creator.id === 'creator-mily' ? 4.9 :
-                 creator.id === 'creator-imtiaz' ? 4.7 : 4.6;
-
-  const reviewsCount = creator.id === 'creator-farhan' ? 240 :
-                       creator.id === 'creator-sarah' ? 190 :
-                       creator.id === 'creator-mily' ? 150 :
-                       creator.id === 'creator-imtiaz' ? 80 : 70;
-
-  const followersCount = creator.id === 'creator-farhan' ? '450K Base' :
-                         creator.id === 'creator-sarah' ? '310K Base' :
-                         creator.id === 'creator-mily' ? '210K Base' :
-                         creator.id === 'creator-imtiaz' ? '180K Base' : '180K Base';
+  // Canonical Trust Score only (creator.score is 0-100 → /5). No per-id demo
+  // numbers. Review counts/ratings have no canonical source yet → shown as "—".
+  const rawScore = Number((creator as { score?: number }).score);
+  const ratingDisplay =
+    Number.isFinite(rawScore) && rawScore > 0
+      ? Math.min(5, Math.round((rawScore / 20) * 10) / 10)
+      : 0;
+  const followersDisplay = (() => {
+    const f = (creator as { followers?: Record<string, string> | string }).followers;
+    if (typeof f === 'string') return f || '—';
+    if (f && typeof f === 'object') {
+      const first = Object.values(f).find((v) => String(v).trim());
+      return first ? String(first) : '—';
+    }
+    return '—';
+  })();
 
   // Interaction States
   const [isJoined, setIsJoined] = useState(false); // follow state
@@ -161,7 +162,9 @@ export function CreatorProfilePage() {
     b.excerpt?.toLowerCase().includes(searchFilter.toLowerCase().trim())
   );
 
-  const reviewDemo = getCreatorReviewDemo(creator);
+  // No canonical Creator-review source yet — never fabricate. Empty until a real
+  // reviews feed exists (see Creator Studio audit note on Operations reviews).
+  const reviewDemo: ReturnType<typeof getCreatorReviewDemo> = { community: [], latestProducts: [] };
 
   if (creatorNotFound) {
     return (
@@ -172,7 +175,7 @@ export function CreatorProfilePage() {
         </p>
         <Link
           to="/creators"
-          className="px-5 py-2.5 bg-[#EB4501] hover:bg-[#CF4400] text-white text-[12px] font-bold rounded-lg transition-all"
+          className="px-5 py-2.5 bg-[#FF5B00] hover:bg-[#EF3C23] text-white text-[12px] font-bold rounded-lg transition-all"
         >
           Browse creators
         </Link>
@@ -188,8 +191,8 @@ export function CreatorProfilePage() {
         <CreatorProfileHero
           creator={creator}
           claimStatus={localClaimStatus}
-          trustScore={rating}
-          reviewCountLabel={`${reviewsCount}+ deliveries`}
+          trustScore={ratingDisplay}
+          reviewCountLabel="platform-managed"
           onShare={() => {
             navigator.clipboard.writeText(window.location.href);
             toast.success('Profile link copied to clipboard!');
@@ -208,8 +211,8 @@ export function CreatorProfilePage() {
             { icon: '📹', label: 'Videos', value: String(creator.videos?.length ?? 0) },
             { icon: '✦', label: 'Reels', value: String(creator.reels?.length ?? 0) },
             { icon: '✍', label: 'Blogs', value: String(creator.blogs?.length ?? 0) },
-            { icon: '♥', label: 'Followers', value: String(followersCount).replace(' Base', '') },
-            { icon: '★', label: 'Reviews', value: String(reviewsCount) },
+            { icon: '♥', label: 'Followers', value: String(followersDisplay).replace(' Base', '') },
+            { icon: '★', label: 'Reviews', value: '—' },
             { icon: '🏷', label: 'Best for', value: String(creator.bestFor || 'Tech') },
           ]}
           extraActions={
@@ -281,7 +284,7 @@ export function CreatorProfilePage() {
                 className={cn(
                   'shrink-0 py-3.5 text-[13px] font-bold cursor-pointer whitespace-nowrap border-0 border-b-2 bg-transparent transition-colors',
                   active
-                    ? 'text-[#07DD05] border-[#07DD05]'
+                    ? 'text-orange-deep border-orange-deep'
                     : 'text-[#6B7280] border-transparent hover:text-[#1A1A2E]',
                 )}
               >
@@ -549,7 +552,7 @@ export function CreatorProfilePage() {
                        </button>
                        <button
                          type="submit"
-                         className="px-5 py-2.5 rounded-lg bg-[#EB4501] hover:brightness-110 text-white text-[12px] font-bold tracking-tight flex items-center gap-1.5 shadow-sm cursor-pointer border-0"
+                         className="px-5 py-2.5 rounded-lg bg-[#FF5B00] hover:brightness-110 text-white text-[12px] font-bold tracking-tight flex items-center gap-1.5 shadow-sm cursor-pointer border-0"
                        >
                          Submit Briefing <Send size={11} />
                        </button>

@@ -434,6 +434,24 @@ export interface CatalogCreatorSocialLinks {
   youtube?: string;
   tiktok?: string;
   linkedin?: string;
+  /** Creator-defined extra links (Twitch, Threads, personal site, …). `label` is
+   *  the display name; `url` must be http(s). Max 8. */
+  custom?: Array<{ label: string; url: string }>;
+}
+
+/** One curated "Featured Content" card on a Creator profile. */
+export interface CatalogCreatorFeaturedItem {
+  id: string;
+  /** 'platform' → a Choosify Guide the creator published; 'external' → an
+   *  off-platform link with a creator-supplied thumbnail. */
+  source: 'platform' | 'external';
+  kind: 'guide' | 'video' | 'reel' | 'blog' | 'link';
+  /** Canonical Guide/content id when source === 'platform'. */
+  contentId?: string;
+  title: string;
+  thumbnail: string;
+  /** Storefront href (platform) or external URL. */
+  url: string;
 }
 
 export interface CatalogCreator {
@@ -452,7 +470,7 @@ export interface CatalogCreator {
   bio: string;
   followers: Record<string, string>;
   socialLinks?: CatalogCreatorSocialLinks;
-  brandPartners?: { name: string; color?: string }[];
+  brandPartners?: { name: string; color?: string; brandId?: string; logo?: string }[];
   collabTypes?: string[];
   responseTime?: string;
   preferredContact?: string;
@@ -464,6 +482,10 @@ export interface CatalogCreator {
   videos: CatalogMediaItem[];
   reels: CatalogMediaItem[];
   blogs: CatalogMediaItem[];
+  /** Creator-curated Featured Content — a mix of their own Choosify Guides and
+   *  external links (with a custom thumbnail). Empty ⇒ the profile falls back to
+   *  the newest videos/reels/blogs. */
+  featuredContent?: CatalogCreatorFeaturedItem[];
   status: 'draft' | 'live' | 'archived';
   createdAt: string;
   updatedAt: string;
@@ -617,9 +639,22 @@ export interface CatalogProductSizeGuideRow {
   [measurement: string]: string;
 }
 
+export type CatalogProductGuideType =
+  | 'size'
+  | 'measurement'
+  | 'compatibility'
+  | 'fitment'
+  | 'feature'
+  | 'custom';
+
 export interface CatalogProductSizeGuide {
-  /** Set true in CMS to expose the size guide on the product detail page */
+  /** Set true in Studio to expose the guide on the product detail page */
   enabled: boolean;
+  /** Storefront CTA context ("View Size Guide", "View Compatibility Guide", …).
+   *  Absent ⇒ 'size' (back-compat). */
+  guideType?: CatalogProductGuideType;
+  /** Custom CTA label, used when `guideType === 'custom'`. */
+  label?: string;
   type?: 'table' | 'image' | 'html';
   title?: string;
   description?: string;
@@ -628,6 +663,20 @@ export interface CatalogProductSizeGuide {
   unitLabel?: string;
   columnHeaders?: string[];
   rows?: CatalogProductSizeGuideRow[];
+}
+
+/** Storefront CTA label for a product guide, from its type / custom label. */
+export function productGuideCtaLabel(g?: Partial<CatalogProductSizeGuide> | null): string {
+  const t = g?.guideType || 'size';
+  if (t === 'custom') return (g?.label || '').trim() || 'View Guide';
+  const map: Record<Exclude<CatalogProductGuideType, 'custom'>, string> = {
+    size: 'View Size Guide',
+    measurement: 'View Measurement Guide',
+    compatibility: 'View Compatibility Guide',
+    fitment: 'View Fitment Guide',
+    feature: 'View Feature Guide',
+  };
+  return map[t as Exclude<CatalogProductGuideType, 'custom'>] || 'View Guide';
 }
 
 /** One "Where to Buy / Price Across Stores" row. `source` marks ownership. */

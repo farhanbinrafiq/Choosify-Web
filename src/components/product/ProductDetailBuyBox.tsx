@@ -42,6 +42,9 @@ interface ProductDetailBuyBoxProps {
   resolvedVariant?: any;
   showSizeGuideButton: boolean;
   onOpenSizeChart: () => void;
+  /** Contextual CTA label — "View Size Guide" / "View Compatibility Guide" / …
+   *  Falls back to a generic size-chart label when absent. */
+  sizeGuideLabel?: string;
   qty: number;
   setQty: (n: number | ((prev: number) => number)) => void;
   isWishlisted: boolean;
@@ -81,6 +84,7 @@ export function ProductDetailBuyBox({
   getColorHexClass,
   showSizeGuideButton,
   onOpenSizeChart,
+  sizeGuideLabel,
   qty,
   setQty,
   isWishlisted,
@@ -154,7 +158,7 @@ export function ProductDetailBuyBox({
         {/* Left — product info */}
         <div className="bg-white rounded-xl border border-[#E8EDF2] p-[26px]">
           <div className="flex gap-2 mb-3.5 flex-wrap">
-            <span className="bg-[#EB4501] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-full">FEATURED</span>
+            <span className="bg-[#FF5B00] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-full">FEATURED</span>
             {isOutOfStock ? (
               <span className="bg-[#FF000D] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-full">
               OUT OF STOCK
@@ -176,14 +180,14 @@ export function ProductDetailBuyBox({
             {selectedColor ? ` · ${selectedColor}` : ''}
           </div>
           <div className="text-[13px] text-[#1A1A2E] mb-[18px] flex items-center gap-1.5 flex-wrap">
-            <span className="inline-flex text-[#EB4501] gap-0.5">
+            <span className="inline-flex text-[#FF5B00] gap-0.5">
               {[1, 2, 3, 4, 5].map((i) => (
                 <Star
                   key={i}
                   size={12}
                   className={cn(
                     'fill-current',
-                    i <= Math.floor(product.rating || 4) ? 'text-[#EB4501]' : 'text-slate-300',
+                    i <= Math.floor(product.rating || 4) ? 'text-[#FF5B00]' : 'text-slate-300',
                   )}
                 />
               ))}
@@ -195,7 +199,7 @@ export function ProductDetailBuyBox({
           </div>
 
           <div className="flex items-baseline gap-3 mb-1.5 flex-wrap">
-            <div className="text-[26px] font-extrabold text-[#EB4501]">BDT {priceNum.toLocaleString()}</div>
+            <div className="text-[26px] font-extrabold text-[#FF5B00]">BDT {priceNum.toLocaleString()}</div>
             {saveAmt > 0 && (
               <>
                 <div className="text-[15px] text-[#9AA0AC] line-through">
@@ -207,7 +211,7 @@ export function ProductDetailBuyBox({
               </>
             )}
           </div>
-          <div className="text-xs text-[#EB4501] mb-1">
+          <div className="text-xs text-[#FF5B00] mb-1">
             Get up to ৳ cashback · EMI available on this product
           </div>
           {sku && (
@@ -239,7 +243,7 @@ export function ProductDetailBuyBox({
                               title={available ? val : `${val} — unavailable`}
                               className={cn(
                                 'w-9 h-9 rounded-full border-2 flex items-center justify-center',
-                                isSelected ? 'border-[#EB4501]' : 'border-transparent hover:border-slate-300',
+                                isSelected ? 'border-[#FF5B00]' : 'border-transparent hover:border-slate-300',
                                 !available && 'opacity-35 cursor-not-allowed',
                               )}
                               aria-label={val}
@@ -257,7 +261,7 @@ export function ProductDetailBuyBox({
                             className={cn(
                               'h-9 px-4 rounded-lg text-[11px] font-bold border transition-colors',
                               isSelected
-                                ? 'border-[#EB4501] text-[#1A1A2E] bg-[#FFF6EF]'
+                                ? 'border-[#FF5B00] text-[#1A1A2E] bg-[#FFF6EF]'
                                 : 'border-[#E5E7EB] text-[#1A1A2E] hover:border-slate-300',
                               !available && 'opacity-40 line-through cursor-not-allowed hover:border-[#E5E7EB]',
                             )}
@@ -271,8 +275,8 @@ export function ProductDetailBuyBox({
                 );
               })}
               {showSizeGuideButton && (
-                <button type="button" onClick={onOpenSizeChart} className="text-[11px] font-bold text-[#EB4501]">
-                  📏 Size Chart
+                <button type="button" onClick={onOpenSizeChart} className="text-[11px] font-bold text-[#FF5B00]">
+                  ↗ {(sizeGuideLabel || 'View Size Guide').toUpperCase()}
                 </button>
               )}
             </div>
@@ -293,7 +297,7 @@ export function ProductDetailBuyBox({
                       onClick={() => setSelectedColor(color)}
                       className={cn(
                         'w-9 h-9 rounded-full border-2 flex items-center justify-center',
-                        isSelected ? 'border-[#EB4501]' : 'border-transparent hover:border-slate-300',
+                        isSelected ? 'border-[#FF5B00]' : 'border-transparent hover:border-slate-300',
                       )}
                       aria-label={color}
                     >
@@ -316,9 +320,9 @@ export function ProductDetailBuyBox({
               <button
                 type="button"
                 onClick={onOpenSizeChart}
-                className="text-[11px] font-bold text-[#EB4501]"
+                className="text-[11px] font-bold text-[#FF5B00]"
               >
-                📏 Size Chart
+                ↗ {(sizeGuideLabel || 'View Size Guide').toUpperCase()}
               </button>
             )}
           </div>
@@ -337,7 +341,7 @@ export function ProductDetailBuyBox({
                   className={cn(
                     'h-9 px-4 rounded-lg text-[11px] font-bold border transition-colors',
                     isSelected
-                      ? 'border-[#EB4501] text-[#1A1A2E] bg-[#FFF6EF]'
+                      ? 'border-[#FF5B00] text-[#1A1A2E] bg-[#FFF6EF]'
                       : 'border-[#E5E7EB] text-[#1A1A2E] hover:border-slate-300',
                   )}
                 >
@@ -395,7 +399,7 @@ export function ProductDetailBuyBox({
                 'w-full border-none py-3.5 rounded-lg text-[13px] font-bold',
                 isOutOfStock
                   ? 'bg-[#F1F1F3] text-[#9AA0AC] cursor-not-allowed'
-                  : 'bg-[#EB4501] text-white hover:bg-[#CF4400]',
+                  : 'bg-[#FF5B00] text-white hover:bg-[#EF3C23]',
               )}
             >
               {isOutOfStock ? 'OUT OF STOCK' : 'ADD TO CART'}
@@ -405,7 +409,7 @@ export function ProductDetailBuyBox({
               <button
                 type="button"
                 onClick={onMessageSeller}
-                className="w-full bg-[#EB4501] text-white border-none py-3.5 rounded-lg text-[13px] font-bold inline-flex items-center justify-center gap-2 hover:bg-[#CF4400]"
+                className="w-full bg-[#FF5B00] text-white border-none py-3.5 rounded-lg text-[13px] font-bold inline-flex items-center justify-center gap-2 hover:bg-[#EF3C23]"
               >
                 <MessageCircleMore size={14} />
                 {messageCtaLabel}
@@ -419,16 +423,16 @@ export function ProductDetailBuyBox({
               className={cn(
                 'w-full bg-white border py-3 rounded-lg text-[12.5px] font-semibold inline-flex items-center justify-center gap-2 transition-colors',
                 isWishlisted
-                  ? 'border-[#EB4501] text-[#EB4501]'
-                  : 'border-[#E5E7EB] text-[#EB4501]',
+                  ? 'border-[#FF5B00] text-[#FF5B00]'
+                  : 'border-[#E5E7EB] text-[#FF5B00]',
               )}
             >
               <Heart
                 size={14}
                 strokeWidth={2}
                 className={cn(
-                  'text-[#EB4501]',
-                  isWishlisted && 'fill-[#EB4501]',
+                  'text-[#FF5B00]',
+                  isWishlisted && 'fill-[#FF5B00]',
                 )}
               />
               {isWishlisted ? 'Wishlisted' : 'Add to Wishlist'}
@@ -451,7 +455,7 @@ export function ProductDetailBuyBox({
             <button
               type="button"
               onClick={onMessageSeller}
-              className="w-full bg-[#000435] text-white border-none py-3 rounded-lg text-[12.5px] font-bold inline-flex items-center justify-center gap-2 hover:brightness-110"
+              className="w-full bg-[#18154C] text-white border-none py-3 rounded-lg text-[12.5px] font-bold inline-flex items-center justify-center gap-2 hover:brightness-110"
             >
               <MessageCircleMore size={14} />
               {messageCtaLabel}
@@ -474,7 +478,7 @@ export function ProductDetailBuyBox({
               <div className="bg-white rounded-xl border border-[#E8EDF2] p-[18px] text-[12.5px] text-[#4B5563] leading-relaxed">
                 <div className="text-[11px] font-extrabold text-[#9AA0AC] uppercase mb-2">Delivery Information</div>
                 <div className="flex items-center gap-1.5 mb-2 text-[#1A1A2E] font-semibold">
-                  <MapPin size={13} className="text-[#EB4501]" /> {region}
+                  <MapPin size={13} className="text-[#FF5B00]" /> {region}
                 </div>
                 <ul className="m-0 p-0 list-none space-y-1">
                   {facts.map((f) => (

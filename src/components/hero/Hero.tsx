@@ -129,12 +129,16 @@ export function Hero({ variant, className }: HeroProps) {
                 style={{
                   background:
                     slide.gradient ||
-                    'linear-gradient(135deg, #000435 0%, #1A1D4E 50%, #EB4501 160%)',
+                    'linear-gradient(135deg, var(--choosify-navy) 0%, #1A1D4E 50%, var(--choosify-orange) 160%)',
                 }}
               />
             )}
-            {/* Soft readability gradient — still image/video-led */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-black/10 pointer-events-none" />
+            {/* Readability layer + transparent branded wash — still image/video-led */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/5 pointer-events-none" />
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{ background: 'var(--choosify-hero-overlay)' }}
+            />
             {slide.primaryCtaLink && isActive && (
               <Link
                 to={slide.primaryCtaLink}

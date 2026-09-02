@@ -500,6 +500,25 @@ export const operationsApi = {
     );
     return result.data;
   },
+  /** New canonical Seller Manual Order (external customer) — preview before sign-in. */
+  getManualOfferClaim: async (token: string): Promise<ManualOfferClaimPreview> => {
+    const result = await request<{ data: ManualOfferClaimPreview }>(
+      `/operations/manual-offers/claim/${encodeURIComponent(token)}`,
+    );
+    return result.data;
+  },
+  /** Server binds the order to the authenticated verified identity — no buyerId is sent. */
+  confirmManualOfferClaim: async (
+    token: string,
+    action?: 'confirm' | 'decline',
+  ): Promise<{ card: Record<string, unknown>; order: Record<string, unknown> | null }> => {
+    const result = await request<{ data: Record<string, unknown>; order: Record<string, unknown> | null }>(
+      `/operations/manual-offers/claim/${encodeURIComponent(token)}/confirm`,
+      'POST',
+      action ? { action } : {},
+    );
+    return { card: result.data, order: result.order };
+  },
   createVerification: async (payload: Record<string, unknown>) => {
     const result = await request<{ data: unknown }>('/operations/verifications', 'POST', payload);
     return result.data;
@@ -544,6 +563,24 @@ export interface OrderClaimPreview {
   createdAt: string;
   claimed: boolean;
   claimedByName?: string;
+}
+
+export interface ManualOfferClaimPreview {
+  offerId: string;
+  sellerName?: string;
+  items: Array<{ productId: string; productTitle: string; quantity: number; price: number; productType?: string }>;
+  subtotal: number;
+  deliveryTotal: number;
+  overallTotal: number;
+  currency: string;
+  status: 'pending' | 'awaiting_buyer_claim' | 'accepted' | 'rejected' | 'expired';
+  createdAt: string;
+  orderId?: string;
+  provenanceSource?: string;
+  intendedCustomerName?: string;
+  addressHint?: string;
+  claimTokenExpiresAt?: string;
+  alreadyClaimed: boolean;
 }
 
 export type PublicJobEmploymentType = 'full_time' | 'part_time' | 'internship' | 'contract';

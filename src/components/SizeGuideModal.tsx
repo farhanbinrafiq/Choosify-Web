@@ -1,7 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Ruler } from 'lucide-react';
-import type { CatalogProductSizeGuide } from '../types/catalog';
+import { productGuideCtaLabel, type CatalogProductSizeGuide } from '../types/catalog';
 
 interface SizeGuideModalProps {
   open: boolean;
@@ -10,8 +10,15 @@ interface SizeGuideModalProps {
 }
 
 export function SizeGuideModal({ open, onClose, sizeGuide }: SizeGuideModalProps) {
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const restoreFocusRef = useRef<HTMLElement | null>(null);
+
   useEffect(() => {
     if (!open) return;
+
+    // Remember what had focus, move focus into the dialog, restore on close.
+    restoreFocusRef.current = (document.activeElement as HTMLElement) ?? null;
+    const focusTimer = window.setTimeout(() => closeRef.current?.focus(), 0);
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape') onClose();
@@ -22,10 +29,15 @@ export function SizeGuideModal({ open, onClose, sizeGuide }: SizeGuideModalProps
     window.addEventListener('keydown', handleKeyDown);
 
     return () => {
+      window.clearTimeout(focusTimer);
       document.body.style.overflow = previousOverflow;
       window.removeEventListener('keydown', handleKeyDown);
+      restoreFocusRef.current?.focus?.();
     };
   }, [open, onClose]);
+
+  const headingText =
+    sizeGuide.title?.trim() || productGuideCtaLabel(sizeGuide).replace(/^view\s+/i, '') || 'Size Guide';
 
   const headers = sizeGuide.columnHeaders?.length
     ? sizeGuide.columnHeaders
@@ -53,16 +65,17 @@ export function SizeGuideModal({ open, onClose, sizeGuide }: SizeGuideModalProps
             onClick={(e) => e.stopPropagation()}
           >
             <button
+              ref={closeRef}
               type="button"
               onClick={onClose}
               className="absolute top-4 right-4 w-9 h-9 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 hover:text-[#1A1D4E] cursor-pointer border-none flex items-center justify-center transition-colors"
-              aria-label="Close size guide"
+              aria-label={`Close ${headingText.toLowerCase()}`}
             >
               <X size={16} />
             </button>
 
             <div className="flex items-center gap-2 mb-3 pr-10">
-              <div className="w-9 h-9 rounded-full bg-[#FFF0E8] text-[#EB4501] flex items-center justify-center shrink-0">
+              <div className="w-9 h-9 rounded-full bg-[#FFF0E8] text-[#FF5B00] flex items-center justify-center shrink-0">
                 <Ruler size={16} />
               </div>
               <div>
@@ -70,7 +83,7 @@ export function SizeGuideModal({ open, onClose, sizeGuide }: SizeGuideModalProps
                   id="size-guide-title"
                   className="text-lg font-extrabold text-[#1A1A2E] tracking-tight leading-tight"
                 >
-                  {sizeGuide.title || 'Size Guide'}
+                  {headingText}
                 </h3>
                 {sizeGuide.unitLabel && (
                   <p className="text-[12px] font-medium text-[#9AA0AC]">

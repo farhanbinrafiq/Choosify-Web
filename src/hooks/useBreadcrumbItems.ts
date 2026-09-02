@@ -48,6 +48,11 @@ export function useBreadcrumbItems(extraLabels: Record<string, string> = {}): Br
       if (post) labels[`/whats-on/${id}`] = post.title;
     }
 
+    // Never render a raw claim/confirm token as a breadcrumb.
+    if (section === 'orders' && segments[1] === 'confirm' && segments[2]) {
+      labels[`/orders/confirm/${segments[2]}`] = 'Confirm Order';
+    }
+
     const categorySlug = new URLSearchParams(search).get('category');
     if (categorySlug) {
       const category = state.allCategories.find(
