@@ -1068,11 +1068,13 @@ export function ProductDetailPage() {
     { label: "Gender", value: "Unisex / Mens" },
   ];
 
-  // Stock calculations — a seller-disabled variant is unpurchasable regardless of stock count.
+  // Stock calculations — a seller-disabled variant (legacy `enabled:false` OR
+  // canonical `status:'inactive'`) is unpurchasable regardless of stock count.
+  // No resolved combination (e.g. a deleted combo) is also unpurchasable.
   const isOutOfStock =
     product?.variants && product.variants.length > 0
       ? selectedVariant
-        ? selectedVariant.stock === 0 || selectedVariant.enabled === false
+        ? selectedVariant.stock === 0 || !variantActive(selectedVariant)
         : true
       : product?.id === 3 ||
         Boolean(product?.title?.includes("MacBook")) ||
@@ -1081,7 +1083,7 @@ export function ProductDetailPage() {
   const stockQuantity =
     product?.variants && product.variants.length > 0
       ? selectedVariant
-        ? selectedVariant.enabled === false
+        ? !variantActive(selectedVariant)
           ? 0
           : selectedVariant.stock
         : 0
@@ -1253,6 +1255,13 @@ export function ProductDetailPage() {
           <ProductMediaGallery
             product={product}
             selectedVariantImage={selectedVariant?.image}
+            variantImages={
+              (selectedVariant?.images && selectedVariant.images.length
+                ? selectedVariant.images
+                : selectedVariant?.image
+                  ? [selectedVariant.image]
+                  : undefined) as string[] | undefined
+            }
           />
         </div>
       </div>
@@ -1305,14 +1314,20 @@ export function ProductDetailPage() {
           }
           // Preserve the canonical selected combination (variantId + SKU +
           // resolved price/MRP/media) through the cart.
+          const variantOptionMap = selectedVariant?.attributes ?? selectedVariant?.options;
           const variantForCart = selectedVariant
             ? {
                 id: selectedVariant.id,
                 sku: selectedVariant.sku,
                 price: selectedVariant.price ?? product.price,
                 originalPrice: selectedVariant.originalPrice,
-                options: selectedVariant.attributes ?? selectedVariant.options,
+                // Carry the option map under BOTH keys — cart / checkout / order
+                // consumers historically read `.attributes`, the canonical model
+                // uses `.options`.
+                options: variantOptionMap,
+                attributes: variantOptionMap,
                 image: selectedVariant.image ?? (selectedVariant.images && selectedVariant.images[0]),
+                images: selectedVariant.images ?? undefined,
                 stock: selectedVariant.stock,
               }
             : undefined;

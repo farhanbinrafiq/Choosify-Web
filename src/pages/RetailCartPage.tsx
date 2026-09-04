@@ -196,7 +196,11 @@ export function RetailCartPage() {
                           >
                             <div className="w-20 h-20 bg-white border border-[#E8EDF2] rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center p-2">
                               <img
-                                src={item.selectedVariant?.image || product.image}
+                                src={
+                                  item.selectedVariant?.image ||
+                                  item.selectedVariant?.images?.[0] ||
+                                  product.image
+                                }
                                 className="w-full h-full object-contain"
                                 alt={product.title}
                               />
@@ -223,7 +227,11 @@ export function RetailCartPage() {
 
                                 {item.selectedVariant && (
                                   <div className="flex flex-wrap gap-1 mt-1 mb-1.5">
-                                    {Object.entries(item.selectedVariant.attributes).map(
+                                    {Object.entries(
+                                      item.selectedVariant.attributes ||
+                                        item.selectedVariant.options ||
+                                        {},
+                                    ).map(
                                       ([key, value]) => (
                                         <span
                                           key={key}

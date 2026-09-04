@@ -222,10 +222,21 @@ export function CheckoutPage() {
   // Helper function to resolve dynamic unit price based on pricing tiers/slabs
   const getSlabPrice = (product: any, _qty: number) => product.price;
 
+  // Unit price for a cart line — the chosen variant's price when one is
+  // selected, otherwise the base product price. The server (POST
+  // /operations/orders) independently re-resolves this from the product's own
+  // productVariants and is the source of truth; this only keeps the on-screen
+  // totals honest.
+  const unitPriceFor = (item: (typeof activeCart)[number]) => {
+    const vp = (item as any).selectedVariant?.price;
+    return typeof vp === 'number' && Number.isFinite(vp) && vp > 0
+      ? vp
+      : getSlabPrice(item.product, item.quantity);
+  };
+
   const calculateSellerSubtotal = (items: typeof activeCart) => {
     return items.reduce((sum, item) => {
-      const activePrice = getSlabPrice(item.product, item.quantity);
-      return sum + (activePrice * item.quantity);
+      return sum + (unitPriceFor(item) * item.quantity);
     }, 0);
   };
 
@@ -233,8 +244,7 @@ export function CheckoutPage() {
   const deliveryTotal = sellerIds.length * DELIVERY_FEE_PER_SELLER;
 
   const subtotal = activeCart.reduce((sum, item) => {
-    const activePrice = getSlabPrice(item.product, item.quantity);
-    return sum + (activePrice * item.quantity);
+    return sum + (unitPriceFor(item) * item.quantity);
   }, 0);
 
   const aggregateTotal = subtotal + deliveryTotal;
@@ -259,7 +269,7 @@ export function CheckoutPage() {
         userId: currentUser?.id,
         cartItems: activeCart.map((item) => ({
           id: String(item.product.id),
-          price: Number(getSlabPrice(item.product, item.quantity) || 0),
+          price: Number(unitPriceFor(item) || 0),
           category: item.product.category,
           brand: item.product?.brand || item.product?.brandName,
           quantity: item.quantity,
@@ -438,7 +448,7 @@ export function CheckoutPage() {
       const items = groupedCart[sellerId];
       const sellerName = items[0]?.product?.brand || items[0]?.product?.brandName || 'Merchant partner';
       const itemsListStr = items.map(it => {
-        const up = getSlabPrice(it.product, it.quantity);
+        const up = unitPriceFor(it);
         return `• ${it.product.title} (${it.quantity} units @ ৳${up.toLocaleString()})`;
       }).join('\n');
 
@@ -485,15 +495,29 @@ export function CheckoutPage() {
       return {
         sellerId,
         sellerBusinessName: sellerName,
-        items: items.map(it => ({
+        items: items.map(it => {
+          // ProductDetailPage stores the chosen combination as `.options`;
+          // tolerate `.attributes` from any older cart entry.
+          const variantOptions: Record<string, string> | undefined =
+            (it.selectedVariant?.options && typeof it.selectedVariant.options === 'object'
+              ? it.selectedVariant.options
+              : it.selectedVariant?.attributes && typeof it.selectedVariant.attributes === 'object'
+                ? it.selectedVariant.attributes
+                : undefined) as Record<string, string> | undefined;
+          return {
           productId: it.product.id,
           productTitle: it.product.title,
           quantity: it.quantity,
-          price: getSlabPrice(it.product, it.quantity),
+          price: unitPriceFor(it),
           image: it.selectedVariant?.image || it.product.image,
           brand: it.product?.brand || it.product?.brandName,
-          variantLabel: it.selectedVariant?.attributes
-            ? Object.entries(it.selectedVariant.attributes)
+          // Canonical variant identity — the server re-resolves this against the
+          // product's own productVariants and is the source of truth for price /
+          // SKU / stock. Sent so it survives Cart → Checkout → Order.
+          variantId: it.selectedVariant?.id ? String(it.selectedVariant.id) : undefined,
+          selectedOptions: variantOptions,
+          variantLabel: variantOptions
+            ? Object.entries(variantOptions)
                 .map(([key, value]) => `${key}: ${value}`)
                 .join(' · ')
             : undefined,
@@ -513,7 +537,8 @@ export function CheckoutPage() {
             typeof (it.product as any)?.expectedUnitPrice === 'number'
               ? (it.product as any).expectedUnitPrice
               : undefined,
-        })),
+          };
+        }),
         deliveryFee: DELIVERY_FEE_PER_SELLER,
         invoiceId: invoiceIdStr,
         trackingStatus: 'pending' as const
@@ -866,14 +891,27 @@ export function CheckoutPage() {
                     </div>
 
                     <div className="space-y-2">
-                      {items.map((it) => (
+                      {items.map((it) => {
+                        const vOpts =
+                          (it as any).selectedVariant?.options || (it as any).selectedVariant?.attributes;
+                        const vLabel =
+                          vOpts && typeof vOpts === 'object'
+                            ? Object.entries(vOpts)
+                                .map(([k, v]) => `${k}: ${v}`)
+                                .join(' · ')
+                            : '';
+                        return (
                         <div key={it.id} className="flex justify-between items-center gap-3 py-2 border-t border-[#F4F7F9] first:border-0">
-                          <span className="text-[12.5px] font-bold text-[#1A1A2E] line-clamp-1">{it.product.title}</span>
+                          <span className="text-[12.5px] font-bold text-[#1A1A2E] line-clamp-1">
+                            {it.product.title}
+                            {vLabel ? <span className="font-semibold text-[#9AA0AC]"> — {vLabel}</span> : null}
+                          </span>
                           <span className="text-[11px] font-bold text-[#9AA0AC] text-right shrink-0">
-                            {it.quantity} × ৳{getSlabPrice(it.product, it.quantity).toLocaleString()}
+                            {it.quantity} × ৳{unitPriceFor(it).toLocaleString()}
                           </span>
                         </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 );

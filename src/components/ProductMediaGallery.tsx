@@ -11,7 +11,13 @@ export { buildProductGalleryItems as getProductMedia } from './media/choosifyMed
 
 interface ProductMediaGalleryProps {
   product: Parameters<typeof buildProductGalleryItems>[0];
+  /** Single image for the selected variant (legacy `variant.image`). */
   selectedVariantImage?: string;
+  /** The selected variant's full `images[]`. When non-empty the gallery shows
+   *  THESE (first = main), so picking Color=Black swaps the whole gallery to the
+   *  black photos. Empty/absent → fall back to the parent product gallery — the
+   *  gallery is never blank. */
+  variantImages?: string[];
   showAddVideo?: boolean;
   onAddVideo?: () => void;
 }
@@ -19,13 +25,16 @@ interface ProductMediaGalleryProps {
 export function ProductMediaGallery({
   product,
   selectedVariantImage,
+  variantImages,
   showAddVideo,
   onAddVideo,
 }: ProductMediaGalleryProps) {
-  const items = buildProductGalleryItems({
-    ...product,
-    image: selectedVariantImage || product.image,
-  });
+  const vImgs = (variantImages ?? []).filter(Boolean);
+  const items = buildProductGalleryItems(
+    vImgs.length
+      ? { ...product, image: vImgs[0], gallery: vImgs }
+      : { ...product, image: selectedVariantImage || product.image },
+  );
 
   return (
     <DetailSliverMediaGallery

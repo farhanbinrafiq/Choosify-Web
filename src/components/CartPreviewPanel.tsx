@@ -126,7 +126,11 @@ export function CartPreviewPanel({ onClose, className }: CartPreviewPanelProps) 
           cartItems.map((item) => {
             const product = item.product;
             const itemPrice = getItemPrice(item);
-            const itemImage = item.selectedVariant?.image || product.image || PLACEHOLDER_IMAGE;
+            const itemImage =
+              item.selectedVariant?.image ||
+              item.selectedVariant?.images?.[0] ||
+              product.image ||
+              PLACEHOLDER_IMAGE;
 
             return (
               <div
@@ -156,9 +160,11 @@ export function CartPreviewPanel({ onClose, className }: CartPreviewPanelProps) 
                     {product.title}
                   </button>
 
-                  {item.selectedVariant?.attributes && (
+                  {(item.selectedVariant?.attributes || item.selectedVariant?.options) && (
                     <div className="flex flex-wrap gap-1 mt-1">
-                      {Object.entries(item.selectedVariant.attributes).map(([key, value]) => (
+                      {Object.entries(
+                        item.selectedVariant.attributes || item.selectedVariant.options || {},
+                      ).map(([key, value]) => (
                         <span
                           key={key}
                           className="text-[8px] font-bold uppercase px-1.5 py-0.5 rounded bg-white border border-[#e8edf2] text-[#8a9bb0]"
