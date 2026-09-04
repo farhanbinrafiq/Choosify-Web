@@ -13,6 +13,33 @@ const CLOUD_NAME =
 const UPLOAD_PRESET = (import.meta as ImportMeta & { env?: Record<string, string> }).env
   ?.VITE_CLOUDINARY_UPLOAD_PRESET as string | undefined;
 
+/**
+ * The backend's local-disk media pipeline returns a relative `/media/...`
+ * URL (see choosify-admin-4.0's mediaStorage.ts publicOrigin() — it prepends
+ * MEDIA_PUBLIC_ORIGIN, an env var this storefront has no visibility into).
+ * choosify-web and choosify-admin are served from different origins (nginx
+ * only proxies /api/v1 to the shared backend, not /media), so a bare
+ * relative URL 404s here even though it resolves fine on the admin app
+ * itself. Resolve it against the API's own origin before ever storing/
+ * rendering it — this is the ONE place that conversion happens, so every
+ * caller (avatar, review photos, warranty-claim evidence) gets a URL that
+ * actually loads regardless of how MEDIA_PUBLIC_ORIGIN is configured.
+ */
+function apiOrigin(): string {
+  try {
+    return new URL(API_BASE).origin;
+  } catch {
+    return ''; // API_BASE itself is relative -> same-origin deployment, no prefix needed
+  }
+}
+
+function resolveMediaUrl(url: string): string {
+  if (!url || /^(https?:|data:|blob:)/i.test(url)) return url;
+  const origin = apiOrigin();
+  if (!origin) return url;
+  return `${origin}${url.startsWith('/') ? '' : '/'}${url}`;
+}
+
 const fileToBase64 = (file: File) =>
   new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
@@ -138,7 +165,7 @@ async function uploadViaOperationsApi(file: File): Promise<string> {
   if (!payload.url) {
     throw new Error('Upload succeeded but no URL was returned.');
   }
-  return payload.url;
+  return resolveMediaUrl(payload.url);
 }
 
 /**
@@ -222,7 +249,7 @@ async function uploadViaCatalogMediaFull(
   if (!payload.url || !payload.mediaId) {
     throw new Error('Upload succeeded but no URL/id was returned.');
   }
-  return { url: payload.url, mediaId: payload.mediaId };
+  return { url: resolveMediaUrl(payload.url), mediaId: payload.mediaId };
 }
 
 async function uploadViaCatalogMedia(file: File, category: 'users' | 'reviews'): Promise<string> {

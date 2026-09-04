@@ -85,8 +85,10 @@ import { PublicReviewCard, resolvePublicReviewAvatarUrl } from '../components/Pu
 import { AddressBookManager } from '../components/address/AddressBookManager';
 import { notify, toast } from '../lib/notify';
 import { notificationApi, type AppNotification } from '../services/notificationApi';
-import { getAccessToken } from '../lib/authSession';
+import { generatedAvatarPlaceholder, getAccessToken } from '../lib/authSession';
 import { updateAvatarUrl, updateDisplayName } from '../lib/authApi';
+import SecuritySettings from '../components/account/SecuritySettings';
+import PrimaryPhoneField from '../components/account/PrimaryPhoneField';
 import { uploadUserAvatar } from '../services/mediaUpload';
 import { getConsumerStorefrontDashboardNav, isConsumerDashboardTabAllowed } from '../lib/platform/dashboardRegistry';
 import { SellerWorkspaceSection } from './ReviewDetailPage';
@@ -1509,6 +1511,7 @@ const NotificationsSection = () => {
 const SETTINGS_TABS = [
   { id: 'personal', label: 'Personal Information' },
   { id: 'addresses', label: 'Addresses' },
+  { id: 'security', label: 'Login & Security' },
 ] as const;
 
 type SettingsSubTab = (typeof SETTINGS_TABS)[number]['id'];
@@ -1528,7 +1531,8 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setSettingsSubTab(initialSubTab === 'addresses' ? 'addresses' : 'personal');
+    const allowed: SettingsSubTab[] = ['personal', 'addresses', 'security'];
+    setSettingsSubTab(allowed.includes(initialSubTab) ? initialSubTab : 'personal');
   }, [initialSubTab]);
 
   useEffect(() => {
@@ -1602,11 +1606,23 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
 
   const handleDeletePhoto = async () => {
     const token = getAccessToken();
-    setAvatar(DEFAULT_AVATAR);
-    persistProfile(DEFAULT_AVATAR);
-    if (token) {
-      await updateAvatarUrl(token, '').catch(() => undefined);
+    if (!token) {
+      toast.error('You must be signed in to remove your profile photo.');
+      return;
     }
+    try {
+      await updateAvatarUrl(token, '');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to remove photo.');
+      return;
+    }
+    // Same generated-initials placeholder a real session bootstrap computes
+    // when avatarUrl is empty — keeps local UI and the server in sync
+    // instead of showing a different hardcoded image than what refresh/
+    // logout+login would later resolve to.
+    const placeholder = generatedAvatarPlaceholder(currentUser?.name || '');
+    setAvatar(placeholder);
+    persistProfile(placeholder);
     toast.success('Profile photo removed.');
   };
 
@@ -1731,21 +1747,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
                     Email changes aren&apos;t supported yet. Contact support if you need this updated.
                   </p>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-[12px] font-semibold text-[#9AA0AC] tracking-tight ml-1">
-                    Phone Number
-                  </label>
-                  <input
-                    className="w-full h-12 bg-slate-100 border border-slate-200/60 rounded-2xl px-5 text-xs font-bold text-[#6B7280] cursor-not-allowed"
-                    value={phone}
-                    readOnly
-                    disabled
-                    placeholder="Not yet supported"
-                  />
-                  <p className="text-[11px] text-[#9AA0AC] ml-1">
-                    Phone number isn&apos;t collected on this account yet.
-                  </p>
-                </div>
+                <PrimaryPhoneField />
               </div>
             </div>
           </div>
@@ -1754,7 +1756,8 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
             <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-6 space-y-3 text-left">
               <h3 className="text-[13px] font-bold text-[#1A1A2E]">Quick links</h3>
               <p className="text-[13px] font-medium text-[#9AA0AC] leading-relaxed">
-                Manage delivery locations from the Addresses tab or sidebar menu.
+                Manage delivery locations from the Addresses tab, or your password and connected
+                accounts from Login &amp; Security.
               </p>
               <button
                 type="button"
@@ -1763,12 +1766,21 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
               >
                 Go to Addresses →
               </button>
+              <button
+                type="button"
+                onClick={() => setSettingsSubTab('security')}
+                className="block text-[12.5px] font-bold text-[#FF5B00] hover:underline bg-transparent border-none cursor-pointer p-0"
+              >
+                Go to Login &amp; Security →
+              </button>
             </div>
           </div>
         </div>
       )}
 
       {settingsSubTab === 'addresses' && <AddressBookManager embedded />}
+
+      {settingsSubTab === 'security' && <SecuritySettings accountEmail={email} />}
     </div>
   );
 };

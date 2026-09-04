@@ -186,7 +186,9 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 function AppContent() {
   const location = useLocation();
   const [searchParams] = useSearchParams();
-  const isCompactShell = location.pathname === '/login';
+  const isCompactShell = ['/login', '/forgot-password', '/reset-password', '/verify-email'].includes(
+    location.pathname,
+  );
   const isMessagesShell = location.pathname.startsWith('/messages');
   const cmsPreviewToken =
     location.pathname.startsWith('/cms-preview') ? searchParams.get('token') : null;
@@ -239,9 +241,10 @@ function AppContent() {
             <Route path="/recommendations/:id" element={<LegacyRecommendationRedirect />} />
             <Route path="/guides/:id/products" element={<PageWrapper><GuideProductsPage /></PageWrapper>} />
             <Route path="/login" element={<LoginSignUpPage />} />
-            <Route path="/forgot-password" element={<PageWrapper><ForgotPasswordPage /></PageWrapper>} />
-            <Route path="/reset-password" element={<PageWrapper><ResetPasswordPage /></PageWrapper>} />
-            <Route path="/verify-email" element={<PageWrapper><VerifyEmailPage /></PageWrapper>} />
+            {/* Full-bleed standalone auth screens — same family as /login, no site nav/footer chrome. */}
+            <Route path="/forgot-password" element={<Suspense fallback={null}><ForgotPasswordPage /></Suspense>} />
+            <Route path="/reset-password" element={<Suspense fallback={null}><ResetPasswordPage /></Suspense>} />
+            <Route path="/verify-email" element={<Suspense fallback={null}><VerifyEmailPage /></Suspense>} />
             <Route path="/post-offer" element={<ProtectedRoute><PageWrapper><PostOfferPage /></PageWrapper></ProtectedRoute>} />
             <Route path="/whats-on" element={<Navigate to="/products" replace />} />
             <Route path="/whats-on/:slug" element={<PageWrapper><LegacyWhatsOnContentRedirect /></PageWrapper>} />

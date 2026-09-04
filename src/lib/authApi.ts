@@ -50,12 +50,27 @@ export type RegisterResponse = {
   dashboardPath: string | null;
 };
 
+export type ConnectedIdentity = {
+  provider: 'google' | 'facebook' | string;
+  /** Provider email, already masked server-side. Never a subject/id. */
+  email: string | null;
+  connectedAt: string;
+};
+
 export type AuthMeResponse = {
   uid: string;
   email: string;
   displayName: string;
   role: string;
   avatarUrl?: string;
+  /** JWT-asserted verification state of the account email. */
+  emailVerified?: boolean;
+  /** false for a social-only Consumer who has never set a Choosify password. */
+  hasPassword?: boolean;
+  /** Canonical primary account phone in E.164, or null when none is set. */
+  phone?: string | null;
+  /** Linked social identities from canonical user_identities. */
+  identities?: ConnectedIdentity[];
 };
 
 export type RefreshResponse = {
@@ -96,6 +111,43 @@ export async function register(payload: RegisterPayload): Promise<RegisterRespon
     throw new Error(await readErrorMessage(response));
   }
   return response.json() as Promise<RegisterResponse>;
+}
+
+/** Which social providers the backend can actually verify right now. */
+export async function getSocialProviders(): Promise<{ google: boolean; facebook: boolean }> {
+  try {
+    const response = await fetch(`${API_BASE}/auth/social/providers`, { credentials: 'include' });
+    if (!response.ok) return { google: false, facebook: false };
+    const body = (await response.json()) as { providers?: { google?: boolean; facebook?: boolean } };
+    return { google: Boolean(body.providers?.google), facebook: Boolean(body.providers?.facebook) };
+  } catch {
+    return { google: false, facebook: false };
+  }
+}
+
+/** Exchange a server-verifiable Google ID token (from Google Identity Services)
+ *  for a Choosify session. Returns the same shape as `login`. */
+export async function googleSignIn(credential: string): Promise<LoginResponse> {
+  const response = await fetch(`${API_BASE}/auth/google`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ credential }),
+  });
+  if (!response.ok) throw new Error(await readErrorMessage(response));
+  return response.json() as Promise<LoginResponse>;
+}
+
+/** Exchange a Facebook access token (from the Facebook JS SDK) for a Choosify session. */
+export async function facebookSignIn(accessToken: string): Promise<LoginResponse> {
+  const response = await fetch(`${API_BASE}/auth/facebook`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ accessToken }),
+  });
+  if (!response.ok) throw new Error(await readErrorMessage(response));
+  return response.json() as Promise<LoginResponse>;
 }
 
 export async function sellerRegister(payload: SellerRegisterPayload): Promise<SellerRegisterResponse> {
@@ -141,8 +193,6 @@ export async function getCurrentUser(accessToken: string): Promise<AuthMeRespons
     credentials: 'include',
     headers: { Authorization: `Bearer ${accessToken}` },
   });
-  // Buyers (role user) get 403 from admin /auth/me — still authenticated.
-  if (response.status === 403) return null;
   if (response.status === 401) {
     throw new Error('Invalid or expired session. Please sign in again.');
   }
@@ -238,4 +288,119 @@ export async function resendVerificationEmail(accessToken: string): Promise<{ su
     throw new Error(await readErrorMessage(response));
   }
   return response.json() as Promise<{ success: boolean; message?: string }>;
+}
+
+// ── Consumer: add a local password to a social-only account (email OTP) ──
+// The destination email is ALWAYS the signed-in account's own email — the
+// server derives it; nothing about it is sent from here.
+
+export class ApiError extends Error {
+  code?: string;
+  status: number;
+  retryAfterSeconds?: number;
+  constructor(message: string, status: number, code?: string, retryAfterSeconds?: number) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.code = code;
+    this.retryAfterSeconds = retryAfterSeconds;
+  }
+}
+
+async function postAuthed<T>(path: string, accessToken: string, body?: unknown): Promise<T> {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: 'POST',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+    body: JSON.stringify(body ?? {}),
+  });
+  const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
+  if (!response.ok) {
+    throw new ApiError(
+      String(data.error || data.message || `Request failed (${response.status})`),
+      response.status,
+      typeof data.code === 'string' ? data.code : undefined,
+      typeof data.retryAfterSeconds === 'number' ? data.retryAfterSeconds : undefined,
+    );
+  }
+  return data as T;
+}
+
+/**
+ * Canonical authenticated account/security snapshot (hasPassword, phone,
+ * identities, emailVerified). Same endpoint as the session profile — GET
+ * /auth/me — so there is one source of truth, not a scatter of tiny endpoints.
+ */
+export async function fetchAccountOverview(accessToken: string): Promise<AuthMeResponse | null> {
+  return getCurrentUser(accessToken);
+}
+
+/** Add or replace the primary account phone. Server normalizes to E.164. */
+export async function updatePrimaryPhone(
+  accessToken: string,
+  phone: string,
+): Promise<{ phone: string | null }> {
+  const data = await postProfile(accessToken, { phone });
+  return { phone: data.phone ?? null };
+}
+
+/** Remove the primary account phone. Does not touch historical order snapshots. */
+export async function deletePrimaryPhone(accessToken: string): Promise<{ phone: string | null }> {
+  const data = await postProfile(accessToken, { phone: null });
+  return { phone: data.phone ?? null };
+}
+
+async function postProfile(
+  accessToken: string,
+  body: Record<string, unknown>,
+): Promise<{ phone?: string | null }> {
+  const response = await fetch(`${API_BASE}/auth/profile`, {
+    method: 'PATCH',
+    credentials: 'include',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+    body: JSON.stringify(body),
+  });
+  const json = (await response.json().catch(() => ({}))) as {
+    data?: { phone?: string | null };
+    error?: string;
+    code?: string;
+  };
+  if (!response.ok) {
+    throw new ApiError(String(json.error || `Request failed (${response.status})`), response.status, json.code);
+  }
+  return json.data ?? {};
+}
+
+/** Step 1 — ask the server to email a 6-digit code to the account's own address. */
+export async function requestLocalPasswordOtp(
+  accessToken: string,
+): Promise<{ success: boolean; email: string; expiresInSeconds: number }> {
+  return postAuthed('/auth/local-password/request-otp', accessToken);
+}
+
+/** Step 2 — submit the code; on success returns a single-use setup authorization token. */
+export async function verifyLocalPasswordOtp(
+  accessToken: string,
+  code: string,
+): Promise<{ success: boolean; setupToken: string; expiresInSeconds: number }> {
+  return postAuthed('/auth/local-password/verify-otp', accessToken, { code });
+}
+
+/** Step 3 — consume the setup token and establish the password. Returns a fresh access token. */
+export async function setLocalPassword(
+  accessToken: string,
+  setupToken: string,
+  newPassword: string,
+  confirmPassword: string,
+): Promise<{ success: boolean; accessToken: string }> {
+  return postAuthed('/auth/local-password/set', accessToken, { setupToken, newPassword, confirmPassword });
+}
+
+/** Canonical change-password for a Consumer who already has one (current-password gated). */
+export async function changePassword(
+  accessToken: string,
+  currentPassword: string,
+  newPassword: string,
+): Promise<{ success: boolean; message?: string }> {
+  return postAuthed('/auth/change-password', accessToken, { currentPassword, newPassword });
 }

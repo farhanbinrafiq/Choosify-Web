@@ -16,20 +16,20 @@ import {
   User,
   Watch,
 } from 'lucide-react';
-import { IconBrandApple } from '@tabler/icons-react';
-
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from '../lib/notify';
 import { cn } from '../lib/utils';
 import { EmiAiLogo } from '../components/EmiAiLogo';
 import { ChoosifyWordmarkLogo } from '../components/ChoosifyWordmarkLogo';
+import { SocialAuthButtons } from '../components/auth/SocialAuthButtons';
 import {
   firebaseAuthErrorMessage,
   registerWithEmailPassword,
   resolveSessionUser,
   signInWithEmailPassword,
 } from '../lib/authSession';
+import type { SessionIdentity } from '../lib/authSession';
 
 type AuthTab = 'sign-in' | 'sign-up';
 
@@ -193,38 +193,6 @@ function FeatureChip({
   );
 }
 
-function GoogleLogo() {
-  return (
-    <img
-      src="/icons/google.svg"
-      alt=""
-      width={18}
-      height={18}
-      className="w-[18px] h-[18px] object-contain"
-      draggable={false}
-      aria-hidden
-    />
-  );
-}
-
-function FacebookLogo() {
-  return (
-    <img
-      src="/icons/facebook.svg"
-      alt=""
-      width={18}
-      height={18}
-      className="w-[18px] h-[18px] object-contain"
-      draggable={false}
-      aria-hidden
-    />
-  );
-}
-
-function AppleLogo() {
-  return <IconBrandApple size={18} stroke={1.75} aria-hidden />;
-}
-
 function AuthField({
   id,
   label,
@@ -348,10 +316,20 @@ export function LoginSignUpPage() {
     }
   };
 
-  const handleSocialLogin = (_provider: 'Google' | 'Facebook' | 'Apple') => {
-    toast.error(
-      'Social login needs provider credentials in Firebase Console first. Use email for now.',
-    );
+  /** Shared post-auth handler for a successful Google / Facebook sign-in — the
+   *  backend has already verified the provider credential and returned a normal
+   *  Choosify Consumer session. */
+  const handleSocialSuccess = async (identity: SessionIdentity) => {
+    const { user } = await resolveSessionUser(identity, currentUser);
+    updateCurrentUser(user);
+    setIsLoggedIn(true);
+    toast.success('Welcome to Choosify!');
+    const nextParam = new URLSearchParams(location.search).get('next');
+    const from =
+      (nextParam && nextParam.startsWith('/') ? nextParam : undefined) ||
+      (location.state as { from?: string } | null)?.from;
+    const dest = from && from !== '/login' && !from.startsWith('/login/') ? from : '/';
+    navigate(dest, { replace: true });
   };
 
   const handleForgotPassword = () => {
@@ -609,35 +587,12 @@ export function LoginSignUpPage() {
                   <div className="h-px flex-1 bg-[#E8EDF2]" />
                 </div>
 
-                <div className="mb-5 flex gap-2.5">
-                  <button
-                    type="button"
-                    onClick={() => handleSocialLogin('Google')}
-                    className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-[#E5E7EB] bg-white px-1.5 py-2.5 text-[11px] font-semibold text-[#1A1A2E] transition-colors hover:bg-[#F9FAFB]"
-                    aria-label="Continue with Google"
-                  >
-                    <GoogleLogo />
-                    Google
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSocialLogin('Facebook')}
-                    className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-[#E5E7EB] bg-white px-1.5 py-2.5 text-[11px] font-semibold text-[#1877F2] transition-colors hover:bg-[#F9FAFB]"
-                    aria-label="Continue with Facebook"
-                  >
-                    <FacebookLogo />
-                    Facebook
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => handleSocialLogin('Apple')}
-                    className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-[#E5E7EB] bg-white px-1.5 py-2.5 text-[11px] font-semibold text-[#1A1A2E] transition-colors hover:bg-[#F9FAFB]"
-                    aria-label="Continue with Apple"
-                  >
-                    <AppleLogo />
-                    Apple
-                  </button>
-                </div>
+                <SocialAuthButtons
+                  mode={isSignUp ? 'sign-up' : 'sign-in'}
+                  disabled={isSubmitting}
+                  onSuccess={handleSocialSuccess}
+                  onError={(message) => toast.error(message)}
+                />
 
                 <p className="m-0 text-center text-[12.5px] text-[#9AA0AC]">
                   {isSignUp ? 'Already have an account?' : 'New to Choosify?'}{' '}

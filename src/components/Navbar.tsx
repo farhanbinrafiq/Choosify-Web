@@ -9,6 +9,7 @@ import { GlobalSearchBar } from './GlobalSearchBar';
 import { useDragScroll } from './FilterEngine';
 import { motion, AnimatePresence } from 'motion/react';
 import { useGlobalState } from '../context/GlobalStateContext';
+import ConsumerAvatar from './ui/ConsumerAvatar';
 import { useDashboard } from '../context/DashboardContext';
 import { CartDrawer } from './CartDrawer';
 import { cn } from '../lib/utils';
@@ -177,7 +178,9 @@ export function Navbar() {
    * full-bleed composition and its canonical branding is the wordmark inside
    * the central card. No full-width header, logo, or divider here.
    */
-  const isAuthChrome = location.pathname === '/login' || location.pathname.startsWith('/login/');
+  const AUTH_STANDALONE = ['/login', '/forgot-password', '/reset-password', '/verify-email'];
+  const isAuthChrome =
+    AUTH_STANDALONE.includes(location.pathname) || location.pathname.startsWith('/login/');
 
   if (isAuthChrome) {
     return null;
@@ -314,9 +317,8 @@ export function Navbar() {
                 aria-label="Open account menu"
                 aria-expanded={isUserMenuOpen}
               >
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#FF5B00] to-[#2323FF] flex items-center justify-center text-white text-[11px] font-bold shrink-0">
-                  {(currentUser?.name || 'F').charAt(0).toUpperCase()}
-                </div>
+                <ConsumerAvatar src={currentUser?.avatar} name={currentUser?.name} size={28} />
+
                 <span className="text-[11.5px] font-semibold hidden lg:block text-white">
                   Hi, {currentUser?.name?.split(' ')[0] || 'Farhan'}
                 </span>
@@ -525,18 +527,8 @@ export function Navbar() {
                 </div>
 
                 <div className="px-5 py-4 bg-[#F4F7F9] border-b border-[#E8EDF2] flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-full bg-gradient-to-br from-[#FF5B00] to-[#2323FF] flex items-center justify-center text-white text-[15px] font-bold shrink-0 overflow-hidden">
-                    {currentUser?.avatar ? (
-                      <img
-                        src={currentUser.avatar}
-                        className="w-full h-full object-cover"
-                        alt=""
-                        onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                      />
-                    ) : (
-                      (currentUser?.name || 'F').charAt(0).toUpperCase()
-                    )}
-                  </div>
+                  <ConsumerAvatar src={currentUser?.avatar} name={currentUser?.name} size={48} />
+
                   <div className="min-w-0">
                     <p className="text-[13px] font-bold text-[#1A1A2E] tracking-tight leading-tight truncate">
                       {currentUser?.name || 'My Account'}

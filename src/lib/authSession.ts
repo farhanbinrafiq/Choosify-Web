@@ -5,6 +5,8 @@ import {
   logout as apiLogout,
   refreshSession as apiRefreshSession,
   register as apiRegister,
+  googleSignIn as apiGoogleSignIn,
+  facebookSignIn as apiFacebookSignIn,
   type AuthMeResponse,
 } from './authApi';
 
@@ -61,12 +63,19 @@ function mapBackendRole(role: string | undefined): UserRole {
   }
 }
 
-/**
- * Admin /auth/me returns 200 for staff/seller profiles, 403 for buyers (role user).
- * Buyers are still authenticated — operations routes accept role "user" via Bearer token.
- */
+/** GET /auth/me — returns 200 for every authenticated role, including plain
+ *  buyers (role "user"); a thrown error here means the token is genuinely
+ *  invalid/expired, not "this role can't read its own profile." */
 export async function fetchAuthMe(token: string): Promise<AuthMeResponse | null> {
   return getCurrentUser(token);
+}
+
+/** The same generated-initials placeholder buildUserFromAuth falls back to
+ *  when there is no server avatarUrl — exported so any UI that clears the
+ *  photo locally (e.g. Profile Settings' Remove Photo) shows the exact same
+ *  image a real session bootstrap would compute, instead of drifting. */
+export function generatedAvatarPlaceholder(name: string): string {
+  return `https://ui-avatars.com/api/?name=${encodeURIComponent(name || 'Choosify member')}&background=FF5B00&color=fff`;
 }
 
 export function buildUserFromAuth(input: {
@@ -98,9 +107,7 @@ export function buildUserFromAuth(input: {
     // one (pre-migration sessions) and finally a generated placeholder.
     avatar:
       input.avatarUrl ||
-      (prev?.id === input.uid && prev.avatar
-        ? prev.avatar
-        : `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=FF5B00&color=fff`),
+      (prev?.id === input.uid && prev.avatar ? prev.avatar : generatedAvatarPlaceholder(name)),
     address: prev?.id === input.uid ? prev.address || '' : '',
     reputation_score: prev?.id === input.uid ? prev.reputation_score : 50,
     orderStats:
@@ -201,6 +208,30 @@ export async function registerWithEmailPassword(
     displayName: result.displayName,
     role: result.role,
     accessToken: result.customToken,
+  };
+}
+
+/** Consumer social sign-in. The backend verifies the provider credential and
+ *  returns the same session payload as email/password login. */
+export async function signInWithGoogle(credential: string): Promise<SessionIdentity> {
+  const result = await apiGoogleSignIn(credential);
+  return {
+    uid: result.uid,
+    email: result.email,
+    displayName: result.displayName,
+    role: result.role,
+    accessToken: result.accessToken,
+  };
+}
+
+export async function signInWithFacebook(accessToken: string): Promise<SessionIdentity> {
+  const result = await apiFacebookSignIn(accessToken);
+  return {
+    uid: result.uid,
+    email: result.email,
+    displayName: result.displayName,
+    role: result.role,
+    accessToken: result.accessToken,
   };
 }
 

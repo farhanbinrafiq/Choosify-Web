@@ -1,24 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link, useSearchParams } from 'react-router-dom';
-import { CheckCircle2, XCircle, Loader2 } from 'lucide-react';
-import { EmiAiLogo } from '../components/EmiAiLogo';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { CheckCircle2, XCircle, Loader2, ArrowRight } from 'lucide-react';
+import { AuthScaffold, AuthPrimaryButton } from '../components/auth/AuthScaffold';
 import { verifyEmail } from '../lib/authApi';
-
-const PRIMARY = '#FF5B00';
 
 type Stage = 'checking' | 'success' | 'invalid';
 
 export default function VerifyEmailPage() {
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token') || '';
   const [stage, setStage] = useState<Stage>('checking');
-  // Tracks which token this component instance has already requested, so
-  // React 18 StrictMode's dev-only double-invoke (mount -> cleanup -> mount)
-  // can't fire this single-use token twice — the second call would always
-  // 400 and must not clobber the first call's real result. Deliberately NOT
-  // using an effect-scoped `cancelled` flag here: StrictMode's synthetic
-  // cleanup would flip it before the in-flight request resolves and silently
-  // swallow the one real response, leaving the page stuck on "Verifying…".
+  // See git history: a ref (not an effect `cancelled` flag) guards React
+  // StrictMode's dev double-invoke from firing this single-use token twice.
   const requestedTokenRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -33,56 +27,49 @@ export default function VerifyEmailPage() {
       .catch(() => setStage('invalid'));
   }, [token]);
 
+  if (stage === 'checking') {
+    return (
+      <AuthScaffold title="Verifying your email…" subtitle="This only takes a moment.">
+        <div className="flex justify-center py-4">
+          <Loader2 className="h-8 w-8 animate-spin text-[#FF5B00]" />
+        </div>
+      </AuthScaffold>
+    );
+  }
+
+  if (stage === 'success') {
+    return (
+      <AuthScaffold title="Email verified" subtitle="Your email address has been confirmed.">
+        <div className="flex flex-col items-center text-center">
+          <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-50">
+            <CheckCircle2 className="h-7 w-7 text-emerald-500" />
+          </div>
+          <AuthPrimaryButton type="button" onClick={() => navigate('/')}>
+            Continue to Choosify <ArrowRight size={16} strokeWidth={2.4} />
+          </AuthPrimaryButton>
+        </div>
+      </AuthScaffold>
+    );
+  }
+
   return (
-    <div className="min-h-screen font-sans choosify-dark-surface flex items-center justify-center px-4 py-12">
-      <div className="w-full max-w-md">
-        <div className="flex justify-center mb-8">
-          <EmiAiLogo />
+    <AuthScaffold
+      title="Link expired or invalid"
+      subtitle="This verification link is no longer valid. Request a fresh one from your account settings after signing in."
+      footer={
+        <button type="button" onClick={() => navigate('/login')} className="font-bold text-white/80 hover:text-white">
+          Back to sign in
+        </button>
+      }
+    >
+      <div className="flex flex-col items-center text-center">
+        <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-rose-50">
+          <XCircle className="h-7 w-7 text-rose-500" />
         </div>
-        <div className="bg-white rounded-3xl shadow-2xl p-8 text-center space-y-4">
-          {stage === 'checking' && (
-            <>
-              <Loader2 className="w-8 h-8 mx-auto animate-spin" style={{ color: PRIMARY }} />
-              <h1 className="text-xl font-black text-[#18154C]">Verifying your email…</h1>
-            </>
-          )}
-          {stage === 'success' && (
-            <>
-              <div className="mx-auto w-14 h-14 rounded-full bg-emerald-50 flex items-center justify-center">
-                <CheckCircle2 className="w-7 h-7 text-emerald-500" />
-              </div>
-              <h1 className="text-xl font-black text-[#18154C]">Email verified</h1>
-              <p className="text-sm text-gray-500 leading-relaxed">Your email address has been confirmed.</p>
-              <Link
-                to="/dashboard"
-                className="inline-block w-full py-3 rounded-xl text-white text-sm font-bold mt-2"
-                style={{ backgroundColor: PRIMARY }}
-              >
-                Go to my account
-              </Link>
-            </>
-          )}
-          {stage === 'invalid' && (
-            <>
-              <div className="mx-auto w-14 h-14 rounded-full bg-rose-50 flex items-center justify-center">
-                <XCircle className="w-7 h-7 text-rose-500" />
-              </div>
-              <h1 className="text-xl font-black text-[#18154C]">Link expired or invalid</h1>
-              <p className="text-sm text-gray-500 leading-relaxed">
-                This verification link is no longer valid. You can request a fresh one from your account settings
-                after signing in.
-              </p>
-              <Link
-                to="/login"
-                className="inline-block w-full py-3 rounded-xl text-white text-sm font-bold mt-2"
-                style={{ backgroundColor: PRIMARY }}
-              >
-                Sign in
-              </Link>
-            </>
-          )}
-        </div>
+        <AuthPrimaryButton type="button" onClick={() => navigate('/login')}>
+          Sign in <ArrowRight size={16} strokeWidth={2.4} />
+        </AuthPrimaryButton>
       </div>
-    </div>
+    </AuthScaffold>
   );
 }
