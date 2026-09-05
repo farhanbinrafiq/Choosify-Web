@@ -244,7 +244,11 @@ export async function requestPasswordReset(email: string): Promise<{ success: bo
   const response = await fetch(`${API_BASE}/auth/password-reset-request`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email: email.trim() }),
+    // 'web' identifies the storefront as the surface the reset link should
+    // open in — a validated enum, never a URL. It does not grant any role
+    // or privilege, only which Choosify SPA renders the token form; the
+    // server owns the actual destination host.
+    body: JSON.stringify({ email: email.trim(), surface: 'web' }),
   });
   // Deliberately generic — the API returns the same body whether or not the
   // email exists. Only a genuinely malformed request (missing/invalid email
