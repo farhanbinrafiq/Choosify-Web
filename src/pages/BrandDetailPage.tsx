@@ -1922,7 +1922,8 @@ export function BrandDetailPage() {
             <BrandOverviewSection
               brandName={brand.name}
               overviewData={overviewData}
-              claimStatus={'claimStatus' in brand ? brand.claimStatus : undefined}
+              claimStatus={localClaimStatus}
+              onClaim={() => setIsClaimModalOpen(true)}
             />
 
             <BrandWhereToBuySection

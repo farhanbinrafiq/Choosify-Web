@@ -1,6 +1,5 @@
 import React from 'react';
 import { CheckCircle2 } from 'lucide-react';
-import { toast } from '../lib/notify';
 import { useDashboard } from '../context/DashboardContext';
 import { OverviewListItem } from './OverviewListIcon';
 
@@ -21,9 +20,12 @@ interface BrandOverviewSectionProps {
   brandName: string;
   overviewData: OverviewData;
   claimStatus?: 'community' | 'pending' | 'verified';
+  /** Opens the real claim-submission flow (ClaimProfileModal). Required for
+   *  the "community" state's button to do anything real. */
+  onClaim?: () => void;
 }
 
-export function BrandOverviewSection({ brandName, overviewData, claimStatus }: BrandOverviewSectionProps) {
+export function BrandOverviewSection({ brandName, overviewData, claimStatus, onClaim }: BrandOverviewSectionProps) {
   const { customOverviews } = useDashboard();
   const brandCustoms = customOverviews ? customOverviews.filter(
     co => co.targetType === 'brand' && co.targetId.toLowerCase() === brandName.toLowerCase()
@@ -177,11 +179,9 @@ export function BrandOverviewSection({ brandName, overviewData, claimStatus }: B
             This brand profile contains publicly available information curated by Choosify. This profile has not yet been claimed by an authorized brand representative.
           </p>
           
-          <button 
+          <button
             type="button"
-            onClick={() => {
-              toast.success("Ownership claim application received for " + brandName + "! Our merchant onboarding team will perform necessary verifications relative to this brand representative request and notify you shortly.", { duration: 5000 });
-            }}
+            onClick={onClaim}
             className="bg-[#FF5B00] hover:bg-[#EF3C23] text-white py-3 px-8 rounded-lg uppercase text-[11px] font-extrabold tracking-widest transition-all active:scale-95 select-none border-0 cursor-pointer"
           >
             Claim Brand Ownership
