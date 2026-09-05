@@ -32,6 +32,7 @@ import type { Order } from '../types/schemas';
 import { evaluatePostOrderConversationExpiry, resolveOrderForMessageThread } from '../lib/messaging/conversationExpiry';
 import { ensureStorefrontSupportThread, isChoosifySupportThread } from '../lib/supportConversation';
 import { messagingApi } from '../services/messagingApi';
+import { useMessagingPoll } from '../hooks/useMessagingPoll';
 
 type ConversationTab = 'all' | 'orders' | 'support' | 'unread';
 
@@ -207,68 +208,61 @@ export function MessagesPage({
     setShowMobileInfo(false);
   }, [threadId]);
 
-  // Thread-open: fetch platform inbox history (conv_platform_<buyerId>). Booking-offer poll below is separate.
-  useEffect(() => {
-    if (!activeThreadId) return;
-    if (
-      activeThreadId === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID ||
-      activeThreadId === EMI_MESSAGES_THREAD_ID
-    ) {
-      return;
+  const formatMsgTime = (iso: string) => {
+    try {
+      return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch {
+      return '';
     }
-    if (!currentUser?.id || !localStorage.getItem('choosify_auth_token')) return;
-    let cancelled = false;
+  };
 
-    const formatTime = (iso: string) => {
+  /** Re-pulls the Choosify Support thread's messages — used both by the
+   *  thread-open effect below and by the REST-polling safety net. */
+  const refetchSupportMessages = useCallback(
+    async (threadId: string) => {
       try {
-        return new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-      } catch {
-        return '';
-      }
-    };
-
-    if (isChoosifySupportThread(activeThread)) {
-      (async () => {
-        try {
-          const rows = await messagingApi.listSupportMessages(activeThreadId);
-          if (cancelled || !Array.isArray(rows) || !rows.length) return;
-          setThreadMessages((prev) => {
-            const mapped = rows.map((row, index) => {
-              const timestamp = String(row.createdAt || new Date().toISOString());
-              const isUser = row.senderRole !== 'admin' && row.senderRole !== 'system';
-              return {
-                id: index + 1,
-                serverId: String(row.id),
-                threadId: activeThreadId,
-                text: String(row.body || ''),
-                sender: (isUser ? 'user' : 'other') as 'user' | 'other',
-                senderName: isUser ? 'Me' : 'Choosify Support',
-                time: formatTime(timestamp),
-                createdAt: timestamp,
-                status: (isUser ? 'delivered' : undefined) as 'delivered' | undefined,
-              };
-            });
-            const serverIds = new Set(mapped.map((m) => m.serverId));
-            const kept = prev.filter(
-              (m) =>
-                m.threadId !== activeThreadId ||
-                (m.serverId && serverIds.has(m.serverId)),
-            );
-            return [...kept, ...mapped] as typeof prev;
+        const rows = await messagingApi.listSupportMessages(threadId);
+        if (!Array.isArray(rows) || !rows.length) return;
+        setThreadMessages((prev) => {
+          const mapped = rows.map((row, index) => {
+            const timestamp = String(row.createdAt || new Date().toISOString());
+            const isUser = row.senderRole !== 'admin' && row.senderRole !== 'system';
+            return {
+              id: index + 1,
+              serverId: String(row.id),
+              threadId,
+              text: String(row.body || ''),
+              sender: (isUser ? 'user' : 'other') as 'user' | 'other',
+              senderName: isUser ? 'Me' : 'Choosify Support',
+              time: formatMsgTime(timestamp),
+              createdAt: timestamp,
+              status: (isUser ? 'delivered' : undefined) as 'delivered' | undefined,
+            };
           });
-        } catch {
-          /* keep local history if API unreachable */
-        }
-      })();
-      return () => {
-        cancelled = true;
-      };
-    }
+          // Additive/update-only merge, keyed by serverId — never evict an
+          // existing message solely because this REST response doesn't
+          // (yet) include it, then re-sort canonically.
+          const byKey = new Map<string, (typeof mapped)[number] | (typeof prev)[number]>();
+          for (const m of prev) byKey.set(m.serverId || `local-${m.id}`, m);
+          for (const m of mapped) byKey.set(m.serverId || `local-${m.id}`, m);
+          return Array.from(byKey.values()).sort((a, b) =>
+            String(a.createdAt || '').localeCompare(String(b.createdAt || '')),
+          ) as typeof prev;
+        });
+      } catch {
+        /* keep local history if API unreachable */
+      }
+    },
+    [setThreadMessages],
+  );
 
-    (async () => {
+  /** Re-pulls conv_platform_<buyerId> history — used both by the thread-open
+   *  effect below and by the REST-polling safety net. */
+  const refetchPlatformMessages = useCallback(
+    async (activeThreadIdForFetch: string) => {
+      if (!currentUser?.id) return;
       try {
         const result = await operationsApi.listPlatformMessages({ userId: currentUser.id });
-        if (cancelled) return;
         const rows = Array.isArray(result.data) ? result.data : [];
         if (!rows.length) return;
 
@@ -283,9 +277,9 @@ export function MessagesPage({
             else if (orderMatch?.[1]) {
               const orderId = orderMatch[1].trim();
               const byRef = threads.find((t) => t.orderRef === orderId);
-              threadId = byRef?.id || activeThreadId;
+              threadId = byRef?.id || activeThreadIdForFetch;
             } else if (row.bookingOffer) {
-              threadId = activeThreadId;
+              threadId = activeThreadIdForFetch;
             }
             const text = rawBody
               .replace(/^\[Order\s+[^\]]+\]\s*/i, '')
@@ -305,41 +299,77 @@ export function MessagesPage({
               text: text || rawBody,
               sender: (isBuyer ? 'user' : 'other') as 'user' | 'other',
               senderName: isBuyer ? 'Me' : String(row.senderName || 'Support'),
-              time: formatTime(timestamp),
+              time: formatMsgTime(timestamp),
               createdAt: timestamp,
               bookingOffer: row.bookingOffer as import('../types/serviceBooking').BookingOfferCard | undefined,
               status: (isBuyer ? 'delivered' : undefined) as 'delivered' | undefined,
             };
           });
 
-          const serverIds = new Set(mapped.map((m) => m.serverId));
-          const kept = prev.filter((m) => {
+          // Additive/update-only merge — never evict an existing/live message
+          // solely because it's absent from this REST response (that race is
+          // what caused messages to intermittently vanish/only reappear after
+          // a refresh). The one narrow exception: a purely local placeholder
+          // in the generic fallback thread (no serverId, no booking offer) is
+          // dropped once real server data for this fetch has arrived.
+          const cleaned = prev.filter((m) => {
             if (
               m.threadId === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID ||
               m.threadId === EMI_MESSAGES_THREAD_ID
             ) {
               return true;
             }
-            if (m.serverId) return serverIds.has(m.serverId);
             if (mapped.length && m.threadId === 'thread-general' && !m.serverId && !m.bookingOffer) {
               return false;
             }
             return true;
           });
           const byKey = new Map<string, (typeof mapped)[number] | (typeof prev)[number]>();
-          for (const m of kept) byKey.set(m.serverId || `local-${m.id}`, m);
+          for (const m of cleaned) byKey.set(m.serverId || `local-${m.id}`, m);
           for (const m of mapped) byKey.set(m.serverId || `local-${m.id}`, m);
-          return Array.from(byKey.values()) as typeof prev;
+          return Array.from(byKey.values()).sort((a, b) =>
+            String(a.createdAt || '').localeCompare(String(b.createdAt || '')),
+          ) as typeof prev;
         });
       } catch {
         // Keep local history if API unreachable.
       }
-    })();
+    },
+    [currentUser?.id, setThreadMessages, threads],
+  );
 
-    return () => {
-      cancelled = true;
-    };
-  }, [activeThreadId, activeThread, currentUser.id, setThreadMessages, threads]);
+  const activeThreadIsSupport = isChoosifySupportThread(activeThread);
+
+  // Thread-open: fetch platform inbox history (conv_platform_<buyerId>) or the
+  // Choosify Support thread's own messages. Booking-offer poll below is separate.
+  useEffect(() => {
+    if (!activeThreadId) return;
+    if (
+      activeThreadId === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID ||
+      activeThreadId === EMI_MESSAGES_THREAD_ID
+    ) {
+      return;
+    }
+    if (!currentUser?.id || !localStorage.getItem('choosify_auth_token')) return;
+
+    if (activeThreadIsSupport) {
+      void refetchSupportMessages(activeThreadId);
+    } else {
+      void refetchPlatformMessages(activeThreadId);
+    }
+  }, [activeThreadId, activeThreadIsSupport, currentUser?.id, refetchSupportMessages, refetchPlatformMessages]);
+
+  // REST-polling safety net: only actually polls when the omni Firestore
+  // mirror isn't genuinely live (see useMessagingPoll) — production must not
+  // depend on Firebase credentials for messages to arrive.
+  const isSpecialThread =
+    activeThreadId === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID || activeThreadId === EMI_MESSAGES_THREAD_ID;
+  const supportPollKey =
+    activeThreadId && !isSpecialThread && activeThreadIsSupport && currentUser?.id ? activeThreadId : null;
+  const platformPollKey =
+    activeThreadId && !isSpecialThread && !activeThreadIsSupport && currentUser?.id ? activeThreadId : null;
+  useMessagingPoll(supportPollKey, () => activeThreadId && void refetchSupportMessages(activeThreadId), 4000);
+  useMessagingPoll(platformPollKey, () => activeThreadId && void refetchPlatformMessages(activeThreadId), 4000);
 
   useEffect(() => {
     const viewport = chatViewportRef.current;
