@@ -121,7 +121,10 @@ export const BrandCard = memo(function BrandCard({ brand, onClick, className }: 
           {brand.logo && (brand.logo.startsWith('http') || brand.logo.startsWith('/')) ? (
             <img
               src={brand.logo}
-              className="max-w-[70%] max-h-[70%] w-auto h-auto object-contain"
+              // Circular frame (rounded-full, overflow-hidden) — keep this
+              // under ~82% to avoid clipping the corners of a perfectly
+              // square logo with no internal margin.
+              className="max-w-[82%] max-h-[82%] w-auto h-auto object-contain"
               alt={brand.name}
               loading="lazy"
               referrerPolicy="no-referrer"

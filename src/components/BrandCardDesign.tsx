@@ -178,7 +178,10 @@ export const BrandCardDesign = memo(function BrandCardDesign({
           <img
             src={brand.logo}
             alt={brand.name}
-            className="relative z-[1] max-w-[80%] max-h-[70%] w-auto h-auto object-contain"
+            // Rectangular frame (px-3 padding already provides breathing
+            // room) — no circular clipping risk, so the logo can safely
+            // use most of the available box while staying object-contain.
+            className="relative z-[1] max-w-[92%] max-h-[86%] w-auto h-auto object-contain"
             loading="lazy"
             onError={(e) => {
               e.currentTarget.style.display = 'none';

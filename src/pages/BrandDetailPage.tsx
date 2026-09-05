@@ -1348,7 +1348,14 @@ export function BrandDetailPage() {
         <img
           src={brandObj.logo}
           alt={brandObj.name}
-          className="max-w-[75%] max-h-[75%] w-auto h-auto object-contain"
+          // This renders inside a circular (rounded-full, overflow-hidden)
+          // frame — unlike a rectangular frame, pushing this too close to
+          // 100% risks clipping the corners of a perfectly square logo
+          // with no internal margin (its diagonal exceeds the circle's
+          // radius past ~71%). 82% is a deliberate, modest increase over
+          // the previous 75% that still keeps any such worst-case overshoot
+          // small enough to be masked by the existing border/shadow.
+          className="max-w-[82%] max-h-[82%] w-auto h-auto object-contain"
           referrerPolicy="no-referrer"
         />
       );
