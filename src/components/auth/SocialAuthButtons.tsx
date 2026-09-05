@@ -29,7 +29,7 @@ const FACEBOOK_APP_ID = (import.meta.env.VITE_FACEBOOK_APP_ID as string | undefi
 
 // Full-width, stacked — same footprint as the primary "Sign in to Choosify" CTA.
 const BTN_CLASS =
-  'flex w-full items-center justify-center gap-2 rounded-lg border border-[#E5E7EB] bg-white py-3 text-[13px] font-semibold text-[#1A1A2E] transition-colors hover:bg-[#F9FAFB] disabled:cursor-not-allowed disabled:opacity-50';
+  'flex w-full items-center justify-center gap-2 rounded-lg border border-[#E5E7EB] bg-white py-3 text-[13px] font-semibold text-[#1A1A2E] transition-colors hover:bg-[#F9FAFB] cursor-pointer disabled:cursor-not-allowed disabled:opacity-50';
 
 function loadScriptOnce(src: string, id: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -242,7 +242,13 @@ export function SocialAuthButtons({ mode, disabled, onSuccess, onError }: Props)
         {googleEnabled && googleReady ? (
           <div
             ref={googleOverlayRef}
-            className="absolute inset-0 overflow-hidden opacity-0"
+            // No overflow-hidden: GIS's rendered iframe can be a few px wider than
+            // the requested width (its own border/shadow chrome), and clipping it
+            // here would silently cut off the real, clickable edges of the button
+            // while it's still fully invisible (opacity-0 already hides all of it,
+            // clipped or not) - so there is nothing to gain from clipping and a
+            // real dead-click-zone to lose.
+            className="absolute inset-0 opacity-0"
             style={{ colorScheme: 'light' }}
             aria-hidden
           />
