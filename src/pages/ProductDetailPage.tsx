@@ -749,7 +749,39 @@ export function ProductDetailPage() {
   };
   const selectOption = (groupName: string, value: string) => {
     setHasUserSelectedVariant(true);
-    setSelectedOptions((p) => ({ ...p, [groupName]: value }));
+    setSelectedOptions((prev) => {
+      const next = { ...prev, [groupName]: value };
+      const vs = (product as any)?.variants;
+      if (!Array.isArray(vs) || !vs.length) return next;
+      const dimOrder = variantOptionGroups.map((g) => g.name);
+      const changedIdx = dimOrder.indexOf(groupName);
+      if (changedIdx < 0) return next;
+      // Clear any LATER dimension (in the seller's own option order) whose
+      // current selection is no longer reachable given everything up to and
+      // including this change. Without this, an irregular/sparse variant
+      // tree can deadlock: e.g. Size=EU41 only ever pairs with Origin=
+      // Vietnam, but if Origin is still stuck on a stale "UK" from a
+      // previous pick, EU41 would render as unavailable (it fails the "match
+      // every already-selected dimension" check) and the buyer could never
+      // click it in the first place. Earlier dimensions constrain later
+      // ones, not the reverse -- so only look ahead here, never behind.
+      for (let i = changedIdx + 1; i < dimOrder.length; i++) {
+        const laterDim = dimOrder[i];
+        const laterVal = next[laterDim];
+        if (laterVal == null) continue;
+        const stillReachable = vs.some((v: any) => {
+          const attrs = v.attributes ?? v.options ?? {};
+          for (let k = 0; k <= i; k++) {
+            const dn = dimOrder[k];
+            const sel = next[dn];
+            if (sel != null && (!(dn in attrs) || attrs[dn] !== sel)) return false;
+          }
+          return true;
+        });
+        if (!stillReachable) delete next[laterDim];
+      }
+      return next;
+    });
   };
   // Read-only compatibility shims for the (many) downstream references that
   // still speak in colour/size terms (message-to-order flow, request fields …).
@@ -857,20 +889,33 @@ export function ProductDetailPage() {
     });
   };
 
-  /** A value is offerable if some active, in-stock combination has it, given the
-   *  other current selections. */
+  /**
+   * A value is offerable if some active, in-stock combination has it, given
+   * the selections already made on EARLIER dimensions only (the seller's own
+   * option order — variantOptionGroups). Deliberately one-directional: a
+   * later dimension's pick narrows nothing for an earlier one, only the
+   * reverse. Selecting an earlier dimension can never be blocked by a later
+   * dimension's stale selection this way — selectOption() above clears that
+   * stale later selection instead, so an irregular/sparse tree (some values
+   * paired with only one other combination) can never deadlock a value that
+   * genuinely exists into permanent unavailability.
+   */
   const isValueAvailable = (groupName: string, value: string) => {
     const vs = (product as any)?.variants;
     if (!Array.isArray(vs) || vs.length === 0) return true;
+    const dimOrder = variantOptionGroups.map((g) => g.name);
+    const idx = dimOrder.indexOf(groupName);
     return vs.some((v: any) => {
       const attrs = v.attributes ?? v.options ?? {};
       if (attrs[groupName] !== value) return false;
-      for (const [k, sel] of Object.entries(selectedOptions)) {
-        if (k === groupName) continue;
-        // A variant missing one of the OTHER already-selected dimensions
+      for (let k = 0; k < idx; k++) {
+        const dn = dimOrder[k];
+        const sel = selectedOptions[dn];
+        if (sel == null) continue;
+        // A variant missing one of the EARLIER already-selected dimensions
         // doesn't actually specify a value for it, so it can never satisfy
         // that selection -- absence is a non-match, not a wildcard.
-        if (!(k in attrs) || attrs[k] !== sel) return false;
+        if (!(dn in attrs) || attrs[dn] !== sel) return false;
       }
       return (v.stock ?? 0) > 0 && variantActive(v);
     });
