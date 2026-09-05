@@ -6,20 +6,19 @@ import { resolveSpotlightExperience } from '../../utils/spotlightContentResolver
 import {
   adaptiveBrandPreviewCount,
   adaptiveProductPreviewCount,
+  buildCreatorReviewsViewAllHref,
   resolveCreatorReviewsPreview,
   type CreatorReviewsPreviewContext,
   type LegacyCreatorContentItem,
 } from '../../utils/creatorReviewsPreview';
 import type { SpotlightContent } from '../../types/spotlight/experience/content';
-import {
-  UniversalCommerceCard,
-  spotlightToContentCardModel,
-  legacyCreatorContentToPreviewModel,
-} from '../content';
+import { UniversalCommerceCard, spotlightToContentCardModel } from '../content';
 import { primaryProductForContent } from '../../utils/spotlightMixedFeed';
 import { usePriorityClockMs } from '../../hooks/usePriorityClockMs';
 import { cn } from '../../lib/utils';
 import type { CatalogProduct } from '../../types/catalog';
+import { detectCreatorReviewPlatform, getCreatorReviewOrientation } from '../../lib/videoEmbed';
+import { CreatorReviewMediaCard } from './CreatorReviewMediaCard';
 
 const BRAND_LOGOS: Record<string, string> = {
   Samsung: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80',
@@ -45,12 +44,24 @@ function isTallCreatorItem(content: SpotlightContent): boolean {
   if (ratio === '9:16' || ratio === '4:5') return true;
   const badge = content.badges.join(' ').toLowerCase();
   if (badge.includes('reel') || badge.includes('short')) return true;
+  // Fall back to URL-structure detection when neither the aspect ratio nor
+  // the badges say anything about shape — catches e.g. a YouTube Short with
+  // no aspectRatio metadata set.
+  if (
+    content.media?.videoUrl &&
+    getCreatorReviewOrientation(detectCreatorReviewPlatform(content.media.videoUrl)) === 'portrait'
+  ) {
+    return true;
+  }
   return false;
 }
 
+// Derived from the actual submitted URL's structure — never the seller-
+// entered `platform` label, which is free text and was previously the
+// only signal used here (missing "youtube shorts" entirely, so a Short
+// always rendered in the landscape bucket).
 function isLegacyTall(item: LegacyCreatorContentItem): boolean {
-  const platformKey = item.platform.toLowerCase();
-  return platformKey.includes('insta') || platformKey.includes('tiktok');
+  return getCreatorReviewOrientation(detectCreatorReviewPlatform(item.videoUrl)) === 'portrait';
 }
 
 /** Same YouTube / Reels cards used on Discover & Brand Story — no custom tile. */
@@ -219,25 +230,16 @@ export function CreatorReviewsPreview({
           {showLegacyOnly
             ? youtubeSource.map((item) => {
                 const legacy = item as LegacyCreatorContentItem;
-                const model = legacyCreatorContentToPreviewModel(legacy, {
-                  brandName,
-                  productId,
-                });
                 return (
-                  <div
+                  <CreatorReviewMediaCard
                     key={legacy.id}
-                    className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.667rem)] xl:w-[calc(25%-0.75rem)] shrink-0 grow-0"
-                  >
-                    <UniversalCommerceCard
-                      mode="commerce"
-                      variant="landscape-video"
-                      model={model}
-                      onNavigate={() => {
-                        if (legacy.videoUrl) window.open(legacy.videoUrl, '_blank', 'noopener,noreferrer');
-                      }}
-                      className="w-full"
-                    />
-                  </div>
+                    videoUrl={legacy.videoUrl}
+                    title={legacy.title}
+                    thumbnail={legacy.thumbnail}
+                    creatorHandle={legacy.creatorHandle}
+                    views={legacy.views}
+                    viewAllHref={buildCreatorReviewsViewAllHref({ productId, brandId })}
+                  />
                 );
               })
             : (youtubeSource as SpotlightContent[]).map((content) => (
@@ -262,28 +264,17 @@ export function CreatorReviewsPreview({
       {reelsSource.length > 0 && (
         <div className="flex flex-wrap gap-3">
           {showLegacyOnly
-            ? (reelsSource as LegacyCreatorContentItem[]).map((legacy) => {
-                const model = legacyCreatorContentToPreviewModel(legacy, {
-                  brandName,
-                  productId,
-                });
-                return (
-                  <div
-                    key={legacy.id}
-                    className="w-[calc(50%-0.375rem)] min-[480px]:w-[calc(33.333%-0.5rem)] md:w-[calc(25%-0.5625rem)] xl:w-[calc(20%-0.6rem)] shrink-0 grow-0"
-                  >
-                    <UniversalCommerceCard
-                      mode="commerce"
-                      variant="portrait-reel"
-                      model={model}
-                      onNavigate={() => {
-                        if (legacy.videoUrl) window.open(legacy.videoUrl, '_blank', 'noopener,noreferrer');
-                      }}
-                      className="w-full"
-                    />
-                  </div>
-                );
-              })
+            ? (reelsSource as LegacyCreatorContentItem[]).map((legacy) => (
+                <CreatorReviewMediaCard
+                  key={legacy.id}
+                  videoUrl={legacy.videoUrl}
+                  title={legacy.title}
+                  thumbnail={legacy.thumbnail}
+                  creatorHandle={legacy.creatorHandle}
+                  views={legacy.views}
+                  viewAllHref={buildCreatorReviewsViewAllHref({ productId, brandId })}
+                />
+              ))
             : (reelsSource as SpotlightContent[]).map((content) => (
                 <div
                   key={content.contentId}

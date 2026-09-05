@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Play } from 'lucide-react';
 import { cn } from '../../../lib/utils';
+import { getVideoEmbedUrl, isEmbeddableVideo } from '../../../lib/videoEmbed';
 
 export interface VideoEmbedCardProps {
   url: string;
@@ -28,31 +29,25 @@ export const VideoEmbedCard: React.FC<VideoEmbedCardProps> = ({
     '1:1': 'aspect-square'
   };
 
-  // Pre-VPS self-hosting pass — youtube/vimeo already built a clean embed URL
-  // from just the extracted video ID (safe: the iframe src is always our own
-  // hardcoded domain regardless of what the input URL contained). tiktok/
-  // instagram/facebook previously fell through to the raw, unvalidated input
-  // URL as the iframe src with zero checks — the actual "arbitrary unsafe
-  // iframe" gap. Now allowlisted by host before ever reaching the iframe;
-  // anything else (including a failed youtube/vimeo ID match) renders nothing
-  // rather than framing an unverified URL.
-  const ALLOWED_IFRAME_HOSTS = ['tiktok.com', 'www.tiktok.com', 'instagram.com', 'www.instagram.com', 'facebook.com', 'www.facebook.com'];
-
+  // youtube/tiktok/instagram/facebook all go through the shared,
+  // security-reviewed builder (lib/videoEmbed.ts): the iframe src is always
+  // built from a regex-extracted id/shortcode interpolated into a fixed,
+  // hardcoded official-embed template (or, for Facebook, the original URL
+  // appears only as an encoded query value on facebook.com's own documented
+  // video plugin) — never the raw input URL framed directly — and is
+  // host-allowlisted before ever reaching the iframe. vimeo keeps its own
+  // extraction here since lib/videoEmbed.ts doesn't cover it.
   const getEmbedUrl = (): string | null => {
-    if (platform === 'youtube') {
-      const match = url.match(/(?:v=|\/)([0-9A-Za-z_-]{11}).*/);
-      return match ? `https://www.youtube.com/embed/${match[1]}?autoplay=${thumbnail ? 1 : 0}` : null;
-    }
     if (platform === 'vimeo') {
       const match = url.match(/vimeo\.com\/(\d+)/);
       return match ? `https://player.vimeo.com/video/${match[1]}?autoplay=${thumbnail ? 1 : 0}` : null;
     }
-    try {
-      const host = new URL(url).hostname.toLowerCase();
-      return ALLOWED_IFRAME_HOSTS.includes(host) ? url : null;
-    } catch {
-      return null;
+    if (!isEmbeddableVideo(url)) return null;
+    const embed = getVideoEmbedUrl(url);
+    if (platform === 'youtube' && !embed.includes('autoplay=')) {
+      return `${embed}${embed.includes('?') ? '&' : '?'}autoplay=${thumbnail ? 1 : 0}`;
     }
+    return embed;
   };
 
   const embedUrl = getEmbedUrl();
