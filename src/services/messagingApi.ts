@@ -43,8 +43,15 @@ async function request<T>(path: string, method: 'GET' | 'POST' = 'POST', body?: 
 }
 
 export const messagingApi = {
-  ensureActiveSupportConversation: (payload?: { subject?: string; body?: string }) =>
-    request<SupportConversationResult>('/support/conversations/ensure', 'POST', payload || {}),
+  ensureActiveSupportConversation: (payload?: {
+    subject?: string;
+    body?: string;
+    /** Fixed, surface-determined persona hint — never user-choosable. The
+     *  storefront always sends 'consumer' so an account whose current role
+     *  is Seller/Creator still reaches its own Consumer-persona Support
+     *  thread here; the server independently re-validates this. */
+    audience?: 'consumer' | 'seller' | 'creator';
+  }) => request<SupportConversationResult>('/support/conversations/ensure', 'POST', payload || {}),
   getActiveSupportConversation: () =>
     request<SupportConversationResult>('/support/conversations/active', 'GET'),
   listSupportConversations: () =>

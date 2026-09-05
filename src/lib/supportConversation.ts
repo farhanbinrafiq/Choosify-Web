@@ -32,12 +32,18 @@ export function isChoosifySupportThread(thread?: {
 
 /**
  * Shared storefront entry: GET/ENSURE the caller's one active support conversation.
+ *
+ * Always requests the Consumer persona explicitly. Every account can act as a
+ * Consumer regardless of its current role, so this is what lets a Seller or
+ * Creator account reach its own Consumer-persona Support thread from the
+ * storefront instead of silently landing on their Seller/Creator thread. The
+ * server independently re-validates this — see resolveSelfServiceSupportAudience.
  */
 export async function ensureStorefrontSupportThread(
   helpers: EnsureSupportThreadHelpers,
 ): Promise<{ conversationId: string; created: boolean } | null> {
   try {
-    const result = await messagingApi.ensureActiveSupportConversation();
+    const result = await messagingApi.ensureActiveSupportConversation({ audience: 'consumer' });
     const conversationId = result.conversation?.id;
     if (!conversationId) {
       toast.error('Could not open support conversation.');
