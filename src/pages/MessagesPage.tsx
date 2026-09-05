@@ -222,6 +222,10 @@ export function MessagesPage({
     async (threadId: string) => {
       try {
         const rows = await messagingApi.listSupportMessages(threadId);
+        // Opening/refreshing this thread means the buyer has seen it -- clear
+        // the server-side unreadCount so the background discovery poll
+        // (DashboardContext) doesn't keep re-flagging an already-read thread.
+        void messagingApi.markSupportConversationRead(threadId).catch(() => {});
         if (!Array.isArray(rows) || !rows.length) return;
         setThreadMessages((prev) => {
           const mapped = rows.map((row, index) => {
@@ -233,6 +237,7 @@ export function MessagesPage({
               threadId,
               text: String(row.body || ''),
               sender: (isUser ? 'user' : 'other') as 'user' | 'other',
+              senderId: row.senderId,
               senderName: isUser ? 'Me' : 'Choosify Support',
               time: formatMsgTime(timestamp),
               createdAt: timestamp,
@@ -298,6 +303,7 @@ export function MessagesPage({
               threadId,
               text: text || rawBody,
               sender: (isBuyer ? 'user' : 'other') as 'user' | 'other',
+              senderId: typeof row.senderId === 'string' ? row.senderId : undefined,
               senderName: isBuyer ? 'Me' : String(row.senderName || 'Support'),
               time: formatMsgTime(timestamp),
               createdAt: timestamp,
@@ -1355,6 +1361,7 @@ export function MessagesPage({
                     onFocusAnnouncement={setFocusedAnnouncementId}
                     currentUserAvatar={currentUser.avatar}
                     peerAvatar={activeThread?.avatar}
+                    currentUserId={currentUser.id}
                     viewerIsSeller={currentUser.role === 'seller'}
                     showSellerBookingActions={currentUser.role === 'seller'}
                     onAcceptBookingOffer={acceptBookingOffer}

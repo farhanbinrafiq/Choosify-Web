@@ -18,6 +18,9 @@ export type SupportConversationResult = {
     lastMessagePreview?: string;
   };
   message?: { id: string; body: string; createdAt: string } | null;
+  /** Only present on GET /support/conversations/active — messages not sent
+   *  by the caller and not yet in the caller's own readBy. */
+  unreadCount?: number;
 };
 
 async function request<T>(path: string, method: 'GET' | 'POST' = 'POST', body?: unknown): Promise<T> {
@@ -52,8 +55,15 @@ export const messagingApi = {
      *  thread here; the server independently re-validates this. */
     audience?: 'consumer' | 'seller' | 'creator';
   }) => request<SupportConversationResult>('/support/conversations/ensure', 'POST', payload || {}),
-  getActiveSupportConversation: () =>
-    request<SupportConversationResult>('/support/conversations/active', 'GET'),
+  /** `audience` defaults to the account's own role-derived persona; the
+   *  storefront always passes 'consumer' (same reasoning as
+   *  ensureActiveSupportConversation above) so it discovers its OWN
+   *  Consumer-persona thread even for a Seller/Creator account. */
+  getActiveSupportConversation: (audience?: 'consumer' | 'seller' | 'creator') =>
+    request<SupportConversationResult>(
+      `/support/conversations/active${audience ? `?audience=${audience}` : ''}`,
+      'GET',
+    ),
   listSupportConversations: () =>
     request<SupportConversationResult['conversation'][]>('/support/conversations', 'GET'),
   listSupportMessages: (conversationId: string) =>
@@ -63,4 +73,9 @@ export const messagingApi = {
     ),
   sendSupportMessage: (conversationId: string, body: string) =>
     request(`/support/conversations/${encodeURIComponent(conversationId)}/messages`, 'POST', { body }),
+  /** Marks every not-by-me message in this conversation read for the caller —
+   *  clears the server-side unreadCount getActiveSupportConversation reports,
+   *  so it doesn't keep re-flagging an already-read thread as unread. */
+  markSupportConversationRead: (conversationId: string) =>
+    request(`/support/conversations/${encodeURIComponent(conversationId)}/read`, 'POST', {}),
 };

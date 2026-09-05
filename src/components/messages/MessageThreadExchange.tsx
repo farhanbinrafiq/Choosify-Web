@@ -20,7 +20,14 @@ type MessageThreadExchangeProps = {
   onFocusAnnouncement?: (id: number) => void;
   currentUserAvatar?: string;
   peerAvatar?: string;
-  /** Current viewer is the seller (outgoing = seller/admin-side sends). Default: buyer — outgoing = `user`. */
+  /** Canonical id of the person viewing this thread. When a message carries
+   *  its own `senderId`, ownership is decided by `senderId === currentUserId`
+   *  — never by role/persona — so alignment is correct for a Seller/Creator/
+   *  dual-capability account viewing ANY thread, Support included. */
+  currentUserId?: string;
+  /** Legacy fallback ONLY for messages with no `senderId` (older cached
+   *  messages) — current viewer is the seller (outgoing = seller/admin-side
+   *  sends). Default: buyer — outgoing = `user`. */
   viewerIsSeller?: boolean;
   onAcceptBookingOffer?: (offer: BookingOfferCard) => void;
   onDeclineBookingOffer?: (offer: BookingOfferCard) => void;
@@ -34,7 +41,17 @@ type MessageThreadExchangeProps = {
   onRejectOrderOffer?: (offer: ManualOrderOfferCard) => void;
 };
 
-function isOutgoingForViewer(message: ThreadMessage, viewerIsSeller: boolean): boolean {
+function isOutgoingForViewer(message: ThreadMessage, viewerIsSeller: boolean, currentUserId?: string): boolean {
+  // Canonical path: compare the message's own sender identity to the viewer's
+  // id. This is correct regardless of conversation type (buyer thread,
+  // Support thread, ...), account role, or persona — a Seller/Creator/dual-
+  // capability account viewing their OWN Support thread still resolves
+  // correctly, which the role-based fallback below cannot do (Support
+  // messages never carry sender:'seller'/'admin', only 'user'/'other').
+  if (currentUserId && message.senderId) {
+    return message.senderId === currentUserId;
+  }
+  // Fallback for a message with no senderId (older cached/local messages).
   if (viewerIsSeller) {
     return message.sender === 'seller' || message.sender === 'admin' || message.sender === 'creator';
   }
@@ -46,9 +63,10 @@ function resolveDeliveryStatus(
   message: ThreadMessage,
   index: number,
   viewerIsSeller: boolean,
+  currentUserId?: string,
 ): MessageDeliveryStatus | null {
-  if (!isOutgoingForViewer(message, viewerIsSeller)) return null;
-  const laterPeerReply = messages.slice(index + 1).some((m) => !isOutgoingForViewer(m, viewerIsSeller));
+  if (!isOutgoingForViewer(message, viewerIsSeller, currentUserId)) return null;
+  const laterPeerReply = messages.slice(index + 1).some((m) => !isOutgoingForViewer(m, viewerIsSeller, currentUserId));
   if (laterPeerReply) return 'seen';
   if (message.status === 'seen' || message.status === 'delivered' || message.status === 'sent') {
     return message.status;
@@ -97,6 +115,7 @@ export function MessageThreadExchange({
   onFocusAnnouncement,
   currentUserAvatar,
   peerAvatar,
+  currentUserId,
   viewerIsSeller = false,
   onAcceptBookingOffer,
   onDeclineBookingOffer,
@@ -111,10 +130,10 @@ export function MessageThreadExchange({
 }: MessageThreadExchangeProps) {
   const lastOutgoingId = useMemo(() => {
     for (let i = messages.length - 1; i >= 0; i -= 1) {
-      if (isOutgoingForViewer(messages[i], viewerIsSeller)) return messages[i].id;
+      if (isOutgoingForViewer(messages[i], viewerIsSeller, currentUserId)) return messages[i].id;
     }
     return null;
-  }, [messages, viewerIsSeller]);
+  }, [messages, viewerIsSeller, currentUserId]);
 
   if (messages.length === 0) {
     return (
@@ -129,12 +148,12 @@ export function MessageThreadExchange({
       {messages.map((m, index) => {
         const prev = index > 0 ? messages[index - 1] : undefined;
         const showDivider = shouldShowTimeDivider(prev, m);
-        const isOutgoing = isOutgoingForViewer(m, viewerIsSeller);
+        const isOutgoing = isOutgoingForViewer(m, viewerIsSeller, currentUserId);
         const isAnnouncementMessage = isAnnouncementsThread || m.sender === 'admin';
         const avatarSrc = isOutgoing
           ? currentUserAvatar || PLACEHOLDER_IMAGE
           : m.avatar || peerAvatar || PLACEHOLDER_IMAGE;
-        const status = resolveDeliveryStatus(messages, m, index, viewerIsSeller);
+        const status = resolveDeliveryStatus(messages, m, index, viewerIsSeller, currentUserId);
         const showStatus = isOutgoing && m.id === lastOutgoingId && status && !isAnnouncementsThread;
 
         return (

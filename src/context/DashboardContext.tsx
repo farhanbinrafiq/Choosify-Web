@@ -19,6 +19,10 @@ import type { CustomerAddress } from '../lib/address/addressTypes';
 import { ADDRESS_STORAGE_KEY, getDefaultAddress, normalizeDefaultAddress } from '../lib/address/addressUtils';
 import { db } from '../lib/firestoreClient';
 import { getAccessToken } from '../lib/authSession';
+import { messagingApi } from '../services/messagingApi';
+import { CHOOSIFY_SUPPORT_THREAD_TITLE } from '../lib/supportConversation';
+import { PLACEHOLDER_IMAGE } from '../constants';
+import { useMessagingPoll } from '../hooks/useMessagingPoll';
 import type { BookingOfferCard } from '../types/serviceBooking';
 import type { ManualOrderOfferCard } from '../types/manualOrder';
 import { operationsApi } from '../services/operationsApi';
@@ -63,6 +67,12 @@ export interface ThreadMessage {
   threadId: string;
   text: string;
   sender: 'user' | 'other' | 'admin' | 'seller' | 'creator';
+  /** Canonical author id (server-authoritative senderId), when known. This is
+   *  the ONLY reliable "is this mine" signal — see MessageThreadExchange's
+   *  isOutgoingForViewer — because `sender` is a role/relationship label that
+   *  isn't consistent across conversation types (Support vs. buyer thread)
+   *  or account persona. */
+  senderId?: string;
   time: string;
   senderName: string;
   avatar?: string;
@@ -850,6 +860,7 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
             threadId,
             text: text || rawBody,
             sender,
+            senderId: typeof row.senderId === 'string' ? row.senderId : undefined,
             senderName: isSelf ? 'Me' : String(row.senderName || 'Support'),
             time: formatTime(timestamp),
             createdAt: timestamp,
@@ -954,6 +965,61 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       if (pollId) window.clearInterval(pollId);
     };
   }, [isLoggedIn, currentUser.id]);
+
+  // Discover an already-existing Choosify Support conversation (e.g. one
+  // Admin opened proactively) without requiring the buyer to click "Contact
+  // Support" first. Read-only check (GET /support/conversations/active) --
+  // never creates a conversation itself, so this can never produce a
+  // duplicate. Always the storefront's own Consumer persona (a Seller/
+  // Creator account still discovers its own Consumer-persona thread here,
+  // same reasoning as ensureStorefrontSupportThread).
+  const discoverSupportThread = useCallback(async () => {
+    if (!isLoggedIn || !currentUser?.id || !getAccessToken()) return;
+    try {
+      const found = await messagingApi.getActiveSupportConversation('consumer');
+      if (!found?.conversation?.id) return;
+      const convId = found.conversation.id;
+      const hasUnread = (found.unreadCount ?? 0) > 0;
+      const preview =
+        found.conversation.lastMessagePreview ||
+        (found.message && (found.message as { body?: string }).body) ||
+        'How can we help you today?';
+      const timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      setThreads((prev) => {
+        if (prev.some((t) => t.id === convId)) {
+          // Already discovered/opened this session -- only refresh the
+          // unread flag if something new has arrived since.
+          return prev.map((t) => (t.id === convId && hasUnread && !t.unread ? { ...t, unread: true } : t));
+        }
+        return [
+          {
+            id: convId,
+            title: CHOOSIFY_SUPPORT_THREAD_TITLE,
+            avatar: PLACEHOLDER_IMAGE,
+            lastMessage: preview,
+            time: timeStr,
+            type: 'general' as const,
+            unread: hasUnread,
+          },
+          ...prev,
+        ];
+      });
+    } catch {
+      // 404 = no active support conversation yet for this persona -- fine,
+      // nothing to surface. Any other failure: stay silent, the explicit
+      // "Contact Support" path still works as a fallback.
+    }
+  }, [isLoggedIn, currentUser?.id]);
+
+  useEffect(() => {
+    void discoverSupportThread();
+  }, [discoverSupportThread]);
+
+  // Background safety net so an admin-initiated message surfaces without a
+  // full reload -- only actually polls when the omni Firestore mirror isn't
+  // genuinely live (see useMessagingPoll); a list-level concern, not an
+  // open-conversation one, so a slower ~20s cadence.
+  useMessagingPoll(isLoggedIn && currentUser?.id ? currentUser.id : null, () => void discoverSupportThread(), 20000);
 
   const addToRecentlyViewed = (product: any) => {
     setRecentlyViewed(prev => {
@@ -1410,6 +1476,9 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       threadId,
       text,
       sender,
+      // Every call site in this app passes sender:'user' ONLY for the current
+      // viewer's own optimistic send, so this is a safe, canonical senderId.
+      senderId: sender === 'user' ? currentUser.id : undefined,
       time: timeStr,
       createdAt,
       senderName: senderName || (sender === 'user' ? 'Me' : 'Partner Representative'),
