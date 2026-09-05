@@ -177,7 +177,22 @@ export function SocialAuthButtons({ mode, disabled, onSuccess, onError }: Props)
     draw();
     const ro = new ResizeObserver(draw);
     ro.observe(shell);
-    return () => ro.disconnect();
+
+    // GIS's popup-based button ties its click handling to a single-use render
+    // (see the `cas=` nonce in the iframe's own src) - after the popup closes,
+    // whether the user completed sign-in or cancelled it, the ORIGINAL iframe
+    // can go stale and stop responding to further clicks. There is no GIS
+    // callback for "the popup was closed without a credential" to hook into
+    // directly, but the window reliably regains focus the moment that popup
+    // closes either way - so treat that as the signal to hand the user a
+    // fresh, guaranteed-live button rather than one that may already be dead.
+    const onWindowFocus = () => draw();
+    window.addEventListener('focus', onWindowFocus);
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('focus', onWindowFocus);
+    };
   }, [googleReady, googleEnabled, mode]);
 
   const handleGoogleFallbackClick = () => {
