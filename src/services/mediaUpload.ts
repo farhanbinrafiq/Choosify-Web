@@ -262,6 +262,17 @@ export async function uploadUserAvatar(file: File): Promise<string> {
   return uploadViaCatalogMedia(file, 'users');
 }
 
+/** Converts a canvas-exported `data:image/...;base64,...` URL (e.g. from AvatarCropModal) into a File for upload. */
+export function dataUrlToFile(dataUrl: string, fileName: string): File {
+  const [meta, base64] = dataUrl.split(',');
+  const mimeMatch = /data:([^;]+);base64/.exec(meta || '');
+  const mimeType = mimeMatch?.[1] || 'image/png';
+  const binary = atob(base64 || '');
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new File([bytes], fileName, { type: mimeType });
+}
+
 /** Review evidence photos — server-backed, up to the caller to cap count (backend caps at 6). */
 export async function uploadReviewPhotos(files: File[]): Promise<string[]> {
   const urls: string[] = [];

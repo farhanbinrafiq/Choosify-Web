@@ -44,6 +44,7 @@ import {
   Ban,
   Camera,
   Upload,
+  Pencil,
 } from 'lucide-react';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
@@ -89,7 +90,8 @@ import { generatedAvatarPlaceholder, getAccessToken } from '../lib/authSession';
 import { updateAvatarUrl, updateDisplayName } from '../lib/authApi';
 import SecuritySettings from '../components/account/SecuritySettings';
 import PrimaryPhoneField from '../components/account/PrimaryPhoneField';
-import { uploadUserAvatar } from '../services/mediaUpload';
+import { uploadUserAvatar, dataUrlToFile } from '../services/mediaUpload';
+import { AvatarCropModal } from '../components/account/AvatarCropModal';
 import { getConsumerStorefrontDashboardNav, isConsumerDashboardTabAllowed } from '../lib/platform/dashboardRegistry';
 import { SellerWorkspaceSection } from './ReviewDetailPage';
 import { CustomerOrdersPage } from './CustomerOrdersPage';
@@ -1528,7 +1530,13 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
   const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
   const [isSavingProfile, setIsSavingProfile] = useState(false);
   const [settingsSubTab, setSettingsSubTab] = useState<SettingsSubTab>(initialSubTab);
+  const [cropOpen, setCropOpen] = useState(false);
+  const [cropSrc, setCropSrc] = useState('');
   const fileInputRef = React.useRef<HTMLInputElement>(null);
+  // Excludes both the static DEFAULT_AVATAR and the generated-initials
+  // placeholder (ui-avatars.com) handleDeletePhoto swaps in locally — neither
+  // is a real photo, so Edit has nothing to crop.
+  const hasRealPhoto = Boolean(avatar && avatar !== DEFAULT_AVATAR && !avatar.includes('ui-avatars.com'));
 
   useEffect(() => {
     const allowed: SettingsSubTab[] = ['personal', 'addresses', 'security'];
@@ -1577,14 +1585,10 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
 
   const handleUploadClick = () => fileInputRef.current?.click();
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    if (!file) return;
-    if (!file.type.startsWith('image/')) {
-      toast.error('Please choose an image file.');
-      return;
-    }
+  /** Shared by a fresh file-input selection and a crop-modal Save — both end
+   *  in the same canonical upload (catalog media, 'users' category) + PATCH
+   *  /auth/profile persist, so avatar state and copy stay in exactly one place. */
+  const uploadAndApplyAvatar = async (file: File, successMessage: string) => {
     const token = getAccessToken();
     if (!token) {
       toast.error('You must be signed in to update your profile photo.');
@@ -1596,12 +1600,45 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
       await updateAvatarUrl(token, url);
       setAvatar(url);
       persistProfile(url);
-      toast.success('Profile photo updated.');
+      toast.success(successMessage);
     } catch (error) {
       toast.error(error instanceof Error ? error.message : 'Failed to upload photo.');
     } finally {
       setIsUploadingAvatar(false);
     }
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please choose an image file.');
+      return;
+    }
+    await uploadAndApplyAvatar(file, 'Profile photo updated.');
+  };
+
+  /** Edit = crop/reposition the current photo (existing OR just-uploaded — both
+   *  are just `avatar` at this point), matching the dashboard's Edit action. */
+  const openCropEditor = () => {
+    if (!hasRealPhoto) {
+      toast.error('No photo to edit. Upload one first.');
+      return;
+    }
+    setCropSrc(avatar);
+    setCropOpen(true);
+  };
+
+  const onCropSave = async (dataUrl: string) => {
+    setCropOpen(false);
+    setCropSrc('');
+    await uploadAndApplyAvatar(dataUrlToFile(dataUrl, 'avatar.png'), 'Profile photo updated.');
+  };
+
+  const onCropCancel = () => {
+    setCropOpen(false);
+    setCropSrc('');
   };
 
   const handleDeletePhoto = async () => {
@@ -1686,6 +1723,17 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
                 >
                   <Camera size={16} />
                 </button>
+                {hasRealPhoto && (
+                  <button
+                    type="button"
+                    onClick={openCropEditor}
+                    disabled={isUploadingAvatar}
+                    aria-label="Edit profile photo"
+                    className="absolute bottom-0 left-0 w-9 h-9 rounded-full bg-white text-[#1A1A2E] border-2 border-[#E8EDF2] flex items-center justify-center cursor-pointer shadow-sm hover:bg-[#F4F7F9] disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    <Pencil size={14} />
+                  </button>
+                )}
               </div>
               <input
                 ref={fileInputRef}
@@ -1694,6 +1742,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
                 className="hidden"
                 onChange={handleFileChange}
               />
+              <AvatarCropModal open={cropOpen} imageSrc={cropSrc} onCancel={onCropCancel} onSave={(dataUrl) => void onCropSave(dataUrl)} />
               <div className="flex flex-wrap items-center justify-center gap-2 mb-4 relative z-[1]">
                 <button
                   type="button"
@@ -1703,6 +1752,15 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
                 >
                   <Upload size={14} />
                   {isUploadingAvatar ? 'Uploading…' : 'Upload new photo'}
+                </button>
+                <button
+                  type="button"
+                  onClick={openCropEditor}
+                  disabled={!hasRealPhoto || isUploadingAvatar}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 text-[12px] font-bold text-[#1A1A2E] bg-[#F4F7F9] hover:bg-[#E8EDF2] border border-[#E8EDF2] rounded-lg cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  <Pencil size={14} />
+                  Edit photo
                 </button>
                 <button
                   type="button"

@@ -148,6 +148,16 @@ export function Navbar() {
     }
   };
 
+  // Identity header (avatar/name/email) in both the desktop dropdown and the
+  // mobile account drawer opens the same canonical Profile Settings ->
+  // Personal Information section the dashboard's own Settings tab reads via
+  // ?tab=settings&section=personal (see DashboardPage.tsx's query parsing).
+  const goToProfileSettings = () => {
+    setIsUserMenuOpen(false);
+    setIsMobileProfileOpen(false);
+    navigate('/dashboard?tab=settings&section=personal');
+  };
+
   const profilePrimaryLinks = dashboardMiniMenu.slice(0, 3);
   const profileSecondaryLinks = dashboardMiniMenu.slice(3);
 
@@ -339,10 +349,15 @@ export function Navbar() {
                       exit={{ opacity: 0, scale: 0.95, y: 8 }}
                       className="absolute right-0 top-full mt-2 bg-white rounded-[10px] shadow-[0_12px_32px_rgba(0,0,0,0.22)] w-[200px] overflow-hidden z-[100] hidden lg:block"
                     >
-                      <div className="px-4 py-3.5 bg-[#F4F7F9] border-b border-[#E8EDF2]">
+                      <button
+                        type="button"
+                        onClick={goToProfileSettings}
+                        aria-label="Open Profile Settings"
+                        className="w-full text-left px-4 py-3.5 bg-[#F4F7F9] border-b border-[#E8EDF2] cursor-pointer transition-colors hover:bg-[#EDF1F4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#FF5B00]"
+                      >
                         <p className="text-[12.5px] font-bold text-[#1A1A2E] truncate">{currentUser?.name || 'Farhan'}</p>
                         <p className="text-[10.5px] text-[#9AA0AC] truncate">{currentUser?.email || 'kamaluddin@gmail.com'}</p>
-                      </div>
+                      </button>
 
                       <div>
                         {dashboardMiniMenu.map((item, idx) => (
@@ -526,7 +541,12 @@ export function Navbar() {
                   </button>
                 </div>
 
-                <div className="px-5 py-4 bg-[#F4F7F9] border-b border-[#E8EDF2] flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={goToProfileSettings}
+                  aria-label="Open Profile Settings"
+                  className="w-full text-left px-5 py-4 bg-[#F4F7F9] border-b border-[#E8EDF2] flex items-center gap-3 cursor-pointer transition-colors hover:bg-[#EDF1F4] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-[#FF5B00]"
+                >
                   <ConsumerAvatar src={currentUser?.avatar} name={currentUser?.name} size={48} />
 
                   <div className="min-w-0">
@@ -537,7 +557,7 @@ export function Navbar() {
                       {currentUser?.email || 'Choosify Member'}
                     </p>
                   </div>
-                </div>
+                </button>
 
                 <div className="flex flex-col">
                   {profilePrimaryLinks.map((item) => (
