@@ -209,6 +209,20 @@ export const operationsApi = {
     );
     return result.data;
   },
+  /** Lazily/idempotently mints (or returns the already-minted) canonical
+   *  invoice number for one seller's slice of an order — same endpoint the
+   *  admin invoice screen uses, same numbering scheme, just callable by the
+   *  order's own buyer too (server-side authorization). */
+  ensureInvoiceNumber: async (
+    orderId: string,
+    sellerId: string,
+  ): Promise<{ invoiceId: string | null; eligible: boolean; reason?: string }> => {
+    const result = await request<{ data: { invoiceId: string | null; eligible: boolean; reason?: string } }>(
+      `/operations/orders/${encodeURIComponent(orderId)}/subs/${encodeURIComponent(sellerId)}/invoice`,
+      'POST',
+    );
+    return result.data;
+  },
   cancelOrder: async (
     orderId: string,
     buyerId: string,

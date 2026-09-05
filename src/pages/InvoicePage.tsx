@@ -1,11 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Printer, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, Printer, Download, Loader2, ShieldCheck } from 'lucide-react';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { operationsApi } from '../services/operationsApi';
 import type { Order, SubOrder } from '../types/schemas';
 import { toast } from '../lib/notify';
 import { usePageBreadcrumbs } from '../context/BreadcrumbContext';
+
+/** Fetches the same logo used on-screen and returns it as a data: URL for
+ *  jsPDF's addImage (same-origin static asset — no CORS concerns). Mirrors
+ *  choosify-admin's OperationsInvoiceView.loadLogoDataUrl(). */
+async function loadLogoDataUrl(): Promise<string | null> {
+  try {
+    const res = await fetch('/brand/choosify-logo-horizontal-navy.png');
+    if (!res.ok) return null;
+    const blob = await res.blob();
+    return await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(typeof reader.result === 'string' ? reader.result : null);
+      reader.onerror = () => resolve(null);
+      reader.readAsDataURL(blob);
+    });
+  } catch {
+    return null;
+  }
+}
 
 /**
  * Real, canonical invoice — replaces the plain-text mockup CustomerOrdersPage
@@ -24,17 +43,63 @@ export function InvoicePage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loadState, setLoadState] = useState<'loading' | 'ready' | 'error'>('loading');
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [pdfState, setPdfState] = useState<'idle' | 'generating' | 'error'>('idle');
+  /** Mirrors choosify-admin's OperationsInvoiceView invoicePrep lifecycle: an
+   *  invoice number is minted lazily, the first time ANY authorized viewer
+   *  (staff, the seller, or — since the server-side authorization widening
+   *  that shipped alongside this — the buyer) actually opens the invoice.
+   *  Without this, a buyer opening their invoice before a seller/staff ever
+   *  had would see no invoice number at all (undefined), the core gap this
+   *  page previously had. */
+  const [invoicePrep, setInvoicePrep] = useState<'pending' | 'ready' | 'unavailable'>('pending');
+  const [unavailableReason, setUnavailableReason] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!orderId) return;
+    if (!orderId || !sellerId) return;
     let cancelled = false;
     setLoadState('loading');
+    setInvoicePrep('pending');
     operationsApi
       .getOrder(orderId)
-      .then((row) => {
+      .then(async (row) => {
         if (cancelled) return;
-        setOrder(row as unknown as Order);
+        const typedOrder = row as unknown as Order;
+        setOrder(typedOrder);
         setLoadState('ready');
+
+        const existingInvoiceId = typedOrder.subOrders.find((s) => s.sellerId === sellerId)?.invoiceId;
+        if (existingInvoiceId) {
+          if (!cancelled) setInvoicePrep('ready');
+          return;
+        }
+        try {
+          const result = await operationsApi.ensureInvoiceNumber(orderId, sellerId);
+          if (cancelled) return;
+          if (!result.eligible || !result.invoiceId) {
+            setInvoicePrep('unavailable');
+            setUnavailableReason(
+              result.reason === 'not_eligible_status'
+                ? 'This order is awaiting payment or was cancelled — no invoice is issued for it.'
+                : "This order's financial data hasn't been finalized yet, so an invoice can't be generated.",
+            );
+            return;
+          }
+          setOrder((prev) =>
+            prev
+              ? {
+                  ...prev,
+                  subOrders: prev.subOrders.map((s) =>
+                    s.sellerId === sellerId ? { ...s, invoiceId: result.invoiceId! } : s,
+                  ),
+                }
+              : prev,
+          );
+          setInvoicePrep('ready');
+        } catch (err) {
+          if (cancelled) return;
+          setInvoicePrep('unavailable');
+          setUnavailableReason(err instanceof Error ? err.message : 'Unable to prepare this invoice.');
+        }
       })
       .catch((err) => {
         if (cancelled) return;
@@ -44,7 +109,7 @@ export function InvoicePage() {
     return () => {
       cancelled = true;
     };
-  }, [orderId]);
+  }, [orderId, sellerId]);
 
   if (!isLoggedIn) {
     return (
@@ -89,6 +154,27 @@ export function InvoicePage() {
     );
   }
 
+  if (invoicePrep === 'pending') {
+    return (
+      <div className="min-h-screen flex items-center justify-center text-sm font-bold text-[#6B7280]">
+        Preparing invoice…
+      </div>
+    );
+  }
+
+  if (invoicePrep === 'unavailable') {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center text-center px-6 gap-3">
+        <ShieldCheck className="w-10 h-10 text-amber-500" />
+        <p className="text-sm font-bold text-[#1A1A2E]">Invoice unavailable</p>
+        <p className="text-xs text-[#6B7280] max-w-sm">{unavailableReason}</p>
+        <Link to="/profile/orders" className="text-xs font-bold text-[#FF5B00] underline">
+          Back to My Orders
+        </Link>
+      </div>
+    );
+  }
+
   const sub: SubOrder | undefined = order.subOrders.find((s) => s.sellerId === sellerId);
   if (!sub) {
     return (
@@ -112,6 +198,37 @@ export function InvoicePage() {
       ? `Paid ${new Date(order.paidAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })}`
       : 'Awaiting payment';
 
+  /** Mirrors choosify-admin's OperationsInvoiceView.downloadPdf(): same
+   *  canonical invoice data (no separate calculation), same Satoshi-embedded
+   *  PDF builder ported 1:1, dynamically imported so jsPDF/autoTable never
+   *  load into the bundle for pages that never open an invoice. */
+  const downloadPdf = async () => {
+    if (pdfState === 'generating') return;
+    setPdfState('generating');
+    try {
+      const [{ buildInvoicePdf, invoicePdfFilename, loadSatoshiPdfFonts }, logoDataUrl] = await Promise.all([
+        import('./invoicePdf'),
+        loadLogoDataUrl(),
+      ]);
+      const satoshiFonts = await loadSatoshiPdfFonts();
+      const doc = buildInvoicePdf({
+        order,
+        sub,
+        invoiceDate,
+        paymentMethodLabel: paymentLabel,
+        paymentStatusLabel: paidLabel,
+        logoDataUrl,
+        satoshiFonts,
+      });
+      doc.save(invoicePdfFilename(sub.invoiceId, order.orderId));
+      setPdfState('idle');
+    } catch (err) {
+      setPdfState('error');
+      toast.error(err instanceof Error ? err.message : 'Failed to generate PDF.');
+      setTimeout(() => setPdfState('idle'), 2500);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-[#F0F8FF] p-4 sm:p-8">
       <style dangerouslySetInnerHTML={{
@@ -126,7 +243,13 @@ export function InvoicePage() {
                route just for this page. */
             #main-navbar, #global-footer { display: none !important; }
             body { background: #ffffff !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .invoice-card { box-shadow: none !important; border: none !important; margin: 0 !important; }
+            .invoice-card { box-shadow: none !important; border: none !important; margin: 0 !important; width: 100% !important; max-width: 100% !important; }
+            /* Multi-page hygiene -- same rules as the admin invoice's print
+               output: repeat the item-table header on each page, never split
+               a row, keep the billing/summary blocks from being cut mid-block. */
+            .invoice-card table thead { display: table-header-group !important; }
+            .invoice-card table tr { break-inside: avoid !important; page-break-inside: avoid !important; }
+            .invoice-billing, .invoice-summary { break-inside: avoid !important; page-break-inside: avoid !important; }
             @page { margin: 15mm; size: A4; }
           }
         `,
@@ -139,12 +262,22 @@ export function InvoicePage() {
         >
           <ArrowLeft size={14} /> Back
         </button>
-        <button
-          onClick={() => window.print()}
-          className="flex items-center gap-1.5 px-4 py-2 bg-[#FF5B00] hover:bg-[#EF3C23] text-white rounded-lg text-xs font-bold uppercase tracking-wider transition-colors"
-        >
-          <Printer size={14} /> Print / Save as PDF
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => window.print()}
+            className="flex items-center gap-1.5 px-4 py-2 bg-white hover:bg-gray-50 border border-[#E8EDF2] text-[#6B7280] rounded-lg text-xs font-bold uppercase tracking-wider transition-colors"
+          >
+            <Printer size={14} /> Print Invoice
+          </button>
+          <button
+            onClick={downloadPdf}
+            disabled={pdfState === 'generating'}
+            className="flex items-center gap-1.5 px-4 py-2 bg-[#FF5B00] hover:bg-[#EF3C23] text-white rounded-lg text-xs font-bold uppercase tracking-wider transition-colors disabled:opacity-60"
+          >
+            {pdfState === 'generating' ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />}
+            {pdfState === 'generating' ? 'Generating PDF…' : 'Download PDF'}
+          </button>
+        </div>
       </div>
 
       <div className="invoice-card max-w-[840px] mx-auto bg-white rounded-lg border border-[#E8EDF2] shadow-2xl p-6 sm:p-12 flex flex-col justify-between">
@@ -171,7 +304,7 @@ export function InvoicePage() {
           <div className="h-px bg-slate-100 my-5" />
 
           {/* Billed to / invoice meta */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
+          <div className="invoice-billing grid grid-cols-1 md:grid-cols-2 gap-6 mb-5">
             <div>
               <div className="text-[11px] font-bold text-slate-400 tracking-wider uppercase mb-2">Billed To</div>
               <div className="text-base font-extrabold text-[#18154C]">{order.shipping?.fullName || currentUser?.name || 'Buyer'}</div>
@@ -229,6 +362,27 @@ export function InvoicePage() {
                       {item.productType === 'service' && item.serviceCategory && (
                         <div className="text-[11px] text-slate-400 mt-1">{item.serviceCategory}</div>
                       )}
+                      {/* Purchased variant snapshot (size/color/etc) + SKU -- the
+                          actual ordered selection, not the product's current
+                          options. Same fields the canonical admin invoice reads
+                          off this identical order record. */}
+                      {(() => {
+                        const variantLabel =
+                          item.variantLabel?.trim() ||
+                          (item.selectedOptions
+                            ? Object.entries(item.selectedOptions)
+                                .map(([k, v]) => `${k}: ${v}`)
+                                .join(' · ')
+                            : undefined);
+                        if (!variantLabel && !item.variantSku) return null;
+                        return (
+                          <div className="text-[11px] text-slate-500 mt-1">
+                            {variantLabel}
+                            {variantLabel && item.variantSku ? ' · ' : ''}
+                            {item.variantSku ? `SKU ${item.variantSku}` : ''}
+                          </div>
+                        );
+                      })()}
                     </td>
                     <td className="py-4 text-right text-slate-700 font-medium">{item.quantity}</td>
                     <td className="py-4 text-right text-slate-700 font-medium">৳ {item.price.toLocaleString()}</td>
@@ -240,7 +394,7 @@ export function InvoicePage() {
           </div>
 
           {/* Summary */}
-          <div className="flex justify-end mb-6">
+          <div className="invoice-summary flex justify-end mb-6">
             <div className="w-full sm:w-[300px] text-xs space-y-2 font-medium">
               <div className="flex justify-between text-slate-500">
                 <span>Subtotal:</span>

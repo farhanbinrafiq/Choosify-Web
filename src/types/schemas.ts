@@ -157,6 +157,13 @@ export interface SubOrderItem {
   productType?: 'physical' | 'service';
   serviceCategory?: string;
   serviceDetails?: Record<string, string | number>;
+  /** Ordered variant snapshot (size/color/fitting/etc — never the product's
+   *  current selection). Same fields the canonical admin invoice reads off
+   *  the identical Operations order record; declared here so the customer
+   *  invoice can display them too. */
+  variantLabel?: string;
+  variantSku?: string;
+  selectedOptions?: Record<string, string>;
 }
 
 export interface SubOrder {

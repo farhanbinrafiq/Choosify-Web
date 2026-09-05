@@ -309,7 +309,8 @@ export function FloatingOverlays() {
           />
         )}
 
-      <div 
+      <div
+        id="floating-overlays-root"
         ref={containerRef}
         className={cn(
           "fixed z-[220] text-[#1A1D4E] font-sans",

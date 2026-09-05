@@ -62,12 +62,21 @@
 }
 
 @theme {
-  --font-sans: "Satoshi", "Helvetica Neue", Arial, sans-serif;
+  /* Satoshi has no Bengali glyphs (Latin-only typeface) -- "Noto Sans
+     Bengali" is a per-character fallback for Bengali script/৳, not a
+     replacement: browsers substitute font-by-font per glyph run within a
+     single font-family list, so Latin text still renders in Satoshi and
+     only Bengali runs fall through to Noto Sans Bengali. Without this,
+     Bengali/৳ still render (verified: modern browsers substitute an
+     OS-installed font automatically for uncovered glyphs even with no
+     matching fallback named), but relying on that is environment-dependent
+     -- this makes it deterministic everywhere Choosify runs. */
+  --font-sans: "Satoshi", "Noto Sans Bengali", "Helvetica Neue", Arial, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
-  --font-serif: "Satoshi", "Helvetica Neue", Arial, sans-serif;
-  --font-serif-display: "Satoshi", "Helvetica Neue", Arial, sans-serif;
-  --font-dm-sans: "Satoshi", "Helvetica Neue", Arial, sans-serif;
-  --font-space: "Satoshi", "Helvetica Neue", Arial, sans-serif;
+  --font-serif: "Satoshi", "Noto Sans Bengali", "Helvetica Neue", Arial, sans-serif;
+  --font-serif-display: "Satoshi", "Noto Sans Bengali", "Helvetica Neue", Arial, sans-serif;
+  --font-dm-sans: "Satoshi", "Noto Sans Bengali", "Helvetica Neue", Arial, sans-serif;
+  --font-space: "Satoshi", "Noto Sans Bengali", "Helvetica Neue", Arial, sans-serif;
   
   --color-navy: #18154C;            /* canonical Choosify Navy */
   --color-ink: #0A0A1F;
@@ -192,6 +201,21 @@
   body,
   body * {
     font-style: normal !important;
+  }
+}
+
+/* Global print rule -- #floating-overlays-root (the "Ask EMI" assistant +
+   other persistent floating panels) and .choosify-toaster (the sitewide
+   react-hot-toast host, e.g. the "Welcome back!" login toast) are both
+   mounted once app-wide in App.tsx, sit on every page, and were leaking into
+   printed/PDF output wherever a page adds its own print CSS (discovered via
+   the customer invoice's print preview -- a toast happened to overlap the
+   invoice header). Belongs here, not on any one page's print styles, since
+   both are global chrome, not page content. */
+@media print {
+  #floating-overlays-root,
+  .choosify-toaster {
+    display: none !important;
   }
 }
 
