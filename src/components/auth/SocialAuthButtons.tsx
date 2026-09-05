@@ -28,8 +28,21 @@ const GOOGLE_CLIENT_ID = (import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID as string 
 const FACEBOOK_APP_ID = (import.meta.env.VITE_FACEBOOK_APP_ID as string | undefined)?.trim() || '';
 
 // Full-width, stacked — same footprint as the primary "Sign in to Choosify" CTA.
+//
+// h-11 (44px) is deliberate, not decorative: Google's GIS button at
+// size="large" always renders its iframe at a fixed 44px tall, and measured
+// against a live production page it is NOT vertically centered inside a
+// taller container — it sits flush to the top (a couple px of overhang
+// above) and falls short at the bottom, leaving a real dead-click-zone
+// along the bottom edge of whatever visible button sits under it. Matching
+// OUR box to google's fixed, known 44px height (rather than trying to force
+// their iframe to fill an arbitrary height, which renderButton's public API
+// has no option for) is what makes the two boxes align exactly, on every
+// breakpoint, with no dead zone. py-* is intentionally NOT used here since a
+// fixed height already fully determines the box (border-box) and
+// items-center already centers the icon+label within it.
 const BTN_CLASS =
-  'flex w-full items-center justify-center gap-2 rounded-lg border border-[#E5E7EB] bg-white py-3 text-[13px] font-semibold text-[#1A1A2E] transition-colors hover:bg-[#F9FAFB] cursor-pointer disabled:cursor-not-allowed disabled:opacity-50';
+  'flex w-full h-11 items-center justify-center gap-2 rounded-lg border border-[#E5E7EB] bg-white text-[13px] font-semibold text-[#1A1A2E] transition-colors hover:bg-[#F9FAFB] cursor-pointer disabled:cursor-not-allowed disabled:opacity-50';
 
 function loadScriptOnce(src: string, id: string): Promise<void> {
   return new Promise((resolve, reject) => {
