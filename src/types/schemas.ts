@@ -1,3 +1,5 @@
+import type { CatalogSocialLinks } from './catalog';
+
 export type UserRole = 'customer' | 'seller' | 'brand' | 'creator' | 'moderator' | 'admin';
 
 export interface User {
@@ -59,6 +61,47 @@ export interface Brand {
   /** Original onboard timestamp — used by listing ranking (not updatedAt) */
   createdAt?: string;
   updatedAt?: string;
+  // --- Brand Details real-data fields (carried through from the raw
+  // catalog brand record; all optional since older/community fixtures may
+  // not have them). Do not fabricate values for these — omit when unknown.
+  description?: string;
+  coverImage?: string;
+  website?: string;
+  socialLinks?: CatalogSocialLinks;
+  overview?: {
+    address?: string;
+    mapLink?: string;
+    email?: string;
+    phone?: string;
+    priceRange?: string;
+    ageFocus?: string;
+    audience?: string;
+    services?: string[];
+    tags?: string[];
+  };
+  faq?: Array<{ q: string; a: string }>;
+  stores?: {
+    authorized?: Array<{ name: string; sub?: string }>;
+    distributors?: Array<{ name: string; sub?: string }>;
+    serviceCenters?: Array<{ name: string; sub?: string; hours?: string }>;
+  };
+  storyBlocks?: Array<{
+    id: string;
+    heading: string;
+    body: string;
+    kind?: 'text' | 'link' | 'content';
+    url?: string;
+    thumbnail?: string;
+    contentId?: string;
+    mediaKind?: string;
+  }>;
+  pinnedStoryContentIds?: string[];
+  /** Real backend ownership fields — the only authoritative source for the
+   *  claim/ownership CTA. Never derive ownership from claimStatus alone. */
+  sellerId?: string;
+  marketplaceAccess?: boolean;
+  marketplaceStatus?: 'not_granted' | 'granted' | 'restricted' | 'suspended' | 'restored' | 'revoked';
+  brandReferenceId?: string;
 }
 
 export interface CommerceProduct {

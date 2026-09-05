@@ -739,26 +739,43 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   };
 
   const apiBrands: Brand[] = (catalogBrands || []).map((brand, idx) => {
-    const status = getBrandClaimStatus(brand.id);
+    // claimStatus/verifiedStatus MUST come from the backend record itself —
+    // never from getBrandClaimStatus (a client-side/localStorage simulation
+    // used only by the mock-fallback path below, before any real brand ever
+    // existed). Overriding real backend claim state with that heuristic was
+    // the root cause of the storefront showing a wrong ownership/claim CTA.
     return {
       id: toNumericId(brand.id, idx + 1),
       catalogId: brand.id,
       slug: brand.slug,
       name: brand.name,
       logo: brand.logo || brand.name.slice(0, 2).toUpperCase(),
-      verifiedStatus: brand.verifiedStatus || status === 'verified',
+      verifiedStatus: Boolean(brand.verifiedStatus),
       followers: brand.followers || 0,
       ratings: brand.ratings || 0,
       sponsoredFlag: brand.sponsoredFlag,
       featuredFlag: brand.featuredFlag,
       category: brand.category,
-      claimStatus: status,
+      claimStatus: brand.claimStatus,
       pinnedProductIds: Array.isArray(brand.pinnedProductIds) ? brand.pinnedProductIds : undefined,
       pinnedShowcaseProductIds: Array.isArray(brand.pinnedShowcaseProductIds)
         ? brand.pinnedShowcaseProductIds
         : undefined,
       createdAt: brand.createdAt,
       updatedAt: brand.updatedAt,
+      description: brand.description || undefined,
+      coverImage: brand.coverImage || undefined,
+      website: brand.website || undefined,
+      socialLinks: brand.socialLinks,
+      overview: brand.overview,
+      faq: brand.faq,
+      stores: brand.stores,
+      storyBlocks: brand.storyBlocks,
+      pinnedStoryContentIds: brand.pinnedStoryContentIds,
+      sellerId: brand.sellerId || undefined,
+      marketplaceAccess: brand.marketplaceAccess,
+      marketplaceStatus: brand.marketplaceStatus,
+      brandReferenceId: brand.brandReferenceId || undefined,
     };
   });
 

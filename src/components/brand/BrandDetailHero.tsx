@@ -26,14 +26,6 @@ export interface BrandDetailHeroProps {
   socialLinks?: ProfileSocialLink[];
 }
 
-const DEFAULT_SCORE_ROWS = [
-  { label: 'Quality', pct: '88%', value: '4.4' },
-  { label: 'Value', pct: '82%', value: '4.1' },
-  { label: 'Trust', pct: '90%', value: '4.5' },
-  { label: 'Service', pct: '80%', value: '4.0' },
-  { label: 'Design', pct: '92%', value: '4.6' },
-];
-
 /**
  * Choosify.dc.html Brand Detail hero —
  * cover banner constrained to feed silhouette (max-w-[1440px], square corners, top padding),
@@ -50,8 +42,8 @@ export function BrandDetailHero({
   onShare,
   onClaim,
   onExploreProducts,
-  score = 4.3,
-  reviewCount = 12490,
+  score = 0,
+  reviewCount = 0,
   facts,
   infoBar,
   coverImage,
@@ -66,7 +58,11 @@ export function BrandDetailHero({
 
   const resolvedSocials =
     socialLinks ||
-    profileSocialLinksFromCatalog(brand?.socialLinks);
+    // Explicit [] fallback — profileSocialLinksFromCatalog's own default
+    // fallback is Choosify's own official social links, meant for contexts
+    // with no brand data at all. A real brand with no socialLinks saved
+    // must show no social pills, never Choosify's.
+    profileSocialLinksFromCatalog(brand?.socialLinks, []);
 
   const brandFacts =
     facts ||
@@ -77,16 +73,6 @@ export function BrandDetailHero({
       { label: 'Deals', value: String(brand.dealCount ?? '24') },
       { label: 'Creators', value: String(brand.creatorCount ?? '18') },
       { label: 'Since', value: String(brand.founded ?? '2012') },
-    ];
-
-  const bar =
-    infoBar ||
-    [
-      { icon: '♥', value: '12.4K', label: 'LOVE REACTS' },
-      { icon: '🏷', value: '8.2K', label: 'ITEMS SAVED' },
-      { icon: '🤝', value: '64', label: 'DEALS FOUND' },
-      { icon: '✓', value: '25K+', label: 'VERIFIED ORDERS' },
-      { icon: '👁', value: '1.2M', label: 'PRODUCT VIEWS' },
     ];
 
   const slug = handle || `@${String(brand.name || 'brand').toLowerCase().replace(/\s+/g, '')}`;
@@ -188,20 +174,11 @@ export function BrandDetailHero({
           <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-5 md:w-[300px] shadow-[0_2px_10px_rgba(0,0,0,0.03)] shrink-0">
             <div className="text-[11px] font-extrabold text-[#9AA0AC] tracking-wide mb-2.5">BRAND SCORE</div>
             <div className="flex items-baseline gap-2 mb-4">
-              <div className="text-[30px] font-extrabold text-[#1A1A2E]">{score}</div>
+              <div className="text-[30px] font-extrabold text-[#1A1A2E]">{reviewCount > 0 ? score.toFixed(1) : '—'}</div>
               <div className="text-[11.5px] text-[#9AA0AC]">
-                /5 · {reviewCount.toLocaleString()} reviews
+                {reviewCount > 0 ? `/5 · ${reviewCount.toLocaleString()} reviews` : 'No reviews yet'}
               </div>
             </div>
-            {DEFAULT_SCORE_ROWS.map((r) => (
-              <div key={r.label} className="flex items-center gap-2.5 mb-2">
-                <div className="text-[11px] text-[#4B5563] font-semibold w-16">{r.label}</div>
-                <div className="flex-1 h-1.5 bg-[#F1F1F3] rounded-sm overflow-hidden">
-                  <div className="h-full bg-[#2323FF] rounded-sm" style={{ width: r.pct }} />
-                </div>
-                <div className="text-[11px] font-extrabold text-[#1A1A2E] w-5 text-right">{r.value}</div>
-              </div>
-            ))}
           </div>
 
           <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-5 flex-1 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
@@ -217,19 +194,6 @@ export function BrandDetailHero({
           </div>
         </div>
 
-        <div className="bg-white border border-[#E8EDF2] rounded-[10px] px-5 sm:px-7 py-[18px] flex flex-wrap items-center gap-x-8 gap-y-4 mb-2 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
-          {bar.map((item) => (
-            <div key={item.label}>
-              <div className="text-base font-extrabold text-[#1A1A2E] flex items-center gap-1.5">
-                <span>{item.icon}</span> {item.value}
-              </div>
-              <div className="text-[10px] text-[#9AA0AC]">{item.label}</div>
-            </div>
-          ))}
-          <div className="choosify-emi-gradient text-white text-[10px] font-extrabold px-4 py-2 rounded-full ml-auto">
-            TRENDING
-          </div>
-        </div>
       </div>
     </div>
   );

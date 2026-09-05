@@ -95,6 +95,14 @@ export interface CatalogBrand {
   sponsoredFlag: boolean;
   createdAt: string;
   updatedAt: string;
+  /** Real backend ownership fields — the only authoritative source for the
+   *  storefront's claim/ownership CTA. Never derive ownership from
+   *  claimStatus alone (a seller-created, marketplace-approved brand can
+   *  still show claimStatus:'pending' if it was never separately claimed). */
+  sellerId?: string;
+  marketplaceAccess?: boolean;
+  marketplaceStatus?: 'not_granted' | 'granted' | 'restricted' | 'suspended' | 'restored' | 'revoked';
+  brandReferenceId?: string;
 }
 
 export interface CatalogProduct {

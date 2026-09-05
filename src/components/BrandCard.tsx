@@ -119,9 +119,9 @@ export const BrandCard = memo(function BrandCard({ brand, onClick, className }: 
       <div className="absolute top-[96px] left-4 z-10">
         <div className="w-[80px] h-[80px] rounded-full border-4 border-white bg-white flex items-center justify-center overflow-hidden shadow-lg">
           {brand.logo && (brand.logo.startsWith('http') || brand.logo.startsWith('/')) ? (
-            <img 
-              src={brand.logo} 
-              className="w-full h-full object-cover" 
+            <img
+              src={brand.logo}
+              className="max-w-[70%] max-h-[70%] w-auto h-auto object-contain"
               alt={brand.name}
               loading="lazy"
               referrerPolicy="no-referrer"

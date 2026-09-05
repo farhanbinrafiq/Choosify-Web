@@ -8,6 +8,7 @@ import {
 import { BRANDS, PRODUCTS } from "../constants";
 import { BrandQuickComparison } from "../components/QuickComparisonSection";
 import type { CatalogBrandFaq, CatalogBrandStores } from "../types/catalog";
+import type { Brand } from "../types/schemas";
 import { ProductCard } from "../components/ProductCard";
 import { motion, AnimatePresence } from "motion/react";
 import { cn } from "../lib/utils";
@@ -49,6 +50,33 @@ import { usePriorityClockMs } from "../hooks/usePriorityClockMs";
 
 const BRAND_FEED_GRID = PRODUCT_CARD_GRID;
 
+/**
+ * Canonical ownership/claim CTA state — derived ONLY from backend-
+ * authoritative fields (sellerId, marketplaceAccess, marketplaceStatus,
+ * claimStatus), never from a client-side heuristic. A brand with its own
+ * sellerId and active/approved marketplace access is always treated as
+ * owned, regardless of whatever claimStatus its record still carries:
+ * seller onboarding stamps claimStatus:'pending' at brand creation and
+ * nothing reconciles it once marketplace access is later granted, so a
+ * legitimately owned, marketplace-approved brand can otherwise be stuck
+ * showing a stale "pending"/"Claim this brand" state forever.
+ */
+function resolveOwnershipClaimStatus(b: {
+  sellerId?: string;
+  marketplaceAccess?: boolean;
+  marketplaceStatus?: string;
+  claimStatus?: "community" | "pending" | "verified";
+}): "verified" | "pending" | "community" {
+  const hasApprovedOwner =
+    Boolean(b.sellerId) &&
+    b.marketplaceAccess === true &&
+    (b.marketplaceStatus === "granted" || b.marketplaceStatus === "restored");
+  if (hasApprovedOwner) return "verified";
+  if (b.claimStatus === "pending") return "pending";
+  if (b.claimStatus === "verified") return "verified";
+  return "community";
+}
+
 export function BrandDetailPage() {
   const brandHeroRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
@@ -58,9 +86,6 @@ export function BrandDetailPage() {
     allBrands,
     allCatalogBrands,
     allProducts,
-    getBrandClaimStatus,
-    updateBrandClaimStatus,
-    brandClaimStatuses,
   } = useGlobalState();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isReportOpen, setIsReportOpen] = useState(false);
@@ -126,20 +151,46 @@ export function BrandDetailPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Dynamically resolve brand or fallback to Sailor/fashion-oriented layout
-  const brandSource = allBrands.length > 0 ? allBrands : BRANDS;
+  // BRANDS (the static legacy fallback, used only if both the real catalog
+  // API and the mock-catalog hydration are unavailable) lacks the newer
+  // optional Brand fields — safe to widen the type here since every one of
+  // those fields is optional and this file only ever reads them
+  // defensively.
+  const brandSource = (allBrands.length > 0 ? allBrands : BRANDS) as Brand[];
   const productSource = allProducts.length > 0 ? allProducts : PRODUCTS;
 
+  // Match the route param against every identifier a "/brands/:id" link in
+  // this app might actually use — the numeric mapped id, the raw catalog id
+  // (e.g. "brand-cb4ec847-..."), the slug (e.g. "test"), or a slugified/
+  // exact name match. Different card/listing components link with
+  // different ones of these, so all must be checked here.
+  const routeIdLower = String(id || "").toLowerCase();
+  const matchedBrand = brandSource.find(
+    (b) =>
+      String(b.id) === id ||
+      String((b as { catalogId?: string }).catalogId || "").toLowerCase() === routeIdLower ||
+      String((b as { slug?: string }).slug || "").toLowerCase() === routeIdLower ||
+      b.name.toLowerCase().replace(/\s+/g, "-") === routeIdLower ||
+      b.name.toLowerCase() === routeIdLower,
+  );
+  // Never silently substitute an unrelated real brand (e.g. picking an
+  // arbitrary index) when the route id doesn't match anything — that would
+  // show one brand's page while claiming to be a different, wrong brand.
+  // A neutral, empty placeholder keeps every hook below well-defined; the
+  // "not found" state is rendered explicitly at the end of this component.
   const brand =
-    brandSource.find(
-      (b) =>
-        String(b.id) === id ||
-        b.name.toLowerCase().replace(/\s+/g, "-") ===
-          String(id).toLowerCase() ||
-        b.name.toLowerCase() === String(id).toLowerCase(),
-    ) ||
-    brandSource.find((b) => b.name === "Sailor") ||
-    brandSource[2];
+    matchedBrand ||
+    ({
+      id: 0,
+      name: "Brand",
+      logo: "",
+      verifiedStatus: false,
+      followers: 0,
+      ratings: 0,
+      sponsoredFlag: false,
+      featuredFlag: false,
+      claimStatus: "community",
+    } as typeof brandSource[number]);
 
   const brandWhatsOnPosts = useMemo(
     () => getBrandPostsByBrandId(Number(brand.id)).slice(0, 6),
@@ -148,7 +199,7 @@ export function BrandDetailPage() {
 
   const [localClaimStatus, setLocalClaimStatus] = useState<
     "verified" | "pending" | "community"
-  >(() => getBrandClaimStatus(brand.id));
+  >(() => resolveOwnershipClaimStatus(brand));
 
   const [currentPage, setCurrentPage] = useState(1);
   // 5 rows × up to 5 columns (PRODUCT_CARD_GRID) before pagination
@@ -182,8 +233,8 @@ export function BrandDetailPage() {
   ]);
 
   useEffect(() => {
-    setLocalClaimStatus(getBrandClaimStatus(brand.id));
-  }, [brand, brandClaimStatuses]);
+    setLocalClaimStatus(resolveOwnershipClaimStatus(brand));
+  }, [brand]);
 
   // Deep-link from brand list discount pill → Top Deals & Coupons (#deals-section)
   useEffect(() => {
@@ -198,6 +249,12 @@ export function BrandDetailPage() {
 
   const [brandReviews, setBrandReviews] = useState<PublicProductReview[]>([]);
   const [brandReviewsLoaded, setBrandReviewsLoaded] = useState(false);
+  // Real average rating + review count from actual submitted reviews — no
+  // fabricated placeholder score/count.
+  const brandAvgRating =
+    brandReviews.length > 0
+      ? brandReviews.reduce((sum, r) => sum + (r.rating || 0), 0) / brandReviews.length
+      : 0;
 
   useEffect(() => {
     let cancelled = false;
@@ -1283,6 +1340,19 @@ export function BrandDetailPage() {
   const popularCats = getPopularCategoryPreviews();
 
   const renderBrandLogo = (brandObj: any) => {
+    // A genuine uploaded logo always wins — never show a demo/prototype
+    // wordmark treatment (or literal logo text in a colored box) when a
+    // real logo image exists for this brand.
+    if (typeof brandObj.logo === "string" && /^(https?:|data:|\/)/.test(brandObj.logo)) {
+      return (
+        <img
+          src={brandObj.logo}
+          alt={brandObj.name}
+          className="max-w-[75%] max-h-[75%] w-auto h-auto object-contain"
+          referrerPolicy="no-referrer"
+        />
+      );
+    }
     const term = brandObj.name.toLowerCase();
     if (term.includes("choosify")) {
       return (
@@ -1355,6 +1425,23 @@ export function BrandDetailPage() {
     );
   };
 
+  if (!matchedBrand) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-center px-6">
+        <div className="text-lg font-extrabold text-[#1A1A2E]">Brand not found</div>
+        <p className="text-sm text-[#9AA0AC] max-w-sm">
+          We couldn't find a brand matching this link. It may have been renamed or removed.
+        </p>
+        <Link
+          to="/brands"
+          className="mt-2 inline-flex items-center bg-[#2323FF] text-white px-5 py-2.5 rounded-lg text-xs font-bold hover:brightness-110"
+        >
+          Back to Brands
+        </Link>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col min-h-screen bg-choosify-feed">
       <div ref={brandHeroRef}>
@@ -1369,6 +1456,8 @@ export function BrandDetailPage() {
           }}
           onClaim={() => setIsClaimModalOpen(true)}
           onExploreProducts={() => scrollToSection("products-section")}
+          score={brandAvgRating}
+          reviewCount={brandReviews.length}
           websiteUrl={
             (brand as any).website
               ? String((brand as any).website).startsWith("http")
@@ -1377,12 +1466,15 @@ export function BrandDetailPage() {
               : undefined
           }
           facts={[
-            { label: "Products", value: String(totalProductsFound || (brand as any).productCount || (brand as any).products || "120+") },
-            { label: "Deals", value: String(totalDealsFound || "24") },
-            { label: "Followers", value: "50K+" },
-            { label: "Categories", value: "8" },
-            { label: "Creators", value: "18" },
-            { label: "Since", value: String((brand as any).founded || "2012") },
+            { label: "Products", value: String(totalProductsFound) },
+            { label: "Deals", value: String(totalDealsFound) },
+            { label: "Followers", value: String(brand.followers ?? 0) },
+            { label: "Categories", value: String(dynamicCategories.length) },
+            // "Creators" and "Since" are omitted rather than fabricated —
+            // there is no real per-brand creator-collaboration count yet,
+            // and brand.createdAt (the only real timestamp available) is an
+            // onboarding date, not a founding year, so it isn't shown as
+            // "Since" either.
           ]}
         />
       </div>
@@ -1640,18 +1732,7 @@ export function BrandDetailPage() {
                 <div className="shrink-0 w-full md:w-auto self-stretch flex items-center justify-center">
                   {localClaimStatus === "community" ? (
                     <button
-                      onClick={() => {
-                        toast.loading(
-                          "Initiating secure brand ownership verification link...",
-                          { duration: 1500 },
-                        );
-                        setTimeout(() => {
-                          updateBrandClaimStatus(brand.id, "pending");
-                          toast.success(
-                            "Verification link generated! Ready for credential matching review.",
-                          );
-                        }, 1500);
-                      }}
+                      onClick={() => setIsClaimModalOpen(true)}
                       className="w-full md:w-auto px-6 py-3 bg-[#FF000D] hover:brightness-110 text-white font-bold text-[13px] tracking-tight rounded-lg shadow-sm active:scale-95 transition-all text-center cursor-pointer border-none"
                     >
                       Claim Ownership
@@ -1856,31 +1937,6 @@ export function BrandDetailPage() {
 
             <BrandStorySection brandId={brand.id} brandName={brand.name} />
 
-          {/* Trust strip — DC style */}
-          <div className="w-full choosify-dark-surface rounded-xl px-7 py-5 text-center text-white">
-            <div className="text-[13px] font-extrabold mb-1">
-              CHOSEN BY MILLIONS. TRUSTED WORLDWIDE.
-            </div>
-            <div className="text-[11.5px] text-white/50 mb-5">
-              100% authentic products, official warranty & dedicated support from{" "}
-              {brand.name}.
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
-                { value: "1M+", label: "Happy Customers" },
-                { value: "50+", label: "Countries" },
-                { value: "2.4K+", label: "Reviews" },
-                { value: "4.3/5", label: "Brand Score" },
-              ].map((ts) => (
-                <div key={ts.label}>
-                  <div className="text-[20px] font-extrabold text-[#FF5B00]">
-                    {ts.value}
-                  </div>
-                  <div className="text-[10.5px] text-white/50">{ts.label}</div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </div>
 

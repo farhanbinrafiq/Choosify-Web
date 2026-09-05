@@ -178,7 +178,7 @@ export const BrandCardDesign = memo(function BrandCardDesign({
           <img
             src={brand.logo}
             alt={brand.name}
-            className="absolute inset-0 w-full h-full object-cover"
+            className="relative z-[1] max-w-[80%] max-h-[70%] w-auto h-auto object-contain"
             loading="lazy"
             onError={(e) => {
               e.currentTarget.style.display = 'none';
