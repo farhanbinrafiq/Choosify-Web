@@ -13,11 +13,22 @@ interface ProductMediaGalleryProps {
   product: Parameters<typeof buildProductGalleryItems>[0];
   /** Single image for the selected variant (legacy `variant.image`). */
   selectedVariantImage?: string;
-  /** The selected variant's full `images[]`. When non-empty the gallery shows
-   *  THESE (first = main), so picking Color=Black swaps the whole gallery to the
-   *  black photos. Empty/absent → fall back to the parent product gallery — the
-   *  gallery is never blank. */
+  /** The selected variant's full `images[]`. Only actually shown when
+   *  `showVariantGallery` is true AND this is non-empty — so picking
+   *  Color=Black swaps the whole gallery to the black photos once that
+   *  selection resolves to one variant. */
   variantImages?: string[];
+  /** Whether the buyer's current selection has resolved to one specific
+   *  variant. False (the default before any pick, or a partial selection
+   *  that doesn't uniquely resolve yet) keeps showing `allListingImages` —
+   *  never prematurely narrows to one variant's photos. Defaults to true for
+   *  backward compatibility with any caller that doesn't pass it. */
+  showVariantGallery?: boolean;
+  /** Deduplicated full listing gallery (primary/listing images first, then
+   *  every active variant's images) — the initial gallery, and the fallback
+   *  whenever the resolved variant has no dedicated images of its own. The
+   *  gallery is never blank: falls back further to `product.image`. */
+  allListingImages?: string[];
   showAddVideo?: boolean;
   onAddVideo?: () => void;
 }
@@ -26,14 +37,19 @@ export function ProductMediaGallery({
   product,
   selectedVariantImage,
   variantImages,
+  showVariantGallery = true,
+  allListingImages,
   showAddVideo,
   onAddVideo,
 }: ProductMediaGalleryProps) {
-  const vImgs = (variantImages ?? []).filter(Boolean);
+  const vImgs = showVariantGallery ? (variantImages ?? []).filter(Boolean) : [];
+  const fallbackGallery = (allListingImages ?? []).filter(Boolean);
   const items = buildProductGalleryItems(
     vImgs.length
       ? { ...product, image: vImgs[0], gallery: vImgs }
-      : { ...product, image: selectedVariantImage || product.image },
+      : fallbackGallery.length
+        ? { ...product, image: fallbackGallery[0], gallery: fallbackGallery }
+        : { ...product, image: selectedVariantImage || product.image },
   );
 
   return (

@@ -739,12 +739,18 @@ export function ProductDetailPage() {
   // No Color/Size/RAM/Storage special-casing — dimensions come from the
   // canonical optionGroups / productVariants.
   const [selectedOptions, setSelectedOptions] = useState<Record<string, string>>({});
+  // Tracks whether the BUYER has actively picked an option (vs. the page's own
+  // auto-selected default) -- the gallery only narrows to one variant's photos
+  // once the buyer's own selection resolves to it, never on initial load.
+  const [hasUserSelectedVariant, setHasUserSelectedVariant] = useState(false);
   const pickOpt = (re: RegExp) => {
     const k = Object.keys(selectedOptions).find((n) => re.test(n));
     return k ? selectedOptions[k] : "";
   };
-  const selectOption = (groupName: string, value: string) =>
+  const selectOption = (groupName: string, value: string) => {
+    setHasUserSelectedVariant(true);
     setSelectedOptions((p) => ({ ...p, [groupName]: value }));
+  };
   // Read-only compatibility shims for the (many) downstream references that
   // still speak in colour/size terms (message-to-order flow, request fields …).
   const selectedColor = pickOpt(/colou?r/i);
@@ -812,12 +818,25 @@ export function ProductDetailPage() {
     return Array.isArray(vs) ? vs.map((v: any) => v.id || v.sku).join('|') : '';
   }, [product]);
   React.useEffect(() => {
+    setHasUserSelectedVariant(false);
     const vs = (product as any)?.variants;
     if (!Array.isArray(vs) || vs.length === 0) {
       setSelectedOptions({});
       return;
     }
-    const first = vs.find((v: any) => (v.stock ?? 0) > 0 && variantActive(v)) || vs[0];
+    // Prefer a variant that actually specifies every current dimension over a
+    // legacy/partial row (e.g. saved before a new option was added) -- picking
+    // a partial row here would auto-select an incomplete combination that can
+    // never resolve back to itself once every dimension must match exactly.
+    const keys = variantOptionGroups.map((g) => g.name);
+    const isComplete = (v: any) => {
+      const attrs = v.attributes ?? v.options ?? {};
+      return keys.every((k) => k in attrs);
+    };
+    const first =
+      vs.find((v: any) => isComplete(v) && (v.stock ?? 0) > 0 && variantActive(v)) ||
+      vs.find((v: any) => isComplete(v)) ||
+      vs[0];
     setSelectedOptions({ ...(first?.attributes ?? first?.options ?? {}) });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product?.id, variantSignature]);
@@ -828,8 +847,13 @@ export function ProductDetailPage() {
     const keys = variantOptionGroups.map((g) => g.name);
     return vs.find((v: any) => {
       const attrs = v.attributes ?? v.options ?? {};
-      // Every rendered dimension must match the current selection.
-      return keys.every((k) => attrs[k] === undefined || attrs[k] === selectedOptions[k]);
+      // Every rendered dimension must be explicitly present on the variant
+      // AND match the current selection. A variant missing a dimension
+      // (e.g. a legacy row saved before that option existed) does NOT
+      // wildcard-match every value for it -- otherwise a single incomplete
+      // variant could silently resolve as "the" match for any selection of
+      // that dimension, surfacing the wrong price/stock/SKU/images.
+      return keys.every((k) => k in attrs && attrs[k] === selectedOptions[k]);
     });
   };
 
@@ -843,7 +867,10 @@ export function ProductDetailPage() {
       if (attrs[groupName] !== value) return false;
       for (const [k, sel] of Object.entries(selectedOptions)) {
         if (k === groupName) continue;
-        if (attrs[k] !== undefined && attrs[k] !== sel) return false;
+        // A variant missing one of the OTHER already-selected dimensions
+        // doesn't actually specify a value for it, so it can never satisfy
+        // that selection -- absence is a non-match, not a wildcard.
+        if (!(k in attrs) || attrs[k] !== sel) return false;
       }
       return (v.stock ?? 0) > 0 && variantActive(v);
     });
@@ -945,6 +972,34 @@ export function ProductDetailPage() {
   const boxContents = getBoxContents();
 
   const selectedVariant = getSelectedVariant();
+
+  // Deduplicated initial/full listing gallery: the listing's own photos first,
+  // then every ACTIVE variant's photos, de-duplicated by URL. Shown until the
+  // buyer's own selection resolves to one specific variant.
+  const allListingImages = React.useMemo(() => {
+    const seen = new Set<string>();
+    const ordered: string[] = [];
+    const push = (url: unknown) => {
+      if (typeof url !== 'string' || !url || seen.has(url)) return;
+      seen.add(url);
+      ordered.push(url);
+    };
+    const primary: string[] = Array.isArray((product as any)?.gallery) && (product as any).gallery.length
+      ? (product as any).gallery
+      : product?.image
+        ? [product.image]
+        : [];
+    primary.forEach(push);
+    const vs = (product as any)?.variants;
+    if (Array.isArray(vs)) {
+      for (const v of vs) {
+        if (!variantActive(v)) continue;
+        const imgs: string[] = Array.isArray(v.images) && v.images.length ? v.images : v.image ? [v.image] : [];
+        imgs.forEach(push);
+      }
+    }
+    return ordered;
+  }, [product]);
 
   // Reset active image index to 0 when variant changes
   React.useEffect(() => {
@@ -1262,6 +1317,8 @@ export function ProductDetailPage() {
                   ? [selectedVariant.image]
                   : undefined) as string[] | undefined
             }
+            showVariantGallery={hasUserSelectedVariant && !!selectedVariant}
+            allListingImages={allListingImages}
           />
         </div>
       </div>
