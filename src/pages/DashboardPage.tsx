@@ -1608,7 +1608,13 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
     }
   };
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  /** A fresh local selection crops BEFORE upload, via a blob: URL — never the
+   *  remote avatar URL. Canvas export of a cross-origin <img> needs the media
+   *  host's cooperation (Access-Control-Allow-Origin), which
+   *  dashboard.choosify.bd's static media route does not currently send for
+   *  the storefront's own origin; a local blob: URL sidesteps that entirely,
+   *  so "new upload -> crop" works regardless. Revoked once consumed. */
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
@@ -1616,11 +1622,15 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
       toast.error('Please choose an image file.');
       return;
     }
-    await uploadAndApplyAvatar(file, 'Profile photo updated.');
+    setCropSrc(URL.createObjectURL(file));
+    setCropOpen(true);
   };
 
-  /** Edit = crop/reposition the current photo (existing OR just-uploaded — both
-   *  are just `avatar` at this point), matching the dashboard's Edit action. */
+  /** Edit = re-crop the CURRENT (already-uploaded, remote) photo. Requires the
+   *  media host to send CORS headers for the storefront's origin - see the
+   *  note on handleFileChange. If that is not yet configured, AvatarCropModal
+   *  itself surfaces a clear "unable to load this image" message rather than
+   *  silently failing. */
   const openCropEditor = () => {
     if (!hasRealPhoto) {
       toast.error('No photo to edit. Upload one first.');
@@ -1630,14 +1640,20 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
     setCropOpen(true);
   };
 
+  const revokeCropSrcIfBlob = (src: string) => {
+    if (src.startsWith('blob:')) URL.revokeObjectURL(src);
+  };
+
   const onCropSave = async (dataUrl: string) => {
     setCropOpen(false);
+    revokeCropSrcIfBlob(cropSrc);
     setCropSrc('');
     await uploadAndApplyAvatar(dataUrlToFile(dataUrl, 'avatar.png'), 'Profile photo updated.');
   };
 
   const onCropCancel = () => {
     setCropOpen(false);
+    revokeCropSrcIfBlob(cropSrc);
     setCropSrc('');
   };
 
