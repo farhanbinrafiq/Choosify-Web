@@ -31,25 +31,6 @@ type CategoryItem = CategoryDisplayItem;
 // left-category-navigation scroll-into-view below.
 const CATEGORIES_SCROLL_TARGET_ID = 'categories-main-display';
 
-// The Categories page renders the canonical static taxonomy (src/data/categories.ts),
-// so its selected-category state is one of those display names. The URL is the
-// source of truth for that selection: ?category= carries it in (Home "Top
-// Categories", 404 suggestions, product-detail category link) and back out on
-// in-page selection. Accept the canonical slug/id, the exact display name, or a
-// slugified name so every existing category link resolves to the same category.
-function resolveCategoryParam(raw: string | null): string | null {
-  if (!raw) return null;
-  const needle = raw.trim().toLowerCase();
-  if (!needle) return null;
-  const match = CATEGORIES.find(
-    (c) =>
-      c.id.toLowerCase() === needle ||
-      c.name.toLowerCase() === needle ||
-      slugifyPathSegment(c.name) === needle,
-  );
-  return match ? match.name : null;
-}
-
 function isBrandLogoImage(value?: string): value is string {
   return Boolean(value && /^(https?:|data:|\/)/.test(value));
 }
@@ -93,17 +74,69 @@ export function CategoriesPage() {
     allDeals,
     allGuides,
     allCreators,
+    allCategories,
   } = useGlobalState();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // Live catalog categories (same source Home "Top Categories" is built from).
+  // Used ONLY to resolve an incoming ?category= identifier and to scope the
+  // selected view — the visible all-categories grid still renders the static
+  // taxonomy (`categoriesList`) so it is unaffected by catalog test data.
+  const catalogCategoryList = useMemo(
+    () => buildCategoryDisplayList(allCategories ?? [], allCatalogProducts ?? []),
+    [allCategories, allCatalogProducts],
+  );
+
+  // Resolve any category identifier (canonical slug, id, exact name, or a
+  // slugified name) to its canonical display name. Static taxonomy first (keeps
+  // 404-page / product-detail links and slug URLs stable), then the live catalog
+  // taxonomy (Home "Top Categories"). Name-free: works for any category.
+  const resolveCategoryName = React.useCallback(
+    (raw: string | null): string | null => {
+      const needle = (raw ?? '').trim().toLowerCase();
+      if (!needle) return null;
+      const staticHit = CATEGORIES.find(
+        (c) =>
+          c.id.toLowerCase() === needle ||
+          c.name.toLowerCase() === needle ||
+          slugifyPathSegment(c.name) === needle,
+      );
+      if (staticHit) return staticHit.name;
+      const catalogHit = catalogCategoryList.find(
+        (c) =>
+          c.id.toLowerCase() === needle ||
+          (c.slug ?? '').toLowerCase() === needle ||
+          c.name.toLowerCase() === needle ||
+          slugifyPathSegment(c.name) === needle,
+      );
+      return catalogHit ? catalogHit.name : null;
+    },
+    [catalogCategoryList],
+  );
+
+  // Canonical slug for a resolved category name (for writing back to ?category=).
+  const categorySlugForName = React.useCallback(
+    (name: string): string => {
+      const staticHit = CATEGORIES.find((c) => c.name === name);
+      if (staticHit) return staticHit.id;
+      const catalogHit = catalogCategoryList.find((c) => c.name === name);
+      return catalogHit?.slug || slugifyPathSegment(name);
+    },
+    [catalogCategoryList],
+  );
   const categoryParam = searchParams.get('category');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategoryTab, setActiveCategoryTab] = useState('All Categories');
   const [quickNavId, setQuickNavId] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  // Seeded from ?category= so a deep link / refresh / new tab / browser back
-  // opens straight into the selected category instead of "All Categories".
+  // Seeded from ?category= on the very first render so a Home click / deep link /
+  // refresh / new tab / browser back opens straight into the selected category
+  // with no "All Categories" flash. `resolveCategoryName` already sees the live
+  // catalog taxonomy when arriving from Home (it is loaded to render Home); on a
+  // cold direct-URL load the catalog may still be hydrating — the effect below
+  // then re-resolves once it lands.
   const [selectedMainCategory, setSelectedMainCategory] = useState<string | null>(
-    () => resolveCategoryParam(categoryParam),
+    () => resolveCategoryName(categoryParam),
   );
 
   // V2 Discovery Filter States
@@ -127,24 +160,25 @@ export function CategoriesPage() {
   ]);
 
   // Keep the selected category aligned with the URL when it changes outside the
-  // page — browser back/forward, or a fresh deep link while already mounted.
+  // page — browser back/forward, a fresh deep link while already mounted, or the
+  // live catalog taxonomy finishing hydration after a direct-URL / refresh load.
   useEffect(() => {
-    const fromUrl = resolveCategoryParam(categoryParam);
+    const fromUrl = resolveCategoryName(categoryParam);
     setSelectedMainCategory((prev) => (prev === fromUrl ? prev : fromUrl));
-  }, [categoryParam]);
+  }, [categoryParam, resolveCategoryName]);
 
-  // In-page category selection is written back to ?category= (canonical display
-  // name, matching Home / 404 / product-detail category links) so the URL always
-  // represents what is on screen and survives refresh / share / back-forward.
+  // In-page category selection is written back to ?category= as the category's
+  // canonical slug (matching Home / 404 / product-detail links) so the URL is a
+  // stable identity and survives refresh / share / back-forward.
   const applySelectedCategory = React.useCallback(
     (next: string | null) => {
       setSelectedMainCategory(next);
       const params = new URLSearchParams(searchParams);
-      if (next) params.set('category', next);
+      if (next) params.set('category', categorySlugForName(next));
       else params.delete('category');
       setSearchParams(params);
     },
-    [searchParams, setSearchParams],
+    [searchParams, setSearchParams, categorySlugForName],
   );
 
   const handleClearAllFilters = () => {
@@ -407,12 +441,25 @@ export function CategoriesPage() {
     [allCatalogProducts],
   );
 
-  // When a sidebar category is selected, the grid swaps to that category's
-  // Level-2 subgroup breakdown instead of the all-categories view.
+  // When a category is selected, the grid swaps to that category's Level-2
+  // subgroup breakdown instead of the all-categories view. Resolve the entry
+  // from the static taxonomy first, then the live catalog taxonomy (so a
+  // catalog-only category from Home "Top Categories" still scopes correctly).
   const selectedCategoryEntry = selectedMainCategory
-    ? categoriesList.find((cat) => cat.name === selectedMainCategory)
+    ? (categoriesList.find((cat) => cat.name === selectedMainCategory) ??
+        catalogCategoryList.find((cat) => cat.name === selectedMainCategory))
     : undefined;
-  const selectedSubgroups = selectedCategoryEntry ? getTaxonomyGroups(selectedCategoryEntry.id) : [];
+  // Static taxonomy has authored Level-2/3 groups; catalog categories fall back
+  // to their own subcategory list (built from catalog children or name presets).
+  const selectedSubgroups = React.useMemo(() => {
+    if (!selectedCategoryEntry) return [];
+    const authored = getTaxonomyGroups(selectedCategoryEntry.id);
+    if (authored.length) return authored;
+    return (selectedCategoryEntry.subcategories ?? []).map((sub) => ({
+      name: sub.name,
+      items: [] as string[],
+    }));
+  }, [selectedCategoryEntry]);
 
   // Dynamic filter supporting the page search system and discovery state criteria
   const filteredCategoriesList = React.useMemo(() => {

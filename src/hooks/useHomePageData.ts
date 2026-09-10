@@ -8,6 +8,7 @@ import { getSectionItemIds, isHomeSectionVisible } from '../utils/homepageCms';
 import { pickByCatalogIds, orderByCatalogIds } from '../utils/catalogMatch';
 import { isPlacementActive } from '../utils/editorialMappers';
 import { buildCategoryDisplayList } from '../utils/categoryDisplay';
+import { slugifyPathSegment } from '../lib/seoHelpers';
 import { getHomeLivePulseItems } from '../lib/home/homepageLivePulse';
 import { buildHomeViralTodayItems, type ViralTodayItem } from '../utils/homeViralToday';
 import { usePriorityClockMs } from './usePriorityClockMs';
@@ -85,12 +86,19 @@ export function useHomePageData() {
     if (cmsCats?.length) {
       return [...cmsCats]
         .sort((a, b) => a.order - b.order)
-        .map((item) => ({
-          id: item.id,
-          name: item.label,
-          count: 0,
-          image: item.image,
-        }));
+        .map((item) => {
+          // Prefer the real catalog slug when the CMS entry points at a known
+          // catalog category; otherwise derive one from the label. Never the raw
+          // label — the Categories page resolves by canonical slug/id.
+          const catalogMatch = (allCategories ?? []).find((c) => c.id === item.id);
+          return {
+            id: item.id,
+            slug: catalogMatch?.slug || slugifyPathSegment(item.label),
+            name: item.label,
+            count: 0,
+            image: item.image,
+          };
+        });
     }
     return buildCategoryDisplayList(allCategories ?? [], allCatalogProducts ?? []).slice(0, 12);
   }, [allCategories, allCatalogProducts, homepageConfig?.topCategories]);

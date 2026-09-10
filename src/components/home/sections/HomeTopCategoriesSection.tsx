@@ -7,6 +7,8 @@ import { HOME_CATEGORY_CHIP_COLORS } from '../../../lib/design/homeTokens';
 
 export interface HomeCategoryItem {
   id?: string;
+  /** Canonical category slug (catalog `slug` / static seed id). Preferred link identifier. */
+  slug?: string;
   name: string;
   count: number;
   image?: string;
@@ -66,8 +68,12 @@ export function HomeTopCategoriesSection({ categories }: HomeTopCategoriesSectio
           const icon = categoryIcon(cat.name);
           return (
             <Link
-              key={cat.id ?? cat.name}
-              to={`/categories?category=${encodeURIComponent(cat.name)}`}
+              key={cat.id ?? cat.slug ?? cat.name}
+              /* Pass the canonical category identity (slug → id → name) so the
+                 Categories page resolves the exact same category regardless of
+                 display-name differences between the catalog and the static
+                 taxonomy. Never depends on the category's name. */
+              to={`/categories?category=${encodeURIComponent(cat.slug || cat.id || cat.name)}`}
               className={cn(
                 'bg-white rounded-[10px] px-3 py-5 flex flex-col items-center gap-2.5 border border-[#E8EDF2]',
                 'hover:border-[#FF5B00]/35 hover:shadow-sm transition-all',

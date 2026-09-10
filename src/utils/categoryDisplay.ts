@@ -11,6 +11,9 @@ export type CategorySubcategory = {
 
 export type CategoryDisplayItem = {
   id: string;
+  /** Canonical URL slug — catalog `CatalogCategory.slug`, or the static seed id
+   *  (already slug-shaped, e.g. `fashion-lifestyle`) for the static fallback. */
+  slug: string;
   name: string;
   icon: string;
   count: number;
@@ -168,6 +171,7 @@ export function buildCategoryDisplayList(
 
         return {
           id: cat.id,
+          slug: cat.slug || cat.id,
           name: cat.name,
           icon: cat.icon || 'Package',
           count,
@@ -179,6 +183,7 @@ export function buildCategoryDisplayList(
 
   return CATEGORIES.map((cat) => ({
     id: cat.id,
+    slug: cat.id,
     name: cat.name,
     icon: cat.icon,
     count: countProductsForCategory(allProducts, cat.name) || 24,
