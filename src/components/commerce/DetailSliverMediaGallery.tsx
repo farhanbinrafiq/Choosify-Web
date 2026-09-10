@@ -15,6 +15,10 @@ export interface DetailSliverLiveBadge {
 
 const ZOOM_MAX = 4;
 const ZOOM_TAP_SCALE = 2.5;
+/** Horizontal travel (px) that counts as a deliberate swipe rather than a tap. */
+const SWIPE_THRESHOLD = 44;
+/** Any pointer travel beyond this (px, taxicab) is a drag — never a click. */
+const DRAG_SLOP = 8;
 
 /** Match platform carousel feel — short eased slide + fade (ChoosifyCarousel ~300–400ms range) */
 const SLIDE_TRANSITION = { duration: 0.35, ease: [0.25, 0.1, 0.25, 1] as const };
@@ -87,6 +91,9 @@ function PinchZoomImage({
   };
 
   const onPointerDown = (e: React.PointerEvent) => {
+    // Keep pinch / pan / tap-zoom gestures inside the viewer — they must never
+    // reach the backdrop's gesture tracking or close handler.
+    e.stopPropagation();
     (e.currentTarget as HTMLElement).setPointerCapture?.(e.pointerId);
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     const g = gesture.current;
@@ -111,6 +118,7 @@ function PinchZoomImage({
 
   const onPointerMove = (e: React.PointerEvent) => {
     if (!pointers.current.has(e.pointerId)) return;
+    e.stopPropagation();
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     const g = gesture.current;
 
@@ -137,6 +145,7 @@ function PinchZoomImage({
   };
 
   const onPointerUp = (e: React.PointerEvent) => {
+    e.stopPropagation();
     pointers.current.delete(e.pointerId);
     const g = gesture.current;
     if (pointers.current.size > 0) return;
@@ -322,10 +331,14 @@ const PEEK_OPACITY: Record<PeekSlot['size'], string> = {
   far: 'opacity-40 hover:opacity-55',
 };
 
-/** Near peeks get more flex + a mobile min-width so side slivers read as content */
+/**
+ * Peek flex ratios. On mobile the centre stage now takes ~78vw, so the single
+ * side peek per side is a controlled sliver — no mobile min-width (that used to
+ * force ~88px slivers and squeeze the hero). Desktop strip sizing unchanged.
+ */
 const PEEK_FLEX: Record<PeekSlot['size'], string> = {
-  near: 'flex-[2_1_0%] sm:flex-[1.4_1_0%] min-w-[5.5rem] sm:min-w-0',
-  mid: 'flex-[1_1_0%] min-w-[3.75rem] sm:min-w-0',
+  near: 'flex-[2_1_0%] sm:flex-[1.4_1_0%] min-w-0',
+  mid: 'flex-[1_1_0%] min-w-0',
   far: 'flex-[0.75_1_0%]',
 };
 
@@ -355,8 +368,12 @@ export function DetailSliverMediaGallery({
   const total = safeItems.length;
   const activeIndexRef = useRef(activeIndex);
   activeIndexRef.current = activeIndex;
-  const swipeRef = useRef<{ x: number; y: number; active: boolean } | null>(null);
+  const swipeRef = useRef<
+    { x: number; y: number; active: boolean; moved: boolean; axis: 'x' | 'y' | null } | null
+  >(null);
   const suppressClickRef = useRef(false);
+  const centerStageRef = useRef<HTMLDivElement>(null);
+  const overlayGestureRef = useRef({ x: 0, y: 0, moved: false });
   const resumeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const hoverPausedRef = useRef(false);
 
@@ -565,20 +582,51 @@ export function DetailSliverMediaGallery({
     else goPrev();
   };
 
+  /** Clear any live finger-follow offset on the centre stage. */
+  const resetStageDrag = useCallback((withTransition: boolean) => {
+    const el = centerStageRef.current;
+    if (!el) return;
+    el.style.transition = withTransition ? 'transform 220ms ease-out' : 'none';
+    el.style.transform = '';
+  }, []);
+
   const onSwipePointerDown = (e: React.PointerEvent) => {
     if (total <= 1 || zoomOpen) return;
     if ((e.target as HTMLElement).closest('a, iframe, video')) return;
-    swipeRef.current = { x: e.clientX, y: e.clientY, active: true };
+    suppressClickRef.current = false;
+    swipeRef.current = { x: e.clientX, y: e.clientY, active: true, moved: false, axis: null };
+  };
+
+  const onSwipePointerMove = (e: React.PointerEvent) => {
+    const s = swipeRef.current;
+    if (!s?.active) return;
+    const dx = e.clientX - s.x;
+    const dy = e.clientY - s.y;
+    if (Math.abs(dx) + Math.abs(dy) > DRAG_SLOP) {
+      s.moved = true;
+      if (!s.axis) s.axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+    }
+    // Horizontal intent → damped drag feedback (the real slide plays on release).
+    if (s.axis === 'x') {
+      const el = centerStageRef.current;
+      if (el) {
+        el.style.transition = 'none';
+        el.style.transform = `translateX(${Math.max(-64, Math.min(64, dx * 0.35))}px)`;
+      }
+    }
   };
 
   const onSwipePointerUp = (e: React.PointerEvent) => {
     const start = swipeRef.current;
     swipeRef.current = null;
+    resetStageDrag(true);
     if (!start?.active || total <= 1) return;
+    // A real drag is never a click (stops the tap from opening the fullscreen viewer).
+    if (start.moved) suppressClickRef.current = true;
+    if (start.axis === 'y') return;
     const dx = e.clientX - start.x;
     const dy = e.clientY - start.y;
-    if (Math.abs(dx) < 48 || Math.abs(dx) < Math.abs(dy) * 1.2) return;
-    suppressClickRef.current = true;
+    if (Math.abs(dx) < SWIPE_THRESHOLD || Math.abs(dx) < Math.abs(dy) * 1.2) return;
     if (dx < 0) goNext();
     else goPrev();
   };
@@ -644,10 +692,14 @@ export function DetailSliverMediaGallery({
           'flex w-full items-center gap-2.5 sm:gap-3 md:gap-3.5',
           multi ? 'justify-stretch' : 'justify-center px-4',
         )}
+        // Browser owns vertical scroll; this row only claims horizontal gestures.
+        style={{ touchAction: 'pan-y' }}
         onPointerDown={onSwipePointerDown}
+        onPointerMove={onSwipePointerMove}
         onPointerUp={onSwipePointerUp}
         onPointerCancel={() => {
           swipeRef.current = null;
+          resetStageDrag(true);
         }}
       >
         {multi ? (
@@ -687,10 +739,12 @@ export function DetailSliverMediaGallery({
         ) : null}
 
         <div
+          ref={centerStageRef}
           className={cn(
             'relative overflow-hidden shrink-0 rounded-2xl md:rounded-none',
-            // Slightly narrower on mobile so side peeks get more room; desktop unchanged feel
-            'w-[min(46vw,760px)] sm:w-[min(50vw,720px)] md:w-[min(48vw,780px)] lg:w-[min(46vw,860px)]',
+            // Mobile: hero takes ~78% of the row so the hierarchy reads
+            // sliver | LARGE ACTIVE | sliver. Tablet/desktop widths unchanged.
+            'w-[min(78vw,30rem)] sm:w-[min(50vw,720px)] md:w-[min(48vw,780px)] lg:w-[min(46vw,860px)]',
             'h-[280px] sm:h-[360px] md:h-[460px] lg:h-[580px]',
           )}
         >
@@ -809,7 +863,7 @@ export function DetailSliverMediaGallery({
         </>
       )}
 
-      <div className="flex justify-center items-center gap-1.5 mt-5 px-4">
+      <div className="flex flex-wrap justify-center items-center gap-1.5 mt-5 px-4 max-w-full">
         {safeItems.map((_, i) => (
           <button
             key={i}
@@ -837,11 +891,25 @@ export function DetailSliverMediaGallery({
       {zoomOpen && (
         <div
           className="fixed inset-0 bg-black/90 z-[200] flex items-center justify-center overscroll-none"
-          onClick={() => setZoomOpen(false)}
-          onPointerDown={onZoomSwipeDown}
+          onPointerDown={(e) => {
+            overlayGestureRef.current = { x: e.clientX, y: e.clientY, moved: false };
+            onZoomSwipeDown(e);
+          }}
+          onPointerMove={(e) => {
+            const g = overlayGestureRef.current;
+            if (Math.abs(e.clientX - g.x) + Math.abs(e.clientY - g.y) > DRAG_SLOP) g.moved = true;
+          }}
           onPointerUp={onZoomSwipeUp}
           onPointerCancel={() => {
             zoomSwipeRef.current = null;
+          }}
+          onClick={(e) => {
+            // Intentional close only: a still click that lands on the backdrop
+            // itself. Never after a scroll / swipe / pan / pinch, and never from
+            // a click that bubbled out of the media or a control.
+            if (e.target === e.currentTarget && !overlayGestureRef.current.moved) {
+              setZoomOpen(false);
+            }
           }}
           role="dialog"
           aria-modal="true"
