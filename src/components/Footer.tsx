@@ -542,16 +542,13 @@ export function Footer() {
         )}
 
         <div className="border-t border-white/10 py-5 flex items-center justify-center">
+          {/* Canonical copyright — fixed legal entity + live year, not overridable
+              by a stale CMS `copyrightText` string. © glyph and the entity name
+              are Choosify orange. */}
           <p className="text-xs text-white/35">
-            {footer?.copyrightText ? (
-              footer.copyrightText
-            ) : (
-              <>
-                <span className="text-orange-primary">©</span> {year}{' '}
-                <span className="text-orange-primary font-semibold">Choosify Technologies Ltd</span>
-                . All rights reserved.
-              </>
-            )}
+            <span className="text-orange-primary">©</span> {year}{' '}
+            <span className="text-orange-primary font-semibold">Choosify Technologies Ltd</span>
+            . All rights reserved.
           </p>
         </div>
       </div>

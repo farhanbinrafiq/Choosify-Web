@@ -455,6 +455,14 @@ export function LoginSignUpPage() {
                     <p className="m-0 text-[11px] text-white/55">Trusted by 100,000+ smart shoppers</p>
                   </div>
                 </div>
+
+                {/* Copyright — canonical line, matching the storefront footer.
+                    © glyph and entity name in Choosify orange. */}
+                <p className="mt-6 text-[11px] text-white/40">
+                  <span className="text-[#FF5B00]">©</span> {new Date().getFullYear()}{' '}
+                  <span className="font-semibold text-[#FF5B00]">Choosify Technologies Ltd</span>
+                  . All rights reserved.
+                </p>
               </div>
 
               {/* Right auth panel — form + handlers unchanged */}
