@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import {
   LayoutDashboard,
   Heart,
@@ -2310,39 +2311,58 @@ export function DashboardPage() {
         </button>
       </div>
 
-      {mobileNavOpen && (
-        <div className="lg:hidden fixed inset-0 z-[80]">
-          <button
-            type="button"
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setMobileNavOpen(false)}
-            aria-label="Close menu"
-          />
-          <div className="absolute inset-y-0 left-0 w-[min(100%,300px)] bg-white shadow-2xl overflow-y-auto flex flex-col border-r border-[#E8EDF2]">
-            <div className="p-4 border-b border-[#E8EDF2] flex items-center justify-between">
-              <span className="text-sm font-extrabold text-[#1A1A2E]">Dashboard</span>
-              <button
-                type="button"
-                onClick={() => setMobileNavOpen(false)}
-                className="text-[#9AA0AC] hover:text-[#1A1A2E] bg-transparent border-none cursor-pointer"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            {renderSidebarNav(true)}
-            <div className="p-4 mt-auto border-t border-[#E8EDF2] space-y-2">
-              <SellerAccountSidebarCard
-                email={currentUser.email || ''}
-                onNavigate={() => setMobileNavOpen(false)}
-              />
-              <BecomeCreatorSidebarCard
-                email={currentUser.email || ''}
-                onNavigate={() => setMobileNavOpen(false)}
-              />
-            </div>
-          </div>
-        </div>
-      )}
+      {/*
+        Mobile-only nav drawer. Desktop uses the permanent LEFT <aside> below;
+        this shares the same content via renderSidebarNav(true). The hamburger
+        sits at the top-right of the mobile header, so the drawer is anchored to
+        the RIGHT edge and slides in right-to-left. AnimatePresence unmounts the
+        whole thing when closed, so nothing sits off-screen to cause overflow.
+      */}
+      <AnimatePresence>
+        {mobileNavOpen && (
+          <>
+            <motion.button
+              type="button"
+              className="lg:hidden fixed inset-0 z-[80] bg-black/40"
+              onClick={() => setMobileNavOpen(false)}
+              aria-label="Close menu"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+            />
+            <motion.div
+              className="lg:hidden fixed inset-y-0 right-0 z-[80] w-[min(100%,300px)] bg-white shadow-2xl overflow-y-auto flex flex-col border-l border-[#E8EDF2]"
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            >
+              <div className="p-4 border-b border-[#E8EDF2] flex items-center justify-between">
+                <span className="text-sm font-extrabold text-[#1A1A2E]">Dashboard</span>
+                <button
+                  type="button"
+                  onClick={() => setMobileNavOpen(false)}
+                  className="text-[#9AA0AC] hover:text-[#1A1A2E] bg-transparent border-none cursor-pointer"
+                >
+                  <X size={20} />
+                </button>
+              </div>
+              {renderSidebarNav(true)}
+              <div className="p-4 mt-auto border-t border-[#E8EDF2] space-y-2">
+                <SellerAccountSidebarCard
+                  email={currentUser.email || ''}
+                  onNavigate={() => setMobileNavOpen(false)}
+                />
+                <BecomeCreatorSidebarCard
+                  email={currentUser.email || ''}
+                  onNavigate={() => setMobileNavOpen(false)}
+                />
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
 
       <div className="flex flex-1 w-full max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-10 py-6 lg:py-7 gap-7 items-start">
         {/* Sidebar Desktop — light sticky */}
