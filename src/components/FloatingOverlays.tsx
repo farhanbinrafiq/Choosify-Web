@@ -419,12 +419,15 @@ export function FloatingOverlays() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
                 className={cn(
-                'relative w-[52px] h-[52px] shadow-[0_8px_20px_rgba(0,0,0,0.28)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none',
+                'relative w-[52px] h-[52px] rounded-full bg-white shadow-[0_8px_20px_rgba(0,0,0,0.28)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none',
                 activePanel === 'emi' && 'ring-2 ring-[#FF5B00]/60 brightness-105',
               )}
               title="Ask Emi — Choosify Assistant"
             >
-              <EmiAiLogo size={52} />
+              {/* Logo sized well under the 52px circle so the full mark stays
+                  clear of the circular boundary on every side (see EmiAiLogo's
+                  own 22%-rounded shell — it must never touch this outer ring). */}
+              <EmiAiLogo size={30} />
               {hasEmiUnread && activePanel !== 'emi' && (
                 <span className="absolute top-0.5 right-0.5 w-3 h-3 rounded-full bg-[#FF5B00] border-2 border-white" />
               )}
@@ -755,7 +758,7 @@ export function FloatingOverlays() {
         whileTap={{ scale: 0.95 }}
         data-floating-fab="emi"
         className={cn(
-          'fixed z-[219] w-14 h-14 shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden cursor-pointer',
+          'fixed z-[219] w-14 h-14 rounded-full bg-white shadow-[0_8px_24px_rgba(0,0,0,0.15)] flex items-center justify-center transition-all pointer-events-auto sm:hidden cursor-pointer',
           activePanel === 'emi' && 'ring-2 ring-[#FF5B00]/60 brightness-105',
         )}
         style={{
@@ -765,7 +768,8 @@ export function FloatingOverlays() {
         aria-label="Ask Emi"
         title="Ask Emi"
       >
-        <EmiAiLogo size={56} />
+        {/* Logo sized well under the 56px circle — same margin ratio as desktop. */}
+        <EmiAiLogo size={32} />
         {hasEmiUnread && activePanel !== 'emi' && (
           <span className="absolute top-1 right-1 w-3 h-3 rounded-full bg-[#FF5B00] border-2 border-white" />
         )}
