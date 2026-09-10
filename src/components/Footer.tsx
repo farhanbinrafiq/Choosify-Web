@@ -2,8 +2,8 @@ import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Store, Award } from 'lucide-react';
 import { useGlobalState } from '../context/GlobalStateContext';
-import type { SiteFooterColumn } from '../types/catalog';
-import { getNavigationLabel } from '../lib/navigation';
+import type { SiteFooterColumn, SiteFooterLink } from '../types/catalog';
+import { getNavigationLabel, PRIMARY_NAV_ITEMS } from '../lib/navigation';
 import { ChoosifyTextWordmarkLogo } from './ChoosifyTextWordmarkLogo';
 import { ChoosifyWordmarkLogo } from './ChoosifyWordmarkLogo';
 import { BrandIcon } from './icons/BrandIcon';
@@ -39,17 +39,21 @@ const PARTNER_SIGNUP_ORIGIN = resolvePartnerSignupOrigin();
 const SELLER_SIGNUP_URL = PARTNER_SIGNUP_ORIGIN + "/signup?type=seller";
 const CREATOR_SIGNUP_URL = PARTNER_SIGNUP_ORIGIN + "/signup?type=creator";
 
+/**
+ * The Discover column mirrors the primary storefront navbar exactly — same
+ * seven items (everything but "Home"), same order, same labels, same
+ * routes — sourced directly from PRIMARY_NAV_ITEMS (lib/navigation.ts) so it
+ * can never drift out of sync with the navbar again.
+ */
+const DISCOVER_COLUMN_LINKS: SiteFooterLink[] = PRIMARY_NAV_ITEMS.filter((item) => item.id !== 'home').map(
+  (item) => ({ label: item.label, url: item.path }),
+);
+
 const DEFAULT_FOOTER_COLUMNS: SiteFooterColumn[] = [
   {
     id: 'discover',
     title: 'Discover',
-    links: [
-      { label: 'Top Brands', url: '/brands' },
-      { label: 'Products & Services', url: '/products' },
-      { label: 'New Arrival', url: '/products?sort=new' },
-      { label: 'Compare Tool', url: '/compare' },
-      { label: 'Best Deals', url: '/deals' },
-    ],
+    links: DISCOVER_COLUMN_LINKS,
   },
   {
     id: 'company',
@@ -155,20 +159,10 @@ function FooterLink({
   url: string;
 }) {
   const displayLabel = getNavigationLabel(url, label);
-  const isCompare = displayLabel.toLowerCase().includes('compare');
   const className =
     'text-[13px] font-medium text-white/70 hover:text-white transition-colors inline-flex items-center gap-2';
 
-  const content = (
-    <>
-      {displayLabel}
-      {isCompare && (
-        <span className="text-[9px] font-bold text-white bg-[#2323FF] px-1.5 py-0.5 rounded tracking-wide">
-          NEW
-        </span>
-      )}
-    </>
-  );
+  const content = <>{displayLabel}</>;
 
   if (url.startsWith('http')) {
     return (
@@ -554,7 +548,7 @@ export function Footer() {
             ) : (
               <>
                 <span className="text-orange-primary">©</span> {year}{' '}
-                <span className="text-orange-primary font-semibold">Choosify</span>
+                <span className="text-orange-primary font-semibold">Choosify Technologies Ltd</span>
                 . All rights reserved.
               </>
             )}
