@@ -707,10 +707,6 @@ export function CreatorsPage() {
             )}
           </div>
 
-          <div className="bg-[#DCFCE7] text-[#166534] rounded-lg px-[18px] py-3 text-[12.5px] font-semibold mb-5">
-            ✓ Trusted & Verified — All creators are verified by Choosify for authenticity and quality.
-          </div>
-
           {filteredCreators.length > 0 ? (
             <>
               <div className={cn(CREATOR_CARD_GRID, 'mb-8')}>
