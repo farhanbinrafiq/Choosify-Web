@@ -770,6 +770,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       overview: brand.overview,
       faq: brand.faq,
       stores: brand.stores,
+      story: brand.story,
       storyBlocks: brand.storyBlocks,
       pinnedStoryContentIds: brand.pinnedStoryContentIds,
       sellerId: brand.sellerId || undefined,

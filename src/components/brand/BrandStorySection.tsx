@@ -18,6 +18,12 @@ import { primaryProductForContent } from '../../utils/spotlightMixedFeed';
 import { resolveFeedCardVariant } from '../../utils/spotlightMixedFeed';
 import type { SpotlightContent } from '../../types/spotlight/experience/content';
 import { cn } from '../../lib/utils';
+import {
+  brandStoryTextBlocks,
+  normalizeBrandStoryCards,
+  type BrandStoryBlock,
+  type BrandStoryCardModel,
+} from '../../lib/brandStory';
 
 const BRAND_LOGOS: Record<string, string> = {};
 
@@ -117,17 +123,118 @@ function totalVisualRows(rows: StoryRow[]): number {
  * Brand Details — "Brand Story" grouped by type into rows with progressive reveal.
  * LIVE keeps featured size during active + 24h grace; then shrinks to YouTube row.
  */
+const STORY_ASPECT: Record<BrandStoryCardModel['aspect'], string> = {
+  landscape: '16 / 9',
+  portrait: '9 / 16',
+  square: '1 / 1',
+};
+
+/** Dashboard-authored Brand Story card (external link or the seller's own published content). */
+function AuthoredStoryCard({ card }: { card: BrandStoryCardModel }) {
+  const [imgFailed, setImgFailed] = useState(false);
+  const showImg = card.hasThumbnail && !imgFailed;
+  const media = (
+    <div
+      className="relative w-full bg-[#F4F7F9] overflow-hidden"
+      style={{
+        aspectRatio: STORY_ASPECT[card.aspect],
+        ...(card.aspect === 'portrait' ? { maxWidth: 220, marginLeft: 'auto', marginRight: 'auto' } : {}),
+      }}
+    >
+      {showImg ? (
+        <img
+          src={card.thumbnailUrl}
+          alt=""
+          loading="lazy"
+          className="w-full h-full object-cover"
+          onError={() => setImgFailed(true)}
+        />
+      ) : (
+        // Neutral Choosify placeholder — never a blank rectangle, never a
+        // fabricated/borrowed image.
+        <div className="absolute inset-0 flex flex-col items-center justify-center gap-1.5 bg-gradient-to-br from-[#1A1D4E] to-[#2A2E6B] text-white">
+          <span className="text-[10px] font-black uppercase tracking-[0.16em] opacity-90">
+            {card.platformLabel}
+          </span>
+          <span className="text-[9px] font-semibold opacity-60">Open to view</span>
+        </div>
+      )}
+    </div>
+  );
+  const meta = (
+    <div className="p-3 text-left">
+      <div className="text-[9px] font-extrabold text-[#8A00C4] uppercase tracking-wider">
+        {card.platformLabel}
+      </div>
+      <div className="text-[12px] font-bold text-[#1A1A2E] mt-0.5 line-clamp-2">{card.title}</div>
+      {card.caption ? (
+        <div className="text-[10.5px] text-[#9AA0AC] mt-0.5 line-clamp-1">{card.caption}</div>
+      ) : null}
+    </div>
+  );
+  const inner = (
+    <>
+      {media}
+      {meta}
+    </>
+  );
+  return card.href ? (
+    <a
+      href={card.href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block bg-white border border-[#E8EDF2] rounded-[10px] overflow-hidden hover:border-[#FF5B00]/40 transition-colors"
+    >
+      {inner}
+    </a>
+  ) : (
+    <div className="bg-white border border-[#E8EDF2] rounded-[10px] overflow-hidden">{inner}</div>
+  );
+}
+
 export function BrandStorySection({
   brandId,
   brandName,
   className,
+  storyBlocks,
+  legacyStory,
 }: {
   brandId: string | number;
   brandName: string;
   className?: string;
+  /** Dashboard-authored Brand Story (CatalogBrand.storyBlocks). */
+  storyBlocks?: BrandStoryBlock[];
+  /** Legacy single free-text brand story (CatalogBrand.story). */
+  legacyStory?: string;
 }) {
   const navigate = useNavigate();
   const { allCatalogProducts, allCatalogGuides, allCreators } = useGlobalState();
+
+  const authoredCards = useMemo(
+    () =>
+      normalizeBrandStoryCards(storyBlocks, (contentId) => {
+        const g = (allCatalogGuides ?? []).find(
+          (x) => String(x.id) === contentId || String(x.slug) === contentId,
+        );
+        if (!g) return undefined;
+        const kindLabel =
+          g.type === 'reels' || g.type === 'shorts'
+            ? 'Reel'
+            : g.type === 'video'
+              ? 'Video'
+              : 'Guide';
+        return {
+          title: g.title,
+          image: g.image || g.gallery?.[0],
+          href: `/spotlight/${g.slug || g.id}`,
+          kindLabel,
+        };
+      }),
+    [storyBlocks, allCatalogGuides],
+  );
+  const authoredText = useMemo(() => brandStoryTextBlocks(storyBlocks), [storyBlocks]);
+  const legacyText = (legacyStory || '').trim();
+  const hasAuthored = authoredCards.length > 0 || authoredText.length > 0 || Boolean(legacyText);
   const nowMs = usePriorityClockMs();
   const [visibleVisualRows, setVisibleVisualRows] = useState(INITIAL_VISUAL_ROWS);
 
@@ -250,7 +357,9 @@ export function BrandStorySection({
 
   const hasMore = visibleVisualRows < feedVisualRows;
 
-  if (!items.length) {
+  // Honest empty state — only when there is neither authored Brand Story
+  // content nor any brand-connected published content.
+  if (!items.length && !hasAuthored) {
     return (
       <section
         id="brand-story-section"
@@ -270,6 +379,8 @@ export function BrandStorySection({
     );
   }
 
+  const storyCount = authoredCards.length + items.length;
+
   return (
     <section
       id="brand-story-section"
@@ -283,12 +394,47 @@ export function BrandStorySection({
         >
           Brand Story
         </h3>
-        <span className="text-[12px] font-bold text-[#9AA0AC]">{items.length} stories</span>
+        <span className="text-[12px] font-bold text-[#9AA0AC]">{storyCount} stories</span>
       </div>
       <p className="text-[12px] text-[#9AA0AC] m-0 mb-4">
         Guides, videos, reviews, live sessions, and updates from {brandName}.
       </p>
 
+      {hasAuthored && (
+        <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 sm:p-5 space-y-4 mb-4">
+          {(legacyText || authoredText.length > 0) && (
+            <div className="space-y-4 text-left">
+              {legacyText ? (
+                <p className="text-[12.5px] text-[#4B5563] m-0 leading-relaxed whitespace-pre-wrap">
+                  {legacyText}
+                </p>
+              ) : (
+                authoredText.map((t) => (
+                  <div key={t.id}>
+                    {t.heading ? (
+                      <div className="text-[10px] font-extrabold text-[#9AA0AC] uppercase tracking-wider mb-1">
+                        {t.heading}
+                      </div>
+                    ) : null}
+                    <p className="text-[12.5px] text-[#4B5563] m-0 leading-relaxed whitespace-pre-wrap">
+                      {t.body}
+                    </p>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+          {authoredCards.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+              {authoredCards.map((card) => (
+                <AuthoredStoryCard key={card.key} card={card} />
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {visibleRows.length > 0 && (
       <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 sm:p-5 space-y-8">
         {visibleRows.map((row) => (
           <div key={row.kind}>
@@ -328,6 +474,7 @@ export function BrandStorySection({
           </div>
         )}
       </div>
+      )}
     </section>
   );
 }

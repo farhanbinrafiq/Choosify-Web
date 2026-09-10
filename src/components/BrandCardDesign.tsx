@@ -4,6 +4,7 @@ import { Heart } from 'lucide-react';
 import { useDashboard } from '../context/DashboardContext';
 import { toast } from '../lib/notify';
 import { cn } from '../lib/utils';
+import { BrandLogo, isBrandLogoUrl } from './brand/BrandLogo';
 
 interface BrandCardDesignProps {
   brand: {
@@ -121,7 +122,6 @@ export const BrandCardDesign = memo(function BrandCardDesign({
     priceText = `From ৳${formatNumber(brand.minPrice)}`;
   }
 
-  const bannerBg = brand.brandColor || hashColor(brand.name);
   const isSaved = savedBrands?.some((b: any) => String(b.id) === String(brand.id));
 
   const circumference = 2 * Math.PI * 18;
@@ -164,39 +164,24 @@ export const BrandCardDesign = memo(function BrandCardDesign({
           This Brand
         </span>
       )}
-      {/* Cover — genuine uploaded brand logo when available, text banner as fallback */}
-      <div
-        className="relative h-[100px] flex items-center justify-center px-3 overflow-hidden"
-        style={{ background: bannerBg }}
-      >
+      {/* Wide brand header — a landscape visual, never the logo stretched:
+          real uploaded cover → brand colour → tasteful Choosify gradient. */}
+      <div className="relative h-[92px] overflow-hidden">
+        {isBrandLogoUrl(brand.coverImage) ? (
+          <img src={brand.coverImage} alt="" className="w-full h-full object-cover" loading="lazy" />
+        ) : brand.brandColor ? (
+          <div className="w-full h-full" style={{ background: brand.brandColor }} />
+        ) : (
+          <div
+            className="w-full h-full"
+            style={{ background: `linear-gradient(135deg, ${hashColor(brand.name)} 0%, #1A1D4E 100%)` }}
+          />
+        )}
         {!isCurrentInComparison && brand.maxDiscountPercent != null && brand.maxDiscountPercent >= 1 && (
           <span className="absolute top-2 left-2 z-[11] rounded-full bg-[#FF000D] text-white text-[9px] font-extrabold px-2 py-0.5 leading-none shadow-sm pointer-events-none">
             {Math.round(brand.maxDiscountPercent)}% Off
           </span>
         )}
-        {brand.logo && /^(https?:|data:|\/)/.test(brand.logo) ? (
-          <img
-            src={brand.logo}
-            alt={brand.name}
-            // Rectangular frame (px-3 padding already provides breathing
-            // room) — no circular clipping risk, so the logo can safely
-            // use most of the available box while staying object-contain.
-            className="relative z-[1] max-w-[92%] max-h-[86%] w-auto h-auto object-contain"
-            loading="lazy"
-            onError={(e) => {
-              e.currentTarget.style.display = 'none';
-              e.currentTarget.nextElementSibling?.classList.remove('hidden');
-            }}
-          />
-        ) : null}
-        <div
-          className={cn(
-            'text-[22px] font-extrabold text-white text-center leading-tight line-clamp-2 relative z-[1]',
-            brand.logo && /^(https?:|data:|\/)/.test(brand.logo) && 'hidden',
-          )}
-        >
-          {brand.name}
-        </div>
         <button
           type="button"
           onClick={toggleWish}
@@ -212,7 +197,15 @@ export const BrandCardDesign = memo(function BrandCardDesign({
         </button>
       </div>
 
-      <div className="p-4 text-center flex flex-col flex-1">
+      {/* Circular brand identity badge overlapping the header's lower edge */}
+      <div className="relative p-4 pt-9 text-center flex flex-col flex-1">
+        <BrandLogo
+          src={isBrandLogoUrl(brand.logo) ? brand.logo : undefined}
+          name={brand.name}
+          size={68}
+          ring
+          className="absolute left-1/2 top-0 -translate-x-1/2 -translate-y-1/2 z-[2]"
+        />
         <div className="flex items-center justify-center gap-1 mb-0.5">
           <h3 className="text-[14px] font-extrabold text-[#1A1A2E] truncate">{brand.name}</h3>
           <span className="text-[#2323FF] text-[12px] font-extrabold" aria-label="Verified">

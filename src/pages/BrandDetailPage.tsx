@@ -26,6 +26,8 @@ import { toast } from '../lib/notify';
 import { BrandOverviewSection } from "../components/BrandOverviewSection";
 import { FollowButton } from "../components/FollowButton";
 import { BrandDetailHero } from "../components/brand/BrandDetailHero";
+import { BRAND_LOGO_IMG_CLASS } from "../components/brand/BrandLogo";
+import type { BrandStoryBlock } from "../lib/brandStory";
 import { ClaimProfileModal } from "../components/ClaimProfileModal";
 import {
   UniversalFilterRenderer,
@@ -1348,14 +1350,12 @@ export function BrandDetailPage() {
         <img
           src={brandObj.logo}
           alt={brandObj.name}
-          // This renders inside a circular (rounded-full, overflow-hidden)
-          // frame — unlike a rectangular frame, pushing this too close to
-          // 100% risks clipping the corners of a perfectly square logo
-          // with no internal margin (its diagonal exceeds the circle's
-          // radius past ~71%). 82% is a deliberate, modest increase over
-          // the previous 75% that still keeps any such worst-case overshoot
-          // small enough to be masked by the existing border/shadow.
-          className="max-w-[82%] max-h-[82%] w-auto h-auto object-contain"
+          // Fills the circular (rounded-full, overflow-hidden) frame edge to
+          // edge — no width/height cap, no padding — so there is no empty
+          // ring between the mark and the avatar boundary. A full-bleed
+          // square logo simply has its corners trimmed by the circle, like
+          // any avatar; object-contain keeps wide/tall marks intact.
+          className={BRAND_LOGO_IMG_CLASS}
           referrerPolicy="no-referrer"
         />
       );
@@ -1943,7 +1943,12 @@ export function BrandDetailPage() {
               faq={(brand as { faq?: CatalogBrandFaq[] }).faq}
             />
 
-            <BrandStorySection brandId={brand.id} brandName={brand.name} />
+            <BrandStorySection
+              brandId={brand.id}
+              brandName={brand.name}
+              storyBlocks={(brand as { storyBlocks?: BrandStoryBlock[] }).storyBlocks}
+              legacyStory={(brand as { story?: string }).story}
+            />
 
         </div>
       </div>
