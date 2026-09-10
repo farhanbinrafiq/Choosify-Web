@@ -4,7 +4,6 @@ import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useGlobalState } from '../context/GlobalStateContext';
-import { toast } from '../lib/notify';
 import { DragScrollContainer, UniversalFilterRenderer, QuickFilterBar, ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
 import { BrandCardDesign } from '../components/BrandCardDesign';
 import { ListingBrowseControls } from '../components/design/ListingBrowseControls';
@@ -22,36 +21,7 @@ import {BRAND_CARD_GRID, PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 import { rankBrands, buildBrandMaxActiveDiscountMap, lookupBrandMaxDiscount, mergeCatalogDealsIntoBrandDiscountMap } from '../utils/listingRanking';
 import { usePriorityClockMs } from '../hooks/usePriorityClockMs';
-
-interface BrandDeal {
-  id: string;
-  name: string;
-  dealHighlight: string;
-  logo: string;
-  bgClass: string;
-}
-
-const BRAND_DEALS: BrandDeal[] = [
-  { id: 'aarong', name: "Aarong", dealHighlight: "Flat 15% OFF on Handicrafts", logo: "Aa", bgClass: "bg-orange-primary/95" },
-  { id: 'apex', name: "Apex", dealHighlight: "Buy 1 Get 1 Free on Select Shoes", logo: "A", bgClass: "bg-navy" },
-  { id: 'sailor', name: "Sailor", dealHighlight: "Flat 20% OFF on Casual Wear", logo: "S", bgClass: "bg-teal-700" },
-  { id: 'adidas', name: "Adidas", dealHighlight: "Extra 10% OFF on Sportswear", logo: "Ad", bgClass: "bg-[#1A1D4E]" },
-  { id: 'bay', name: "Bay Emporium", dealHighlight: "Up to 30% OFF on Leather Boots", logo: "B", bgClass: "bg-red-700" }
-];
-
-interface PromoCode {
-  brandId: string;
-  brandName: string;
-  code: string;
-  discount: string;
-}
-
-const PROMO_CODES: PromoCode[] = [
-  { brandId: 'aarong', brandName: "Aarong", code: "AARONG15", discount: "Flat 15% OFF" },
-  { brandId: 'apex', brandName: "Apex", code: "APEXFOOT26", discount: "BDT 500 FLAT" },
-  { brandId: 'sailor', brandName: "Sailor", code: "SAILOREID", discount: "Flat 20% OFF" },
-  { brandId: 'adidas', brandName: "Adidas", code: "ADIEXTRA10", discount: "10% FLAT OFF" }
-];
+import { FeaturedBrandDealsPanel } from '../components/FeaturedBrandDealsPanel';
 
 interface Brand {
   id: string;
@@ -994,6 +964,19 @@ export function BrandsPage() {
 
           <AdSenseSlot format="infeed" className="mt-6" />
 
+          {/* Canonical placement for Featured Brand Deals + Featured Promocodes.
+              The legacy right <aside> further down is `hidden lg:flex` AND is also
+              forced to `display:none` at every width >= 1024px by this page's
+              `.choosify-listing-feed-only` shell, so it renders for nobody. This
+              in-<main> panel is the only live copy and is shown at ALL widths:
+              1 column on phones, 2 columns from `sm` (tablet / laptop / desktop).
+              Not a "mobile" component. Intentionally no AdSenseSlot here — the
+              (dead) sidebar still carries the single sidebar ad declaration, so
+              there is no duplicate ad request or analytics event. */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+            <FeaturedBrandDealsPanel />
+          </div>
+
           {filteredBrands.length === 0 && (
              <div className="py-20 text-center">
                 <Search size={48} className="mx-auto text-gray-300 mb-4" />
@@ -1010,113 +993,17 @@ export function BrandsPage() {
         </main>
 
         {/* RIGHT SIDEBAR WITH SPONSOR & SELLERS CARD */}
+        {/* Kept byte-for-byte as it was (structure + classes + the AdSenseSlot below).
+            NOTE: `.choosify-listing-feed-only` hides this <aside> at every width, so it
+            does not currently render for anyone — the in-<main> panel above is what
+            actually surfaces this content. Left in place so nothing about the existing
+            desktop shell/markup changes; the single sidebar ad request also lives here
+            only (never duplicated into the in-<main> copy). */}
         <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
-          {/* FEATURED BRAND DEALS SECTION */}
-          <div className="bg-white rounded-2xl border border-[#eef2f6] p-4.5 shadow-sm w-full text-left animate-fade-in">
-            <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#eef2f6] px-1">
-              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
-                Featured Brand Deals
-              </h3>
-              <Link 
-                to="/brand-deals" 
-                className="text-[10px] font-bold text-orange-primary hover:underline flex items-center gap-1"
-              >
-                See All →
-              </Link>
-            </div>
-
-            <div className="flex flex-col gap-2.5">
-              {BRAND_DEALS.length === 0 ? (
-                <div className="text-center py-6 border border-dashed border-gray-200 rounded-2xl">
-                  <p className="text-xs text-gray-400 font-medium">Featured brand deals will appear here.</p>
-                </div>
-              ) : (
-                BRAND_DEALS.map((item) => (
-                  <Link 
-                    to={`/brands/${item.id}`}
-                    key={item.id} 
-                    className="flex items-center gap-3 bg-white border border-[#eef2f6]/60 rounded-2xl p-2 hover:shadow-soft hover:border-[#FF5B00]/10 transition-all duration-300 group cursor-pointer"
-                  >
-                    <div className={cn("w-9 h-9 rounded-lg overflow-hidden shrink-0 border border-transparent flex items-center justify-center text-white font-semibold text-xs shadow-sm", item.bgClass)}>
-                      {item.logo}
-                    </div>
-                    <div className="flex-1 min-w-0 flex flex-col justify-center text-left">
-                      <h4 className="font-sans text-xs font-semibold uppercase tracking-tight text-[#1A1D4E] group-hover:text-[#EF3C23] transition-colors truncate">
-                        {item.name}
-                      </h4>
-                      <p className="text-[9px] font-semibold text-gray-400 mt-0.5 truncate uppercase">
-                        {item.dealHighlight}
-                      </p>
-                    </div>
-                    <span className="text-[8px] font-bold text-[#FF5B00] uppercase tracking-wider shrink-0 whitespace-nowrap group-hover:-translate-x-0.5 transition-transform">
-                      View Deal
-                    </span>
-                  </Link>
-                ))
-              )}
-            </div>
-          </div>
-
-          {/* FEATURED PROMOCODES SECTION */}
-          <div className="bg-white rounded-2xl border border-[#eef2f6] p-4.5 shadow-sm w-full text-left animate-fade-in">
-            <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#eef2f6] px-1">
-              <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider">
-                Featured Promocodes
-              </h3>
-            </div>
-
-            <div className="flex flex-col gap-2.5">
-              {PROMO_CODES.length === 0 ? (
-                <div className="text-center py-6 border border-dashed border-gray-200 rounded-2xl">
-                  <p className="text-xs text-gray-400 font-medium">No active promo codes available right now.</p>
-                </div>
-              ) : (
-                PROMO_CODES.map((item, idx) => (
-                  <Link 
-                    to={`/brands/${item.brandId}`}
-                    key={idx} 
-                    className="bg-white border border-[#eef2f6]/65 hover:border-[#FF5B00]/15 rounded-2xl p-2.5 hover:shadow-soft transition-all duration-300 group cursor-pointer flex flex-col gap-2 text-left"
-                  >
-                    {/* Header row with brand details */}
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="min-w-0">
-                        <h4 className="font-sans text-xs font-semibold uppercase tracking-tight text-[#1A1D4E] group-hover:text-[#EF3C23] transition-colors truncate">
-                          {item.brandName}
-                        </h4>
-                        <span className="text-[9px] font-bold text-[#FF5B00] uppercase tracking-wide">
-                          {item.discount}
-                        </span>
-                      </div>
-                      
-                      {/* Copy button */}
-                      <button 
-                        onClick={(e) => {
-                          e.preventDefault(); // prevent follow Link navigation
-                          e.stopPropagation(); // prevent card container click handler
-                          navigator.clipboard.writeText(item.code);
-                          toast.success(`Coupon code "${item.code}" copied to clipboard!`);
-                        }}
-                        className="px-2.5 py-1 bg-[#FF5B00]/10 hover:bg-[#EF3C23] text-[#FF5B00] hover:text-white transition-all cursor-pointer rounded-full text-[8px] font-bold uppercase tracking-wider flex items-center gap-1 shrink-0"
-                      >
-                        <Copy className="w-2.5 h-2.5" />
-                        Copy
-                      </button>
-                    </div>
-                    
-                    {/* Code display window */}
-                    <div className="bg-gray-50 border border-dashed border-[#eef2f6] rounded-2xl px-2.5 py-1.5 flex items-center justify-between font-mono text-[9.5px] font-semibold text-gray-650 tracking-wider">
-                      <span>{item.code}</span>
-                      <span className="text-[7.5px] font-sans font-semibold text-gray-400 uppercase">ACTIVE</span>
-                    </div>
-                  </Link>
-                ))
-              )}
-            </div>
-          </div>
+          <FeaturedBrandDealsPanel />
 
           <AdSenseSlot format="sidebar" />
-
-         </aside>
+        </aside>
       </div>
     </div>
   );
