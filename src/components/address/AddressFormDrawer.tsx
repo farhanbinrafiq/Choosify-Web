@@ -10,8 +10,8 @@ import {
   getPostalCodesForCity,
   getUpazilasForDistrict,
 } from '../../lib/address/bangladeshLocations';
-import { cn } from '../../lib/utils';
 import { SearchableSelectField } from './SearchableSelectField';
+import { LocationSelectField } from './LocationSelectField';
 
 const ADDRESS_TYPES: Array<{ id: AddressType; label: string }> = [
   { id: 'home', label: 'Home' },
@@ -201,59 +201,175 @@ export function AddressFormDrawer({
                 })
               }
             />
-            <SearchableSelectField
+            <LocationSelectField
               label="District"
               required
               value={draft.location.districtId}
               options={districts}
               disabled={!draft.location.divisionId}
-              onChange={(districtId) =>
+              onSelect={(districtId) =>
                 onLocationChange({
                   districtId,
+                  districtName: '',
+                  manualDistrict: false,
+                  upazilaId: '',
+                  upazilaName: '',
+                  manualUpazila: false,
+                  cityId: '',
+                  cityName: '',
+                  manualCity: false,
+                  postalCodeId: '',
+                  postalCode: '',
+                  manualPostalCode: false,
+                })
+              }
+              manual={Boolean(draft.location.manualDistrict)}
+              manualValue={draft.location.districtName ?? ''}
+              onManualChange={(districtName) => onLocationChange({ districtName })}
+              onEnterManual={() =>
+                onLocationChange({
+                  manualDistrict: true,
+                  districtId: '',
                   upazilaId: '',
                   cityId: '',
                   postalCodeId: '',
                   postalCode: '',
                 })
               }
+              onExitManual={() =>
+                onLocationChange({
+                  manualDistrict: false,
+                  districtName: '',
+                  upazilaId: '',
+                  upazilaName: '',
+                  manualUpazila: false,
+                  cityId: '',
+                  cityName: '',
+                  manualCity: false,
+                  postalCodeId: '',
+                  postalCode: '',
+                  manualPostalCode: false,
+                })
+              }
             />
-            <SearchableSelectField
+            <LocationSelectField
               label="Upazila / Thana"
               value={draft.location.upazilaId}
               options={upazilas}
               disabled={!draft.location.districtId}
-              onChange={(upazilaId) =>
-                onLocationChange({ upazilaId, cityId: '', postalCodeId: '', postalCode: '' })
+              lockedManual={Boolean(draft.location.manualDistrict)}
+              onSelect={(upazilaId) =>
+                onLocationChange({
+                  upazilaId,
+                  upazilaName: '',
+                  manualUpazila: false,
+                  cityId: '',
+                  cityName: '',
+                  manualCity: false,
+                  postalCodeId: '',
+                  postalCode: '',
+                  manualPostalCode: false,
+                })
+              }
+              manual={Boolean(draft.location.manualUpazila)}
+              manualValue={draft.location.upazilaName ?? ''}
+              onManualChange={(upazilaName) => onLocationChange({ upazilaName })}
+              onEnterManual={() =>
+                onLocationChange({
+                  manualUpazila: true,
+                  upazilaId: '',
+                  cityId: '',
+                  postalCodeId: '',
+                  postalCode: '',
+                })
+              }
+              onExitManual={() =>
+                onLocationChange({
+                  manualUpazila: false,
+                  upazilaName: '',
+                  cityId: '',
+                  cityName: '',
+                  manualCity: false,
+                  postalCodeId: '',
+                  postalCode: '',
+                  manualPostalCode: false,
+                })
               }
             />
-            <SearchableSelectField
+            <LocationSelectField
               label="City / Municipality"
               required
               value={draft.location.cityId}
               options={cities}
               disabled={!draft.location.upazilaId}
-              onChange={(cityId) => onLocationChange({ cityId, postalCodeId: '', postalCode: '' })}
+              lockedManual={Boolean(draft.location.manualDistrict || draft.location.manualUpazila)}
+              onSelect={(cityId) =>
+                onLocationChange({
+                  cityId,
+                  cityName: '',
+                  manualCity: false,
+                  postalCodeId: '',
+                  postalCode: '',
+                  manualPostalCode: false,
+                })
+              }
+              manual={Boolean(draft.location.manualCity)}
+              manualValue={draft.location.cityName ?? ''}
+              onManualChange={(cityName) => onLocationChange({ cityName })}
+              onEnterManual={() =>
+                onLocationChange({
+                  manualCity: true,
+                  cityId: '',
+                  postalCodeId: '',
+                  postalCode: '',
+                })
+              }
+              onExitManual={() =>
+                onLocationChange({
+                  manualCity: false,
+                  cityName: '',
+                  postalCodeId: '',
+                  postalCode: '',
+                  manualPostalCode: false,
+                })
+              }
             />
-            <SearchableSelectField
+            <LocationSelectField
               label="Postal Code"
               required
               value={draft.location.postalCodeId}
               options={postalCodes}
               disabled={!draft.location.cityId}
-              onChange={(postalCodeId) => {
+              lockedManual={Boolean(
+                draft.location.manualDistrict ||
+                  draft.location.manualUpazila ||
+                  draft.location.manualCity,
+              )}
+              manualInputMode="numeric"
+              manualPlaceholder="e.g. 4700"
+              onSelect={(postalCodeId) => {
                 const postal = postalCodes.find((item) => item.id === postalCodeId);
-                onLocationChange({ postalCodeId, postalCode: postal?.postalCode ?? '' });
+                onLocationChange({
+                  postalCodeId,
+                  postalCode: postal?.postalCode ?? '',
+                  manualPostalCode: false,
+                });
               }}
+              manual={Boolean(draft.location.manualPostalCode)}
+              manualValue={draft.location.postalCode}
+              onManualChange={(postalCode) => onLocationChange({ postalCode })}
+              onEnterManual={() =>
+                onLocationChange({ manualPostalCode: true, postalCodeId: '', postalCode: '' })
+              }
+              onExitManual={() =>
+                onLocationChange({ manualPostalCode: false, postalCodeId: '', postalCode: '' })
+              }
             />
             <TextField
-              label={draft.isCustomLocation ? 'Custom Area / Road' : 'Area / Road'}
+              label="Area / Road"
               required
-              value={draft.isCustomLocation ? draft.customArea : draft.area}
-              onChange={(value) =>
-                draft.isCustomLocation
-                  ? onDraftChange({ customArea: value })
-                  : onDraftChange({ area: value })
-              }
+              value={draft.area}
+              onChange={(area) => onDraftChange({ area })}
               placeholder="Banani DOHS, Road 11"
             />
             <TextField
@@ -285,28 +401,14 @@ export function AddressFormDrawer({
             </div>
           </div>
 
-          <div className="rounded-[5px] bg-[#fafbfc] border border-[#e8edf2] p-4 space-y-3">
-            <p className="text-[10px] font-black uppercase tracking-wider text-[#1a1a2e]">
-              Can&apos;t find your area?
+          {draft.isCustomLocation && (
+            <p className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] font-semibold text-amber-800">
+              <span className="mt-[1px]">•</span>
+              One or more location fields were entered manually because they were
+              not in Choosify&apos;s location list. This address is saved as a
+              custom location.
             </p>
-            <button
-              type="button"
-              onClick={() => onDraftChange({ isCustomLocation: !draft.isCustomLocation })}
-              className={cn(
-                'min-h-[44px] px-4 rounded-full text-[10px] font-black uppercase tracking-wider border',
-                draft.isCustomLocation
-                  ? 'bg-[#FF5B00] text-white border-[#FF5B00]'
-                  : 'bg-white text-[#1a1a2e] border-[#e8edf2]',
-              )}
-            >
-              Use Custom Area
-            </button>
-            {draft.isCustomLocation && (
-              <p className="text-[10px] text-amber-700 font-bold">
-                Custom area will be saved with isCustomLocation = true for admin review.
-              </p>
-            )}
-          </div>
+          )}
 
           {Object.keys(errors).length > 0 && (
             <div className="rounded-xl border border-rose-100 bg-rose-50 p-3 text-[12px] font-semibold text-rose-700">

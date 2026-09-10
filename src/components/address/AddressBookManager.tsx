@@ -111,11 +111,11 @@ function AddressCard({
           </p>
           <p>
             <span className="text-gray-400">District:</span>{' '}
-            {findLocationName(address.location.districtId) || '—'}
+            {findLocationName(address.location.districtId) || address.location.districtName || '—'}
           </p>
           <p>
             <span className="text-gray-400">City:</span>{' '}
-            {findLocationName(address.location.cityId) || '—'}
+            {findLocationName(address.location.cityId) || address.location.cityName || '—'}
           </p>
           <p>
             <span className="text-gray-400">Postal:</span> {address.location.postalCode || '—'}
@@ -126,7 +126,7 @@ function AddressCard({
         )}
         {address.isCustomLocation && (
           <p className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2 py-1">
-            <AlertTriangle size={10} /> Custom area
+            <AlertTriangle size={10} /> Manual location
           </p>
         )}
       </div>
@@ -357,7 +357,19 @@ export function AddressBookManager({ embedded = false }: { embedded?: boolean })
         onSubmit={submit}
         onDraftChange={(patch) => setDraft((prev) => ({ ...prev, ...patch }))}
         onLocationChange={(patch) =>
-          setDraft((prev) => ({ ...prev, location: { ...prev.location, ...patch } }))
+          setDraft((prev) => {
+            const location = { ...prev.location, ...patch };
+            // CUSTOM = one or more structured location fields could not be found
+            // in Choosify's dataset and were typed manually. A normal address
+            // that only uses the dropdowns is never marked custom.
+            const isCustomLocation = Boolean(
+              location.manualDistrict ||
+                location.manualUpazila ||
+                location.manualCity ||
+                location.manualPostalCode,
+            );
+            return { ...prev, location, isCustomLocation };
+          })
         }
       />
     </section>

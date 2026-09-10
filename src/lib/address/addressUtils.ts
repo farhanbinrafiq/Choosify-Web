@@ -22,6 +22,13 @@ export function createEmptyAddressDraft(): CustomerAddressDraft {
       cityId: '',
       postalCodeId: '',
       postalCode: '',
+      districtName: '',
+      upazilaName: '',
+      cityName: '',
+      manualDistrict: false,
+      manualUpazila: false,
+      manualCity: false,
+      manualPostalCode: false,
     },
     area: '',
     customArea: '',
@@ -36,13 +43,16 @@ export function createEmptyAddressDraft(): CustomerAddressDraft {
 
 export function validateAddressDraft(draft: CustomerAddressDraft): AddressValidationResult {
   const errors: AddressValidationResult['errors'] = {};
+  const loc = draft.location;
 
   if (!draft.label.trim()) errors.label = 'Address name is required';
-  if (!draft.location.countryId) errors.country = 'Country is required';
-  if (!draft.location.divisionId) errors.division = 'Division is required';
-  if (!draft.location.districtId) errors.district = 'District is required';
-  if (!draft.location.cityId) errors.city = 'City is required';
-  if (!draft.location.postalCode) errors.postalCode = 'Postal code is required';
+  if (!loc.countryId) errors.country = 'Country is required';
+  if (!loc.divisionId) errors.division = 'Division is required';
+  // District / City stay required — satisfied by either a structured selection
+  // or an intentional manual fallback value, never by an empty field.
+  if (!loc.districtId && !loc.districtName?.trim()) errors.district = 'District is required';
+  if (!loc.cityId && !loc.cityName?.trim()) errors.city = 'City is required';
+  if (!loc.postalCode.trim()) errors.postalCode = 'Postal code is required';
   if (!draft.area.trim() && !draft.customArea?.trim()) errors.area = 'Area / block / road is required';
   if (!draft.houseOrBuilding.trim()) errors.houseOrBuilding = 'House / building is required';
 
@@ -57,9 +67,17 @@ export function draftToAddress(
   options?: { id?: string; isDefault?: boolean; createdAt?: string },
 ): CustomerAddress {
   const now = new Date().toISOString();
+  const location = draft.location;
   return {
     id: options?.id ?? `addr-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     ...draft,
+    location: {
+      ...location,
+      districtName: location.districtName?.trim() || undefined,
+      upazilaName: location.upazilaName?.trim() || undefined,
+      cityName: location.cityName?.trim() || undefined,
+      postalCode: location.postalCode.trim(),
+    },
     label: draft.label.trim(),
     area: draft.area.trim(),
     customArea: draft.customArea?.trim(),
@@ -82,8 +100,10 @@ export function addressToDraft(address: CustomerAddress): CustomerAddressDraft {
     recipientName: address.recipientName,
     phone: address.phone,
     location: address.location,
-    area: address.area,
-    customArea: address.customArea,
+    // Area / Road is a single free-text field now; fold any legacy customArea
+    // value into it so editing an older address does not lose it.
+    area: address.area || address.customArea || '',
+    customArea: undefined,
     isCustomLocation: address.isCustomLocation,
     houseOrBuilding: address.houseOrBuilding,
     floorOrUnit: address.floorOrUnit,
@@ -95,24 +115,26 @@ export function addressToDraft(address: CustomerAddress): CustomerAddressDraft {
 
 export function formatAddressLine(address: CustomerAddress): string {
   const area = address.isCustomLocation && address.customArea ? address.customArea : address.area;
+  const { location } = address;
   return [
     address.houseOrBuilding,
     address.floorOrUnit,
     area,
-    address.location.unionOrWard,
-    findLocationName(address.location.cityId),
-    address.location.postalCode,
+    location.unionOrWard,
+    findLocationName(location.cityId) || location.cityName,
+    location.postalCode,
   ]
     .filter(Boolean)
     .join(', ');
 }
 
 export function formatLocationTrail(address: CustomerAddress): string {
+  const { location } = address;
   return [
-    findLocationName(address.location.divisionId),
-    findLocationName(address.location.districtId),
-    findLocationName(address.location.upazilaId),
-    findLocationName(address.location.cityId),
+    findLocationName(location.divisionId),
+    findLocationName(location.districtId) || location.districtName,
+    findLocationName(location.upazilaId) || location.upazilaName,
+    findLocationName(location.cityId) || location.cityName,
   ]
     .filter(Boolean)
     .join(' / ');

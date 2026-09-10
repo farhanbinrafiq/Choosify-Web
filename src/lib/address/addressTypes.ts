@@ -22,6 +22,21 @@ export interface AddressLocationSelection {
   cityId: string;
   postalCodeId: string;
   postalCode: string;
+  /**
+   * Manual fallback — used only when a structured option is missing from
+   * Choosify's location dataset. When `manual<Field>` is true the matching
+   * `<field>Id` is cleared and the typed value lives in `<field>Name`
+   * (or, for the postal code, in `postalCode`). Any manual flag being true is
+   * what makes `CustomerAddress.isCustomLocation` true — a normal address that
+   * only uses the structured selectors is never marked custom.
+   */
+  districtName?: string;
+  upazilaName?: string;
+  cityName?: string;
+  manualDistrict?: boolean;
+  manualUpazila?: boolean;
+  manualCity?: boolean;
+  manualPostalCode?: boolean;
 }
 
 export interface ReservedGeoFields {

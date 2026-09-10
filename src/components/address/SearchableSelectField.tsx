@@ -1,6 +1,6 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { ChevronDown, Search } from 'lucide-react';
+import { ChevronDown, Plus, Search } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
 export interface SearchableSelectOption {
@@ -17,6 +17,14 @@ interface SearchableSelectFieldProps {
   required?: boolean;
   disabled?: boolean;
   placeholder?: string;
+  /**
+   * Fallback for when the wanted option is not in Choosify's location dataset.
+   * When provided, the search menu shows a secondary "add manually" action
+   * (emphasised when a search yields no matches). Selecting it switches the
+   * field to manual entry via the parent.
+   */
+  onRequestManual?: () => void;
+  manualActionLabel?: string;
 }
 
 function FieldLabel({ children, required = false }: { children: React.ReactNode; required?: boolean }) {
@@ -36,6 +44,8 @@ export function SearchableSelectField({
   required,
   disabled,
   placeholder = 'Select',
+  onRequestManual,
+  manualActionLabel = 'Add manually',
 }: SearchableSelectFieldProps) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState('');
@@ -144,8 +154,10 @@ export function SearchableSelectField({
             </div>
             <ul className="max-h-48 overflow-y-auto" role="listbox">
               {filtered.length === 0 ? (
-                <li className="px-4 py-3 text-[10px] font-bold text-gray-400 uppercase tracking-wider">
-                  No matches
+                <li className="px-4 py-3 text-[11px] font-bold text-gray-500">
+                  {query.trim()
+                    ? `No matching ${label.toLowerCase()} found.`
+                    : `No ${label.toLowerCase()} available.`}
                 </li>
               ) : (
                 filtered.map((option) => (
@@ -170,6 +182,23 @@ export function SearchableSelectField({
                 ))
               )}
             </ul>
+            {onRequestManual && (
+              <button
+                type="button"
+                onClick={() => {
+                  onRequestManual();
+                  setOpen(false);
+                  setQuery('');
+                }}
+                className={cn(
+                  'w-full flex items-center gap-2 border-t border-[#e8edf2] px-4 py-2.5 text-left text-[11px] font-bold text-[#FF5B00] hover:bg-[#FFF0E8] transition-colors',
+                  filtered.length === 0 && 'bg-[#FFF7F2]',
+                )}
+              >
+                <Plus size={13} className="shrink-0" />
+                {manualActionLabel}
+              </button>
+            )}
           </div>,
           document.body,
         )}
