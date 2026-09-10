@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Check, PenTool, Search, Sparkles, Users, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../lib/utils';
@@ -15,7 +15,9 @@ import { ListingFeedHeader } from '../components/design/ListingFeedHeader';
 import { ListingFilterPills } from '../components/design/ListingFilterPills';
 import { buildCategoryDisplayList, type CategoryDisplayItem } from '../utils/categoryDisplay';
 import { getCategoryStatBlock } from '../utils/categoryStats';
-import { ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters } from '../components/FilterEngine';
+import { CATEGORIES } from '../data/categories';
+import { slugifyPathSegment } from '../lib/seoHelpers';
+import { ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters, scrollToFilterResultsTarget } from '../components/FilterEngine';
 import { PAGE_LISTING_SINGLE_SHELL, CATEGORY_CARD_GRID } from "../lib/pageLayout";
 import { ListingAdRail } from '../components/ListingAdRail';
 import { PLACEMENT_KEYS } from '../lib/placements';
@@ -23,6 +25,30 @@ import { SponsoredFeedInjector } from '../components/commerce/SponsoredFeedInjec
 import { CategorySponsoredAdCard } from '../components/categories/CategorySponsoredAdCard';
 
 type CategoryItem = CategoryDisplayItem;
+
+// Anchor for the category browsing section (feed header → filter pills → category
+// nav → first results row). Shared by the FilterEngine registration and the
+// left-category-navigation scroll-into-view below.
+const CATEGORIES_SCROLL_TARGET_ID = 'categories-main-display';
+
+// The Categories page renders the canonical static taxonomy (src/data/categories.ts),
+// so its selected-category state is one of those display names. The URL is the
+// source of truth for that selection: ?category= carries it in (Home "Top
+// Categories", 404 suggestions, product-detail category link) and back out on
+// in-page selection. Accept the canonical slug/id, the exact display name, or a
+// slugified name so every existing category link resolves to the same category.
+function resolveCategoryParam(raw: string | null): string | null {
+  if (!raw) return null;
+  const needle = raw.trim().toLowerCase();
+  if (!needle) return null;
+  const match = CATEGORIES.find(
+    (c) =>
+      c.id.toLowerCase() === needle ||
+      c.name.toLowerCase() === needle ||
+      slugifyPathSegment(c.name) === needle,
+  );
+  return match ? match.name : null;
+}
 
 function isBrandLogoImage(value?: string): value is string {
   return Boolean(value && /^(https?:|data:|\/)/.test(value));
@@ -68,11 +94,17 @@ export function CategoriesPage() {
     allGuides,
     allCreators,
   } = useGlobalState();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const categoryParam = searchParams.get('category');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategoryTab, setActiveCategoryTab] = useState('All Categories');
   const [quickNavId, setQuickNavId] = useState('');
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedMainCategory, setSelectedMainCategory] = useState<string | null>(null);
+  // Seeded from ?category= so a deep link / refresh / new tab / browser back
+  // opens straight into the selected category instead of "All Categories".
+  const [selectedMainCategory, setSelectedMainCategory] = useState<string | null>(
+    () => resolveCategoryParam(categoryParam),
+  );
 
   // V2 Discovery Filter States
   const [selectedCategoryType, setSelectedCategoryType] = useState<string | null>(null);
@@ -94,6 +126,27 @@ export function CategoriesPage() {
     selectedAvailability, selectedContent, selectedMainCategory
   ]);
 
+  // Keep the selected category aligned with the URL when it changes outside the
+  // page — browser back/forward, or a fresh deep link while already mounted.
+  useEffect(() => {
+    const fromUrl = resolveCategoryParam(categoryParam);
+    setSelectedMainCategory((prev) => (prev === fromUrl ? prev : fromUrl));
+  }, [categoryParam]);
+
+  // In-page category selection is written back to ?category= (canonical display
+  // name, matching Home / 404 / product-detail category links) so the URL always
+  // represents what is on screen and survives refresh / share / back-forward.
+  const applySelectedCategory = React.useCallback(
+    (next: string | null) => {
+      setSelectedMainCategory(next);
+      const params = new URLSearchParams(searchParams);
+      if (next) params.set('category', next);
+      else params.delete('category');
+      setSearchParams(params);
+    },
+    [searchParams, setSearchParams],
+  );
+
   const handleClearAllFilters = () => {
     setSelectedCategoryType(null);
     setSelectedCategoryStatus(null);
@@ -102,11 +155,29 @@ export function CategoriesPage() {
     setSearchQuery('');
     setActiveCategoryTab('All Categories');
     setQuickNavId('');
-    setSelectedMainCategory(null);
+    applySelectedCategory(null);
   };
 
+  // After a category is picked from the left category navigation, the feed swaps
+  // to that category's content in place (state-only change — no route change, no
+  // remount), so the browser keeps the old scroll offset. Pull the user back to
+  // the start of the category browsing section, clearing the sticky navbar.
+  const scrollToCategoryResults = React.useCallback(() => {
+    if (typeof window === 'undefined') return;
+    // Navbar publishes its live height in px as --choosify-navbar-height; the CSS
+    // default is a rem string, so ignore anything that doesn't parse to a sane px.
+    const navbarHeightPx = parseInt(
+      getComputedStyle(document.documentElement).getPropertyValue('--choosify-navbar-height'),
+      10,
+    );
+    const offset = (navbarHeightPx >= 40 ? navbarHeightPx : 104) + 24;
+    // One frame so the category state change has committed before we measure.
+    requestAnimationFrame(() => scrollToFilterResultsTarget(CATEGORIES_SCROLL_TARGET_ID, offset));
+  }, []);
+
   const handleSidebarCategorySelect = (name: string) => {
-    setSelectedMainCategory((prev) => (prev === name ? null : name));
+    applySelectedCategory(selectedMainCategory === name ? null : name);
+    scrollToCategoryResults();
   };
 
   const handleQuickNavSelect = (id: string, filterType: string | null) => {
@@ -405,7 +476,7 @@ export function CategoriesPage() {
 
   useRegisterPageFilters({
     pageName: 'Categories',
-    scrollTargetId: 'categories-main-display',
+    scrollTargetId: CATEGORIES_SCROLL_TARGET_ID,
     renderSearch: () => (
       <div className="relative">
         <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
@@ -577,7 +648,7 @@ export function CategoriesPage() {
           </div>
         </aside>
 
-        <div id="categories-main-display" className="choosify-middle-feed scroll-mt-40 min-w-0 pb-10 space-y-6">
+        <div id={CATEGORIES_SCROLL_TARGET_ID} className="choosify-middle-feed scroll-mt-40 min-w-0 pb-10 space-y-6">
           <ListingFeedHeader
             eyebrow="Shop by • Categories"
             title={
@@ -593,7 +664,7 @@ export function CategoriesPage() {
               selectedMainCategory ? (
                 <button
                   type="button"
-                  onClick={() => setSelectedMainCategory(null)}
+                  onClick={() => applySelectedCategory(null)}
                   className="inline-flex items-center gap-1.5 text-[11px] font-bold text-orange-primary uppercase tracking-wide cursor-pointer hover:underline"
                 >
                   <X size={12} /> Clear filter

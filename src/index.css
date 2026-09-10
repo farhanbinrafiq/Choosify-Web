@@ -769,24 +769,32 @@ a[class*="bg-[#EF3C23]"]:not([class*="bg-[#EF3C23]/"]):hover {
   width: 100%;
 }
 
-/* Category browse cards — 4-col cap matching Choosify.dc.html; fixed card footprint */
+/*
+ * Category browse cards are information-dense (image, title, product/brand
+ * counts, subcategory list, promoted-brand bar, promoted badge), so the column
+ * count follows a minimum readable card width instead of fixed per-breakpoint
+ * counts:
+ *   phones (<=~430px)   -> 1 per row. min(100%, 17.5rem) keeps a single column
+ *                          and never lets a track exceed the container, so there
+ *                          is no horizontal overflow at 320px.
+ *   ~600px / tablets    -> 2 per row once two ~17.5rem cards + gap fit
+ *                          (covers 768 / 820).
+ *   >=1024px            -> the desktop left filter panel + category rail narrow
+ *                          the feed; pin 3 so cards don't collapse to a cramped
+ *                          ~170px the auto-fill/4-col rule produced here.
+ *   >=1280px            -> 4 per row — unchanged from the existing desktop design.
+ */
 .choosify-category-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 17.5rem), 1fr));
   gap: clamp(0.75rem, 1.15vw, 1.25rem);
   align-items: stretch;
   justify-items: stretch;
 }
 
-@media (min-width: 768px) {
-  .choosify-category-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
 @media (min-width: 1024px) {
   .choosify-category-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 
