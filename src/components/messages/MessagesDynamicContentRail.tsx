@@ -63,15 +63,18 @@ export function resolveEntityDisplay(entity: AnnouncementAssociatedEntity) {
 export function EntityCard({
   entity,
   className,
+  compact,
 }: {
   entity: AnnouncementAssociatedEntity;
   className?: string;
+  /** Smaller image/type/padding — for inline placement inside a feed message. */
+  compact?: boolean;
 }) {
   const display = resolveEntityDisplay(entity);
 
   return (
     <div className={`rounded-[10px] border border-[#E8EDF2] overflow-hidden bg-white ${className ?? ''}`}>
-      <div className="aspect-[4/3] bg-[#F4F7F9] relative overflow-hidden">
+      <div className={`${compact ? 'aspect-[16/9]' : 'aspect-[4/3]'} bg-[#F4F7F9] relative overflow-hidden`}>
         <img
           src={display.image}
           alt=""
@@ -80,30 +83,36 @@ export function EntityCard({
             e.currentTarget.src = PLACEHOLDER_IMAGE;
           }}
         />
-        <span className="absolute top-2 left-2 text-[9px] font-extrabold uppercase tracking-wide px-2 py-0.5 rounded-md bg-white/95 text-[#FF5B00] border border-[#FF5B00]/20">
+        <span
+          className={`absolute top-1.5 left-1.5 font-extrabold uppercase tracking-wide rounded-md bg-white/95 text-[#FF5B00] border border-[#FF5B00]/20 ${
+            compact ? 'text-[8px] px-1.5 py-0.5' : 'text-[9px] px-2 py-0.5'
+          }`}
+        >
           {entityTypeLabel(entity.type)}
         </span>
       </div>
-      <div className="p-3.5 space-y-2">
+      <div className={compact ? 'p-2.5 space-y-1.5' : 'p-3.5 space-y-2'}>
         <div>
-          <h3 className="text-[13px] font-extrabold text-[#1A1A2E] leading-snug">
+          <h3 className={`font-extrabold text-[#1A1A2E] leading-snug ${compact ? 'text-[12px]' : 'text-[13px]'}`}>
             {display.title}
           </h3>
           {display.subtitle ? (
-            <p className="text-[11px] text-[#9AA0AC] mt-0.5">{display.subtitle}</p>
+            <p className={`text-[#9AA0AC] mt-0.5 ${compact ? 'text-[10px]' : 'text-[11px]'}`}>{display.subtitle}</p>
           ) : null}
         </div>
         {display.meta ? (
-          <p className="text-[14px] font-extrabold text-[#FF5B00] tabular-nums">
+          <p className={`font-extrabold text-[#FF5B00] tabular-nums ${compact ? 'text-[12.5px]' : 'text-[14px]'}`}>
             {display.meta}
           </p>
         ) : null}
         <Link
           to={display.href}
-          className="inline-flex w-full items-center justify-center gap-1.5 min-h-[38px] px-3 rounded-lg bg-[#FF5B00] text-white text-[11.5px] font-bold no-underline hover:brightness-110"
+          className={`inline-flex w-full items-center justify-center gap-1.5 rounded-lg bg-[#FF5B00] text-white font-bold no-underline hover:brightness-110 ${
+            compact ? 'min-h-[32px] px-2.5 text-[10.5px]' : 'min-h-[38px] px-3 text-[11.5px]'
+          }`}
         >
           {display.ctaLabel}
-          <ExternalLink size={12} />
+          <ExternalLink size={compact ? 10 : 12} />
         </Link>
       </div>
     </div>

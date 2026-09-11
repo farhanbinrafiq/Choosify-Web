@@ -491,8 +491,8 @@ export function MessageThreadExchange({
                 ) : null}
 
                 {isAnnouncementMessage && m.associatedEntity && (
-                  <div className="xl:hidden w-full max-w-sm mt-2" onClick={(e) => e.stopPropagation()}>
-                    <EntityCard entity={m.associatedEntity} />
+                  <div className="w-full max-w-[220px] mt-2" onClick={(e) => e.stopPropagation()}>
+                    <EntityCard entity={m.associatedEntity} compact />
                   </div>
                 )}
 
