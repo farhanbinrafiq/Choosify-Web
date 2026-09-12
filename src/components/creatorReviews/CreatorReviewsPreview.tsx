@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useGlobalState } from '../../context/GlobalStateContext';
 import { getAllBrandPosts } from '../../lib/brandPosts';
@@ -6,7 +6,6 @@ import { resolveSpotlightExperience } from '../../utils/spotlightContentResolver
 import {
   adaptiveBrandPreviewCount,
   adaptiveProductPreviewCount,
-  buildCreatorReviewsViewAllHref,
   resolveCreatorReviewsPreview,
   type CreatorReviewsPreviewContext,
   type LegacyCreatorContentItem,
@@ -19,6 +18,7 @@ import { cn } from '../../lib/utils';
 import type { CatalogProduct } from '../../types/catalog';
 import { detectCreatorReviewPlatform, getCreatorReviewOrientation } from '../../lib/videoEmbed';
 import { CreatorReviewMediaCard } from './CreatorReviewMediaCard';
+import { CreatorReviewViewerModal, type CreatorReviewViewerMedia } from './CreatorReviewViewerModal';
 
 const BRAND_LOGOS: Record<string, string> = {
   Samsung: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80',
@@ -108,6 +108,17 @@ export function CreatorReviewsPreview({
   const navigate = useNavigate();
   const nowMs = usePriorityClockMs();
   const { allCatalogProducts, allCatalogGuides, allCreators } = useGlobalState();
+  // Single shared active-media state -- the only iframe for this whole
+  // section lives inside CreatorReviewViewerModal, so at most one Creator
+  // Review can ever be playing at a time (starting another replaces this).
+  const [activeMedia, setActiveMedia] = useState<CreatorReviewViewerMedia | null>(null);
+  // Product Detail "VIEW ALL" — expands this section in place on the same
+  // page/URL instead of navigating to Spotlight. Brand context is untouched
+  // and keeps navigating via preview.viewAllHref (see the header below).
+  const [expanded, setExpanded] = useState(false);
+  useEffect(() => {
+    setExpanded(false);
+  }, [productId, brandId]);
 
   const allContent = useMemo(
     () =>
@@ -121,6 +132,11 @@ export function CreatorReviewsPreview({
     [allCatalogProducts, allCatalogGuides, allCreators],
   );
 
+  // Only Product Detail gets in-place expansion; Brand context keeps
+  // navigating to Spotlight via preview.viewAllHref, untouched.
+  const isExpandable = context === 'product';
+  const effectiveExpanded = isExpandable && expanded;
+
   const preview = useMemo(
     () =>
       resolveCreatorReviewsPreview(allContent, {
@@ -130,6 +146,7 @@ export function CreatorReviewsPreview({
         brandName,
         featuredContentId,
         legacyCreatorContent,
+        expanded: effectiveExpanded,
       }),
     [
       allContent,
@@ -139,22 +156,30 @@ export function CreatorReviewsPreview({
       brandName,
       featuredContentId,
       legacyCreatorContent,
+      effectiveExpanded,
     ],
   );
 
+  // Whether there is more content than the collapsed preview shows, computed
+  // independently of `expanded` so the VIEW ALL/VIEW LESS control's presence
+  // never flickers off just because the user expanded it.
+  const legacyCap = useMemo(
+    () =>
+      context === 'product'
+        ? adaptiveProductPreviewCount(legacyCreatorContent?.length ?? 0)
+        : adaptiveBrandPreviewCount(legacyCreatorContent?.length ?? 0),
+    [legacyCreatorContent, context],
+  );
+  const legacyHasMore = (legacyCreatorContent?.length ?? 0) > legacyCap;
+
   const legacyFallback = useMemo(() => {
     if (preview.totalCount > 0 || !legacyCreatorContent?.length) return [];
-    const cap =
-      context === 'product'
-        ? adaptiveProductPreviewCount(legacyCreatorContent.length)
-        : adaptiveBrandPreviewCount(legacyCreatorContent.length);
+    const cap = effectiveExpanded ? legacyCreatorContent.length : legacyCap;
     return legacyCreatorContent.slice(0, cap);
-  }, [preview.totalCount, legacyCreatorContent, context]);
+  }, [preview.totalCount, legacyCreatorContent, legacyCap, effectiveExpanded]);
 
   const showLegacyOnly = preview.totalCount === 0 && legacyFallback.length > 0;
-  const showViewAll =
-    preview.showViewAll ||
-    (showLegacyOnly && (legacyCreatorContent?.length ?? 0) > legacyFallback.length);
+  const showViewAll = preview.showViewAll || (showLegacyOnly && legacyHasMore);
 
   const resolvedTitle =
     title ?? (context === 'brand' ? 'CREATORS REVIEW' : 'CREATOR REVIEWS');
@@ -208,14 +233,25 @@ export function CreatorReviewsPreview({
           >
             {resolvedTitle}
           </h2>
-          {showViewAll && (
-            <Link
-              to={preview.viewAllHref}
-              className="text-[12px] font-bold text-[#1A1A2E] hover:text-[#EF3C23] shrink-0"
-            >
-              VIEW ALL ›
-            </Link>
-          )}
+          {showViewAll &&
+            (isExpandable ? (
+              <button
+                type="button"
+                onClick={() => setExpanded((prev) => !prev)}
+                className="text-[12px] font-bold text-[#1A1A2E] hover:text-[#EF3C23] shrink-0 bg-transparent border-none cursor-pointer p-0"
+                aria-expanded={effectiveExpanded}
+                aria-controls="creator-reviews-preview-grid"
+              >
+                {effectiveExpanded ? 'VIEW LESS' : 'VIEW ALL ›'}
+              </button>
+            ) : (
+              <Link
+                to={preview.viewAllHref}
+                className="text-[12px] font-bold text-[#1A1A2E] hover:text-[#EF3C23] shrink-0"
+              >
+                VIEW ALL ›
+              </Link>
+            ))}
         </div>
         <p className="text-[11px] sm:text-[11.5px] text-[#9AA0AC] mt-0.5 m-0">{resolvedSubtitle}</p>
         {productTitle && context === 'product' ? (
@@ -223,14 +259,55 @@ export function CreatorReviewsPreview({
         ) : null}
       </header>
 
-      {/* Same YouTube card size as Discover / Brand Story — flex-wrap (not grid) so a
-          partial row keeps each card at its normal size instead of stretching to fill. */}
-      {youtubeSource.length > 0 && (
-        <div className="flex flex-wrap gap-4 mb-4 last:mb-0">
-          {showLegacyOnly
-            ? youtubeSource.map((item) => {
-                const legacy = item as LegacyCreatorContentItem;
-                return (
+      <div id="creator-reviews-preview-grid">
+        {/* Same YouTube card size as Discover / Brand Story — flex-wrap (not grid) so a
+            partial row keeps each card at its normal size instead of stretching to fill. */}
+        {youtubeSource.length > 0 && (
+          <div className="flex flex-wrap gap-4 mb-4 last:mb-0">
+            {showLegacyOnly
+              ? youtubeSource.map((item) => {
+                  const legacy = item as LegacyCreatorContentItem;
+                  return (
+                    <CreatorReviewMediaCard
+                      key={legacy.id}
+                      videoUrl={legacy.videoUrl}
+                      title={legacy.title}
+                      thumbnail={legacy.thumbnail}
+                      creatorHandle={legacy.creatorHandle}
+                      views={legacy.views}
+                      onPlay={() =>
+                        setActiveMedia({
+                          videoUrl: legacy.videoUrl,
+                          title: legacy.title,
+                          creatorHandle: legacy.creatorHandle,
+                        })
+                      }
+                    />
+                  );
+                })
+              : (youtubeSource as SpotlightContent[]).map((content) => (
+                  <div
+                    key={content.contentId}
+                    className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.667rem)] xl:w-[calc(25%-0.75rem)] shrink-0 grow-0"
+                  >
+                    <ReviewCard
+                      content={content}
+                      products={allCatalogProducts}
+                      forceVariant="landscape-video"
+                      nowMs={nowMs}
+                      onNavigate={() => navigate(content.href)}
+                    />
+                  </div>
+                ))}
+          </div>
+        )}
+
+        {/* Same Reels card size as Discover / Brand Story — flex-wrap so a partial row
+            doesn't stretch cards taller/wider than the standard reel tile. */}
+        {reelsSource.length > 0 && (
+          <div className="flex flex-wrap gap-3">
+            {showLegacyOnly
+              ? (reelsSource as LegacyCreatorContentItem[]).map((legacy) => (
                   <CreatorReviewMediaCard
                     key={legacy.id}
                     videoUrl={legacy.videoUrl}
@@ -238,59 +315,34 @@ export function CreatorReviewsPreview({
                     thumbnail={legacy.thumbnail}
                     creatorHandle={legacy.creatorHandle}
                     views={legacy.views}
-                    viewAllHref={buildCreatorReviewsViewAllHref({ productId, brandId })}
+                    onPlay={() =>
+                      setActiveMedia({
+                        videoUrl: legacy.videoUrl,
+                        title: legacy.title,
+                        creatorHandle: legacy.creatorHandle,
+                      })
+                    }
                   />
-                );
-              })
-            : (youtubeSource as SpotlightContent[]).map((content) => (
-                <div
-                  key={content.contentId}
-                  className="w-full sm:w-[calc(50%-0.5rem)] lg:w-[calc(33.333%-0.667rem)] xl:w-[calc(25%-0.75rem)] shrink-0 grow-0"
-                >
-                  <ReviewCard
-                    content={content}
-                    products={allCatalogProducts}
-                    forceVariant="landscape-video"
-                    nowMs={nowMs}
-                    onNavigate={() => navigate(content.href)}
-                  />
-                </div>
-              ))}
-        </div>
-      )}
+                ))
+              : (reelsSource as SpotlightContent[]).map((content) => (
+                  <div
+                    key={content.contentId}
+                    className="w-[calc(50%-0.375rem)] min-[480px]:w-[calc(33.333%-0.5rem)] md:w-[calc(25%-0.5625rem)] xl:w-[calc(20%-0.6rem)] shrink-0 grow-0"
+                  >
+                    <ReviewCard
+                      content={content}
+                      products={allCatalogProducts}
+                      forceVariant="portrait-reel"
+                      nowMs={nowMs}
+                      onNavigate={() => navigate(content.href)}
+                    />
+                  </div>
+                ))}
+          </div>
+        )}
+      </div>
 
-      {/* Same Reels card size as Discover / Brand Story — flex-wrap so a partial row
-          doesn't stretch cards taller/wider than the standard reel tile. */}
-      {reelsSource.length > 0 && (
-        <div className="flex flex-wrap gap-3">
-          {showLegacyOnly
-            ? (reelsSource as LegacyCreatorContentItem[]).map((legacy) => (
-                <CreatorReviewMediaCard
-                  key={legacy.id}
-                  videoUrl={legacy.videoUrl}
-                  title={legacy.title}
-                  thumbnail={legacy.thumbnail}
-                  creatorHandle={legacy.creatorHandle}
-                  views={legacy.views}
-                  viewAllHref={buildCreatorReviewsViewAllHref({ productId, brandId })}
-                />
-              ))
-            : (reelsSource as SpotlightContent[]).map((content) => (
-                <div
-                  key={content.contentId}
-                  className="w-[calc(50%-0.375rem)] min-[480px]:w-[calc(33.333%-0.5rem)] md:w-[calc(25%-0.5625rem)] xl:w-[calc(20%-0.6rem)] shrink-0 grow-0"
-                >
-                  <ReviewCard
-                    content={content}
-                    products={allCatalogProducts}
-                    forceVariant="portrait-reel"
-                    nowMs={nowMs}
-                    onNavigate={() => navigate(content.href)}
-                  />
-                </div>
-              ))}
-        </div>
-      )}
+      <CreatorReviewViewerModal media={activeMedia} onClose={() => setActiveMedia(null)} />
     </section>
   );
 }

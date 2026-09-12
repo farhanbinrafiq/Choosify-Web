@@ -47,6 +47,12 @@ export interface CreatorReviewsPreviewOptions {
   /** Seller/admin pinned featured review (Spotlight contentId or sourceId) */
   featuredContentId?: string;
   legacyCreatorContent?: LegacyCreatorContentItem[];
+  /** Product Detail "VIEW ALL" in-place expansion — when true, visibleCount
+   *  is not capped by adaptiveProductPreviewCount, so every pooled review for
+   *  this product is returned instead of just the preview slice. Does not
+   *  change which reviews are pooled (still scoped to this product/brand via
+   *  filterCreatorReviewsForEntity), only how many of them are visible. */
+  expanded?: boolean;
 }
 
 export function isCreatorReviewContent(content: SpotlightContent): boolean {
@@ -163,8 +169,9 @@ export function resolveCreatorReviewsPreview(
   const pool = ranked.slice(0, maxPool);
 
   const totalCount = pool.length;
-  const visibleCount =
-    options.context === 'product'
+  const visibleCount = options.expanded
+    ? totalCount
+    : options.context === 'product'
       ? adaptiveProductPreviewCount(totalCount)
       : adaptiveBrandPreviewCount(totalCount);
 
