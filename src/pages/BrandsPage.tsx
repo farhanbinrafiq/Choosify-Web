@@ -44,6 +44,8 @@ interface Brand {
   followers?: number;
   sponsoredFlag?: boolean;
   featuredFlag?: boolean;
+  /** Canonical profile cover/banner — same field the Brand Detail hero reads. */
+  coverImage?: string;
 }
 
 export function BrandsPage() {
@@ -260,6 +262,7 @@ export function BrandsPage() {
         verifiedStatus: brand.verifiedStatus,
         createdAt: brand.createdAt,
         updatedAt: brand.updatedAt,
+        coverImage: brand.coverImage,
       }));
     }
     return fallbackBrands;

@@ -126,6 +126,7 @@ export function ChoosifySponsoredCard({
               description: brand.description,
               rating: brand.ratings ?? 4.5,
               category: brand.category,
+              coverImage: brand.coverImage,
             }}
           />
         </Suspense>
