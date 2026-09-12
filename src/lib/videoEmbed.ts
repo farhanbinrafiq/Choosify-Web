@@ -256,9 +256,16 @@ export interface CreatorReviewMedia {
 
 export function resolveCreatorReviewMedia(
   url: string,
-  fallbackThumbnail?: string,
+  customThumbnail?: string,
 ): CreatorReviewMedia {
   const platform = detectCreatorReviewPlatform(url);
+  // Precedence (platform-independent): a seller-selected custom thumbnail
+  // always wins over a platform-generated one (e.g. YouTube's auto thumbnail),
+  // which in turn wins over having nothing at all. Previously this was
+  // reversed -- the derived platform thumbnail (only ever non-empty for
+  // YouTube/YouTube Shorts today) silently overrode a valid custom thumbnail,
+  // while Facebook/Instagram/TikTok "worked" only because getVideoPosterUrl
+  // never derives anything for them, not because the precedence was correct.
   const derivedThumb = getVideoPosterUrl(url);
   return {
     platform,
@@ -267,6 +274,6 @@ export function resolveCreatorReviewMedia(
     externalUrl: url,
     embedUrl: getVideoEmbedUrl(url),
     canEmbed: isEmbeddableVideo(url),
-    thumbnailUrl: derivedThumb || fallbackThumbnail || '',
+    thumbnailUrl: customThumbnail || derivedThumb || '',
   };
 }
