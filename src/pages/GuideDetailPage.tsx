@@ -65,6 +65,7 @@ import { CreatorCardDesign } from "../components/CreatorCardDesign";
 import { SpotlightDetailsDescriptionSection } from "../components/spotlight/experience/SpotlightDetailsDescriptionSection";
 import { SpotlightDetailsServicesSection } from "../components/spotlight/experience/SpotlightDetailsServicesSection";
 import { SpotlightDetailsRelatedRail } from "../components/spotlight/experience/SpotlightDetailsRelatedRail";
+import { partitionDiscoverFeedLanes } from "../utils/spotlightMixedFeed";
 import { ContentDetailOptionalSections } from "../components/contentDetail/ContentDetailOptionalSections";
 import { ContentDetailWhatIsDiscussed } from "../components/contentDetail/ContentDetailWhatIsDiscussed";
 import { useSpotlightExperience } from "../hooks/useSpotlightExperience";
@@ -665,13 +666,26 @@ export function GuideDetailPage({
       ...spotlightContent.graph.relatedGuideIds,
       ...spotlightContent.connections.spotlightContentIds,
     ]);
-    const fromGraph = spotlightAllContent.filter(
-      (c) => c.contentId !== spotlightContent.contentId && graphIds.has(c.contentId),
-    );
+    const pool = spotlightAllContent.filter((c) => c.contentId !== spotlightContent.contentId);
+    const fromGraph = pool.filter((c) => graphIds.has(c.contentId));
     if (fromGraph.length >= 2) return fromGraph.slice(0, 4);
-    return spotlightAllContent
-      .filter((c) => c.contentId !== spotlightContent.contentId)
-      .slice(0, 4);
+
+    // No/insufficient explicit relations — build a media-type-diverse sample
+    // (same lane classifier Discovery/UniversalCommerceCard already use, via
+    // partitionDiscoverFeedLanes) instead of an arbitrary contiguous slice,
+    // which otherwise tends to surface a homogeneous run (e.g. every item
+    // happens to be a Reel) depending on how the pool is ordered. Selection
+    // only — the render path/card component is untouched.
+    const lanes = partitionDiscoverFeedLanes(pool);
+    const laneOrder = [lanes.reels, lanes.youtube, lanes.blogs, lanes.live];
+    const mixed: SpotlightContent[] = [];
+    for (let i = 0; mixed.length < 4 && laneOrder.some((l) => l.length > i); i += 1) {
+      for (const lane of laneOrder) {
+        if (mixed.length >= 4) break;
+        if (lane[i]) mixed.push(lane[i]);
+      }
+    }
+    return mixed;
   }, [spotlightContent, spotlightAllContent]);
 
   // Exactly one primary publisher identity block:
