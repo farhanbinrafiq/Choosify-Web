@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useLayoutEffect, useRef, useMemo, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
@@ -197,11 +197,20 @@ export function MessagesPage({
     return true;
   });
 
-  // Filter messages for active thread
-  const activeMessages = threadMessages.filter(m => m.threadId === activeThreadId);
+  // Filter messages for active thread. Memoized so an unrelated re-render
+  // (typing, an unrelated poll tick, etc.) doesn't produce a new array
+  // reference and spuriously re-fire the scroll effects below.
+  const activeMessages = useMemo(
+    () => threadMessages.filter(m => m.threadId === activeThreadId),
+    [threadMessages, activeThreadId],
+  );
 
   // Ref to scroll only the chat viewport (not the whole page)
   const chatViewportRef = useRef<HTMLDivElement>(null);
+  // Tracks whether the user is currently near the bottom of the chat viewport.
+  // Read by the live-update effect below to decide whether to follow new
+  // messages down or leave the user's scroll position alone.
+  const isNearBottomRef = useRef(true);
 
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
@@ -377,11 +386,41 @@ export function MessagesPage({
   useMessagingPoll(supportPollKey, () => activeThreadId && void refetchSupportMessages(activeThreadId), 4000);
   useMessagingPoll(platformPollKey, () => activeThreadId && void refetchPlatformMessages(activeThreadId), 4000);
 
+  // Opening a conversation: jump to the latest message immediately.
+  // useLayoutEffect so this runs before the browser paints — the viewport
+  // never visibly shows the top of the thread first. Keyed on activeThreadId
+  // only (not activeMessages) so this fires once per conversation switch,
+  // not on every subsequent message-list update.
+  useLayoutEffect(() => {
+    const viewport = chatViewportRef.current;
+    if (!viewport || !activeThreadId) return;
+    viewport.scrollTop = viewport.scrollHeight;
+    isNearBottomRef.current = true;
+  }, [activeThreadId]);
+
+  // Track whether the user is near the bottom, so live updates know whether
+  // to follow the conversation or leave the user's scroll position alone.
   useEffect(() => {
     const viewport = chatViewportRef.current;
     if (!viewport) return;
+    const NEAR_BOTTOM_PX = 120;
+    const handleScroll = () => {
+      const distanceFromBottom = viewport.scrollHeight - viewport.scrollTop - viewport.clientHeight;
+      isNearBottomRef.current = distanceFromBottom <= NEAR_BOTTOM_PX;
+    };
+    viewport.addEventListener('scroll', handleScroll, { passive: true });
+    return () => viewport.removeEventListener('scroll', handleScroll);
+  }, [activeThreadId]);
+
+  // Live updates (new message arrives via realtime/poll): only follow the
+  // conversation down if the user was already near the bottom. A user who
+  // has scrolled up to read history is never forcibly jumped away.
+  useEffect(() => {
+    const viewport = chatViewportRef.current;
+    if (!viewport) return;
+    if (!isNearBottomRef.current) return;
     viewport.scrollTop = viewport.scrollHeight;
-  }, [activeMessages, activeThreadId]);
+  }, [activeMessages]);
 
   // Find linked order for active thread (orderRef, bookingRequestId, or seller thread match)
   const linkedOrder = useMemo(
@@ -1215,6 +1254,7 @@ export function MessagesPage({
               <>
               <div
                 ref={chatViewportRef}
+                data-preserve-scroll
                 className="flex-1 p-5 overflow-y-auto space-y-4 no-scrollbar relative min-h-0 bg-choosify-feed"
               >
                 {showFreezeNotice && conversationExpiry.freezeNotice && (
