@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef } from "react";
+﻿import React, { useState, useMemo, useRef } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import {
   ArrowLeft,
@@ -49,7 +49,6 @@ import { CATEGORY_SPEC_CONFIGS } from "../data/guideSpecConfigs";
 import { useDashboard } from "../context/DashboardContext";
 import { useGlobalState } from "../context/GlobalStateContext";
 import { toast } from '../lib/notify';
-import { FollowButton } from "../components/FollowButton";
 import { useRegisterPageFilters } from "../components/FilterEngine";
 import type { CatalogGuide } from "../types/catalog";
 import type { SpotlightContent } from "../types/spotlight/experience/content";
@@ -62,6 +61,7 @@ import {
 import { resolveContentDetailOptionalSections } from "../lib/spotlight/content/resolveContentDetailSections";
 import { catalogGuideHref } from "../lib/spotlight/content";
 import { BrandCardDesign, mapBrandToCardDesign } from "../components/BrandCardDesign";
+import { CreatorCardDesign } from "../components/CreatorCardDesign";
 import { SpotlightDetailsDescriptionSection } from "../components/spotlight/experience/SpotlightDetailsDescriptionSection";
 import { SpotlightDetailsServicesSection } from "../components/spotlight/experience/SpotlightDetailsServicesSection";
 import { SpotlightDetailsRelatedRail } from "../components/spotlight/experience/SpotlightDetailsRelatedRail";
@@ -431,27 +431,70 @@ export function GuideDetailPage({
   // author (ABOUT THE BRAND, no author card). Otherwise the guide is
   // creator-authored (ABOUT THE AUTHOR). `brandIds` are *mentions* only and never
   // imply authorship — they render as "BRAND MENTIONED".
+  // Real Spotlight content carries publisher identity on `spotlightContent.
+  // publisher` (canonical `SpotlightPublisher`, `publisherType` is one of the
+  // full set incl. 'brand'/'creator'/etc — see types/spotlight/experience/
+  // publisher.ts), which the legacy `guide.publisherType` field never covers.
+  // Check BOTH sources — never infer type from the display name.
+  const spotlightPublisherIsBrand = spotlightContent?.publisher?.publisherType === 'brand';
   const guidePublisherType: 'creator' | 'brand' =
-    (guide as any)?.publisherType === 'brand' ? 'brand' : 'creator';
-  const publisherBrandId = (guide as any)?.publisherBrandId as string | undefined;
+    (guide as any)?.publisherType === 'brand' || spotlightPublisherIsBrand ? 'brand' : 'creator';
+  const publisherBrandId =
+    ((guide as any)?.publisherBrandId as string | undefined) ??
+    (spotlightPublisherIsBrand ? spotlightContent?.publisher.publisherId : undefined);
 
   const publisherBrandCard = useMemo(() => {
     if (guidePublisherType !== 'brand') return null;
-    const b = (allBrands ?? []).find(
+    const byId = (allBrands ?? []).find(
       (x: any) =>
         String(x.catalogId) === String(publisherBrandId) ||
         String(x.id) === String(publisherBrandId) ||
         String(x.slug) === String(publisherBrandId),
     );
-    if (b) return mapBrandToCardDesign(b);
+    if (byId) {
+      return mapBrandToCardDesign({
+        ...byId,
+        // Real catalog match: keep its own real rating/verified; never
+        // fabricate the Price Range / Success stats this component would
+        // otherwise invent for a record that doesn't actually carry them.
+        priceRange: (byId as any).priceRange ?? null,
+        successScore: (byId as any).successScore ?? null,
+      });
+    }
     // Server enrichment: resolved publisher brand identity travels with the guide
     // so a brand-authored guide always renders "About the Brand".
     const pb = (guide as any)?.publisherBrand;
     if (pb && pb.name) {
-      return mapBrandToCardDesign({ id: pb.id, name: pb.name, logo: pb.logo, slug: pb.slug });
+      return mapBrandToCardDesign({
+        id: pb.id,
+        name: pb.name,
+        logo: pb.logo,
+        slug: pb.slug,
+        priceRange: null,
+        successScore: null,
+        verified: pb.verified,
+      });
+    }
+    // Genuine Spotlight publisher of type 'brand' with no catalog id/slug
+    // overlap (the Spotlight demo layer and the live catalog aren't
+    // guaranteed to share a namespace) — resolve by name against the real,
+    // live catalog. Only render if an ACTUAL catalog brand is found; never
+    // fabricate a profile or link to one that doesn't exist.
+    if (spotlightPublisherIsBrand && spotlightContent) {
+      const pub = spotlightContent.publisher;
+      const byName = (allBrands ?? []).find(
+        (x: any) => String(x.name).trim().toLowerCase() === String(pub.name).trim().toLowerCase(),
+      );
+      if (byName) {
+        return mapBrandToCardDesign({
+          ...byName,
+          priceRange: (byName as any).priceRange ?? null,
+          successScore: (byName as any).successScore ?? null,
+        });
+      }
     }
     return null;
-  }, [guidePublisherType, publisherBrandId, allBrands, guide]);
+  }, [guidePublisherType, publisherBrandId, allBrands, guide, spotlightContent, spotlightPublisherIsBrand]);
 
   /** Mentioned brands = canonical brand mentions, excluding the publisher brand itself. */
   const mentionedBrandCards = useMemo(
@@ -490,6 +533,7 @@ export function GuideDetailPage({
       reviews: null as number | null,
       rating: null as number | null,
       platforms: Array.isArray(c.platforms) ? c.platforms : [],
+      coverImage: c.coverImage,
     };
   }, [guide, allCreators]);
 
@@ -1424,67 +1468,29 @@ export function GuideDetailPage({
                     <div className="text-[11px] font-extrabold text-[#1A1A2E] tracking-wide mb-3.5">
                       ABOUT THE AUTHOR
                     </div>
-                    <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-5 text-center">
-                      <div className="relative w-[72px] h-[72px] mx-auto mb-3">
-                        {creator?.avatar ? (
-                          <img
-                            src={creator.avatar}
-                            alt=""
-                            className="w-full h-full rounded-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full rounded-full bg-[#FF5B00] flex items-center justify-center text-white text-[20px] font-extrabold">
-                            {authorInitial}
-                          </div>
-                        )}
-                        <div className="absolute bottom-0 right-0 w-[22px] h-[22px] rounded-full bg-[#6C4CFF] border-2 border-white flex items-center justify-center text-white text-[11px] font-extrabold">
-                          ✓
-                        </div>
-                      </div>
-                      <div className="text-[14px] font-extrabold text-[#1A1A2E] mb-0.5">
-                        {creator.name}
-                      </div>
-                      <div className="text-[11.5px] text-[#9AA0AC] mb-3.5">
-                        {creator.verifiedStatus || creator.bestFor || 'Choosify Editor'}
-                      </div>
-                      <div className="flex items-center justify-center border-y border-[#F1F1F3] py-3 mb-3.5">
-                        <div className="flex-1">
-                          <div className="text-[14px] font-extrabold text-[#1A1A2E]">
-                            {typeof creator.reviews === 'number' ? creator.reviews : '—'}
-                          </div>
-                          <div className="text-[9.5px] text-[#9AA0AC]">Reviews</div>
-                        </div>
-                        <div className="w-px h-[26px] bg-[#F1F1F3]" />
-                        <div className="flex-1">
-                          <div className="text-[14px] font-extrabold text-[#1A1A2E]">
-                            {typeof creator.followers === 'number'
-                              ? creator.followers >= 1000
-                                ? `${(creator.followers / 1000).toFixed(1)}K`
-                                : creator.followers
-                              : '—'}
-                          </div>
-                          <div className="text-[9.5px] text-[#9AA0AC]">Followers</div>
-                        </div>
-                        <div className="w-px h-[26px] bg-[#F1F1F3]" />
-                        <div className="flex-1">
-                          <div className="text-[14px] font-extrabold text-[#1A1A2E]">
-                            {typeof creator.score === 'number' ? creator.score : '—'}
-                          </div>
-                          <div className="text-[9.5px] text-[#9AA0AC]">Score</div>
-                        </div>
-                      </div>
-                      <FollowButton
-                        id={`creator-${creator.id || creator.name}`}
-                        name={creator.name}
-                        type="creator"
-                        className="w-full h-9 rounded-lg text-[11.5px] font-bold mb-2"
+                    {/* Canonical Creator card — same component/proportions as the
+                        Creator Directory tile (CreatorCardDesign). Capped width +
+                        justify-self-start keep it from stretching to fill this
+                        half of the two-column grid; only real, non-fabricated
+                        creator fields are passed (see `strict` mapping below). */}
+                    <div className="max-w-[280px] justify-self-start">
+                      <CreatorCardDesign
+                        creator={{
+                          id: creator.id ?? creator.name,
+                          name: creator.name,
+                          handle: creator.handle || creator.name,
+                          avatar: creator.avatar || '',
+                          score: typeof creator.score === 'number' ? creator.score : 0,
+                          bestFor: creator.bestFor || 'Creator',
+                          niche: creator.bestFor || undefined,
+                          platforms: Array.isArray(creator.platforms) ? creator.platforms : [],
+                          rating: typeof creator.rating === 'number' ? creator.rating : null,
+                          reviews: typeof creator.reviews === 'number' ? creator.reviews : null,
+                          followers: typeof creator.followers === 'number' ? creator.followers : null,
+                          verified: creator.verifiedStatus === 'Verified creator',
+                          coverImage: (creator as { coverImage?: string }).coverImage,
+                        }}
                       />
-                      <Link
-                        to={`/creators/${creator.id || creator.name}`}
-                        className="block w-full choosify-dark-surface hover:brightness-110 text-white text-center py-[9px] rounded-lg text-[11.5px] font-bold transition-[filter]"
-                      >
-                        View Profile
-                      </Link>
                     </div>
                   </div>
 
