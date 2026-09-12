@@ -214,17 +214,27 @@ export function buildInvoicePdf({
   doc.text('BILLED TO', MARGIN, y);
   doc.setFontSize(11);
   doc.setTextColor(...BRAND.navy);
-  doc.text(order.shipping?.fullName || 'Buyer', MARGIN, y + 6);
+  // Wrapped the same as address/phone below -- an unbounded customer name was
+  // otherwise free to run into the metadata column on the right.
+  const billedToColWidth = 95;
+  const nameLines = doc.splitTextToSize(order.shipping?.fullName || 'Buyer', billedToColWidth) as string[];
+  const nameLineH = 11 * 0.42;
+  nameLines.forEach((line, i) => doc.text(line, MARGIN, y + 6 + i * nameLineH));
+  const addrStartY = y + 6 + (nameLines.length - 1) * nameLineH + 6; // matches the original fixed "y + 12" when the name is a single line
   doc.setFont(FONT, 'normal');
   doc.setFontSize(8.5);
   doc.setTextColor(60, 60, 70);
   const addrLine = `${order.shipping?.address || '—'}${order.shipping?.region ? `, ${order.shipping.region}` : ''}`;
-  const billedToColWidth = 95;
   const addrLines = doc.splitTextToSize(addrLine, billedToColWidth) as string[];
   const addrLineH = 8.5 * 0.42;
-  addrLines.forEach((line, i) => doc.text(line, MARGIN, y + 12 + i * addrLineH));
-  const phoneY = y + 12 + addrLines.length * addrLineH + 2.5;
-  doc.text(`Phone: ${order.shipping?.phone || '—'}`, MARGIN, phoneY);
+  addrLines.forEach((line, i) => doc.text(line, MARGIN, addrStartY + i * addrLineH));
+  const phoneY = addrStartY + addrLines.length * addrLineH + 2.5;
+  // Same wrapping treatment as the address above -- an unbounded phone line
+  // was the one remaining spot in this block that could run past the "Billed
+  // To" column into the metadata column on the right (e.g. when a long value
+  // ends up here instead of a short number).
+  const phoneLines = doc.splitTextToSize(`Phone: ${order.shipping?.phone || '—'}`, billedToColWidth) as string[];
+  phoneLines.forEach((line, i) => doc.text(line, MARGIN, phoneY + i * addrLineH));
 
   const metaX = PAGE_W - MARGIN;
   const metaColWidth = 85;
@@ -234,7 +244,7 @@ export function buildInvoicePdf({
   my = drawMetadataRow(doc, { xRight: metaX, y: my, colWidth: metaColWidth, label: 'Order Reference', value: order.orderId, font: FONT });
   my = drawMetadataRow(doc, { xRight: metaX, y: my, colWidth: metaColWidth, label: 'Invoice Date', value: invoiceDate, font: FONT });
 
-  const billedToBottom = phoneY + 3;
+  const billedToBottom = phoneY + (phoneLines.length - 1) * addrLineH + 3;
   y = Math.max(billedToBottom, my) + 4;
   doc.setDrawColor(...BRAND.hairline);
   doc.line(MARGIN, y, PAGE_W - MARGIN, y);

@@ -16,6 +16,7 @@ import { toast } from '../lib/notify';
 import { operationsApi } from '../services/operationsApi';
 import { usePageBreadcrumbs } from '../context/BreadcrumbContext';
 import { formatAddressLine } from '../lib/address/addressUtils';
+import { isPlausibleBdPhone } from '../lib/phoneValidation';
 import { PLACEHOLDER_IMAGE } from '../constants';
 
 const KNOWN_PROMOS_FALLBACK = [
@@ -319,6 +320,13 @@ export function CheckoutPage() {
   const handlePlaceOrder = async () => {
     if (!fullName.trim() || !phone.trim() || !address.trim()) {
       toast.error('Please deliver all shipping credentials!');
+      return;
+    }
+    // Guards the shipping "Phone" field staying semantically independent from
+    // "Delivery Address" -- a non-empty check alone doesn't stop a customer
+    // from leaving an address (or any other text) in the phone box.
+    if (!isPlausibleBdPhone(phone)) {
+      toast.error('Enter a valid Bangladesh mobile number, e.g. 01XXXXXXXXX.');
       return;
     }
     if (isSubmittingRef.current) return;
