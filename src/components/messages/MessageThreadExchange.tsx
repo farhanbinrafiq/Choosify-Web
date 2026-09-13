@@ -475,14 +475,12 @@ export function MessageThreadExchange({
                     className={cn(
                       'px-3.5 py-2.5 text-[13px] font-medium leading-relaxed whitespace-pre-line break-words',
                       isOutgoing
-                        ? 'bg-[#FF5B00] text-white rounded-[18px] rounded-br-md'
-                        : isAnnouncementMessage
-                          ? 'bg-white text-[#1A1A2E] border border-[#E8EDF2] rounded-[18px] rounded-bl-md shadow-sm'
-                          : 'bg-[#F1F1F3] text-[#1A1A2E] rounded-[18px] rounded-bl-md',
+                        ? 'bg-gradient-to-br from-orange-primary to-orange-deep text-white rounded-[18px] rounded-br-md'
+                        : 'bg-gradient-to-br from-navy to-[#3D1D6B] text-white rounded-[18px] rounded-bl-md',
                     )}
                   >
                     {!isOutgoing && isAnnouncementMessage && (
-                      <span className="block text-[10px] font-bold text-[#9AA0AC] mb-1">
+                      <span className="block text-[10px] font-bold text-white/70 mb-1">
                         {CHOOSIFY_ANNOUNCEMENTS_TITLE}
                       </span>
                     )}
