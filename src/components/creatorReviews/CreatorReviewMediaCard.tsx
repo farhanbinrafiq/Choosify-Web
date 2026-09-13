@@ -1,9 +1,30 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ExternalLink, Play } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { PLACEHOLDER_IMAGE } from '../../constants';
 import { resolveCreatorReviewMedia } from '../../lib/videoEmbed';
+import { getTikTokThumbnail } from '../../lib/tiktokOembed';
+import { ProviderPlaceholder } from './ProviderPlaceholder';
+
+/** Platforms with no credential-free provider-thumbnail source -- Facebook
+ *  and Instagram both gate their oEmbed behind a Graph API app token, so we
+ *  never fabricate a photo for them; TikTok is included here only as the
+ *  fallback while its (real, credential-free) oEmbed fetch is in flight or
+ *  has failed. YouTube/YouTube Shorts normally derive a real thumbnail (see
+ *  getVideoPosterUrl) and never reach this set in practice, but are included
+ *  so the rare malformed-URL case (id extraction fails) still gets the
+ *  honest placeholder instead of silently falling through to the unrelated
+ *  generic stock photo below. */
+const BRANDABLE_PLATFORMS = new Set([
+  'facebook_video',
+  'facebook_reel',
+  'instagram_post',
+  'instagram_reel',
+  'tiktok',
+  'youtube',
+  'youtube_shorts',
+]);
 
 export interface CreatorReviewMediaCardProps {
   videoUrl: string;
@@ -54,6 +75,30 @@ export function CreatorReviewMediaCard({
   const media = resolveCreatorReviewMedia(videoUrl, thumbnail);
   const isPortrait = media.orientation === 'portrait';
 
+  // TikTok's oEmbed is the one non-YouTube provider with a real,
+  // credential-free thumbnail -- fetched only when no custom thumbnail was
+  // given and there's nothing already resolved (canonical precedence is
+  // unaffected: a custom thumbnail always short-circuits this).
+  const needsTikTokFetch = media.platform === 'tiktok' && !media.thumbnailUrl;
+  const [tiktokThumb, setTiktokThumb] = useState<string | null>(null);
+  useEffect(() => {
+    if (!needsTikTokFetch) {
+      setTiktokThumb(null);
+      return;
+    }
+    let cancelled = false;
+    getTikTokThumbnail(videoUrl).then((url) => {
+      if (!cancelled) setTiktokThumb(url);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [needsTikTokFetch, videoUrl]);
+
+  const resolvedThumbnail = media.thumbnailUrl || (needsTikTokFetch ? tiktokThumb : null);
+  const showBrandedPlaceholder = !resolvedThumbnail && BRANDABLE_PLATFORMS.has(media.platform);
+  const displaySrc = resolvedThumbnail || (showBrandedPlaceholder ? null : PLACEHOLDER_IMAGE);
+
   return (
     <div
       className={cn(
@@ -93,12 +138,16 @@ export function CreatorReviewMediaCard({
             isPortrait ? 'aspect-[9/16]' : 'aspect-video',
           )}
         >
-          <img
-            src={media.thumbnailUrl || PLACEHOLDER_IMAGE}
-            alt={title}
-            className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-            loading="lazy"
-          />
+          {displaySrc ? (
+            <img
+              src={displaySrc}
+              alt={title}
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              loading="lazy"
+            />
+          ) : (
+            <ProviderPlaceholder platform={media.platform} label={media.platformLabel} />
+          )}
           <div className="absolute inset-0 bg-black/25 group-hover:bg-black/35 transition-colors flex items-center justify-center">
             <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/95 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
               <Play className="w-4 h-4 sm:w-5 sm:h-5 text-[#1A1A2E] ml-0.5 fill-[#1A1A2E]" />

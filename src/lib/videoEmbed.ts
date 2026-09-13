@@ -60,19 +60,28 @@ export function detectCreatorReviewPlatform(url: string): CreatorReviewPlatform 
   }
   if (host.endsWith('tiktok.com')) return 'tiktok';
   if (host.endsWith('facebook.com') || host === 'fb.watch') {
-    if (/\/reel\//.test(clean)) return 'facebook_reel';
+    if (/\/reel\//.test(clean) || /\/share\/r\//.test(clean)) return 'facebook_reel';
     return 'facebook_video';
   }
   return 'unknown';
 }
 
-/** Card/player orientation implied by the detected platform. */
+/**
+ * Card/player orientation implied by the detected platform.
+ *
+ * `instagram_post` is deliberately `'portrait'`, not `'landscape'` -- a
+ * native Instagram feed post is square/4:5/portrait, never 16:9, so forcing
+ * it into a landscape box was itself a bug (it made the viewer clip/scroll
+ * Instagram's own embedded content). Portrait is the honest closer default
+ * until real per-post aspect metadata is available.
+ */
 export function getCreatorReviewOrientation(
   platform: CreatorReviewPlatform,
 ): 'portrait' | 'landscape' {
   switch (platform) {
     case 'youtube_shorts':
     case 'instagram_reel':
+    case 'instagram_post':
     case 'tiktok':
     case 'facebook_reel':
       return 'portrait';
@@ -111,6 +120,35 @@ function extractTikTokVideoId(url: string): string {
 function extractInstagramShortcode(url: string): string {
   const match = url.match(/\/(?:p|reel|reels|tv)\/([A-Za-z0-9_-]+)/);
   return match ? match[1] : '';
+}
+
+/**
+ * Facebook's video plugin can only ever succeed for a URL that references
+ * one specific piece of content -- a bare profile/page/group URL can never
+ * be embedded no matter what Facebook's permissions say. Facebook's own
+ * "Watch" tab (facebook.com/watch) was discontinued in 2023 and now
+ * redirects into Reels, so `/watch` alone is no longer a reliable positive
+ * signal either. Require the URL to actually reference a specific
+ * video/reel -- a `/videos/<id>` path, a `/reel(s)/` path, a numeric `v=`
+ * query, or a fb.watch/<code> short link -- before ever attempting an
+ * embed; anything else (e.g. a seller accidentally pasting a Page URL)
+ * short-circuits straight to the honest fallback instead of guaranteeing a
+ * failed iframe attempt.
+ */
+function looksLikeSpecificFacebookContent(url: string): boolean {
+  return (
+    /\/videos?\/\d+/.test(url) ||
+    /\/reels?\//.test(url) ||
+    /[?&]v=\d+/.test(url) ||
+    /^https?:\/\/(www\.)?fb\.watch\//.test(url) ||
+    // Facebook's modern "Share" button link (mobile + desktop) -- a
+    // redirect shortcode for one specific video/reel (not a bare page URL).
+    // Confirmed against real local Brand Story data
+    // (facebook.com/share/v/<code>/). `/share/p/` (a generic post -- not
+    // necessarily video) is deliberately excluded: the video plugin can't
+    // help with a non-video post regardless.
+    /\/share\/[vr]\//.test(url)
+  );
 }
 
 function hasAllowedEmbedHost(url: string): boolean {
@@ -235,7 +273,14 @@ export function isEmbeddableVideo(url: string): boolean {
     embed.includes('/embed/') || // youtube /embed/<id>, tiktok /embed/v2/<id>
     /\/(p|reel)\/[^/]+\/embed/.test(embed) || // instagram /p|reel/<code>/embed
     embed.includes('/plugins/video.php'); // facebook official video plugin
-  return looksLikeRecognizedEmbed && hasAllowedEmbedHost(embed);
+  if (!looksLikeRecognizedEmbed || !hasAllowedEmbedHost(embed)) return false;
+  // Facebook's plugin URL "looks recognized" for literally any facebook.com
+  // string (see getVideoEmbedUrl) -- only a URL that actually references
+  // specific content can ever really play, so gate on that too.
+  if (embed.includes('/plugins/video.php') && !looksLikeSpecificFacebookContent(url)) {
+    return false;
+  }
+  return true;
 }
 
 /**

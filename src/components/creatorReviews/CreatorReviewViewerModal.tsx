@@ -2,7 +2,41 @@ import React, { useEffect } from 'react';
 import { X, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../../lib/utils';
-import { resolveCreatorReviewMedia } from '../../lib/videoEmbed';
+import { resolveCreatorReviewMedia, type CreatorReviewPlatform } from '../../lib/videoEmbed';
+
+/**
+ * Presentation-only box sizing per platform's actual embed shape -- not
+ * every provider is a bare 16:9/9:16 video:
+ *  - YouTube (both shapes) and Facebook video are pure video, no extra
+ *    platform chrome, so a plain landscape/portrait video box fits.
+ *  - Instagram posts are native square/4:5/portrait, never 16:9.
+ *  - Instagram Reels / Facebook Reels are portrait video but with modest
+ *    caption/action-bar chrome layered on top -- a touch roomier than a
+ *    bare video box.
+ *  - TikTok's frame always renders caption/like/follow chrome below the
+ *    video itself; assuming it's "just a 9:16 video" clips that chrome, so
+ *    it gets independently-constrained width/height instead of one strict
+ *    aspect ratio.
+ * All values are relative (min()/vh/vw), never a bare fixed pixel height.
+ */
+function getViewerBoxClassName(platform: CreatorReviewPlatform): string {
+  switch (platform) {
+    case 'youtube_shorts':
+      return 'h-[min(75vh,600px)] max-h-[75vh] w-auto aspect-[9/16]';
+    case 'instagram_post':
+      return 'w-[min(480px,90vw)] max-h-[85vh] aspect-square';
+    case 'instagram_reel':
+    case 'facebook_reel':
+      return 'h-[min(80vh,640px)] max-h-[80vh] w-auto aspect-[3/5]';
+    case 'tiktok':
+      return 'w-[min(380px,92vw)] h-[min(85vh,720px)]';
+    case 'youtube':
+    case 'facebook_video':
+    case 'unknown':
+    default:
+      return 'w-[min(880px,90vw)] max-w-full aspect-video';
+  }
+}
 
 export interface CreatorReviewViewerMedia {
   videoUrl: string;
@@ -41,7 +75,6 @@ export function CreatorReviewViewerModal({ media, onClose }: Props) {
   if (!media) return null;
 
   const resolved = resolveCreatorReviewMedia(media.videoUrl);
-  const isPortrait = resolved.orientation === 'portrait';
 
   return (
     <AnimatePresence>
@@ -76,9 +109,7 @@ export function CreatorReviewViewerModal({ media, onClose }: Props) {
           <div
             className={cn(
               'relative bg-black rounded-2xl overflow-hidden shadow-2xl border border-white/10',
-              isPortrait
-                ? 'h-[min(75vh,600px)] max-h-[75vh] w-auto aspect-[9/16]'
-                : 'w-[min(880px,90vw)] max-w-full aspect-video',
+              getViewerBoxClassName(resolved.platform),
             )}
           >
             {resolved.canEmbed ? (
@@ -91,16 +122,14 @@ export function CreatorReviewViewerModal({ media, onClose }: Props) {
               />
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center px-6">
-                <p className="text-sm font-semibold text-white/80">
-                  Preview not available for {resolved.platformLabel} here.
-                </p>
+                <p className="text-sm font-semibold text-white/80">This video can&rsquo;t be played here.</p>
                 <a
                   href={resolved.externalUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white text-[#1A1A2E] text-[12px] font-bold"
                 >
-                  Open on {resolved.platformLabel} <ExternalLink size={12} />
+                  Watch on {resolved.platformLabel} <ExternalLink size={12} />
                 </a>
               </div>
             )}
