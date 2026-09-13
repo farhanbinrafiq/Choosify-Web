@@ -88,6 +88,7 @@ export function BrandDetailPage() {
     allBrands,
     allCatalogBrands,
     allProducts,
+    isLoggedIn,
   } = useGlobalState();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isReportOpen, setIsReportOpen] = useState(false);
@@ -1462,6 +1463,13 @@ export function BrandDetailPage() {
             toast.success("Share link copied!");
           }}
           onClaim={() => setIsClaimModalOpen(true)}
+          onReport={() => {
+            if (!isLoggedIn) {
+              navigate('/login', { state: { from: location.pathname } });
+              return;
+            }
+            setIsReportOpen(true);
+          }}
           onExploreProducts={() => scrollToSection("products-section")}
           score={brandAvgRating}
           reviewCount={brandReviews.length}
@@ -1963,6 +1971,7 @@ export function BrandDetailPage() {
         type="brand"
         targetId={String(brand.id)}
         targetName={brand.name}
+        source="storefront"
       />
 
       <ClaimProfileModal

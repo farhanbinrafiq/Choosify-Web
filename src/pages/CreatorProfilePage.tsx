@@ -1,15 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
 import { toast } from '../lib/notify';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Heart, Send, FileText, CheckCircle2, 
+import {
+  Heart, Send, FileText, CheckCircle2,
   Sparkles, Clock, Lock
 } from 'lucide-react';
 import { CREATORS } from '../data/creators';
 import { cn } from '../lib/utils';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { ClaimProfileModal } from '../components/ClaimProfileModal';
+import { ReportModal } from '../components/ReportModal';
 import { CreatorProfileHero } from '../components/creator/CreatorProfileHero';
 import { CreatorOverviewFeed } from '../components/creator/CreatorOverviewFeed';
 import {
@@ -33,7 +34,10 @@ type CreatorProfileTab =
 export function CreatorProfilePage() {
   const creatorHeroRef = useRef<HTMLDivElement>(null);
   const { id } = useParams<{ id: string }>();
-  const { openVideo, getCreatorClaimStatus, updateCreatorClaimStatus, creatorClaimStatuses, allCreators } = useGlobalState();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { openVideo, getCreatorClaimStatus, updateCreatorClaimStatus, creatorClaimStatuses, allCreators, isLoggedIn } = useGlobalState();
+  const [isReportOpen, setIsReportOpen] = useState(false);
 
   // Prefer catalog creators; fall back to mock CREATORS
   const matchedCreator = allCreators.find((c) => c.id === id) || CREATORS.find((c) => c.id === id);
@@ -206,6 +210,13 @@ export function CreatorProfilePage() {
           }}
           onClaim={() => {
             setIsClaimModalOpen(true);
+          }}
+          onReport={() => {
+            if (!isLoggedIn) {
+              navigate('/login', { state: { from: location.pathname } });
+              return;
+            }
+            setIsReportOpen(true);
           }}
           facts={[
             { icon: '📹', label: 'Videos', value: String(creator.videos?.length ?? 0) },
@@ -656,6 +667,15 @@ export function CreatorProfilePage() {
           setLocalClaimStatus('pending');
           updateCreatorClaimStatus(creator.id, 'pending');
         }}
+      />
+
+      <ReportModal
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+        type="creator"
+        targetId={String(creator.id)}
+        targetName={creator.name}
+        source="storefront"
       />
 
     </div>

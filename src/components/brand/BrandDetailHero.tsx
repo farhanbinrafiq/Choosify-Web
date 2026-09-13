@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, Globe, Share2, ShieldCheck } from 'lucide-react';
+import { Check, Flag, Globe, Share2, ShieldCheck } from 'lucide-react';
 import { FollowButton } from '../FollowButton';
 import {
   ProfileSocialPills,
@@ -17,6 +17,7 @@ export interface BrandDetailHeroProps {
   websiteUrl?: string;
   onShare: () => void;
   onClaim?: () => void;
+  onReport?: () => void;
   onExploreProducts: () => void;
   score?: number;
   reviewCount?: number;
@@ -41,6 +42,7 @@ export function BrandDetailHero({
   websiteUrl,
   onShare,
   onClaim,
+  onReport,
   onExploreProducts,
   score = 0,
   reviewCount = 0,
@@ -158,6 +160,16 @@ export function BrandDetailHero({
             >
               <Share2 size={13} /> Share
             </button>
+            {onReport && (
+              <button
+                type="button"
+                onClick={onReport}
+                title="Report this brand"
+                className="inline-flex items-center gap-1.5 bg-white text-[#9AA0AC] border border-[#E5E7EB] px-3 py-2.5 rounded-lg text-xs font-semibold hover:bg-[#F4F7F9] hover:text-red-500"
+              >
+                <Flag size={13} />
+              </button>
+            )}
             {claimStatus === 'community' && onClaim && (
               <button
                 type="button"

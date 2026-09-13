@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import {
   ArrowLeft,
   Share2,
+  Flag,
   Bookmark,
   Star,
   ArrowRight,
@@ -48,6 +49,7 @@ import { DYNAMIC_GUIDES, DEFAULT_DYNAMIC_GUIDE } from "../data/mockGuides";
 import { CATEGORY_SPEC_CONFIGS } from "../data/guideSpecConfigs";
 import { useDashboard } from "../context/DashboardContext";
 import { useGlobalState } from "../context/GlobalStateContext";
+import { ReportModal } from "../components/ReportModal";
 import { toast } from '../lib/notify';
 import { useRegisterPageFilters } from "../components/FilterEngine";
 import type { CatalogGuide } from "../types/catalog";
@@ -185,10 +187,12 @@ export function GuideDetailPage({
     allCatalogProducts,
     allCatalogGuides,
     allCreators,
+    isLoggedIn,
   } = useGlobalState();
   const { allContent: spotlightAllContent } = useSpotlightExperience();
   const [relatedPlatformFilter, setRelatedPlatformFilter] = useState<string>('all');
   const [relatedTopicFilter, setRelatedTopicFilter] = useState<string>('all');
+  const [isReportOpen, setIsReportOpen] = useState(false);
 
   const guide =
     spotlightGuideOverride ||
@@ -1079,6 +1083,20 @@ export function GuideDetailPage({
                 <Share2 size={14} />
                 Share
               </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!isLoggedIn) {
+                    navigate('/login', { state: { from: pathname } });
+                    return;
+                  }
+                  setIsReportOpen(true);
+                }}
+                title="Report this guide"
+                className="inline-flex items-center gap-1.5 bg-[#F4F7F9] text-[#9AA0AC] border-0 px-3 py-[11px] rounded-lg text-xs font-bold cursor-pointer hover:bg-[#E8EDF2] hover:text-red-500 transition-colors"
+              >
+                <Flag size={14} />
+              </button>
             </div>
           </div>
         </div>
@@ -1613,6 +1631,15 @@ export function GuideDetailPage({
         )}
       </div>
       )}
+
+      <ReportModal
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+        type="guide"
+        targetId={String(guide.id)}
+        targetName={guide.title}
+        source="storefront"
+      />
     </div>
   );
 }

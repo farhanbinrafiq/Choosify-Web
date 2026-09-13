@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, MessageCircleMore, Share2, ShieldCheck } from 'lucide-react';
+import { Check, Flag, MessageCircleMore, Share2, ShieldCheck } from 'lucide-react';
 import { FollowButton } from '../FollowButton';
 import {
   ProfileSocialPills,
@@ -13,6 +13,7 @@ export interface CreatorProfileHeroProps {
   onShare: () => void;
   onMessage?: () => void;
   onClaim?: () => void;
+  onReport?: () => void;
   trustScore?: number;
   reviewCountLabel?: string;
   facts?: Array<{ icon: string; label: string; value: string }>;
@@ -37,6 +38,7 @@ export function CreatorProfileHero({
   onShare,
   onMessage,
   onClaim,
+  onReport,
   trustScore = 4.9,
   reviewCountLabel = '12.4K+ reviews',
   facts,
@@ -163,6 +165,16 @@ export function CreatorProfileHero({
             >
               <Share2 size={13} /> Share
             </button>
+            {onReport && (
+              <button
+                type="button"
+                onClick={onReport}
+                title="Report this creator"
+                className="inline-flex items-center gap-1.5 bg-white text-[#9AA0AC] border border-[#E5E7EB] px-3 py-2.5 rounded-lg text-xs font-semibold hover:bg-[#F4F7F9] hover:text-red-500"
+              >
+                <Flag size={13} />
+              </button>
+            )}
             {claimStatus === 'community' && onClaim && (
               <button
                 type="button"

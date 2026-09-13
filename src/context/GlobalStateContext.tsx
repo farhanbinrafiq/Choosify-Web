@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
-import { CommerceProduct, User, Seller, Brand, Order, SubOrder, SubOrderItem, Report, BuyerReputation } from '../types/schemas';
+import { CommerceProduct, User, Seller, Brand, Order, SubOrder, SubOrderItem, BuyerReputation } from '../types/schemas';
 import { CREATORS } from '../data/creators';
 import { loadMockCatalog } from '../data/loadMockCatalog';
 import {
@@ -80,8 +80,6 @@ export interface GlobalStateContextType {
   addClaimedOrder: (order: Order) => void;
   updateOrder: (orderId: string, updates: Partial<Order>) => void;
   updateSubOrderStatus: (parentOrderId: string, sellerId: string, nextStatus: 'pending' | 'dispatched' | 'transit' | 'delivered') => void;
-  reports: Report[];
-  addReport: (type: 'seller' | 'product' | 'brand', targetId: string, reason: string, description: string, evidence?: string) => void;
   currentUser: User;
   setCurrentUser: (user: User) => void;
   updateCurrentUser: (updates: Partial<User>) => void;
@@ -215,11 +213,6 @@ let _pendingPromo: { code: string; discount: number; type: 'flat' | 'percentage'
 export function GlobalStateProvider({ children }: { children: React.ReactNode }) {
   const [retailCart, setRetailCart] = useState<CartItem[]>(() => {
     const saved = localStorage.getItem('choosify_retail_cart');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [reports, setReports] = useState<Report[]>(() => {
-    const saved = localStorage.getItem('choosify_reports');
     return saved ? JSON.parse(saved) : [];
   });
 
@@ -461,10 +454,6 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   useEffect(() => {
     localStorage.setItem('choosify_retail_cart', JSON.stringify(retailCart));
   }, [retailCart]);
-
-  useEffect(() => {
-    localStorage.setItem('choosify_reports', JSON.stringify(reports));
-  }, [reports]);
 
   useEffect(() => {
     localStorage.setItem('choosify_orders', JSON.stringify(orders));
@@ -1083,30 +1072,6 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     }));
   };
 
-  const addReport = (
-    type: 'seller' | 'product' | 'brand',
-    targetId: string,
-    reason: string,
-    description: string,
-    evidence?: string
-  ) => {
-    const newReport: Report = {
-      report_id: `REP-${Date.now()}`,
-      reporter_id: currentUser.id,
-      type,
-      targetId,
-      reason,
-      description,
-      evidence,
-      status: 'pending',
-      createdAt: new Date().toISOString()
-    };
-    setReports(prev => [newReport, ...prev]);
-    toast.success(`Thank you. Your report has been registered. ID: ${newReport.report_id}`, {
-      duration: 4000
-    });
-  };
-
   const productSource = apiProducts.length > 0 ? apiProducts : mockMappedProducts;
   const allProducts = mergeServiceSeedProducts(productSource);
   const sellersWithSeed = mergeServiceSeedSellers(INITIAL_SELLERS);
@@ -1157,8 +1122,6 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       addClaimedOrder,
       updateOrder,
       updateSubOrderStatus,
-      reports,
-      addReport,
       currentUser,
       setCurrentUser,
       updateCurrentUser,

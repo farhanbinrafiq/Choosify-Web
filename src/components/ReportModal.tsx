@@ -1,47 +1,104 @@
 import React, { useState } from 'react';
-import { X, ShieldAlert, CheckCircle2 } from 'lucide-react';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { X, ShieldAlert, CheckCircle2, Loader2 } from 'lucide-react';
 import { useGlobalState } from '../context/GlobalStateContext';
+import { submitReport, type ReportCategory, type ReportSource } from '../services/reportApi';
 
 interface ReportModalProps {
   isOpen: boolean;
   onClose: () => void;
-  type: 'seller' | 'product' | 'brand';
+  /** Real backend resourceType vocabulary -- product/brand/creator/guide/review/user, etc. */
+  type: string;
+  /** The real canonical id of the reported entity (never a name, index, or fabricated value). */
   targetId: string;
   targetName: string;
+  source?: ReportSource;
 }
 
-export function ReportModal({ isOpen, onClose, type, targetId, targetName }: ReportModalProps) {
-  const { addReport } = useGlobalState();
-  const [reason, setReason] = useState('Spam or Scam');
+const REASONS: Array<{ value: ReportCategory; label: string }> = [
+  { value: 'spam', label: 'Spam' },
+  { value: 'fraud', label: 'Fraud / Scam' },
+  { value: 'abuse', label: 'Harassment / Abuse' },
+  { value: 'counterfeit', label: 'Counterfeit / Misleading' },
+  { value: 'fake_product', label: 'Fake Product Listing' },
+  { value: 'copyright', label: 'Copyright / IP' },
+  { value: 'incorrect_information', label: 'Incorrect Information' },
+  { value: 'other', label: 'Other' },
+];
+
+/**
+ * Real end-to-end report flow -- submits to the actual moderation backend
+ * (POST /api/moderation/reports, choosify-admin-4.0) so the report lands in
+ * Admin > Moderation Center > Reported. No local/fake persistence: this used
+ * to push into GlobalStateContext's in-memory `reports` array, which never
+ * reached a moderator. Reporter identity always comes from the signed-in
+ * user's JWT server-side -- this component never sends a reporter id.
+ */
+export function ReportModal({ isOpen, onClose, type, targetId, targetName, source }: ReportModalProps) {
+  const { isLoggedIn } = useGlobalState();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const [reason, setReason] = useState<ReportCategory>('spam');
   const [description, setDescription] = useState('');
-  const [evidence, setEvidence] = useState('');
+  const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const requiresDetails = reason === 'other';
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!description.trim()) return;
+    if (submitting || submitted) return;
 
-    addReport(type, targetId, reason, description, evidence || undefined);
-    setSubmitted(true);
-    setTimeout(() => {
-      setSubmitted(false);
-      setDescription('');
-      setEvidence('');
+    if (!isLoggedIn) {
       onClose();
-    }, 2000);
-  };
+      navigate('/login', { state: { from: location.pathname } });
+      return;
+    }
 
-  const reasons = [
-    'Spam or Misbehavior',
-    'Counterfeit / Fake Products',
-    'Incorrect Specifications or Photos',
-    'Pricing Manipulation / Fraud',
-    'Prohibited or Illegal Material',
-    'Poor Business Practice / Abuse',
-    'Other',
-  ];
+    if (requiresDetails && !description.trim()) {
+      setError('Please tell us more so our review team understands the issue.');
+      return;
+    }
+
+    setSubmitting(true);
+    setError(null);
+    try {
+      await submitReport({
+        category: reason,
+        resourceType: type,
+        resourceId: targetId,
+        resourceLabel: targetName,
+        description: description.trim() || undefined,
+        source,
+      });
+      setSubmitted(true);
+      setTimeout(() => {
+        setSubmitted(false);
+        setDescription('');
+        setReason('spam');
+        onClose();
+      }, 2000);
+    } catch (err) {
+      const status = (err as { status?: number })?.status;
+      if (status === 401) {
+        onClose();
+        navigate('/login', { state: { from: location.pathname } });
+        return;
+      }
+      if (status === 409) {
+        setError('You already submitted a similar report recently. Our team is reviewing it.');
+      } else if (status === 400) {
+        setError(err instanceof Error ? err.message : 'Please check your report details and try again.');
+      } else {
+        setError('Something went wrong submitting your report. Please try again.');
+      }
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 font-sans">
@@ -61,10 +118,10 @@ export function ReportModal({ isOpen, onClose, type, targetId, targetName }: Rep
               <CheckCircle2 size={32} />
             </div>
             <h3 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-2">
-              Report submitted
+              Thanks. Your report has been submitted for review.
             </h3>
             <p className="text-[13px] font-medium text-[#9AA0AC]">
-              Our team is reviewing your report.
+              Our team is reviewing it.
             </p>
           </div>
         ) : (
@@ -81,23 +138,29 @@ export function ReportModal({ isOpen, onClose, type, targetId, targetName }: Rep
               </div>
             </div>
 
+            {error && (
+              <div className="rounded-xl border border-red-200 bg-red-50 px-3.5 py-2.5 text-[12.5px] font-semibold text-red-700">
+                {error}
+              </div>
+            )}
+
             <div>
               <label className="block text-[12px] font-semibold text-[#9AA0AC] mb-2.5">
-                Reason
+                Why are you reporting this?
               </label>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                {reasons.map((r, i) => (
+                {REASONS.map((r) => (
                   <button
-                    key={i}
+                    key={r.value}
                     type="button"
-                    onClick={() => setReason(r)}
+                    onClick={() => setReason(r.value)}
                     className={`px-4 py-2.5 rounded-xl text-left text-[13px] font-semibold border transition-all ${
-                      reason === r
+                      reason === r.value
                         ? 'bg-[#18154C] text-white border-[#18154C]'
                         : 'bg-[#F4F7F9] text-[#1A1A2E]/80 border-[#E8EDF2] hover:border-[#d5dce5]'
                     }`}
                   >
-                    {r}
+                    {r.label}
                   </button>
                 ))}
               </div>
@@ -105,28 +168,15 @@ export function ReportModal({ isOpen, onClose, type, targetId, targetName }: Rep
 
             <div>
               <label className="block text-[12px] font-semibold text-[#9AA0AC] mb-2.5">
-                Details
+                Tell us more {requiresDetails ? '' : '(optional)'}
               </label>
               <textarea
-                required
+                required={requiresDetails}
                 rows={4}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe the issue to help our review team…"
+                placeholder="Explain the issue -- don't just repeat the reason above…"
                 className="w-full bg-[#F4F7F9] border border-[#E8EDF2] rounded-xl p-3.5 text-sm font-medium text-[#1A1A2E] placeholder:text-[#9AA0AC] focus:outline-none focus:border-[#FF5B00]/40 focus:bg-white transition-all resize-none"
-              />
-            </div>
-
-            <div>
-              <label className="block text-[12px] font-semibold text-[#9AA0AC] mb-2.5">
-                Evidence link (optional)
-              </label>
-              <input
-                type="text"
-                value={evidence}
-                onChange={(e) => setEvidence(e.target.value)}
-                placeholder="https://…"
-                className="w-full bg-[#F4F7F9] border border-[#E8EDF2] rounded-xl px-3.5 py-3 text-sm font-medium text-[#1A1A2E] placeholder:text-[#9AA0AC] focus:outline-none focus:border-[#FF5B00]/40 focus:bg-white transition-all"
               />
             </div>
 
@@ -140,8 +190,10 @@ export function ReportModal({ isOpen, onClose, type, targetId, targetName }: Rep
               </button>
               <button
                 type="submit"
-                className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white text-[13px] font-bold tracking-tight rounded-xl transition-all"
+                disabled={submitting}
+                className="flex-1 py-3 bg-red-500 hover:bg-red-600 disabled:opacity-60 text-white text-[13px] font-bold tracking-tight rounded-xl transition-all inline-flex items-center justify-center gap-1.5"
               >
+                {submitting && <Loader2 size={14} className="animate-spin" />}
                 Submit report
               </button>
             </div>

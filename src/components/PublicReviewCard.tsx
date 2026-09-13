@@ -30,6 +30,9 @@ interface PublicReviewCardProps {
   onHelpfulClick?: () => void;
   onEditClick?: () => void;
   onDeleteClick?: () => void;
+  /** Only rendered when both `id` (a real review id) and this are provided --
+   *  never wired to a fabricated id such as an array index. */
+  onReportClick?: () => void;
   showActions?: boolean;
 }
 
@@ -56,11 +59,13 @@ export function resolvePublicReviewAvatarUrl(
 
 /** Choosify.dc.html public review card — Product / Brand detail feeds */
 export function PublicReviewCard({
+  id,
   review,
   isDark = false,
   onHelpfulClick,
   onEditClick,
   onDeleteClick,
+  onReportClick,
   showActions = false,
 }: PublicReviewCardProps) {
   const ratingNum = typeof review.rating === 'string' ? parseFloat(review.rating) : review.rating;
@@ -240,7 +245,18 @@ export function PublicReviewCard({
         ) : (
           <span />
         )}
-        {!showActions && <MoreHorizontal size={16} className="text-[#9AA0AC]" aria-hidden />}
+        {!showActions && id && onReportClick ? (
+          <button
+            type="button"
+            onClick={onReportClick}
+            title="Report this review"
+            className="text-[#9AA0AC] hover:text-red-500 bg-transparent border-0 cursor-pointer p-0"
+          >
+            <MoreHorizontal size={16} />
+          </button>
+        ) : !showActions ? (
+          <MoreHorizontal size={16} className="text-[#9AA0AC]" aria-hidden />
+        ) : null}
       </div>
     </div>
   );

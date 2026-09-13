@@ -1,5 +1,5 @@
 import React from 'react';
-import { Check, Heart, MapPin, MessageCircleMore, Star } from 'lucide-react';
+import { Check, Flag, Heart, MapPin, MessageCircleMore, Star } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { EmiAiLogo } from '../EmiAiLogo';
 
@@ -51,6 +51,7 @@ interface ProductDetailBuyBoxProps {
   onToggleWishlist: () => void;
   onAddToCart: () => void;
   onCompare: () => void;
+  onReport?: () => void;
   compareDisabled?: boolean;
   compareHint?: string;
   onMessageSeller: () => void;
@@ -91,6 +92,7 @@ export function ProductDetailBuyBox({
   onToggleWishlist,
   onAddToCart,
   onCompare,
+  onReport,
   compareDisabled = false,
   compareHint,
   onMessageSeller,
@@ -196,6 +198,15 @@ export function ProductDetailBuyBox({
             <span className="text-[#9AA0AC]">
               ({product.reviews || '12.4K'} Reviews) · {purchasedCount}+ sold
             </span>
+            {onReport && (
+              <button
+                type="button"
+                onClick={onReport}
+                className="ml-1 inline-flex items-center gap-1 text-[#9AA0AC] hover:text-red-500 font-semibold"
+              >
+                <Flag size={11} /> Report
+              </button>
+            )}
           </div>
 
           <div className="flex items-baseline gap-3 mb-1.5 flex-wrap">

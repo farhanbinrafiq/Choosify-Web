@@ -56,6 +56,7 @@ import { PrescriptionDetailsModal, type PrescriptionData } from '../components/p
 import { formatReviewDate } from '../utils/formatReviewDate';
 import { CreatorReviewsPreview } from "../components/creatorReviews/CreatorReviewsPreview";
 import { PublicReviewCard, resolvePublicReviewAvatarUrl } from "../components/PublicReviewCard";
+import { ReportModal } from "../components/ReportModal";
 import NotFoundPage from "./NotFoundPage";
 import { useRegisterPageFilters } from "../components/FilterEngine";
 import { getBrandOfficialWebsite, normalizeExternalUrl } from "../utils/overviewRegistry";
@@ -264,6 +265,8 @@ export function ProductDetailPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [isMobile, setIsMobile] = React.useState(window.innerWidth < 768);
+  const [isReportOpen, setIsReportOpen] = React.useState(false);
+  const [reviewReport, setReviewReport] = React.useState<{ id: string; label: string } | null>(null);
 
   React.useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
@@ -1464,6 +1467,13 @@ export function ProductDetailPage() {
         }
         compareDisabled={isCompareCategoryBlocked}
         compareHint={compareHint}
+        onReport={() => {
+          if (!isLoggedIn) {
+            navigate('/login', { state: { from: location.pathname } });
+            return;
+          }
+          setIsReportOpen(true);
+        }}
         onMessageSeller={handleMessageOrder}
         onAskEmi={() => {
           openEmiPanel(`Tell me more about ${product.title} and alternatives`);
@@ -1579,6 +1589,7 @@ export function ProductDetailPage() {
                   ...(Array.isArray(reviews) ? reviews : [])
                     .filter((r: any) => r.productId === product.id)
                     .map((r: any) => ({
+                      id: r.id,
                       name: r.authorName,
                       avatar: resolvePublicReviewAvatarUrl(
                         r.avatar,
@@ -1620,10 +1631,22 @@ export function ProductDetailPage() {
                       </div>
                     );
                   }
-                  return publicReviews.map((review, i) => (
+                  return publicReviews.map((review: any, i) => (
                   <PublicReviewCard
                     key={i}
+                    id={review.id}
                     review={review}
+                    onReportClick={
+                      review.id
+                        ? () => {
+                            if (!isLoggedIn) {
+                              navigate('/login', { state: { from: location.pathname } });
+                              return;
+                            }
+                            setReviewReport({ id: String(review.id), label: `${review.name}'s review` });
+                          }
+                        : undefined
+                    }
                   />
                   ));
                 })()}
@@ -2315,6 +2338,24 @@ export function ProductDetailPage() {
           setPrescriptionData(data);
           setShowPrescriptionModal(false);
         }}
+      />
+
+      <ReportModal
+        isOpen={isReportOpen}
+        onClose={() => setIsReportOpen(false)}
+        type="product"
+        targetId={String(product.id)}
+        targetName={product.title}
+        source="storefront"
+      />
+
+      <ReportModal
+        isOpen={Boolean(reviewReport)}
+        onClose={() => setReviewReport(null)}
+        type="review"
+        targetId={reviewReport?.id || ''}
+        targetName={reviewReport?.label || 'this review'}
+        source="storefront"
       />
     </div>
   );
