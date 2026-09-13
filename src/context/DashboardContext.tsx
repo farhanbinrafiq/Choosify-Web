@@ -187,6 +187,18 @@ interface DashboardContextType {
   markAllAsRead: () => void;
   addToRecentlyViewed: (product: any) => void;
   addNotification: (message: string, type: 'order' | 'message' | 'system' | 'deal') => void;
+  /**
+   * Shared so the global EMI FAB/panel (FloatingOverlays) and every mobile
+   * full-height overlay drawer (the Dashboard hamburger drawer here, plus
+   * the Navbar's left nav drawer and right "My Account" drawer below) can
+   * stay mutually exclusive without any of them owning another's state.
+   */
+  mobileNavOpen: boolean;
+  setMobileNavOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  mobileNavMenuOpen: boolean;
+  setMobileNavMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
+  mobileProfileMenuOpen: boolean;
+  setMobileProfileMenuOpen: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
 const DashboardContext = createContext<DashboardContextType | undefined>(undefined);
@@ -236,6 +248,14 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   const [comparedProducts, setComparedProducts] = useState<any[]>(() =>
     pruneComparedToFirstCategory(readStoredArray(scopedKey('choosify_compared_products', userId))),
   );
+
+  // Mobile full-height overlay drawers -- shared (not persisted) so the
+  // global EMI FAB/panel can react to any of them without a duplicate
+  // parallel state. mobileNavOpen: Dashboard hamburger drawer. mobileNavMenuOpen:
+  // Navbar's left nav drawer. mobileProfileMenuOpen: Navbar's right "My Account" drawer.
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [mobileNavMenuOpen, setMobileNavMenuOpen] = useState(false);
+  const [mobileProfileMenuOpen, setMobileProfileMenuOpen] = useState(false);
 
   // Re-read every scoped key when the signed-in account changes (login,
   // logout, or switching accounts) without a full page reload -- the lazy
@@ -1637,7 +1657,10 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
       createNewThread,
       markAllAsRead,
       addToRecentlyViewed,
-      addNotification
+      addNotification,
+      mobileNavOpen, setMobileNavOpen,
+      mobileNavMenuOpen, setMobileNavMenuOpen,
+      mobileProfileMenuOpen, setMobileProfileMenuOpen
     }}>
       {children}
     </DashboardContext.Provider>

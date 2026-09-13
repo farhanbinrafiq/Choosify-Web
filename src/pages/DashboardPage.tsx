@@ -1960,9 +1960,11 @@ export function DashboardPage() {
     savedProducts, 
     savedBrands, 
     savedGuides,
-    lovedBrands, 
-    followedBrands, 
+    lovedBrands,
+    followedBrands,
     recentlyViewed,
+    mobileNavOpen,
+    setMobileNavOpen,
   } = useDashboard();
   const location = useLocation();
   const navigate = useNavigate();
@@ -2029,7 +2031,6 @@ export function DashboardPage() {
 
   const [activeTab, setActiveTab] = useState('overview');
   const [settingsSubTab, setSettingsSubTab] = useState<SettingsSubTab>('personal');
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   useEffect(() => {
     // TODO: addToRecentlyViewed called from ProductDetailPage â€” see Prompt 6

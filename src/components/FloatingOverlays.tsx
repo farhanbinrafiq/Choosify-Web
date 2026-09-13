@@ -41,7 +41,16 @@ export function FloatingOverlays() {
   const onEmiPage = currentPath.startsWith('/emi');
 
   const { retailCart, activeVideo, closeVideo, isLoggedIn, isFeatureEnabled } = useGlobalState();
-  const { threads } = useDashboard();
+  const {
+    threads,
+    mobileNavOpen, setMobileNavOpen,
+    mobileNavMenuOpen, setMobileNavMenuOpen,
+    mobileProfileMenuOpen, setMobileProfileMenuOpen,
+  } = useDashboard();
+  // Any mobile full-height overlay drawer that currently owns the viewport --
+  // the Dashboard hamburger drawer, the Navbar's left nav drawer, or its right
+  // "My Account" drawer. EMI (FAB + panel) must never coexist with one of these.
+  const anyMobileDrawerOpen = mobileNavOpen || mobileNavMenuOpen || mobileProfileMenuOpen;
 
   const { hasUnread: hasEmiUnread } = useEmiUnread();
 
@@ -98,8 +107,22 @@ export function FloatingOverlays() {
   useEffect(() => {
     if (activePanel === 'emi') {
       markEmiMessagesRead();
+      // Every mobile full-height overlay drawer and the EMI panel are
+      // mutually exclusive -- opening EMI (FAB click or the choosify:open-emi
+      // event) always closes whichever drawer is open, regardless of trigger.
+      setMobileNavOpen(false);
+      setMobileNavMenuOpen(false);
+      setMobileProfileMenuOpen(false);
     }
-  }, [activePanel]);
+  }, [activePanel, setMobileNavOpen, setMobileNavMenuOpen, setMobileProfileMenuOpen]);
+
+  // Mirror of the effect above: opening any mobile drawer closes an active
+  // EMI panel so the two kinds of overlay never coexist.
+  useEffect(() => {
+    if (anyMobileDrawerOpen) {
+      setActivePanel((prev) => (prev === 'emi' ? null : prev));
+    }
+  }, [anyMobileDrawerOpen]);
 
   useEffect(() => {
     const onOpenEmi = (e: Event) => {
@@ -407,7 +430,7 @@ export function FloatingOverlays() {
 
         {/* EMI ASSISTANT — always available when feature flag is on */}
         <AnimatePresence>
-          {showEmiFab && (
+          {showEmiFab && !anyMobileDrawerOpen && (
             <motion.button
               key="dock-emi-trigger"
               data-floating-fab="emi"
@@ -751,7 +774,7 @@ export function FloatingOverlays() {
       </>
     )}
 
-    {isMobile && showEmiFab && (
+    {isMobile && showEmiFab && !anyMobileDrawerOpen && (
       <motion.button
         type="button"
         onClick={() => setActivePanel(activePanel === 'emi' ? null : 'emi')}

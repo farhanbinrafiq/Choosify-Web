@@ -24,13 +24,16 @@ export function Navbar() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [cartAnchorEl, setCartAnchorEl] = useState<HTMLElement | null>(null);
   const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isMobileProfileOpen, setIsMobileProfileOpen] = useState(false);
-  
   const navigate = useNavigate();
   const location = useLocation();
   const { retailCart, isLoggedIn, logout, currentUser, siteConfig, featureFlags } = useGlobalState();
-  const { threads } = useDashboard();
+  const {
+    threads,
+    mobileNavMenuOpen: isMobileMenuOpen,
+    setMobileNavMenuOpen: setIsMobileMenuOpen,
+    mobileProfileMenuOpen: isMobileProfileOpen,
+    setMobileProfileMenuOpen: setIsMobileProfileOpen,
+  } = useDashboard();
 
   const unreadMsgCount = isLoggedIn ? threads.filter(t => t.unread).length : 0;
 
