@@ -3,6 +3,7 @@ import { X, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { cn } from '../../lib/utils';
 import { resolveCreatorReviewMedia, type CreatorReviewPlatform } from '../../lib/videoEmbed';
+import { FacebookSdkEmbed, InstagramSdkEmbed } from './MetaSdkEmbed';
 
 /**
  * Presentation-only box sizing per platform's actual embed shape -- not
@@ -118,19 +119,20 @@ export function CreatorReviewViewerModal({ media, onClose }: Props) {
           >
             {resolved.canEmbed ? (
               resolved.platform === 'facebook_reel' || resolved.platform === 'facebook_video' ? (
-                // Facebook-specific attribute set, matching Facebook's own
-                // generated embed markup (scrolling/frameborder/allow) --
-                // left isolated from the other platforms' iframe below so
-                // YouTube/TikTok/Instagram's existing behavior can't drift.
-                <iframe
-                  src={resolved.embedUrl}
-                  title={media.title}
-                  scrolling="no"
-                  frameBorder="0"
-                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-                  allowFullScreen
-                  className="absolute inset-0 w-full h-full border-0"
-                />
+                // Facebook's plugins/video.php iframe returns "Video
+                // unavailable" for this content in real-browser testing even
+                // with a canonicalized href and official-style attributes --
+                // Meta's own current reference implementation
+                // (facebook/meta-embeds-for-wordpress) does not use that
+                // iframe either. This renders the same official XFBML
+                // container that architecture uses instead. Isolated from
+                // the other platforms' iframe below so YouTube/TikTok's
+                // existing behavior can't drift.
+                <FacebookSdkEmbed href={resolved.canonicalUrl} />
+              ) : resolved.platform === 'instagram_reel' || resolved.platform === 'instagram_post' ? (
+                // Same rationale as Facebook above, using Instagram's
+                // official blockquote + embed.js mechanism.
+                <InstagramSdkEmbed permalink={resolved.canonicalUrl} />
               ) : (
                 <iframe
                   src={resolved.embedUrl}

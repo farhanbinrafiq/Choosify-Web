@@ -161,12 +161,27 @@ function looksLikeSpecificFacebookContent(url: string): boolean {
  * canonical form, so it passes through unchanged exactly as before --
  * Facebook's plugin already resolves those shapes on its own.
  */
-function canonicalizeFacebookUrl(url: string): string {
+export function canonicalizeFacebookUrl(url: string): string {
   const reelId = url.match(/\/reel\/(\d+)/)?.[1];
   if (reelId) return `https://www.facebook.com/reel/${reelId}/`;
   const videoId = url.match(/\/videos\/(\d+)/)?.[1] || url.match(/[?&]v=(\d+)/)?.[1];
   if (videoId) return `https://www.facebook.com/watch/?v=${videoId}`;
   return url;
+}
+
+/**
+ * Instagram-specific canonicalization -- the bare permalink form
+ * (`instagram.com/<p|reel>/<shortcode>/`), no query string. Instagram's own
+ * oEmbed-returned `data-instgrm-permalink` additionally carries its own
+ * `utm_source`/`utm_campaign` tracking params, but those are Instagram's
+ * own decoration, not a requirement -- the SDK embeds correctly from the
+ * bare canonical form alone.
+ */
+export function canonicalizeInstagramUrl(url: string): string {
+  const shortcode = extractInstagramShortcode(url);
+  if (!shortcode) return url;
+  const kind = /\/(reel|reels)\//.test(url) ? 'reel' : 'p';
+  return `https://www.instagram.com/${kind}/${shortcode}/`;
 }
 
 function hasAllowedEmbedHost(url: string): boolean {
@@ -320,6 +335,13 @@ export interface CreatorReviewMedia {
   orientation: 'portrait' | 'landscape';
   externalUrl: string;
   embedUrl: string;
+  /**
+   * Bare canonical URL (no tracking params/fragments), used only by
+   * Facebook/Instagram's official SDK-based embed (see
+   * CreatorReviewViewerModal / MetaSdkEmbed) -- meaningless for the other
+   * platforms, which stay on the plain `embedUrl` iframe.
+   */
+  canonicalUrl: string;
   canEmbed: boolean;
   thumbnailUrl: string;
 }
@@ -337,12 +359,19 @@ export function resolveCreatorReviewMedia(
   // while Facebook/Instagram/TikTok "worked" only because getVideoPosterUrl
   // never derives anything for them, not because the precedence was correct.
   const derivedThumb = getVideoPosterUrl(url);
+  const canonicalUrl =
+    platform === 'facebook_reel' || platform === 'facebook_video'
+      ? canonicalizeFacebookUrl(url)
+      : platform === 'instagram_reel' || platform === 'instagram_post'
+        ? canonicalizeInstagramUrl(url)
+        : url;
   return {
     platform,
     platformLabel: creatorReviewPlatformLabel(platform),
     orientation: getCreatorReviewOrientation(platform),
     externalUrl: url,
     embedUrl: getVideoEmbedUrl(url),
+    canonicalUrl,
     canEmbed: isEmbeddableVideo(url),
     thumbnailUrl: customThumbnail || derivedThumb || '',
   };
