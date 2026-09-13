@@ -26,8 +26,12 @@ function getViewerBoxClassName(platform: CreatorReviewPlatform): string {
     case 'instagram_post':
       return 'w-[min(480px,90vw)] max-h-[85vh] aspect-square';
     case 'instagram_reel':
-    case 'facebook_reel':
       return 'h-[min(80vh,640px)] max-h-[80vh] w-auto aspect-[3/5]';
+    case 'facebook_reel':
+      // True Reel aspect (Facebook's own generated embed is 267x476, ~9:16),
+      // isolated from Instagram Reel's box so this doesn't drift the two
+      // platforms together again.
+      return 'h-[min(80vh,640px)] max-h-[80vh] w-auto aspect-[9/16]';
     case 'tiktok':
       return 'w-[min(380px,92vw)] h-[min(85vh,720px)]';
     case 'youtube':
@@ -113,13 +117,29 @@ export function CreatorReviewViewerModal({ media, onClose }: Props) {
             )}
           >
             {resolved.canEmbed ? (
-              <iframe
-                src={resolved.embedUrl}
-                title={media.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="absolute inset-0 w-full h-full border-0"
-              />
+              resolved.platform === 'facebook_reel' || resolved.platform === 'facebook_video' ? (
+                // Facebook-specific attribute set, matching Facebook's own
+                // generated embed markup (scrolling/frameborder/allow) --
+                // left isolated from the other platforms' iframe below so
+                // YouTube/TikTok/Instagram's existing behavior can't drift.
+                <iframe
+                  src={resolved.embedUrl}
+                  title={media.title}
+                  scrolling="no"
+                  frameBorder="0"
+                  allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full border-0"
+                />
+              ) : (
+                <iframe
+                  src={resolved.embedUrl}
+                  title={media.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full border-0"
+                />
+              )
             ) : (
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center px-6">
                 <p className="text-sm font-semibold text-white/80">This video can&rsquo;t be played here.</p>

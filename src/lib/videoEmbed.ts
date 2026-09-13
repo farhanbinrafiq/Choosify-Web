@@ -151,6 +151,24 @@ function looksLikeSpecificFacebookContent(url: string): boolean {
   );
 }
 
+/**
+ * Facebook-specific canonicalization -- strips tracking/share cruft (`rdid`,
+ * `share_url`, trailing `#`, etc.) that a user's copy-pasted share link
+ * carries but Facebook's own embed generator never includes. Only fires for
+ * URL shapes we can extract a real numeric id from (`/reel/<id>`,
+ * `/videos/<id>`, `?v=<id>`); anything else (an opaque `/share/v/<code>`
+ * redirect, a `fb.watch/<code>` short link) has no client-derivable
+ * canonical form, so it passes through unchanged exactly as before --
+ * Facebook's plugin already resolves those shapes on its own.
+ */
+function canonicalizeFacebookUrl(url: string): string {
+  const reelId = url.match(/\/reel\/(\d+)/)?.[1];
+  if (reelId) return `https://www.facebook.com/reel/${reelId}/`;
+  const videoId = url.match(/\/videos\/(\d+)/)?.[1] || url.match(/[?&]v=(\d+)/)?.[1];
+  if (videoId) return `https://www.facebook.com/watch/?v=${videoId}`;
+  return url;
+}
+
 function hasAllowedEmbedHost(url: string): boolean {
   try {
     const host = new URL(url).hostname.toLowerCase();
@@ -218,8 +236,15 @@ export function getVideoEmbedUrl(url: string): string {
   if (clean.includes('facebook.com') || clean.includes('fb.watch')) {
     // Facebook's official embed mechanism: the iframe's own origin is
     // always facebook.com — the original URL only ever appears as an
-    // encoded query value, per Facebook's documented video plugin.
-    return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(clean)}&show_text=0`;
+    // encoded query value, per Facebook's documented video plugin. The href
+    // itself is canonicalized first (see canonicalizeFacebookUrl) so a
+    // pasted share link's `rdid`/`share_url`/trailing `#` never rides along
+    // into the embed, matching the shape Facebook's own embed generator
+    // produces. `show_text=false` and `t=0` mirror that generator's output;
+    // width/height are deliberately omitted here (not hard-coded) so the
+    // modal's CSS box stays in control of actual rendered size.
+    const canonical = canonicalizeFacebookUrl(clean);
+    return `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(canonical)}&show_text=false&t=0`;
   }
 
   if (/\.(mp4|webm|ogg)(\?|$)/i.test(clean) || clean.startsWith('blob:')) {
