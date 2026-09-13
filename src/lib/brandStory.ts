@@ -12,6 +12,7 @@ import {
   creatorReviewPlatformLabel,
   detectCreatorReviewPlatform,
   getVideoPosterUrl,
+  type CreatorReviewPlatform,
 } from './videoEmbed';
 
 export type BrandStoryBlock = {
@@ -45,6 +46,15 @@ export type BrandStoryCardModel = {
   hasThumbnail: boolean;
   platformLabel: string;
   aspect: 'landscape' | 'portrait' | 'square';
+  /**
+   * Only meaningful for `kind: 'link'` -- the platform detected from the raw
+   * URL's own structure (never the seller-entered label). `'unknown'` means
+   * the link doesn't match any platform this app can embed (e.g. a plain
+   * external blog/article), so the card must keep its existing plain
+   * external-link behavior rather than offering a Play affordance for
+   * something we can't actually play in-platform.
+   */
+  platform?: CreatorReviewPlatform;
 };
 
 const IMG_RE = /^(https?:|data:|\/)/i;
@@ -95,7 +105,8 @@ export function normalizeBrandStoryCards(
         thumbnailUrl: thumb,
         hasThumbnail: Boolean(thumb),
         platformLabel: platform !== 'unknown' ? creatorReviewPlatformLabel(platform) : 'Link',
-        aspect: aspectForMediaKind(b.mediaKind) ,
+        aspect: aspectForMediaKind(b.mediaKind),
+        platform,
       });
       return;
     }

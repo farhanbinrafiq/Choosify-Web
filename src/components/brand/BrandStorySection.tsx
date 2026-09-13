@@ -1,6 +1,11 @@
 import React, { useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { ExternalLink, Play } from 'lucide-react';
 import { useGlobalState } from '../../context/GlobalStateContext';
+import {
+  CreatorReviewViewerModal,
+  type CreatorReviewViewerMedia,
+} from '../creatorReviews/CreatorReviewViewerModal';
 import { getAllBrandPosts } from '../../lib/brandPosts';
 import { resolveSpotlightExperience } from '../../utils/spotlightContentResolver';
 import {
@@ -129,10 +134,36 @@ const STORY_ASPECT: Record<BrandStoryCardModel['aspect'], string> = {
   square: '1 / 1',
 };
 
-/** Dashboard-authored Brand Story card (external link or the seller's own published content). */
-function AuthoredStoryCard({ card }: { card: BrandStoryCardModel }) {
+/**
+ * Dashboard-authored Brand Story card — external link or the seller's own
+ * published content.
+ *
+ * Three distinct interaction models, chosen by what the card actually is:
+ *  1. `kind: 'link'` on a platform this app can embed (YouTube/Shorts/
+ *     Instagram/TikTok/Facebook/Reel) — Play opens the SAME shared Creator
+ *     Review viewer in-platform; a separate small external-link icon opens
+ *     the real original URL. Clicking the card never leaves Choosify by
+ *     itself just because the source happens to be external.
+ *  2. `kind: 'link'` on an unrecognized platform (e.g. a plain blog/article
+ *     URL) — kept exactly as before: the whole card is a plain
+ *     `target="_blank"` external link. No embed is invented for a provider
+ *     this app doesn't support.
+ *  3. `kind: 'content'` (a Choosify-hosted guide/review the seller
+ *     published) — an in-app `<Link>`, not a new-tab external anchor; this
+ *     was a real bug (Choosify's own detail pages were opening in a new
+ *     browser tab).
+ */
+function AuthoredStoryCard({
+  card,
+  onPlay,
+}: {
+  card: BrandStoryCardModel;
+  onPlay: (media: CreatorReviewViewerMedia) => void;
+}) {
   const [imgFailed, setImgFailed] = useState(false);
   const showImg = card.hasThumbnail && !imgFailed;
+  const isPlayableLink = card.kind === 'link' && !!card.platform && card.platform !== 'unknown' && !!card.href;
+
   const media = (
     <div
       className="relative w-full bg-[#F4F7F9] overflow-hidden"
@@ -159,6 +190,31 @@ function AuthoredStoryCard({ card }: { card: BrandStoryCardModel }) {
           <span className="text-[9px] font-semibold opacity-60">Open to view</span>
         </div>
       )}
+      {isPlayableLink && (
+        <>
+          <button
+            type="button"
+            onClick={() => onPlay({ videoUrl: card.href as string, title: card.title })}
+            aria-label={`Play ${card.title}`}
+            className="absolute inset-0 flex items-center justify-center bg-black/10 hover:bg-black/25 transition-colors cursor-pointer"
+          >
+            <div className="w-11 h-11 rounded-full bg-white/95 flex items-center justify-center shadow-lg">
+              <Play className="w-4 h-4 text-[#1A1A2E] ml-0.5 fill-[#1A1A2E]" />
+            </div>
+          </button>
+          <a
+            href={card.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            title={`Open on ${card.platformLabel}`}
+            aria-label={`Open on ${card.platformLabel}`}
+            className="absolute top-2 right-2 z-10 w-6 h-6 rounded-full bg-black/70 hover:bg-black/85 flex items-center justify-center text-white transition-colors"
+          >
+            <ExternalLink size={12} />
+          </a>
+        </>
+      )}
     </div>
   );
   const meta = (
@@ -172,12 +228,33 @@ function AuthoredStoryCard({ card }: { card: BrandStoryCardModel }) {
       ) : null}
     </div>
   );
-  const inner = (
-    <>
-      {media}
-      {meta}
-    </>
-  );
+
+  if (isPlayableLink) {
+    // The media area owns the Play/external-link affordances above; the
+    // card itself is not a link at all, so those two controls stay the
+    // only interactive targets (no whole-card navigation to fight with them).
+    return (
+      <div className="bg-white border border-[#E8EDF2] rounded-[10px] overflow-hidden">
+        {media}
+        {meta}
+      </div>
+    );
+  }
+
+  if (card.kind === 'content' && card.href) {
+    return (
+      <Link
+        to={card.href}
+        className="block bg-white border border-[#E8EDF2] rounded-[10px] overflow-hidden hover:border-[#FF5B00]/40 transition-colors"
+      >
+        {media}
+        {meta}
+      </Link>
+    );
+  }
+
+  // Unrecognized platform (e.g. a plain blog/article link) — unchanged:
+  // plain external link, no invented embed.
   return card.href ? (
     <a
       href={card.href}
@@ -185,10 +262,14 @@ function AuthoredStoryCard({ card }: { card: BrandStoryCardModel }) {
       rel="noopener noreferrer"
       className="block bg-white border border-[#E8EDF2] rounded-[10px] overflow-hidden hover:border-[#FF5B00]/40 transition-colors"
     >
-      {inner}
+      {media}
+      {meta}
     </a>
   ) : (
-    <div className="bg-white border border-[#E8EDF2] rounded-[10px] overflow-hidden">{inner}</div>
+    <div className="bg-white border border-[#E8EDF2] rounded-[10px] overflow-hidden">
+      {media}
+      {meta}
+    </div>
   );
 }
 
@@ -209,6 +290,10 @@ export function BrandStorySection({
 }) {
   const navigate = useNavigate();
   const { allCatalogProducts, allCatalogGuides, allCreators } = useGlobalState();
+  // Single shared active-media state -- same one-active-player contract as
+  // CreatorReviewsPreview: at most one Brand Story video can be playing at a
+  // time, and this reuses the exact same modal (not a copy of it).
+  const [activeMedia, setActiveMedia] = useState<CreatorReviewViewerMedia | null>(null);
 
   const authoredCards = useMemo(
     () =>
@@ -427,7 +512,7 @@ export function BrandStorySection({
           {authoredCards.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
               {authoredCards.map((card) => (
-                <AuthoredStoryCard key={card.key} card={card} />
+                <AuthoredStoryCard key={card.key} card={card} onPlay={setActiveMedia} />
               ))}
             </div>
           )}
@@ -475,6 +560,8 @@ export function BrandStorySection({
         )}
       </div>
       )}
+
+      <CreatorReviewViewerModal media={activeMedia} onClose={() => setActiveMedia(null)} />
     </section>
   );
 }
