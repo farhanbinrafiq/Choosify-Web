@@ -779,7 +779,7 @@ export function BrandDealsPage() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
             <button
               type="button"
-              onClick={() => navigate('/about#suggest-brand')}
+              onClick={() => navigate('/suggest-brand')}
               className="w-full sm:w-auto px-7 py-3 bg-white text-[#1A1A2E] font-bold text-[12.5px] rounded-lg hover:bg-[#EF3C23] hover:text-white transition-colors cursor-pointer border-0"
             >
               Request a brand

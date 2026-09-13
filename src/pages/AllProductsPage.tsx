@@ -16,6 +16,7 @@ import {PRODUCT_CARD_GRID, PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 import { ListingAdRail } from '../components/ListingAdRail';
 import { AdSenseSlot } from '../components/AdSenseSlot';
+import { CtaBannerSlot } from '../components/CtaBannerSlot';
 import { ProductsSponsoredBannerCarousel } from '../components/commerce/AdvertiseHereCard';
 import { SponsoredCardChrome } from '../components/commerce/SponsoredCardChrome';
 import { useSponsoredFeedEntries } from '../hooks/useSponsoredFeedEntries';
@@ -1013,6 +1014,8 @@ export function AllProductsPage() {
             />
           )}
 
+          <CtaBannerSlot page="products" section="products-grid" position="before" className="mb-6" />
+
           {/* Product Grid */}
           {isLoading ? (
             <div className={cn(
@@ -1057,12 +1060,15 @@ export function AllProductsPage() {
             </div>
           )}
 
+          <CtaBannerSlot page="products" section="products-grid" position="after" className="mt-6" />
+
           <PaginationBar
             showingCount={filteredProducts.length}
             totalCount={filteredProducts.length}
           />
 
           <AdSenseSlot format="infeed" className="mt-6" />
+          <CtaBannerSlot page="products" section="products-end" position="after" className="mt-6" />
         </main>
 
         {/* RIGHT SIDEBAR WITH PREMIUM AARONG AD BANNER */}

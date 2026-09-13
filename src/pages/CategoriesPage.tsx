@@ -18,6 +18,7 @@ import { getCategoryStatBlock } from '../utils/categoryStats';
 import { CATEGORIES } from '../data/categories';
 import { slugifyPathSegment } from '../lib/seoHelpers';
 import { ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters, scrollToFilterResultsTarget } from '../components/FilterEngine';
+import { CtaBannerSlot } from '../components/CtaBannerSlot';
 import { PAGE_LISTING_SINGLE_SHELL, CATEGORY_CARD_GRID } from "../lib/pageLayout";
 import { ListingAdRail } from '../components/ListingAdRail';
 import { PLACEMENT_KEYS } from '../lib/placements';
@@ -696,6 +697,7 @@ export function CategoriesPage() {
         </aside>
 
         <div id={CATEGORIES_SCROLL_TARGET_ID} className="choosify-middle-feed scroll-mt-40 min-w-0 pb-10 space-y-6">
+          <CtaBannerSlot page="categories" section="categories-feed-header" position="before" />
           <ListingFeedHeader
             eyebrow="Shop by • Categories"
             title={
@@ -719,6 +721,7 @@ export function CategoriesPage() {
               ) : undefined
             }
           />
+          <CtaBannerSlot page="categories" section="categories-feed-header" position="after" />
 
           <ListingFilterPills
             pills={CATEGORY_QUICK_NAV_ITEMS.map((item) => ({
@@ -858,6 +861,10 @@ export function CategoriesPage() {
             adSenseFormat="sidebar"
           />
         </aside>
+      </div>
+
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-5 lg:px-6 w-full">
+        <CtaBannerSlot page="categories" section="categories-browse-body" position="after" className="mb-8" />
       </div>
 
       {/* Mobile / Tablet Filter Drawer */}

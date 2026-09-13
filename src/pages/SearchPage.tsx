@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 import { BRANDS, CATEGORIES } from '../constants';
 import { ProductCard } from '../components/ProductCard';
 import { AdvertiseHereCard } from '../components/commerce/AdvertiseHereCard';
+import { CtaBannerSlot } from '../components/CtaBannerSlot';
 import { mockGuides } from '../data/mockGuides';
 import { CREATORS } from '../data/creators';
 import { useDashboard } from '../context/DashboardContext';
@@ -328,6 +329,7 @@ export function SearchPage() {
       </div>
 
       <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-10 py-6 pb-14">
+        <CtaBannerSlot page="search" section="search-pill-tabs" position="before" className="mb-6" />
         {/* DC pill tabs */}
         <div className="flex gap-2.5 mb-6 flex-wrap">
           {DC_TABS.map((tab) => {
@@ -353,6 +355,7 @@ export function SearchPage() {
             );
           })}
         </div>
+        <CtaBannerSlot page="search" section="search-pill-tabs" position="after" className="mb-6" />
 
         {!rawQuery.trim() && (
           <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-10 text-center">
@@ -518,6 +521,8 @@ export function SearchPage() {
             )}
           </section>
         )}
+
+        <CtaBannerSlot page="search" section="search-end" position="after" className="mt-8" />
       </div>
     </div>
   );

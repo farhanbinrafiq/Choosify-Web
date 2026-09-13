@@ -14,6 +14,7 @@ import { useInfiniteListBatch } from '../hooks/useInfiniteListBatch';
 import { ListingAdRail } from '../components/ListingAdRail';
 import { AdSenseSlot } from '../components/AdSenseSlot';
 import { AdvertiseHereCard } from '../components/commerce/AdvertiseHereCard';
+import { CtaBannerSlot } from '../components/CtaBannerSlot';
 import { usePlacements } from '../hooks/usePlacements';
 import { PLACEMENT_KEYS, INFEED_INTERVAL, INFEED_MAX_PER_PAGE } from '../lib/placements';
 import { injectPlacementsIntoFeed } from '../utils/injectFeedPlacements';
@@ -925,6 +926,8 @@ export function BrandsPage() {
             )}
           </div>
 
+          <CtaBannerSlot page="brands" section="brands-grid" position="before" className="mb-8" />
+
           {filteredBrands.length > 0 ? (
             <>
               <div className={cn(BRAND_CARD_GRID, 'mb-8')}>
@@ -950,6 +953,10 @@ export function BrandsPage() {
             </>
           ) : null}
 
+          <CtaBannerSlot page="brands" section="brands-grid" position="after" className="mb-8" />
+
+          <CtaBannerSlot page="brands" section="brands-follow-cta-strip" position="before" className="mb-8" />
+
           <div className="choosify-dark-surface rounded-xl px-7 py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-white mb-8">
             <div>
               <div className="text-[15px] font-bold mb-1">Want exclusive brand deals?</div>
@@ -964,6 +971,8 @@ export function BrandsPage() {
               FOLLOW BRANDS
             </Link>
           </div>
+
+          <CtaBannerSlot page="brands" section="brands-follow-cta-strip" position="after" className="mb-8" />
 
           <AdSenseSlot format="infeed" className="mt-6" />
 

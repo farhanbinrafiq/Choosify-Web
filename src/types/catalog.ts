@@ -403,7 +403,72 @@ export interface SiteConfig {
   websiteAssets?: SiteWebsiteAssets;
   /** Informational / legal / business page bodies from Website Manager → Pages */
   sitePages?: import('../lib/cmsSitePages').SitePagesConfig;
+  /** Editorial CTA/banner strips from Website Manager → CTA & Banners. Not paid/sponsored placements (see CatalogPlacement). */
+  ctaBanners?: CtaBannerItem[];
   updatedAt: string;
+}
+
+/**
+ * "creator_signup"/"seller_signup" are first-class destination types (not a
+ * magic string nested under "external") because they resolve client-side to
+ * the current partner-signup origin (dev/prod aware, see partnerSignupOrigin.ts)
+ * rather than being a literal stored URL like a real "external" destination.
+ */
+export type CtaDestinationType = 'internal' | 'creator_signup' | 'seller_signup' | 'external' | 'none';
+
+/** Which page this CTA renders on -- must have a matching entry in the shared placement registry (ctaPlacementRegistry.ts). */
+export type CtaPageKey =
+  | 'home'
+  | 'brands'
+  | 'deals'
+  | 'categories'
+  | 'products'
+  | 'search'
+  | 'creators';
+
+/** Where relative to the named section this CTA renders -- see ctaPlacementRegistry.ts for which positions a given section supports. */
+export type CtaPosition = 'before' | 'after';
+
+/**
+ * Reuses the existing authenticated-role/session lookup (isLoggedIn +
+ * operationsApi.getSellerStatus) already used by BecomeCreatorSidebarCard --
+ * not a new segmentation engine. "none" always shows.
+ */
+export type CtaAudienceRule =
+  | 'none'
+  | 'guests_only'
+  | 'logged_in_only'
+  | 'hide_if_has_creator_account'
+  | 'hide_if_has_seller_account';
+
+export interface CtaBannerItem {
+  /** Unique internal name/key, e.g. "creators.join_cta". Validated unique server-side. */
+  id: string;
+  /** Which page renders this (see CTA_PLACEMENT_REGISTRY for the real, wired sections on that page). */
+  page: CtaPageKey;
+  /** Registry section key on that page (e.g. "creators-grid"). */
+  section: string;
+  /** Before or after that section. */
+  position: CtaPosition;
+  title: string;
+  subtitle: string;
+  buttonLabel: string;
+  destinationType: CtaDestinationType;
+  /**
+   * Internal: an app route (e.g. "/suggest-brand"). External: a full https://
+   * URL. Unused (empty) for creator_signup / seller_signup / none.
+   */
+  destinationValue: string;
+  /** Ignored for destinationType "none". */
+  openInNewTab: boolean;
+  enabled: boolean;
+  /** Scoped within the same (page, section, position) group -- not a global order. */
+  order: number;
+  style?: 'navy' | 'purple' | 'orange' | 'light';
+  icon?: string;
+  startDate?: string;
+  endDate?: string;
+  audienceRule?: CtaAudienceRule;
 }
 
 export interface CatalogSnapshot {

@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 import { SponsoredVerticalAdCarousel } from '../commerce/SponsoredVerticalAdCarousel';
+import { useGlobalState } from '../../context/GlobalStateContext';
+import { getCtaBanner, isCtaBannerVisible } from '../../lib/ctaBanners';
 
 export const TOP_COUPONS = [
   { pct: '10%', code: 'CHOOSIFY10', min: 'Min. Spend BDT 5,000' },
@@ -207,6 +209,10 @@ export function DealsBrandDealsCard({ className }: { className?: string }) {
 
 export function DealsSubscribeBanner({ className }: { className?: string }) {
   const [email, setEmail] = useState('');
+  const { siteConfig } = useGlobalState();
+  const cta = getCtaBanner(siteConfig?.ctaBanners, 'deals.subscribe_cta');
+
+  if (!isCtaBannerVisible(cta)) return null;
 
   return (
     <div
@@ -216,10 +222,8 @@ export function DealsSubscribeBanner({ className }: { className?: string }) {
       )}
     >
       <div>
-        <div className="text-[15px] font-bold mb-1">🎁 NEVER MISS A DEAL!</div>
-        <div className="text-xs text-white/55">
-          Subscribe and get top deals straight to your inbox.
-        </div>
+        <div className="text-[15px] font-bold mb-1">{cta.title}</div>
+        <div className="text-xs text-white/55">{cta.subtitle}</div>
       </div>
       <form
         className="flex gap-2.5 w-full sm:w-auto"
@@ -239,7 +243,7 @@ export function DealsSubscribeBanner({ className }: { className?: string }) {
           type="submit"
           className="bg-[#FF5B00] text-white border-0 px-[22px] rounded-lg text-xs font-bold cursor-pointer hover:brightness-110 shrink-0"
         >
-          SUBSCRIBE
+          {cta.buttonLabel}
         </button>
       </form>
     </div>

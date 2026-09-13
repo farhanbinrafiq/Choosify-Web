@@ -14,6 +14,7 @@ import { HomeFeaturedBrandsSection } from '../components/home/sections/HomeFeatu
 import { HomePopularServicesSection } from '../components/home/sections/HomePopularServicesSection';
 import { HomeRecentlyViewedSection } from '../components/home/sections/HomeRecentlyViewedSection';
 import { getOrderedHomeSectionIds } from '../utils/homepageCms';
+import { CtaBannerSlot } from '../components/CtaBannerSlot';
 
 /**
  * Homepage — layout sourced from Choosify.dc.html Home screen.
@@ -75,7 +76,11 @@ export function HomePage() {
 
       case 'deals':
         return data.sectionVisible('deals') ? (
-          <HomeTodaysDealsSection key="deals" tiles={data.promoTiles} />
+          <React.Fragment key="deals">
+            <CtaBannerSlot page="home" section="home-deals" position="before" className="max-w-7xl mx-auto px-6 mb-6" />
+            <HomeTodaysDealsSection tiles={data.promoTiles} />
+            <CtaBannerSlot page="home" section="home-deals" position="after" className="max-w-7xl mx-auto px-6 mt-6" />
+          </React.Fragment>
         ) : null;
 
       case 'compare':
@@ -88,11 +93,14 @@ export function HomePage() {
 
       case 'featured-brands':
         return data.sectionVisible('featured-brands') ? (
-          <HomeFeaturedBrandsSection
-            key="featured-brands"
-            featuredBrands={data.spotlightBrands}
-            brandFallback={data.brandFallback}
-          />
+          <React.Fragment key="featured-brands">
+            <CtaBannerSlot page="home" section="home-featured-brands" position="before" className="max-w-7xl mx-auto px-6 mb-6" />
+            <HomeFeaturedBrandsSection
+              featuredBrands={data.spotlightBrands}
+              brandFallback={data.brandFallback}
+            />
+            <CtaBannerSlot page="home" section="home-featured-brands" position="after" className="max-w-7xl mx-auto px-6 mt-6" />
+          </React.Fragment>
         ) : null;
 
       case 'services':
@@ -123,6 +131,7 @@ export function HomePage() {
         {sectionOrder.map((sectionId) => renderSection(sectionId))}
         {/* If neither spotlight nor standalone trending rendered, still show sponsored once */}
         {!showSpotlight && !showStandaloneTrending && <HomeSponsoredBannerSection />}
+        <CtaBannerSlot page="home" section="home-end" position="after" className="max-w-7xl mx-auto px-6 mt-8" />
       </main>
     </HomepageLayout>
   );

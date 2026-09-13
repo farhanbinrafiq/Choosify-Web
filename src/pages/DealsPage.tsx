@@ -16,6 +16,7 @@ import { PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 import { ListingAdRail } from '../components/ListingAdRail';
 import { AdSenseSlot } from '../components/AdSenseSlot';
+import { CtaBannerSlot } from '../components/CtaBannerSlot';
 import { usePlacements } from '../hooks/usePlacements';
 import { PLACEMENT_KEYS, INFEED_INTERVAL, INFEED_MAX_PER_PAGE } from '../lib/placements';
 import { injectPlacementsIntoFeed } from '../utils/injectFeedPlacements';
@@ -692,6 +693,8 @@ export function DealsPage() {
               aiDiscoverPrompt="Help me find the best deals on Choosify"
             />
 
+            <CtaBannerSlot page="deals" section="deals-flash-dotd" position="before" className="mb-6" />
+
             {/* FLASH DEALS + DEAL OF THE DAY — Choosify.dc.html */}
             <section className="w-full">
               <div className="grid grid-cols-1 lg:grid-cols-[2.6fr_1fr] gap-5 mb-9">
@@ -824,6 +827,8 @@ export function DealsPage() {
               </div>
             </section>
 
+            <CtaBannerSlot page="deals" section="deals-flash-dotd" position="after" className="mb-6" />
+
             {/* Choosify.dc.html — horizontal sponsored banner carousel */}
             <ProductsSponsoredBannerCarousel
               items={dealsSponsoredBanners}
@@ -919,7 +924,9 @@ export function DealsPage() {
               <DealsBrandDealsCard />
             </div>
 
+            <CtaBannerSlot page="deals" section="deals-subscribe-banner" position="before" className="mb-8" />
             <DealsSubscribeBanner className="mb-8" />
+            <CtaBannerSlot page="deals" section="deals-subscribe-banner" position="after" className="mb-8" />
 
             <AdSenseSlot format="infeed" className="mt-6" />
 

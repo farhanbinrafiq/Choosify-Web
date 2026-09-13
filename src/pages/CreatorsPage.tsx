@@ -22,6 +22,7 @@ import { PLACEMENT_KEYS, INFEED_INTERVAL, INFEED_MAX_PER_PAGE } from '../lib/pla
 import { injectPlacementsIntoFeed } from '../utils/injectFeedPlacements';
 import { rankCreators } from '../utils/listingRanking';
 import { usePriorityClockMs } from '../hooks/usePriorityClockMs';
+import { CtaBannerSlot } from '../components/CtaBannerSlot';
 
 interface CreatorCollab {
   id: string;
@@ -565,6 +566,7 @@ export function CreatorsPage() {
 
         {/* Main Content Area */}
         <main id="creators-main-display" className="choosify-middle-feed scroll-mt-36 min-w-0 pb-10 space-y-6">
+          <CtaBannerSlot page="creators" section="creators-feed-header" position="before" />
           <ListingFeedHeader
             eyebrow="Our partners • Creator directory"
             title={
@@ -595,6 +597,7 @@ export function CreatorsPage() {
               ) : null
             }
           />
+          <CtaBannerSlot page="creators" section="creators-feed-header" position="after" />
 
           <ListingFilterPills
             pills={creatorsBrowseItems.map((item) => ({
@@ -707,6 +710,8 @@ export function CreatorsPage() {
             )}
           </div>
 
+          <CtaBannerSlot page="creators" section="creators-grid" position="before" className="mb-8" />
+
           {filteredCreators.length > 0 ? (
             <>
               <div className={cn(CREATOR_CARD_GRID, 'mb-8')}>
@@ -726,20 +731,7 @@ export function CreatorsPage() {
             </>
           ) : null}
 
-          <div className="choosify-dark-surface rounded-xl px-7 py-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 text-white mb-8">
-            <div>
-              <div className="text-[15px] font-bold mb-1">Are you a creator?</div>
-              <div className="text-[12px] text-white/55">
-                Join Choosify and grow your audience by sharing honest reviews.
-              </div>
-            </div>
-            <Link
-              to="/advertise"
-              className="bg-[#FF5B00] text-white px-[22px] py-3 rounded-lg text-[12px] font-bold no-underline hover:brightness-110 shrink-0"
-            >
-              JOIN AS CREATOR
-            </Link>
-          </div>
+          <CtaBannerSlot page="creators" section="creators-grid" position="after" className="mb-8" />
 
           <AdSenseSlot format="infeed" className="mt-6" />
 
