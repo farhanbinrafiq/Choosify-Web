@@ -18,10 +18,12 @@ interface BrandCardDesignProps {
     reviewCount?: number;
     category?: string;
     bestFor?: string;
-    priceRange?: string;
+    /** `null` = honestly unknown, omit that stat cell. `undefined` keeps the
+     *  legacy directory-tile placeholder for older callers. */
+    priceRange?: string | null;
     minPrice?: number;
     maxPrice?: number;
-    successScore?: number;
+    successScore?: number | null;
     recommended?: string;
     isHot?: boolean;
     isFeatured?: boolean;
@@ -29,6 +31,8 @@ interface BrandCardDesignProps {
     brandColor?: string;
     /** Highest active %-off among this brand's live deals; omit when none */
     maxDiscountPercent?: number;
+    /** Defaults to true (existing directory-tile behavior) when omitted. */
+    verified?: boolean;
   };
   onClick?: () => void;
   /**
@@ -75,22 +79,29 @@ export function mapBrandToCardDesign(brand: any, fallback?: any) {
     originalBrand?.priceRange ||
     (category === 'Fashion' ? '৳500-2000' : '৳5000-25000');
 
+  // `null` on the input is an explicit "honestly unknown" signal (omit);
+  // `undefined` keeps the legacy directory-tile placeholder fallback.
+  const priceRangeOut = brand.priceRange === null ? null : priceRange;
+  const successScoreOut =
+    brand.successScore === null
+      ? null
+      : brand.successScore ||
+        (brand.recommended ? parseInt(String(brand.recommended), 10) : undefined) ||
+        Math.round((brand.rating || 4.8) * 20);
+
   return {
     id: brand.id,
     name: brand.name,
     logo: brand.logo || brand.avatar || brand.name?.slice(0, 2)?.toUpperCase() || 'BR',
     category,
     bestFor,
-    priceRange,
+    priceRange: priceRangeOut,
     rating: brand.rating || brand.ratings || 4.8,
     reviewCount:
       (brand.reviewCount ?? brand.reviews ?? Math.floor((brand.followers || 8400) * 0.1)) || 840,
     isFeatured: !!(brand.isFeatured || brand.featuredFlag),
     isHot: !!brand.isHot,
-    successScore:
-      brand.successScore ||
-      (brand.recommended ? parseInt(String(brand.recommended), 10) : undefined) ||
-      Math.round((brand.rating || 4.8) * 20),
+    successScore: successScoreOut,
     tagline:
       brand.tagline ||
       brand.description ||
@@ -98,6 +109,7 @@ export function mapBrandToCardDesign(brand: any, fallback?: any) {
       'Traditional & contemporary clothing',
     coverImage: brand.coverImage,
     brandColor: brand.brandColor || brand.primaryColor,
+    verified: brand.verified ?? brand.verifiedStatus,
   };
 }
 
@@ -108,14 +120,19 @@ export const BrandCardDesign = memo(function BrandCardDesign({
   isCurrentInComparison,
 }: BrandCardDesignProps) {
   const { savedBrands, setSavedBrands } = useDashboard();
+  const verified = brand.verified !== false;
   const bestForText = brand.bestFor ?? brand.category ?? 'Fashion';
-  const score =
-    brand.successScore ||
-    (brand.recommended ? parseInt(String(brand.recommended), 10) : null) ||
-    Math.round((brand.rating || 4.5) * 20);
+  const scoreKnown = brand.successScore !== null;
+  const score = !scoreKnown
+    ? null
+    : brand.successScore ||
+      (brand.recommended ? parseInt(String(brand.recommended), 10) : null) ||
+      Math.round((brand.rating || 4.5) * 20);
 
-  let priceText = '৳500-2000';
-  if (brand.priceRange) priceText = brand.priceRange;
+  const priceKnown = brand.priceRange !== null;
+  let priceText: string | null = '৳500-2000';
+  if (!priceKnown) priceText = null;
+  else if (brand.priceRange) priceText = brand.priceRange;
   else if (brand.minPrice !== undefined && brand.maxPrice !== undefined) {
     priceText = `৳${formatNumber(brand.minPrice)}-${formatNumber(brand.maxPrice)}`;
   } else if (brand.minPrice !== undefined) {
@@ -125,7 +142,7 @@ export const BrandCardDesign = memo(function BrandCardDesign({
   const isSaved = savedBrands?.some((b: any) => String(b.id) === String(brand.id));
 
   const circumference = 2 * Math.PI * 18;
-  const dashOffset = circumference * (1 - Math.min(100, Math.max(0, score)) / 100);
+  const dashOffset = score === null ? 0 : circumference * (1 - Math.min(100, Math.max(0, score)) / 100);
 
   const toggleWish = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -141,13 +158,15 @@ export const BrandCardDesign = memo(function BrandCardDesign({
   };
 
   const CardWrapper: any = isCurrentInComparison ? 'div' : Link;
+  // Always the plain profile URL -- the "X% Off" badge above is a decorative,
+  // non-interactive (pointer-events-none) overlay on this same whole-card
+  // link, not a distinct "View Deals" affordance, so the entire card must
+  // never carry the #deals-section deep-link hash. Every brand with any
+  // live discount was landing on the deals section instead of the top.
   const wrapperProps = isCurrentInComparison
     ? {}
     : {
-        to:
-          brand.maxDiscountPercent && brand.maxDiscountPercent >= 1
-            ? `/brands/${brand.id}#deals-section`
-            : `/brands/${brand.id}`,
+        to: `/brands/${brand.id}`,
         onClick,
       };
 
@@ -208,46 +227,54 @@ export const BrandCardDesign = memo(function BrandCardDesign({
         />
         <div className="flex items-center justify-center gap-1 mb-0.5">
           <h3 className="text-[14px] font-extrabold text-[#1A1A2E] truncate">{brand.name}</h3>
-          <span className="text-[#2323FF] text-[12px] font-extrabold" aria-label="Verified">
-            ✓
-          </span>
+          {verified && (
+            <span className="text-[#2323FF] text-[12px] font-extrabold" aria-label="Verified">
+              ✓
+            </span>
+          )}
         </div>
-        <p className="text-[11px] text-[#2323FF] mb-3">✓ Verified Brand</p>
+        {verified && <p className="text-[11px] text-[#2323FF] mb-3">✓ Verified Brand</p>}
 
-        {/* Stats — dc Brands List: Best For | Price Range | Success ring */}
+        {/* Stats — dc Brands List: Best For | Price Range | Success ring.
+            Price Range / Success are omitted (not fabricated) when the
+            caller explicitly passes null for real-but-unknown data. */}
         <div className="flex items-center justify-between gap-1 px-1 py-3.5 mb-3.5">
           <div className="min-w-0 text-left">
             <div className="text-[13px] font-extrabold text-[#1A1A2E] leading-tight">Best For</div>
             <div className="text-[12px] font-bold text-[#8A00C4] truncate">{bestForText}</div>
           </div>
-          <div className="min-w-0 text-center px-1">
-            <div className="text-[15px] font-extrabold text-[#2323FF] truncate leading-tight">
-              {priceText.replace(/^From\s+/i, '').split('-')[0] || priceText}
-            </div>
-            <div className="text-[9.5px] text-[#4B5563]">Price Range</div>
-          </div>
-          <div className="min-w-0 flex flex-col items-center text-center">
-            <div className="relative w-11 h-11 mb-0.5">
-              <svg viewBox="0 0 44 44" className="w-11 h-11 -rotate-90">
-                <circle cx="22" cy="22" r="18" fill="none" stroke="#F1F1F3" strokeWidth="4" />
-                <circle
-                  cx="22"
-                  cy="22"
-                  r="18"
-                  fill="none"
-                  stroke="#07DD05"
-                  strokeWidth="4"
-                  strokeLinecap="round"
-                  strokeDasharray={circumference}
-                  strokeDashoffset={dashOffset}
-                />
-              </svg>
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-[10px] font-extrabold text-[#1A1A2E]">{score}%</span>
+          {priceText !== null && (
+            <div className="min-w-0 text-center px-1">
+              <div className="text-[15px] font-extrabold text-[#2323FF] truncate leading-tight">
+                {priceText.replace(/^From\s+/i, '').split('-')[0] || priceText}
               </div>
+              <div className="text-[9.5px] text-[#4B5563]">Price Range</div>
             </div>
-            <div className="text-[9px] text-[#9AA0AC]">Success</div>
-          </div>
+          )}
+          {score !== null && (
+            <div className="min-w-0 flex flex-col items-center text-center">
+              <div className="relative w-11 h-11 mb-0.5">
+                <svg viewBox="0 0 44 44" className="w-11 h-11 -rotate-90">
+                  <circle cx="22" cy="22" r="18" fill="none" stroke="#F1F1F3" strokeWidth="4" />
+                  <circle
+                    cx="22"
+                    cy="22"
+                    r="18"
+                    fill="none"
+                    stroke="#07DD05"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                    strokeDasharray={circumference}
+                    strokeDashoffset={dashOffset}
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-[10px] font-extrabold text-[#1A1A2E]">{score}%</span>
+                </div>
+              </div>
+              <div className="text-[9px] text-[#9AA0AC]">Success</div>
+            </div>
+          )}
         </div>
 
         <span
