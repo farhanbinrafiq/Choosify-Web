@@ -48,6 +48,8 @@ import { BrandStorySection } from "../components/brand/BrandStorySection";
 import {
   rankBrandCatalogProducts,
 } from "../utils/listingRanking";
+import { SortDropdown } from "../components/SortDropdown";
+import { BRAND_DETAIL_SORT_OPTIONS, BRAND_DETAIL_SORT_DEFAULT, applySortOption } from "../lib/sorting/sortRegistry";
 import { usePriorityClockMs } from "../hooks/usePriorityClockMs";
 
 const BRAND_FEED_GRID = PRODUCT_CARD_GRID;
@@ -142,7 +144,7 @@ export function BrandDetailPage() {
   const [featuredOnlyFilter, setFeaturedOnlyFilter] = useState(false);
 
   // Sort State
-  const [sortOption, setSortOption] = useState<string>("default");
+  const [sortOption, setSortOption] = useState<string>(BRAND_DETAIL_SORT_DEFAULT);
   const priorityNowMs = usePriorityClockMs();
 
   // Smart filters specs State
@@ -233,6 +235,7 @@ export function BrandDetailPage() {
     inStockOnlyFilter,
     featuredOnlyFilter,
     smartSpecs,
+    sortOption,
   ]);
 
   useEffect(() => {
@@ -446,31 +449,6 @@ export function BrandDetailPage() {
           label: "Featured",
           active: featuredOnlyFilter,
           onClick: () => setFeaturedOnlyFilter(!featuredOnlyFilter),
-        },
-        {
-          id: "sort",
-          label:
-            sortOption === "default"
-              ? "Sort Selection"
-              : `Sort: ${
-                  sortOption === "price-asc"
-                    ? "৳ Low to High"
-                    : sortOption === "price-desc"
-                      ? "৳ High to Low"
-                      : sortOption === "rating-desc"
-                        ? "Top Rating"
-                        : "Best Discount"
-                }`,
-          active: sortOption !== "default",
-          onClick: () => {
-            setSortOption((prev) => {
-              if (prev === "default") return "price-asc";
-              if (prev === "price-asc") return "price-desc";
-              if (prev === "price-desc") return "rating-desc";
-              if (prev === "rating-desc") return "discount-desc";
-              return "default";
-            });
-          },
         },
       ],
       renderFilters: () => (
@@ -934,43 +912,21 @@ export function BrandDetailPage() {
   // Dynamic Sorting Engine — default uses shared brand-catalog ranking
   const sortedProducts = useMemo(() => {
     const list = [...filteredProducts] as any[];
-    if (sortOption === "price-asc") {
-      return list.sort((a, b) => {
-        const prA =
-          typeof a.price === "number"
-            ? a.price
-            : parseInt(String(a.price).replace(/[^0-9]/g, "")) || 0;
-        const prB =
-          typeof b.price === "number"
-            ? b.price
-            : parseInt(String(b.price).replace(/[^0-9]/g, "")) || 0;
-        return prA - prB;
-      });
-    }
-    if (sortOption === "price-desc") {
-      return list.sort((a, b) => {
-        const prA =
-          typeof a.price === "number"
-            ? a.price
-            : parseInt(String(a.price).replace(/[^0-9]/g, "")) || 0;
-        const prB =
-          typeof b.price === "number"
-            ? b.price
-            : parseInt(String(b.price).replace(/[^0-9]/g, "")) || 0;
-        return prB - prA;
-      });
-    }
-    if (sortOption === "rating-desc") {
-      return list.sort((a, b) => (b.rating || 0) - (a.rating || 0));
-    }
-    if (sortOption === "discount-desc") {
-      return list.sort((a, b) => {
-        const discA = a.discount || a.discountPercent || 0;
-        const discB = b.discount || b.discountPercent || 0;
-        return discB - discA;
-      });
-    }
-    return rankBrandCatalogProducts(list, priorityNowMs);
+    const priceOf = (p: any) =>
+      typeof p.price === "number"
+        ? p.price
+        : parseInt(String(p.price).replace(/[^0-9]/g, ""), 10) || 0;
+    return applySortOption(
+      list,
+      BRAND_DETAIL_SORT_OPTIONS,
+      sortOption,
+      BRAND_DETAIL_SORT_DEFAULT,
+      (items) => rankBrandCatalogProducts(items, { nowMs: priorityNowMs }),
+      (p) => ({
+        price: priceOf(p),
+        discountPercent: Number(p.discount || p.discountPercent || 0),
+      }),
+    );
   }, [filteredProducts, sortOption, priorityNowMs]);
 
   const totalPages = Math.ceil(sortedProducts.length / productsPerPage);
@@ -1810,16 +1766,19 @@ export function BrandDetailPage() {
 
             {/* A. PRODUCTS SECTION — always rendered; grid when catalog matches */}
             <StudioWrap sectionId="brand-catalog" className="scroll-mt-36">
-              <div className="flex items-baseline justify-between gap-3 mb-1 text-left">
+              <div className="flex items-baseline justify-between gap-3 mb-1 text-left flex-wrap">
                 <h2 className="text-[15px] font-extrabold text-[#1A1A2E] tracking-tight m-0">
                   {brand.name.toUpperCase()} PRODUCTS
                 </h2>
-                <Link
-                  to={`/brands/${brand.id}/products`}
-                  className="text-[12px] font-bold text-[#1A1A2E] no-underline hover:text-[#EF3C23] shrink-0"
-                >
-                  VIEW ALL PRODUCTS ›
-                </Link>
+                <div className="flex items-center gap-3">
+                  <SortDropdown options={BRAND_DETAIL_SORT_OPTIONS} value={sortOption} onChange={setSortOption} />
+                  <Link
+                    to={`/brands/${brand.id}/products`}
+                    className="text-[12px] font-bold text-[#1A1A2E] no-underline hover:text-[#EF3C23] shrink-0"
+                  >
+                    VIEW ALL PRODUCTS ›
+                  </Link>
+                </div>
               </div>
               <p className="text-[11.5px] text-[#9AA0AC] m-0 mb-3.5">
                 Explore all products from {brand.name}

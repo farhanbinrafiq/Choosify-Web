@@ -24,6 +24,8 @@ import { ListingAdRail } from '../components/ListingAdRail';
 import { PLACEMENT_KEYS } from '../lib/placements';
 import { SponsoredFeedInjector } from '../components/commerce/SponsoredFeedInjector';
 import { CategorySponsoredAdCard } from '../components/categories/CategorySponsoredAdCard';
+import { SortDropdown } from '../components/SortDropdown';
+import { CATEGORY_SORT_OPTIONS, CATEGORY_SORT_DEFAULT, applySortOption } from '../lib/sorting/sortRegistry';
 
 type CategoryItem = CategoryDisplayItem;
 
@@ -146,6 +148,7 @@ export function CategoriesPage() {
   const [selectedAvailability, setSelectedAvailability] = useState<string | null>(null);
   const [selectedContent, setSelectedContent] = useState<string | null>(null);
   const [isMobileDrawerOpen, setIsMobileDrawerOpen] = useState(false);
+  const [sortOption, setSortOption] = useState<string>(CATEGORY_SORT_DEFAULT);
 
   // Simulated content refresh loader that reacts to any discovery filter parameter change
   useEffect(() => {
@@ -519,8 +522,15 @@ export function CategoriesPage() {
       });
     }
 
-    return result;
-  }, [searchQuery, activeCategoryTab, selectedCategoryType, selectedCategoryStatus, selectedAvailability, selectedContent, selectedMainCategory, categoriesList]);
+    return applySortOption(
+      result,
+      CATEGORY_SORT_OPTIONS,
+      sortOption,
+      CATEGORY_SORT_DEFAULT,
+      (list) => list,
+      (cat) => ({ name: cat.name, count: cat.count }),
+    );
+  }, [searchQuery, activeCategoryTab, selectedCategoryType, selectedCategoryStatus, selectedAvailability, selectedContent, selectedMainCategory, categoriesList, sortOption]);
 
   useRegisterPageFilters({
     pageName: 'Categories',
@@ -723,6 +733,13 @@ export function CategoriesPage() {
           />
           <CtaBannerSlot page="categories" section="categories-feed-header" position="after" />
 
+          {/* Mobile-only: ListingFilterPills (incl. AI Discover) hides below sm, so surface Sort here too */}
+          {!selectedMainCategory && (
+            <div className="flex justify-end sm:hidden">
+              <SortDropdown options={CATEGORY_SORT_OPTIONS} value={sortOption} onChange={setSortOption} />
+            </div>
+          )}
+
           <ListingFilterPills
             pills={CATEGORY_QUICK_NAV_ITEMS.map((item) => ({
               id: item.id,
@@ -742,6 +759,11 @@ export function CategoriesPage() {
             )}
             onClearFilters={handleClearAllFilters}
             aiDiscoverPrompt="Help me explore categories on Choosify"
+            sortSlot={
+              !selectedMainCategory ? (
+                <SortDropdown options={CATEGORY_SORT_OPTIONS} value={sortOption} onChange={setSortOption} />
+              ) : undefined
+            }
           />
 
           <div className="flex flex-col lg:flex-row lg:items-start gap-4 lg:gap-6">

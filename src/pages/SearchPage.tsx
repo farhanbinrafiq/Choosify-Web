@@ -14,6 +14,8 @@ import { useRegisterPageFilters, UniversalFilterRenderer } from '../components/F
 import { catalogGuideHref } from '../lib/spotlight/content';
 import { cn } from '../lib/utils';
 import { toast } from '../lib/notify';
+import { SortDropdown } from '../components/SortDropdown';
+import { SEARCH_SORT_OPTIONS, SEARCH_SORT_DEFAULT, applySortOption, resolveSortIdFromParam } from '../lib/sorting/sortRegistry';
 
 type SearchTab = 'all' | 'products' | 'brands' | 'guides' | 'deals' | 'creators';
 
@@ -34,7 +36,19 @@ export function SearchPage() {
   const rawQuery = searchParams.get('q') || '';
   const [localInput, setLocalInput] = useState(rawQuery);
   const [activeTab, setActiveTab] = useState<SearchTab>('all');
-  const [sortBy, setSortBy] = useState<'default' | 'price_asc' | 'price_desc' | 'newest'>('default');
+  const [sortBy, setSortByState] = useState<string>(() =>
+    resolveSortIdFromParam(SEARCH_SORT_OPTIONS, SEARCH_SORT_DEFAULT, searchParams.get('sort')),
+  );
+  const setSortBy = React.useCallback(
+    (id: string) => {
+      setSortByState(id);
+      const updated = new URLSearchParams(searchParams);
+      if (id === SEARCH_SORT_DEFAULT) updated.delete('sort');
+      else updated.set('sort', id);
+      setSearchParams(updated);
+    },
+    [searchParams, setSearchParams],
+  );
   const [maxPrice, setMaxPrice] = useState('all');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [inStockOnly, setInStockOnly] = useState(false);
@@ -63,9 +77,15 @@ export function SearchPage() {
     setLocalInput(rawQuery);
   }, [rawQuery]);
 
+  // Keep sort aligned with ?sort= on browser back/forward or external nav.
+  useEffect(() => {
+    const resolved = resolveSortIdFromParam(SEARCH_SORT_OPTIONS, SEARCH_SORT_DEFAULT, searchParams.get('sort'));
+    setSortByState((prev) => (prev === resolved ? prev : resolved));
+  }, [searchParams]);
+
   const filterCount = useMemo(() => {
     let n = 0;
-    if (sortBy !== 'default') n += 1;
+    if (sortBy !== SEARCH_SORT_DEFAULT) n += 1;
     if (maxPrice !== 'all') n += 1;
     if (categoryFilter !== 'all') n += 1;
     if (inStockOnly) n += 1;
@@ -107,69 +127,62 @@ export function SearchPage() {
         onClick: () => setActiveTab(t.id),
       })),
       renderFilters: () => (
-        <UniversalFilterRenderer
-          profile={{
-            entity: 'products',
-            filters: [
-              {
-                id: 'sort',
-                name: 'Sort by',
-                type: 'single_select',
-                options: [
-                  { value: 'default', label: 'Relevance' },
-                  { value: 'price_asc', label: 'Price: Low to High' },
-                  { value: 'price_desc', label: 'Price: High to Low' },
-                  { value: 'newest', label: 'Newest' },
-                ],
-              },
-              {
-                id: 'price',
-                name: 'Max price',
-                type: 'single_select',
-                options: [
-                  { value: 'all', label: 'Any price' },
-                  { value: '5000', label: 'Under BDT 5,000' },
-                  { value: '15000', label: 'Under BDT 15,000' },
-                  { value: '50000', label: 'Under BDT 50,000' },
-                ],
-              },
-              {
-                id: 'category',
-                name: 'Category',
-                type: 'single_select',
-                options: [
-                  { value: 'all', label: 'All categories' },
-                  ...categorySource.slice(0, 12).map((c) => ({ value: c.name, label: c.name })),
-                ],
-              },
-              {
-                id: 'stock',
-                name: 'Availability',
-                type: 'single_select',
-                options: [
-                  { value: 'all', label: 'All items' },
-                  { value: 'in_stock', label: 'In stock only' },
-                ],
-              },
-            ],
-          }}
-          activeFilters={{
-            sort: sortBy,
-            price: maxPrice,
-            category: categoryFilter,
-            stock: inStockOnly ? 'in_stock' : 'all',
-          }}
-          onFilterChange={(filterId, value) => {
-            if (filterId === 'sort') setSortBy((value || 'default') as typeof sortBy);
-            if (filterId === 'price') setMaxPrice(value || 'all');
-            if (filterId === 'category') setCategoryFilter(value || 'all');
-            if (filterId === 'stock') setInStockOnly(value === 'in_stock');
-          }}
-        />
+        <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5 font-sans">
+            <label className="text-[10px] font-black text-[#8a9bb0] uppercase tracking-wider">Sort by</label>
+            <SortDropdown options={SEARCH_SORT_OPTIONS} value={sortBy} onChange={setSortBy} className="w-full" />
+          </div>
+          <UniversalFilterRenderer
+            profile={{
+              entity: 'products',
+              filters: [
+                {
+                  id: 'price',
+                  name: 'Max price',
+                  type: 'single_select',
+                  options: [
+                    { value: 'all', label: 'Any price' },
+                    { value: '5000', label: 'Under BDT 5,000' },
+                    { value: '15000', label: 'Under BDT 15,000' },
+                    { value: '50000', label: 'Under BDT 50,000' },
+                  ],
+                },
+                {
+                  id: 'category',
+                  name: 'Category',
+                  type: 'single_select',
+                  options: [
+                    { value: 'all', label: 'All categories' },
+                    ...categorySource.slice(0, 12).map((c) => ({ value: c.name, label: c.name })),
+                  ],
+                },
+                {
+                  id: 'stock',
+                  name: 'Availability',
+                  type: 'single_select',
+                  options: [
+                    { value: 'all', label: 'All items' },
+                    { value: 'in_stock', label: 'In stock only' },
+                  ],
+                },
+              ],
+            }}
+            activeFilters={{
+              price: maxPrice,
+              category: categoryFilter,
+              stock: inStockOnly ? 'in_stock' : 'all',
+            }}
+            onFilterChange={(filterId, value) => {
+              if (filterId === 'price') setMaxPrice(value || 'all');
+              if (filterId === 'category') setCategoryFilter(value || 'all');
+              if (filterId === 'stock') setInStockOnly(value === 'in_stock');
+            }}
+          />
+        </div>
       ),
       activeFilterCount: filterCount,
       onClearAll: () => {
-        setSortBy('default');
+        setSortBy(SEARCH_SORT_DEFAULT);
         setMaxPrice('all');
         setCategoryFilter('all');
         setInStockOnly(false);
@@ -220,10 +233,14 @@ export function SearchPage() {
     if (inStockOnly) {
       products = products.filter((p) => Number(p.stock ?? 1) > 0);
     }
-    if (sortBy === 'price_asc') products = [...products].sort((a, b) => Number(a.price) - Number(b.price));
-    else if (sortBy === 'price_desc') products = [...products].sort((a, b) => Number(b.price) - Number(a.price));
-    else if (sortBy === 'newest') products = [...products].sort((a, b) => Number(b.id) - Number(a.id));
-    else products = [...products].sort((a, b) => (b.score || 0) - (a.score || 0));
+    products = applySortOption(
+      products,
+      SEARCH_SORT_OPTIONS,
+      sortBy,
+      SEARCH_SORT_DEFAULT,
+      (list) => [...list].sort((a, b) => (b.score || 0) - (a.score || 0)),
+      (p) => ({ createdAt: p.createdAt, price: Number(p.price) || 0 }),
+    );
 
     // Out-of-stock results sink to the end regardless of sort -- a stable
     // partition, so each group keeps the order just computed above.
@@ -330,30 +347,35 @@ export function SearchPage() {
 
       <div className="max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-10 py-6 pb-14">
         <CtaBannerSlot page="search" section="search-pill-tabs" position="before" className="mb-6" />
-        {/* DC pill tabs */}
-        <div className="flex gap-2.5 mb-6 flex-wrap">
-          {DC_TABS.map((tab) => {
-            const active = activeTab === tab.id;
-            const count = tabCounts[tab.id];
-            return (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={cn(
-                  'px-4 py-2.5 rounded-[20px] text-xs font-bold cursor-pointer border transition-colors',
-                  active
-                    ? 'bg-[#FF5B00] text-white border-[#FF5B00]'
-                    : 'bg-white text-[#1A1A2E] border-[#E5E7EB] hover:border-[#FF5B00]/40',
-                )}
-              >
-                {tab.label}{' '}
-                <span className={cn(active ? 'opacity-60' : 'text-[#9AA0AC]')}>
-                  ({count})
-                </span>
-              </button>
-            );
-          })}
+        {/* DC pill tabs + sort */}
+        <div className="flex flex-wrap items-center justify-between gap-2.5 mb-6">
+          <div className="flex gap-2.5 flex-wrap">
+            {DC_TABS.map((tab) => {
+              const active = activeTab === tab.id;
+              const count = tabCounts[tab.id];
+              return (
+                <button
+                  key={tab.id}
+                  type="button"
+                  onClick={() => setActiveTab(tab.id)}
+                  className={cn(
+                    'px-4 py-2.5 rounded-[20px] text-xs font-bold cursor-pointer border transition-colors',
+                    active
+                      ? 'bg-[#FF5B00] text-white border-[#FF5B00]'
+                      : 'bg-white text-[#1A1A2E] border-[#E5E7EB] hover:border-[#FF5B00]/40',
+                  )}
+                >
+                  {tab.label}{' '}
+                  <span className={cn(active ? 'opacity-60' : 'text-[#9AA0AC]')}>
+                    ({count})
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+          <div className="flex items-center gap-2.5 shrink-0">
+            <SortDropdown options={SEARCH_SORT_OPTIONS} value={sortBy} onChange={setSortBy} />
+          </div>
         </div>
         <CtaBannerSlot page="search" section="search-pill-tabs" position="after" className="mb-6" />
 

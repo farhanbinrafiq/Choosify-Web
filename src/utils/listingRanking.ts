@@ -354,9 +354,14 @@ export function scoreBrand(b: BrandRankingInput, nowMs: number = Date.now()): nu
 
 export function rankBrands<T extends BrandRankingInput>(
   items: T[],
-  nowMs: number = Date.now(),
+  options?: {
+    nowMs?: number;
+    /** Skip ranking when user picked an explicit sort (e.g. newest / A-Z) */
+    skip?: boolean;
+  },
 ): T[] {
-  if (items.length <= 1) return items;
+  if (options?.skip || items.length <= 1) return items;
+  const nowMs = options?.nowMs ?? Date.now();
   const sponsored = items.filter((b) => b.sponsoredFlag || b.isHot || b.featuredFlag || b.isFeatured);
   const organic = items.filter((b) => !(b.sponsoredFlag || b.isHot || b.featuredFlag || b.isFeatured));
   return interleaveSponsoredCap(
@@ -432,9 +437,14 @@ export function scoreCreator(c: CreatorRankingInput, nowMs: number = Date.now())
 
 export function rankCreators<T extends CreatorRankingInput>(
   items: T[],
-  nowMs: number = Date.now(),
+  options?: {
+    nowMs?: number;
+    /** Skip ranking when user picked an explicit sort (e.g. newest / A-Z) */
+    skip?: boolean;
+  },
 ): T[] {
-  if (items.length <= 1) return items;
+  if (options?.skip || items.length <= 1) return items;
+  const nowMs = options?.nowMs ?? Date.now();
   const sponsored = items.filter((c) => c.featuredFlag || c.isFeatured || c.isHot);
   const organic = items.filter((c) => !(c.featuredFlag || c.isFeatured || c.isHot));
   return interleaveSponsoredCap(
@@ -507,9 +517,14 @@ export function scoreDeal(d: DealRankingInput, nowMs: number = Date.now()): numb
 
 export function rankDeals<T extends DealRankingInput>(
   items: T[],
-  nowMs: number = Date.now(),
+  options?: {
+    nowMs?: number;
+    /** Skip ranking when user picked an explicit sort (e.g. ending soon / price) */
+    skip?: boolean;
+  },
 ): T[] {
-  if (items.length <= 1) return items;
+  if (options?.skip || items.length <= 1) return items;
+  const nowMs = options?.nowMs ?? Date.now();
   const sponsored = items.filter((d) => d.sponsored || d.featuredFlag);
   const organic = items.filter((d) => !(d.sponsored || d.featuredFlag));
   return interleaveSponsoredCap(
@@ -528,9 +543,14 @@ export function rankDeals<T extends DealRankingInput>(
  */
 export function rankBrandCatalogProducts<T extends ProductRankingInput>(
   items: T[],
-  nowMs: number = Date.now(),
+  options?: {
+    nowMs?: number;
+    /** Skip ranking when user picked an explicit sort (e.g. price / discount) */
+    skip?: boolean;
+  },
 ): T[] {
-  if (items.length <= 1) return items;
+  if (options?.skip || items.length <= 1) return items;
+  const nowMs = options?.nowMs ?? Date.now();
   return stableSort(items, (p) => {
     // Strip list-page sponsored weight; re-apply as hard pin
     const base = scoreProduct({ ...p, sponsored: false, featuredFlag: false }, nowMs);

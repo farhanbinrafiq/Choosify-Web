@@ -23,6 +23,8 @@ import { injectPlacementsIntoFeed } from '../utils/injectFeedPlacements';
 import { rankCreators } from '../utils/listingRanking';
 import { usePriorityClockMs } from '../hooks/usePriorityClockMs';
 import { CtaBannerSlot } from '../components/CtaBannerSlot';
+import { SortDropdown } from '../components/SortDropdown';
+import { CREATOR_SORT_OPTIONS, CREATOR_SORT_DEFAULT, applySortOption } from '../lib/sorting/sortRegistry';
 
 interface CreatorCollab {
   id: string;
@@ -60,6 +62,7 @@ export function CreatorsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [verificationFilter, setVerificationFilter] = useState<'all' | 'verified' | 'unverified'>('all');
   const [popularityFilter, setPopularityFilter] = useState<'all' | 'high' | 'normal'>('all');
+  const [sortOption, setSortOption] = useState<string>(CREATOR_SORT_DEFAULT);
 
   // Model-level augmentation matching BrandsPage visual cards rating, reviews structure
   const mappedCreators = React.useMemo(() => {
@@ -145,8 +148,19 @@ export function CreatorsPage() {
       result = result.filter(c => c.rating < 4.8);
     }
 
-    return rankCreators(result, priorityNowMs);
-  }, [mappedCreators, searchQuery, selectedLetter, activeTab, selectedCategory, verificationFilter, popularityFilter, priorityNowMs]);
+    return applySortOption(
+      result,
+      CREATOR_SORT_OPTIONS,
+      sortOption,
+      CREATOR_SORT_DEFAULT,
+      (list) => rankCreators(list, { nowMs: priorityNowMs }),
+      (c) => ({
+        createdAt: c.createdAt,
+        name: c.name,
+        contentCount: (c.videos?.length ?? 0) + (c.reels?.length ?? 0) + (c.blogs?.length ?? 0),
+      }),
+    );
+  }, [mappedCreators, searchQuery, selectedLetter, activeTab, selectedCategory, verificationFilter, popularityFilter, priorityNowMs, sortOption]);
 
   const infeedPlacements = usePlacements(PLACEMENT_KEYS.INFEED_CREATOR, {
     limit: INFEED_MAX_PER_PAGE,
@@ -173,7 +187,7 @@ export function CreatorsPage() {
   } = useInfiniteListBatch(creatorFeed, {
     initial: 24,
     loadMore: 12,
-    resetKey: searchQuery + (selectedLetter ?? ''),
+    resetKey: searchQuery + (selectedLetter ?? '') + sortOption,
   });
 
   const sectionNavItems = useMemo(
@@ -599,6 +613,11 @@ export function CreatorsPage() {
           />
           <CtaBannerSlot page="creators" section="creators-feed-header" position="after" />
 
+          {/* Mobile-only: ListingFilterPills (incl. AI Discover) hides below sm, so surface Sort here too */}
+          <div className="flex justify-end sm:hidden">
+            <SortDropdown options={CREATOR_SORT_OPTIONS} value={sortOption} onChange={setSortOption} />
+          </div>
+
           <ListingFilterPills
             pills={creatorsBrowseItems.map((item) => ({
               id: item.id,
@@ -623,6 +642,7 @@ export function CreatorsPage() {
               setPopularityFilter('all');
             }}
             aiDiscoverPrompt="Help me find creators on Choosify"
+            sortSlot={<SortDropdown options={CREATOR_SORT_OPTIONS} value={sortOption} onChange={setSortOption} />}
           />
 
           {/* Active Filter Chips */}

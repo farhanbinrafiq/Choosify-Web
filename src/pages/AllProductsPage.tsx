@@ -25,6 +25,8 @@ import { PLACEMENT_KEYS } from '../lib/placements';
 import { resolveServiceKeywords } from '../lib/home/popularServices';
 import { rankProducts } from '../utils/listingRanking';
 import { usePriorityClockMs } from '../hooks/usePriorityClockMs';
+import { SortDropdown } from '../components/SortDropdown';
+import { PRODUCT_SORT_OPTIONS, PRODUCT_SORT_DEFAULT, applySortOption, resolveSortIdFromParam } from '../lib/sorting/sortRegistry';
 
 const SPONSORED_RECOMMENDATIONS = [
   {
@@ -83,7 +85,19 @@ export function AllProductsPage() {
   const [minPrice, setMinPrice] = useState<string>('');
   const [maxPrice, setMaxPrice] = useState<string>('');
   const [priceError, setPriceError] = useState<string>('');
-  const [sortOption, setSortOption] = useState<'popular' | 'featured' | 'price-asc' | 'price-desc' | 'rating-desc'>('featured');
+  const [sortOption, setSortOptionState] = useState<string>(() =>
+    resolveSortIdFromParam(PRODUCT_SORT_OPTIONS, PRODUCT_SORT_DEFAULT, searchParams.get('sort')),
+  );
+  const setSortOption = React.useCallback(
+    (id: string) => {
+      setSortOptionState(id);
+      const updated = new URLSearchParams(searchParams);
+      if (id === PRODUCT_SORT_DEFAULT) updated.delete('sort');
+      else updated.set('sort', id);
+      setSearchParams(updated);
+    },
+    [searchParams, setSearchParams],
+  );
   const [activeSpecs, setActiveSpecs] = useState<Record<string, string>>({});
   const [priceMin, setPriceMin] = useState<number>(0);
   const priorityNowMs = usePriorityClockMs();
@@ -102,7 +116,9 @@ export function AllProductsPage() {
         if (filters.retailPriceLimit) setRetailPriceLimit(filters.retailPriceLimit);
         if (filters.minPrice) setMinPrice(filters.minPrice);
         if (filters.maxPrice) setMaxPrice(filters.maxPrice);
-        if (filters.sortOption) setSortOption(filters.sortOption);
+        if (filters.sortOption && !searchParams.get('sort')) {
+          setSortOptionState(resolveSortIdFromParam(PRODUCT_SORT_OPTIONS, PRODUCT_SORT_DEFAULT, filters.sortOption));
+        }
         if (filters.activeTab) setActiveTab(filters.activeTab);
         if (filters.activeSpecs) setActiveSpecs(filters.activeSpecs);
         if (filters.priceMin !== undefined) setPriceMin(filters.priceMin);
@@ -141,6 +157,9 @@ export function AllProductsPage() {
     if (categoryParam) {
       setSelectedCategory(categoryParam);
     }
+    const sortParam = searchParams.get('sort');
+    const resolvedSort = resolveSortIdFromParam(PRODUCT_SORT_OPTIONS, PRODUCT_SORT_DEFAULT, sortParam);
+    setSortOptionState((prev) => (prev === resolvedSort ? prev : resolvedSort));
   }, [rawQuery, searchParams]);
 
   // Category / filter links often keep pathname /products — scroll to top on query change
@@ -226,16 +245,7 @@ export function AllProductsPage() {
       <div className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5 font-sans">
           <label className="text-[10px] font-black text-[#8a9bb0] uppercase tracking-wider">Sort Listings By</label>
-          <select
-            value={sortOption}
-            onChange={(e) => setSortOption(e.target.value as any)}
-            className="w-full h-10 px-3 bg-[#F4F8FA] border border-[#eef2f6] rounded-2xl text-xs font-semibold text-navy outline-none focus:border-orange-primary/30"
-          >
-            <option value="featured">Featured / Recommended</option>
-            <option value="price-asc">Price: Low to High</option>
-            <option value="price-desc">Price: High to Low</option>
-            <option value="rating-desc">Rating: High to Low</option>
-          </select>
+          <SortDropdown options={PRODUCT_SORT_OPTIONS} value={sortOption} onChange={setSortOption} className="w-full" />
         </div>
 
         <UniversalFilterRenderer
@@ -343,7 +353,7 @@ export function AllProductsPage() {
               </button>
             )}
           </div>
-          
+
           <div className="flex items-center gap-2">
             <div className="flex-1">
               <input
@@ -525,31 +535,25 @@ export function AllProductsPage() {
     result = result.filter(p => p.price >= priceMin && p.price <= priceMax);
 
     // 6. Explicit sort OR default dynamic ranking
-    if (sortOption === 'price-asc') {
-      result.sort((a, b) => a.price - b.price);
-    } else if (sortOption === 'price-desc') {
-      result.sort((a, b) => b.price - a.price);
-    } else if (sortOption === 'rating-desc') {
-      result.sort((a, b) => Number(b.rating || 0) - Number(a.rating || 0));
-    } else if (sortOption === 'featured') {
-      result.sort((a, b) => {
-        const aFeat = a.featuredFlag || a.isBestseller ? 1 : 0;
-        const bFeat = b.featuredFlag || b.isBestseller ? 1 : 0;
-        if (bFeat !== aFeat) return bFeat - aFeat;
-        return Number(b.rating || 0) - Number(a.rating || 0);
-      });
-    } else {
-      const brandFollowersById: Record<string, number> = {};
-      for (const b of allBrands) {
-        brandFollowersById[String(b.id)] = Number((b as { followers?: number }).followers) || 0;
-        if (b.name) brandFollowersById[b.name] = Number((b as { followers?: number }).followers) || 0;
-      }
-      result = rankProducts(result, {
-        nowMs: priorityNowMs,
-        brandFollowersById,
-        getBrandId: (p) => String(p.brandId || p.brandName || ''),
-      });
-    }
+    result = applySortOption(
+      result,
+      PRODUCT_SORT_OPTIONS,
+      sortOption,
+      PRODUCT_SORT_DEFAULT,
+      (list) => {
+        const brandFollowersById: Record<string, number> = {};
+        for (const b of allBrands) {
+          brandFollowersById[String(b.id)] = Number((b as { followers?: number }).followers) || 0;
+          if (b.name) brandFollowersById[b.name] = Number((b as { followers?: number }).followers) || 0;
+        }
+        return rankProducts(list, {
+          nowMs: priorityNowMs,
+          brandFollowersById,
+          getBrandId: (p) => String(p.brandId || p.brandName || ''),
+        });
+      },
+      (p) => ({ createdAt: p.createdAt, price: p.price }),
+    );
 
     // Out-of-stock items always sink to the end, after whichever sort ran
     // above -- a stable partition, so each group keeps its own sorted order,
@@ -710,16 +714,7 @@ export function AllProductsPage() {
               sorting={
                 <div className="flex flex-col gap-1.5 font-sans">
                   <label className="text-[10px] font-black text-[#8a9bb0] uppercase tracking-wider">Sort Listings By</label>
-                  <select
-                    value={sortOption}
-                    onChange={(e) => setSortOption(e.target.value as any)}
-                    className="w-full h-10 px-3 bg-[#F4F8FA] border border-[#eef2f6] rounded-2xl text-xs font-semibold text-navy outline-none focus:border-orange-primary/30"
-                  >
-                    <option value="featured">Featured / Recommended</option>
-                    <option value="price-asc">Price: Low to High</option>
-                    <option value="price-desc">Price: High to Low</option>
-                    <option value="rating-desc">Rating: High to Low</option>
-                  </select>
+                  <SortDropdown options={PRODUCT_SORT_OPTIONS} value={sortOption} onChange={setSortOption} className="w-full" />
                 </div>
               }
               advancedSection={
@@ -904,6 +899,11 @@ export function AllProductsPage() {
             itemLabel="products"
           />
 
+          {/* Mobile-only: ListingFilterPills (incl. AI Discover) hides below sm, so surface Sort here too */}
+          <div className="flex justify-end sm:hidden mb-3">
+            <SortDropdown options={PRODUCT_SORT_OPTIONS} value={sortOption} onChange={setSortOption} />
+          </div>
+
           <ListingFilterPills
             className="mb-6"
             pills={productsBrowseItems.map((item) => ({
@@ -929,6 +929,7 @@ export function AllProductsPage() {
               setRatingFilter(null);
             }}
             aiDiscoverPrompt="Help me browse products on Choosify"
+            sortSlot={<SortDropdown options={PRODUCT_SORT_OPTIONS} value={sortOption} onChange={setSortOption} />}
           />
 
           {/* Top Bar / Sorting */}
@@ -968,24 +969,8 @@ export function AllProductsPage() {
                 )}
               </div>
 
-              {/* Grid Toggle & Sort Trigger */}
+              {/* Grid Toggle */}
               <div className="flex items-center gap-4 ml-auto">
-                <div className="flex items-center gap-2 text-navy text-[10px] font-black uppercase tracking-widest">
-                  Sort:
-                  <div className="relative">
-                    <select 
-                      value={sortOption}
-                      onChange={(e) => setSortOption(e.target.value as any)}
-                      className="appearance-none bg-white border border-gray-200 rounded-xl px-4 py-2 pr-10 text-xs font-bold text-navy focus:outline-none focus:border-orange-primary shadow-sm hover:bg-gray-50 cursor-pointer"
-                    >
-                      <option value="popular">Popularity</option>
-                      <option value="price-asc">Price: Low to High</option>
-                      <option value="price-desc">Price: High to Low</option>
-                    </select>
-                    <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-navy" />
-                  </div>
-                </div>
-
                 {/* View Mode Switcher */}
                 <div className="flex bg-white border border-gray-200 rounded-lg p-0.5 shadow-sm">
                   <button 

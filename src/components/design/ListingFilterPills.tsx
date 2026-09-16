@@ -30,6 +30,8 @@ export interface ListingFilterPillsProps {
   className?: string;
   /** Sticky under-header chrome (triggers mobile dock show/hide) */
   sticky?: boolean;
+  /** Optional control (e.g. SortDropdown) rendered immediately to the left of the AI Discover button, in the same right-aligned toolbar group. */
+  sortSlot?: React.ReactNode;
 }
 
 const pillBase =
@@ -58,6 +60,7 @@ export function ListingFilterPills({
   showFiltersPill = true,
   className,
   sticky = true,
+  sortSlot,
 }: ListingFilterPillsProps) {
   const { canOpenFilters, toggleFilters } = useOpenPageFilters();
 
@@ -126,6 +129,7 @@ export function ListingFilterPills({
                 Clear Filters
               </button>
             ) : null}
+            {sortSlot}
             {showAiDiscover ? (
               <button
                 type="button"

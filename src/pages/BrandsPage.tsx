@@ -23,6 +23,8 @@ import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
 import { rankBrands, buildBrandMaxActiveDiscountMap, lookupBrandMaxDiscount, mergeCatalogDealsIntoBrandDiscountMap } from '../utils/listingRanking';
 import { usePriorityClockMs } from '../hooks/usePriorityClockMs';
 import { FeaturedBrandDealsPanel } from '../components/FeaturedBrandDealsPanel';
+import { SortDropdown } from '../components/SortDropdown';
+import { BRAND_SORT_OPTIONS, BRAND_SORT_DEFAULT, applySortOption } from '../lib/sorting/sortRegistry';
 
 interface Brand {
   id: string;
@@ -50,7 +52,7 @@ interface Brand {
 }
 
 export function BrandsPage() {
-  const { allBrands: globalBrands, allProducts, allDeals, getBrandClaimStatus } = useGlobalState();
+  const { allBrands: globalBrands, allProducts, allCatalogProducts, allDeals, getBrandClaimStatus } = useGlobalState();
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All Brands');
@@ -58,6 +60,7 @@ export function BrandsPage() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [verificationFilter, setVerificationFilter] = useState<'all' | 'verified' | 'unverified'>('all');
   const [popularityFilter, setPopularityFilter] = useState<'all' | 'hot' | 'featured' | 'top-rated'>('all');
+  const [sortOption, setSortOption] = useState<string>(BRAND_SORT_DEFAULT);
   const priorityNowMs = usePriorityClockMs();
 
   const fallbackBrands: Brand[] = [
@@ -281,6 +284,39 @@ export function BrandsPage() {
     );
   }, [allProducts, allDeals, priorityNowMs]);
 
+  // Live per-brand product count — computed from already-resident allProducts,
+  // not a stored field. Keyed by every identifier a brand card might carry so
+  // the lookup matches regardless of which id shape a given product uses.
+  const brandProductCountMap = React.useMemo(() => {
+    const map = new Map<string, number>();
+    const bump = (raw: string | number | undefined | null) => {
+      if (raw == null) return;
+      const key = String(raw).trim().toLowerCase();
+      if (!key) return;
+      map.set(key, (map.get(key) ?? 0) + 1);
+    };
+    for (const p of allCatalogProducts || []) {
+      bump(p.brandId);
+      bump(p.brandName);
+    }
+    return map;
+  }, [allCatalogProducts]);
+
+  const brandProductCount = React.useCallback(
+    (b: Brand): number => {
+      const keys = [b.catalogId, b.slug, b.id, b.name]
+        .filter((v) => v != null && String(v).trim() !== '')
+        .map((v) => String(v).trim().toLowerCase());
+      let max = 0;
+      for (const key of keys) {
+        const v = brandProductCountMap.get(key);
+        if (typeof v === 'number' && v > max) max = v;
+      }
+      return max;
+    },
+    [brandProductCountMap],
+  );
+
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
   const dynamicCategories = React.useMemo(() => {
@@ -347,8 +383,15 @@ export function BrandsPage() {
       result = result.filter(b => b.rating >= 4.8);
     }
 
-    return rankBrands(result, priorityNowMs);
-  }, [brands, searchQuery, selectedLetter, activeTab, selectedCategory, verificationFilter, popularityFilter, getBrandClaimStatus, priorityNowMs]);
+    return applySortOption(
+      result,
+      BRAND_SORT_OPTIONS,
+      sortOption,
+      BRAND_SORT_DEFAULT,
+      (list) => rankBrands(list, { nowMs: priorityNowMs }),
+      (b) => ({ createdAt: b.createdAt, name: b.name, productCount: brandProductCount(b) }),
+    );
+  }, [brands, searchQuery, selectedLetter, activeTab, selectedCategory, verificationFilter, popularityFilter, getBrandClaimStatus, priorityNowMs, sortOption, brandProductCount]);
 
   const infeedPlacements = usePlacements(PLACEMENT_KEYS.INFEED_BRAND, {
     limit: INFEED_MAX_PER_PAGE,
@@ -374,7 +417,7 @@ export function BrandsPage() {
   } = useInfiniteListBatch(brandFeed, {
     initial: 24,
     loadMore: 12,
-    resetKey: searchQuery + (selectedLetter ?? ''),
+    resetKey: searchQuery + (selectedLetter ?? '') + sortOption,
   });
 
   const sectionNavItems = useMemo(
@@ -815,6 +858,11 @@ export function BrandsPage() {
             }
           />
 
+          {/* Mobile-only: ListingFilterPills (incl. AI Discover) hides below sm, so surface Sort here too */}
+          <div className="flex justify-end sm:hidden">
+            <SortDropdown options={BRAND_SORT_OPTIONS} value={sortOption} onChange={setSortOption} />
+          </div>
+
           <ListingFilterPills
             pills={brandsBrowseItems.map((item) => ({
               id: item.id,
@@ -839,6 +887,7 @@ export function BrandsPage() {
               setPopularityFilter('all');
             }}
             aiDiscoverPrompt="Help me find brands on Choosify"
+            sortSlot={<SortDropdown options={BRAND_SORT_OPTIONS} value={sortOption} onChange={setSortOption} />}
           />
 
           {/* Active Filter Chips */}

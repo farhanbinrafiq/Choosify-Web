@@ -20,8 +20,10 @@ import { CtaBannerSlot } from '../components/CtaBannerSlot';
 import { usePlacements } from '../hooks/usePlacements';
 import { PLACEMENT_KEYS, INFEED_INTERVAL, INFEED_MAX_PER_PAGE } from '../lib/placements';
 import { injectPlacementsIntoFeed } from '../utils/injectFeedPlacements';
-import { rankDeals, dealDiscountPercent } from '../utils/listingRanking';
+import { rankDeals, dealDiscountPercent, parseTs } from '../utils/listingRanking';
 import { usePriorityClockMs } from '../hooks/usePriorityClockMs';
+import { SortDropdown } from '../components/SortDropdown';
+import { DEAL_SORT_OPTIONS, DEAL_SORT_DEFAULT, applySortOption, resolveSortIdFromParam } from '../lib/sorting/sortRegistry';
 import { ProductsSponsoredBannerCarousel, AdvertiseHereCard } from '../components/commerce/AdvertiseHereCard';
 import { useSponsoredPlacementsForSurface } from '../hooks/useSponsoredPlacementsForSurface';
 import {
@@ -121,6 +123,19 @@ export function DealsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState(getInitialTab);
   const [minDiscount, setMinDiscount] = useState<number>(0);
+  const [sortOption, setSortOptionState] = useState<string>(() =>
+    resolveSortIdFromParam(DEAL_SORT_OPTIONS, DEAL_SORT_DEFAULT, searchParams.get('sort')),
+  );
+  const setSortOption = React.useCallback(
+    (id: string) => {
+      setSortOptionState(id);
+      const updated = new URLSearchParams(searchParams);
+      if (id === DEAL_SORT_DEFAULT) updated.delete('sort');
+      else updated.set('sort', id);
+      setSearchParams(updated);
+    },
+    [searchParams, setSearchParams],
+  );
   const priorityNowMs = usePriorityClockMs();
   const dealsSponsoredBanners = useSponsoredPlacementsForSurface('deals', { limit: 4 });
   const productSource: any[] = allProducts.length > 0 ? allProducts : PRODUCTS;
@@ -174,7 +189,9 @@ export function DealsPage() {
   const handleTabChange = (tab: string) => {
     setActiveTab(tab);
     const urlKey = TAB_TO_URL[tab] || tab.toLowerCase().replace(/\s+/g, '_');
-    setSearchParams({ tab: urlKey });
+    const updated = new URLSearchParams(searchParams);
+    updated.set('tab', urlKey);
+    setSearchParams(updated);
   };
 
   const handleViewAllCoupons = () => {
@@ -194,6 +211,8 @@ export function DealsPage() {
       else if (t === 'expired') setActiveTab('Expired Deals');
       else if (t === 'all') setActiveTab('All Deals');
     }
+    const resolvedSort = resolveSortIdFromParam(DEAL_SORT_OPTIONS, DEAL_SORT_DEFAULT, searchParams.get('sort'));
+    setSortOptionState((prev) => (prev === resolvedSort ? prev : resolvedSort));
   }, [searchParams]);
 
   // Restore state from sessionStorage on mount
@@ -259,8 +278,20 @@ export function DealsPage() {
         (p.description || '').toLowerCase().includes(q)
       );
     }
-    return rankDeals(result, priorityNowMs);
-  }, [searchQuery, activeTab, selectedCategory, minDiscount, productSource, priorityNowMs]);
+    return applySortOption(
+      result,
+      DEAL_SORT_OPTIONS,
+      sortOption,
+      DEAL_SORT_DEFAULT,
+      (list) => rankDeals(list, { nowMs: priorityNowMs }),
+      (p: any) => ({
+        createdAt: p.createdAt,
+        price: Number(p.price) || 0,
+        discountPercent: dealDiscountPercent(p),
+        endsAt: parseTs(p.dealValidUntil) ?? parseTs(p.validUntil),
+      }),
+    );
+  }, [searchQuery, activeTab, selectedCategory, minDiscount, productSource, priorityNowMs, sortOption]);
 
   const infeedPlacements = usePlacements(PLACEMENT_KEYS.INFEED_DEAL, {
     limit: INFEED_MAX_PER_PAGE,
@@ -671,6 +702,11 @@ export function DealsPage() {
               itemLabel={activeTab === 'Promo Codes' ? 'coupons' : 'deals'}
             />
 
+            {/* Mobile-only: ListingFilterPills (incl. AI Discover) hides below sm, so surface Sort here too */}
+            <div className="flex justify-end sm:hidden">
+              <SortDropdown options={DEAL_SORT_OPTIONS} value={sortOption} onChange={setSortOption} />
+            </div>
+
             <ListingFilterPills
               pills={dealsBrowseItems.map((item) => ({
                 id: item.id,
@@ -691,6 +727,7 @@ export function DealsPage() {
                 setMinDiscount(0);
               }}
               aiDiscoverPrompt="Help me find the best deals on Choosify"
+              sortSlot={<SortDropdown options={DEAL_SORT_OPTIONS} value={sortOption} onChange={setSortOption} />}
             />
 
             <CtaBannerSlot page="deals" section="deals-flash-dotd" position="before" className="mb-6" />
