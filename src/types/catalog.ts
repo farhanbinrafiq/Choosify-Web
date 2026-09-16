@@ -401,6 +401,13 @@ export interface SiteConfig {
   contentBadges?: SiteContentBadge[];
   heroTickers?: SiteHeroTickerItem[];
   websiteAssets?: SiteWebsiteAssets;
+  /** Optional dynamic visual for the storefront/admin auth-page left column
+   *  (Login/Signup/Forgot/Reset/Seller-Signup left-side marketing area).
+   *  Not mandatory — the auth shells render without an image when unset. */
+  authVisual?: {
+    storefrontImage?: string;
+    storefrontImageAlt?: string;
+  };
   /** Informational / legal / business page bodies from Website Manager → Pages */
   sitePages?: import('../lib/cmsSitePages').SitePagesConfig;
   /** Editorial CTA/banner strips from Website Manager → CTA & Banners. Not paid/sponsored placements (see CatalogPlacement). */

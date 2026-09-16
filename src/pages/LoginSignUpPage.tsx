@@ -1,28 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import {
-  ArrowRight,
-  Check,
-  Eye,
-  EyeOff,
-  Footprints,
-  GitCompareArrows,
-  Headphones,
-  Lock,
-  Mail,
-  Shield,
-  ShieldCheck,
-  ShoppingBag,
-  Star,
-  User,
-  Watch,
-} from 'lucide-react';
+import { ArrowRight, Eye, EyeOff, Lock, Mail } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from '../lib/notify';
 import { cn } from '../lib/utils';
-import { EmiAiLogo } from '../components/EmiAiLogo';
-import { ChoosifyWordmarkLogo } from '../components/ChoosifyWordmarkLogo';
 import { SocialAuthButtons } from '../components/auth/SocialAuthButtons';
+import { StorefrontAuthShell } from '../components/auth/StorefrontAuthShell';
 import {
   firebaseAuthErrorMessage,
   registerWithEmailPassword,
@@ -32,166 +15,6 @@ import {
 import type { SessionIdentity } from '../lib/authSession';
 
 type AuthTab = 'sign-in' | 'sign-up';
-
-const PAGE_BG = '#18154C';
-const PRIMARY = '#FF5B00';
-
-/** Strongest three only — the full list lives on the marketing site. */
-const SIGNIN_FEATURES = [
-  'Save products & brands',
-  'Track reviews & comparisons',
-  'Get personalized recommendations',
-];
-
-/** Bottom trust strip — integrated with the background, not another card. */
-const TRUST_POINTS = [
-  {
-    icon: Lock,
-    title: 'Secure sign-in',
-    sub: 'Your account is protected',
-    iconColor: PRIMARY,
-  },
-  {
-    icon: ShieldCheck,
-    title: 'Verified seller ecosystem',
-    sub: 'Only trusted brands',
-    iconColor: '#2323FF',
-  },
-  {
-    icon: Shield,
-    title: 'Privacy protected',
-    sub: 'Your data stays private',
-    iconColor: '#07A828',
-  },
-];
-
-/**
- * Decorative product-ecosystem cards for the empty outer space on large
- * desktop only. NOT catalog data — no images fetched, no API calls, no records.
- */
-type EcoCard = {
-  name: string;
-  price: string;
-  rating: string;
-  icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
-  /** absolute-position + rotation classes */
-  pos: string;
-  rotate: string;
-};
-
-const ECOSYSTEM_LEFT: EcoCard[] = [
-  {
-    name: 'Wireless Earbuds',
-    price: '৳2,499',
-    rating: '4.8',
-    icon: Headphones,
-    pos: 'left-[3%] top-[16%] min-[1600px]:left-[5%]',
-    rotate: '-rotate-[5deg]',
-  },
-  {
-    name: 'Leather Tote',
-    price: '৳4,890',
-    rating: '4.7',
-    icon: ShoppingBag,
-    pos: 'left-[2%] top-[52%] min-[1600px]:left-[4%]',
-    rotate: 'rotate-[4deg]',
-  },
-];
-
-const ECOSYSTEM_RIGHT: EcoCard[] = [
-  {
-    name: 'Running Shoes',
-    price: '৳6,490',
-    rating: '4.6',
-    icon: Footprints,
-    pos: 'right-[3%] top-[13%] min-[1600px]:right-[5%]',
-    rotate: 'rotate-[5deg]',
-  },
-  {
-    name: 'Classic Watch',
-    price: '৳3,250',
-    rating: '4.7',
-    icon: Watch,
-    pos: 'right-[2%] top-[50%] min-[1600px]:right-[4%]',
-    rotate: '-rotate-[4deg]',
-  },
-];
-
-/** Decorative floating chips around the central composition. */
-const FEATURE_CHIPS: {
-  label: string;
-  icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
-  pos: string;
-}[] = [
-  { label: 'Verified Sellers', icon: ShieldCheck, pos: 'left-[16%] top-[30%]' },
-  { label: 'Compare Easily', icon: GitCompareArrows, pos: 'left-[15%] top-[52%]' },
-  { label: 'Best Match', icon: Star, pos: 'right-[16%] top-[28%]' },
-  { label: 'Secure & Safe', icon: Lock, pos: 'right-[15%] top-[50%]' },
-];
-
-/** A handful of tiny brand-tinted nodes drifting along the orbital band. */
-const ORBIT_NODES: { pos: string; cls: string }[] = [
-  { pos: 'left-[19%] top-[22%]', cls: 'h-1.5 w-1.5 bg-[#FF5B00]/50 shadow-[0_0_10px_2px_rgba(255,91,0,0.22)]' },
-  { pos: 'right-[20%] top-[18%]', cls: 'h-1 w-1 bg-[#7A3CFF]/55' },
-  { pos: 'right-[13%] top-[58%]', cls: 'h-1.5 w-1.5 bg-[#EF3C23]/45 shadow-[0_0_10px_2px_rgba(239,60,35,0.18)]' },
-  { pos: 'left-[12%] top-[62%]', cls: 'h-1 w-1 bg-white/25' },
-  { pos: 'left-[30%] top-[12%]', cls: 'h-1 w-1 bg-[#7A3CFF]/45' },
-  { pos: 'right-[31%] top-[70%]', cls: 'h-1 w-1 bg-white/20' },
-];
-
-function EcosystemCard({ card }: { card: EcoCard }) {
-  const Icon = card.icon;
-  return (
-    <div
-      aria-hidden
-      className={cn(
-        'absolute w-[150px] rounded-2xl border border-white/10 bg-white/[0.045] p-3.5 text-left',
-        'shadow-[0_20px_50px_-20px_rgba(0,0,0,0.6)] backdrop-blur-[3px] pointer-events-none select-none',
-        card.pos,
-        card.rotate,
-      )}
-    >
-      <span className="absolute -inset-px rounded-2xl bg-gradient-to-br from-white/[0.06] to-transparent" />
-      <div className="relative">
-        <div className="mb-2 flex items-center justify-between">
-          <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-white/[0.06] text-white/70">
-            <Icon size={15} strokeWidth={2} />
-          </span>
-          <span className="flex items-center gap-0.5 text-[9.5px] font-bold text-white/60">
-            <Star size={9} className="fill-[#FF5B00] text-[#FF5B00]" /> {card.rating}
-          </span>
-        </div>
-        <div className="text-[11px] font-bold text-white/85">{card.name}</div>
-        <div className="text-[10px] font-extrabold text-[#FF5B00]">{card.price}</div>
-      </div>
-    </div>
-  );
-}
-
-function FeatureChip({
-  label,
-  icon: Icon,
-  pos,
-}: {
-  label: string;
-  icon: React.ComponentType<{ size?: number; className?: string; strokeWidth?: number }>;
-  pos: string;
-}) {
-  return (
-    <div
-      aria-hidden
-      className={cn(
-        'absolute flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.05]',
-        'px-3 py-1.5 text-[10.5px] font-semibold text-white/70 backdrop-blur-[3px]',
-        'shadow-[0_10px_30px_-15px_rgba(0,0,0,0.6)] pointer-events-none select-none',
-        pos,
-      )}
-    >
-      <Icon size={12} strokeWidth={2} className="text-[#FF5B00]" />
-      {label}
-    </div>
-  );
-}
 
 function AuthField({
   id,
@@ -339,135 +162,9 @@ export function LoginSignUpPage() {
   const isSignUp = activeTab === 'sign-up';
 
   return (
-    <div
-      className="auth-shell relative min-h-screen overflow-hidden font-sans choosify-dark-surface"
-      style={{ backgroundColor: PAGE_BG }}
-    >
-      {/* ── Atmospheric depth (decorative, non-interactive) ───────────────── */}
-      <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden>
-        <div className="auth-dot-grid absolute inset-0 opacity-[0.5]" />
-        <div className="absolute -left-[12%] top-[8%] h-[520px] w-[520px] rounded-full bg-[#FF5B00]/10 blur-[130px]" />
-        <div className="absolute -right-[14%] top-[24%] h-[560px] w-[560px] rounded-full bg-[#7A3CFF]/14 blur-[150px]" />
-        <div className="absolute bottom-[-18%] left-1/2 h-[460px] w-[720px] -translate-x-1/2 rounded-full bg-[#EF3C23]/8 blur-[150px]" />
-        {/* subtle dotted orbital paths — centred on the auth composition (large desktop only) */}
-        <div className="hidden xl:block auth-orbit absolute left-1/2 top-1/2 h-[740px] w-[740px] -translate-x-1/2 translate-y-[calc(-50%_-_1.25rem)] rounded-full" />
-        <div className="hidden min-[1600px]:block auth-orbit auth-orbit--wide absolute left-1/2 top-1/2 h-[1040px] w-[1160px] -translate-x-1/2 translate-y-[calc(-50%_-_1.25rem)] rounded-full" />
-        {/* tiny brand-tinted orbital nodes */}
-        {ORBIT_NODES.map((n, i) => (
-          <span key={i} className={cn('absolute hidden rounded-full xl:block', n.pos, n.cls)} />
-        ))}
-      </div>
-      <div
-        className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/35"
-        aria-hidden
-      />
-
-      {/* ── Decorative product ecosystem — large desktop only ─────────────── */}
-      <div className="pointer-events-none absolute inset-0 hidden xl:block" aria-hidden>
-        {ECOSYSTEM_LEFT.map((c) => (
-          <EcosystemCard key={c.name} card={c} />
-        ))}
-        {ECOSYSTEM_RIGHT.map((c) => (
-          <EcosystemCard key={c.name} card={c} />
-        ))}
-        <div className="hidden min-[1600px]:block">
-          {FEATURE_CHIPS.map((chip) => (
-            <FeatureChip key={chip.label} {...chip} />
-          ))}
-        </div>
-      </div>
-
-      <div className="relative z-[2] flex min-h-screen flex-col">
-        {/* Ask EMI — floats independently in the upper-right, no header chrome */}
-        <div className="absolute right-6 top-6 z-[3] flex items-center gap-4 sm:right-10">
-          <Link
-            to="/contact"
-            className="hidden text-[12.5px] text-white/60 transition-colors hover:text-white/85 sm:inline"
-          >
-            Need help?
-          </Link>
-          <Link
-            to="/messages/thread-emi-ai"
-            className="flex items-center gap-1.5 rounded-full border-0 py-1.5 pl-1.5 pr-3.5 transition-all hover:brightness-110 choosify-emi-gradient"
-          >
-            <EmiAiLogo size={22} />
-            <span className="text-xs font-bold text-white">Ask EMI</span>
-          </Link>
-        </div>
-
-        {/* Central composition — card + trust strip as one group, slightly above centre */}
-        <div className="flex flex-1 items-center justify-center px-6 py-10 sm:px-10">
-          <div className="w-full max-w-[920px] lg:-translate-y-4 min-[1600px]:max-w-[980px] min-[1600px]:-translate-y-8">
-            <div className="flex w-full flex-col overflow-hidden rounded-2xl shadow-[0_28px_80px_-24px_rgba(0,0,0,0.65)] lg:flex-row">
-              {/* Left marketing copy */}
-              <div className="flex min-w-0 flex-1 flex-col p-7 choosify-dark-surface sm:p-9 min-[1600px]:p-11">
-                <ChoosifyWordmarkLogo height={26} className="mb-6 h-[26px] w-auto" tone="white" />
-                <div className="mb-5 inline-block w-max rounded-full bg-[rgba(255,90,44,0.15)] px-3.5 py-1.5 text-[11px] font-bold text-[#FF5B00]">
-                  ✦ Join 100,000+ SHOPPERS
-                </div>
-                <h1 className="mb-6 text-[28px] font-extrabold leading-[1.2] text-white sm:text-[34px] sm:mb-7">
-                  Verify Brands.
-                  <br />
-                  Compare Easily.
-                  <br />
-                  Choose With{' '}
-                  <span className="choosify-emi-gradient-text">Confidence.</span>
-                </h1>
-                <p className="m-0 mb-8 text-[13.5px] leading-[1.7] text-white/55">
-                  Bookmark products, track reviews, and get personalized picks from
-                  Bangladesh&apos;s #1 discovery platform.
-                </p>
-                <ul className="m-0 list-none space-y-3.5 p-0">
-                  {SIGNIN_FEATURES.map((feature) => (
-                    <li key={feature} className="flex items-center gap-2.5 text-[13px] text-white/85">
-                      <span className="flex h-5 w-5 shrink-0 items-center justify-center">
-                        <Check size={14} strokeWidth={3} stroke="url(#choosify-emi-icon-grad)" />
-                      </span>
-                      {feature}
-                    </li>
-                  ))}
-                </ul>
-
-                {/* Community / social proof */}
-                <div className="mt-9 flex items-center gap-3 sm:mt-10">
-                  <div className="flex -space-x-2">
-                    {['from-[#FF5B00] to-[#EF3C23]', 'from-[#7A3CFF] to-[#2323FF]', 'from-[#0EA5A5] to-[#07A828]'].map(
-                      (g, i) => (
-                        <span
-                          key={i}
-                          aria-hidden
-                          className={cn(
-                            'flex h-7 w-7 items-center justify-center rounded-full border-2 border-[#1B1750] bg-gradient-to-br',
-                            g,
-                          )}
-                        >
-                          <User size={12} strokeWidth={2.4} className="text-white/90" />
-                        </span>
-                      ),
-                    )}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-0.5 text-[#FF5B00]">
-                      {[0, 1, 2, 3, 4].map((i) => (
-                        <Star key={i} size={11} className="fill-current" />
-                      ))}
-                    </div>
-                    <p className="m-0 text-[11px] text-white/55">Trusted by 100,000+ smart shoppers</p>
-                  </div>
-                </div>
-
-                {/* Copyright — canonical line, matching the storefront footer.
-                    © glyph and entity name in Choosify orange. */}
-                <p className="mt-6 text-[11px] text-white/40">
-                  <span className="text-[#FF5B00]">©</span> {new Date().getFullYear()}{' '}
-                  <span className="font-semibold text-[#FF5B00]">Choosify Technologies Ltd</span>
-                  . All rights reserved.
-                </p>
-              </div>
-
-              {/* Right auth panel — form + handlers unchanged */}
-              <div className="w-full bg-white p-8 sm:p-9 lg:w-[400px] lg:shrink-0">
-                <h2 className="mb-1 text-[22px] font-extrabold text-[#1A1A2E]">
+    <StorefrontAuthShell>
+      <>
+        <h2 className="mb-1 text-[22px] font-extrabold text-[#1A1A2E]">
                   {isSignUp ? 'Create your account' : 'Welcome back'}
                 </h2>
                 <p className="mb-5 text-[12.5px] text-[#9AA0AC]">
@@ -524,7 +221,7 @@ export function LoginSignUpPage() {
                     onChange={setEmail}
                     autoComplete="email"
                     icon={Mail}
-                    placeholder="Enter your email"
+                    placeholder="Enter your email address"
                   />
 
                   <AuthField
@@ -612,32 +309,7 @@ export function LoginSignUpPage() {
                     {isSignUp ? 'Sign in' : 'Sign up'}
                   </button>
                 </p>
-              </div>
-            </div>
-
-            {/* Trust strip — integrated with the background, not a card */}
-            <div className="mt-8 hidden grid-cols-3 gap-6 px-2 sm:grid">
-              {TRUST_POINTS.map((point) => {
-                const Icon = point.icon;
-                return (
-                  <div key={point.title} className="flex items-start gap-2.5">
-                    <Icon
-                      size={16}
-                      strokeWidth={2.1}
-                      className="mt-0.5 shrink-0"
-                      style={{ color: point.iconColor }}
-                    />
-                    <div>
-                      <h3 className="m-0 text-[12px] font-bold text-white/85">{point.title}</h3>
-                      <p className="m-0 text-[11px] leading-normal text-white/45">{point.sub}</p>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+      </>
+    </StorefrontAuthShell>
   );
 }
