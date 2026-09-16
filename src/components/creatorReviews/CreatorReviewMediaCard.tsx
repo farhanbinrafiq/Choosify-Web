@@ -139,20 +139,27 @@ export function CreatorReviewMediaCard({
           )}
         >
           {displaySrc ? (
-            <img
-              src={displaySrc}
-              alt={title}
-              className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-              loading="lazy"
-            />
+            <>
+              <img
+                src={displaySrc}
+                alt={title}
+                className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                loading="lazy"
+              />
+              {/* Darkening tint + play button -- only meaningful on top of a
+                  real photo (for contrast/legibility). ProviderPlaceholder
+                  below renders its own play affordance directly on its
+                  branded background instead, so this never double-darkens
+                  it into looking like an empty/broken thumbnail. */}
+              <div className="absolute inset-0 bg-black/25 group-hover:bg-black/35 transition-colors flex items-center justify-center">
+                <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/95 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                  <Play className="w-4 h-4 sm:w-5 sm:h-5 text-[#1A1A2E] ml-0.5 fill-[#1A1A2E]" />
+                </div>
+              </div>
+            </>
           ) : (
             <ProviderPlaceholder platform={media.platform} label={media.platformLabel} />
           )}
-          <div className="absolute inset-0 bg-black/25 group-hover:bg-black/35 transition-colors flex items-center justify-center">
-            <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-full bg-white/95 flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
-              <Play className="w-4 h-4 sm:w-5 sm:h-5 text-[#1A1A2E] ml-0.5 fill-[#1A1A2E]" />
-            </div>
-          </div>
         </button>
       </div>
 
