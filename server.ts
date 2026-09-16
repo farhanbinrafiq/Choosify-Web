@@ -106,7 +106,11 @@ async function startServer() {
       express.static(path.join(distPath, 'assets'), { immutable: true, maxAge: '365d' }),
     );
     app.use('/og', express.static(path.join(distPath, 'og'), { maxAge: '1d' }));
-    app.use(express.static(distPath, { index: false, maxAge: '1h' }));
+    // dotfiles: 'allow' is required so /.well-known/... (e.g. BIMI's
+    // /.well-known/bimi/choosify.svg) is actually served -- serve-static's
+    // default 'ignore' silently skips any path with a dot-prefixed segment
+    // and falls through to the SPA catch-all below instead of 404ing.
+    app.use(express.static(distPath, { index: false, maxAge: '1h', dotfiles: 'allow' }));
     app.use((_req, res) => {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
       res.sendFile(path.join(distPath, 'index.html'));
