@@ -252,7 +252,14 @@ export const ProductCard = memo(function ProductCard({
   const { savedProducts, setSavedProducts, addToCompare, comparedProducts } = useDashboard();
   const { allBrands, addToCart, siteConfig } = useGlobalState();
 
-  const brandObj = allBrands?.find((b: any) => b.id === product.brandId);
+  // Prefer the real backend catalog id over the numeric `id`/`brandId`
+  // fields, which are a client-side compatibility shim that can silently
+  // collide across independently-ordered brand/product arrays (see
+  // ProductDetailPage.tsx for the full explanation) — matching on it alone
+  // can resolve a product to a completely unrelated brand.
+  const brandObj = (product as any).catalogBrandId
+    ? allBrands?.find((b: any) => b.catalogId === (product as any).catalogBrandId)
+    : allBrands?.find((b: any) => b.id === product.brandId);
   const brandName = brandObj ? brandObj.name : product.brand || 'Choosify';
   const cmsBadges = resolveProductBadges(product, siteConfig);
   const statusBadgeLabels = collectProductBadgeLabels(product, cmsBadges);

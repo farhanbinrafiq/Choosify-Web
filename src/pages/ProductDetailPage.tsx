@@ -110,153 +110,46 @@ export interface ProductAddon {
   image?: string;
   badge?: 'Popular' | 'Recommended' | 'Best Value';
   available: boolean;
+  /** Seller-configured cap on how many units of this addon a buyer may select (default 1). */
+  maxQuantity?: number;
   /** Selecting this addon requires the buyer to submit lens power / a prescription document */
   prescriptionLens?: boolean;
 }
 
-// Seeded mock add-ons per industry — keyed by product category
-// In future backend integration, these will come from the product API response
-const ADDON_SEEDS: Record<string, ProductAddon[]> = {
-  'Electronics': [
-    { id: 'ag1', title: 'Extended Warranty', description: '12-month extended coverage beyond standard warranty', price: 890, badge: 'Popular', available: true },
-    { id: 'ag2', title: 'Screen Protector', description: 'Premium tempered glass, 9H hardness, anti-glare', price: 350, badge: 'Recommended', available: true },
-    { id: 'ag3', title: 'Installation Service', description: 'Professional setup and data transfer at home', price: 550, available: true },
-    { id: 'ag4', title: 'Premium Case', description: 'Genuine leather protective case', price: 690, available: true },
-  ],
-  'Fashion & Lifestyle': [
-    { id: 'fc1', title: 'Gift Wrap', description: 'Premium branded gift wrapping with ribbon', price: 100, badge: 'Popular', available: true },
-    { id: 'fc2', title: 'Greeting Card', description: 'Personalised printed message card', price: 60, available: true },
-    { id: 'fc3', title: 'Express Ironing', description: 'Garment pressed and ready to wear', price: 150, badge: 'Recommended', available: true },
-    { id: 'ff1', title: 'Cleaning Kit', description: 'Professional-grade shoe/accessory care kit', price: 290, badge: 'Best Value', available: true },
-    { id: 'fc4', title: 'Monogramming', description: 'Initials embroidered on the item', price: 350, available: false },
-  ],
-  'Home, Furniture & Appliances': [
-    { id: 'ha1', title: 'Professional Installation', description: 'Certified technician installs at your location', price: 1200, badge: 'Recommended', available: true },
-    { id: 'ha2', title: 'Old Appliance Removal', description: 'We collect and dispose your old unit', price: 600, available: true },
-    { id: 'fur1', title: 'Assembly Service', description: 'Expert team assembles at your home', price: 800, badge: 'Popular', available: true },
-    { id: 'fur2', title: 'Premium Delivery', description: 'White-glove delivery + room placement', price: 1200, available: true },
-    { id: 'ha4', title: 'Extended Warranty', description: '2-year extended coverage', price: 1800, badge: 'Best Value', available: true },
-  ],
-  'Eyewear': [
-    { id: 'ew5', title: 'Single Vision Prescription Lenses', description: 'Standard prescription power in one field of vision', price: 900, badge: 'Popular', available: true, prescriptionLens: true },
-    { id: 'ew6', title: 'Progressive (Multifocal) Lenses', description: 'Seamless near, intermediate, and distance vision', price: 2400, badge: 'Recommended', available: true, prescriptionLens: true },
-    { id: 'ew7', title: 'Photochromic (Transition) Lenses', description: 'Auto-darkening prescription lenses for outdoor use', price: 1800, available: true, prescriptionLens: true },
-    { id: 'ew1', title: 'Cleaning Kit', description: 'Microfiber cloth + cleaning spray', price: 180, available: true },
-    { id: 'ew2', title: 'Hard Case', description: 'Rigid protective carry case', price: 350, available: true },
-    { id: 'ew3', title: 'Anti-Reflective Coating', description: 'AR coating upgrade for lenses', price: 890, badge: 'Best Value', available: true },
-    { id: 'ew4', title: 'Blue Light Filter', description: 'Digital screen protection upgrade', price: 750, available: true },
-  ],
-  'Beauty, Health & Pharmacy': [
-    { id: 'bg1', title: 'Gift Box', description: 'Premium branded gift packaging', price: 200, badge: 'Popular', available: true },
-    { id: 'bg2', title: 'Sample Kit', description: 'Complementary brand sample collection', price: 350, badge: 'Recommended', available: true },
-    { id: 'bg3', title: 'Premium Packaging', description: 'Luxury presentation box with bow', price: 290, available: true },
-  ],
-  'Grocery & Food': [
-    { id: 'fg1', title: 'Gift Wrap', description: 'Hamper-style gift wrapping', price: 150, badge: 'Popular', available: true },
-    { id: 'fg2', title: 'Greeting Card', description: 'Personalised message card', price: 60, available: true },
-    { id: 'fg3', title: 'Cold Chain Delivery', description: 'Temperature-controlled express delivery', price: 250, badge: 'Recommended', available: true },
-  ],
-};
-
 /**
- * Add-ons for service/booking listings — keyed by `serviceCategory` (a stable enum),
- * not the free-text `category` label, since booking-style listings vary their display
- * category per product. Only categories where a bolt-on upsell genuinely makes sense
- * get an entry (hotels, tours/travel, events, restaurant reservations, appointments,
- * beauty/spa) — one-off services like real estate, passport help, recruitment, B2B
- * sourcing, equipment rental, and donations intentionally have none.
+ * Real seller-configured add-ons only (Product Studio's `addonItems` /
+ * `enableAddonItems`, surfaced here as `studioAddonItems`) — no
+ * category-keyed or platform-wide seed/fallback tables. A product whose
+ * seller hasn't configured any add-ons simply has none; the caller
+ * (`hasAddons`) hides the whole Add-on Items section in that case rather
+ * than filling it with generic catalog-wide filler.
  */
-const SERVICE_ADDON_SEEDS: Record<string, ProductAddon[]> = {
-  hotels: [
-    { id: 'svc-ht1', title: 'Extra Bed', description: 'Additional bed set up in the room', price: 1000, badge: 'Popular', available: true },
-    { id: 'svc-ht2', title: 'Extra Person', description: 'Additional guest beyond standard occupancy', price: 1500, available: true },
-    { id: 'svc-ht3', title: 'Airport Pickup / Drop-off', description: 'Private transfer to/from the airport', price: 1800, badge: 'Recommended', available: true },
-    { id: 'svc-ht4', title: 'Additional Meal', description: 'Extra breakfast, lunch, or dinner per person', price: 650, available: true },
-    { id: 'svc-ht5', title: 'Late Check-out', description: 'Check-out extended to 4:00 PM', price: 1200, available: true },
-  ],
-  travel: [
-    { id: 'svc-tr1', title: 'Extra Person', description: 'Add another traveler to the package', price: 6500, badge: 'Popular', available: true },
-    { id: 'svc-tr2', title: 'Airport Pickup / Drop-off', description: 'Private transfer to/from the airport', price: 1800, badge: 'Recommended', available: true },
-    { id: 'svc-tr3', title: 'Additional Meal', description: 'Extra meal per person per day', price: 650, available: true },
-    { id: 'svc-tr4', title: 'Private Room Upgrade', description: 'Upgrade from shared to private room', price: 3200, badge: 'Best Value', available: true },
-  ],
-  events: [
-    { id: 'svc-ev1', title: 'Extra Hour of Coverage', description: 'Extend photography/videography by 1 hour', price: 5000, badge: 'Popular', available: true },
-    { id: 'svc-ev2', title: 'Additional Photographer', description: 'Second shooter for wider event coverage', price: 12000, badge: 'Recommended', available: true },
-    { id: 'svc-ev3', title: 'Drone Coverage', description: 'Aerial shots and video for the event', price: 8000, available: true },
-  ],
-  reservation: [
-    { id: 'svc-rv1', title: 'Extra Guest', description: 'Add a seat beyond the reserved table size', price: 0, available: true },
-    { id: 'svc-rv2', title: 'Birthday / Occasion Setup', description: 'Table decoration for a special occasion', price: 800, badge: 'Popular', available: true },
-    { id: 'svc-rv3', title: 'Private Dining Room', description: 'Upgrade to a private room if available', price: 2500, badge: 'Recommended', available: true },
-  ],
-  appointments: [
-    { id: 'svc-ap1', title: 'Extend Session (+30 min)', description: 'Add half an hour to your appointment', price: 1200, badge: 'Popular', available: true },
-    { id: 'svc-ap2', title: 'Home Visit', description: 'Provider comes to your location instead', price: 1500, badge: 'Recommended', available: true },
-  ],
-  beauty: [
-    { id: 'svc-bt1', title: 'Extend Session (+30 min)', description: 'Add half an hour to your treatment', price: 1200, available: true },
-    { id: 'svc-bt2', title: 'Aromatherapy Upgrade', description: 'Add essential oils to your session', price: 500, badge: 'Popular', available: true },
-  ],
-};
-
-// Resolve add-ons for a product — category seeds with platform fallback
-const FALLBACK_ADDONS: ProductAddon[] = [
-  { id: 'fb1', title: 'Extended Warranty', description: '12-month extended coverage', price: 890, badge: 'Popular', available: true, image: 'https://images.unsplash.com/photo-1585386959984-a4155224a1ad?w=80&h=80&fit=crop' },
-  { id: 'fb2', title: 'Premium Case', description: 'Protective branded case', price: 690, available: true, image: 'https://images.unsplash.com/photo-1601784551446-20c9e07cdbdb?w=80&h=80&fit=crop' },
-  { id: 'fb3', title: 'Screen Protector', description: 'Tempered glass protection', price: 350, badge: 'Recommended', available: true, image: 'https://images.unsplash.com/photo-1592890288564-76628a30a657?w=80&h=80&fit=crop' },
-  { id: 'fb4', title: 'Gift Wrap', description: 'Premium gift packaging', price: 100, available: true, image: 'https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=80&h=80&fit=crop' },
-];
-
 function resolveAddons(product: any): ProductAddon[] {
-  if (!product) return FALLBACK_ADDONS;
-
-  // Canonical Studio-authored add-ons are AUTHORITATIVE — when present the seeded
-  // fallback tables below are never used. Respect enabled / sortOrder / badge /
-  // maxQuantity from the canonical detail.addonItems shape.
+  if (!product) return [];
   if (
-    product.enableAddonItems !== false &&
-    Array.isArray(product.studioAddonItems) &&
-    product.studioAddonItems.length
+    product.enableAddonItems === false ||
+    !Array.isArray(product.studioAddonItems) ||
+    !product.studioAddonItems.length
   ) {
-    return [...product.studioAddonItems]
-      .filter((item: any) => item && item.title)
-      .sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
-      .map((item: any) => ({
-        id: item.id,
-        title: item.title,
-        description: item.description || '',
-        price: typeof item.price === 'number' ? item.price : Number(item.price) || 0,
-        badge: item.badge || undefined,
-        maxQuantity:
-          typeof item.maxQuantity === 'number' && item.maxQuantity >= 1
-            ? Math.floor(item.maxQuantity)
-            : 1,
-        // A seller-disabled add-on is shown struck-through but not selectable.
-        available: item.enabled !== false,
-      }));
+    return [];
   }
 
-  // Service/booking listings: match on the stable `serviceCategory` enum, not the
-  // free-text display category. No entry = no addons (e.g. real estate, passport
-  // help, recruitment, B2B sourcing, equipment rental, donations).
-  if (product.productType === 'service') {
-    return SERVICE_ADDON_SEEDS[product.serviceCategory] || [];
-  }
-
-  // Tag-based match first — lets a product surface a specialised addon set (e.g.
-  // prescription lenses for sunglasses tagged "eyewear") independent of its top-level category.
-  const tags: string[] = Array.isArray(product.tags) ? product.tags.map((t: string) => String(t).toLowerCase()) : [];
-  const tagMatchKey = Object.keys(ADDON_SEEDS).find((k) => tags.includes(k.toLowerCase()));
-  if (tagMatchKey) return ADDON_SEEDS[tagMatchKey];
-
-  const category = product.category || product.type || '';
-  if (ADDON_SEEDS[category]) return ADDON_SEEDS[category];
-  const matchKey = Object.keys(ADDON_SEEDS).find(k =>
-    category.toLowerCase().includes(k.toLowerCase()) ||
-    k.toLowerCase().includes(category.toLowerCase())
-  );
-  return matchKey ? ADDON_SEEDS[matchKey] : FALLBACK_ADDONS;
+  return [...product.studioAddonItems]
+    .filter((item: any) => item && item.title)
+    .sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+    .map((item: any) => ({
+      id: item.id,
+      title: item.title,
+      description: item.description || '',
+      price: typeof item.price === 'number' ? item.price : Number(item.price) || 0,
+      badge: item.badge || undefined,
+      maxQuantity:
+        typeof item.maxQuantity === 'number' && item.maxQuantity >= 1
+          ? Math.floor(item.maxQuantity)
+          : 1,
+      // A seller-disabled add-on is shown struck-through but not selectable.
+      available: item.enabled !== false,
+    }));
 }
 
 export function ProductDetailPage() {
@@ -361,10 +254,12 @@ export function ProductDetailPage() {
       enableAddonItems: detail.enableAddonItems,
       enableDeliveryInfo: (detail as any).enableDeliveryInfo,
       enableWarrantyInfo: (detail as any).enableWarrantyInfo,
+      enableThingsToKnow: (detail as any).enableThingsToKnow,
       studioBoxContents: detail.boxContents,
       additionalSpecs: detail.additionalSpecs,
       curatedPublicReviews: detail.publicReviews,
       studioAddonItems: detail.addonItems,
+      thingsToKnowItems: (detail as any).thingsToKnowItems,
       deliveryInfo: (detail as any).deliveryInfo,
       afterSalesInfo: (detail as any).afterSalesInfo,
       warrantyMonths: (baseProduct as any)?.warrantyMonths,
@@ -413,10 +308,22 @@ export function ProductDetailPage() {
 
   // ── Optional Add-ons State ───────────────────────────────────────
   const [selectedAddonIds, setSelectedAddonIds] = useState<Set<string>>(new Set());
+  const [addonQuantities, setAddonQuantities] = useState<Record<string, number>>({});
   // Depend on `product` itself (it is memoized upstream) so add-ons re-resolve
   // once the canonical detail (studioAddonItems) arrives via the lazy fetch.
   const resolvedAddons = useMemo(() => resolveAddons(product), [product]);
   const hasAddons = resolvedAddons.length > 0;
+
+  const getAddonQty = React.useCallback(
+    (addonId: string) => addonQuantities[addonId] ?? 1,
+    [addonQuantities],
+  );
+
+  const setAddonQty = (addonId: string, qty: number) => {
+    const addon = resolvedAddons.find((a) => a.id === addonId);
+    const max = addon?.maxQuantity && addon.maxQuantity >= 1 ? addon.maxQuantity : 1;
+    setAddonQuantities((prev) => ({ ...prev, [addonId]: Math.min(max, Math.max(1, qty)) }));
+  };
 
   // ── Prescription upload (Eyewear — required once a prescription lens addon is selected) ──
   const [prescriptionData, setPrescriptionData] = useState<PrescriptionData | null>(null);
@@ -474,8 +381,8 @@ export function ProductDetailPage() {
   const addonTotal = useMemo(() => {
     return resolvedAddons
       .filter(a => selectedAddonIds.has(a.id) && a.available)
-      .reduce((sum, a) => sum + a.price, 0);
-  }, [selectedAddonIds, resolvedAddons]);
+      .reduce((sum, a) => sum + a.price * getAddonQty(a.id), 0);
+  }, [selectedAddonIds, resolvedAddons, getAddonQty]);
 
   // Selected add-on objects (for cart and message builder)
   const selectedAddons = useMemo(() =>
@@ -490,10 +397,17 @@ export function ProductDetailPage() {
       else next.add(addonId);
       return next;
     });
+    setAddonQuantities((prev) => {
+      if (!(addonId in prev)) return prev;
+      const next = { ...prev };
+      delete next[addonId];
+      return next;
+    });
   };
 
   React.useEffect(() => {
     setSelectedAddonIds(new Set());
+    setAddonQuantities({});
   }, [product?.id]);
 
   const addToCart = (prod: any, qty: number, variant?: any) => {
@@ -501,8 +415,8 @@ export function ProductDetailPage() {
     const selected = addonsToApply.filter(addon => selectedAddonIds.has(addon.id) && addon.available);
     const prescriptionSuffix = prescriptionData ? ' [Prescription attached]' : '';
     if (selected.length > 0) {
-      const addOnPrice = selected.reduce((sum, item) => sum + item.price, 0);
-      const addOnNames = selected.map(item => item.title).join(", ");
+      const addOnPrice = selected.reduce((sum, item) => sum + item.price * getAddonQty(item.id), 0);
+      const addOnNames = selected.map(item => `${item.title}${getAddonQty(item.id) > 1 ? ` x${getAddonQty(item.id)}` : ''}`).join(", ");
       const customizedProduct = {
         ...prod,
         price: prod.price + addOnPrice,
@@ -716,12 +630,32 @@ export function ProductDetailPage() {
   const compareHint = isCompareCategoryBlocked
     ? `Irrelevant category for the current comparison (locked to ${compareLockedCategory!.label}). Browse matching products on /products?category=${encodeURIComponent(compareLockedCategory!.label)}.`
     : undefined;
+  // Brand resolution — prefer the REAL backend catalog id (a stable string,
+  // e.g. a UUID/cuid) over the numeric `id`/`brandId` fields. Those numeric
+  // ids are a client-side compatibility shim (GlobalStateContext's
+  // `toNumericId`) that silently falls back to the item's ARRAY INDEX when
+  // a real id has no digits — brands and products are independently
+  // ordered arrays, so two unrelated items can end up with the same
+  // synthetic numeric id purely by index coincidence (this was the root
+  // cause of a product showing an unrelated brand, e.g. "Samsung Galaxy
+  // S24 Ultra" resolving to "Walton"). Only fall back to the numeric id
+  // (for legacy/mock data that never had a catalogId) or a name match when
+  // there's genuinely no real id to match on.
   const brandObj = product
-    ? brandList.find((b: any) => b.id === product.brandId) ||
+    ? (product.catalogBrandId
+        ? brandList.find((b: any) => b.catalogId === product.catalogBrandId)
+        : undefined) ||
+      brandList.find((b: any) => b.id === product.brandId && !product.catalogBrandId) ||
       brandList.find((b: any) => b.name?.toLowerCase() === product.brand?.toLowerCase())
     : undefined;
-  const brandId = brandObj ? brandObj.id : 1;
-  const brandName = brandObj ? brandObj.name : "Apex";
+  // No fabricated brand name/id when resolution genuinely fails — the
+  // product's own real `brand`/`brandName` field (never "Apex"/"Sailor")
+  // is the primary fallback; `brandId` stays undefined rather than a
+  // meaningless synthetic `1`. "Unknown Brand" is a last-resort label (not
+  // a specific fake brand identity) for the rare case a product genuinely
+  // has no brand data at all, so UI strings never render literal "undefined".
+  const brandId = brandObj ? brandObj.id : undefined;
+  const brandName = brandObj ? brandObj.name : (product?.brand || product?.brandName || 'Unknown Brand');
   const brandOfficialWebsite = useMemo(() => {
     const fromProduct = (product as any)?.officialWebsite || (product as any)?.buyUrl || (product as any)?.storeUrl;
     const fromBrand = (brandObj as any)?.website || (brandObj as any)?.officialWebsite;
@@ -734,9 +668,26 @@ export function ProductDetailPage() {
   const [activeAccordionIndex, setActiveAccordionIndex] = useState(0);
   const [carouselIndex, setCarouselIndex] = useState(1);
 
-  // States for Stats Bar and ScrollSpy
-  const [purchasedCount] = useState(854);
-  const [viewCount] = useState(() => 8420 + (product?.id ?? 0) * 37);
+  // Real product review stats — combines actual buyer-posted reviews
+  // (`reviews`, filtered to this product) with Studio-curated public
+  // reviews (also real, seller-entered), never a fabricated default.
+  // count === 0 means honestly "no ratings yet", not a fake "4.8".
+  const productReviewStats = useMemo(() => {
+    const real = (Array.isArray(reviews) ? reviews : []).filter(
+      (r: any) => r.productId === product?.id,
+    );
+    const curated =
+      product?.enablePublicReviews !== false && Array.isArray((product as any)?.curatedPublicReviews)
+        ? (product as any).curatedPublicReviews
+        : [];
+    const ratings = [
+      ...real.map((r: any) => Number(r.rating)),
+      ...curated.map((r: any) => Number(r.rating)),
+    ].filter((n) => Number.isFinite(n) && n > 0);
+    const count = ratings.length;
+    const avg = count > 0 ? ratings.reduce((sum, n) => sum + n, 0) / count : 0;
+    return { count, avg };
+  }, [reviews, product]);
 
   // Generic, category-schema-driven variant selection: { dimensionName: value }.
   // No Color/Size/RAM/Storage special-casing — dimensions come from the
@@ -1380,8 +1331,9 @@ export function ProductDetailPage() {
         brandName={brandName}
         isOutOfStock={!!isOutOfStock}
         stockQuantity={stockQuantity}
-        purchasedCount={purchasedCount}
-        viewCount={viewCount}
+        reviewCount={productReviewStats.count}
+        avgRating={productReviewStats.avg}
+        featured={Boolean((product as any)?.featuredFlag)}
         uniqueColors={uniqueColors}
         uniqueSizes={uniqueSizes}
         uniqueRams={uniqueRams}
@@ -1441,7 +1393,7 @@ export function ProductDetailPage() {
             sessionStorage.setItem(
               `choosify_addons_${product.id}`,
               JSON.stringify(
-                selectedAddons.map((a: any) => ({ id: a.id, title: a.title, price: a.price, quantity: 1 })),
+                selectedAddons.map((a: any) => ({ id: a.id, title: a.title, price: a.price, quantity: getAddonQty(a.id) })),
               ),
             );
           }
@@ -1485,6 +1437,8 @@ export function ProductDetailPage() {
                 addons={resolvedAddons}
                 selectedIds={selectedAddonIds}
                 onToggle={toggleAddon}
+                quantities={addonQuantities}
+                onQtyChange={setAddonQty}
                 basePrice={product.price}
                 addonTotal={addonTotal}
               />
@@ -1534,13 +1488,13 @@ export function ProductDetailPage() {
                       value: String(row.value || ''),
                     }))
                   : [
-                      { label: 'Brand', value: brandObj?.name || product.brand || 'Sailor' },
+                      { label: 'Brand', value: brandName },
                       { label: 'Category', value: product.category || 'Lifestyle' },
                       { label: 'Material', value: 'Premium Grade Build' },
                       { label: 'Origin', value: 'Local Production / Auth' },
                       { label: 'Warranty', value: '1 Year Care Warranty' },
                       { label: 'Model', value: product.title?.substring(0, 16) || 'Classic' },
-                      { label: 'Rating', value: `${product.rating || '4.8'} / 5` },
+                      { label: 'Rating', value: productReviewStats.count > 0 ? `${productReviewStats.avg.toFixed(1)} / 5` : 'No ratings yet' },
                       { label: 'Status', value: isOutOfStock ? 'Out of Stock' : 'In Stock' },
                     ]),
                 ...(product.enableAdditionalSpecs !== false && Array.isArray((product as any).additionalSpecs)
@@ -1917,7 +1871,9 @@ export function ProductDetailPage() {
                   : [
                       `Category: ${product.category || 'General'}`,
                       `Brand: ${brandName}`,
-                      `Rating: ${product.rating || '4.8'} / 5`,
+                      productReviewStats.count > 0
+                        ? `Rating: ${productReviewStats.avg.toFixed(1)} / 5`
+                        : 'Rating: No ratings yet',
                     ]
                 ).map((item: string, i: number) => (
                   <OverviewListItem
@@ -1976,6 +1932,38 @@ export function ProductDetailPage() {
                         ))}
                       </div>
                     )}
+                  </div>
+                </StudioWrap>
+              );
+            })()}
+
+            {/* Things to Know — seller/admin-entered structured purchase
+                guidance only (never auto-generated per category). Hidden
+                entirely when the seller hasn't added any enabled items. */}
+            {(() => {
+              const items: Array<{ id: string; title: string; description?: string; enabled?: boolean }> =
+                Array.isArray((product as any).thingsToKnowItems) ? (product as any).thingsToKnowItems : [];
+              const visible = items.filter((t) => t.enabled !== false && t.title?.trim());
+              if ((product as any).enableThingsToKnow === false || visible.length === 0) return null;
+              return (
+                <StudioWrap
+                  sectionId="product-things-to-know"
+                  className="scroll-mt-36 bg-white rounded-xl border border-[#E8EDF2] p-6 w-full text-left"
+                >
+                  <div className="text-[11px] font-extrabold text-[#1A1A2E] mb-3">
+                    THINGS TO KNOW
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                    {visible.map((t) => (
+                      <div key={t.id} className="bg-[#F4F7F9] rounded-[10px] p-4">
+                        <div className="text-[12px] font-extrabold text-[#1A1A2E] mb-1">{t.title}</div>
+                        {t.description ? (
+                          <div className="text-[11.5px] text-[#4B5563] leading-relaxed whitespace-pre-wrap">
+                            {t.description}
+                          </div>
+                        ) : null}
+                      </div>
+                    ))}
                   </div>
                 </StudioWrap>
               );

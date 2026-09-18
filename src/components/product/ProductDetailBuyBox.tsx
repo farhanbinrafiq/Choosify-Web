@@ -19,8 +19,12 @@ interface ProductDetailBuyBoxProps {
   brandName: string;
   isOutOfStock: boolean;
   stockQuantity: number;
-  purchasedCount: number;
-  viewCount: number;
+  /** Real review count — 0 means honestly "no ratings yet", never a fake default. */
+  reviewCount: number;
+  /** Real average rating (0 when reviewCount is 0) — never a fake "4.8" default. */
+  avgRating: number;
+  /** Real `product.featuredFlag` — the FEATURED badge only renders when this is true. */
+  featured?: boolean;
   uniqueColors: string[];
   uniqueSizes: string[];
   uniqueRams: string[];
@@ -70,8 +74,9 @@ export function ProductDetailBuyBox({
   brandName,
   isOutOfStock,
   stockQuantity,
-  purchasedCount,
-  viewCount,
+  reviewCount,
+  avgRating,
+  featured = false,
   uniqueColors,
   uniqueSizes,
   uniqueRams,
@@ -133,34 +138,29 @@ export function ProductDetailBuyBox({
 
   return (
     <div className={cn('w-full pb-10', className)}>
-      {/* Stats strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-[repeat(4,1fr)_auto] gap-3.5 bg-white rounded-xl border border-[#E8EDF2] px-6 py-[18px] mb-4 items-center">
-        <div className="text-center">
-          <div className="text-lg font-extrabold text-[#1A1A2E]">★ {product.rating || '4.8'}</div>
-          <div className="text-[11px] text-[#9AA0AC]">Rating</div>
+      {/* Stats strip — real rating/review data only. No fabricated
+          orders/views counters and no unconditional TRENDING badge (there
+          is no real per-product "trending" signal today). */}
+      {reviewCount > 0 && (
+        <div className="grid grid-cols-2 gap-3.5 bg-white rounded-xl border border-[#E8EDF2] px-6 py-[18px] mb-4 items-center">
+          <div className="text-center">
+            <div className="text-lg font-extrabold text-[#1A1A2E]">★ {avgRating.toFixed(1)}</div>
+            <div className="text-[11px] text-[#9AA0AC]">Rating</div>
+          </div>
+          <div className="text-center">
+            <div className="text-lg font-extrabold text-[#1A1A2E]">{reviewCount.toLocaleString()}</div>
+            <div className="text-[11px] text-[#9AA0AC]">Reviews</div>
+          </div>
         </div>
-        <div className="text-center">
-          <div className="text-lg font-extrabold text-[#1A1A2E]">{(product.reviews || 12400).toLocaleString()}</div>
-          <div className="text-[11px] text-[#9AA0AC]">Reviews</div>
-        </div>
-        <div className="text-center">
-          <div className="text-lg font-extrabold text-[#1A1A2E]">{purchasedCount.toLocaleString()}</div>
-          <div className="text-[11px] text-[#9AA0AC]">Orders</div>
-        </div>
-        <div className="text-center">
-          <div className="text-lg font-extrabold text-[#1A1A2E]">{viewCount.toLocaleString()}</div>
-          <div className="text-[11px] text-[#9AA0AC]">Views</div>
-        </div>
-        <div className="choosify-emi-gradient text-white text-[10px] font-extrabold px-3 py-1.5 rounded-full justify-self-center lg:justify-self-end whitespace-nowrap">
-          TRENDING
-        </div>
-      </div>
+      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-4 mb-4">
         {/* Left — product info */}
         <div className="bg-white rounded-xl border border-[#E8EDF2] p-[26px]">
           <div className="flex gap-2 mb-3.5 flex-wrap">
-            <span className="bg-[#FF5B00] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-full">FEATURED</span>
+            {featured && (
+              <span className="bg-[#FF5B00] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-full">FEATURED</span>
+            )}
             {isOutOfStock ? (
               <span className="bg-[#FF000D] text-white text-[9px] font-extrabold px-2.5 py-1 rounded-full">
               OUT OF STOCK
@@ -182,22 +182,26 @@ export function ProductDetailBuyBox({
             {selectedColor ? ` · ${selectedColor}` : ''}
           </div>
           <div className="text-[13px] text-[#1A1A2E] mb-[18px] flex items-center gap-1.5 flex-wrap">
-            <span className="inline-flex text-[#FF5B00] gap-0.5">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <Star
-                  key={i}
-                  size={12}
-                  className={cn(
-                    'fill-current',
-                    i <= Math.floor(product.rating || 4) ? 'text-[#FF5B00]' : 'text-slate-300',
-                  )}
-                />
-              ))}
-            </span>
-            <b>{product.rating || '4.8'}</b>
-            <span className="text-[#9AA0AC]">
-              ({product.reviews || '12.4K'} Reviews) · {purchasedCount}+ sold
-            </span>
+            {reviewCount > 0 ? (
+              <>
+                <span className="inline-flex text-[#FF5B00] gap-0.5">
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <Star
+                      key={i}
+                      size={12}
+                      className={cn(
+                        'fill-current',
+                        i <= Math.round(avgRating) ? 'text-[#FF5B00]' : 'text-slate-300',
+                      )}
+                    />
+                  ))}
+                </span>
+                <b>{avgRating.toFixed(1)}</b>
+                <span className="text-[#9AA0AC]">({reviewCount.toLocaleString()} Reviews)</span>
+              </>
+            ) : (
+              <span className="text-[#9AA0AC]">No ratings yet</span>
+            )}
             {onReport && (
               <button
                 type="button"
@@ -221,9 +225,6 @@ export function ProductDetailBuyBox({
                 </div>
               </>
             )}
-          </div>
-          <div className="text-xs text-[#FF5B00] mb-1">
-            Get up to ৳ cashback · EMI available on this product
           </div>
           {sku && (
             <div className="text-[11px] text-[#9AA0AC] mb-4">SKU: <span className="font-semibold text-[#4B5563]">{sku}</span></div>
