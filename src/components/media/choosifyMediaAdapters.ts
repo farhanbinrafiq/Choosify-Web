@@ -1,6 +1,12 @@
-import type { ChoosifyMediaItem, ChoosifyMediaKind } from './choosifyMediaTypes';
+import type { ChoosifyMediaAspect, ChoosifyMediaItem, ChoosifyMediaKind } from './choosifyMediaTypes';
 import { isVideoKind } from './choosifyMediaTypes';
 import { PLACEHOLDER_IMAGE } from '../../constants';
+import {
+  getVideoEmbedUrl,
+  isEmbeddableVideo,
+  isUnsupportedFacebookShareUrl,
+  detectCreatorReviewPlatform,
+} from '../../lib/videoEmbed';
 
 let mediaIdCounter = 0;
 function mid(prefix: string): string {
@@ -34,11 +40,42 @@ const PRODUCT_VIDEO_YT_RE =
 const PRODUCT_VIDEO_FILE_RE = /\.(mp4|webm|mov|m4v)(\?.*)?$/i;
 
 /**
+ * Orientation for Facebook/Instagram/TikTok product video — deliberately
+ * NOT reused from `videoEmbed.ts`'s `getCreatorReviewOrientation`, which
+ * treats every Facebook/Instagram Reel as portrait. Real QA on a genuine
+ * canonical Facebook Reel URL found LANDSCAPE content, proving that rule
+ * wrong: a Reel is a posting format, not proof of the underlying file's
+ * pixel orientation. Provider identity is used only as a default for the
+ * one case where it's actually reliable — TikTok has no landscape upload
+ * path — never as a universal rule.
+ *
+ * Facebook and Instagram have NO reliable credential-free dimension source
+ * at all right now (this app's own server already found their tokenless
+ * oEmbed returns no usable thumbnail/dimension data — see
+ * server/catalogRouter.ts), and the cross-origin embed iframe itself can
+ * never be measured from this page (browser same-origin policy). '16/9' is
+ * used as an honest, clearly-labeled TEMPORARY fallback — the overwhelmingly
+ * common real-world video shape — not a claim about this specific video.
+ * `'auto'` is deliberately NOT used here: in the gallery's contain-sizing
+ * layout (see DetailSliverMediaGallery.tsx), an item with no aspect-ratio
+ * constraint at all can collapse to zero size, which is worse than a
+ * slightly-wrong default.
+ */
+function brandableAspect(url: string): ChoosifyMediaAspect {
+  return detectCreatorReviewPlatform(url) === 'tiktok' ? '9/16' : '16/9';
+}
+
+/**
  * Resolve a product's single canonical `videoUrl` into one gallery media item.
  * Supported sources (mirrors the platform's server-side normalization):
  *   - a YouTube link (watch / youtu.be / embed / shorts)  -> embedded iframe slide
  *   - a direct HTTPS video file (.mp4/.webm/.mov/.m4v)     -> native <video> slide
  *   - a platform `/media/products/*.mp4` path              -> native <video> slide
+ *   - a Facebook (Reel/video, not an opaque `/share/` link), Instagram, or
+ *     TikTok video link -> embedded iframe slide, via the same
+ *     `getVideoEmbedUrl` (Facebook's official plugins/video.php, Instagram's
+ *     /embed, TikTok's /embed/v2/<id>) Creator Reviews already uses — no
+ *     separate embed mechanism to maintain.
  * Anything else is ignored (no broken slide). Returns null when there is no video.
  */
 function productVideoMediaItem(raw: string | undefined, poster: string): ChoosifyMediaItem | null {
@@ -46,6 +83,10 @@ function productVideoMediaItem(raw: string | undefined, poster: string): Choosif
   if (!s) return null;
   const yt = s.match(PRODUCT_VIDEO_YT_RE);
   if (yt) {
+    // Shorts are portrait; a regular watch/embed link is landscape — the same
+    // canonical platform detection Creator Reviews already uses for the exact
+    // same URL shapes, so "is this a Short" is decided in exactly one place.
+    const isShorts = detectCreatorReviewPlatform(s) === 'youtube_shorts';
     return {
       id: mid('pvideo'),
       kind: 'live',
@@ -53,10 +94,12 @@ function productVideoMediaItem(raw: string | undefined, poster: string): Choosif
       embedUrl: `https://www.youtube-nocookie.com/embed/${yt[1]}`,
       posterUrl: poster || undefined,
       alt: 'Product video',
-      aspectRatio: '16/9',
+      aspectRatio: isShorts ? '9/16' : '16/9',
     };
   }
   if (s.startsWith('/media/') || PRODUCT_VIDEO_FILE_RE.test(s)) {
+    // No reliable way to read a direct file's real orientation without
+    // downloading/decoding it — landscape is the honest, sensible default.
     return {
       id: mid('pvideo'),
       kind: 'landscape_video',
@@ -64,6 +107,17 @@ function productVideoMediaItem(raw: string | undefined, poster: string): Choosif
       posterUrl: poster || undefined,
       alt: 'Product video',
       aspectRatio: '16/9',
+    };
+  }
+  if (!isUnsupportedFacebookShareUrl(s) && isEmbeddableVideo(s)) {
+    return {
+      id: mid('pvideo'),
+      kind: 'live',
+      url: s,
+      embedUrl: getVideoEmbedUrl(s),
+      posterUrl: poster || undefined,
+      alt: 'Product video',
+      aspectRatio: brandableAspect(s),
     };
   }
   return null;

@@ -19,6 +19,29 @@ const ALLOWED_EMBED_HOSTS = [
   'www.facebook.com',
 ];
 
+/**
+ * The backend's local-disk media pipeline returns a relative `/media/...`
+ * URL (see choosify-admin-4.0's mediaStorage.ts publicOrigin()). This
+ * storefront and the admin app are served from different origins, so a bare
+ * relative URL 404s here even though it resolves fine on the admin app
+ * itself -- resolve it against the API's own origin before ever rendering
+ * it. Mirrors services/mediaUpload.ts's identical (private) resolveMediaUrl,
+ * duplicated here rather than imported to keep this a dependency-free leaf
+ * module (mediaUpload.ts pulls in auth/session/Cloudinary config this file
+ * has no other reason to depend on).
+ */
+function resolveCreatorThumbnailMediaUrl(url: string): string {
+  if (!url || /^(https?:|data:|blob:)/i.test(url)) return url;
+  const apiBase = ((import.meta as any).env?.VITE_API_BASE_URL as string | undefined) || '/api/v1';
+  let origin = '';
+  try {
+    origin = new URL(apiBase).origin;
+  } catch {
+    return url; // apiBase itself is relative -> same-origin deployment, no prefix needed
+  }
+  return `${origin}${url.startsWith('/') ? '' : '/'}${url}`;
+}
+
 // ---------------------------------------------------------------------
 // Creator Review platform detection — derived from URL structure only,
 // never a seller-entered manual label (product.creatorContent.platform
@@ -41,6 +64,91 @@ function safeHostname(url: string): string {
   } catch {
     return '';
   }
+}
+
+/**
+ * Sellers sometimes paste a platform's official "Embed Code" snippet
+ * (an <iframe>, <blockquote>, or <script> block) into the video-link field
+ * instead of a plain URL -- TikTok, Instagram, and Facebook's own "Embed"
+ * options all produce this. That raw HTML is never stored or rendered
+ * (real XSS surface if it were) -- instead this extracts the one URL that
+ * actually identifies the content, from the small set of attributes these
+ * platforms use to carry it (`cite`, `data-href`, `data-instgrm-permalink`,
+ * or an `href=` query param inside a `plugins/video.php?...` iframe src),
+ * falling back to the first bare http(s) URL found in the text. The
+ * extracted candidate is only ever treated as a plain URL string -- it is
+ * re-validated by the normal platform detection/allowlist logic exactly
+ * like any pasted link, never trusted or rendered as HTML.
+ */
+/**
+ * A real browser DOM-parses embed-code HTML before ever reading an attribute
+ * off it, which silently decodes HTML entities (`&amp;` -> `&` etc.) as part
+ * of normal attribute parsing. This extractor works on the raw text instead
+ * (deliberately -- see the doc comment above), so it has to do that same
+ * decoding by hand; skipping it left literal `&amp;` text baked into stored
+ * URLs pasted from Instagram/Facebook's official embed code (their markup
+ * always HTML-escapes attribute values, e.g.
+ * `data-instgrm-permalink="...?utm_source=ig_embed&amp;utm_campaign=..."`).
+ * Deliberately narrow -- only the entities these platforms' own embed
+ * snippets actually use in a URL attribute.
+ */
+function decodeHtmlEntities(value: string): string {
+  return value
+    .replace(/&amp;/g, '&')
+    .replace(/&quot;/g, '"')
+    .replace(/&#0?39;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>');
+}
+
+export function extractUrlFromPastedInput(input: string): string {
+  const raw = (input || '').trim();
+  if (!raw) return raw;
+  // Already a clean, parseable absolute URL -- nothing to extract.
+  try {
+    new URL(raw);
+    return raw;
+  } catch {
+    // fall through -- likely embed-code HTML, try to pull a URL out of it
+  }
+
+  // Facebook's plugins/video.php iframe src carries the real target as an
+  // encoded `href=` query value -- check this before the generic attribute
+  // match below, since it needs URL-decoding rather than a literal copy.
+  const hrefParamMatch = raw.match(/[?&]href=([^&"'<>\s]+)/i);
+  if (hrefParamMatch?.[1]) {
+    try {
+      const decoded = decodeHtmlEntities(decodeURIComponent(hrefParamMatch[1]));
+      new URL(decoded);
+      return decoded;
+    } catch {
+      // fall through
+    }
+  }
+
+  const attrMatch = raw.match(/(?:cite|data-href|data-instgrm-permalink)=["']([^"']+)["']/i);
+  if (attrMatch?.[1]) {
+    const decoded = decodeHtmlEntities(attrMatch[1]);
+    try {
+      new URL(decoded);
+      return decoded;
+    } catch {
+      // fall through
+    }
+  }
+
+  const bareMatch = raw.match(/https?:\/\/[^\s"'<>]+/i);
+  if (bareMatch?.[0]) {
+    const decoded = decodeHtmlEntities(bareMatch[0]);
+    try {
+      new URL(decoded);
+      return decoded;
+    } catch {
+      // fall through
+    }
+  }
+
+  return raw;
 }
 
 /** Detects the platform + content shape from the URL's own structure. */
@@ -137,7 +245,10 @@ function extractInstagramShortcode(url: string): string {
  */
 function looksLikeSpecificFacebookContent(url: string): boolean {
   return (
-    /\/videos?\/\d+/.test(url) ||
+    // Facebook's SEO-friendly video URLs insert a text slug before the
+    // numeric id (`/<page>/videos/<slug>/<id>/`) -- the optional segment
+    // here accounts for that shape as well as the bare `/videos/<id>` form.
+    /\/videos?\/(?:[^/]+\/)?\d+/.test(url) ||
     /\/reels?\//.test(url) ||
     /[?&]v=\d+/.test(url) ||
     /^https?:\/\/(www\.)?fb\.watch\//.test(url) ||
@@ -164,7 +275,8 @@ function looksLikeSpecificFacebookContent(url: string): boolean {
 export function canonicalizeFacebookUrl(url: string): string {
   const reelId = url.match(/\/reel\/(\d+)/)?.[1];
   if (reelId) return `https://www.facebook.com/reel/${reelId}/`;
-  const videoId = url.match(/\/videos\/(\d+)/)?.[1] || url.match(/[?&]v=(\d+)/)?.[1];
+  // Optional slug segment before the id -- see looksLikeSpecificFacebookContent.
+  const videoId = url.match(/\/videos\/(?:[^/]+\/)?(\d+)/)?.[1] || url.match(/[?&]v=(\d+)/)?.[1];
   if (videoId) return `https://www.facebook.com/watch/?v=${videoId}`;
   return url;
 }
@@ -177,6 +289,24 @@ export function canonicalizeFacebookUrl(url: string): string {
  * own decoration, not a requirement -- the SDK embeds correctly from the
  * bare canonical form alone.
  */
+/**
+ * Facebook share links (`/share/r/<token>/`, `/share/v/<token>/`) are NOT
+ * embeddable content URLs -- they are opaque, session-resolved redirect
+ * tokens, structurally distinct from a real canonical Reel/video URL.
+ * Confirmed by direct testing: an unauthenticated fetch of one returns
+ * HTTP 400 with no redirect at all, and Meta's own tokenless oEmbed accepts
+ * the URL but echoes the same unresolved `/share/...` string back rather
+ * than resolving it -- there is no legitimate, credential-free way to turn
+ * the opaque token into a numeric video/reel id. It must never be treated
+ * as one (see canonicalizeFacebookUrl, which is untouched by this and only
+ * ever matches genuine numeric-id URL shapes).
+ */
+export function isUnsupportedFacebookShareUrl(url: string): boolean {
+  const host = safeHostname(url || '');
+  if (!host.endsWith('facebook.com')) return false;
+  return /\/share\/[rv]\//i.test(url);
+}
+
 export function canonicalizeInstagramUrl(url: string): string {
   const shortcode = extractInstagramShortcode(url);
   if (!shortcode) return url;
@@ -301,6 +431,12 @@ export function isDirectVideoFile(url: string): boolean {
 
 export function isEmbeddableVideo(url: string): boolean {
   if (!url || url === '#') return false;
+  // Facebook share links look superficially "specific" (looksLikeSpecificFacebookContent
+  // allows /share/[vr]/) but cannot actually be resolved to playable content
+  // without a logged-in Facebook session -- see isUnsupportedFacebookShareUrl.
+  // Gated first and unconditionally so this can never be reached by any
+  // other platform's logic below.
+  if (isUnsupportedFacebookShareUrl(url)) return false;
   const embed = getVideoEmbedUrl(url);
   if (!embed.length) return false;
   // Direct video files / blob: URLs render via a plain <video> tag, not an
@@ -347,9 +483,13 @@ export interface CreatorReviewMedia {
 }
 
 export function resolveCreatorReviewMedia(
-  url: string,
+  rawUrl: string,
   customThumbnail?: string,
 ): CreatorReviewMedia {
+  // Normalizes an accidentally-pasted embed-code snippet down to its plain
+  // URL before any detection/canonicalization runs -- see
+  // extractUrlFromPastedInput. A no-op for an already-clean URL.
+  const url = extractUrlFromPastedInput(rawUrl);
   const platform = detectCreatorReviewPlatform(url);
   // Precedence (platform-independent): a seller-selected custom thumbnail
   // always wins over a platform-generated one (e.g. YouTube's auto thumbnail),
@@ -373,6 +513,6 @@ export function resolveCreatorReviewMedia(
     embedUrl: getVideoEmbedUrl(url),
     canonicalUrl,
     canEmbed: isEmbeddableVideo(url),
-    thumbnailUrl: customThumbnail || derivedThumb || '',
+    thumbnailUrl: resolveCreatorThumbnailMediaUrl(customThumbnail || '') || derivedThumb || '',
   };
 }
