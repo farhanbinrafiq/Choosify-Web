@@ -66,15 +66,17 @@ export function BrandDetailHero({
     // must show no social pills, never Choosify's.
     profileSocialLinksFromCatalog(brand?.socialLinks, []);
 
+  // Real/zero counts only when the caller doesn't pass its own `facts` —
+  // never a fabricated positive number ("120+", "50K+" etc.). "Creators" and
+  // "Since" are omitted entirely, same as BrandDetailPage's real facts array,
+  // since there is no genuine per-brand source for either yet.
   const brandFacts =
     facts ||
     [
-      { label: 'Products', value: String(brand.productCount ?? brand.products ?? '120+') },
-      { label: 'Followers', value: String(brand.followers ?? '50K+') },
-      { label: 'Categories', value: String(brand.categoryCount ?? '8') },
-      { label: 'Deals', value: String(brand.dealCount ?? '24') },
-      { label: 'Creators', value: String(brand.creatorCount ?? '18') },
-      { label: 'Since', value: String(brand.founded ?? '2012') },
+      { label: 'Products', value: String(brand.productCount ?? brand.products ?? 0) },
+      { label: 'Followers', value: String(brand.followers ?? 0) },
+      { label: 'Categories', value: String(brand.categoryCount ?? 0) },
+      { label: 'Deals', value: String(brand.dealCount ?? 0) },
     ];
 
   const slug = handle || `@${String(brand.name || 'brand').toLowerCase().replace(/\s+/g, '')}`;
@@ -89,7 +91,7 @@ export function BrandDetailHero({
             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-none" />
           </div>
           <div className="absolute left-1/2 top-full -translate-x-1/2 -translate-y-[60px] w-[100px] h-[100px] md:w-[120px] md:h-[120px] z-[5]">
-            <div className="w-full h-full rounded-full bg-white border-[5px] border-white shadow-[0_16px_36px_rgba(0,0,0,0.28),0_0_0_4px_rgba(35,35,255,0.18)] overflow-hidden flex items-center justify-center">
+            <div className="w-full h-full rounded-full bg-white shadow-[0_4px_14px_rgba(0,0,0,0.2)] overflow-hidden flex items-center justify-center">
               {logoNode}
             </div>
           </div>

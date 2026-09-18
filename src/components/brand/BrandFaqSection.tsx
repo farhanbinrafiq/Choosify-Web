@@ -3,40 +3,23 @@ import { ChevronDown } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import type { CatalogBrandFaq } from '../../types/catalog';
 
-export function buildBrandFaqs(brandName: string): { q: string; a: string }[] {
-  return [
-    {
-      q: `Are ${brandName} products sold on Choosify 100% genuine?`,
-      a: `Yes. All ${brandName} listings on Choosify are sourced from authorized sellers and verified partners with authenticity checks before publication.`,
-    },
-    {
-      q: `What warranty do I get on ${brandName} purchases?`,
-      a: `Most ${brandName} products include the official manufacturer warranty. Coverage length varies by category — check each product page for exact terms.`,
-    },
-    {
-      q: `How do I claim service or repair support?`,
-      a: `Visit an authorized service center listed under Where to Buy, or contact the seller via Choosify Messages with your order ID and serial number.`,
-    },
-    {
-      q: `Does ${brandName} offer EMI or installment options?`,
-      a: `EMI is available on eligible ${brandName} products through partner banks and card issuers. Look for the EMI badge on the product buy box.`,
-    },
-    {
-      q: `Where is my nearest authorized ${brandName} store?`,
-      a: `Use the Store Location section above for authorized stores, distributors, and service centers near you, including map links where available.`,
-    },
-  ];
-}
-
+/**
+ * Real seller-entered FAQs only (brand.faq via Brand Studio) — no template
+ * "Are {brand} products genuine?" filler when the seller hasn't written any.
+ * Caller (BrandDetailPage) skips rendering this section entirely when `faq`
+ * is empty.
+ */
 export function BrandFaqSection({
-  brandName,
+  brandName: _brandName,
   faq,
 }: {
   brandName: string;
   faq?: CatalogBrandFaq[];
 }) {
-  const faqs = faq && faq.length > 0 ? faq : buildBrandFaqs(brandName);
+  const faqs = faq ?? [];
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  if (faqs.length === 0) return null;
 
   return (
     <div id="faq-section" className="scroll-mt-36 w-full">

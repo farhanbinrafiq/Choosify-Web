@@ -26,7 +26,7 @@ import { toast } from '../lib/notify';
 import { BrandOverviewSection } from "../components/BrandOverviewSection";
 import { FollowButton } from "../components/FollowButton";
 import { BrandDetailHero } from "../components/brand/BrandDetailHero";
-import { BRAND_LOGO_IMG_CLASS } from "../components/brand/BrandLogo";
+import { BRAND_LOGO_IMG_CLASS, brandInitials } from "../components/brand/BrandLogo";
 import type { BrandStoryBlock } from "../lib/brandStory";
 import { ClaimProfileModal } from "../components/ClaimProfileModal";
 import {
@@ -40,7 +40,6 @@ import { UniversalCarousel } from "../components/design/UniversalCarousel";
 import { PaginationBar } from "../components/PaginationBar";
 import { PublicReviewCard, resolvePublicReviewAvatarUrl } from "../components/PublicReviewCard";
 import { TikTokIcon } from "../components/brand/TikTokIcon";
-import { BrandCouponCarouselCard, buildBrandCoupons } from "../components/brand/BrandCouponsSection";
 import { operationsApi, type PublicProductReview } from "../services/operationsApi";
 import { BrandWhereToBuySection } from "../components/brand/BrandWhereToBuySection";
 import { BrandFaqSection } from "../components/brand/BrandFaqSection";
@@ -935,8 +934,9 @@ export function BrandDetailPage() {
     currentPage * productsPerPage,
   );
 
-  // Extract deals (sale/deal flags) — fall back to top brand products so the merged carousel isn't empty
-  const filteredDeals = sortedProducts.filter(
+  // Extract deals (real sale/deal flags only) — never padded with regular
+  // products relabeled as "deals" when there aren't any real ones.
+  const finalDeals = sortedProducts.filter(
     (p: any) =>
       p.tag === "SALE" ||
       p.tag === "HOT" ||
@@ -946,22 +946,14 @@ export function BrandDetailPage() {
       (typeof p.discountPercent === "number" && p.discountPercent > 0) ||
       Boolean(p.dealType),
   );
-  const finalDeals =
-    filteredDeals.length > 0 ? filteredDeals : sortedProducts.slice(0, 6);
 
   // Counts
   const totalDealsFound = finalDeals.length;
   const totalProductsFound = sortedProducts.length || brandProducts.length;
-  const brandCoupons = buildBrandCoupons(brand.name);
 
   const dealsCouponsCarouselItems = useMemo(
-    () => [
-      ...finalDeals.map((product: any) => ({ kind: "deal" as const, product })),
-      ...brandCoupons
-        .slice(0, 3)
-        .map((coupon) => ({ kind: "coupon" as const, coupon })),
-    ],
-    [finalDeals, brandCoupons],
+    () => finalDeals.map((product: any) => ({ kind: "deal" as const, product })),
+    [finalDeals],
   );
 
   function clearAllFilters() {
@@ -991,178 +983,10 @@ export function BrandDetailPage() {
     setCurrentSearchInput("");
   }
 
-  const [productLineIndex, setProductLineIndex] = useState(1);
-
-  const carouselItems = [
-    {
-      name: "Premium Comfort",
-      category: "Classic Collection",
-      img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=1200&h=800&fit=crop",
-    },
-    {
-      name: `${brand.name} Eid Collection`,
-      category: "Modern Fit",
-      img: "https://images.unsplash.com/photo-1512314889357-e157c22f938d?w=1200&h=800&fit=crop",
-    },
-    {
-      name: "Royal Edition",
-      category: "Luxury Series",
-      img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&h=800&fit=crop",
-    },
-    {
-      name: "Festive Spirit",
-      category: "Seasonal Wear",
-      img: "https://images.unsplash.com/photo-1511741454500-ddbf7ef33554?w=1200&h=800&fit=crop",
-    },
-  ];
-
-  const handleProductLineNext = () =>
-    setProductLineIndex((prev) => (prev + 1) % carouselItems.length);
-  const handleProductLinePrev = () =>
-    setProductLineIndex(
-      (prev) => (prev - 1 + carouselItems.length) % carouselItems.length,
-    );
-
-  const getBrandOverviews = (brandName: string) => {
-    const name = brandName.toLowerCase();
-    if (name.includes("choosify")) {
-      return {
-        address:
-          "CHOOSE-HQ, SUITE 5A, METROPOLITAN TOWERS, GULSHAN-2, DHAKA 1212.",
-        website: "choosify.com",
-        map: "https://www.google.com/maps",
-        email: "hello@choosify.com",
-        phone: "09612246673",
-        priceRange: "BDT - FREE ACCESS",
-        ageRange: "AGE: 15 - 65",
-        audience: "SHOPPERS, CREATORS, VERIFIED OUTLETS & SMART BUYERS",
-        services: [
-          "TRANSPARENT COMMUNITY COMPARISONS",
-          "VERIFIED OUTLET REVIEWS & INSIGHTS",
-          "ACTIVE PROMO CODES & CAMPAIGNS",
-          "INFLUENCER INSIGHTS & EXPERIENCES",
-          "RETAIL DEAL DISCOVERY & PRICE TRACKING",
-          "REAL-TIME PRICE HISTORY TRACKER",
-        ],
-        tags: [
-          "#BrandDiscovery",
-          "#ProductComparison",
-          "#Deals",
-          "#Recommendations",
-          "#Creators",
-          "#Marketplace",
-          "#ConsumerInsights",
-          "#ShoppingGuides",
-        ],
-      };
-    }
-    if (name.includes("fff")) {
-      return {
-        address:
-          "FFF SOURCING HQ, PLOT 12, ROAD 4, SECTOR 3, UTTARA, DHAKA 1230 BANGLADESH.",
-        website: "fff.com.bd",
-        map: "https://www.google.com/maps",
-        email: "sourcing@fff.com.bd",
-        phone: "+8801711223344",
-        priceRange: "BDT - CUSTOM QUOTES",
-        ageRange: "AGE: 18 - 60",
-        audience: "INTERNATIONAL FASHION BRANDS, RETAILERS, IMPORTERS",
-        services: [
-          "GARMENT SOURCING",
-          "BUYING HOUSE SERVICES",
-          "APPAREL MANUFACTURING COORDINATION",
-          "QUALITY CONTROL",
-          "VENDOR MANAGEMENT",
-          "PRODUCT DEVELOPMENT",
-          "EXPORT SUPPORT",
-          "COMPLIANCE MANAGEMENT",
-        ],
-        tags: [
-          "#GarmentSourcing",
-          "#BuyingHouse",
-          "#ApparelManufacturing",
-          "#BangladeshExports",
-          "#FashionProduction",
-          "#QualityControl",
-          "#VendorManagement",
-          "#TextileIndustry",
-        ],
-      };
-    }
-    if (
-      name.includes("sailor") ||
-      name.includes("la reve") ||
-      name.includes("yellow") ||
-      name.includes("aarong") ||
-      name.includes("ethnic") ||
-      name.includes("fashion") ||
-      name.includes("apex") ||
-      name.includes("bata") ||
-      name.includes("lotto")
-    ) {
-      return {
-        address:
-          "GRAND SHOPPING MALL, HOUSE 2, ROAD 2, SECTOR 92. 1500 - DHAKA BANGLADESH.",
-        website: "www.website.com",
-        map: "https://www.google.com/maps",
-        email: "fashion@gmail.com",
-        phone: "01234456789",
-        priceRange: "BDT - 500",
-        ageRange: "AGE: 12 - 40",
-        audience: "MALE, FEMALE, YOUTH & KIDS",
-        services: [
-          "90 DAYS RETURN WITH REFUND POLICY",
-          "FULL COD ENTIRE BANGLADESH",
-          "6 MONTHS WARRANTY ALL PRODUCT",
-          "CUSTOM GIFT BOX AVAILABLE",
-          "3 HOURS DELIVERY INSIDE DHAKA METRO",
-          "ONLINE & OFFLINE ORDER FACILITIES.",
-        ],
-        tags: [
-          "#premium buyers",
-          "#quality driven",
-          "#ethnic wear",
-          "#fashion",
-          "#eid collection",
-          "#trend setter",
-          "#old money",
-          "#summer collection",
-          "#beach wear",
-        ],
-      };
-    }
-
-    return {
-      address: "JAMUNA FUTURE PARK, LEVEL 4, SHOP 22B, DHAKA BANGLADESH.",
-      website: `www.${name}.com.bd`,
-      map: "https://www.google.com/maps",
-      email: `support@${name}.com`,
-      phone: "09612345678",
-      priceRange: "BDT 5,000 - 150,000",
-      ageRange: "AGE: 18 - 60",
-      audience: "TECH ENTHUSIASTS, PROFESSIONALS",
-      services: [
-        "7 DAYS REPLACEMENT WARRANTY",
-        "100% ORIGINAL PRODUCT GUARANTEE",
-        "OFFICIAL BRAND WARRANTY",
-        "EMI AVAILABLE UP TO 24 MONTHS",
-        "EXPRESS HOME DELIVERY",
-        "SECURE CARD & MOBILE PAYMENTS",
-      ],
-      tags: [
-        "#tech",
-        "#gadgets",
-        "#original",
-        "#official warranty",
-        "#smart choice",
-        "#power user",
-        "#premium build",
-        "#trending tech",
-      ],
-    };
-  };
-
-  const fallbackOverview = getBrandOverviews(brand.name);
+  // Brand Overview shows ONLY what the seller actually entered (via Brand
+  // Studio's real `brand.overview`) or a real platform value (website).
+  // There is no name-keyed or generic prototype fallback — a field the
+  // seller hasn't filled in is simply omitted, not invented.
   const catalogOverview = (brand as { overview?: {
     address?: string;
     email?: string;
@@ -1173,135 +997,25 @@ export function BrandDetailPage() {
     services?: string[];
     tags?: string[];
   } }).overview;
-  const overviewData = catalogOverview
-    ? {
-        address: catalogOverview.address || fallbackOverview.address,
-        website:
-          (brand as { website?: string }).website?.replace(/^https?:\/\//, '') ||
-          fallbackOverview.website,
-        map: fallbackOverview.map,
-        email: catalogOverview.email || fallbackOverview.email,
-        phone: catalogOverview.phone || fallbackOverview.phone,
-        priceRange: catalogOverview.priceRange || fallbackOverview.priceRange,
-        ageRange: catalogOverview.ageFocus
-          ? `AGE: ${catalogOverview.ageFocus}`
-          : fallbackOverview.ageRange,
-        audience: catalogOverview.audience || fallbackOverview.audience,
-        services:
-          catalogOverview.services && catalogOverview.services.length
-            ? catalogOverview.services
-            : fallbackOverview.services,
-        tags:
-          catalogOverview.tags && catalogOverview.tags.length
-            ? catalogOverview.tags
-            : fallbackOverview.tags,
-      }
-    : fallbackOverview;
-
-  const getPopularCategoryPreviews = () => {
-    const cat = (brand.category || "").toLowerCase();
-    const name = brand.name.toLowerCase();
-    if (name.includes("choosify")) {
-      return [
-        {
-          label: "BRANDS",
-          img: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=600&fit=crop",
-        },
-        {
-          label: "PRODUCTS",
-          img: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=600&fit=crop",
-        },
-        {
-          label: "CREATORS",
-          img: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=400&h=600&fit=crop",
-        },
-      ];
-    }
-    if (name.includes("fff")) {
-      return [
-        {
-          label: "SOURCING",
-          img: "https://images.unsplash.com/photo-1558449028-b53a39d100fc?w=400&h=600&fit=crop",
-        },
-        {
-          label: "EXPORT",
-          img: "https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=600&fit=crop",
-        },
-        {
-          label: "GARMENTS",
-          img: "https://images.unsplash.com/photo-1525507119028-ed4c629a60a3?w=400&h=600&fit=crop",
-        },
-      ];
-    }
-    if (
-      name.includes("sailor") ||
-      name.includes("la reve") ||
-      name.includes("yellow") ||
-      name.includes("aarong") ||
-      cat.includes("fashion") ||
-      cat.includes("lifestyle") ||
-      cat.includes("clothing") ||
-      cat.includes("ethnic")
-    ) {
-      return [
-        {
-          label: "PANJABI",
-          img: "https://images.unsplash.com/photo-1621184455862-c163dfb30e0f?w=400&h=600&fit=crop",
-        },
-        {
-          label: "SUIT",
-          img: "https://images.unsplash.com/photo-1594938298603-c8148c4dae35?w=400&h=600&fit=crop",
-        },
-        {
-          label: "WESTERN",
-          img: "https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=400&h=600&fit=crop",
-        },
-      ];
-    }
-    if (
-      cat.includes("shoe") ||
-      cat.includes("footwear") ||
-      name.includes("bata") ||
-      name.includes("apex") ||
-      name.includes("lotto")
-    ) {
-      return [
-        {
-          label: "CASUAL",
-          img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&h=600&fit=crop",
-        },
-        {
-          label: "SNEAKERS",
-          img: "https://images.unsplash.com/photo-1595950653106-6c9ebd614d3a?w=400&h=600&fit=crop",
-        },
-        {
-          label: "FORMAL",
-          img: "https://images.unsplash.com/photo-1533867617858-e7b97e060509?w=400&h=600&fit=crop",
-        },
-      ];
-    }
-    return [
-      {
-        label: "MOBILES",
-        img: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=400&h=600&fit=crop",
-      },
-      {
-        label: "GEAR",
-        img: "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?w=400&h=600&fit=crop",
-      },
-      {
-        label: "WEARABLES",
-        img: "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?w=400&h=600&fit=crop",
-      },
-    ];
+  const overviewData = {
+    address: catalogOverview?.address || undefined,
+    website: (brand as { website?: string }).website?.replace(/^https?:\/\//, '') || undefined,
+    map: "https://www.google.com/maps",
+    email: catalogOverview?.email || undefined,
+    phone: catalogOverview?.phone || undefined,
+    priceRange: catalogOverview?.priceRange || undefined,
+    ageRange: catalogOverview?.ageFocus ? `AGE: ${catalogOverview.ageFocus}` : undefined,
+    audience: catalogOverview?.audience || undefined,
+    services: catalogOverview?.services && catalogOverview.services.length ? catalogOverview.services : [],
+    tags: catalogOverview?.tags && catalogOverview.tags.length ? catalogOverview.tags : [],
   };
 
-  const popularCats = getPopularCategoryPreviews();
-
   const renderBrandLogo = (brandObj: any) => {
-    // A genuine uploaded logo always wins — never show a demo/prototype
-    // wordmark treatment (or literal logo text in a colored box) when a
-    // real logo image exists for this brand.
+    // A genuine uploaded logo always wins. When there isn't one, the ONLY
+    // acceptable fallback is a neutral initials mark — never a per-brand
+    // hardcoded wordmark/color keyed off the brand's NAME (that was
+    // prototype content masquerading as real branding for any real brand
+    // that happened to share a name substring with the old demo set).
     if (typeof brandObj.logo === "string" && /^(https?:|data:|\/)/.test(brandObj.logo)) {
       return (
         <img
@@ -1317,74 +1031,9 @@ export function BrandDetailPage() {
         />
       );
     }
-    const term = brandObj.name.toLowerCase();
-    if (term.includes("choosify")) {
-      return (
-        <img
-          src="https://res.cloudinary.com/djdyqr8yd/image/upload/v1782468737/717067140_122103081177325182_5170626542063953926_n_fiefp6.jpg"
-          className="w-full h-full object-cover"
-          alt="Choosify Brand"
-          referrerPolicy="no-referrer"
-        />
-      );
-    }
-    if (term.includes("fff")) {
-      return (
-        <div className="flex flex-col items-center justify-center h-full text-center bg-[#1E293B] w-full text-[#F1F5F9] px-2 py-3 select-none">
-          <span className="font-space tracking-wider text-[28px] font-black leading-none">
-            FFF
-          </span>
-          <span className="text-[6px] tracking-[0.2em] font-mono text-gray-400 font-bold uppercase mt-1.5">
-            SOURCING LTD
-          </span>
-        </div>
-      );
-    }
-    if (term.includes("sailor")) {
-      return (
-        <div className="flex flex-col items-center justify-center h-full text-center bg-[#17192C] w-full text-white px-2 py-3 select-none">
-          <span className="font-serif tracking-widest text-[24px] font-bold leading-none uppercase">
-            sailor
-          </span>
-          <span className="text-[6px] tracking-[0.25em] font-mono text-gray-400 font-bold uppercase mt-1.5">
-            by epyllion
-          </span>
-        </div>
-      );
-    }
-    if (term.includes("apex")) {
-      return (
-        <div className="flex items-center justify-center h-full text-center bg-[#EB1C24] w-full text-white font-black italic tracking-tighter text-3xl select-none">
-          apex
-        </div>
-      );
-    }
-    if (term.includes("bata")) {
-      return (
-        <div className="flex items-center justify-center h-full text-center bg-[#E60012] w-full text-white font-black text-4xl select-none">
-          Bata
-        </div>
-      );
-    }
-    if (term.includes("aarong")) {
-      return (
-        <div className="flex flex-col items-center justify-center h-full text-center bg-[#AC1F24] w-full text-white px-2 py-2 select-none">
-          <span className="font-serif tracking-widest text-[22px] font-extrabold leading-none uppercase">
-            aarong
-          </span>
-        </div>
-      );
-    }
-    if (term.includes("yellow")) {
-      return (
-        <div className="flex items-center justify-center h-full text-center bg-[#FFF100] w-full text-navy font-black text-3xl select-none">
-          YELLOW
-        </div>
-      );
-    }
     return (
-      <div className="w-full h-full bg-gradient-to-br from-navy to-[#2A2E6B] flex items-center justify-center text-4xl font-extrabold text-white">
-        {brandObj.logo || brandObj.name.substring(0, 2)}
+      <div className="w-full h-full bg-gradient-to-br from-[#1A1D4E] to-[#2A2E6B] flex items-center justify-center text-3xl font-extrabold text-white">
+        {brandInitials(brandObj.name)}
       </div>
     );
   };
@@ -1722,47 +1371,37 @@ export function BrandDetailPage() {
               </div>
             )}
 
-            {/* B. DEALS + COUPONS — always merged carousel (deals + coupon tiles) */}
-            <StudioWrap sectionId="brand-deals" className="scroll-mt-36">
-              <div className="flex items-baseline justify-between gap-3 mb-1 text-left">
-                <h2 className="text-[15px] font-extrabold text-[#1A1A2E] tracking-tight m-0">
-                  TOP DEALS & COUPONS ON {brand.name.toUpperCase()}
-                </h2>
-                <Link
-                  to="/deals"
-                  className="text-[12px] font-bold text-[#1A1A2E] no-underline hover:text-[#EF3C23] shrink-0"
-                >
-                  VIEW ALL DEALS ›
-                </Link>
-              </div>
-              <p className="text-[11.5px] text-[#9AA0AC] m-0 mb-3.5">
-                Limited-time offers on {brand.name} products
-              </p>
+            {/* B. DEALS — real deals only. No coupon model exists for brands
+                yet (no fabricated coupon tiles), and the whole section is
+                hidden rather than shown empty when there are no real deals. */}
+            {dealsCouponsCarouselItems.length > 0 && (
+              <StudioWrap sectionId="brand-deals" className="scroll-mt-36">
+                <div className="flex items-baseline justify-between gap-3 mb-1 text-left">
+                  <h2 className="text-[15px] font-extrabold text-[#1A1A2E] tracking-tight m-0">
+                    TOP DEALS ON {brand.name.toUpperCase()}
+                  </h2>
+                  <Link
+                    to="/deals"
+                    className="text-[12px] font-bold text-[#1A1A2E] no-underline hover:text-[#EF3C23] shrink-0"
+                  >
+                    VIEW ALL DEALS ›
+                  </Link>
+                </div>
+                <p className="text-[11.5px] text-[#9AA0AC] m-0 mb-3.5">
+                  Limited-time offers on {brand.name} products
+                </p>
 
-              {dealsCouponsCarouselItems.length > 0 ? (
                 <UniversalCarousel
                   items={dealsCouponsCarouselItems}
-                  getKey={(entry, i) =>
-                    entry.kind === "deal" ? String(entry.product.id ?? i) : entry.coupon.code
-                  }
+                  getKey={(entry, i) => String(entry.product.id ?? i)}
                   itemWidth={220}
                   gap={14}
                   className="pr-1"
                   autoPlay
-                  renderItem={(entry) =>
-                    entry.kind === "deal" ? (
-                      <ProductCard product={entry.product} variant="grid" />
-                    ) : (
-                      <BrandCouponCarouselCard coupon={entry.coupon} />
-                    )
-                  }
+                  renderItem={(entry) => <ProductCard product={entry.product} variant="grid" />}
                 />
-              ) : (
-                <div className="p-8 text-center bg-white border border-[#E8EDF2] rounded-xl text-gray-400 text-xs font-bold">
-                  No deals or coupons available for {brand.name} yet.
-                </div>
-              )}
-            </StudioWrap>
+              </StudioWrap>
+            )}
 
             {/* A. PRODUCTS SECTION — always rendered; grid when catalog matches */}
             <StudioWrap sectionId="brand-catalog" className="scroll-mt-36">

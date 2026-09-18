@@ -19,30 +19,15 @@ type ServiceRow = {
   hours: string;
 };
 
-function buildWhereToBuy(brandName: string) {
-  const n = brandName;
-  return {
-    stores: [
-      { name: `${n} Store Gulshan`, location: 'Gulshan-2, Dhaka', status: 'Open Now' },
-      { name: `${n} Store Bashundhara`, location: 'Bashundhara City, Dhaka', status: 'Open Now' },
-      { name: `${n} Store Chattogram`, location: 'GEC Circle, Chattogram', status: 'Open Now' },
-      { name: `${n} Store Sylhet`, location: 'Zindabazar, Sylhet', status: 'Closed' },
-    ] as StoreRow[],
-    distributors: [
-      { name: 'Ryans Computers', type: 'Authorized Distributor', region: 'Nationwide' },
-      { name: 'Star Tech & Engineering', type: 'Authorized Reseller', region: 'Nationwide' },
-      { name: 'Pickaboo', type: 'Online Reseller', region: 'Nationwide' },
-      { name: 'Global Brand Pvt. Ltd.', type: 'Authorized Distributor', region: 'Dhaka & Chattogram' },
-    ] as DistributorRow[],
-    services: [
-      { name: `${n} Care Dhaka`, location: 'Banani, Dhaka', hours: '10AM–8PM' },
-      { name: `${n} Care Chattogram`, location: 'Agrabad, Chattogram', hours: '10AM–7PM' },
-      { name: `${n} Care Sylhet`, location: 'Zindabazar, Sylhet', hours: '10AM–7PM' },
-      { name: `${n} Care Khulna`, location: 'Shib Bari, Khulna', hours: '10AM–6PM' },
-    ] as ServiceRow[],
-  };
-}
-
+/**
+ * Real seller-entered stores/distributors/service-centers only (brand.stores
+ * via Brand Studio) — no hardcoded store names, and no real-world third-party
+ * company names (the old fallback literally listed "Ryans Computers", "Star
+ * Tech & Engineering", etc. as if they distributed for every brand). Whole
+ * section is hidden when the seller hasn't entered anything in any of the
+ * three categories; an individual category with no entries renders nothing
+ * for that category rather than falling back to mock rows.
+ */
 export function BrandWhereToBuySection({
   brandName,
   stores: catalogStores,
@@ -50,21 +35,12 @@ export function BrandWhereToBuySection({
   brandName: string;
   stores?: CatalogBrandStores;
 }) {
-  const hasRealData =
-    (catalogStores?.authorized?.length ?? 0) > 0 ||
-    (catalogStores?.distributors?.length ?? 0) > 0 ||
-    (catalogStores?.serviceCenters?.length ?? 0) > 0;
+  const stores: StoreRow[] = (catalogStores?.authorized ?? []).map((s) => ({ name: s.name, location: s.sub || '' }));
+  const distributors: DistributorRow[] = (catalogStores?.distributors ?? []).map((s) => ({ name: s.name, type: '', region: s.sub || '' }));
+  const services: ServiceRow[] = (catalogStores?.serviceCenters ?? []).map((s) => ({ name: s.name, location: s.sub || '', hours: s.hours || '' }));
 
-  const fallback = buildWhereToBuy(brandName);
-  const stores: StoreRow[] = hasRealData
-    ? (catalogStores?.authorized ?? []).map((s) => ({ name: s.name, location: s.sub || '' }))
-    : fallback.stores;
-  const distributors: DistributorRow[] = hasRealData
-    ? (catalogStores?.distributors ?? []).map((s) => ({ name: s.name, type: '', region: s.sub || '' }))
-    : fallback.distributors;
-  const services: ServiceRow[] = hasRealData
-    ? (catalogStores?.serviceCenters ?? []).map((s) => ({ name: s.name, location: s.sub || '', hours: s.hours || '' }))
-    : fallback.services;
+  const hasAnyData = stores.length > 0 || distributors.length > 0 || services.length > 0;
+  if (!hasAnyData) return null;
 
   return (
     <div id="store-location-section" className="scroll-mt-36 w-full">
@@ -72,6 +48,7 @@ export function BrandWhereToBuySection({
         WHERE TO BUY {brandName.toUpperCase()}
       </h3>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
+        {stores.length > 0 && (
         <div className="bg-white border border-[#E8EDF2] rounded-[10px] overflow-hidden">
           <div className="text-[11px] font-extrabold text-white choosify-dark-surface px-2.5 py-1.5">
             AUTHORIZED STORES
@@ -107,7 +84,9 @@ export function BrandWhereToBuySection({
           ))}
           </div>
         </div>
+        )}
 
+        {distributors.length > 0 && (
         <div className="bg-white border border-[#E8EDF2] rounded-[10px] overflow-hidden">
           <div className="text-[11px] font-extrabold text-white choosify-dark-surface px-2.5 py-1.5">
             DISTRIBUTORS & RESELLERS
@@ -134,7 +113,9 @@ export function BrandWhereToBuySection({
           ))}
           </div>
         </div>
+        )}
 
+        {services.length > 0 && (
         <div className="bg-white border border-[#E8EDF2] rounded-[10px] overflow-hidden">
           <div className="text-[11px] font-extrabold text-white choosify-dark-surface px-2.5 py-1.5">
             SERVICE CENTERS
@@ -156,6 +137,7 @@ export function BrandWhereToBuySection({
           ))}
           </div>
         </div>
+        )}
       </div>
     </div>
   );

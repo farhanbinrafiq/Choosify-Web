@@ -32,7 +32,7 @@ export interface BrandLogoProps {
   /** px size of the square avatar box */
   size?: number;
   shape?: 'circle' | 'rounded';
-  /** thin outer white ring + soft shadow */
+  /** soft drop shadow for separation from a colored/gradient header (no border stroke) */
   ring?: boolean;
   className?: string;
 }
@@ -57,7 +57,7 @@ export function BrandLogo({
       className={cn(
         'relative inline-flex items-center justify-center overflow-hidden bg-white shrink-0 select-none',
         shape === 'circle' ? 'rounded-full' : 'rounded-xl',
-        ring && 'border-[3px] border-white shadow-[0_6px_18px_rgba(0,0,0,0.18)]',
+        ring && 'shadow-[0_4px_10px_rgba(0,0,0,0.14)]',
         className,
       )}
       style={{ width: size, height: size }}
