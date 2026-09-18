@@ -2,7 +2,7 @@
  * Product / Service detail hero — thin adapter over shared `DetailSliverMediaGallery`
  * (slide animation, mobile peeks, fullscreen viewer, autoplay).
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { DetailSliverMediaGallery } from './commerce/DetailSliverMediaGallery';
 import { buildProductGalleryItems } from './media/choosifyMediaAdapters';
 
@@ -44,12 +44,34 @@ export function ProductMediaGallery({
 }: ProductMediaGalleryProps) {
   const vImgs = showVariantGallery ? (variantImages ?? []).filter(Boolean) : [];
   const fallbackGallery = (allListingImages ?? []).filter(Boolean);
-  const items = buildProductGalleryItems(
-    vImgs.length
-      ? { ...product, image: vImgs[0], gallery: vImgs }
-      : fallbackGallery.length
-        ? { ...product, image: fallbackGallery[0], gallery: fallbackGallery }
-        : { ...product, image: selectedVariantImage || product.image },
+  // `buildProductGalleryItems` mints a fresh counter-based `id` for every
+  // item on every call — memoized here on the actual URLs/videoUrl so an
+  // unrelated parent re-render (variant pricing, tabs, anything upstream)
+  // doesn't hand the gallery a brand-new `items` array with all-new ids.
+  // Without this, `DetailSliverMediaGallery`'s slide/peek elements (keyed
+  // partly by `item.id`) would remount on every such re-render — tearing
+  // down and rebuilding the actual <img>/<video>/<iframe> mid-session,
+  // which can visibly interrupt an in-progress Facebook/video embed load.
+  const galleryDepsKey = JSON.stringify({
+    vImgs,
+    fallbackGallery,
+    selectedVariantImage: selectedVariantImage || '',
+    image: product.image || '',
+    videoUrl: product.videoUrl || '',
+    title: product.title || '',
+    category: product.category || '',
+  });
+  const items = useMemo(
+    () =>
+      buildProductGalleryItems(
+        vImgs.length
+          ? { ...product, image: vImgs[0], gallery: vImgs }
+          : fallbackGallery.length
+            ? { ...product, image: fallbackGallery[0], gallery: fallbackGallery }
+            : { ...product, image: selectedVariantImage || product.image },
+      ),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [galleryDepsKey],
   );
 
   return (

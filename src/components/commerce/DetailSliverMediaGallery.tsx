@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, Radio, Clock, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { cn } from '../../lib/utils';
 import type { CommerceMediaItem } from './commerceMediaTypes';
-import { isVideoKind } from '../media/choosifyMediaTypes';
+import { isVideoKind, resolveItemAspectRatio } from '../media/choosifyMediaTypes';
 
 export interface DetailSliverLiveBadge {
   label: string;
@@ -226,6 +226,73 @@ export interface DetailSliverMediaGalleryProps {
   autoplayIntervalMs?: number;
 }
 
+/**
+ * Explicit "contain within a width/height budget" fit — deliberately NOT
+ * delegated to CSS `aspect-ratio` + `max-width`/`max-height` + auto/auto.
+ * That CSS-only approach was tried and, per real browser QA, produced wrong
+ * results on the active stage box: its only in-flow-eligible content is an
+ * absolutely-positioned `motion.button` (taken out of flow entirely), so
+ * the box has nothing concrete to size a "shrink-to-fit" width from, and
+ * the browser's actual resolution of the dual max-constraint didn't match
+ * the replaced-element "contain" behavior the CSS technique assumes.
+ * Computing the final pixel box in JS removes that ambiguity: for landscape
+ * content (ratio > 1) width is the driving constraint (use the full width
+ * budget, derive height, only fall back to the height budget if that
+ * derived height would overflow it); for portrait content the same
+ * arithmetic naturally makes height the driving constraint instead — no
+ * per-orientation branching needed, it falls out of the width-first-then-
+ * clamp order.
+ */
+function containFit(ratio: number, maxWidth: number, maxHeight: number): { width: number; height: number } {
+  const safeRatio = ratio > 0 ? ratio : 16 / 9;
+  let width = maxWidth;
+  let height = width / safeRatio;
+  if (height > maxHeight) {
+    height = maxHeight;
+    width = height * safeRatio;
+  }
+  return { width: Math.round(width), height: Math.round(height) };
+}
+
+/**
+ * Carousel row sizing: EVERY slide (center and peeks alike) shares one
+ * height budget per its role/breakpoint; width is always DERIVED from that
+ * item's own real ratio (`height * ratio`) — never the other way around.
+ * This is what keeps the coverflow track's shape (arrows, dot position,
+ * peek visibility) stable while a landscape/portrait/square item still
+ * renders at its own true shape: the carousel only ever picks a HEIGHT for
+ * a role, it never forces a WIDTH that would make an item's box disagree
+ * with its actual content ratio. `maxWidth` is a rarely-binding safety cap
+ * only, for pathologically wide ratios that would otherwise blow out the
+ * row on narrow viewports.
+ */
+function ratioBoxSize(ratio: number, height: number, maxWidth: number): { width: number; height: number } {
+  const safeRatio = ratio > 0 ? ratio : 16 / 9;
+  let width = height * safeRatio;
+  let h = height;
+  if (width > maxWidth) {
+    width = maxWidth;
+    h = width / safeRatio;
+  }
+  return { width: Math.round(width), height: Math.round(h) };
+}
+
+/** Mirrors the center stage's former fixed max-width Tailwind classes (`min(Xvw, Ypx)` per breakpoint). */
+function stageWidthBudget(viewportWidth: number): number {
+  if (viewportWidth >= 1024) return Math.min(viewportWidth * 0.46, 860);
+  if (viewportWidth >= 768) return Math.min(viewportWidth * 0.48, 780);
+  if (viewportWidth >= 640) return Math.min(viewportWidth * 0.5, 720);
+  return Math.min(viewportWidth * 0.78, 480);
+}
+
+/** Mirrors the center stage's former fixed max-height Tailwind classes — the viewport-height safety cap. */
+function stageHeightBudget(viewportWidth: number): number {
+  if (viewportWidth >= 1024) return 580;
+  if (viewportWidth >= 768) return 460;
+  if (viewportWidth >= 640) return 360;
+  return 280;
+}
+
 function slideAt(items: CommerceMediaItem[], index: number, offset: number): CommerceMediaItem | null {
   if (!items.length) return null;
   const n = items.length;
@@ -236,13 +303,24 @@ function SliverMedia({
   item,
   className,
   playSize = 56,
+  fit = 'cover',
+  onMeasured,
 }: {
   item: CommerceMediaItem;
   className?: string;
   playSize?: number;
+  /** 'contain' when the parent box already matches this item's real aspect
+   *  ratio (the active slide) — cropping isn't needed there. Peeks keep the
+   *  default 'cover' since their box shape is independent of real content. */
+  fit?: 'cover' | 'contain';
+  /** Real pixel dimensions once the browser can report them (image `onLoad`
+   *  / video `onLoadedMetadata`) — only wired for the active slide; peeks
+   *  don't measure. */
+  onMeasured?: (width: number, height: number) => void;
 }) {
   const video = isVideoKind(item.kind);
   const src = item.posterUrl ?? item.url;
+  const fitClass = fit === 'contain' ? 'object-contain' : 'object-cover';
   // A real, directly-playable video file (uploaded /media clip or external .mp4/.webm)
   // — render it as a native <video>, not a broken <img src="…​.mp4">.
   const isPlayableVideoFile =
@@ -256,13 +334,26 @@ function SliverMedia({
           poster={item.posterUrl || undefined}
           controls
           playsInline
-          preload="none"
-          className="w-full h-full object-cover bg-black"
+          // Metadata-only fetch (a small byte-range request, not the whole
+          // file) is required to read real videoWidth/videoHeight — only
+          // requested when a caller actually wants to measure (the active
+          // slide); peeks keep the original 'none' (no extra network cost
+          // for previews that may never be viewed).
+          preload={onMeasured ? 'metadata' : 'none'}
+          className={cn('w-full h-full bg-black', fitClass)}
           onClick={(e) => e.stopPropagation()}
+          onLoadedMetadata={
+            onMeasured
+              ? (e) => {
+                  const v = e.currentTarget;
+                  if (v.videoWidth > 0 && v.videoHeight > 0) onMeasured(v.videoWidth, v.videoHeight);
+                }
+              : undefined
+          }
         />
       ) : video && item.kind !== 'live' ? (
         <>
-          <img src={src} alt={item.alt ?? ''} className="w-full h-full object-cover" loading="lazy" />
+          <img src={src} alt={item.alt ?? ''} className={cn('w-full h-full', fitClass)} loading="lazy" />
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <div
               className="rounded-full bg-[#FF000D] flex items-center justify-center"
@@ -283,11 +374,34 @@ function SliverMedia({
         <iframe
           src={item.embedUrl}
           title={item.alt ?? 'Live'}
+          // Explicit width/height attributes (not just CSS) — some provider
+          // embeds (notably Facebook's plugins/video.php, which we call
+          // without a `width=` query param per `videoEmbed.ts`) read the
+          // iframe's own HTML sizing attributes for their internal
+          // responsive layout, not only the CSS box. This is a same-origin,
+          // Choosify-controlled change; it cannot be verified against the
+          // provider's actual cross-origin internal layout without a real
+          // browser (see the report's disclosed limitation).
+          width="100%"
+          height="100%"
           className="w-full h-full border-0"
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         />
       ) : (
-        <img src={src} alt={item.alt ?? ''} className="w-full h-full object-cover" loading="lazy" />
+        <img
+          src={src}
+          alt={item.alt ?? ''}
+          className={cn('w-full h-full', fitClass)}
+          loading="lazy"
+          onLoad={
+            onMeasured
+              ? (e) => {
+                  const img = e.currentTarget;
+                  if (img.naturalWidth > 0 && img.naturalHeight > 0) onMeasured(img.naturalWidth, img.naturalHeight);
+                }
+              : undefined
+          }
+        />
       )}
     </div>
   );
@@ -319,27 +433,39 @@ function rightPeekSlots(count: number): PeekSlot[] {
   return slots;
 }
 
-const PEEK_HEIGHT: Record<PeekSlot['size'], string> = {
-  near: 'h-[220px] sm:h-[300px] md:h-[380px] lg:h-[510px]',
-  mid: 'h-[200px] sm:h-[270px] md:h-[340px] lg:h-[430px]',
-  far: 'h-[180px] sm:h-[240px] md:h-[300px] lg:h-[460px]',
+/**
+ * Every slide — center AND peeks — is sized the SAME way: a shared height
+ * budget (per slot/breakpoint) with WIDTH derived from that item's own real
+ * aspect ratio (`ratioBoxSize`, defined below `containFit`). The carousel
+ * only scales/positions cards via this height budget and peek opacity; it
+ * never forces an item into a fixed box shape or crops it. A peek being
+ * partially visible at the row's edge is the CAROUSEL VIEWPORT clipping the
+ * card (natural `overflow-hidden` on the side strip) — never the card
+ * itself cropping its own media.
+ */
+const PEEK_HEIGHT_PX: Record<PeekSlot['size'], [number, number, number, number]> = {
+  near: [220, 300, 380, 510],
+  mid: [200, 270, 340, 430],
+  far: [180, 240, 300, 460],
 };
+
+function peekHeightBudget(size: PeekSlot['size'], viewportWidth: number): number {
+  const [base, sm, md, lg] = PEEK_HEIGHT_PX[size];
+  if (viewportWidth >= 1024) return lg;
+  if (viewportWidth >= 768) return md;
+  if (viewportWidth >= 640) return sm;
+  return base;
+}
+
+/** Safety cap only — prevents one extreme-ratio peek from unbalancing the row; rarely binds. */
+function peekWidthCap(size: PeekSlot['size'], viewportWidth: number): number {
+  return Math.min(peekHeightBudget(size, viewportWidth) * 2.4, viewportWidth * 0.55);
+}
 
 const PEEK_OPACITY: Record<PeekSlot['size'], string> = {
   near: 'opacity-85 hover:opacity-95',
   mid: 'opacity-45 hover:opacity-60',
   far: 'opacity-40 hover:opacity-55',
-};
-
-/**
- * Peek flex ratios. On mobile the centre stage now takes ~78vw, so the single
- * side peek per side is a controlled sliver — no mobile min-width (that used to
- * force ~88px slivers and squeeze the hero). Desktop strip sizing unchanged.
- */
-const PEEK_FLEX: Record<PeekSlot['size'], string> = {
-  near: 'flex-[2_1_0%] sm:flex-[1.4_1_0%] min-w-0',
-  mid: 'flex-[1_1_0%] min-w-0',
-  far: 'flex-[0.75_1_0%]',
 };
 
 /**
@@ -365,6 +491,21 @@ export function DetailSliverMediaGallery({
   const [zoomOpen, setZoomOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
   const [autoplayPaused, setAutoplayPaused] = useState(false);
+  // Real pixel dimensions measured client-side (image `onLoad` / video
+  // `onLoadedMetadata`) for the ACTIVE slide only, keyed by item id/url so
+  // re-visiting an already-measured item doesn't need to re-measure. This
+  // is the real-dimensions tier `resolveItemAspectCss` prefers over any
+  // stored/preset aspect hint.
+  const [measuredByKey, setMeasuredByKey] = useState<Record<string, { width: number; height: number }>>({});
+  // Real available width/height budget for the active stage box, recomputed
+  // on resize — feeds `containFit` so the box is sized in JS, not left to
+  // CSS `aspect-ratio` auto-resolution (see `containFit`'s comment).
+  const [viewportWidth, setViewportWidth] = useState(() =>
+    typeof window !== 'undefined' ? window.innerWidth : 1280,
+  );
+  const [viewportHeight, setViewportHeight] = useState(() =>
+    typeof window !== 'undefined' ? window.innerHeight : 800,
+  );
   const total = safeItems.length;
   const activeIndexRef = useRef(activeIndex);
   activeIndexRef.current = activeIndex;
@@ -400,6 +541,15 @@ export function DetailSliverMediaGallery({
     sync();
     mq.addEventListener('change', sync);
     return () => mq.removeEventListener('change', sync);
+  }, []);
+
+  useEffect(() => {
+    const onResize = () => {
+      setViewportWidth(window.innerWidth);
+      setViewportHeight(window.innerHeight);
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
   }, []);
 
   useEffect(() => () => clearResumeTimer(), [clearResumeTimer]);
@@ -677,7 +827,67 @@ export function DetailSliverMediaGallery({
   if (!safeItems.length) return null;
 
   const current = slideAt(safeItems, activeIndex, 0)!;
-  const slideKey = current.id ?? current.url ?? String(activeIndex);
+  const slideKey = current.url || current.id || String(activeIndex);
+  // The active stage's ratio is decided by ONE function,
+  // `resolveItemAspectRatio` — real measured pixel dimensions (once an
+  // image finishes loading, or a video's metadata arrives) always win over
+  // any stored/provider-based preset. This applies to EVERY item, photo or
+  // video — an item can be exactly 1:1, 4:5, or any other real ratio, not
+  // just a landscape/portrait binary. Peek slides are unaffected — only the
+  // active slide's own box derives from this.
+  //
+  // Keyed by URL first (stable across re-renders even if an upstream
+  // `useMemo` ever regenerates item ids) so a re-visited item's measurement
+  // is never silently dropped/mismatched.
+  const activeKey = current.url || current.id || String(activeIndex);
+  const activeMeasured = measuredByKey[activeKey] ?? null;
+  const activeRatio = resolveItemAspectRatio(current, activeMeasured);
+  // Shared-height, ratio-derived-width (see `ratioBoxSize`) — the carousel
+  // picks the HEIGHT for the center role; the active item's own real ratio
+  // decides the width. Never the reverse (no fixed width forcing a ratio).
+  const stageBudgetWidth = stageWidthBudget(viewportWidth);
+  const stageBudgetHeight = stageHeightBudget(viewportWidth);
+  const activeStageSize = ratioBoxSize(activeRatio, stageBudgetHeight, stageBudgetWidth);
+  // Fullscreen viewer bounds: the OVERLAY stays full-viewport (that's correct
+  // and unchanged), but the MEDIA WRAPPER inside it must be the fitted
+  // rectangle for the active item's real ratio — not a fixed `86vw × 84vh`
+  // box that leaves the actual (contain-fitted) media smaller than its own
+  // wrapper. Fullscreen has no shared-height sibling to stay consistent
+  // with, so it uses `containFit` (largest rectangle within the viewport
+  // bounds) rather than `ratioBoxSize`.
+  const zoomBoundsWidth = Math.min(viewportWidth * 0.94, 1400);
+  const zoomBoundsHeight = viewportHeight * 0.88;
+  const zoomMediaSize = containFit(activeRatio, zoomBoundsWidth, zoomBoundsHeight);
+  const handleActiveMeasured = useCallback(
+    (width: number, height: number) => {
+      setMeasuredByKey((prev) => {
+        const existing = prev[activeKey];
+        if (existing && existing.width === width && existing.height === height) return prev;
+        return { ...prev, [activeKey]: { width, height } };
+      });
+    },
+    [activeKey],
+  );
+  // Peeks report their own real dimensions too, each keyed by ITS OWN item
+  // key — never a single shared/global measurement slot — so the same
+  // item keeps its own real ratio whether it's currently center or peek,
+  // and a re-visited item doesn't need to re-measure.
+  const makePeekMeasuredHandler = useCallback((key: string) => {
+    return (width: number, height: number) => {
+      setMeasuredByKey((prev) => {
+        const existing = prev[key];
+        if (existing && existing.width === width && existing.height === height) return prev;
+        return { ...prev, [key]: { width, height } };
+      });
+    };
+  }, []);
+  const peekKeyFor = (item: CommerceMediaItem) => item.url || item.id || '';
+  const peekSizeFor = (item: CommerceMediaItem, slot: PeekSlot) => {
+    const key = peekKeyFor(item);
+    const measured = measuredByKey[key] ?? null;
+    const ratio = resolveItemAspectRatio(item, measured);
+    return ratioBoxSize(ratio, peekHeightBudget(slot.size, viewportWidth), peekWidthCap(slot.size, viewportWidth));
+  };
 
   return (
     <section
@@ -707,29 +917,34 @@ export function DetailSliverMediaGallery({
             {leftSlots.map((slot) => {
               const item = slideAt(safeItems, activeIndex, slot.offset);
               if (!item) return null;
+              const peekSize = peekSizeFor(item, slot);
               return (
                 <button
                   key={`L${slot.offset}`}
                   type="button"
                   onClick={withSwipeClickGuard(goPrev)}
                   className={cn(
-                    'relative min-w-0 overflow-hidden cursor-pointer border-0 p-0 bg-transparent rounded-xl',
-                    PEEK_FLEX[slot.size],
-                    PEEK_HEIGHT[slot.size],
+                    'relative shrink-0 overflow-hidden cursor-pointer border-0 p-0 bg-transparent rounded-xl',
                     PEEK_OPACITY[slot.size],
                   )}
+                  style={{ width: peekSize.width, height: peekSize.height }}
                   aria-label="Previous media"
                 >
                   <AnimatePresence mode="popLayout" initial={false}>
                     <motion.div
-                      key={`${activeIndex}:${item.id ?? item.url}:${slot.offset}`}
+                      key={`${activeIndex}:${peekKeyFor(item)}:${slot.offset}`}
                       className="absolute inset-0"
                       initial={{ opacity: 0.55, x: direction >= 0 ? 12 : -12 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0.35, x: direction >= 0 ? -12 : 12 }}
                       transition={SLIDE_TRANSITION}
                     >
-                      <SliverMedia item={item} playSize={slot.size === 'near' ? 36 : 28} />
+                      <SliverMedia
+                        item={item}
+                        playSize={slot.size === 'near' ? 36 : 28}
+                        fit="contain"
+                        onMeasured={makePeekMeasuredHandler(peekKeyFor(item))}
+                      />
                     </motion.div>
                   </AnimatePresence>
                 </button>
@@ -738,15 +953,19 @@ export function DetailSliverMediaGallery({
           </div>
         ) : null}
 
+        {/*
+          Center slide: same model as a peek (`ratioBoxSize`) — a shared
+          HEIGHT budget for the center role, WIDTH derived from the active
+          item's own real ratio. Carousel role picks the height; content
+          picks the width. No separate "stable stage" box around this one —
+          every slide in the row (peeks included) already sizes itself the
+          same way, so the row's shape follows real content consistently
+          instead of one item being boxed differently from its neighbors.
+        */}
         <div
           ref={centerStageRef}
-          className={cn(
-            'relative overflow-hidden shrink-0 rounded-2xl md:rounded-none',
-            // Mobile: hero takes ~78% of the row so the hierarchy reads
-            // sliver | LARGE ACTIVE | sliver. Tablet/desktop widths unchanged.
-            'w-[min(78vw,30rem)] sm:w-[min(50vw,720px)] md:w-[min(48vw,780px)] lg:w-[min(46vw,860px)]',
-            'h-[280px] sm:h-[360px] md:h-[460px] lg:h-[580px]',
-          )}
+          className="relative shrink-0 overflow-hidden rounded-2xl md:rounded-none"
+          style={{ width: activeStageSize.width, height: activeStageSize.height }}
         >
           <AnimatePresence initial={false} custom={direction} mode="popLayout">
             <motion.button
@@ -762,7 +981,7 @@ export function DetailSliverMediaGallery({
               className="absolute inset-0 block w-full h-full border-0 p-0 bg-transparent cursor-zoom-in"
               aria-label="View media fullscreen"
             >
-              <SliverMedia item={current} playSize={48} />
+              <SliverMedia item={current} playSize={48} fit="contain" onMeasured={handleActiveMeasured} />
             </motion.button>
           </AnimatePresence>
           <button
@@ -810,29 +1029,34 @@ export function DetailSliverMediaGallery({
             {rightSlots.map((slot) => {
               const item = slideAt(safeItems, activeIndex, slot.offset);
               if (!item) return null;
+              const peekSize = peekSizeFor(item, slot);
               return (
                 <button
                   key={`R${slot.offset}`}
                   type="button"
                   onClick={withSwipeClickGuard(goNext)}
                   className={cn(
-                    'relative min-w-0 overflow-hidden cursor-pointer border-0 p-0 bg-transparent rounded-xl',
-                    PEEK_FLEX[slot.size],
-                    PEEK_HEIGHT[slot.size],
+                    'relative shrink-0 overflow-hidden cursor-pointer border-0 p-0 bg-transparent rounded-xl',
                     PEEK_OPACITY[slot.size],
                   )}
+                  style={{ width: peekSize.width, height: peekSize.height }}
                   aria-label="Next media"
                 >
                   <AnimatePresence mode="popLayout" initial={false}>
                     <motion.div
-                      key={`${activeIndex}:${item.id ?? item.url}:${slot.offset}`}
+                      key={`${activeIndex}:${peekKeyFor(item)}:${slot.offset}`}
                       className="absolute inset-0"
                       initial={{ opacity: 0.55, x: direction >= 0 ? 12 : -12 }}
                       animate={{ opacity: 1, x: 0 }}
                       exit={{ opacity: 0.35, x: direction >= 0 ? -12 : 12 }}
                       transition={SLIDE_TRANSITION}
                     >
-                      <SliverMedia item={item} playSize={slot.size === 'near' ? 40 : 28} />
+                      <SliverMedia
+                        item={item}
+                        playSize={slot.size === 'near' ? 40 : 28}
+                        fit="contain"
+                        onMeasured={makePeekMeasuredHandler(peekKeyFor(item))}
+                      />
                     </motion.div>
                   </AnimatePresence>
                 </button>
@@ -916,7 +1140,7 @@ export function DetailSliverMediaGallery({
           aria-label="Zoomed media"
         >
           <div
-            className="w-full h-full sm:w-[86vw] sm:h-[84vh] sm:max-w-[960px]"
+            style={{ width: zoomMediaSize.width, height: zoomMediaSize.height }}
             onClick={(e) => e.stopPropagation()}
           >
             {isVideoKind(current.kind) ? (
@@ -928,7 +1152,7 @@ export function DetailSliverMediaGallery({
                 }}
                 onPointerUp={onZoomSwipeUp}
               >
-                <SliverMedia item={current} playSize={64} />
+                <SliverMedia item={current} playSize={64} fit="contain" onMeasured={handleActiveMeasured} />
               </div>
             ) : (
               <PinchZoomImage
