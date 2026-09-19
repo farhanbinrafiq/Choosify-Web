@@ -149,7 +149,7 @@ export const SpotlightCard = memo(function SpotlightCard({
         id={`spotlight-featured-${finalId}`}
         onClick={handlePress}
         className={cn(
-          "bg-white rounded-[24px] overflow-hidden border border-gray-100 shadow-[0_8px_30px_rgb(0,0,0,0.02)] hover:shadow-[0_12px_40px_rgb(0,0,0,0.06)] transition-all duration-300 cursor-pointer group flex flex-col md:flex-row w-full text-left min-h-[320px]",
+          "bg-white rounded-[24px] overflow-hidden border border-gray-100 hover:shadow-sm transition-all duration-300 cursor-pointer group flex flex-col md:flex-row w-full text-left min-h-[320px]",
           className
         )}
       >
@@ -232,7 +232,7 @@ export const SpotlightCard = memo(function SpotlightCard({
         id={`spotlight-standard-${finalId}`}
         onClick={handlePress}
         className={cn(
-          "bg-white rounded-[24px] overflow-hidden border border-[#EEF2F7] shadow-[0_4px_20px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.05)] transition-all duration-300 cursor-pointer group flex flex-col justify-between text-left h-full",
+          "bg-white rounded-[24px] overflow-hidden border border-[#EEF2F7] hover:shadow-sm transition-all duration-300 cursor-pointer group flex flex-col justify-between text-left h-full",
           className
         )}
       >
@@ -300,7 +300,7 @@ export const SpotlightCard = memo(function SpotlightCard({
         id={`spotlight-video-${finalId}`}
         onClick={handlePress}
         className={cn(
-          "bg-white rounded-[24px] overflow-hidden border border-[#EEF2F7] shadow-[0_4px_20px_rgb(0,0,0,0.02)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.05)] transition-all duration-300 cursor-pointer group flex flex-col text-left h-full",
+          "bg-white rounded-[24px] overflow-hidden border border-[#EEF2F7] hover:shadow-sm transition-all duration-300 cursor-pointer group flex flex-col text-left h-full",
           className
         )}
       >
@@ -367,7 +367,7 @@ export const SpotlightCard = memo(function SpotlightCard({
         id={`spotlight-reel-${finalId}`}
         onClick={handlePress}
         className={cn(
-          "relative min-w-[200px] aspect-[9/16] rounded-[24px] overflow-hidden cursor-pointer group shadow-lg border border-transparent transition-all duration-300 h-[360px] shrink-0 snap-start",
+          "relative min-w-[200px] aspect-[9/16] rounded-[24px] overflow-hidden cursor-pointer group border border-transparent transition-all duration-300 h-[360px] shrink-0 snap-start",
           className
         )}
       >
@@ -429,7 +429,7 @@ export const SpotlightCard = memo(function SpotlightCard({
         id={`spotlight-campaign-${finalId}`}
         onClick={handlePress}
         className={cn(
-          "bg-gradient-to-br from-[#FFF5F0] to-[#FFF0EB] rounded-[24px] p-6 border border-orange-100 shadow-[0_4px_20px_rgba(255, 91, 0,0.02)] hover:shadow-[0_8px_30px_rgba(255, 91, 0,0.06)] transition-all duration-300 flex flex-col justify-between text-left h-full cursor-pointer group relative overflow-hidden",
+          "bg-gradient-to-br from-[#FFF5F0] to-[#FFF0EB] rounded-[24px] p-6 border border-orange-100 hover:shadow-sm transition-all duration-300 flex flex-col justify-between text-left h-full cursor-pointer group relative overflow-hidden",
           className
         )}
       >
@@ -500,7 +500,7 @@ export const SpotlightCard = memo(function SpotlightCard({
         id={`spotlight-collection-${finalId}`}
         onClick={handlePress}
         className={cn(
-          "bg-white rounded-[24px] border border-[#EEF2F7] overflow-hidden group hover:shadow-xl transition-all h-full flex flex-col relative text-left cursor-pointer",
+          "bg-white rounded-[24px] border border-[#EEF2F7] overflow-hidden group hover:shadow-sm transition-all h-full flex flex-col relative text-left cursor-pointer",
           className
         )}
       >

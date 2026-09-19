@@ -34,7 +34,7 @@ export const ComparisonGuideCard: React.FC<ComparisonGuideCardProps> = ({
   className
 }) => {
   return (
-    <div className={cn("bg-white rounded-[32px] overflow-hidden border border-slate-100 shadow-sm", className)}>
+    <div className={cn("bg-white rounded-[32px] overflow-hidden border border-slate-100", className)}>
       <div className="grid grid-cols-1 md:grid-cols-2 divide-y md:divide-y-0 md:divide-x divide-slate-100 bg-[#F8F9FC]">
         {[productA, productB].map((product, idx) => (
           <div key={idx} className="p-8 flex flex-col items-center text-center relative group">

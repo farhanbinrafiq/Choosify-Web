@@ -2,11 +2,6 @@ import React, { useEffect, useRef } from 'react';
 import { cn } from '../lib/utils';
 import { useDragScroll } from './FilterEngine';
 import type { SectionNavItem } from '../hooks/useSectionScrollSpy';
-import {
-  MobileVerticalNavDock,
-  MobileDockStickySentinel,
-  inferSectionDockIcon,
-} from './design/MobileVerticalNavDock';
 
 interface StickySectionNavProps {
   sections: SectionNavItem[];
@@ -92,41 +87,11 @@ export function StickySectionNav({
     userScrollUntilRef.current = Date.now() + 1500;
   };
 
-  const dockItems = [
-    {
-      id: allId,
-      icon: inferSectionDockIcon(allId, allLabel),
-      label: allLabel,
-      active: activeId === allId,
-      onClick: () => onNavigate(allId),
-    },
-    ...items.map((section) => ({
-      id: section.id,
-      icon: section.icon ?? inferSectionDockIcon(section.id, section.label),
-      label: section.label,
-      active: activeId === section.id,
-      onClick: () => onNavigate(section.id),
-    })),
-  ];
-
   return (
-    <>
-      {items.length > 0 && (
-        <>
-          <MobileDockStickySentinel />
-          <MobileVerticalNavDock
-            items={dockItems}
-            ariaLabel="Page sections"
-            preferenceKey="section-nav"
-          />
-        </>
-      )}
-
       <nav
         aria-label="Page sections"
-        data-mobile-dock-trigger
         className={cn(
-          'choosify-sticky-section-nav sticky z-40 w-full px-4 sm:px-5 lg:px-6 py-2 bg-[#F4F7F9]/90 backdrop-blur-sm hidden sm:block',
+          'choosify-sticky-section-nav sticky z-40 w-full px-4 sm:px-5 lg:px-6 py-2 bg-[#F4F7F9]/90 backdrop-blur-sm block',
           className,
         )}
       >
@@ -176,6 +141,5 @@ export function StickySectionNav({
           </div>
         </div>
       </nav>
-    </>
   );
 }

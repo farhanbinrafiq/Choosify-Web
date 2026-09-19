@@ -9,28 +9,28 @@ export const RecommendationsVerdict = ({ verdict }: { verdict: any }) => {
         <h2 className="text-2xl font-extrabold text-[#18154C] uppercase tracking-wider mb-6">RECOMMENDATIONS &<br/>QUICK VERDICT</h2>
         
         <div className="space-y-4">
-          <div className="bg-white rounded-[20px] p-6 shadow-soft ">
+          <div className="bg-white rounded-[20px] p-6 border border-[#EEF1F6]">
             <div className="flex items-center gap-2 mb-2 text-emerald-600 font-bold uppercase tracking-wider text-sm">
               <CheckCircle2 className="w-5 h-5" /> BUY IF YOU
             </div>
             <p className="text-slate-600 font-medium pl-7">{verdict.buyIf}</p>
           </div>
           
-          <div className="bg-white rounded-[20px] p-6 shadow-soft ">
+          <div className="bg-white rounded-[20px] p-6 border border-[#EEF1F6]">
             <div className="flex items-center gap-2 mb-2 text-amber-500 font-bold uppercase tracking-wider text-sm">
               <HelpCircle className="w-5 h-5" /> CONSIDER IF
             </div>
             <p className="text-slate-600 font-medium pl-7">{verdict.considerIf}</p>
           </div>
 
-          <div className="bg-white rounded-[20px] p-6 shadow-soft ">
+          <div className="bg-white rounded-[20px] p-6 border border-[#EEF1F6]">
             <div className="flex items-center gap-2 mb-2 text-red-500 font-bold uppercase tracking-wider text-sm">
               <XCircle className="w-5 h-5" /> NOT FOR YOU IF
             </div>
             <p className="text-slate-600 font-medium pl-7">{verdict.notForYouIf}</p>
           </div>
 
-          <div className="bg-white rounded-[20px] p-6 shadow-soft ">
+          <div className="bg-white rounded-[20px] p-6 border border-[#EEF1F6]">
             <div className="flex items-center gap-2 mb-2 text-blue-600 font-bold uppercase tracking-wider text-sm">
               <Info className="w-5 h-5" /> VERDICT
             </div>

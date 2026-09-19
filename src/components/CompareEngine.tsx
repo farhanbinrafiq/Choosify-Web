@@ -1333,7 +1333,7 @@ export function CompareEngine() {
              {compareMode === 'brand' && (
                <div className="flex flex-col gap-4">
                  {/* BRAND SEGMENT */}
-                 <div className="bg-white border border-[#E8EDF2] rounded-xl p-4.5 shadow-sm text-left font-sans">
+                 <div className="bg-white border border-[#E8EDF2] rounded-xl p-4.5 text-left font-sans">
                    <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Reputation Tier</h3>
                    <div className="space-y-1">
                      {[
@@ -1358,7 +1358,7 @@ export function CompareEngine() {
                  </div>
 
                  {/* BRAND COUNTRY REGENCY */}
-                 <div className="bg-white border border-[#E8EDF2] rounded-xl p-4.5 shadow-sm text-left font-sans">
+                 <div className="bg-white border border-[#E8EDF2] rounded-xl p-4.5 text-left font-sans">
                    <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Country of Operation</h3>
                    <div className="space-y-1">
                      {[
@@ -1386,7 +1386,7 @@ export function CompareEngine() {
              {compareMode === 'creator' && (
                <div className="flex flex-col gap-4">
                  {/* CREATOR PLATFORM */}
-                 <div className="bg-white border border-[#E8EDF2] rounded-xl p-4.5 shadow-sm text-left font-sans">
+                 <div className="bg-white border border-[#E8EDF2] rounded-xl p-4.5 text-left font-sans">
                    <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Platform Focus</h3>
                    <div className="space-y-1">
                      {['all', 'YouTube', 'Instagram', 'Facebook'].map((plat) => (
@@ -1407,7 +1407,7 @@ export function CompareEngine() {
                  </div>
 
                  {/* ENGAGEMENT WEIGHT */}
-                 <div className="bg-white border border-[#E8EDF2] rounded-xl p-4.5 shadow-sm text-left font-sans">
+                 <div className="bg-white border border-[#E8EDF2] rounded-xl p-4.5 text-left font-sans">
                    <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Engagement Threshold</h3>
                    <div className="space-y-1">
                      {[
@@ -1436,7 +1436,7 @@ export function CompareEngine() {
              {compareMode === 'guide' && (
                <div className="flex flex-col gap-4">
                  {/* DIFFICULTY */}
-                 <div className="bg-white border border-[#E8EDF2] rounded-xl p-4.5 shadow-sm text-left font-sans">
+                 <div className="bg-white border border-[#E8EDF2] rounded-xl p-4.5 text-left font-sans">
                    <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Difficulty Tier</h3>
                    <div className="space-y-1">
                      {['all', 'Beginner Friendly', 'Advanced Collector'].map((diff) => (
@@ -1457,7 +1457,7 @@ export function CompareEngine() {
                  </div>
 
                  {/* USE CASE */}
-                 <div className="bg-white border border-[#E8EDF2] rounded-xl p-4.5 shadow-sm text-left font-sans">
+                 <div className="bg-white border border-[#E8EDF2] rounded-xl p-4.5 text-left font-sans">
                    <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Primary Use-Case</h3>
                    <div className="space-y-1">
                      {[
@@ -1486,7 +1486,7 @@ export function CompareEngine() {
              {compareMode === 'ai' && (
                <div className="flex flex-col gap-4">
                  {/* AI SELECTION MODEL */}
-                 <div className="bg-white border border-[#E8EDF2] rounded-xl p-4.5 shadow-sm text-left font-sans">
+                 <div className="bg-white border border-[#E8EDF2] rounded-xl p-4.5 text-left font-sans">
                    <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Best-Suited Target</h3>
                    <div className="space-y-1">
                      {[
@@ -1511,7 +1511,7 @@ export function CompareEngine() {
                  </div>
 
                  {/* RISK RATING */}
-                 <div className="bg-white border border-[#E8EDF2] rounded-xl p-4.5 shadow-sm text-left font-sans">
+                 <div className="bg-white border border-[#E8EDF2] rounded-xl p-4.5 text-left font-sans">
                    <h3 className="text-[11px] font-semibold text-[#8a9bb0] uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-3">Calculated Risk Scope</h3>
                    <div className="space-y-1">
                      {[
@@ -1616,7 +1616,7 @@ export function CompareEngine() {
             </div>
 
             {/* 2. SAVED COMPARISONS LOGS */}
-            <div className="bg-white border border-[#E8EDF2] rounded-xl p-4.5 shadow-sm text-left">
+            <div className="bg-white border border-[#E8EDF2] rounded-xl p-4.5 text-left">
               <div className="flex items-center justify-between pb-3 border-b border-[#e8edf2] mb-3">
                  <h4 className="text-[10px] font-black text-[#8a9bb0] uppercase tracking-wider">Related Decisions</h4>
                  <span className="text-[9px] font-bold text-orange-primary py-0.5 px-2 bg-orange-primary/15 rounded-full uppercase scale-95">3 Saved</span>
@@ -1640,7 +1640,7 @@ export function CompareEngine() {
             </div>
 
             {/* 3. SHARE LINK GENERATION */}
-            <div className="bg-white border border-[#E8EDF2] rounded-xl p-4.5 shadow-sm text-left font-sans">
+            <div className="bg-white border border-[#E8EDF2] rounded-xl p-4.5 text-left font-sans">
                <h4 className="text-[10px] font-extrabold text-[#8a9bb0] uppercase tracking-wider leading-none mb-3">Share Comparison Matrix</h4>
                <p className="text-[10px] text-gray-400 font-medium leading-relaxed mb-3">
                  Export these active filters and parameters into a standalone share link.
@@ -1748,7 +1748,7 @@ export function CompareEngine() {
                       {searchableProducts.map((product: any) => (
                         <div
                           key={product.id}
-                          className="bg-white border border-[#e8edf2] rounded-[8px] p-4 flex flex-col gap-4 shadow-sm"
+                          className="bg-white border border-[#e8edf2] rounded-[8px] p-4 flex flex-col gap-4"
                         >
                           <button
                             type="button"

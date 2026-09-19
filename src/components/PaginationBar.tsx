@@ -4,36 +4,56 @@ import { cn } from '../lib/utils';
 
 export interface PaginationBarProps {
   currentPage?: number;
-  totalPages?: number;
+  /** Real page count derived from the caller's own data (e.g.
+   *  `Math.ceil(total / pageSize)` or backend pagination metadata) --
+   *  required, not defaulted, so a caller can never end up showing fake
+   *  pages just because it forgot to pass this. */
+  totalPages: number;
   showingCount?: number;
   totalCount?: number;
   onPageChange?: (page: number) => void;
   className?: string;
-  /** Choosify.dc.html pageNums: square 32px, no arrows, no summary (default). */
+  /** Choosify.dc.html pageNums: square 32px, arrows shown by default -- a
+   *  page-number-only control is unusable once there are more pages than
+   *  fit the windowed list (e.g. page 3 of 43 has no way to reach 4 or 5
+   *  without them). */
   showArrows?: boolean;
   showSummary?: boolean;
 }
 
+/**
+ * Windowed page list that always shows the current page WITH its neighbors,
+ * not just "first 3 / last 3" -- being on page 3 of 43 must show 4 and 5 as
+ * reachable, not jump straight from 3 to an ellipsis and page 43.
+ */
 function buildPageList(current: number, total: number): (number | '...')[] {
   if (total <= 7) {
     return Array.from({ length: total }, (_, i) => i + 1);
   }
-  if (current <= 3) return [1, 2, 3, '...', total];
-  if (current >= total - 2) return [1, '...', total - 2, total - 1, total];
-  return [1, '...', current, '...', total];
+  if (current <= 4) {
+    return [1, 2, 3, 4, 5, '...', total];
+  }
+  if (current >= total - 3) {
+    return [1, '...', total - 4, total - 3, total - 2, total - 1, total];
+  }
+  return [1, '...', current - 1, current, current + 1, '...', total];
 }
 
 /** Choosify.dc.html `pageNums` — 32×32, radius 6px, active #FF5B00 */
 export function PaginationBar({
   currentPage = 1,
-  totalPages = 12,
+  totalPages,
   showingCount,
   totalCount,
   onPageChange,
   className,
-  showArrows = false,
+  showArrows = true,
   showSummary = false,
 }: PaginationBarProps) {
+  // A dataset with zero or one page has nothing to paginate -- render
+  // nothing rather than a decorative single "1" button or (worse) fake pages.
+  if (totalPages <= 1) return null;
+
   const pages = buildPageList(currentPage, totalPages);
   const showing = showingCount ?? totalCount ?? 0;
   const total = totalCount ?? showing;

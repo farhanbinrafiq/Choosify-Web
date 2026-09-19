@@ -9,8 +9,8 @@ import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
 import { cn } from '../lib/utils';
 import { useFloatingFilter, useFloatingFilters, scrollToFilterResultsTarget, getFloatingPanelMotion, preserveWindowScroll } from './FilterEngine';
-import { MobileVerticalNavDock } from './design/MobileVerticalNavDock';
 import { VideoLightbox } from './VideoLightbox';
+import { shadowClass } from '../design-system/tokens/shadows';
 import {
   CartPreviewPanel,
   cartPreviewDesktopShellClass,
@@ -313,24 +313,6 @@ export function FloatingOverlays() {
   return (
     <>
       <VideoLightbox video={activeVideo} onClose={closeVideo} />
-
-      {!drawerFiltersData &&
-        filterConfig.browseDockItems &&
-        filterConfig.browseDockItems.length > 0 && (
-          <MobileVerticalNavDock
-            items={filterConfig.browseDockItems.map((item) => ({
-              id: item.id,
-              icon: item.icon,
-              label: item.name,
-              sub: item.sub,
-              bg: item.bg,
-              active: item.active,
-              onClick: () => item.onClick?.(),
-            }))}
-            ariaLabel="Browse"
-            preferenceKey="spotlight-browse"
-          />
-        )}
 
       <div
         id="floating-overlays-root"
@@ -658,14 +640,7 @@ export function FloatingOverlays() {
                 )}
 
                 {filterConfig.renderBrowseControls && (
-                  <div
-                    className={cn(
-                      'px-5 pt-4 pb-3 border-b border-[#e8edf2]',
-                      filterConfig.browseDockItems?.length
-                        ? 'max-sm:[&_[data-browse-presets]]:hidden'
-                        : undefined,
-                    )}
-                  >
+                  <div className="px-5 pt-4 pb-3 border-b border-[#e8edf2]">
                     {filterConfig.renderBrowseControls()}
                   </div>
                 )}
@@ -749,7 +724,9 @@ export function FloatingOverlays() {
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           className={cn(
-            'relative w-14 h-14 rounded-full bg-white border border-[#e8edf2] shadow-[0_8px_24px_rgba(0,0,0,0.18)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.22)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none pointer-events-auto',
+            'relative w-14 h-14 rounded-full bg-white border border-[#e8edf2] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none pointer-events-auto',
+            shadowClass.fab,
+            shadowClass.fabHover,
             filterOpen && 'ring-2 ring-[#FF5B00]/30',
           )}
           aria-label="Open filters"

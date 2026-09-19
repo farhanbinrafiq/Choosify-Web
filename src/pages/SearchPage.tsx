@@ -3,8 +3,11 @@ import { Link, useSearchParams } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { BRANDS, CATEGORIES } from '../constants';
 import { ProductCard } from '../components/ProductCard';
-import { AdvertiseHereCard } from '../components/commerce/AdvertiseHereCard';
+import { SponsoredProductTile } from '../components/commerce/AdvertiseHereCard';
 import { CtaBannerSlot } from '../components/CtaBannerSlot';
+import { usePlacements } from '../hooks/usePlacements';
+import { SPONSORED_SURFACE_CONFIG } from '../lib/commerce/sponsoredPlacementRegistry';
+import { resolvedPlacementToSponsoredItem } from '../utils/sponsoredPlacementAdapter';
 import { mockGuides } from '../data/mockGuides';
 import { CREATORS } from '../data/creators';
 import { useDashboard } from '../context/DashboardContext';
@@ -307,6 +310,34 @@ export function SearchPage() {
     sortBy,
   ]);
 
+  // Real, query-relevance-gated promoted search ad. Pulls only actual
+  // configured CMS placements targeting the 'infeed_search' slot (no
+  // catalog/demo fallback -- withFallback: false -- an irrelevant or empty
+  // ad shelf must never be papered over with a random product/brand) and
+  // only ever shows one if its own resolved title/brand/category text
+  // actually contains the search query, exactly the same substring match
+  // organic product search already uses for its title/brand/category
+  // fields. No configured search placement, or none matching the query,
+  // means no promoted card -- never a generic "Advertise your product
+  // here" filler standing in for a relevant result.
+  const searchPlacements = usePlacements(SPONSORED_SURFACE_CONFIG.search.placementKey, {
+    limit: 5,
+    withFallback: false,
+  });
+  const relevantSearchAd = useMemo(() => {
+    const q = rawQuery.toLowerCase().trim().replace(/\s+/g, ' ');
+    if (!q) return null;
+    return (
+      searchPlacements.find((p) => {
+        const haystack = `${p.title} ${p.subtitle ?? ''}`.toLowerCase().replace(/\s+/g, ' ');
+        return haystack.includes(q);
+      }) ?? null
+    );
+  }, [searchPlacements, rawQuery]);
+  const relevantSearchAdItem = relevantSearchAd
+    ? resolvedPlacementToSponsoredItem(relevantSearchAd, relevantSearchAd.subtitle)
+    : null;
+
   const tabCounts: Record<SearchTab, number> = {
     all: results.total,
     products: results.products.length,
@@ -406,11 +437,8 @@ export function SearchPage() {
               {productList.map((product) => (
                 <ProductCard key={product.id} product={product} variant="grid" />
               ))}
-              {(activeTab === 'all' || activeTab === 'products') && (
-                <AdvertiseHereCard
-                  variant="product-tile"
-                  className="min-h-[280px]"
-                />
+              {(activeTab === 'all' || activeTab === 'products') && relevantSearchAdItem && (
+                <SponsoredProductTile item={relevantSearchAdItem} className="min-h-[280px]" />
               )}
             </div>
             {activeTab === 'all' && results.products.length > 5 && (

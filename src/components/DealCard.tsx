@@ -86,7 +86,7 @@ export const DealCard = memo(function DealCard({
       <div 
         id={`deal-card-${product.id}`}
         onClick={handleCardClick}
-        className="bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex group text-left cursor-pointer h-[190px] w-full"
+        className="bg-white rounded-2xl border border-slate-100 overflow-hidden hover:shadow-sm transition-all duration-300 flex group text-left cursor-pointer h-[190px] w-full"
       >
         {/* Left image area */}
         <div className="relative w-28 sm:w-36 bg-gray-50 flex items-center justify-center shrink-0 overflow-hidden">

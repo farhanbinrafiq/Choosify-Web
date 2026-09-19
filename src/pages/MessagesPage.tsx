@@ -8,6 +8,11 @@ import {
   CHOOSIFY_ANNOUNCEMENTS_TITLE,
 } from '../lib/announcements';
 import {
+  NOTIFICATIONS_THREAD_ID,
+  NOTIFICATIONS_THREAD_TITLE,
+  NOTIFICATIONS_THREAD_AVATAR,
+} from '../lib/notificationsThread';
+import {
   EMI_MESSAGES_THREAD_ID,
   EMI_MESSAGES_THREAD_TITLE,
 } from '../lib/emiThread';
@@ -33,6 +38,10 @@ import { evaluatePostOrderConversationExpiry, resolveOrderForMessageThread } fro
 import { ensureStorefrontSupportThread, isChoosifySupportThread } from '../lib/supportConversation';
 import { messagingApi } from '../services/messagingApi';
 import { useMessagingPoll } from '../hooks/useMessagingPoll';
+import { useNotificationsFeed } from '../hooks/useNotificationsFeed';
+import { NotificationsChannel } from '../components/messages/NotificationsChannel';
+import type { MessageThread } from '../context/DashboardContext';
+import type { AppNotification } from '../services/notificationApi';
 
 type ConversationTab = 'all' | 'orders' | 'support' | 'unread';
 
@@ -144,21 +153,42 @@ export function MessagesPage({
     [emiActiveContent?.picks],
   );
 
-  const sortedThreads = useMemo(() => {
-    return [...threads].sort((a, b) => {
-      if (a.id === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID) return -1;
-      if (b.id === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID) return 1;
-      return 0;
-    });
-  }, [threads]);
+  // Notifications is a virtual, system-owned Inbox channel — a live
+  // projection of the canonical notification store (useNotificationsFeed),
+  // never a fabricated/duplicated message history. It's computed here, not
+  // written into DashboardContext's `threads`/localStorage, so it can never
+  // pollute real conversation state.
+  const notificationsFeed = useNotificationsFeed(Boolean(currentUser?.id));
+  const notificationsVirtualThread: MessageThread = useMemo(() => {
+    const latest = notificationsFeed.items[0];
+    return {
+      id: NOTIFICATIONS_THREAD_ID,
+      title: NOTIFICATIONS_THREAD_TITLE,
+      avatar: NOTIFICATIONS_THREAD_AVATAR,
+      lastMessage: latest ? latest.title : 'No notifications yet.',
+      time: latest ? formatMsgTime(latest.createdAt) : '',
+      type: 'notifications',
+      unread: notificationsFeed.summary.unread > 0,
+      readOnly: true,
+    };
+  }, [notificationsFeed.items, notificationsFeed.summary]);
 
-  // Active thread selection — announcements thread is pinned first
+  const sortedThreads = useMemo(() => {
+    const combined = [notificationsVirtualThread, ...threads];
+    return combined.sort((a, b) => {
+      const rank = (t: MessageThread) =>
+        t.id === NOTIFICATIONS_THREAD_ID ? 0 : t.id === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID ? 1 : 2;
+      return rank(a) - rank(b);
+    });
+  }, [threads, notificationsVirtualThread]);
+
+  // Active thread selection — Notifications, then Announcements, pinned first
   const activeThreadId = threadId || (sortedThreads.length > 0 ? sortedThreads[0].id : null);
   const activeThread = sortedThreads.find(t => t.id === activeThreadId);
   const isAnnouncementsThread =
     activeThread?.type === 'announcement' ||
-    activeThread?.id === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID ||
-    activeThread?.readOnly === true;
+    activeThread?.id === CHOOSIFY_ANNOUNCEMENTS_THREAD_ID;
+  const isNotificationsThread = activeThread?.id === NOTIFICATIONS_THREAD_ID;
   const isEmiThread = activeThread?.id === EMI_MESSAGES_THREAD_ID;
 
   // Auto-mark active thread as read (only when selection changes — not on every threads update)
@@ -802,7 +832,7 @@ export function MessagesPage({
   }, [activeBookingOffer?.requestId, activeBookingOffer?.status, reconcileBookingOffer]);
 
   const handleSendMessage = async () => {
-    if (!inputText.trim() || !activeThreadId || isAnnouncementsThread || isEmiThread) return;
+    if (!inputText.trim() || !activeThreadId || isAnnouncementsThread || isEmiThread || isNotificationsThread) return;
     if (isConversationClosed) {
       toast.error(conversationExpiry.closedLabel || 'This conversation has ended');
       return;
@@ -1101,6 +1131,11 @@ export function MessagesPage({
                             Broadcast
                           </span>
                         )}
+                        {t.type === 'notifications' && (
+                          <span className="inline-flex text-[9px] font-bold bg-[#F1F1F3] text-[#4B5563] px-2 py-0.5 rounded">
+                            System
+                          </span>
+                        )}
                         {t.orderRef && (
                           <span className="inline-flex text-[9px] font-bold bg-[#FFF3EC] text-[#FF5B00] px-2 py-0.5 rounded-xl">
                             ORDER: {t.orderRef}
@@ -1183,7 +1218,12 @@ export function MessagesPage({
                     <h2 className="text-[13px] font-bold text-[#1A1A2E] leading-tight truncate">
                       {activeThread.title}
                     </h2>
-                    {isAnnouncementsThread ? (
+                    {isNotificationsThread ? (
+                      <span className="text-[10.5px] font-medium text-[#4B5563] flex items-center gap-1">
+                        <Megaphone size={10} className="text-[#FF5B00]" />
+                        System channel · Read-only
+                      </span>
+                    ) : isAnnouncementsThread ? (
                       <span className="text-[10.5px] font-medium text-[#4B5563] flex items-center gap-1">
                         <Megaphone size={10} className="text-[#FF5B00]" />
                         Platform updates
@@ -1207,7 +1247,7 @@ export function MessagesPage({
                       ORDER: {activeThread.orderRef}
                     </span>
                   )}
-                  {!isEmiThread && (
+                  {!isEmiThread && !isNotificationsThread && (
                     <button
                       type="button"
                       onClick={() => setShowReportModal(true)}
@@ -1218,7 +1258,7 @@ export function MessagesPage({
                       Report to Support
                     </button>
                   )}
-                  {!isAnnouncementsThread && !isEmiThread && (
+                  {!isAnnouncementsThread && !isEmiThread && !isNotificationsThread && (
                     <button
                       type="button"
                       onClick={() => setShowMobileInfo(true)}
@@ -1239,7 +1279,9 @@ export function MessagesPage({
                 </div>
               </div>
 
-              {/* Chat viewport — Emi AI embeds the full assistant inside Messages */}
+              {/* Chat viewport — Emi AI embeds the full assistant; Notifications is a
+                  read-only system channel projected live from the canonical
+                  notification store (never a fabricated chat history) */}
               {isEmiThread ? (
                 <div className="flex-1 min-h-0 overflow-hidden flex flex-col bg-white">
                   <EmiChatPanel
@@ -1250,6 +1292,18 @@ export function MessagesPage({
                     onActiveContentChange={handleEmiActiveContentChange}
                   />
                 </div>
+              ) : isNotificationsThread ? (
+                <NotificationsChannel
+                  items={notificationsFeed.items}
+                  loading={notificationsFeed.loading}
+                  error={notificationsFeed.error}
+                  onRefresh={() => void notificationsFeed.refresh()}
+                  onMarkAllRead={() => void notificationsFeed.markAllRead()}
+                  onOpen={(n: AppNotification) => {
+                    if (!n.read) void notificationsFeed.markRead(n.id);
+                    if (n.actionUrl) navigate(n.actionUrl);
+                  }}
+                />
               ) : (
               <>
               <div
@@ -1595,6 +1649,7 @@ export function MessagesPage({
           linkedSubOrder={linkedSubOrder}
           isAnnouncementsThread={isAnnouncementsThread}
           isEmiThread={isEmiThread}
+          isNotificationsThread={isNotificationsThread}
           focusedAnnouncement={focusedAnnouncement}
           emiEntities={isEmiThread ? emiRailEntities : null}
           emiExcerpt={isEmiThread ? emiActiveContent?.excerpt ?? null : null}
@@ -1608,7 +1663,7 @@ export function MessagesPage({
         />
       </div>
 
-      {activeThread && !isAnnouncementsThread && !isEmiThread && (
+      {activeThread && !isAnnouncementsThread && !isEmiThread && !isNotificationsThread && (
         <MobileThreadInfoSheet
           open={showMobileInfo}
           onClose={() => setShowMobileInfo(false)}

@@ -1,5 +1,6 @@
 import React from 'react';
-import { BRAND_ICON } from '../icons/brandIcons';
+import { Globe } from 'lucide-react';
+import { BRAND_ICON, socialIconSrc } from '../icons/brandIcons';
 
 export interface ProfileSocialLink {
   name: string;
@@ -65,13 +66,21 @@ export function profileSocialLinksFromCatalog(
       iconSrc: SOCIAL_ICON_BY_KEY[key],
     });
   });
-  // Creator-defined extra links (Twitch, Threads, personal site, …) — no sprite
-  // icon, so the pill renders the label only.
+  // Seller/creator-added custom links (e.g. added as "LinkedIn" via the
+  // generic "Other links" field rather than a named field, or a genuinely
+  // unsupported platform). The URL is what actually identifies the
+  // platform — never trust the seller's free-text label alone — so this
+  // always runs socialIconSrc() against the URL first. Only when the URL
+  // doesn't match a known platform do we fall back to the seller's typed
+  // label for icon detection, then to no icon (ProfileSocialPills renders a
+  // generic globe glyph instead of leaving an empty circle).
   if (Array.isArray(socialLinks.custom)) {
     for (const c of socialLinks.custom) {
       const href = c?.url?.trim();
       const name = c?.label?.trim();
-      if (href && name) mapped.push({ name, href });
+      if (href && name) {
+        mapped.push({ name, href, iconSrc: socialIconSrc(href) || socialIconSrc(name) });
+      }
     }
   }
   return mapped.length ? mapped : fallback;
@@ -107,7 +116,7 @@ export function ProfileSocialPills({
                   draggable={false}
                   aria-hidden
                 />
-              ) : (
+              ) : (sl.layers ?? []).length > 0 ? (
                 (sl.layers ?? []).map((ly, i) => (
                   <span
                     key={`${sl.name}-${i}`}
@@ -120,6 +129,10 @@ export function ProfileSocialPills({
                     {ly.glyph}
                   </span>
                 ))
+              ) : (
+                // Unknown/unsupported platform — a generic external-link
+                // glyph, never an empty circle.
+                <Globe size={16} className="text-[#6B7280]" aria-hidden />
               )}
             </div>
             <span className="text-[11px] font-bold text-[#1A1A2E]">{sl.name}</span>

@@ -7,7 +7,7 @@ import { getFloatingPanelClassName } from './FloatingPanelShell';
 import { AlphabetFilterStrip } from './AlphabetFilterStrip';
 import type { SectionNavItem } from '../hooks/useSectionScrollSpy';
 import type { DcStickyFilterItem } from './design/DcListingStickyFilters';
-import { MobileVerticalNavDock } from './design/MobileVerticalNavDock';
+import { shadowClass } from '../design-system/tokens/shadows';
 
 // ==========================================
 // LAYER 1: FILTER ENGINE (GLOBAL DEFINITIONS)
@@ -460,7 +460,7 @@ export function UniversalFilterRenderer({
   const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
 
   // Settle consistent sizes and paddings (5px rounded border styling system)
-  const cardBaseStyle = "bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm text-left font-sans flex flex-col gap-3 min-w-[230px] max-w-[280px] w-full shrink-0 select-none transition-all hover:border-[#1A1D4E]/10";
+  const cardBaseStyle = "bg-white border border-[#e8edf2] rounded-[5px] p-4.5 text-left font-sans flex flex-col gap-3 min-w-[230px] max-w-[280px] w-full shrink-0 select-none transition-all hover:border-[#1A1D4E]/10";
 
   return (
     <>
@@ -753,7 +753,7 @@ export function CategorySmartFilters({ category, activeSpecs, onSpecChange }: Sm
           <span className="text-[8.5px] text-gray-400 font-semibold uppercase tracking-wide block mt-0.5">Custom filters synced with Smartphone directory</span>
         </div>
         {specs.map((spec) => (
-          <div key={spec.key} className="bg-white border border-[#e8edf2] rounded-[5px] p-4 text-left shadow-sm">
+          <div key={spec.key} className="bg-white border border-[#e8edf2] rounded-[5px] p-4 text-left">
             <h4 className="text-[10.5px] font-extrabold text-gray-450 uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-2 flex items-center justify-between">
               <span>{spec.name}</span>
               {activeSpecs[spec.key] && (
@@ -835,7 +835,7 @@ export function CategorySmartFilters({ category, activeSpecs, onSpecChange }: Sm
           <span className="text-[8.5px] text-gray-400 font-semibold uppercase tracking-wide block mt-0.5">Custom apparel scopes</span>
         </div>
         {specs.map((spec) => (
-          <div key={spec.key} className="bg-white border border-[#e8edf2] rounded-[5px] p-4 text-left shadow-sm">
+          <div key={spec.key} className="bg-white border border-[#e8edf2] rounded-[5px] p-4 text-left">
             <h4 className="text-[10.5px] font-extrabold text-gray-450 uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-2 flex items-center justify-between">
               <span>{spec.name}</span>
               {activeSpecs[spec.key] && (
@@ -907,7 +907,7 @@ export function CategorySmartFilters({ category, activeSpecs, onSpecChange }: Sm
           <span className="text-[8.5px] text-gray-400 font-semibold uppercase tracking-wide block mt-0.5">Optimized dimensions for eyeglasses</span>
         </div>
         {specs.map((spec) => (
-          <div key={spec.key} className="bg-white border border-[#e8edf2] rounded-[5px] p-4 text-left shadow-sm">
+          <div key={spec.key} className="bg-white border border-[#e8edf2] rounded-[5px] p-4 text-left">
             <h4 className="text-[10.5px] font-extrabold text-gray-450 uppercase tracking-wider pb-2 border-b border-[#e8edf2] mb-2 flex items-center justify-between">
               <span>{spec.name}</span>
               {activeSpecs[spec.key] && (
@@ -1059,7 +1059,7 @@ export function FullSidebarFilterPanel({
     <div className="flex flex-col gap-4 w-full animate-fade-in text-left font-sans">
       
       {/* Header element */}
-      <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 shadow-sm flex items-center justify-between">
+      <div className="bg-white border border-[#e8edf2] rounded-[5px] p-4.5 flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <div className="w-2 h-2 rounded-full bg-orange-primary animate-pulse" />
           <h3 className="text-[11.5px] font-black uppercase tracking-[0.12em] text-[#1a1a2e]">{title}</h3>
@@ -1262,22 +1262,6 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
     >
       {children}
 
-      {activeFiltersData?.browseDockItems && activeFiltersData.browseDockItems.length > 0 && (
-        <MobileVerticalNavDock
-          items={activeFiltersData.browseDockItems.map((item) => ({
-            id: item.id,
-            icon: item.icon,
-            label: item.name,
-            sub: item.sub,
-            bg: item.bg,
-            active: item.active,
-            onClick: () => item.onClick?.(),
-          }))}
-          ariaLabel="Browse"
-          preferenceKey={activePageId || 'browse'}
-        />
-      )}
-
       {activeFiltersData && (
         <>
         <AnimatePresence>
@@ -1401,17 +1385,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                   )}
 
                   {activeFiltersData.browseControls && (
-                    <div
-                      className={cn(
-                        'flex flex-col gap-2',
-                        // Browse presets move to the mobile vertical dock
-                        activeFiltersData.browseDockItems?.length
-                          ? 'max-sm:[&_[data-browse-presets]]:hidden'
-                          : undefined,
-                      )}
-                    >
-                      {activeFiltersData.browseControls}
-                    </div>
+                    <div className="flex flex-col gap-2">{activeFiltersData.browseControls}</div>
                   )}
 
                   {activeFiltersData.alphabetFilter && (
@@ -1427,7 +1401,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                       <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] text-left">
                         {activeFiltersData.sectionNav.profileLabel || 'On this page'}
                       </div>
-                      <div className="w-full bg-white border border-[#e8edf2] rounded-[5px] p-3 shadow-sm">
+                      <div className="w-full bg-white border border-[#e8edf2] rounded-[5px] p-3">
                         <DragScrollContainer className="gap-2 pb-0 py-0 items-center">
                           <button
                             type="button"
@@ -1467,7 +1441,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                   {activeFiltersData.quickFilters && (
                     <div className="flex flex-col gap-2">
                       <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] text-left">Quick Filters</div>
-                      <div className="w-full bg-white border border-[#e8edf2] rounded-[5px] p-3 shadow-sm">
+                      <div className="w-full bg-white border border-[#e8edf2] rounded-[5px] p-3">
                         {activeFiltersData.quickFilters}
                       </div>
                     </div>
@@ -1487,7 +1461,7 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
                   {activeFiltersData.sorting && (
                     <div className="flex flex-col gap-2">
                       <div className="text-[9px] font-black uppercase tracking-[0.15em] text-[#8a9bb0] text-left">Sorting & Display</div>
-                      <div className="w-full bg-white border border-[#e8edf2] rounded-[5px] p-4 shadow-sm">
+                      <div className="w-full bg-white border border-[#e8edf2] rounded-[5px] p-4">
                         {activeFiltersData.sorting}
                       </div>
                     </div>
@@ -1527,7 +1501,9 @@ export function DrawerFilterProvider({ children }: { children: React.ReactNode }
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             className={cn(
-              'absolute bottom-0 left-0 z-[1] w-14 h-14 rounded-full bg-white border border-[#e8edf2] shadow-[0_8px_24px_rgba(0,0,0,0.18)] hover:shadow-[0_8px_24px_rgba(0,0,0,0.22)] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none pointer-events-auto',
+              'absolute bottom-0 left-0 z-[1] w-14 h-14 rounded-full bg-white border border-[#e8edf2] flex items-center justify-center transition-all duration-300 cursor-pointer focus:outline-none pointer-events-auto',
+              shadowClass.fab,
+              shadowClass.fabHover,
               isOpen && 'ring-2 ring-[#FF5B00]/30',
             )}
             aria-label={isOpen ? 'Close filters' : 'Open filters'}

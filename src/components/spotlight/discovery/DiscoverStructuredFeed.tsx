@@ -197,13 +197,36 @@ export function DiscoverStructuredFeed({
 
   const lanes = useMemo(() => partitionDiscoverFeedLanes(items, nowMs), [items, nowMs]);
 
-  /** When a format pill is active, show that lane in full (same as YouTube / Reels View All). */
+  /**
+   * When a format pill is active, show ONLY that lane (in full) -- every
+   * other lane must render nothing, not just a trimmed preview. Previously
+   * only the Blogs lane had this exclusivity (`isBlogsLaneFocused`); YouTube/
+   * Reels/Live fell through to their sliced-preview branch for every OTHER
+   * tab too, so selecting Reels still rendered a "YouTube Picks" section
+   * (and vice versa) because both only special-cased their own tab and
+   * never hid for someone else's. `showsAllLanes` is the single "All" case
+   * where every lane gets its trimmed preview; any other specific tab shows
+   * just its own lane, in full, nothing else.
+   */
+  const showsAllLanes = activeFormatId === 'all';
   const youtube =
-    activeFormatId === 'videos' ? lanes.youtube : lanes.youtube.slice(0, LANE_LIMITS.youtube);
+    activeFormatId === 'videos'
+      ? lanes.youtube
+      : showsAllLanes
+        ? lanes.youtube.slice(0, LANE_LIMITS.youtube)
+        : [];
   const reels =
-    activeFormatId === 'reels' ? lanes.reels : lanes.reels.slice(0, LANE_LIMITS.reels);
+    activeFormatId === 'reels'
+      ? lanes.reels
+      : showsAllLanes
+        ? lanes.reels.slice(0, LANE_LIMITS.reels)
+        : [];
   const live =
-    activeFormatId === 'live' ? lanes.live : lanes.live.slice(0, LANE_LIMITS.live);
+    activeFormatId === 'live'
+      ? lanes.live
+      : showsAllLanes
+        ? lanes.live.slice(0, LANE_LIMITS.live)
+        : [];
   // 'guides' (Buying Guides) is a content-type subset of the 'blogs' lane
   // bucket -- partitionDiscoverFeedLanes classifies buying_guide/tutorial/
   // tips/comparison items as the 'blog' card variant regardless of which of
@@ -212,7 +235,10 @@ export function DiscoverStructuredFeed({
   // items never rendered in the main pane -- just an empty page until the
   // user navigated away. Treat both tabs as the same focused lane.
   const isBlogsLaneFocused = activeFormatId === 'blogs' || activeFormatId === 'guides';
-  const blogsAside = isBlogsLaneFocused ? [] : lanes.blogs.slice(0, LANE_LIMITS.blogs);
+  // Same exclusivity as youtube/reels/live above -- the blog preview strip
+  // in the sidebar is an "All" (or blogs-lane) affordance, not something
+  // that should keep appearing while Reels/YouTube/Live is the active tab.
+  const blogsAside = showsAllLanes ? lanes.blogs.slice(0, LANE_LIMITS.blogs) : [];
   const blogsMain = isBlogsLaneFocused ? lanes.blogs : [];
   const blogsFocused = isBlogsLaneFocused;
 
@@ -432,8 +458,16 @@ export function DiscoverStructuredFeed({
         </div>
       )}
 
-      {/* Choosify.dc.html — guides / expert / creators / community / trust */}
-      <DiscoverLowerSections />
+      {/* Choosify.dc.html — guides / expert / creators / community / trust.
+          Editorial/discovery modules (Guides by Product Type, Expert's
+          Picks, Top Creators, community/trust strip) belong to the broad
+          "All" browsing experience only -- they are not filtered by
+          content type, so showing them under Reels/YouTube/Blogs/Live/
+          Guides made every filtered view still display unrelated sections
+          (the reported bug: selecting Reels still showed a YouTube-picks
+          section above it). Only mount this block when no format filter
+          is active. */}
+      {activeFormatId === 'all' && <DiscoverLowerSections />}
     </div>
   );
 }

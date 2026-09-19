@@ -23,6 +23,7 @@ import {
   getCompareLockedCategory,
   isSameCompareCategory,
 } from '../utils/compareCategory';
+import type { SiteConfig } from '../types/catalog';
 
 /** Choosify.dc.html product tile tokens */
 const DC = {
@@ -51,7 +52,22 @@ function parsePrice(value: unknown): number {
   return Number(String(value ?? '').replace(/[^\d.]/g, '')) || 0;
 }
 
-function resolveDcBadge(product: any): { label: string; bg: string } | null {
+/**
+ * Looks up an admin-configured color for a badge from the SAME canonical
+ * `siteConfig.productBadges` array (Website Manager -> Product Badges) that
+ * `utils/productBadges.ts`'s `resolveProductBadges` already matches against
+ * by label -- reusing that one existing config source rather than adding a
+ * second one. Falls back to the given design-token hex when no admin has
+ * configured a matching, active entry (or none has been configured yet).
+ */
+function resolveBadgeColor(label: string, fallback: string, siteConfig: SiteConfig | null): string {
+  const configured = siteConfig?.productBadges?.find(
+    (b) => b.isActive && b.label.trim().toLowerCase() === label.trim().toLowerCase(),
+  );
+  return configured?.color || fallback;
+}
+
+function resolveDcBadge(product: any, siteConfig: SiteConfig | null): { label: string; bg: string } | null {
   // Checked first and returned immediately -- an unavailable product
   // shouldn't advertise a discount/deal/promo it can't currently be bought
   // under, and shoppers need to see "Out of Stock" before anything else.
@@ -66,11 +82,14 @@ function resolveDcBadge(product: any): { label: string; bg: string } | null {
   if (discount && discount > 0) {
     return { label: `-${discount}%`, bg: DC.discountRed };
   }
-  if (product.isNewArrival) return { label: 'NEW', bg: DC.newGreen };
-  if (product.isBestseller) return { label: 'BESTSELLER', bg: DC.orange };
-  if (product.featuredFlag) return { label: 'Promoted', bg: DC.officialBlue };
+  // Label text matches the same canonical labels `productBadgeLabels()` derives
+  // in utils/productBadges.ts, so a badge an admin configures under those exact
+  // names (New / Trending / Featured / Flash Sale) recolors this pill too.
+  if (product.isNewArrival) return { label: 'NEW', bg: resolveBadgeColor('New', DC.newGreen, siteConfig) };
+  if (product.isBestseller) return { label: 'BESTSELLER', bg: resolveBadgeColor('Trending', DC.orange, siteConfig) };
+  if (product.featuredFlag) return { label: 'Promoted', bg: resolveBadgeColor('Featured', DC.officialBlue, siteConfig) };
   if (product.isDeal || product.dealType || product.tag === 'SALE') {
-    return { label: 'BEST DEAL', bg: DC.dealAmber };
+    return { label: 'BEST DEAL', bg: resolveBadgeColor('Flash Sale', DC.dealAmber, siteConfig) };
   }
   return null;
 }
@@ -100,12 +119,11 @@ function resolveCashbackLabel(price: number): string {
   return `৳${cashback.toLocaleString('en-BD')}`;
 }
 
+/** Real rating only -- no synthetic/seeded fallback. A product with no rating data gets no rating badge. */
 function resolveRating(product: any): number | null {
   const r = Number(product.rating);
   if (Number.isFinite(r) && r > 0) return Math.min(5, Math.round(r * 10) / 10);
-  const seed = Number.parseInt(String(product.id ?? '').replace(/\D/g, ''), 10);
-  if (!Number.isFinite(seed)) return 4.8;
-  return Math.round((4 + (seed % 10) / 10) * 10) / 10;
+  return null;
 }
 
 function getProductCardImages(product: any): string[] {
@@ -284,11 +302,16 @@ export const ProductCard = memo(function ProductCard({
   const priceLabel = formatBdt(priceNum) || String(product.price ?? '');
   const origLabel =
     origNum > priceNum ? formatBdt(origNum) : product.originalPrice ? formatBdt(product.originalPrice) : '';
-  const badge = resolveDcBadge(product);
+  const badge = resolveDcBadge(product, siteConfig);
   const isOutOfStock = product.status === 'out_of_stock' || product.stock === 0;
   const variantLine = resolveVariantLine(product);
   const cashback = resolveCashbackLabel(priceNum);
   const rating = resolveRating(product);
+  // No existing config entry represents "Rating" today (the admin badge
+  // model only covers status-flag badges) -- this reads one automatically
+  // if/when an admin ever adds an active "Rating" entry, otherwise keeps
+  // the current design-token color unchanged.
+  const ratingBadgeColor = resolveBadgeColor('Rating', DC.ratingGreen, siteConfig);
   const isOfficial = product.official !== false && product.verified !== false;
   const isService = isServiceListing(product);
   const productHref = `/products/${product.slug ?? product.id}`;
@@ -488,8 +511,11 @@ export const ProductCard = memo(function ProductCard({
       onClick={openProduct}
       id={`product-${product.id}`}
     >
-      {/* Image plane — fixed 170px (compact: 118px) */}
-      <div className={cn('relative w-full shrink-0 bg-[#F4F7F9]', isCompactGrid ? 'h-[118px]' : 'h-[170px]')}>
+      {/* Image plane — fixed 170px (compact: 118px). overflow-hidden guarantees
+          the absolutely-positioned badges/heart button can never visually
+          escape this box into the body content below, regardless of glyph
+          metrics. */}
+      <div className={cn('relative w-full shrink-0 overflow-hidden bg-[#F4F7F9]', isCompactGrid ? 'h-[118px]' : 'h-[170px]')}>
         <img
           src={imageSrc}
           alt={product.title || 'Product'}
@@ -525,7 +551,14 @@ export const ProductCard = memo(function ProductCard({
         </button>
 
         {rating != null && (
-          <div className="absolute bottom-2 left-2 z-20 bg-[#07A828] text-white text-[10px] font-extrabold px-[7px] py-[3px] rounded-full pointer-events-none">
+          // Bottom-right (not bottom-left, its old position): the discount/CMS
+          // badge already owns the top-left corner and this keeps every badge
+          // on its own corner with no shared edge, so nothing crowds the seam
+          // between the image and the title/price content directly below.
+          <div
+            className="absolute bottom-2 right-2 z-20 text-white text-[10px] font-extrabold px-[7px] py-[3px] rounded-full pointer-events-none"
+            style={{ background: ratingBadgeColor }}
+          >
             {rating.toFixed(1)} ★
           </div>
         )}

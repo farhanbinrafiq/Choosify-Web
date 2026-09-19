@@ -123,6 +123,8 @@ export function DealsPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState(getInitialTab);
   const [minDiscount, setMinDiscount] = useState<number>(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const DEALS_PER_PAGE = 12;
   const [sortOption, setSortOptionState] = useState<string>(() =>
     resolveSortIdFromParam(DEAL_SORT_OPTIONS, DEAL_SORT_DEFAULT, searchParams.get('sort')),
   );
@@ -297,16 +299,34 @@ export function DealsPage() {
     limit: INFEED_MAX_PER_PAGE,
   });
 
+  // Real pagination derived from the actual current-tab result count --
+  // resets to page 1 whenever the active dataset changes (tab switch,
+  // filter, search, sort) so a stale page number can't point past the end
+  // of a now-smaller result set.
+  const activeListLength = activeTab === 'Promo Codes' ? feedCoupons.length : filteredProducts.length;
+  const totalPages = Math.max(1, Math.ceil(activeListLength / DEALS_PER_PAGE));
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, feedCoupons, filteredProducts]);
+  const paginatedCoupons = React.useMemo(
+    () => feedCoupons.slice((currentPage - 1) * DEALS_PER_PAGE, currentPage * DEALS_PER_PAGE),
+    [feedCoupons, currentPage],
+  );
+  const paginatedProducts = React.useMemo(
+    () => filteredProducts.slice((currentPage - 1) * DEALS_PER_PAGE, currentPage * DEALS_PER_PAGE),
+    [filteredProducts, currentPage],
+  );
+
   const dealFeed = React.useMemo(
     () =>
       injectPlacementsIntoFeed(
-        filteredProducts,
+        paginatedProducts,
         (product) => `deal-${product.id}`,
         infeedPlacements,
         INFEED_INTERVAL.deal,
         INFEED_MAX_PER_PAGE,
       ),
-    [filteredProducts, infeedPlacements],
+    [paginatedProducts, infeedPlacements],
   );
 
   const categoriesList = React.useMemo(() => {
@@ -558,7 +578,7 @@ export function DealsPage() {
                   setSearchQuery={setSearchQuery}
                   searchPlaceholder="Search active deals and promos..."
                   browseControls={dealsBrowseControls}
-                  browseDockItems={dealsBrowseItems}
+                  sorting={<SortDropdown options={DEAL_SORT_OPTIONS} value={sortOption} onChange={setSortOption} />}
                   quickFilters={
                     <QuickFilterBar
                       title="Deals Quick Specs"
@@ -698,14 +718,18 @@ export function DealsPage() {
                 (selectedCategory ? ` · ${selectedCategory}` : '') +
                 (searchQuery ? ` · “${searchQuery}”` : '')
               }
-              count={activeTab === 'Promo Codes' ? feedCoupons.length : filteredProducts.length}
+              count={activeListLength}
+              showingFrom={
+                (activeTab === 'Promo Codes' ? paginatedCoupons.length : paginatedProducts.length) === 0
+                  ? 0
+                  : (currentPage - 1) * DEALS_PER_PAGE + 1
+              }
+              showingTo={
+                (currentPage - 1) * DEALS_PER_PAGE +
+                (activeTab === 'Promo Codes' ? paginatedCoupons.length : paginatedProducts.length)
+              }
               itemLabel={activeTab === 'Promo Codes' ? 'coupons' : 'deals'}
             />
-
-            {/* Mobile-only: ListingFilterPills (incl. AI Discover) hides below sm, so surface Sort here too */}
-            <div className="flex justify-end sm:hidden">
-              <SortDropdown options={DEAL_SORT_OPTIONS} value={sortOption} onChange={setSortOption} />
-            </div>
 
             <ListingFilterPills
               pills={dealsBrowseItems.map((item) => ({
@@ -898,7 +922,7 @@ export function DealsPage() {
                   {/* Top Deals — capped at 4 per row on desktop */}
                   <div className="grid grid-cols-1 min-[520px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch text-left">
                     {activeTab === 'Promo Codes' ? (
-                      feedCoupons.map((coupon) => (
+                      paginatedCoupons.map((coupon) => (
                         <div key={coupon.code} className="w-full h-full">
                           <BrandCouponCarouselCard coupon={coupon} />
                         </div>
@@ -927,14 +951,13 @@ export function DealsPage() {
                   </div>
 
                   <PaginationBar
+                    currentPage={currentPage}
+                    totalPages={totalPages}
                     showingCount={
-                      activeTab === 'Promo Codes'
-                        ? feedCoupons.length
-                        : Math.min(12, filteredProducts.length)
+                      activeTab === 'Promo Codes' ? paginatedCoupons.length : paginatedProducts.length
                     }
-                    totalCount={
-                      activeTab === 'Promo Codes' ? feedCoupons.length : filteredProducts.length
-                    }
+                    totalCount={activeListLength}
+                    onPageChange={setCurrentPage}
                   />
                 </div>
 

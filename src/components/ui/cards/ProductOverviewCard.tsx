@@ -31,7 +31,7 @@ export const ProductOverviewCard: React.FC<ProductOverviewCardProps> = ({
   className
 }) => {
   return (
-    <div className={cn("bg-white rounded-2xl border border-slate-100 p-6 md:p-8 flex flex-col shadow-[0_8px_30px_rgb(0,0,0,0.03)]", className)}>
+    <div className={cn("bg-white rounded-2xl border border-slate-100 p-6 md:p-8 flex flex-col", className)}>
       {title && (
         <h3 className="text-sm font-black text-[#18154C] uppercase tracking-wider mb-6">
           {title}

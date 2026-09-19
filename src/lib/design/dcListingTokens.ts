@@ -10,9 +10,10 @@ export const LISTING_PAGE_MAX_WIDTH = 'max-w-[1440px]';
 
 /** Content column under listing heroes (max-width + side gutters) */
 export const DC_CONTENT_MAX = `${LISTING_PAGE_MAX_WIDTH} mx-auto px-5 sm:px-8 lg:px-10`;
-export const DC_CARD =
-  'bg-white border border-[#E8EDF2] rounded-[14px] shadow-[0_12px_30px_rgba(0,0,0,0.08)]';
-export const DC_STICKY_BAR = `${DC_CARD} sticky z-40 h-[88px] px-[26px] flex items-center gap-[22px] overflow-x-auto`;
+/** Flat (Level 0) — border does the separation work, no shadow. */
+export const DC_CARD = 'bg-white border border-[#E8EDF2] rounded-[14px]';
+/** Sticky bar (Level 1) — genuinely floats over scrolled content, so it keeps a soft shadow. */
+export const DC_STICKY_BAR = `${DC_CARD} sticky z-40 h-[88px] px-[26px] flex items-center gap-[22px] overflow-x-auto shadow-sm`;
 
 /** Navy listing / discover hero background — shared dark-surface token (footer-sourced) */
 export const DC_LISTING_HERO_BG = 'var(--gradient-dark-surface)';

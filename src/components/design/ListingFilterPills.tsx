@@ -3,7 +3,6 @@ import { SlidersHorizontal } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { openEmiPanel } from '../../lib/emi';
 import { useOpenPageFilters } from '../FilterEngine';
-import { MobileDockStickySentinel } from './MobileVerticalNavDock';
 
 export interface ListingFilterPillItem {
   id: string;
@@ -46,9 +45,12 @@ const pillActive =
   'footer-brand-gradient text-white border-transparent hover:brightness-110';
 
 /**
- * Discover-style under-header filter pills — desktop/tablet only.
- * On mobile the bar is hidden; browse filters live in the left vertical dock.
- * A sentinel stays mounted so the mobile dock still knows when to appear.
+ * Discover-style under-header filter pills — desktop/tablet only. On mobile
+ * this row is hidden entirely; the canonical Filters FAB (bottom-left) is
+ * the single mobile filter entry point instead (its drawer includes the
+ * same browse/quick filters). The old left vertical floating dock this used
+ * to defer to on mobile has been removed — not replaced with anything, per
+ * product decision to keep mobile to one filter action, not a pill row.
  */
 export function ListingFilterPills({
   pills,
@@ -69,19 +71,14 @@ export function ListingFilterPills({
   };
 
   return (
-    <>
-      {/* Always mounted — drives mobile left-dock show/hide even when pills are hidden */}
-      {sticky ? <MobileDockStickySentinel /> : null}
-
       <div
-        data-mobile-dock-trigger
         className={cn(
           'choosify-listing-filter-pills choosify-sticky-section-nav w-full hidden sm:block',
           sticky && 'sticky z-40 bg-[#F4F7F9]/95 backdrop-blur-sm',
           className,
         )}
       >
-        <div className="flex justify-between items-center py-4 pb-6 flex-wrap gap-2.5">
+        <div className="flex items-center justify-between flex-wrap gap-2.5 py-4 pb-6">
           <div className="flex gap-2.5 flex-wrap">
             {showFiltersPill && canOpenFilters && (
               <button
@@ -142,6 +139,5 @@ export function ListingFilterPills({
           </div>
         </div>
       </div>
-    </>
   );
 }

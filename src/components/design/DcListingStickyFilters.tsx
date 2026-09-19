@@ -137,7 +137,7 @@ export function DcListingStickyFilters({
       <div
         className={cn(
           maxWidthClass,
-          'mx-auto bg-white border border-[#E8EDF2] rounded-[14px] shadow-[0_12px_30px_rgba(0,0,0,0.08)] overflow-hidden',
+          'mx-auto bg-white border border-[#E8EDF2] rounded-[14px] shadow-sm overflow-hidden',
           cardClassName,
         )}
       >

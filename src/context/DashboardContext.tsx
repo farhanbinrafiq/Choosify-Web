@@ -54,7 +54,7 @@ export interface MessageThread {
   avatar: string;
   lastMessage: string;
   time: string;
-  type: 'retail' | 'general' | 'announcement';
+  type: 'retail' | 'general' | 'announcement' | 'notifications';
   unread: boolean;
   orderRef?: string;
   readOnly?: boolean;

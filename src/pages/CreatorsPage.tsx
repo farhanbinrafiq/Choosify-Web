@@ -419,7 +419,7 @@ export function CreatorsPage() {
               setSearchQuery={setSearchQuery}
               searchPlaceholder="Search creators, niche, handle or bio..."
               browseControls={creatorsBrowseControls}
-              browseDockItems={creatorsBrowseItems}
+              sorting={<SortDropdown options={CREATOR_SORT_OPTIONS} value={sortOption} onChange={setSortOption} />}
               activeChips={
                 <ActiveFilterChips
                   chips={[
@@ -612,11 +612,6 @@ export function CreatorsPage() {
             }
           />
           <CtaBannerSlot page="creators" section="creators-feed-header" position="after" />
-
-          {/* Mobile-only: ListingFilterPills (incl. AI Discover) hides below sm, so surface Sort here too */}
-          <div className="flex justify-end sm:hidden">
-            <SortDropdown options={CREATOR_SORT_OPTIONS} value={sortOption} onChange={setSortOption} />
-          </div>
 
           <ListingFilterPills
             pills={creatorsBrowseItems.map((item) => ({

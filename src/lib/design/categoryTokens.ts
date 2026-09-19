@@ -10,7 +10,7 @@ export const CATEGORY_CONTENT_MAX = `${LISTING_PAGE_MAX_WIDTH} mx-auto px-5 sm:p
 export const CATEGORY_CARD_RADIUS = 'rounded-[20px]';
 
 export const CATEGORY_CARD_HOVER =
-  'transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-xl';
+  'transition-all duration-200 ease-out hover:-translate-y-1 hover:shadow-sm';
 
 export const CATEGORY_SECTION_PY = 'py-12 md:py-16 lg:py-20';
 

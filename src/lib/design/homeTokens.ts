@@ -21,9 +21,13 @@ export const HOME_PAGE_BG = '#F0F8FF';
 /** max-width:1280px; padding:0 40px — Choosify.dc.html Home */
 export const HOME_CONTENT_MAX = 'max-w-[1280px] mx-auto px-5 sm:px-8 lg:px-10';
 
-/** Elevated white section card from dc.html */
+/**
+ * White section card. Flat (Level 0) — a hairline border separates it from
+ * the page background instead of the large blurred shadow this used to
+ * carry; the page no longer reads as a stack of floating white boxes.
+ */
 export const HOME_PANEL =
-  'bg-white rounded-[14px] px-5 pt-[22px] pb-1.5 sm:px-6 shadow-[0_16px_40px_rgba(0,0,0,0.12)]';
+  'bg-white rounded-[14px] px-5 pt-[22px] pb-1.5 sm:px-6 border border-[#E8EDF2]';
 
 export const HOME_PANEL_GAP = 'mt-6';
 

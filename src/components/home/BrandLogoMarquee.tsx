@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import { cn } from '../../lib/utils';
 import { colors } from '../../design-system/tokens/colors';
 import { radius } from '../../design-system/tokens/radius';
-import { shadows } from '../../design-system/tokens/shadows';
 import { motionClass } from '../../design-system/tokens/motion';
 
 interface BrandLogoMarqueeProps {
@@ -36,7 +35,6 @@ export function BrandLogoMarquee({ brands, className }: BrandLogoMarqueeProps) {
           style={{
             borderColor: colors.border.subtle,
             borderRadius: radius.xl,
-            boxShadow: shadows.sm,
           }}
         >
           {brand.logo && String(brand.logo).startsWith('http') ? (

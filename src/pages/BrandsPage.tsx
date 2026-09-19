@@ -651,7 +651,7 @@ export function BrandsPage() {
               setSearchQuery={setSearchQuery}
               searchPlaceholder="Search brands, category or best for..."
               browseControls={brandsBrowseControls}
-              browseDockItems={brandsBrowseItems}
+              sorting={<SortDropdown options={BRAND_SORT_OPTIONS} value={sortOption} onChange={setSortOption} />}
               quickFilters={
                 <QuickFilterBar
                   title="Brands Quick Specs"
@@ -857,11 +857,6 @@ export function BrandsPage() {
               ) : null
             }
           />
-
-          {/* Mobile-only: ListingFilterPills (incl. AI Discover) hides below sm, so surface Sort here too */}
-          <div className="flex justify-end sm:hidden">
-            <SortDropdown options={BRAND_SORT_OPTIONS} value={sortOption} onChange={setSortOption} />
-          </div>
 
           <ListingFilterPills
             pills={brandsBrowseItems.map((item) => ({

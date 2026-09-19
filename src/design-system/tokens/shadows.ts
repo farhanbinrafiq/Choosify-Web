@@ -20,6 +20,9 @@ export const shadowClass = {
   cardHover: 'hover:shadow-lg',
   editorialHover: 'hover:shadow-xl',
   modal: 'shadow-2xl',
+  /** Level 1 — small circular floating action buttons (FAB stack, filter quick-add). One shared value instead of independently duplicated literals per file. */
+  fab: 'shadow-[0_8px_24px_rgba(0,0,0,0.18)]',
+  fabHover: 'hover:shadow-[0_8px_24px_rgba(0,0,0,0.22)]',
 } as const;
 
 export type ShadowToken = typeof shadows;

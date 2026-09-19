@@ -10,7 +10,6 @@ import {
 import { cn } from '../../lib/utils';
 import { colors } from '../../design-system/tokens/colors';
 import { radius } from '../../design-system/tokens/radius';
-import { shadows } from '../../design-system/tokens/shadows';
 
 const TRUST_ITEMS = [
   {
@@ -73,7 +72,6 @@ export function TrustStrip({ className }: TrustStripProps) {
             borderRadius: radius['2xl'],
             backgroundColor: 'rgba(255,255,255,0.8)',
             border: `1px solid ${colors.border.subtle}`,
-            boxShadow: shadows.sm,
           }}
         >
           <div

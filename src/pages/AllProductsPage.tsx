@@ -99,6 +99,8 @@ export function AllProductsPage() {
     [searchParams, setSearchParams],
   );
   const [activeSpecs, setActiveSpecs] = useState<Record<string, string>>({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const PRODUCTS_PER_PAGE = 24;
   const [priceMin, setPriceMin] = useState<number>(0);
   const priorityNowMs = usePriorityClockMs();
   const [priceMax, setPriceMax] = useState<number>(999999);
@@ -581,9 +583,26 @@ export function AllProductsPage() {
     setSearchParams(new URLSearchParams());
   }
 
+  // Real pagination derived from the actual filtered/searched result count --
+  // never a fixed/prototype page count. Resets to page 1 whenever the
+  // underlying dataset changes (new filter, search, tab, sort) so a stale
+  // page number can never point past the end of a now-smaller result set.
+  const totalPages = Math.max(1, Math.ceil(filteredProducts.length / PRODUCTS_PER_PAGE));
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filteredProducts]);
+  const paginatedProducts = useMemo(
+    () =>
+      filteredProducts.slice(
+        (currentPage - 1) * PRODUCTS_PER_PAGE,
+        currentPage * PRODUCTS_PER_PAGE,
+      ),
+    [filteredProducts, currentPage],
+  );
+
   const productFeed = useSponsoredFeedEntries(
     'products',
-    filteredProducts,
+    paginatedProducts,
     (product) => `product-${product.id}`,
     { enabled: viewMode === 'grid' },
   );
@@ -681,7 +700,6 @@ export function AllProductsPage() {
               onSearchSubmit={executeSearch}
               searchPlaceholder="Search products, brands or details..."
               browseControls={productsBrowseControls}
-              browseDockItems={productsBrowseItems}
               quickFilters={
                 <QuickFilterBar
                   title="Products Quick Specs"
@@ -896,13 +914,10 @@ export function AllProductsPage() {
               (sidebarSearch ? ` · “${sidebarSearch}”` : '')
             }
             count={filteredProducts.length}
+            showingFrom={paginatedProducts.length === 0 ? 0 : (currentPage - 1) * PRODUCTS_PER_PAGE + 1}
+            showingTo={(currentPage - 1) * PRODUCTS_PER_PAGE + paginatedProducts.length}
             itemLabel="products"
           />
-
-          {/* Mobile-only: ListingFilterPills (incl. AI Discover) hides below sm, so surface Sort here too */}
-          <div className="flex justify-end sm:hidden mb-3">
-            <SortDropdown options={PRODUCT_SORT_OPTIONS} value={sortOption} onChange={setSortOption} />
-          </div>
 
           <ListingFilterPills
             className="mb-6"
@@ -1048,8 +1063,11 @@ export function AllProductsPage() {
           <CtaBannerSlot page="products" section="products-grid" position="after" className="mt-6" />
 
           <PaginationBar
-            showingCount={filteredProducts.length}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            showingCount={paginatedProducts.length}
             totalCount={filteredProducts.length}
+            onPageChange={setCurrentPage}
           />
 
           <AdSenseSlot format="infeed" className="mt-6" />

@@ -187,6 +187,9 @@ export function GuidesPage() {
   const { allGuides } = useGlobalState();
   const guideSource = allGuides;
 
+  const [currentPage, setCurrentPage] = useState(1);
+  const GUIDES_PER_PAGE = 12;
+
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All');
   const [isLoading, setIsLoading] = useState(true);
@@ -570,6 +573,18 @@ export function GuidesPage() {
 
   const filteredBlogs = getFilteredBlogs();
 
+  // Real pagination derived from the actual filtered result count. Clamped
+  // (rather than reset via an effect) because getFilteredBlogs() returns a
+  // fresh array reference on every render, so there's no stable identity to
+  // key a "dataset changed" effect off of -- clamping the page used for
+  // slicing is synchronous and correct regardless of *why* the count shrank.
+  const totalPages = Math.max(1, Math.ceil(filteredBlogs.length / GUIDES_PER_PAGE));
+  const clampedPage = Math.min(currentPage, totalPages);
+  const paginatedBlogs = filteredBlogs.slice(
+    (clampedPage - 1) * GUIDES_PER_PAGE,
+    clampedPage * GUIDES_PER_PAGE,
+  );
+
   const infeedPlacements = usePlacements(PLACEMENT_KEYS.INFEED_GUIDE, {
     limit: INFEED_MAX_PER_PAGE,
     entityType: 'guide',
@@ -578,13 +593,13 @@ export function GuidesPage() {
   const guideFeed = useMemo(
     () =>
       injectPlacementsIntoFeed(
-        filteredBlogs,
+        paginatedBlogs,
         (guide) => `guide-${guide.id}`,
         infeedPlacements,
         INFEED_INTERVAL.guide,
         INFEED_MAX_PER_PAGE,
       ),
-    [filteredBlogs, infeedPlacements],
+    [paginatedBlogs, infeedPlacements],
   );
 
   const isAnyFilterActive = !!(
@@ -1435,7 +1450,14 @@ export function GuidesPage() {
                </>
              )}
              
-             <PaginationBar showingCount={8} totalCount={156} className="mt-24 pt-16" />
+             <PaginationBar
+               currentPage={clampedPage}
+               totalPages={totalPages}
+               showingCount={paginatedBlogs.length}
+               totalCount={filteredBlogs.length}
+               onPageChange={setCurrentPage}
+               className="mt-24 pt-16"
+             />
 
             <AdSenseSlot format="infeed" className="mt-6" />
          </div>

@@ -87,13 +87,17 @@ export function CreatorReviewMediaCard({
       return;
     }
     let cancelled = false;
-    getTikTokThumbnail(videoUrl).then((url) => {
+    // media.externalUrl (not the raw videoUrl prop) -- if the seller pasted
+    // embed-code HTML, resolveCreatorReviewMedia already extracted the plain
+    // URL onto media.externalUrl; TikTok's oEmbed endpoint needs that clean
+    // URL as its query param, not the raw HTML blob.
+    getTikTokThumbnail(media.externalUrl).then((url) => {
       if (!cancelled) setTiktokThumb(url);
     });
     return () => {
       cancelled = true;
     };
-  }, [needsTikTokFetch, videoUrl]);
+  }, [needsTikTokFetch, media.externalUrl]);
 
   const resolvedThumbnail = media.thumbnailUrl || (needsTikTokFetch ? tiktokThumb : null);
   const showBrandedPlaceholder = !resolvedThumbnail && BRANDABLE_PLATFORMS.has(media.platform);

@@ -128,7 +128,25 @@ export function CreatorReviewViewerModal({ media, onClose }: Props) {
                 // container that architecture uses instead. Isolated from
                 // the other platforms' iframe below so YouTube/TikTok's
                 // existing behavior can't drift.
-                <FacebookSdkEmbed href={resolved.canonicalUrl} />
+                <>
+                  <FacebookSdkEmbed href={resolved.canonicalUrl} />
+                  {/* Facebook's player renders inside a cross-origin iframe
+                      Choosify cannot inspect -- if Facebook itself refuses
+                      inline playback for this content (a real, observed
+                      failure mode independent of this implementation), the
+                      only signal is inside that iframe. Rather than trying
+                      to detect it, this gives the user a working escape
+                      hatch that's visible immediately, not just discoverable
+                      in the info bar below the modal. */}
+                  <a
+                    href={resolved.externalUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="absolute bottom-3 right-3 z-10 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black/70 hover:bg-black/85 text-white text-[11px] font-bold backdrop-blur-sm transition-colors"
+                  >
+                    Watch on Facebook <ExternalLink size={11} />
+                  </a>
+                </>
               ) : resolved.platform === 'instagram_reel' || resolved.platform === 'instagram_post' ? (
                 // Same rationale as Facebook above, using Instagram's
                 // official blockquote + embed.js mechanism.

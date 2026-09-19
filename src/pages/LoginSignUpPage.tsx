@@ -78,6 +78,8 @@ export function LoginSignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
   const { setIsLoggedIn, updateCurrentUser, currentUser } = useGlobalState();
   const location = useLocation();
@@ -108,6 +110,14 @@ export function LoginSignUpPage() {
     }
     if (activeTab === 'sign-up' && password.length < 8) {
       toast.error('Password must be at least 8 characters.');
+      return;
+    }
+    if (activeTab === 'sign-up' && !confirmPassword) {
+      toast.error('Please confirm your password.');
+      return;
+    }
+    if (activeTab === 'sign-up' && password !== confirmPassword) {
+      toast.error('Passwords do not match.');
       return;
     }
 
@@ -160,14 +170,18 @@ export function LoginSignUpPage() {
   };
 
   const isSignUp = activeTab === 'sign-up';
+  // Inline hint only — never blocks typing, and only appears once the user has
+  // actually started the confirm field, so it doesn't nag while they're still
+  // typing the first password. Submission is separately blocked in handleSubmit.
+  const passwordsMismatch = isSignUp && confirmPassword.length > 0 && password !== confirmPassword;
 
   return (
     <StorefrontAuthShell>
       <>
-        <h2 className="mb-1 text-[22px] font-extrabold text-[#1A1A2E]">
+        <h2 className="mb-1 text-center text-[22px] font-extrabold text-[#1A1A2E] lg:text-left">
                   {isSignUp ? 'Create your account' : 'Welcome back'}
                 </h2>
-                <p className="mb-5 text-[12.5px] text-[#9AA0AC]">
+                <p className="mb-5 text-center text-[12.5px] text-[#9AA0AC] lg:text-left">
                   {isSignUp
                     ? 'Join Choosify to save products and compare brands'
                     : 'Sign in to continue to Choosify'}
@@ -246,6 +260,35 @@ export function LoginSignUpPage() {
                     }
                   />
 
+                  {isSignUp && (
+                    <div>
+                      <AuthField
+                        id="confirm-password"
+                        label="Confirm Password"
+                        type={showConfirmPassword ? 'text' : 'password'}
+                        value={confirmPassword}
+                        onChange={setConfirmPassword}
+                        autoComplete="new-password"
+                        icon={Lock}
+                        placeholder="Confirm your password"
+                        rightSlot={
+                          <button
+                            type="button"
+                            aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                            aria-pressed={showConfirmPassword}
+                            onClick={() => setShowConfirmPassword((v) => !v)}
+                            className="rounded-md p-1.5 text-[#9AA0AC] outline-none transition-colors hover:text-[#1A1A2E] focus-visible:ring-2 focus-visible:ring-[#FF5B00]/40"
+                          >
+                            {showConfirmPassword ? <EyeOff size={16} strokeWidth={2} /> : <Eye size={16} strokeWidth={2} />}
+                          </button>
+                        }
+                      />
+                      {passwordsMismatch && (
+                        <p className="mt-1.5 text-xs font-semibold text-red-600">Passwords do not match.</p>
+                      )}
+                    </div>
+                  )}
+
                   {!isSignUp && (
                     <div className="flex items-center justify-between gap-3">
                       <label className="flex cursor-pointer items-center gap-1.5 text-xs text-[#4B5563]">
@@ -281,7 +324,7 @@ export function LoginSignUpPage() {
                         : 'Signing in…'
                       : isSignUp
                         ? 'Create account'
-                        : 'Sign in to Choosify'}
+                        : 'Login to Choosify Marketplace'}
                     {!isSubmitting && <ArrowRight size={16} strokeWidth={2.4} className="text-current" />}
                   </button>
                 </form>

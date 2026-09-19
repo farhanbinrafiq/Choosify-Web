@@ -17,6 +17,7 @@ import { resolveSiteNavigation } from '../lib/navigation';
 import { isNavPathEnabled } from '../lib/featureFlags';
 import { toast } from '../lib/notify';
 import { ChoosifyWordmarkLogo } from './ChoosifyWordmarkLogo';
+import { useNotificationsFeed } from '../hooks/useNotificationsFeed';
 
 export function Navbar() {
   const [searchQuery, setSearchQuery] = useState('');
@@ -35,7 +36,14 @@ export function Navbar() {
     setMobileProfileMenuOpen: setIsMobileProfileOpen,
   } = useDashboard();
 
-  const unreadMsgCount = isLoggedIn ? threads.filter(t => t.unread).length : 0;
+  // Single authoritative unread source for notifications (server summary.unread)
+  // aggregated with real conversation unread state — never a second/fabricated
+  // counter. threads never contains a virtual "Notifications" row (that's
+  // computed only inside MessagesPage), so this can't double-count it.
+  const notificationsFeed = useNotificationsFeed(isLoggedIn);
+  const unreadMsgCount = isLoggedIn
+    ? threads.filter(t => t.unread).length + notificationsFeed.summary.unread
+    : 0;
 
   const profileMenuRef = useRef<HTMLDivElement>(null);
   const { ref: categoryStripRef, props: categoryStripProps } = useDragScroll({ grabCursor: false });
@@ -206,7 +214,7 @@ export function Navbar() {
           {siteConfig.announcementBarText}
         </div>
       )}
-      <header className="w-full min-w-0 z-50 sticky top-0 shadow-2xl border-b border-white/[0.07]" id="main-navbar">
+      <header className="w-full min-w-0 z-50 sticky top-0 shadow-sm border-b border-white/[0.07]" id="main-navbar">
         {/* Row 1 — Logo, prominent search, account actions (Choosify 3.0) */}
         <nav className="choosify-chrome-header text-white h-16 sm:h-[4.5rem] flex items-center gap-2 sm:gap-3 px-3 sm:px-4 lg:px-6 xl:px-8 border-b border-white/5 lg:border-b-0 relative z-[40]">
         
@@ -379,12 +387,13 @@ export function Navbar() {
                             )}
                           </button>
                         ))}
-                        <button 
+                        <button
                           type="button"
                           onClick={() => {
                             setIsUserMenuOpen(false);
                             logout();
                             toast.success('Successfully logged out.');
+                            navigate('/login');
                           }}
                           className="w-full flex items-center gap-2 px-4 py-[11px] text-xs font-semibold text-[#FF000D] hover:bg-red-50 transition-colors"
                         >
@@ -608,7 +617,7 @@ export function Navbar() {
                     logout();
                     setIsMobileProfileOpen(false);
                     toast.success('Successfully logged out.');
-                    navigate('/');
+                    navigate('/login');
                   }}
                   className="w-full flex items-center gap-2.5 px-5 py-3.5 text-[12.5px] font-semibold text-[#FF000D] hover:bg-red-50 transition-colors cursor-pointer text-left"
                 >

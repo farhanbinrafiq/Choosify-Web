@@ -13,6 +13,7 @@ type MessagesRightRailProps = {
   linkedSubOrder?: SubOrder | null;
   isAnnouncementsThread?: boolean;
   isEmiThread?: boolean;
+  isNotificationsThread?: boolean;
   /** Focused announcement message (or latest with entity) */
   focusedAnnouncement?: ThreadMessage | null;
   /** Emi: entities from the focused / latest assistant reply with picks */
@@ -121,6 +122,7 @@ export function MessagesRightRail({
   linkedSubOrder,
   isAnnouncementsThread,
   isEmiThread,
+  isNotificationsThread,
   focusedAnnouncement,
   emiEntities,
   emiExcerpt,
@@ -128,6 +130,28 @@ export function MessagesRightRail({
   onViewOrder,
   onReportProblem,
 }: MessagesRightRailProps) {
+  if (isNotificationsThread) {
+    return (
+      <aside className="hidden xl:flex w-[260px] shrink-0 flex-col border-l border-[#E8EDF2] bg-white p-[18px] gap-4 overflow-y-auto min-h-0">
+        <div>
+          <p className="text-[11px] font-black uppercase tracking-wide text-[#9AA0AC] mb-2">About this channel</p>
+          <p className="text-[11.5px] text-[#4B5563] leading-relaxed">
+            Notifications is a system-owned, read-only channel. It carries your personalized
+            order, refund, account and eligible seller/creator campaign updates — sourced
+            directly from Choosify's notification records.
+          </p>
+        </div>
+        <div className="pt-3 border-t border-[#E8EDF2]">
+          <p className="text-[11px] font-black uppercase tracking-wide text-[#9AA0AC] mb-2">Note</p>
+          <p className="text-[11.5px] text-[#4B5563] leading-relaxed">
+            This channel can't be replied to. For help with a specific order, open its
+            conversation from your order or use Report to Support elsewhere in Inbox.
+          </p>
+        </div>
+      </aside>
+    );
+  }
+
   if (isAnnouncementsThread) {
     const entity = focusedAnnouncement?.associatedEntity;
     return (

@@ -20,6 +20,7 @@ import {
   saveReturnRequests,
 } from '../lib/dashboard/pendingActions';
 import { operationsApi } from '../services/operationsApi';
+import { uploadReturnEvidence } from '../services/mediaUpload';
 
 function mapStorefrontReturnReason(
   label: string,
@@ -55,6 +56,9 @@ export function CustomerOrdersPage({
   const [returningOrderId, setReturningOrderId] = useState<string | null>(null);
   const [returnReason, setReturnReason] = useState('Wrong Item');
   const [returnDesc, setReturnDesc] = useState('');
+  const [returnFiles, setReturnFiles] = useState<File[]>([]);
+  const [returnVideoLink, setReturnVideoLink] = useState('');
+  const [returnUploading, setReturnUploading] = useState(false);
   const [returnedOrderIds, setReturnedOrderIds] = useState<Set<string>>(() => {
     const fromOrders = new Set(
       orders.filter((o) => o.returnRequested).map((o) => o.orderId),
@@ -486,95 +490,125 @@ export function CustomerOrdersPage({
                             />
                           </div>
                         </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[12px] font-semibold text-[#9AA0AC] block">
+                            Evidence Photos (photo or video link required)
+                          </label>
+                          <input
+                            type="file"
+                            accept="image/*"
+                            multiple
+                            onChange={(e) => {
+                              const picked = Array.from(e.target.files || []);
+                              e.target.value = '';
+                              setReturnFiles((prev) => [...prev, ...picked].slice(0, 8));
+                            }}
+                            className="text-xs"
+                          />
+                          {returnFiles.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mt-1">
+                              {returnFiles.map((f, i) => (
+                                <img key={i} src={URL.createObjectURL(f)} alt="" className="w-12 h-12 rounded-lg object-cover border border-[#E8EDF2]" />
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        <div className="space-y-1.5">
+                          <label className="text-[12px] font-semibold text-[#9AA0AC] block">
+                            Video Link (photo or video link required)
+                          </label>
+                          <input
+                            type="url"
+                            value={returnVideoLink}
+                            onChange={(e) => setReturnVideoLink(e.target.value)}
+                            placeholder="Google Drive link to a video of the issue"
+                            className="w-full h-10 bg-white border border-[#E8EDF2] rounded-lg px-3 text-sm text-[#1A1A2E] focus:outline-none focus:border-[#FF5B00]"
+                          />
+                        </div>
                         <div className="flex gap-3 flex-wrap">
                           <button
                             type="button"
-                            onClick={() => {
+                            disabled={returnUploading}
+                            onClick={async () => {
                               if (!returnDesc.trim()) {
                                 toast.error('Please describe the issue.');
                                 return;
                               }
-                              const createdAt = new Date().toISOString();
+                              if (returnFiles.length === 0 && !returnVideoLink.trim()) {
+                                toast.error('Please attach at least one evidence photo or a video link.');
+                                return;
+                              }
+                              if (returnVideoLink.trim() && !/^https?:\/\//i.test(returnVideoLink.trim())) {
+                                toast.error('Video link must start with http:// or https://');
+                                return;
+                              }
                               const sellerId = order.subOrders[0]?.sellerId || 'unknown';
                               const itemId = String(order.subOrders[0]?.items?.[0]?.productId || order.orderId);
                               const reasonCode = mapStorefrontReturnReason(returnReason);
-                              const row: ReturnRequest = {
-                                id: `RET-${Date.now()}`,
-                                orderId: order.orderId,
-                                sellerId,
-                                buyerId: currentUser.id,
-                                itemId,
-                                reason: reasonCode,
-                                description: returnDesc.trim(),
-                                status: 'initiated',
-                                createdAt,
-                              };
-                              const nextReturns = [row, ...loadReturnRequests()];
-                              saveReturnRequests(nextReturns);
-                              window.dispatchEvent(new Event('choosify-returns-updated'));
-                              updateOrder(order.orderId, {
-                                returnRequested: true,
-                                returnReason,
-                                returnRequestedAt: createdAt,
-                              });
-                              operationsApi
-                                .createReturn({
+                              setReturnUploading(true);
+                              try {
+                                const evidenceMediaIds = returnFiles.length ? await uploadReturnEvidence(returnFiles) : [];
+                                // Real submission only — no optimistic localStorage write before the
+                                // server confirms (a prior version wrote an optimistic row first and
+                                // never rolled it back on failure, so a failed submission could still
+                                // show as "created" in the buyer's own list).
+                                const saved = await operationsApi.createReturn({
                                   orderId: order.orderId,
                                   buyerId: currentUser.id,
                                   sellerId,
                                   itemId,
                                   reason: reasonCode,
                                   description: returnDesc.trim(),
+                                  evidenceMediaIds,
+                                  videoLink: returnVideoLink.trim() || undefined,
                                   initiatedBy: 'customer',
-                                })
-                                .then((saved) => {
-                                  const merged = [
-                                    saved,
-                                    ...loadReturnRequests().filter((r) => r.id !== row.id && r.id !== saved.id),
-                                  ];
-                                  saveReturnRequests(merged);
-                                  window.dispatchEvent(new Event('choosify-returns-updated'));
-                                })
-                                .catch((err) => {
-                                  toast.error((err as Error)?.message || 'Failed to submit return to server.');
                                 });
-                              window.dispatchEvent(
-                                new CustomEvent('choosify-return-request', {
-                                  detail: {
-                                    orderId: order.orderId,
-                                    reason: returnReason,
-                                    description: returnDesc,
-                                  },
-                                })
-                              );
-                              toast.success(
-                                'Return request submitted. We will respond within 48 hours.'
-                              );
-                              addNotification(
-                                'Your return request has been submitted.',
-                                'order'
-                              );
-                              setReturnedOrderIds((prev) => {
-                                const next = new Set(prev);
-                                next.add(order.orderId);
-                                return next;
-                              });
-                              setReturningOrderId(null);
-                              setReturnReason('Wrong Item');
-                              setReturnDesc('');
+                                const merged = [saved, ...loadReturnRequests().filter((r) => r.id !== saved.id)];
+                                saveReturnRequests(merged);
+                                window.dispatchEvent(new Event('choosify-returns-updated'));
+                                updateOrder(order.orderId, {
+                                  returnRequested: true,
+                                  returnReason,
+                                  returnRequestedAt: saved.createdAt,
+                                });
+                                window.dispatchEvent(
+                                  new CustomEvent('choosify-return-request', {
+                                    detail: { orderId: order.orderId, reason: returnReason, description: returnDesc },
+                                  })
+                                );
+                                toast.success('Return request submitted. We will respond within 48 hours.');
+                                addNotification('Your return request has been submitted.', 'order');
+                                setReturnedOrderIds((prev) => {
+                                  const next = new Set(prev);
+                                  next.add(order.orderId);
+                                  return next;
+                                });
+                                setReturningOrderId(null);
+                                setReturnReason('Wrong Item');
+                                setReturnDesc('');
+                                setReturnFiles([]);
+                                setReturnVideoLink('');
+                              } catch (err) {
+                                toast.error((err as Error)?.message || 'Failed to submit return request.');
+                              } finally {
+                                setReturnUploading(false);
+                              }
                             }}
-                            className="px-5 py-2.5 bg-[#FF5B00] hover:bg-[#EF3C23] text-white text-[12px] font-bold rounded-lg transition-all cursor-pointer border-0"
+                            className="px-5 py-2.5 bg-[#FF5B00] hover:bg-[#EF3C23] text-white text-[12px] font-bold rounded-lg transition-all cursor-pointer border-0 disabled:opacity-60"
                           >
-                            Submit return request
+                            {returnUploading ? 'Submitting…' : 'Submit return request'}
                           </button>
                           <button
                             type="button"
+                            disabled={returnUploading}
                             onClick={() => {
                               setReturningOrderId(null);
                               setReturnReason('Wrong Item');
                               setReturnDesc('');
+                              setReturnFiles([]);
+                              setReturnVideoLink('');
                             }}
-                            className="px-5 py-2.5 bg-white hover:bg-gray-50 text-[#1A1A2E] text-[12px] font-bold rounded-lg transition-all cursor-pointer border border-[#E8EDF2]"
+                            className="px-5 py-2.5 bg-white hover:bg-gray-50 text-[#1A1A2E] text-[12px] font-bold rounded-lg transition-all cursor-pointer border border-[#E8EDF2] disabled:opacity-60"
                           >
                             Cancel
                           </button>
