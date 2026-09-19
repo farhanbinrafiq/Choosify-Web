@@ -206,7 +206,7 @@ export async function uploadVerificationFile(file: File): Promise<{ url: string;
  */
 async function uploadViaCatalogMediaFull(
   file: File,
-  category: 'users' | 'reviews' | 'warranty-claims',
+  category: 'users' | 'reviews' | 'warranty-claims' | 'return-evidence',
 ): Promise<{ url: string; mediaId: string }> {
   const allowedImage = file.type.startsWith('image/');
   const allowedVideo = category === 'warranty-claims' && file.type.startsWith('video/');
@@ -289,6 +289,17 @@ export async function uploadWarrantyClaimEvidence(files: File[]): Promise<string
   for (const file of files.slice(0, 8)) {
     // eslint-disable-next-line no-await-in-loop
     const result = await uploadViaCatalogMediaFull(file, 'warranty-claims');
+    mediaIds.push(result.mediaId);
+  }
+  return mediaIds;
+}
+
+/** Return/refund case evidence photos — private (buyer/seller/admin only). Returns media ids for evidenceMediaIds. */
+export async function uploadReturnEvidence(files: File[]): Promise<string[]> {
+  const mediaIds: string[] = [];
+  for (const file of files.slice(0, 8)) {
+    // eslint-disable-next-line no-await-in-loop
+    const result = await uploadViaCatalogMediaFull(file, 'return-evidence');
     mediaIds.push(result.mediaId);
   }
   return mediaIds;

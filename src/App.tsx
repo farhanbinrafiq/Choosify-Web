@@ -38,6 +38,7 @@ const GuideProductsPage = lazy(() => import('./pages/GuideProductsPage').then(m 
 // useTransitions={false}, a blank LoadingFallback on Sign In feels broken).
 import { LoginSignUpPage } from './pages/LoginSignUpPage';
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'));
+const WarrantyClaimDocumentPage = lazy(() => import('./pages/WarrantyClaimDocumentPage'));
 const ResetPasswordPage = lazy(() => import('./pages/ResetPasswordPage'));
 const VerifyEmailPage = lazy(() => import('./pages/VerifyEmailPage'));
 const PostOfferPage = lazy(() => import('./pages/PostOfferPage').then(m => ({ default: m.PostOfferPage })));
@@ -246,6 +247,11 @@ function AppContent() {
             <Route path="/reset-password" element={<Suspense fallback={null}><ResetPasswordPage /></Suspense>} />
             <Route path="/verify-email" element={<Suspense fallback={null}><VerifyEmailPage /></Suspense>} />
             <Route path="/post-offer" element={<ProtectedRoute><PageWrapper><PostOfferPage /></PageWrapper></ProtectedRoute>} />
+            {/* Standalone, unshelled — printable Warranty Claim Document (opened in a new tab). */}
+            <Route
+              path="/warranty-claims/:id/document"
+              element={<ProtectedRoute><Suspense fallback={null}><WarrantyClaimDocumentPage /></Suspense></ProtectedRoute>}
+            />
             <Route path="/whats-on" element={<Navigate to="/products" replace />} />
             <Route path="/whats-on/:slug" element={<PageWrapper><LegacyWhatsOnContentRedirect /></PageWrapper>} />
             <Route path="/customer-favorite" element={<Navigate to="/products" replace />} />

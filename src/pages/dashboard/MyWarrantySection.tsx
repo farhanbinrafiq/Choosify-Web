@@ -1,8 +1,17 @@
-import React, { useEffect, useMemo, useState } from 'react';
-import { ShieldCheck, X } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { ShieldCheck, X, ChevronDown, ChevronUp, FileText } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { operationsApi } from '../../services/operationsApi';
-import { warrantyClaimsApi, type WarrantyClaim, type WarrantyClaimIssueType } from '../../services/warrantyClaimsApi';
+import {
+  warrantyClaimsApi,
+  type WarrantyClaim,
+  type WarrantyClaimIssueType,
+  type WarrantyClaimServiceStage,
+  type WarrantyClaimResolutionType,
+  type WarrantyClaimAttachmentCategory,
+  WARRANTY_CLAIM_ATTACHMENT_CATEGORY_LABELS,
+} from '../../services/warrantyClaimsApi';
 import { uploadWarrantyClaimEvidence } from '../../services/mediaUpload';
 import { useGlobalState } from '../../context/GlobalStateContext';
 import { toast } from '../../lib/notify';
@@ -21,7 +30,8 @@ type WarrantyItem = {
   purchaseDate: string;
   warrantyStartsAt?: string;
   warrantyExpiresAt: string;
-  claim?: WarrantyClaim;
+  /** Full claim history for this warranty entitlement — newest first. Never just the latest. */
+  claims: WarrantyClaim[];
   status: DerivedStatus;
 };
 
@@ -34,6 +44,91 @@ const STATUS_BADGE: Record<DerivedStatus, { text: string; className: string }> =
 };
 
 const OPEN_CLAIM_STATUSES = new Set(['submitted', 'acknowledged', 'more_info_required', 'approved', 'service_in_progress']);
+
+// No document exists before the claim is actually accepted and moving
+// through repair — buyer already sees seller/staff notes and status updates
+// on this page for that. Available from approval through resolution.
+const DELIVERY_INVOICE_ELIGIBLE_STATUSES = new Set(['approved', 'service_in_progress', 'resolved']);
+
+const ATTACHMENT_CATEGORIES: WarrantyClaimAttachmentCategory[] = ['warrantyCard', 'productPhoto', 'box', 'receipt'];
+
+function CategoryUpload({
+  label,
+  files,
+  onChange,
+}: {
+  label: string;
+  files: File[];
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) {
+  const previews = files.map((f) => URL.createObjectURL(f));
+  return (
+    <div className="border border-[#E5E7EB] rounded-xl p-2.5">
+      <label className="block text-[11px] font-bold text-[#1A1A2E] mb-1.5">{label}</label>
+      <input type="file" accept="image/*" multiple onChange={onChange} className="text-[11px]" />
+      {previews.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mt-2">
+          {previews.map((src) => (
+            <img key={src} src={src} alt="" className="w-12 h-12 rounded-lg object-cover border border-slate-200" />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+const STATUS_LABEL: Record<string, string> = {
+  submitted: 'Claim Submitted',
+  acknowledged: 'Seller Viewed',
+  more_info_required: 'More Info Required',
+  approved: 'Claim Accepted',
+  rejected: 'Rejected',
+  service_in_progress: 'Resolution In Progress',
+  resolved: 'Resolved',
+  cancelled: 'Cancelled',
+  disputed: 'Disputed',
+};
+
+const SERVICE_STAGE_LABEL: Record<WarrantyClaimServiceStage, string> = {
+  return_requested: 'Return Requested',
+  in_transit: 'Product In Transit',
+  received: 'Product Received',
+  under_review: 'Under Review',
+  repair_in_progress: 'Repair In Progress',
+  replacement_in_progress: 'Replacement In Progress',
+  ready_for_dispatch: 'Ready For Dispatch',
+  dispatched: 'Dispatched',
+  delivered: 'Delivered',
+};
+
+const RESOLUTION_TYPE_LABEL: Record<WarrantyClaimResolutionType, string> = {
+  repaired: 'Repaired',
+  replaced: 'Replaced',
+  refunded: 'Refunded',
+  rejected: 'Rejected',
+  no_fault_found: 'No Fault Found',
+  other: 'Other',
+};
+
+/** What the buyer should expect next, given the current status/stage — informational only, never a fabricated SLA. */
+function nextExpectedStep(claim: WarrantyClaim): string | null {
+  switch (claim.status) {
+    case 'submitted':
+      return 'Waiting for the seller to review your claim.';
+    case 'acknowledged':
+      return 'The seller has seen your claim and is deciding next steps.';
+    case 'more_info_required':
+      return 'Please provide the additional information the seller requested.';
+    case 'approved':
+      return 'Your claim was accepted — the seller will begin resolving it shortly.';
+    case 'service_in_progress':
+      return claim.serviceStage === 'return_requested' || claim.serviceStage === 'in_transit'
+        ? 'Send the product back as instructed by the seller.'
+        : 'The seller is working on a repair, replacement, or resolution.';
+    default:
+      return null;
+  }
+}
 
 const ISSUE_TYPES: { value: WarrantyClaimIssueType; label: string }[] = [
   { value: 'not_powering_on', label: 'Not powering on' },
@@ -58,6 +153,8 @@ export function MyWarrantySection() {
   const [items, setItems] = useState<WarrantyItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [claimTarget, setClaimTarget] = useState<WarrantyItem | null>(null);
+  const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [expandedClaim, setExpandedClaim] = useState<string | null>(null);
 
   const load = () => {
     setLoading(true);
@@ -66,12 +163,15 @@ export function MyWarrantySection() {
       warrantyClaimsApi.list(currentUser.id).catch(() => [] as WarrantyClaim[]),
     ])
       .then(([orders, claims]) => {
-        const claimsByItem = new Map<string, WarrantyClaim>();
+        // Full history per item — newest first. Never keep only the latest.
+        const claimsByItem = new Map<string, WarrantyClaim[]>();
         for (const c of claims) {
-          const existing = claimsByItem.get(c.orderItemId);
-          if (!existing || new Date(c.submittedAt) > new Date(existing.submittedAt)) {
-            claimsByItem.set(c.orderItemId, c);
-          }
+          const list = claimsByItem.get(c.orderItemId) || [];
+          list.push(c);
+          claimsByItem.set(c.orderItemId, list);
+        }
+        for (const list of claimsByItem.values()) {
+          list.sort((a, b) => new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime());
         }
 
         const derived: WarrantyItem[] = [];
@@ -86,12 +186,13 @@ export function MyWarrantySection() {
               const warrantyExpiresAt = typeof item?.warrantyExpiresAt === 'string' ? item.warrantyExpiresAt : '';
               if (!warrantyMonths || !warrantyExpiresAt) continue;
               const itemId = String(item?.itemId || '');
-              const claim = itemId ? claimsByItem.get(itemId) : undefined;
+              const itemClaims = itemId ? claimsByItem.get(itemId) || [] : [];
+              const latestClaim = itemClaims[0];
 
               let status: DerivedStatus;
-              if (claim && OPEN_CLAIM_STATUSES.has(claim.status)) {
+              if (latestClaim && OPEN_CLAIM_STATUSES.has(latestClaim.status)) {
                 status = 'CLAIM_OPEN';
-              } else if (claim && (claim.status === 'resolved' || claim.status === 'rejected')) {
+              } else if (latestClaim && (latestClaim.status === 'resolved' || latestClaim.status === 'rejected')) {
                 status = 'CLAIM_RESOLVED';
               } else {
                 const daysLeft = (new Date(warrantyExpiresAt).getTime() - Date.now()) / (24 * 60 * 60 * 1000);
@@ -111,7 +212,7 @@ export function MyWarrantySection() {
                 purchaseDate: createdAt,
                 warrantyStartsAt: typeof item?.warrantyStartsAt === 'string' ? item.warrantyStartsAt : undefined,
                 warrantyExpiresAt,
-                claim,
+                claims: itemClaims,
                 status,
               });
             }
@@ -146,44 +247,131 @@ export function MyWarrantySection() {
         <div className="space-y-3" data-testid="warranty-item-list">
           {items.map((item) => {
             const badge = STATUS_BADGE[item.status];
-            const canClaim = item.status === 'UNDER_WARRANTY' || item.status === 'EXPIRING_SOON';
+            const hasOpenClaim = item.claims.some((c) => OPEN_CLAIM_STATUSES.has(c.status));
+            const warrantyActive = item.status !== 'OUT_OF_WARRANTY';
+            const canClaim = warrantyActive && !hasOpenClaim;
+            const isExpanded = expandedItem === item.orderItemId;
             return (
-              <div key={item.orderItemId} className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 flex gap-3" data-testid="warranty-item-row">
-                <img
-                  src={item.image || 'https://placehold.co/80x80?text=Product'}
-                  alt={item.productTitle}
-                  className="w-16 h-16 rounded-lg object-cover shrink-0 bg-[#F4F7F9]"
-                />
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2 mb-1">
-                    <h3 className="text-[13.5px] font-extrabold text-[#1A1A2E] truncate">{item.productTitle}</h3>
-                    <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full border', badge.className)}>
-                      {badge.text}
-                    </span>
-                  </div>
-                  <p className="text-[11.5px] text-[#9AA0AC]">Order {item.orderId}</p>
-                  <p className="text-[11.5px] text-[#4B5563] mt-1">
-                    {item.warrantyMonths}-month warranty{item.warrantyProvider ? ` · ${item.warrantyProvider}` : ''}
-                  </p>
-                  <p className="text-[11.5px] text-[#9AA0AC]">
-                    Expires {new Date(item.warrantyExpiresAt).toLocaleDateString('en-BD')} ·{' '}
-                    {timeRemaining(item.warrantyExpiresAt)}
-                  </p>
-                  {item.claim && (
-                    <p className="text-[11px] text-[#9AA0AC] mt-1">
-                      Claim status: <span className="font-bold text-[#1A1A2E]">{item.claim.status.replace(/_/g, ' ')}</span>
+              <div key={item.orderItemId} className="bg-white border border-[#E8EDF2] rounded-[10px] p-4" data-testid="warranty-item-row">
+                <div className="flex gap-3">
+                  <img
+                    src={item.image || 'https://placehold.co/80x80?text=Product'}
+                    alt={item.productTitle}
+                    className="w-16 h-16 rounded-lg object-cover shrink-0 bg-[#F4F7F9]"
+                  />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 mb-1">
+                      <h3 className="text-[13.5px] font-extrabold text-[#1A1A2E] truncate">{item.productTitle}</h3>
+                      <span className={cn('text-[10px] font-bold px-2 py-0.5 rounded-full border', badge.className)}>
+                        {badge.text}
+                      </span>
+                    </div>
+                    <p className="text-[11.5px] text-[#9AA0AC]">Order {item.orderId}</p>
+                    <p className="text-[11.5px] text-[#4B5563] mt-1">
+                      {item.warrantyMonths}-month warranty{item.warrantyProvider ? ` · ${item.warrantyProvider}` : ''}
                     </p>
-                  )}
-                  {canClaim && !item.claim && (
-                    <button
-                      onClick={() => setClaimTarget(item)}
-                      className="mt-2 text-[11px] font-black uppercase px-3 py-1.5 rounded-lg bg-[#FF5B00] text-white hover:brightness-105"
-                      data-testid="claim-warranty-btn"
-                    >
-                      Claim Warranty
-                    </button>
-                  )}
+                    <p className="text-[11.5px] text-[#9AA0AC]">
+                      {warrantyActive ? 'Warranty Active' : 'Expired'} · Expires{' '}
+                      {new Date(item.warrantyExpiresAt).toLocaleDateString('en-BD')} · {timeRemaining(item.warrantyExpiresAt)}
+                    </p>
+
+                    <div className="flex items-center gap-3 mt-2">
+                      {item.claims.length > 0 && (
+                        <button
+                          onClick={() => setExpandedItem(isExpanded ? null : item.orderItemId)}
+                          className="text-[11px] font-bold text-[#1A1A2E] flex items-center gap-1"
+                        >
+                          Claims made: {item.claims.length}
+                          {isExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                        </button>
+                      )}
+                      {canClaim && (
+                        <button
+                          onClick={() => setClaimTarget(item)}
+                          className="text-[11px] font-black uppercase px-3 py-1.5 rounded-lg bg-[#FF5B00] text-white hover:brightness-105"
+                          data-testid="claim-warranty-btn"
+                        >
+                          Claim Warranty
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
+
+                {isExpanded && item.claims.length > 0 && (
+                  <div className="mt-3 pt-3 border-t border-[#F1F1F3] space-y-2">
+                    {item.claims.map((claim, idx) => {
+                      const claimExpanded = expandedClaim === claim.id;
+                      const nextStep = nextExpectedStep(claim);
+                      return (
+                        <div key={claim.id} className="bg-[#FAFAFB] rounded-lg p-3">
+                          <button
+                            onClick={() => setExpandedClaim(claimExpanded ? null : claim.id)}
+                            className="w-full flex items-center justify-between text-[11.5px]"
+                          >
+                            <span className="font-bold text-[#1A1A2E]">
+                              Claim #{item.claims.length - idx} ({claim.referenceId || claim.id})
+                              {claim.resolutionType ? ` — ${RESOLUTION_TYPE_LABEL[claim.resolutionType]}` : ''} —{' '}
+                              {STATUS_LABEL[claim.status] || claim.status}
+                            </span>
+                            {claimExpanded ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+                          </button>
+
+                          {claimExpanded && (
+                            <div className="mt-2 text-[11px] text-[#4B5563] space-y-2">
+                              <div>Submitted {new Date(claim.submittedAt).toLocaleDateString('en-BD')}</div>
+                              {claim.status === 'service_in_progress' && claim.serviceStage && (
+                                <div className="font-bold text-[#1A1A2E]">{SERVICE_STAGE_LABEL[claim.serviceStage]}</div>
+                              )}
+                              {claim.sellerResponse && (
+                                <div className="bg-white rounded-lg p-2 border border-[#E8EDF2]">
+                                  <span className="font-bold">Latest seller note:</span> {claim.sellerResponse}
+                                </div>
+                              )}
+                              {claim.estimatedCompletionDate && !['resolved', 'rejected', 'cancelled'].includes(claim.status) && (
+                                <div>
+                                  <span className="font-bold">Estimated completion:</span>{' '}
+                                  {new Date(claim.estimatedCompletionDate).toLocaleDateString('en-BD')}
+                                </div>
+                              )}
+                              {nextStep && <div className="italic text-[#9AA0AC]">Next: {nextStep}</div>}
+                              {claim.resolutionNotes && (
+                                <div>
+                                  <span className="font-bold">Outcome:</span> {claim.resolutionNotes}
+                                </div>
+                              )}
+
+                              {claim.timeline && claim.timeline.length > 0 && (
+                                <ol className="space-y-1 border-t border-[#E8EDF2] pt-2">
+                                  {claim.timeline.slice().reverse().map((t) => (
+                                    <li key={t.id} className="flex gap-2">
+                                      <span className="text-[#9AA0AC] shrink-0">{new Date(t.at).toLocaleDateString('en-BD')}</span>
+                                      <span>
+                                        <span className="font-bold">{STATUS_LABEL[t.status] || t.status}</span>
+                                        {t.serviceStage ? ` · ${SERVICE_STAGE_LABEL[t.serviceStage]}` : ''}
+                                        {t.note ? ` — ${t.note}` : ''}
+                                      </span>
+                                    </li>
+                                  ))}
+                                </ol>
+                              )}
+
+                              {DELIVERY_INVOICE_ELIGIBLE_STATUSES.has(claim.status) && (
+                              <Link
+                                to={`/warranty-claims/${claim.id}/document`}
+                                target="_blank"
+                                className="inline-flex items-center gap-1 text-[11px] font-bold text-[#FF5B00]"
+                              >
+                                <FileText size={12} /> Warranty Delivery Invoice
+                              </Link>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             );
           })}
@@ -215,15 +403,20 @@ function ClaimWarrantyModal({
 }) {
   const [issueType, setIssueType] = useState<WarrantyClaimIssueType>('not_powering_on');
   const [description, setDescription] = useState('');
-  const [files, setFiles] = useState<File[]>([]);
+  const [filesByCategory, setFilesByCategory] = useState<Record<WarrantyClaimAttachmentCategory, File[]>>({
+    warrantyCard: [],
+    productPhoto: [],
+    box: [],
+    receipt: [],
+  });
   const [submitting, setSubmitting] = useState(false);
 
-  const previews = useMemo(() => files.map((f) => URL.createObjectURL(f)), [files]);
+  const totalFileCount = ATTACHMENT_CATEGORIES.reduce((sum, cat) => sum + filesByCategory[cat].length, 0);
 
-  const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFiles = (cat: WarrantyClaimAttachmentCategory) => (e: React.ChangeEvent<HTMLInputElement>) => {
     const picked = Array.from(e.target.files || []);
     e.target.value = '';
-    setFiles((prev) => [...prev, ...picked].slice(0, 8));
+    setFilesByCategory((prev) => ({ ...prev, [cat]: [...prev[cat], ...picked].slice(0, 4) }));
   };
 
   const submit = async () => {
@@ -231,15 +424,23 @@ function ClaimWarrantyModal({
       toast.error('Please describe the issue.');
       return;
     }
+    if (totalFileCount === 0) {
+      toast.error('Please attach at least one photo — warranty card, product, box, or receipt.');
+      return;
+    }
     setSubmitting(true);
     try {
-      const attachmentMediaIds = files.length ? await uploadWarrantyClaimEvidence(files) : [];
+      const attachmentCategories: Partial<Record<WarrantyClaimAttachmentCategory, string[]>> = {};
+      for (const cat of ATTACHMENT_CATEGORIES) {
+        const catFiles = filesByCategory[cat];
+        if (catFiles.length) attachmentCategories[cat] = await uploadWarrantyClaimEvidence(catFiles);
+      }
       const result = await warrantyClaimsApi.create({
         orderId: item.orderId,
         orderItemId: item.orderItemId,
         issueType,
         description: description.trim(),
-        attachmentMediaIds,
+        attachmentCategories,
       });
       toast.success(result.reused ? 'You already have an open claim for this item.' : 'Warranty claim submitted.');
       onSubmitted();
@@ -297,15 +498,19 @@ function ClaimWarrantyModal({
           className="w-full mb-3 p-2.5 border border-[#E5E7EB] rounded-xl text-xs"
         />
 
-        <label className="block text-[10px] font-black uppercase text-slate-500 mb-1.5">Evidence (photos/video)</label>
-        <input type="file" accept="image/*,video/mp4,video/webm" multiple onChange={handleFiles} className="text-xs mb-2" />
-        {previews.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-3">
-            {previews.map((src, i) => (
-              <img key={src} src={src} alt="" className="w-14 h-14 rounded-lg object-cover border border-slate-200" />
-            ))}
-          </div>
-        )}
+        <div className="mb-1.5 flex items-center justify-between">
+          <label className="block text-[10px] font-black uppercase text-slate-500">Evidence — at least one photo required</label>
+        </div>
+        <div className="space-y-3 mb-3">
+          {ATTACHMENT_CATEGORIES.map((cat) => (
+            <CategoryUpload
+              key={cat}
+              label={WARRANTY_CLAIM_ATTACHMENT_CATEGORY_LABELS[cat]}
+              files={filesByCategory[cat]}
+              onChange={handleFiles(cat)}
+            />
+          ))}
+        </div>
 
         <button
           onClick={submit}

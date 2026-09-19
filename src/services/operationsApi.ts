@@ -250,6 +250,8 @@ export const operationsApi = {
     reason: string;
     description: string;
     evidencePhotos?: string[];
+    evidenceMediaIds?: string[];
+    videoLink?: string;
     initiatedBy?: 'customer' | 'admin';
   }): Promise<import('../types/schemas').ReturnRequest> => {
     const result = await request<{ data: import('../types/schemas').ReturnRequest }>(

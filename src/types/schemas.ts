@@ -253,8 +253,18 @@ export interface Report {
   createdAt: string;
 }
 
+export interface ReturnTimelineEntry {
+  id: string;
+  status: string;
+  note?: string;
+  at: string;
+  by?: string;
+}
+
 export interface ReturnRequest {
   id: string;
+  /** Permanent Choosify Return Reference ID (RT-#####), when assigned. */
+  referenceId?: string;
   orderId: string;
   sellerId: string;
   buyerId: string;
@@ -263,6 +273,11 @@ export interface ReturnRequest {
   description: string;
   evidence?: string;
   evidencePhotos?: string[];
+  evidenceMediaIds?: string[];
+  /** Buyer-supplied external video link (e.g. Google Drive) — never a raw video upload. */
+  videoLink?: string;
+  /** Recorded at approval time — does the buyer have to send the item back before the refund? */
+  requiresReturn?: boolean;
   /** Admin CMS statuses; `pending` kept as a storefront alias for `initiated`. */
   status:
     | 'pending'
@@ -280,6 +295,8 @@ export interface ReturnRequest {
   refundAmount?: number;
   refundStatus?: string;
   returnTrackingId?: string;
+  /** Buyer-visible structured history — every status transition. */
+  timeline?: ReturnTimelineEntry[];
 }
 
 export interface PromoCode {

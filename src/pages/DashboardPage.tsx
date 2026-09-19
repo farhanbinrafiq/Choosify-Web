@@ -46,12 +46,14 @@ import {
   Camera,
   Upload,
   Pencil,
+  Wallet,
 } from 'lucide-react';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { MyPaymentOptionsSection } from './dashboard/MyPaymentOptionsSection';
 import { MyCancellationsSection } from './dashboard/MyCancellationsSection';
 import { MyReturnsSection } from './dashboard/MyReturnsSection';
+import { MyRefundSection } from './dashboard/MyRefundSection';
 import { MyWarrantySection } from './dashboard/MyWarrantySection';
 import { SellerOrdersSection } from './dashboard/SellerOrdersSection';
 import { ToPaySection } from './dashboard/ToPaySection';
@@ -113,6 +115,7 @@ const DASHBOARD_TABS_WITH_RIGHT_CONTENT = new Set([
   'to-pay',
   'my-cancellations',
   'my-returns',
+  'my-refund',
   'my-warranty',
   'my-payment-options',
 ]);
@@ -240,6 +243,7 @@ const ACTIVITY_TAB_IDS = new Set([
   'to-pay',
   'my-cancellations',
   'my-returns',
+  'my-refund',
   'my-warranty',
   'my-payment-options',
 ]);
@@ -1996,6 +2000,7 @@ export function DashboardPage() {
     Banknote,
     Ban,
     RotateCcw,
+    Wallet,
     CreditCard,
   };
 
@@ -2125,6 +2130,8 @@ export function DashboardPage() {
         return <MyCancellationsSection />;
       case 'my-returns':
         return <MyReturnsSection />;
+      case 'my-refund':
+        return <MyRefundSection />;
       case 'my-warranty':
         return <MyWarrantySection />;
       case 'my-payment-options':
@@ -2274,7 +2281,7 @@ export function DashboardPage() {
         onClick={() => {
           setMobileNavOpen(false);
           logout();
-          navigate('/');
+          navigate('/login');
           toast.success('Successfully logged out.');
         }}
       />
