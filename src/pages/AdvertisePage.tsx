@@ -5,9 +5,20 @@ import {
   Layers, Users2, ArrowRight
 } from 'lucide-react';
 import { StaticPageHero } from '../components/StaticPageHero';
-import { operationsApi } from '../services/operationsApi';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { enabledSorted, fillTemplate, resolveSitePages } from '../lib/cmsSitePages';
+import {
+  FieldError,
+  InquiryFormError,
+  InquiryHoneypot,
+  InquiryOptionsError,
+  InquirySuccessPanel,
+  inquiryInputClass,
+  inquiryLabelClass,
+  useInquiryOptions,
+  useInquirySubmit,
+  useSignedInContact,
+} from '../components/inquiry/inquiryForm';
 
 const STAT_VALUE_COLORS = ['text-[#5C2AFE]', 'text-orange-primary', 'text-emerald-500'] as const;
 
@@ -25,47 +36,50 @@ export function AdvertisePage() {
   const content = resolveSitePages(siteConfig?.sitePages).advertise;
   const audienceStats = enabledSorted(content.audienceStats);
   const placements = enabledSorted(content.placements);
-  const budgetOptions = enabledSorted(content.budgetOptions);
-  const placementOptions = enabledSorted(content.placementOptions);
-  const defaultBudget = budgetOptions[0]?.value || 'under-50k';
-  const defaultPlacement = placementOptions[0]?.value || 'sponsored-brands';
+  const { options, error: optionsError, retry: retryOptions } = useInquiryOptions();
+  const budgetOptions = options?.adBudgetRanges ?? [];
+  const placementOptions = options?.adPlacementInterests ?? [];
+  const signedIn = useSignedInContact();
+  const inquiry = useInquirySubmit();
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  const [formData, setFormData] = useState({
+  const emptyForm = () => ({
     brandName: '',
-    contactPerson: '',
-    email: '',
-    budget: defaultBudget,
-    placementInterest: defaultPlacement,
-    message: ''
+    contactPerson: signedIn.name,
+    email: signedIn.email,
+    budget: '',
+    placementInterest: '',
+    message: '',
   });
+  const [formData, setFormData] = useState(emptyForm);
+  const [honeypot, setHoneypot] = useState('');
 
-  const [submitted, setSubmitted] = useState(false);
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      email: prev.email || signedIn.email,
+      contactPerson: prev.contactPerson || signedIn.name,
+    }));
+  }, [signedIn.email, signedIn.name]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.brandName || !formData.email) {
-      alert('Please fill in Brand Name and Email.');
-      return;
-    }
-    try {
-      await operationsApi.submitLead({
-        brandName: formData.brandName,
-        contactPerson: formData.contactPerson,
-        email: formData.email,
-        budget: formData.budget,
-        placementInterest: formData.placementInterest,
-        message: formData.message,
-        source: 'advertise-page',
-      });
-      setSubmitted(true);
-    } catch {
-      setSubmitted(true);
-    }
+    await inquiry.submit({
+      inquiryType: 'advertising',
+      brandName: formData.brandName,
+      contactPerson: formData.contactPerson,
+      email: formData.email,
+      budget: formData.budget,
+      placementInterest: formData.placementInterest,
+      message: formData.message,
+      companyFax: honeypot,
+    });
   };
+
+  const fe = inquiry.fieldErrors;
 
   return (
     <div className="min-h-screen bg-choosify-feed font-sans">
@@ -127,21 +141,23 @@ export function AdvertisePage() {
               </p>
             </div>
 
-            {/* Audience Overview */}
-            <div className="space-y-4">
-              <h2 className="text-xl md:text-2xl font-extrabold text-[#1A1A2E] tracking-tight">
-                {content.audienceHeading}
-              </h2>
-              <div className="h-0.5 w-16 bg-orange-primary mb-6" />
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                {audienceStats.map((stat, i) => (
-                  <div key={stat.id} className="bg-white border border-[#e8edf2] rounded-[5px] p-5 shadow-xs text-center">
-                    <span className={`block text-2xl font-black italic font-mono mb-1 ${STAT_VALUE_COLORS[i % STAT_VALUE_COLORS.length]}`}>{stat.value}</span>
-                    <span className="block text-[9px] font-black text-gray-400 uppercase tracking-widest">{stat.label}</span>
-                  </div>
-                ))}
+            {/* Audience Overview — only rendered when real, CMS-authored figures exist. */}
+            {audienceStats.length > 0 ? (
+              <div className="space-y-4">
+                <h2 className="text-xl md:text-2xl font-extrabold text-[#1A1A2E] tracking-tight">
+                  {content.audienceHeading}
+                </h2>
+                <div className="h-0.5 w-16 bg-orange-primary mb-6" />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {audienceStats.map((stat, i) => (
+                    <div key={stat.id} className="bg-white border border-[#e8edf2] rounded-[5px] p-5 shadow-xs text-center">
+                      <span className={`block text-2xl font-black italic font-mono mb-1 ${STAT_VALUE_COLORS[i % STAT_VALUE_COLORS.length]}`}>{stat.value}</span>
+                      <span className="block text-[9px] font-black text-gray-400 uppercase tracking-widest">{stat.label}</span>
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            ) : null}
 
             {/* Placement Opportunities (Advertising Types) */}
             <div className="space-y-4">
@@ -189,7 +205,7 @@ export function AdvertisePage() {
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#FF5B00] to-[#EF3C23]" />
               
               <AnimatePresence mode="wait">
-                {!submitted ? (
+                {inquiry.status !== 'success' ? (
                   <motion.div
                     key="form"
                     initial={{ opacity: 0 }}
@@ -202,118 +218,143 @@ export function AdvertisePage() {
                       <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">{content.formSubheading}</p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-4 text-xs font-semibold text-gray-700">
+                    <form onSubmit={handleSubmit} noValidate className="relative space-y-4 text-xs font-semibold text-gray-700">
+                      <InquiryHoneypot value={honeypot} onChange={setHoneypot} />
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.brandName.label}</label>
-                        <input 
-                          type="text" 
+                        <label htmlFor="ad-brand" className={inquiryLabelClass}>{content.fields.brandName.label}</label>
+                        <input
+                          id="ad-brand"
+                          type="text"
                           required
+                          maxLength={options?.limits.name}
                           value={formData.brandName}
-                          onChange={e => setFormData({...formData, brandName: e.target.value})}
+                          onChange={e => { setFormData({ ...formData, brandName: e.target.value }); inquiry.clearFieldError('brandName'); }}
                           placeholder={content.fields.brandName.placeholder}
-                          className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium"
+                          aria-invalid={Boolean(fe.brandName)}
+                          className={inquiryInputClass}
                         />
+                        <FieldError message={fe.brandName} />
                       </div>
 
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.contactPerson.label}</label>
-                        <input 
-                          type="text" 
+                        <label htmlFor="ad-contact" className={inquiryLabelClass}>{content.fields.contactPerson.label}</label>
+                        <input
+                          id="ad-contact"
+                          type="text"
                           required
+                          autoComplete="name"
+                          maxLength={options?.limits.name}
                           value={formData.contactPerson}
-                          onChange={e => setFormData({...formData, contactPerson: e.target.value})}
+                          onChange={e => { setFormData({ ...formData, contactPerson: e.target.value }); inquiry.clearFieldError('contactPerson'); }}
                           placeholder={content.fields.contactPerson.placeholder}
-                          className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium"
+                          aria-invalid={Boolean(fe.contactPerson)}
+                          className={inquiryInputClass}
                         />
+                        <FieldError message={fe.contactPerson} />
                       </div>
 
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.email.label}</label>
-                        <input 
-                          type="email" 
+                        <label htmlFor="ad-email" className={inquiryLabelClass}>{content.fields.email.label}</label>
+                        <input
+                          id="ad-email"
+                          type="email"
                           required
+                          autoComplete="email"
+                          maxLength={options?.limits.email}
                           value={formData.email}
-                          onChange={e => setFormData({...formData, email: e.target.value})}
+                          onChange={e => { setFormData({ ...formData, email: e.target.value }); inquiry.clearFieldError('email'); }}
                           placeholder={content.fields.email.placeholder}
-                          className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium"
+                          aria-invalid={Boolean(fe.email)}
+                          className={inquiryInputClass}
                         />
+                        <FieldError message={fe.email} />
                       </div>
 
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.budget.label}</label>
-                        <select 
+                        <label htmlFor="ad-budget" className={inquiryLabelClass}>{content.fields.budget.label || 'Monthly Budget'} *</label>
+                        <select
+                          id="ad-budget"
+                          required
                           value={formData.budget}
-                          onChange={e => setFormData({...formData, budget: e.target.value})}
-                          className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium"
+                          onChange={e => { setFormData({ ...formData, budget: e.target.value }); inquiry.clearFieldError('budget'); }}
+                          disabled={!options}
+                          aria-invalid={Boolean(fe.budget)}
+                          className={inquiryInputClass}
                         >
+                          <option value="">{options ? 'Select a budget range' : 'Loading…'}</option>
                           {budgetOptions.map((opt) => (
-                            <option key={opt.id} value={opt.value}>{opt.label}</option>
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
                           ))}
                         </select>
+                        <FieldError message={fe.budget} />
                       </div>
 
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.placementInterest.label}</label>
-                        <select 
+                        <label htmlFor="ad-placement" className={inquiryLabelClass}>{content.fields.placementInterest.label || 'Placement Interest'} *</label>
+                        <select
+                          id="ad-placement"
+                          required
                           value={formData.placementInterest}
-                          onChange={e => setFormData({...formData, placementInterest: e.target.value})}
-                          className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium"
+                          onChange={e => { setFormData({ ...formData, placementInterest: e.target.value }); inquiry.clearFieldError('placementInterest'); }}
+                          disabled={!options}
+                          aria-invalid={Boolean(fe.placementInterest)}
+                          className={inquiryInputClass}
                         >
+                          <option value="">{options ? 'Select a placement' : 'Loading…'}</option>
                           {placementOptions.map((opt) => (
-                            <option key={opt.id} value={opt.value}>{opt.label}</option>
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
                           ))}
                         </select>
+                        <FieldError message={fe.placementInterest} />
                       </div>
 
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.message.label}</label>
-                        <textarea 
+                        <label htmlFor="ad-message" className={inquiryLabelClass}>{content.fields.message.label}</label>
+                        <textarea
+                          id="ad-message"
                           rows={3}
+                          maxLength={options?.limits.message}
                           value={formData.message}
-                          onChange={e => setFormData({...formData, message: e.target.value})}
+                          onChange={e => { setFormData({ ...formData, message: e.target.value }); inquiry.clearFieldError('message'); }}
                           placeholder={content.fields.message.placeholder}
-                          className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium resize-none"
+                          className={`${inquiryInputClass} resize-none`}
                         />
+                        <FieldError message={fe.message} />
                       </div>
 
-                      <button 
+                      <p className="text-[10px] font-semibold text-gray-400">
+                        Submitting this form does not book or charge for any placement — our team reviews every request first.
+                      </p>
+
+                      {optionsError ? <InquiryOptionsError message={optionsError} onRetry={retryOptions} /> : null}
+                      <InquiryFormError message={inquiry.error} />
+
+                      <button
                         type="submit"
-                        className="w-full py-3 bg-[#050514] hover:bg-orange-primary text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-all flex items-center justify-center gap-2 group border-none cursor-pointer mt-4"
+                        disabled={inquiry.submitting}
+                        className="w-full py-3 bg-[#050514] hover:bg-orange-primary text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-all flex items-center justify-center gap-2 group border-none cursor-pointer mt-4 disabled:opacity-60 disabled:cursor-wait"
                       >
-                        {content.submitLabel}
+                        {inquiry.submitting ? 'Sending…' : content.submitLabel}
                         <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
                       </button>
                     </form>
                   </motion.div>
                 ) : (
-                  <motion.div
-                    key="success"
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="py-12 px-2 text-center flex flex-col items-center justify-center space-y-6"
-                  >
-                    <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-500 flex items-center justify-center text-3xl">
-                      ✓
-                    </div>
-                    <div>
-                      <h3 className="text-base font-extrabold text-[#1A1A2E] tracking-tight mb-1">{content.successTitle}</h3>
-                      <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">{content.successSubtitle}</p>
-                    </div>
-                    <p className="text-gray-500 text-xs leading-relaxed font-semibold max-w-sm">
-                      {fillTemplate(content.successBodyTemplate, {
+                  <motion.div key="success" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}>
+                    <InquirySuccessPanel
+                      title={content.successTitle}
+                      subtitle={content.successSubtitle}
+                      referenceId={inquiry.referenceId}
+                      body={fillTemplate(content.successBodyTemplate, {
                         brandName: formData.brandName,
                         contactPerson: formData.contactPerson,
                       })}
-                    </p>
-                    <button 
-                      onClick={() => {
-                        setFormData({ brandName: '', contactPerson: '', email: '', budget: defaultBudget, placementInterest: defaultPlacement, message: '' });
-                        setSubmitted(false);
+                      resetLabel={content.successResetLabel}
+                      onReset={() => {
+                        setFormData(emptyForm());
+                        inquiry.reset();
                       }}
-                      className="px-6 py-2.5 bg-navy hover:bg-orange-primary text-white text-[9px] font-black uppercase tracking-widest rounded-lg transition-colors border-none cursor-pointer"
-                    >
-                      {content.successResetLabel}
-                    </button>
+                    />
                   </motion.div>
                 )}
               </AnimatePresence>

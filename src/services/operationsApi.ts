@@ -40,14 +40,15 @@ async function request<T>(path: string, method: HttpMethod = 'GET', body?: unkno
 
   if (!response.ok) {
     const rawError = await response.text();
-    let parsed: { error?: string; message?: string; code?: string; details?: Record<string, unknown> } | null = null;
+    let parsed: {
+      error?: string;
+      message?: string;
+      code?: string;
+      details?: Record<string, unknown>;
+      fieldErrors?: Record<string, string>;
+    } | null = null;
     try {
-      parsed = JSON.parse(rawError) as {
-        error?: string;
-        message?: string;
-        code?: string;
-        details?: Record<string, unknown>;
-      };
+      parsed = JSON.parse(rawError) as typeof parsed;
     } catch {
       /* plain text */
     }
@@ -56,16 +57,58 @@ async function request<T>(path: string, method: HttpMethod = 'GET', body?: unkno
       status?: number;
       serverCode?: string;
       details?: Record<string, unknown>;
+      fieldErrors?: Record<string, string>;
     };
     err.code = parsed?.error;
     // Machine-readable error code + structured details, when the API supplies them
     // (e.g. { code: 'GUIDE_OFFER_PRICE_CHANGED', details: { actualUnitPrice } }).
     err.serverCode = parsed?.code;
     err.details = parsed?.details;
+    err.fieldErrors = parsed?.fieldErrors;
     err.status = response.status;
     throw err;
   }
   return response.json() as Promise<T>;
+}
+
+export type InquiryType = 'suggest_brand' | 'partnership' | 'advertising' | 'general_contact';
+
+export interface InquiryOption {
+  value: string;
+  label: string;
+}
+
+/** Served by GET /operations/lead-options — mirrors choosify-admin shared/inquiries/inquiryOptions.ts. */
+export interface InquiryOptions {
+  inquiryTypes: InquiryOption[];
+  categories: Array<InquiryOption & { parentId: string | null }>;
+  partnershipModels: InquiryOption[];
+  adBudgetRanges: InquiryOption[];
+  adPlacementInterests: InquiryOption[];
+  limits: { name: number; email: number; url: number; country: number; subject: number; message: number };
+}
+
+export interface InquiryPayload {
+  inquiryType: InquiryType;
+  email: string;
+  brandName?: string;
+  contactPerson?: string;
+  website?: string;
+  categoryId?: string;
+  country?: string;
+  subject?: string;
+  partnershipModel?: string;
+  budget?: string;
+  placementInterest?: string;
+  message?: string;
+  sourcePath?: string;
+  /** Hidden honeypot — real users never fill it. */
+  companyFax?: string;
+}
+
+export interface InquirySubmitResult {
+  referenceId: string | null;
+  duplicate: boolean;
 }
 
 /** Shape of the pending-payment order server/booking/bookingService.ts builds and returns
@@ -319,16 +362,34 @@ export const operationsApi = {
     const suffix = qs.toString() ? `?${qs}` : '';
     return request(`/operations/platform-messages${suffix}`);
   },
+  /** Controlled option lists for the public inquiry forms (the server validates against the same lists). */
+  getInquiryOptions: async (): Promise<InquiryOptions> => {
+    const result = await request<{ data: InquiryOptions }>('/operations/lead-options');
+    return result.data;
+  },
+  /**
+   * Public business inquiry. Resolves only when the server has persisted it;
+   * any failure throws (with `fieldErrors` for validation problems).
+   */
+  submitInquiry: async (payload: InquiryPayload): Promise<InquirySubmitResult> => {
+    const result = await request<{ data: { id: string; referenceId: string | null }; duplicate?: boolean }>(
+      '/operations/leads',
+      'POST',
+      payload,
+    );
+    return { referenceId: result.data?.referenceId ?? null, duplicate: Boolean(result.duplicate) };
+  },
+  /** Legacy lead intake (creator collaboration requests). Business inquiries use submitInquiry. */
   submitLead: async (payload: {
     brandName: string;
-    contactPerson?: string;
+    contactPerson: string;
     email: string;
     budget?: string;
     placementInterest?: string;
     message?: string;
     source?: string;
   }) => {
-    const result = await request<{ data: unknown }>('/operations/leads', 'POST', payload);
+    const result = await request<{ data: { id: string; referenceId?: string | null } }>('/operations/leads', 'POST', payload);
     return result.data;
   },
   submitPlatformMessage: async (payload: {

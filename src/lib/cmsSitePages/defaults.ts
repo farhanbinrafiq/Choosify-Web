@@ -75,12 +75,12 @@ export const DEFAULT_SUGGEST_BRAND: SuggestBrandPageContent = {
     sideCardTitle: 'Discovery Engine',
     sideCardSubtitle: 'Community Driven',
     sideCardBody:
-      "Over 70% of listed brand catalogs are vetted directly from recommendations proposed by savvy consumers like you. Let's make smart shopping mainstream!",
+      'Every suggestion is reviewed by the Choosify team before a brand is considered for listing. Your recommendation helps us find authentic brands worth featuring.',
     sideCardIcon: '💡',
   },
   whyHeading: 'Why Suggest Brands',
   whyBody:
-    "Choosify is built on trust, transparency, and authenticity. By suggesting high-quality brands that deserve a spotlight, you're helping thousands of Bangladeshi consumers make confident buying choices. Avoid online shop scams and help others connect with authentic, verified outlets.",
+    "Choosify is built on trust, transparency, and authenticity. By suggesting high-quality brands that deserve a spotlight, you help Bangladeshi shoppers make confident buying choices and connect with authentic outlets.",
   whyCards: [
     { id: 'secure', title: 'Expand Secure Outlets', desc: 'We vet every recommended store against stringent authenticity guidelines to protect consumers.', enabled: true, order: 0 },
     { id: 'local', title: 'Promote Local Craft', desc: 'Support home-grown Bangladeshi artisans, weavers, boutique designers, and indie entrepreneurs.', enabled: true, order: 1 },
@@ -92,14 +92,14 @@ export const DEFAULT_SUGGEST_BRAND: SuggestBrandPageContent = {
     { id: 's3', step: '03', title: 'Platform Onboarding', desc: 'We list the approved brand profile, letting users search their items, compare rates, and write reviews.', enabled: true, order: 2 },
   ],
   benefitsHeading: 'Benefits of Joining Choosify',
-  benefitsIntro: "Vetted brands receive extensive visibility on Bangladesh's smartest product discovery canvas:",
+  benefitsIntro: 'Brands listed on Choosify can:',
   benefits: [
-    'Premium brand listing placement in search results',
-    'Direct verification badge to showcase credibility',
-    'Instant review tracking & customer feedback cycles',
-    'Access to compare tools highlighting key selling points',
-    'Ability to post deals, promos, and discount vouchers',
-    'Targeted campaign spots reaching high-intent buyers',
+    'Have a brand profile discoverable in search and brand pages',
+    'Apply for brand verification to show credibility',
+    'Collect and respond to customer reviews',
+    'Appear in product comparisons',
+    'Post deals, promotions, and discount vouchers',
+    'Request sponsored placements, reviewed by our team',
   ],
   formHeading: 'Suggest Sourcing',
   formSubheading: 'Fill in brand credentials below',
@@ -110,19 +110,13 @@ export const DEFAULT_SUGGEST_BRAND: SuggestBrandPageContent = {
     country: { label: 'Country', placeholder: 'e.g., Bangladesh, Japan, USA' },
     reason: { label: 'Why should we list this brand? *', placeholder: 'Tell us what makes them stand out, their catalog, authenticity level, etc.' },
   },
-  categoryOptions: [
-    { id: 'fashion', value: 'Fashion & Lifestyle', label: 'Fashion & Lifestyle', enabled: true, order: 0 },
-    { id: 'mobile', value: 'Mobile & Phones', label: 'Mobile & Phones', enabled: true, order: 1 },
-    { id: 'tech', value: 'Tech & Electronics', label: 'Tech & Electronics', enabled: true, order: 2 },
-    { id: 'beauty', value: 'Beauty & Cosmetics', label: 'Beauty & Cosmetics', enabled: true, order: 3 },
-    { id: 'jewelry', value: 'Jewelry & Accessories', label: 'Jewelry & Accessories', enabled: true, order: 4 },
-    { id: 'home', value: 'Home & Living', label: 'Home & Living', enabled: true, order: 5 },
-  ],
+  // Categories now come from the live catalog (GET /operations/lead-options); kept for CMS shape compatibility.
+  categoryOptions: [],
   submitLabel: 'Submit Suggestion',
-  successTitle: 'Thank You!',
-  successSubtitle: 'Suggestion Submitted Successfully',
+  successTitle: 'Request received',
+  successSubtitle: 'Brand suggestion recorded',
   successBodyTemplate:
-    'We have logged your suggestion for {{brandName}}. Our vetting desk will evaluate this brand profile shortly. Thank you for contributing to the Choosify discovery platform!',
+    "Thank you — your suggestion for {{brandName}} has been received. The Choosify team will review it and may contact you using the email you provided.",
   successResetLabel: 'Suggest Another Brand',
 };
 
@@ -131,7 +125,7 @@ export const DEFAULT_PARTNERSHIP: PartnershipPageContent = {
     badge: 'Collaborate & Scale',
     title: 'Partnership Opportunities',
     description:
-      "Partner with Choosify, Bangladesh's leading product discovery platform. Join forces with us to accelerate growth, enhance brand transparency, and empower consumers.",
+      'Partner with Choosify, a product discovery platform for Bangladeshi shoppers. Work with us to grow your brand, build transparency, and reach engaged buyers.',
     sideCardTitle: 'Synergetic Ecosystem',
     sideCardSubtitle: 'Win-Win Dynamic',
     sideCardBody:
@@ -143,14 +137,12 @@ export const DEFAULT_PARTNERSHIP: PartnershipPageContent = {
     'Choosify acts as the primary hub connecting authentic brands with verified creators and curious shoppers. Our platform supports collaborative growth models that align brand visibility with real audience engagement. Explore how our partnerships can unlock reliable revenue pipelines for your business.',
   categoriesHeading: 'Partnership Categories',
   categories: [
-    { id: 'brand', icon: 'award', title: 'Brand Partnerships', desc: 'Connect your catalog with high-intent buyers, secure a verification badge, and deploy campaigns that drive tangible ROI.', enabled: true, order: 0 },
-    { id: 'creator', icon: 'users', title: 'Creator Partnerships', desc: 'Collaborate on sponsored deals, leverage direct affiliate loops, and expand your community reach across our creator marketplace.', enabled: true, order: 1 },
-    { id: 'affiliate', icon: 'zap', title: 'Affiliate Partnerships', desc: 'Unlock special commission overrides, integrate exclusive coupon codes, and build durable passive earnings from your traffic.', enabled: true, order: 2 },
-    { id: 'agency', icon: 'briefcase', title: 'Agency Partnerships', desc: 'Get consolidated dashboards to manage multiple client brand listings, unlock analytics APIs, and scale brand verified campaigns.', enabled: true, order: 3 },
+    { id: 'brand', icon: 'award', title: 'Brand / Seller Partnerships', desc: 'List your catalog, apply for brand verification, and run deals and promotions on Choosify.', enabled: true, order: 0 },
+    { id: 'creator', icon: 'users', title: 'Creator Partnerships', desc: 'Publish buying guides and reviews, and grow your audience through the Choosify creator program.', enabled: true, order: 1 },
   ],
-  credibilityTitle: 'Durable Platform Credibility',
+  credibilityTitle: 'Built on Trust',
   credibilityBody:
-    "By aligning with Choosify, partners leverage Bangladesh's premier, scam-free discovery database. Our unified pricing engine and brand verified claim statuses ensure that customer trust is maintained at every touchpoint.",
+    'Brand verification and moderated listings help shoppers trust what they find on Choosify — and that trust extends to our partners.',
   formHeading: 'Request Partnership',
   formSubheading: 'Submit strategic collaboration request',
   fields: {
@@ -160,17 +152,13 @@ export const DEFAULT_PARTNERSHIP: PartnershipPageContent = {
     partnershipModel: { label: 'Partnership Model', placeholder: '' },
     message: { label: 'Brief Proposal / Message', placeholder: 'Describe your goals, audience size, integration interests, or agency roster details.' },
   },
-  modelOptions: [
-    { id: 'brand', value: 'brand', label: 'Brand Partnerships', enabled: true, order: 0 },
-    { id: 'creator', value: 'creator', label: 'Creator Partnerships', enabled: true, order: 1 },
-    { id: 'affiliate', value: 'affiliate', label: 'Affiliate Partnerships', enabled: true, order: 2 },
-    { id: 'agency', value: 'agency', label: 'Agency Partnerships', enabled: true, order: 3 },
-  ],
+  // Partnership models now come from the server registry (GET /operations/lead-options); kept for CMS shape compatibility.
+  modelOptions: [],
   submitLabel: 'Submit Proposal',
-  successTitle: 'Proposal Logged',
-  successSubtitle: 'Partnership Desk Acknowledged',
+  successTitle: 'Request received',
+  successSubtitle: 'Partnership request recorded',
   successBodyTemplate:
-    'We have received the partnership brief for {{companyName}}. Our strategic relations desk will review and contact {{contactName}} within 2 business days. Thank you for choosing Choosify!',
+    'Thank you — we have received the partnership request for {{companyName}}. The Choosify team will review it and contact {{contactName}} using the details provided.',
   successResetLabel: 'Submit Another Request',
 };
 
@@ -179,31 +167,27 @@ export const DEFAULT_ADVERTISE: AdvertisePageContent = {
     badge: 'Premium Brand Exposure',
     title: 'Advertise on Choosify',
     description:
-      'Reach thousands of high-intent Bangladeshi shoppers actively comparing pricing, seeking recommendations, and preparing to purchase.',
-    sideCardTitle: 'Targeting Precision',
+      'Put your brand in front of Bangladeshi shoppers while they compare prices, read recommendations, and decide what to buy.',
+    sideCardTitle: 'Where Decisions Happen',
     sideCardBody:
-      "We don't do blind eyeballs. Choosify positions your brand right where active purchase comparisons occur. Ensure your catalog remains top-of-mind.",
+      'Choosify placements appear on the pages shoppers use to compare products and brands, so your catalog stays visible at the moment of choice.',
   },
   whyHeading: 'Why Advertise',
   whyBody:
-    'Traditional social platforms bombard users with interrupting feeds. On Choosify, users come with an active intention: Compare, Discovery, and Purchase. Advertising here guarantees alignment with customers at the bottom of the buying funnel, boosting click-through rates and campaign efficiency.',
+    'Shoppers come to Choosify with a purpose: to compare, discover, and buy. Placements here sit alongside that intent rather than interrupting an unrelated feed.',
   audienceHeading: 'Audience Overview',
-  audienceStats: [
-    { id: 'shoppers', value: '150K+', label: 'Monthly Shoppers', enabled: true, order: 0 },
-    { id: 'dhaka', value: '75%', label: 'Dhaka-Based Buyers', enabled: true, order: 1 },
-    { id: 'impressions', value: '4.2m+', label: 'Monthly Impressions', enabled: true, order: 2 },
-  ],
+  // No verified audience metrics are published yet; the section is hidden while this list is empty.
+  audienceStats: [],
   placementsHeading: 'Placement Opportunities',
   placements: [
-    { id: 'brands', icon: 'sparkles', title: 'Promoted Brands', desc: 'Get featured at the top of brand listings and search pages. Drive high-visibility branding directly above alphabetical arrays.', enabled: true, order: 0 },
-    { id: 'deals', icon: 'trending', title: 'Promoted Deals', desc: 'Pin your discount coupon, clearance code, or hot deal to the top of the popular "Deals" and category feeds.', enabled: true, order: 1 },
-    { id: 'recs', icon: 'layers', title: 'Promoted Recommendations', desc: 'Embed your top-selling products inside highly-vetted community shopping guides and expert recommendation blogs.', enabled: true, order: 2 },
-    { id: 'home', icon: 'megaphone', title: 'Homepage Placement', desc: 'Capture absolute attention with hero carousel banners or dedicated bento-grid display items on our central discovery homepage.', enabled: true, order: 3 },
-    { id: 'creators', icon: 'users', title: 'Creator Collaborations', desc: 'Let us match your catalog with viral local TikTokers and Instagram influencers to deploy authentic social campaigns.', enabled: true, order: 4 },
+    { id: 'home', icon: 'megaphone', title: 'Homepage Banners', desc: 'Banner placements on the Choosify homepage.', enabled: true, order: 0 },
+    { id: 'deals', icon: 'trending', title: 'Deals Placements', desc: 'Featured positions for your offers on the Deals page.', enabled: true, order: 1 },
+    { id: 'browse', icon: 'sparkles', title: 'Category, Brand & Product Pages', desc: 'Banners on category, browse, brand, and product pages where shoppers compare options.', enabled: true, order: 2 },
+    { id: 'recs', icon: 'layers', title: 'Sponsored Listings', desc: 'Sponsored products, brands, deals, and recommendations shown within listings, clearly labelled as sponsored.', enabled: true, order: 3 },
   ],
-  pricingTitle: 'Custom Pricing Available',
+  pricingTitle: 'Pricing on Request',
   pricingBody:
-    "No rigid packages. We structure custom pricing tailored directly to your brand's monthly budget, target category, and specific conversion goals. Start scaling from small community campaigns upwards!",
+    "Pricing depends on the placement, duration, and category. Tell us about your goals and our team will follow up with options — nothing is booked or charged until you agree.",
   formHeading: 'Talk To Our Team',
   formSubheading: 'Start building your custom campaign',
   fields: {
@@ -214,24 +198,14 @@ export const DEFAULT_ADVERTISE: AdvertisePageContent = {
     placementInterest: { label: 'Placement Interest', placeholder: '' },
     message: { label: 'Campaign Goals', placeholder: 'Describe what products you wish to spotlight, your launch timeline, etc.' },
   },
-  budgetOptions: [
-    { id: 'b1', value: 'under-50k', label: 'Under ৳50,000 / month', enabled: true, order: 0 },
-    { id: 'b2', value: '50k-150k', label: '৳50,000 - ৳150,000 / month', enabled: true, order: 1 },
-    { id: 'b3', value: '150k-500k', label: '৳150,000 - ৳500,000 / month', enabled: true, order: 2 },
-    { id: 'b4', value: 'above-500k', label: 'Above ৳500,000 / month', enabled: true, order: 3 },
-  ],
-  placementOptions: [
-    { id: 'p1', value: 'sponsored-brands', label: 'Promoted Brands Spotlight', enabled: true, order: 0 },
-    { id: 'p2', value: 'sponsored-deals', label: 'Promoted Deals & Promo Pins', enabled: true, order: 1 },
-    { id: 'p3', value: 'sponsored-recs', label: 'Promoted Guide Placement', enabled: true, order: 2 },
-    { id: 'p4', value: 'homepage', label: 'Homepage Banner Spots', enabled: true, order: 3 },
-    { id: 'p5', value: 'creator-collabs', label: 'Influencer Collaborations', enabled: true, order: 4 },
-  ],
+  // Budget ranges and placement interests now come from the server registry (GET /operations/lead-options).
+  budgetOptions: [],
+  placementOptions: [],
   submitLabel: 'Talk To Our Team',
-  successTitle: 'Inquiry Sent',
-  successSubtitle: 'Campaign Desk Notified',
+  successTitle: 'Request received',
+  successSubtitle: 'Advertising inquiry recorded',
   successBodyTemplate:
-    'We have logged your campaign parameters for {{brandName}}. An advertising manager will contact {{contactPerson}} with custom mock media-kit and CTR models in 24 hours.',
+    'Thank you — we have received the advertising inquiry for {{brandName}}. The Choosify team will review it and contact {{contactPerson}}. No placement has been booked and nothing has been charged.',
   successResetLabel: 'Submit Another Inquiry',
 };
 
@@ -522,14 +496,14 @@ export const DEFAULT_CONTACT: ContactPageContent = {
   ],
   methodsHeading: 'Contact Methods',
   methods: [
-    { id: 'email', iconKey: 'mail', title: 'Email Support', value: '{{supportEmail}}', desc: 'Response within 24 hours', enabled: true, order: 0 },
+    { id: 'email', iconKey: 'mail', title: 'Email Support', value: '{{supportEmail}}', desc: 'We read every message', enabled: true, order: 0 },
     { id: 'messenger', iconKey: 'messenger', title: 'Messenger Support', value: 'fb.com/choosify.bd', desc: 'Live chat during working hours', enabled: true, order: 1 },
     { id: 'social', iconKey: 'social', title: 'Social Channels', value: '@choosify.bd', desc: 'DM us on Instagram or TikTok', enabled: true, order: 2 },
   ],
   useGlobalSupportEmail: true,
-  commitmentTitle: 'Commitment to Prompt Responses',
+  commitmentTitle: 'We Aim to Respond Promptly',
   commitmentBody:
-    'We prioritize user and seller satisfaction above all. Our general SLA response window is under 24 hours for verified sellers, and 48 hours for general community inquiries. Thank you for helping us maintain a transparent marketplace!',
+    'Every message sent through this form is recorded and reviewed by the Choosify team. Thank you for helping us maintain a transparent marketplace!',
   formHeading: 'Send A Message',
   formSubheading: 'Fill in parameters below',
   fields: {
@@ -539,10 +513,10 @@ export const DEFAULT_CONTACT: ContactPageContent = {
     message: { label: 'Message Content *', placeholder: 'How can we help? Provide order details or profile link if relevant.' },
   },
   submitLabel: 'Submit Message',
-  successTitle: 'Message Logged',
-  successSubtitle: 'Support Desk Notified',
+  successTitle: 'Message received',
+  successSubtitle: 'Your message has been recorded',
   successBodyTemplate:
-    'We have logged your query. Our team will review your message regarding "{{subject}}" and reply back to {{email}} shortly. Thank you for reaching out!',
+    'Thank you — we have received your message regarding "{{subject}}". The Choosify team will review it and reply to {{email}}.',
   successResetLabel: 'Send Another Message',
 };
 

@@ -2,9 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Award, ShieldCheck, ArrowRight } from 'lucide-react';
 import { StaticPageHero } from '../components/StaticPageHero';
-import { operationsApi } from '../services/operationsApi';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { enabledSorted, fillTemplate, resolveSitePages } from '../lib/cmsSitePages';
+import {
+  FieldError,
+  InquiryFormError,
+  InquiryHoneypot,
+  InquiryOptionsError,
+  InquirySuccessPanel,
+  inquiryInputClass,
+  inquiryLabelClass,
+  useInquiryOptions,
+  useInquirySubmit,
+  useSignedInContact,
+} from '../components/inquiry/inquiryForm';
 
 function whyCardIcon(id: string, index: number) {
   if (id === 'local' || index === 1) {
@@ -18,40 +29,51 @@ export function SuggestBrandPage() {
   const content = resolveSitePages(siteConfig?.sitePages).suggestBrand;
   const whyCards = enabledSorted(content.whyCards);
   const howSteps = enabledSorted(content.howSteps);
-  const categoryOptions = enabledSorted(content.categoryOptions);
+  const { options, error: optionsError, retry: retryOptions } = useInquiryOptions();
+  const signedIn = useSignedInContact();
+  const inquiry = useInquirySubmit();
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  const [formData, setFormData] = useState({
+  const emptyForm = () => ({
     brandName: '',
     website: '',
-    category: '',
+    categoryId: '',
     country: '',
-    reason: ''
+    reason: '',
+    email: signedIn.email,
+    contactName: signedIn.name,
   });
+  const [formData, setFormData] = useState(emptyForm);
+  const [honeypot, setHoneypot] = useState('');
 
-  const [submitted, setSubmitted] = useState(false);
+  // Signed-in details can arrive after first render; only fill fields the user hasn't typed in.
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      email: prev.email || signedIn.email,
+      contactName: prev.contactName || signedIn.name,
+    }));
+  }, [signedIn.email, signedIn.name]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.brandName || !formData.website) {
-      alert('Please fill in the Brand Name and Website fields.');
-      return;
-    }
-    try {
-      await operationsApi.submitLead({
-        brandName: formData.brandName,
-        email: formData.website,
-        message: `Category: ${formData.category}\nCountry: ${formData.country}\nReason: ${formData.reason}`,
-        source: 'suggest-brand',
-      });
-    } catch {
-      // still show success UX
-    }
-    setSubmitted(true);
+    await inquiry.submit({
+      inquiryType: 'suggest_brand',
+      brandName: formData.brandName,
+      website: formData.website,
+      categoryId: formData.categoryId || undefined,
+      country: formData.country,
+      message: formData.reason,
+      email: formData.email,
+      contactPerson: formData.contactName,
+      companyFax: honeypot,
+    });
   };
+
+  const fe = inquiry.fieldErrors;
 
   return (
     <div className="min-h-screen bg-choosify-feed font-sans">
@@ -178,7 +200,7 @@ export function SuggestBrandPage() {
               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#FF5B00] to-[#EF3C23]" />
               
               <AnimatePresence mode="wait">
-                {!submitted ? (
+                {inquiry.status !== 'success' ? (
                   <motion.div
                     key="form"
                     initial={{ opacity: 0 }}
@@ -191,103 +213,147 @@ export function SuggestBrandPage() {
                       <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">{content.formSubheading}</p>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="space-y-4 text-xs font-semibold text-gray-700">
+                    <form onSubmit={handleSubmit} noValidate className="relative space-y-4 text-xs font-semibold text-gray-700">
+                      <InquiryHoneypot value={honeypot} onChange={setHoneypot} />
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.brandName.label}</label>
-                        <input 
-                          type="text" 
+                        <label htmlFor="sb-brand" className={inquiryLabelClass}>{content.fields.brandName.label}</label>
+                        <input
+                          id="sb-brand"
+                          type="text"
                           required
+                          maxLength={options?.limits.name}
                           value={formData.brandName}
-                          onChange={e => setFormData({...formData, brandName: e.target.value})}
+                          onChange={e => { setFormData({ ...formData, brandName: e.target.value }); inquiry.clearFieldError('brandName'); }}
                           placeholder={content.fields.brandName.placeholder}
-                          className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium"
+                          aria-invalid={Boolean(fe.brandName)}
+                          className={inquiryInputClass}
                         />
+                        <FieldError message={fe.brandName} />
                       </div>
 
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.website.label}</label>
-                        <input 
-                          type="text" 
+                        <label htmlFor="sb-website" className={inquiryLabelClass}>{content.fields.website.label}</label>
+                        <input
+                          id="sb-website"
+                          type="text"
+                          inputMode="url"
                           required
+                          maxLength={options?.limits.url}
                           value={formData.website}
-                          onChange={e => setFormData({...formData, website: e.target.value})}
+                          onChange={e => { setFormData({ ...formData, website: e.target.value }); inquiry.clearFieldError('website'); }}
                           placeholder={content.fields.website.placeholder}
-                          className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium"
+                          aria-invalid={Boolean(fe.website)}
+                          className={inquiryInputClass}
                         />
+                        <FieldError message={fe.website} />
                       </div>
 
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.category.label}</label>
-                        <select 
-                          value={formData.category}
-                          onChange={e => setFormData({...formData, category: e.target.value})}
-                          className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium"
+                        <label htmlFor="sb-category" className={inquiryLabelClass}>{content.fields.category.label}</label>
+                        <select
+                          id="sb-category"
+                          value={formData.categoryId}
+                          onChange={e => { setFormData({ ...formData, categoryId: e.target.value }); inquiry.clearFieldError('categoryId'); }}
+                          disabled={!options}
+                          aria-invalid={Boolean(fe.categoryId)}
+                          className={inquiryInputClass}
                         >
-                          <option value="">{content.fields.category.placeholder || 'Select a Category'}</option>
-                          {categoryOptions.map((opt) => (
-                            <option key={opt.id} value={opt.value}>{opt.label}</option>
+                          <option value="">{options ? content.fields.category.placeholder || 'Select a Category' : 'Loading categories…'}</option>
+                          {(options?.categories ?? []).filter((c) => !c.parentId).map((opt) => (
+                            <option key={opt.value} value={opt.value}>{opt.label}</option>
                           ))}
                         </select>
+                        <FieldError message={fe.categoryId} />
                       </div>
 
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.country.label}</label>
-                        <input 
-                          type="text" 
+                        <label htmlFor="sb-country" className={inquiryLabelClass}>{content.fields.country.label}</label>
+                        <input
+                          id="sb-country"
+                          type="text"
+                          maxLength={options?.limits.country}
                           value={formData.country}
-                          onChange={e => setFormData({...formData, country: e.target.value})}
+                          onChange={e => { setFormData({ ...formData, country: e.target.value }); inquiry.clearFieldError('country'); }}
                           placeholder={content.fields.country.placeholder}
-                          className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium"
+                          className={inquiryInputClass}
                         />
+                        <FieldError message={fe.country} />
                       </div>
 
                       <div className="space-y-1.5 text-left">
-                        <label className="block text-[10px] uppercase tracking-wider text-navy font-bold">{content.fields.reason.label}</label>
-                        <textarea 
+                        <label htmlFor="sb-reason" className={inquiryLabelClass}>{content.fields.reason.label}</label>
+                        <textarea
+                          id="sb-reason"
                           rows={3}
                           required
+                          maxLength={options?.limits.message}
                           value={formData.reason}
-                          onChange={e => setFormData({...formData, reason: e.target.value})}
+                          onChange={e => { setFormData({ ...formData, reason: e.target.value }); inquiry.clearFieldError('message'); }}
                           placeholder={content.fields.reason.placeholder}
-                          className="w-full p-3 bg-gray-50/50 border border-gray-200 rounded-[5px] outline-none text-navy focus:border-orange-primary transition-colors font-medium resize-none"
+                          aria-invalid={Boolean(fe.message)}
+                          className={`${inquiryInputClass} resize-none`}
                         />
+                        <FieldError message={fe.message} />
                       </div>
 
-                      <button 
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-1.5 text-left">
+                          <label htmlFor="sb-email" className={inquiryLabelClass}>Your Email *</label>
+                          <input
+                            id="sb-email"
+                            type="email"
+                            required
+                            autoComplete="email"
+                            maxLength={options?.limits.email}
+                            value={formData.email}
+                            onChange={e => { setFormData({ ...formData, email: e.target.value }); inquiry.clearFieldError('email'); }}
+                            placeholder="So we can follow up"
+                            aria-invalid={Boolean(fe.email)}
+                            className={inquiryInputClass}
+                          />
+                          <FieldError message={fe.email} />
+                        </div>
+                        <div className="space-y-1.5 text-left">
+                          <label htmlFor="sb-name" className={inquiryLabelClass}>Your Name</label>
+                          <input
+                            id="sb-name"
+                            type="text"
+                            autoComplete="name"
+                            maxLength={options?.limits.name}
+                            value={formData.contactName}
+                            onChange={e => { setFormData({ ...formData, contactName: e.target.value }); inquiry.clearFieldError('contactPerson'); }}
+                            className={inquiryInputClass}
+                          />
+                          <FieldError message={fe.contactPerson} />
+                        </div>
+                      </div>
+
+                      {optionsError ? <InquiryOptionsError message={optionsError} onRetry={retryOptions} /> : null}
+                      <InquiryFormError message={inquiry.error} />
+
+                      <button
                         type="submit"
-                        className="w-full py-3 bg-[#050514] hover:bg-orange-primary text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-all flex items-center justify-center gap-2 group border-none cursor-pointer mt-4"
+                        disabled={inquiry.submitting}
+                        className="w-full py-3 bg-[#050514] hover:bg-orange-primary text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-all flex items-center justify-center gap-2 group border-none cursor-pointer mt-4 disabled:opacity-60 disabled:cursor-wait"
                       >
-                        {content.submitLabel}
+                        {inquiry.submitting ? 'Sending…' : content.submitLabel}
                         <ArrowRight size={12} className="group-hover:translate-x-0.5 transition-transform" />
                       </button>
                     </form>
                   </motion.div>
                 ) : (
-                  <motion.div
-                    key="success"
-                    initial={{ opacity: 0, scale: 0.98 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className="py-12 px-2 text-center flex flex-col items-center justify-center space-y-6"
-                  >
-                    <div className="w-16 h-16 rounded-full bg-emerald-50 border border-emerald-100 text-emerald-500 flex items-center justify-center text-3xl">
-                      ✓
-                    </div>
-                    <div>
-                      <h3 className="text-base font-extrabold text-[#1A1A2E] tracking-tight mb-1">{content.successTitle}</h3>
-                      <p className="text-gray-400 text-[10px] uppercase font-bold tracking-wider">{content.successSubtitle}</p>
-                    </div>
-                    <p className="text-gray-500 text-xs leading-relaxed font-semibold max-w-sm">
-                      {fillTemplate(content.successBodyTemplate, { brandName: formData.brandName })}
-                    </p>
-                    <button 
-                      onClick={() => {
-                        setFormData({ brandName: '', website: '', category: '', country: '', reason: '' });
-                        setSubmitted(false);
+                  <motion.div key="success" initial={{ opacity: 0, scale: 0.98 }} animate={{ opacity: 1, scale: 1 }}>
+                    <InquirySuccessPanel
+                      title={content.successTitle}
+                      subtitle={content.successSubtitle}
+                      referenceId={inquiry.referenceId}
+                      body={fillTemplate(content.successBodyTemplate, { brandName: formData.brandName })}
+                      resetLabel={content.successResetLabel}
+                      onReset={() => {
+                        setFormData(emptyForm());
+                        inquiry.reset();
                       }}
-                      className="px-6 py-2.5 bg-navy hover:bg-orange-primary text-white text-[9px] font-black uppercase tracking-widest rounded-lg transition-colors border-none cursor-pointer"
-                    >
-                      {content.successResetLabel}
-                    </button>
+                    />
                   </motion.div>
                 )}
               </AnimatePresence>
