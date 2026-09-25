@@ -415,6 +415,57 @@ export interface SiteConfig {
   updatedAt: string;
 }
 
+// ── Storefront Curation (public, server-resolved) ─────────────────────────────
+
+/** Public-safe coupon display fields (mirrors admin shared PublicCoupon). */
+export interface StorefrontCoupon {
+  code: string;
+  headline: string;
+  detail: string;
+  validUntil: string;
+}
+
+export interface StorefrontDealsCuration {
+  topCoupons: StorefrontCoupon[];
+  popularCategories: Array<{ id: string; name: string; slug: string; icon: string }>;
+  brandDeals: Array<{ id: string; name: string; slug: string; logo: string | null; upToPercent: number | null }>;
+}
+
+/** Approved icon keys — must match admin shared/storefront/storefrontCuration.ts ASSURANCE_ICONS. */
+export type AssuranceIconKey =
+  | 'shield-check'
+  | 'badge-check'
+  | 'lock'
+  | 'credit-card'
+  | 'rotate-ccw'
+  | 'headphones'
+  | 'banknote'
+  | 'truck'
+  | 'award'
+  | 'star'
+  | 'users'
+  | 'refresh-cw'
+  | 'sparkles'
+  | 'thumbs-up'
+  | 'heart'
+  | 'search';
+
+export type AssuranceTone = 'blue' | 'orange' | 'green' | 'purple' | 'red' | 'slate';
+export type AssuranceVariant = 'chips' | 'text' | 'icons';
+export type AssurancePlacementKey = 'deals.assurance_strip' | 'discover.assurance_strip' | 'account.overview_trust';
+
+export interface StorefrontAssuranceItem {
+  id: string;
+  title: string;
+  description: string;
+  icon: AssuranceIconKey;
+  tone: AssuranceTone;
+}
+
+export interface StorefrontAssurance {
+  placements: Partial<Record<AssurancePlacementKey, { variant: AssuranceVariant; items: StorefrontAssuranceItem[] }>>;
+}
+
 /**
  * "creator_signup"/"seller_signup" are first-class destination types (not a
  * magic string nested under "external") because they resolve client-side to

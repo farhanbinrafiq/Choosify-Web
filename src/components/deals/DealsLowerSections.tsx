@@ -4,58 +4,30 @@ import { cn } from '../../lib/utils';
 import { SponsoredVerticalAdCarousel } from '../commerce/SponsoredVerticalAdCarousel';
 import { useGlobalState } from '../../context/GlobalStateContext';
 import { getCtaBanner, isCtaBannerVisible } from '../../lib/ctaBanners';
+import { getCategoryIconComponent } from '../../lib/categoryIcons';
+import { AssuranceStrip } from '../assurance/AssuranceStrip';
+import type { StorefrontDealsCuration } from '../../types/catalog';
 
-export const TOP_COUPONS = [
-  { pct: '10%', code: 'CHOOSIFY10', min: 'Min. Spend BDT 5,000' },
-  { pct: '15%', code: 'SAVE15', min: 'Min. Spend BDT 10,000' },
-  { pct: '5%', code: 'EMI5', min: 'Min. Spend BDT 3,000' },
-] as const;
-
-/** Choosify.dc.html dealsTrustStrip — authentic / guarantee strip */
-const DEALS_TRUST = [
-  { icon: '🛡', bg: '#DBEAFE', title: '100% Authentic', sub: 'Verified products & sellers' },
-  { icon: '🔒', bg: '#FFEDD5', title: 'Best Price Guarantee', sub: 'We beat any lower price' },
-  { icon: '↺', bg: '#DCFCE7', title: 'Easy Returns', sub: '7-day return policy' },
-  { icon: '🔐', bg: '#F3E8FF', title: 'Secure Payments', sub: '100% secure checkout' },
-  { icon: '🎧', bg: '#FEE2E2', title: '24/7 Support', sub: "We're here to help" },
-] as const;
-
-const POPULAR_DEAL_CATS = [
-  { name: 'Smartphones', icon: '📱' },
-  { name: 'Laptops', icon: '💻' },
-  { name: 'Audio', icon: '🎧' },
-  { name: 'Smart Watches', icon: '⌚' },
-  { name: 'Home Appliances', icon: '🏠' },
-  { name: 'Gaming', icon: '🎮' },
-  { name: 'Accessories', icon: '🔌' },
-  { name: 'Cameras', icon: '📷' },
-] as const;
-
-const BRAND_DEALS_ROW = [
-  { name: 'SAMSUNG', off: 'Up to 20% Off', color: '#1428A0' },
-  { name: 'Apple', off: 'Up to 15% Off', color: '#1A1A2E' },
-  { name: 'mi', off: 'Up to 18% Off', color: '#FF5B00' },
-  { name: 'SONY', off: 'Up to 25% Off', color: '#1A1A2E' },
-  { name: 'DELL', off: 'Up to 20% Off', color: '#2323FF' },
-  { name: 'ASUS', off: 'Up to 20% Off', color: '#1A1A2E' },
-  // Second row — same curated static set as the first six
-  { name: 'LG', off: 'Up to 22% Off', color: '#A50034' },
-  { name: 'HP', off: 'Up to 18% Off', color: '#0096D6' },
-  { name: 'Lenovo', off: 'Up to 20% Off', color: '#E2231A' },
-  { name: 'Xiaomi', off: 'Up to 24% Off', color: '#FF6900' },
-  { name: 'OnePlus', off: 'Up to 16% Off', color: '#F5010C' },
-  { name: 'Canon', off: 'Up to 15% Off', color: '#C8102E' },
-] as const;
+/*
+ * Deals page lower modules. Content is Admin-curated (Storefront Curation →
+ * Deals Curation) and resolved server-side against the real coupon / category /
+ * brand records with eligibility applied. Each module renders nothing when it
+ * has no items — no empty cards, no prototype fallback.
+ */
 
 export function DealsTopCouponsCard({
+  coupons,
   className,
   onViewAllCoupons,
 }: {
+  coupons: StorefrontDealsCuration['topCoupons'];
   className?: string;
   /** Same pattern as Discover lane “View All” — activates in-page filter, no navigation. */
   onViewAllCoupons?: () => void;
 }) {
   const [copied, setCopied] = useState<string | null>(null);
+
+  if (coupons.length === 0) return null;
 
   const handleViewAll = () => {
     onViewAllCoupons?.();
@@ -79,15 +51,15 @@ export function DealsTopCouponsCard({
         </button>
       </div>
       <div className="flex flex-col gap-2.5 mb-3.5 flex-1">
-        {TOP_COUPONS.map((cp) => (
+        {coupons.map((cp) => (
           <div
             key={cp.code}
             className="flex items-center gap-3 border border-dashed border-[#E5E7EB] rounded-lg px-3 py-2.5"
           >
-            <div className="text-sm font-extrabold text-[#FF5B00] w-[38px] shrink-0">{cp.pct}</div>
+            <div className="text-sm font-extrabold text-[#FF5B00] min-w-[38px] shrink-0">{cp.headline}</div>
             <div className="flex-1 min-w-0">
-              <div className="text-[11px] font-bold text-[#1A1A2E]">Use Code: {cp.code}</div>
-              <div className="text-[9.5px] text-[#9AA0AC]">{cp.min}</div>
+              <div className="text-[11px] font-bold text-[#1A1A2E] truncate">Use Code: {cp.code}</div>
+              <div className="text-[9.5px] text-[#9AA0AC]">{cp.detail}</div>
             </div>
             <button
               type="button"
@@ -114,42 +86,21 @@ export function DealsTopCouponsCard({
   );
 }
 
-/** Choosify authentication / trust guarantees — dealsTrustStrip */
+/** Choosify authentication / trust guarantees — CMS placement `deals.assurance_strip`. */
 export function DealsAuthenticationStrip({ className }: { className?: string }) {
-  return (
-    <div
-      className={cn(
-        'bg-white rounded-xl border border-[#E8EDF2] px-5 sm:px-6 py-5 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3.5',
-        className,
-      )}
-      aria-label="Choosify authentication guarantees"
-    >
-      {DEALS_TRUST.map((tb) => (
-        <div key={tb.title} className="flex items-center gap-2.5 min-w-0">
-          <div
-            className="w-8 h-8 rounded-full flex items-center justify-center shrink-0 text-sm"
-            style={{ backgroundColor: tb.bg }}
-            aria-hidden
-          >
-            {tb.icon}
-          </div>
-          <div className="min-w-0">
-            <div className="text-[11.5px] font-bold text-[#1A1A2E] truncate">{tb.title}</div>
-            <div className="text-[9.5px] text-[#9AA0AC] leading-snug">{tb.sub}</div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
+  return <AssuranceStrip placement="deals.assurance_strip" className={className} />;
 }
 
 export function DealsPopularCategoriesCard({
+  categories,
   onCategoryClick,
   className,
 }: {
+  categories: StorefrontDealsCuration['popularCategories'];
   onCategoryClick?: (name: string) => void;
   className?: string;
 }) {
+  if (categories.length === 0) return null;
   return (
     <div className={cn('bg-white rounded-xl border border-[#E8EDF2] p-5', className)}>
       <div className="flex justify-between items-center mb-3.5">
@@ -162,14 +113,17 @@ export function DealsPopularCategoriesCard({
         </Link>
       </div>
       <div className="grid grid-cols-2 gap-2.5">
-        {POPULAR_DEAL_CATS.map((pc) => (
+        {categories.map((pc) => (
           <button
-            key={pc.name}
+            key={pc.id}
             type="button"
             onClick={() => onCategoryClick?.(pc.name)}
             className="flex items-center gap-2 text-[11.5px] text-[#4B5563] cursor-pointer bg-transparent border-0 p-1.5 rounded-md hover:bg-[#F4F7F9] text-left"
           >
-            <span aria-hidden>{pc.icon}</span> {pc.name}
+            <span className="inline-flex w-4 h-4 shrink-0" aria-hidden>
+              {getCategoryIconComponent(pc.name, pc.icon, '#FF5B00')}
+            </span>
+            {pc.name}
           </button>
         ))}
       </div>
@@ -177,7 +131,42 @@ export function DealsPopularCategoriesCard({
   );
 }
 
-export function DealsBrandDealsCard({ className }: { className?: string }) {
+/** One Brand Deals tile — logo when it loads, otherwise the brand name (never a broken image). */
+function BrandDealTile({ brand }: { brand: StorefrontDealsCuration['brandDeals'][number] }) {
+  const [logoFailed, setLogoFailed] = useState(false);
+  const showLogo = !!brand.logo && !logoFailed;
+  return (
+    <Link
+      to={`/brands/${encodeURIComponent(brand.slug)}`}
+      className="border border-[#E8EDF2] rounded-lg px-2 py-3 text-center no-underline hover:border-[#FF5B00]/40 transition-colors min-w-0"
+    >
+      {showLogo ? (
+        <img
+          src={brand.logo!}
+          alt={brand.name}
+          onError={() => setLogoFailed(true)}
+          className="h-6 w-auto max-w-full mx-auto mb-2 object-contain"
+          loading="lazy"
+        />
+      ) : (
+        <div className="text-xs font-extrabold mb-2 text-[#1A1A2E] truncate">{brand.name}</div>
+      )}
+      {/* Only real live deal discounts — never an invented "Up to" figure. */}
+      <div className="text-[9.5px] text-[#9AA0AC] truncate">
+        {brand.upToPercent ? `Up to ${brand.upToPercent}% Off` : showLogo ? brand.name : 'View brand'}
+      </div>
+    </Link>
+  );
+}
+
+export function DealsBrandDealsCard({
+  brands,
+  className,
+}: {
+  brands: StorefrontDealsCuration['brandDeals'];
+  className?: string;
+}) {
+  if (brands.length === 0) return null;
   return (
     <div className={cn('bg-white rounded-xl border border-[#E8EDF2] p-5', className)}>
       <div className="flex justify-between items-center mb-3.5">
@@ -190,17 +179,8 @@ export function DealsBrandDealsCard({ className }: { className?: string }) {
         </Link>
       </div>
       <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
-        {BRAND_DEALS_ROW.map((bd) => (
-          <Link
-            key={bd.name}
-            to="/brands"
-            className="border border-[#E8EDF2] rounded-lg px-2 py-3 text-center no-underline hover:border-[#FF5B00]/40 transition-colors"
-          >
-            <div className="text-xs font-extrabold mb-2" style={{ color: bd.color }}>
-              {bd.name}
-            </div>
-            <div className="text-[9.5px] text-[#9AA0AC]">{bd.off}</div>
-          </Link>
+        {brands.map((bd) => (
+          <BrandDealTile key={bd.id} brand={bd} />
         ))}
       </div>
     </div>

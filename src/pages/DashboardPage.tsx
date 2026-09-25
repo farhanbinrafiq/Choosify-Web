@@ -35,10 +35,8 @@ import {
   MapPin,
   Menu,
   Truck,
-  BadgeCheck,
   CreditCard,
   RotateCcw,
-  Headphones,
   Banknote,
   Award,
   Gift,
@@ -66,6 +64,7 @@ import {
   loadReturnRequests,
 } from '../lib/dashboard/pendingActions';
 import { ProductCard } from '../components/ProductCard';
+import { AssuranceStrip } from '../components/assurance/AssuranceStrip';
 import { BrandCardDesign, mapBrandToCardDesign } from '../components/BrandCardDesign';
 import { CreatorCardDesign } from '../components/CreatorCardDesign';
 import {
@@ -120,13 +119,6 @@ const DASHBOARD_TABS_WITH_RIGHT_CONTENT = new Set([
   'my-payment-options',
 ]);
 
-const OVERVIEW_TRUST = [
-  { id: 'verified', label: 'Verified Sellers', icon: BadgeCheck },
-  { id: 'payments', label: 'Secure Payments', icon: CreditCard },
-  { id: 'returns', label: 'Easy Returns', icon: RotateCcw },
-  { id: 'cod', label: 'COD Available', icon: Banknote },
-  { id: 'support', label: '24/7 Support', icon: Headphones },
-] as const;
 
 const OVERVIEW_BADGES = [
   { id: 'verified-buyer', label: 'Verified Buyer', emoji: '✓' },
@@ -707,21 +699,8 @@ const OverviewSection = ({
             />
           </div>
 
-          <div
-            className="bg-white rounded-[10px] border border-[#E8EDF2] px-4 sm:px-5 py-4 grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 min-w-0"
-            aria-label="Choosify trust guarantees"
-          >
-            {OVERVIEW_TRUST.map(({ id, label, icon: Icon }) => (
-              <div key={id} className="flex items-center gap-2.5 min-w-0">
-                <div className="w-8 h-8 rounded-full bg-[#FF5B00]/10 text-[#FF5B00] flex items-center justify-center shrink-0">
-                  <Icon size={15} aria-hidden />
-                </div>
-                <span className="text-[11.5px] font-bold text-[#1A1A2E] leading-snug break-words">
-                  {label}
-                </span>
-              </div>
-            ))}
-          </div>
+          {/* Admin → Storefront Curation → Trust & Assurance (account.overview_trust) */}
+          <AssuranceStrip placement="account.overview_trust" />
         </div>
 
         <aside className="space-y-4 min-w-0 lg:sticky lg:top-[88px]">

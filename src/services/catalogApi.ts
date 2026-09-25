@@ -11,6 +11,9 @@ import type {
   CatalogProductDetail,
   HomepageConfig,
   SiteConfig,
+  StorefrontAssurance,
+  StorefrontCoupon,
+  StorefrontDealsCuration,
 } from '../types/catalog';
 
 const API_BASE = ((import.meta as any).env?.VITE_API_BASE_URL as string | undefined) || '/api/v1';
@@ -86,6 +89,24 @@ export const catalogApi = {
   getSiteConfig: async (): Promise<SiteConfig> => {
     const result = await request<{ site: SiteConfig }>('/catalog/site');
     return result.site;
+  },
+
+  /** Storefront Curation — Deals page modules, already resolved + eligibility-filtered server-side. */
+  getDealsCuration: async (): Promise<StorefrontDealsCuration> => {
+    const result = await request<{ data: StorefrontDealsCuration }>('/catalog/storefront/deals-curation');
+    return result.data;
+  },
+
+  /** Every coupon currently valid for storefront display ("View All Coupons"). */
+  getStorefrontCoupons: async (): Promise<StorefrontCoupon[]> => {
+    const result = await request<{ data: StorefrontCoupon[] }>('/catalog/storefront/coupons');
+    return result.data;
+  },
+
+  /** Trust & Assurance strips by placement (server applies defaults/enabled filtering). */
+  getAssuranceStrips: async (): Promise<StorefrontAssurance> => {
+    const result = await request<{ data: StorefrontAssurance }>('/catalog/storefront/assurance');
+    return result.data;
   },
 
   listCreators: async (): Promise<CatalogCreator[]> => {

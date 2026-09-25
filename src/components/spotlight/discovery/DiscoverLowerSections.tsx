@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { PLACEHOLDER_IMAGE } from '../../../constants';
 import { useGlobalState } from '../../../context/GlobalStateContext';
 import { CREATORS } from '../../../data/creators';
+import { AssuranceStrip } from '../../assurance/AssuranceStrip';
 
 /** Choosify.dc.html Discover — sections below YouTube / Reels / Live / Blog Stories */
 
@@ -360,14 +361,6 @@ const COMMUNITY_REVIEWS = [
   },
 ] as const;
 
-const TRUST_POINTS = [
-  { title: 'Expert & Verified', sub: 'Content by experts and verified creators' },
-  { title: '100% Independent', sub: 'Unbiased guides you can trust' },
-  { title: 'Regularly Updated', sub: 'Latest trends and recommendations' },
-  { title: 'Real Experiences', sub: 'From real users and customers' },
-  { title: 'Smart & Helpful', sub: 'AI powered discovery just for you' },
-] as const;
-
 export function DiscoverLowerSections() {
   const { allCreators } = useGlobalState();
 
@@ -511,15 +504,8 @@ export function DiscoverLowerSections() {
         </div>
       </div>
 
-      {/* Choosify statement / trust strip */}
-      <div className="flex justify-between bg-white border border-[#E8EDF2] rounded-[10px] px-6 py-[18px] flex-wrap gap-3.5">
-        {TRUST_POINTS.map((tp) => (
-          <div key={tp.title} className="text-center max-w-[150px]">
-            <div className="text-[11.5px] font-bold text-[#1A1A2E] mb-1">{tp.title}</div>
-            <div className="text-[10px] text-[#9AA0AC]">{tp.sub}</div>
-          </div>
-        ))}
-      </div>
+      {/* Choosify statement / trust strip — Admin → Storefront Curation → Trust & Assurance */}
+      <AssuranceStrip placement="discover.assurance_strip" />
     </div>
   );
 }

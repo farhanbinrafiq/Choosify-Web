@@ -33,27 +33,13 @@ import {
   DealsSubscribeBanner,
   DealsTopCouponsCard,
   DealsVerticalSponsoredCard,
-  TOP_COUPONS,
 } from '../components/deals/DealsLowerSections';
+import { catalogApi } from '../services/catalogApi';
+import type { StorefrontCoupon, StorefrontDealsCuration } from '../types/catalog';
 import {
   BrandCouponCarouselCard,
   type BrandCoupon,
 } from '../components/brand/BrandCouponsSection';
-
-const PROMO_CODES = [
-  { brandId: 'aarong', brandName: "Aarong", code: "AARONG15", discount: "Flat 15% OFF" },
-  { brandId: 'apex', brandName: "Apex", code: "APEXFOOT26", discount: "BDT 500 FLAT" },
-  { brandId: 'sailor', brandName: "Sailor", code: "SAILOREID", discount: "Flat 20% OFF" },
-  { brandId: 'adidas', brandName: "Adidas", code: "ADIEXTRA10", discount: "10% FLAT OFF" }
-];
-
-function discountLabelToCouponPct(discount: string): string {
-  const pctMatch = discount.match(/(\d+)\s*%/);
-  if (pctMatch) return `${pctMatch[1]}%`;
-  const flatMatch = discount.match(/(?:BDT|৳|Flat)\s*([\d,]+)/i);
-  if (flatMatch) return `৳${flatMatch[1].replace(/,/g, '')}`;
-  return discount.replace(/\s*OFF\s*/gi, '').trim().slice(0, 10) || 'Deal';
-}
 
 function FlashDealCountdown({ validUntil }: { validUntil: string }) {
   const [parts, setParts] = useState({ h: '00', m: '00', s: '00' });
@@ -102,7 +88,7 @@ function FlashDealCountdown({ validUntil }: { validUntil: string }) {
 
 export function DealsPage() {
   const navigate = useNavigate();
-  const { allProducts, allBrands, allDeals } = useGlobalState();
+  const { allProducts, allBrands } = useGlobalState();
   const [searchParams, setSearchParams] = useSearchParams();
   const getInitialTab = () => {
     const t = searchParams.get('tab');
@@ -145,39 +131,34 @@ export function DealsPage() {
     allBrands.length > 0
       ? allBrands.map((brand) => ({ ...brand, rating: brand.ratings, products: brand.followers || 0 }))
       : BRANDS;
-  const promoCodes = React.useMemo(
-    () =>
-      allDeals.length > 0
-        ? allDeals
-            .filter((deal) => !!deal.promoCode)
-            .map((deal) => ({
-              brandId: deal.brandId || 'brand-generic',
-              brandName: deal.seller || 'Brand',
-              code: deal.promoCode || '',
-              discount: deal.discountType === 'flat' ? `Flat ৳${deal.discountValue} OFF` : `${deal.discountValue}% OFF`,
-            }))
-        : PROMO_CODES,
-    [allDeals]
-  );
+  /** Admin-curated Deals modules (Top Coupons / Popular Deal Categories / Brand Deals), eligibility applied server-side. */
+  const [dealsCuration, setDealsCuration] = useState<StorefrontDealsCuration | null>(null);
+  /** Every coupon currently valid for storefront display — the full "View All Coupons" set (not limited to Top Coupons). */
+  const [eligibleCoupons, setEligibleCoupons] = useState<StorefrontCoupon[]>([]);
+  useEffect(() => {
+    let alive = true;
+    catalogApi
+      .getDealsCuration()
+      .then((d) => alive && setDealsCuration(d))
+      .catch(() => alive && setDealsCuration({ topCoupons: [], popularCategories: [], brandDeals: [] }));
+    catalogApi
+      .getStorefrontCoupons()
+      .then((c) => alive && setEligibleCoupons(c))
+      .catch(() => {});
+    return () => {
+      alive = false;
+    };
+  }, []);
 
-  /** Full coupon set for Promo Codes feed — Brand Details carousel card shape. */
-  const feedCoupons = React.useMemo((): BrandCoupon[] => {
-    const fromDeals: BrandCoupon[] = promoCodes
-      .filter((promo) => promo.code)
-      .map((promo) => ({
-        pct: discountLabelToCouponPct(promo.discount),
-        code: promo.code,
-        min: promo.brandName ? `From ${promo.brandName}` : 'Platform promo',
-      }));
-    const seen = new Set(fromDeals.map((c) => c.code.toUpperCase()));
-    for (const cp of TOP_COUPONS) {
-      if (!seen.has(cp.code.toUpperCase())) {
-        fromDeals.push({ pct: cp.pct, code: cp.code, min: cp.min });
-        seen.add(cp.code.toUpperCase());
-      }
-    }
-    return fromDeals;
-  }, [promoCodes]);
+  /**
+   * Promo Codes feed ("View All Coupons") — ONLY eligible, public-safe coupons
+   * from GET /catalog/storefront/coupons. No hardcoded/prototype fallback and no
+   * legacy CatalogDeal promo codes: when nothing is eligible the feed is empty.
+   */
+  const feedCoupons = React.useMemo(
+    (): BrandCoupon[] => eligibleCoupons.map((cp) => ({ pct: cp.headline, code: cp.code, min: cp.detail })),
+    [eligibleCoupons],
+  );
 
   const TAB_TO_URL: Record<string, string> = {
     'Flash Deals': 'flash',
@@ -962,7 +943,7 @@ export function DealsPage() {
                 </div>
 
                 <div className="flex flex-col gap-4 self-start lg:sticky lg:top-28 w-full min-w-0">
-                  <DealsTopCouponsCard onViewAllCoupons={handleViewAllCoupons} />
+                  <DealsTopCouponsCard coupons={dealsCuration?.topCoupons ?? []} onViewAllCoupons={handleViewAllCoupons} />
                   {/* Fill remaining right-column height while the deals feed scrolls */}
                   <DealsVerticalSponsoredCard />
                   <DealsVerticalSponsoredCard />
@@ -973,16 +954,29 @@ export function DealsPage() {
             {/* Choosify authentication / trust */}
             <DealsAuthenticationStrip className="mb-6" />
 
-            {/* Popular categories + Brand deals */}
-            <div className="grid grid-cols-1 md:grid-cols-[1fr_1.4fr] gap-4 mb-6">
-              <DealsPopularCategoriesCard
-                onCategoryClick={(name) => {
-                  setSelectedCategory(name);
-                  document.getElementById('all-deals')?.scrollIntoView({ behavior: 'smooth' });
-                }}
-              />
-              <DealsBrandDealsCard />
-            </div>
+            {/* Popular categories + Brand deals — Admin-curated; the row collapses when either/both are empty. */}
+            {(() => {
+              const cats = dealsCuration?.popularCategories ?? [];
+              const brandsRow = dealsCuration?.brandDeals ?? [];
+              if (cats.length === 0 && brandsRow.length === 0) return null;
+              return (
+                <div
+                  className={cn(
+                    'grid grid-cols-1 gap-4 mb-6',
+                    cats.length > 0 && brandsRow.length > 0 && 'md:grid-cols-[1fr_1.4fr]',
+                  )}
+                >
+                  <DealsPopularCategoriesCard
+                    categories={cats}
+                    onCategoryClick={(name) => {
+                      setSelectedCategory(name);
+                      document.getElementById('all-deals')?.scrollIntoView({ behavior: 'smooth' });
+                    }}
+                  />
+                  <DealsBrandDealsCard brands={brandsRow} />
+                </div>
+              );
+            })()}
 
             <CtaBannerSlot page="deals" section="deals-subscribe-banner" position="before" className="mb-8" />
             <DealsSubscribeBanner className="mb-8" />
