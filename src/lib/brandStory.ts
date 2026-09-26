@@ -11,6 +11,7 @@
 import {
   creatorReviewPlatformLabel,
   detectCreatorReviewPlatform,
+  extractUrlFromPastedInput,
   getVideoPosterUrl,
   type CreatorReviewPlatform,
 } from './videoEmbed';
@@ -72,6 +73,18 @@ function aspectForMediaKind(kind?: BrandStoryBlock['mediaKind']): BrandStoryCard
   return 'landscape';
 }
 
+/**
+ * The media kind the dashboard's "Auto-detect from link" option implies for a
+ * detected platform -- mirrors the dashboard's own `detectStoryMediaKind`
+ * (Facebook reels/videos are one `facebook` kind there), so a story left on
+ * auto-detect renders in the same aspect the seller saw in Brand Studio.
+ */
+function mediaKindForPlatform(platform: CreatorReviewPlatform): NonNullable<BrandStoryBlock['mediaKind']> {
+  if (platform === 'facebook_reel' || platform === 'facebook_video') return 'facebook';
+  if (platform === 'unknown') return 'other';
+  return platform;
+}
+
 export type BrandStoryContentLookup = (
   contentId: string,
 ) => { title?: string; image?: string; href?: string; kindLabel?: string } | undefined;
@@ -92,9 +105,14 @@ export function normalizeBrandStoryCards(
     if (kind === 'text') return; // text handled separately
 
     if (kind === 'link') {
-      const url = (b.url || '').trim();
+      // Sellers sometimes paste a platform's official embed code (e.g.
+      // Instagram's <blockquote data-instgrm-permalink=...>) instead of a
+      // plain link -- reduce it to the one real content URL first, exactly as
+      // Creator Review media does, so detection/thumbnail/href all run on that
+      // URL. The stored block is never rewritten.
+      const url = extractUrlFromPastedInput((b.url || '').trim());
       if (!url) return;
-      const thumb = resolveBrandStoryThumb(b);
+      const thumb = resolveBrandStoryThumb({ thumbnail: b.thumbnail, url });
       const platform = detectCreatorReviewPlatform(url);
       cards.push({
         key: b.id || `sbl-${i}`,
@@ -105,7 +123,9 @@ export function normalizeBrandStoryCards(
         thumbnailUrl: thumb,
         hasThumbnail: Boolean(thumb),
         platformLabel: platform !== 'unknown' ? creatorReviewPlatformLabel(platform) : 'Link',
-        aspect: aspectForMediaKind(b.mediaKind),
+        // An explicit seller-chosen media type wins; "Auto-detect" (no stored
+        // mediaKind) follows the platform detected from the URL.
+        aspect: aspectForMediaKind(b.mediaKind || mediaKindForPlatform(platform)),
         platform,
       });
       return;

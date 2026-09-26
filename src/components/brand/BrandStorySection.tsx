@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ExternalLink, Play } from 'lucide-react';
 import { useGlobalState } from '../../context/GlobalStateContext';
@@ -6,6 +6,8 @@ import {
   CreatorReviewViewerModal,
   type CreatorReviewViewerMedia,
 } from '../creatorReviews/CreatorReviewViewerModal';
+import { ProviderPlaceholder } from '../creatorReviews/ProviderPlaceholder';
+import { getTikTokThumbnail } from '../../lib/tiktokOembed';
 import { getAllBrandPosts } from '../../lib/brandPosts';
 import { resolveSpotlightExperience } from '../../utils/spotlightContentResolver';
 import {
@@ -161,12 +163,36 @@ function AuthoredStoryCard({
   onPlay: (media: CreatorReviewViewerMedia) => void;
 }) {
   const [imgFailed, setImgFailed] = useState(false);
-  const showImg = card.hasThumbnail && !imgFailed;
   const isPlayableLink = card.kind === 'link' && !!card.platform && card.platform !== 'unknown' && !!card.href;
+
+  // Same thumbnail precedence as Creator Review media (CreatorReviewMediaCard):
+  // custom → YouTube-derived (already in card.thumbnailUrl) → TikTok's public
+  // oEmbed thumbnail (fetched fresh, never persisted) → the honest
+  // platform-branded ProviderPlaceholder. Facebook/Instagram have no
+  // credential-free thumbnail source, so they get the branded placeholder.
+  const needsTikTokFetch = isPlayableLink && card.platform === 'tiktok' && !card.hasThumbnail;
+  const [tiktokThumb, setTiktokThumb] = useState<string | null>(null);
+  useEffect(() => {
+    if (!needsTikTokFetch || !card.href) {
+      setTiktokThumb(null);
+      return;
+    }
+    let cancelled = false;
+    getTikTokThumbnail(card.href).then((url) => {
+      if (!cancelled) setTiktokThumb(url);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [needsTikTokFetch, card.href]);
+
+  const thumbSrc = card.hasThumbnail ? card.thumbnailUrl : tiktokThumb || '';
+  const showImg = Boolean(thumbSrc) && !imgFailed;
+  const showProviderPlaceholder = !showImg && isPlayableLink;
 
   const media = (
     <div
-      className="relative w-full bg-[#F4F7F9] overflow-hidden"
+      className="group relative w-full bg-[#F4F7F9] overflow-hidden"
       style={{
         aspectRatio: STORY_ASPECT[card.aspect],
         ...(card.aspect === 'portrait' ? { maxWidth: 220, marginLeft: 'auto', marginRight: 'auto' } : {}),
@@ -174,12 +200,17 @@ function AuthoredStoryCard({
     >
       {showImg ? (
         <img
-          src={card.thumbnailUrl}
+          src={thumbSrc}
           alt=""
           loading="lazy"
           className="w-full h-full object-cover"
           onError={() => setImgFailed(true)}
         />
+      ) : showProviderPlaceholder ? (
+        // Branded "Preview unavailable" tile shared with Creator Reviews --
+        // renders its own play affordance, so the Play overlay below skips its
+        // circle in this state.
+        <ProviderPlaceholder platform={card.platform!} label={card.platformLabel} />
       ) : (
         // Neutral Choosify placeholder — never a blank rectangle, never a
         // fabricated/borrowed image.
@@ -196,11 +227,16 @@ function AuthoredStoryCard({
             type="button"
             onClick={() => onPlay({ videoUrl: card.href as string, title: card.title })}
             aria-label={`Play ${card.title}`}
-            className="absolute inset-0 flex items-center justify-center bg-black/10 hover:bg-black/25 transition-colors cursor-pointer"
+            className={cn(
+              'absolute inset-0 flex items-center justify-center transition-colors cursor-pointer',
+              showProviderPlaceholder ? 'bg-transparent' : 'bg-black/10 hover:bg-black/25',
+            )}
           >
-            <div className="w-11 h-11 rounded-full bg-white/95 flex items-center justify-center shadow-lg">
-              <Play className="w-4 h-4 text-[#1A1A2E] ml-0.5 fill-[#1A1A2E]" />
-            </div>
+            {showProviderPlaceholder ? null : (
+              <div className="w-11 h-11 rounded-full bg-white/95 flex items-center justify-center shadow-lg">
+                <Play className="w-4 h-4 text-[#1A1A2E] ml-0.5 fill-[#1A1A2E]" />
+              </div>
+            )}
           </button>
           <a
             href={card.href}
