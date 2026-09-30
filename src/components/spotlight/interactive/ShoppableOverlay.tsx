@@ -1,3 +1,4 @@
+import { productPath } from '../../../../lib/publicUrls';
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { GitCompare, Heart, Share2, ShoppingBag } from 'lucide-react';
@@ -65,7 +66,7 @@ export function ShoppableOverlay({ event, products, activeChapter, heroProductId
               type="button"
               onClick={() => {
                 trackInteractiveEvent('buy_click', event.eventId, { productId: hero.id });
-                navigate(`/products/${hero.slug || hero.id}#buy`);
+                navigate(`${productPath(hero)}#buy`);
               }}
               className="col-span-2 inline-flex items-center justify-center gap-1 py-2 bg-[#FF5B00] text-white text-[10px] font-black uppercase rounded"
             >
@@ -103,7 +104,7 @@ export function ShoppableOverlay({ event, products, activeChapter, heroProductId
             {pinned.map((product) => (
               <li key={product.id}>
                 <Link
-                  to={`/products/${product.slug || product.id}`}
+                  to={productPath(product)}
                   onClick={() => trackInteractiveEvent('pinned_product_click', event.eventId, { productId: product.id })}
                   className="flex gap-3 p-2 border border-[#e8edf2] rounded-[5px] hover:border-[#FF5B00]/40"
                 >

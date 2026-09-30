@@ -1,3 +1,4 @@
+import { brandPath } from '../../lib/publicUrls';
 import React, { useState, useMemo } from 'react';
 import { PAGE_LISTING_SINGLE_SHELL, PRODUCT_CARD_GRID } from "../lib/pageLayout";
 import { StickySectionNav } from '../components/StickySectionNav';
@@ -678,7 +679,7 @@ export function BrandDealsPage() {
                         </div>
                       </div>
                       <button 
-                        onClick={() => navigate(`/brands/${brand.id}/products`)}
+                        onClick={() => navigate(brandPath(brand, '/products'))}
                         className="flex items-center gap-1.5 text-orange-primary font-black uppercase text-[10px] tracking-widest hover:gap-2.5 transition-all bg-white border border-[#e8edf2] px-3 py-1.5 rounded-[5px] shadow-xs hover:border-orange-primary/30"
                       >
                         Brand Store <ArrowRight size={11} />
@@ -690,7 +691,7 @@ export function BrandDealsPage() {
                       {[1, 2, 3, 4, 5].map((deal) => (
                         <div 
                           key={deal} 
-                          onClick={() => navigate(`/brands/${brand.id}/products`)}
+                          onClick={() => navigate(brandPath(brand, '/products'))}
                           className="bg-white rounded-[5px] p-6 flex flex-col items-center text-center gap-6 hover:shadow-lg hover:border-orange-primary/20 transition-all cursor-pointer border border-[#e8edf2] group relative overflow-hidden shadow-sm"
                         >
                           <div className="absolute top-0 right-0 w-32 h-32 bg-orange-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-125 transition-transform duration-700" />

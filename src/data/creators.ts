@@ -18,6 +18,8 @@ export interface MediaItem {
 
 export interface Creator {
   id: string;
+  /** Catalog slug — the canonical public URL key (/creators/{slug}). Absent on static mock creators. */
+  slug?: string;
   name: string;
   handle: string;
   avatar: string;

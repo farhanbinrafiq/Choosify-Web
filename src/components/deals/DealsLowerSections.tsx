@@ -1,3 +1,4 @@
+import { brandPath } from '../../../lib/publicUrls';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '../../lib/utils';
@@ -137,7 +138,7 @@ function BrandDealTile({ brand }: { brand: StorefrontDealsCuration['brandDeals']
   const showLogo = !!brand.logo && !logoFailed;
   return (
     <Link
-      to={`/brands/${encodeURIComponent(brand.slug)}`}
+      to={brandPath(brand)}
       className="border border-[#E8EDF2] rounded-lg px-2 py-3 text-center no-underline hover:border-[#FF5B00]/40 transition-colors min-w-0"
     >
       {showLogo ? (

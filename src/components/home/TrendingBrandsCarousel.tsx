@@ -1,3 +1,4 @@
+import { brandPath } from '../../../lib/publicUrls';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Award, ArrowUpRight } from 'lucide-react';
@@ -119,7 +120,7 @@ export function TrendingBrandsCarousel({
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: -40 }}
                   transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-                  onClick={() => navigate(`/brands/${brand.id}`)}
+                  onClick={() => navigate(brandPath(brand))}
                   className="relative overflow-hidden cursor-pointer group w-full h-full"
                   style={{ borderRadius: '16px', flexShrink: 0 }}
                 >
@@ -166,7 +167,7 @@ export function TrendingBrandsCarousel({
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate(`/brands/${brand.id}`);
+                        navigate(brandPath(brand));
                       }}
                       className="mt-1 flex items-center gap-2 text-white text-[10px] font-black uppercase tracking-widest"
                     >
@@ -197,7 +198,7 @@ export function TrendingBrandsCarousel({
                 onClick={() => {
                   if (position === 'farPrev' || position === 'prev') goPrev();
                   else if (position === 'next') goNext();
-                  else navigate(`/brands/${brand.id}`);
+                  else navigate(brandPath(brand));
                 }}
                 className="relative overflow-hidden cursor-pointer group h-full"
                 style={{ borderRadius: isActive ? '20px' : '16px', minWidth: 0, flexShrink: 0 }}
@@ -250,7 +251,7 @@ export function TrendingBrandsCarousel({
                       type="button"
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate(`/brands/${brand.id}`);
+                        navigate(brandPath(brand));
                       }}
                       className="mt-1 flex items-center gap-2 text-white text-[10px] font-black uppercase tracking-widest"
                     >

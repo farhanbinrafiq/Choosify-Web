@@ -1,3 +1,4 @@
+import { brandPath } from '../../lib/publicUrls';
 import React, { useMemo, useRef } from 'react';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import {
@@ -280,7 +281,7 @@ export function BrandPostDetailPage() {
               <article className="bg-white rounded-[5px] border border-[#e8edf2] shadow-sm overflow-hidden w-full">
                 <div className="p-6 sm:p-10 space-y-6 text-left">
                   <Link
-                    to={`/brands/${post.brandId}`}
+                    to={brandPath({ id: post.brandId })}
                     className="inline-flex items-center gap-3 group"
                   >
                     <div className="w-12 h-12 rounded-full bg-[#1A1D4E] text-white flex items-center justify-center text-xs font-black">

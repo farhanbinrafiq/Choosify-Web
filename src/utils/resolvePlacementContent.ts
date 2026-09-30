@@ -1,3 +1,4 @@
+import { brandPath, creatorPath, productPath } from '../../lib/publicUrls';
 import type {
   CatalogBrand,
   CatalogCreator,
@@ -94,7 +95,7 @@ export function resolvePlacementContent(
   switch (placement.entityType) {
     case 'product': {
       if (!product && !title) return null;
-      href = `/products/${product?.id ?? placement.entityId}`;
+      href = product ? productPath(product) : productPath({ id: placement.entityId });
       title = title || product?.title || 'Featured Product';
       subtitle = subtitle ?? product?.brandName;
       image = pickEntityImage(image, product?.image);
@@ -103,7 +104,7 @@ export function resolvePlacementContent(
     }
     case 'brand': {
       if (!brand && !title) return null;
-      href = `/brands/${brand?.id ?? placement.entityId}`;
+      href = brand ? brandPath(brand) : brandPath({ id: placement.entityId });
       title = title || brand?.name || 'Featured Brand';
       subtitle = subtitle ?? brand?.category;
       image = pickEntityImage(image, brand?.logo);
@@ -117,7 +118,7 @@ export function resolvePlacementContent(
       if (product) {
         title = title || product.title;
         image = pickEntityImage(image, product.image);
-        href = `/products/${product.id}`;
+        href = productPath(product);
       }
       break;
     }
@@ -135,7 +136,7 @@ export function resolvePlacementContent(
     }
     case 'creator': {
       if (!creator && !title) return null;
-      href = `/creators/${creator?.id ?? placement.entityId}`;
+      href = creator ? creatorPath(creator) : creatorPath({ id: placement.entityId });
       title = title || creator?.name || 'Featured Creator';
       subtitle = subtitle ?? creator?.handle;
       image = pickEntityImage(image, creator?.avatar);
@@ -175,7 +176,7 @@ export function buildFallbackPortraitPlacement(catalogs: CatalogLookup): Resolve
       title: product.title,
       subtitle: product.brandName,
       image: pickEntityImage(product.image),
-      href: `/products/${product.id}`,
+      href: productPath(product),
       ctaLabel: 'Shop Now',
       isExternal: false,
       entityType: 'product',
@@ -189,7 +190,7 @@ export function buildFallbackPortraitPlacement(catalogs: CatalogLookup): Resolve
       title: brand.name,
       subtitle: brand.category,
       image: pickEntityImage(brand.logo),
-      href: `/brands/${brand.id}`,
+      href: brandPath(brand),
       ctaLabel: 'View Brand',
       isExternal: false,
       entityType: 'brand',
@@ -211,7 +212,7 @@ export function buildFallbackLandscapePlacement(catalogs: CatalogLookup): Resolv
     title: brand.name,
     subtitle: brand.category,
     image: brand.logo,
-    href: `/brands/${brand.id}`,
+    href: brandPath(brand),
     ctaLabel: 'Shop Now',
     isExternal: false,
     entityType: 'brand',

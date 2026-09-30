@@ -19,7 +19,8 @@ import { useSectionScrollSpy } from "../hooks/useSectionScrollSpy";
 import { StudioWrap } from "../components/studio/StudioWrap";
 import { BrandPostCarouselSection } from "../components/BrandPostCarouselSection";
 import { getBrandPostsByBrandId } from "../lib/brandPosts";
-import { useNavigate, Link, useParams, useLocation } from "react-router-dom";
+import { useNavigate, Link, useParams, useLocation, Navigate } from "react-router-dom";
+import { brandPath, resolveBrandParam } from "../../lib/publicUrls";
 import { ReportModal } from "../components/ReportModal";
 import { useGlobalState } from "../context/GlobalStateContext";
 import { toast } from '../lib/notify';
@@ -90,6 +91,7 @@ export function BrandDetailPage() {
     allCatalogBrands,
     allProducts,
     isLoggedIn,
+    catalogReady,
   } = useGlobalState();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isReportOpen, setIsReportOpen] = useState(false);
@@ -163,20 +165,13 @@ export function BrandDetailPage() {
   const brandSource = (allBrands.length > 0 ? allBrands : BRANDS) as Brand[];
   const productSource = allProducts.length > 0 ? allProducts : PRODUCTS;
 
-  // Match the route param against every identifier a "/brands/:id" link in
-  // this app might actually use — the numeric mapped id, the raw catalog id
-  // (e.g. "brand-cb4ec847-..."), the slug (e.g. "test"), or a slugified/
-  // exact name match. Different card/listing components link with
-  // different ones of these, so all must be checked here.
-  const routeIdLower = String(id || "").toLowerCase();
-  const matchedBrand = brandSource.find(
-    (b) =>
-      String(b.id) === id ||
-      String((b as { catalogId?: string }).catalogId || "").toLowerCase() === routeIdLower ||
-      String((b as { slug?: string }).slug || "").toLowerCase() === routeIdLower ||
-      b.name.toLowerCase().replace(/\s+/g, "-") === routeIdLower ||
-      b.name.toLowerCase() === routeIdLower,
-  );
+  // The canonical key is the brand slug (lib/publicUrls.ts). Older links used the
+  // raw catalog id (e.g. "brand-cb4ec847-..."), a legacy numeric id or a name
+  // form — those still resolve and redirect to the slug, but only when they
+  // identify exactly one brand; an ambiguous link is never guessed.
+  const brandRoute = useMemo(() => resolveBrandParam(id, brandSource), [id, brandSource]);
+  const matchedBrand =
+    brandRoute.status === "canonical" || brandRoute.status === "redirect" ? brandRoute.entity : undefined;
   // Never silently substitute an unrelated real brand (e.g. picking an
   // arbitrary index) when the route id doesn't match anything — that would
   // show one brand's page while claiming to be a different, wrong brand.
@@ -1038,6 +1033,14 @@ export function BrandDetailPage() {
     );
   };
 
+  if (!catalogReady && brandRoute.status !== "canonical") {
+    return <div className="min-h-[60vh]" aria-busy="true" />;
+  }
+  if (brandRoute.status === "redirect") {
+    // Keep the "/products" sub-view of /brands/:id/products.
+    const subPath = location.pathname.replace(/\/+$/, "").endsWith("/products") ? "/products" : "";
+    return <Navigate to={`${brandRoute.to}${subPath}${location.search}${location.hash}`} replace />;
+  }
   if (!matchedBrand) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-3 text-center px-6">
@@ -1412,7 +1415,7 @@ export function BrandDetailPage() {
                 <div className="flex items-center gap-3">
                   <SortDropdown options={BRAND_DETAIL_SORT_OPTIONS} value={sortOption} onChange={setSortOption} />
                   <Link
-                    to={`/brands/${brand.id}/products`}
+                    to={brandPath(brand, "/products")}
                     className="text-[12px] font-bold text-[#1A1A2E] no-underline hover:text-[#EF3C23] shrink-0"
                   >
                     VIEW ALL PRODUCTS ›

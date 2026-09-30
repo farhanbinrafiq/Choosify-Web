@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useParams, useNavigate, useLocation, Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useParams, useNavigate, useLocation, Link, Navigate } from 'react-router-dom';
+import { resolveCreatorParam } from '../../lib/publicUrls';
 import { toast } from '../lib/notify';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -36,11 +37,17 @@ export function CreatorProfilePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { openVideo, getCreatorClaimStatus, updateCreatorClaimStatus, creatorClaimStatuses, allCreators, isLoggedIn } = useGlobalState();
+  const { openVideo, getCreatorClaimStatus, updateCreatorClaimStatus, creatorClaimStatuses, allCreators, isLoggedIn, catalogReady } = useGlobalState();
   const [isReportOpen, setIsReportOpen] = useState(false);
 
-  // Prefer catalog creators; fall back to mock CREATORS
-  const matchedCreator = allCreators.find((c) => c.id === id) || CREATORS.find((c) => c.id === id);
+  // Canonical key is the creator slug; the creator id still resolves (then
+  // redirects). Prefer catalog creators; fall back to mock CREATORS.
+  const creatorRoute = useMemo(() => {
+    const fromCatalog = resolveCreatorParam(id, allCreators);
+    return fromCatalog.status === 'not_found' ? resolveCreatorParam(id, CREATORS) : fromCatalog;
+  }, [id, allCreators]);
+  const matchedCreator =
+    creatorRoute.status === 'canonical' || creatorRoute.status === 'redirect' ? creatorRoute.entity : undefined;
   // Fallback creator record only exists to keep hooks below call-safe when no
   // match is found (React hooks must run unconditionally) -- creatorNotFound
   // decides what actually renders, so an unknown :id never shows someone else's
@@ -170,6 +177,12 @@ export function CreatorProfilePage() {
   // reviews feed exists (see Creator Studio audit note on Operations reviews).
   const reviewDemo: ReturnType<typeof getCreatorReviewDemo> = { community: [], latestProducts: [] };
 
+  if (!catalogReady && creatorRoute.status !== 'canonical') {
+    return <div className="min-h-[60vh]" aria-busy="true" />;
+  }
+  if (creatorRoute.status === 'redirect') {
+    return <Navigate to={`${creatorRoute.to}${location.search}${location.hash}`} replace />;
+  }
   if (creatorNotFound) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] px-6 text-center gap-4">

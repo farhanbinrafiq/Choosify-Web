@@ -28,6 +28,7 @@ import {
 } from '../lib/authSession';
 import type { CatalogBrand, CatalogCategory, CatalogCreator, CatalogDeal, CatalogGuide, CatalogPlacement, CatalogProduct, CatalogProductDetail, HomepageConfig, SiteConfig } from '../types/catalog';
 import { mapCatalogCreator, mapCatalogGuide } from '../utils/editorialMappers';
+import { legacyNumericId } from '../../lib/publicUrls';
 import { commerceProductToCatalog, resolveCatalogProducts } from '../utils/productNormalize';
 import type { Creator } from '../data/creators';
 import { useOptionalCmsDraftPreview } from '../contexts/CmsDraftPreviewContext';
@@ -115,6 +116,12 @@ export interface GlobalStateContextType {
   isFeatureEnabled: (key: string) => boolean;
   /** True when catalog hydrate failed and static mock data is in use. */
   isUsingFallbackData: boolean;
+  /**
+   * True once the first catalog hydrate has settled (real data or fallback).
+   * Detail pages only redirect legacy links / show "not found" after this, so a
+   * link is never resolved against the temporary mock list.
+   */
+  catalogReady: boolean;
 }
 
 const DEFAULT_USER: User = {
@@ -722,10 +729,9 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     };
   }, []);
 
-  const toNumericId = (value: string, fallback: number): number => {
-    const numeric = Number(value.replace(/[^0-9]/g, ''));
-    return Number.isFinite(numeric) && numeric > 0 ? numeric : fallback;
-  };
+  // Internal numeric keys only (cart, compare, legacy lookups) — never a public
+  // URL key: they can collide and lose precision. Links use lib/publicUrls.
+  const toNumericId = (value: string, fallback: number): number => legacyNumericId(value, fallback);
 
   const apiBrands: Brand[] = (catalogBrands || []).map((brand, idx) => {
     // claimStatus/verifiedStatus MUST come from the backend record itself —
@@ -1156,6 +1162,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       featureFlags,
       isFeatureEnabled: (key: string) => isFlagEnabled(featureFlags, key),
       isUsingFallbackData,
+      catalogReady: catalogProducts !== null || isUsingFallbackData,
     }}>
       {children}
     </GlobalStateContext.Provider>

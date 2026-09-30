@@ -7,6 +7,7 @@ import {
   matchesRouteParam,
   type BreadcrumbItem,
 } from '../lib/seoHelpers';
+import { resolveBrandParam, resolveCreatorParam, resolveProductParam, resolvedEntity } from '../../lib/publicUrls';
 
 /** Resolve breadcrumb trail from the current route + catalog entities */
 export function useBreadcrumbItems(extraLabels: Record<string, string> = {}): BreadcrumbItem[] {
@@ -19,7 +20,7 @@ export function useBreadcrumbItems(extraLabels: Record<string, string> = {}): Br
     const [section, id] = segments;
 
     if (section === 'products' && id) {
-      const product = state.allProducts.find((p) => matchesRouteParam(p, id));
+      const product = resolvedEntity(resolveProductParam(id, state.allProducts));
       if (product) {
         labels[`/products/${id}`] =
           (product as { title?: string; name?: string }).title ||
@@ -29,7 +30,7 @@ export function useBreadcrumbItems(extraLabels: Record<string, string> = {}): Br
     }
 
     if (section === 'brands' && id) {
-      const brand = state.allBrands.find((b) => matchesRouteParam(b, id));
+      const brand = resolvedEntity(resolveBrandParam(id, state.allBrands));
       if (brand) labels[`/brands/${id}`] = brand.name;
     }
 
@@ -39,7 +40,7 @@ export function useBreadcrumbItems(extraLabels: Record<string, string> = {}): Br
     }
 
     if (section === 'creators' && id) {
-      const creator = state.allCreators.find((c) => matchesRouteParam(c, id));
+      const creator = resolvedEntity(resolveCreatorParam(id, state.allCreators));
       if (creator) labels[`/creators/${id}`] = creator.name;
     }
 

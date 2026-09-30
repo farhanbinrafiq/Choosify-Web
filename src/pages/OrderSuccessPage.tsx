@@ -1,3 +1,4 @@
+import { productPath } from '../../lib/publicUrls';
 import React, { useMemo, useRef } from 'react';
 import { useLocation, Link, useNavigate, useParams } from 'react-router-dom';
 import {
@@ -492,7 +493,7 @@ export function OrderSuccessPage() {
                     toast.error('No product on this order to rate yet.');
                     return;
                   }
-                  navigate(`/products/${firstItem.productId}#public-reviews-section`);
+                  navigate(`${productPath({ id: firstItem.productId })}#public-reviews-section`);
                 }}
                 className="bg-[#FF5B00] hover:bg-[#EF3C23] text-white border-0 px-[18px] py-2.5 rounded-lg text-[11px] font-bold cursor-pointer"
               >

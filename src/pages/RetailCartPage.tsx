@@ -1,3 +1,4 @@
+import { productPath } from '../../lib/publicUrls';
 import React from 'react';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -210,7 +211,7 @@ export function RetailCartPage() {
                               <div>
                                 <div className="flex justify-between items-start gap-2 mb-1">
                                   <Link
-                                    to={`/products/${product.id}`}
+                                    to={productPath(product)}
                                     className="text-[13px] font-bold text-[#1A1A2E] hover:text-[#EF3C23] transition-colors line-clamp-2"
                                   >
                                     {product.title}

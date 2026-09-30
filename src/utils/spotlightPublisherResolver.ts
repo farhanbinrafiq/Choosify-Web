@@ -1,3 +1,4 @@
+import { brandPath, creatorPath } from '../../lib/publicUrls';
 import type { CatalogProduct } from '../types/catalog';
 import type { SpotlightCampaignRecord } from '../types/spotlight/cms';
 import type { SpotlightCampaignType } from '../types/spotlight/campaignTypes';
@@ -18,7 +19,7 @@ export function publisherFromBrand(
     isVerified: verified,
     badges: verified ? ['Verified Brand'] : [],
     trustScore: verified ? 85 : 60,
-    profileHref: `/brands/${brandId}`,
+    profileHref: brandPath({ id: brandId }),
   };
 }
 
@@ -36,7 +37,7 @@ export function publisherFromCreator(
     isVerified: score >= 75,
     badges: score >= 90 ? ['Top Creator'] : ['Creator'],
     reputation: score,
-    profileHref: `/creators/${creatorId}`,
+    profileHref: creatorPath({ id: creatorId }),
   };
 }
 

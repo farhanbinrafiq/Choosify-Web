@@ -1,3 +1,4 @@
+import { productPath } from '../../lib/publicUrls';
 import React, { useState, useMemo, useRef } from 'react';
 import { PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
 import { 
@@ -1160,7 +1161,7 @@ export function CompareEngine() {
                       ))}
                     </div>
                     <Link
-                      to={`/products/${productWinner.id}`}
+                      to={productPath(productWinner)}
                       className="block w-full text-center bg-[#FF5B00] hover:brightness-110 text-white py-2.5 rounded-lg text-xs font-bold no-underline transition-all"
                     >
                       View Full Review
@@ -1285,7 +1286,7 @@ export function CompareEngine() {
                   </div>
                   <div className="text-[9.5px] font-bold text-white/60">{productWinner?.brand || productWinner?.brandName}</div>
                   <div className="text-[13px] font-extrabold mb-1.5">{productWinner.name}</div>
-                  <Link to={`/products/${productWinner.id}`} className="text-[11px] font-bold text-[#FF9E5C] no-underline">
+                  <Link to={productPath(productWinner)} className="text-[11px] font-bold text-[#FF9E5C] no-underline">
                     View product →
                   </Link>
                 </div>
@@ -1752,7 +1753,7 @@ export function CompareEngine() {
                         >
                           <button
                             type="button"
-                            onClick={() => navigate(`/products/${product.id}`)}
+                            onClick={() => navigate(productPath(product))}
                             className="text-left flex items-start gap-3 cursor-pointer"
                           >
                             <img
@@ -1787,7 +1788,7 @@ export function CompareEngine() {
                             </button>
                             <button
                               type="button"
-                              onClick={() => navigate(`/products/${product.id}`)}
+                              onClick={() => navigate(productPath(product))}
                               className="px-3 py-2 rounded-[5px] border border-[#e8edf2] text-[#1A1D4E] hover:border-[#FF5B00]/30 hover:text-[#EF3C23] text-[10px] font-black uppercase tracking-widest cursor-pointer"
                             >
                               View

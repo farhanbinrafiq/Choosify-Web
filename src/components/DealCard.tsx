@@ -1,3 +1,4 @@
+import { productPath } from '../../lib/publicUrls';
 import React, { memo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronRight, Star, Heart, Truck, Shield } from 'lucide-react';
@@ -78,7 +79,7 @@ export const DealCard = memo(function DealCard({
       if (onClick) {
         onClick();
       } else {
-        navigate(`/products/${product.id}`);
+        navigate(productPath(product));
       }
     };
 

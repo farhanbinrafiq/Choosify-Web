@@ -1,3 +1,4 @@
+import { productPath } from '../../../../lib/publicUrls';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Play, ShoppingBag, Scale, Heart, User, ChevronRight } from 'lucide-react';
@@ -30,7 +31,7 @@ export function SpotlightContentRenderer({
   className,
 }: SpotlightContentRendererProps) {
   const primary = products[0];
-  const primaryUrl = primary ? `/products/${primary.slug || primary.id}` : undefined;
+  const primaryUrl = primary ? productPath(primary) : undefined;
   const hero = resolveContentHeroDefinition(content.contentType, content.media, content.isLive);
   const profileHref = publisherProfileHref(content.publisher);
   const hasService = content.connections.serviceIds.length > 0 || content.commerce.featuredServiceIds.length > 0;

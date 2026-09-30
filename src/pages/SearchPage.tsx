@@ -1,3 +1,4 @@
+import { brandPath, creatorPath } from '../../lib/publicUrls';
 import React, { useMemo, useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Search } from 'lucide-react';
@@ -461,7 +462,7 @@ export function SearchPage() {
               {brandList.map((brand: any, i: number) => (
                 <Link
                   key={brand.id || brand.name}
-                  to={`/brands/${brand.id || brand.slug || encodeURIComponent(brand.name)}`}
+                  to={brandPath(brand)}
                   className="bg-white rounded-[10px] border border-[#E8EDF2] p-[18px] text-center no-underline hover:border-[#FF5B00]/35 transition-colors"
                 >
                   <div
@@ -539,7 +540,7 @@ export function SearchPage() {
               {(activeTab === 'all' ? results.creators.slice(0, 5) : results.creators).map((c: any) => (
                 <Link
                   key={c.id || c.name}
-                  to={`/creators/${c.id}`}
+                  to={creatorPath(c)}
                   className="bg-white rounded-[10px] border border-[#E8EDF2] p-5 text-center no-underline hover:border-[#FF5B00]/35 transition-colors"
                 >
                   <div className="w-14 h-14 rounded-full overflow-hidden mx-auto mb-3 bg-[#F4F7F9]">

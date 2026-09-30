@@ -1,3 +1,4 @@
+import { brandPath } from '../../../../lib/publicUrls';
 import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useGlobalState } from '../../../context/GlobalStateContext';
@@ -59,7 +60,7 @@ export function ContentDetailBrandsMentionedSection({
         {brands.map((brand: any) => (
           <Link
             key={brand.id}
-            to={`/brands/${brand.id}`}
+            to={brandPath(brand)}
             className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 text-center hover:border-[#FF5B00]/40 transition-colors no-underline"
           >
             <div className="w-14 h-14 mx-auto mb-2.5 rounded-full bg-[#F4F7F9] overflow-hidden flex items-center justify-center">

@@ -1,3 +1,4 @@
+import { productPath } from '../../../../lib/publicUrls';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingBag } from 'lucide-react';
@@ -23,7 +24,7 @@ export function SpotlightCommerceStrip({
 }: SpotlightCommerceStripProps) {
   if (!product && !serviceLabel) return null;
 
-  const productUrl = product ? `/products/${product.slug || product.id}` : undefined;
+  const productUrl = product ? productPath(product) : undefined;
 
   return (
     <div className={cn('rounded-[5px] border border-[#e8edf2] bg-[#fafbfc] p-2.5', className)}>

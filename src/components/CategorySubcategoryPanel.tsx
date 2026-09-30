@@ -1,3 +1,4 @@
+import { creatorPath } from '../../lib/publicUrls';
 import React, { Suspense } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
@@ -189,7 +190,7 @@ export function CategorySubcategoryPanel({
               {categoryCreators.map((creator) => (
                 <Link
                   key={creator.id}
-                  to={`/creators/${creator.id}`}
+                  to={creatorPath(creator)}
                   className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-[#F7F8FA] hover:bg-white border border-[#eef2f6] hover:border-[#FF5B00]/20 transition-all duration-200"
                 >
                   <div className="w-8 h-8 rounded-full bg-[#FF5B00]/10 overflow-hidden flex items-center justify-center text-[10px] font-bold text-[#FF5B00]">

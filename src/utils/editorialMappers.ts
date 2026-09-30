@@ -3,6 +3,7 @@ import type { Creator } from '../data/creators';
 
 export const mapCatalogCreator = (creator: CatalogCreator): Creator => ({
   id: creator.id,
+  slug: creator.slug,
   name: creator.name,
   handle: creator.handle,
   avatar: creator.avatar,

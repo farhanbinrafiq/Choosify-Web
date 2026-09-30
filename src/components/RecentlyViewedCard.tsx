@@ -1,3 +1,4 @@
+import { productPath } from '../../lib/publicUrls';
 import React, { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
@@ -30,7 +31,7 @@ export const RecentlyViewedCard = memo(function RecentlyViewedCard({ product, cl
 
   return (
     <Link
-      to={`/products/${product.id}`}
+      to={productPath(product)}
       id={`recently-viewed-card-${product.id}`}
       className={cn(
         "block w-[150px] min-w-[150px] max-w-[150px] bg-white rounded-2xl border border-slate-100 p-3 hover:shadow-md transition-all duration-300 select-none text-left flex flex-col gap-2 shrink-0 group cursor-pointer",

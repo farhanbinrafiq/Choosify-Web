@@ -1,3 +1,4 @@
+import { productPath } from '../../lib/publicUrls';
 import { useMemo, useCallback } from 'react';
 import { BRANDS } from '../constants';
 import { useGlobalState } from '../context/GlobalStateContext';
@@ -180,7 +181,7 @@ export function useHomePageData() {
       id: String(item.id ?? item.dealId ?? idx),
       title: item.title ?? item.name ?? 'Special Offer',
       subtitle: item.description ?? item.brandName ?? 'Limited time promotion on Choosify',
-      href: item.href ?? (item.id ? `/products/${item.id}` : '/deals'),
+      href: item.href ?? (item.id ? productPath(item) : '/deals'),
       badge: kinds[idx % kinds.length].replace('_', ' '),
       kind: kinds[idx % kinds.length],
       image: item.image,

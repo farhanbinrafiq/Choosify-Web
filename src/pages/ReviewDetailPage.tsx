@@ -1,3 +1,4 @@
+import { creatorPath } from '../../lib/publicUrls';
 import React, { useMemo } from 'react';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import {
@@ -126,7 +127,7 @@ export function ReviewDetailPage() {
           <div className="flex flex-wrap items-center gap-3 text-[11.5px] font-semibold text-[#9AA0AC]">
             <span className="inline-flex items-center gap-1"><Star size={12} className="text-[#FF5B00]" /> Verified review</span>
             {review.creatorId && (
-              <Link to={`/creators/${review.creatorId}`} className="inline-flex items-center gap-1 text-[#FF5B00] hover:underline">
+              <Link to={creatorPath({ id: review.creatorId })} className="inline-flex items-center gap-1 text-[#FF5B00] hover:underline">
                 <User size={12} /> {review.author}
               </Link>
             )}

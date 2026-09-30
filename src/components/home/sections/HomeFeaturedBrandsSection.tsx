@@ -1,3 +1,4 @@
+import { brandPath } from '../../../../lib/publicUrls';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { DcHomeBlock } from '../DcHomePanel';
@@ -50,7 +51,7 @@ export function HomeFeaturedBrandsSection({
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 mb-2">
         {brands.map((b: any, i: number) => {
           const name = b.name || b.brandName || 'Brand';
-          const href = b.slug ? `/brands/${b.slug}` : b.id ? `/brands/${b.id}` : '/brands';
+          const href = brandPath(b);
           const logo = b.logo || b.image;
           return (
             <Link

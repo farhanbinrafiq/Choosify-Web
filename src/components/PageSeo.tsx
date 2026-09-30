@@ -26,6 +26,7 @@ import {
   resolveOgType,
 } from '../lib/seoHelpers';
 import { useBreadcrumbItems } from '../hooks/useBreadcrumbItems';
+import { resolveBrandParam, resolveCreatorParam, resolveProductParam, resolvedEntity } from '../../lib/publicUrls';
 import {
   articleJsonLd,
   brandJsonLd,
@@ -116,7 +117,7 @@ function resolveMeta(
   const [section, id] = segments;
 
   if (section === 'products' && id) {
-    const product = state.allProducts.find((p) => matchesRouteParam(p, id));
+    const product = resolvedEntity(resolveProductParam(id, state.allProducts));
     if (!product) {
       return {
         title: formatPageTitle('Product'),
@@ -155,7 +156,7 @@ function resolveMeta(
   }
 
   if (section === 'brands' && id) {
-    const brand = state.allBrands.find((b) => matchesRouteParam(b, id));
+    const brand = resolvedEntity(resolveBrandParam(id, state.allBrands));
     if (!brand) {
       return {
         title: formatPageTitle('Brand'),
@@ -202,7 +203,7 @@ function resolveMeta(
   }
 
   if (section === 'creators' && id) {
-    const creator = state.allCreators.find((c) => matchesRouteParam(c, id));
+    const creator = resolvedEntity(resolveCreatorParam(id, state.allCreators));
     const name = creator?.name || 'Creator';
     return {
       title: formatPageTitle(name),
@@ -331,7 +332,7 @@ export function PageSeo() {
     const [section, id] = segments;
 
     if (section === 'products' && id) {
-      const product = state.allProducts.find((p) => matchesRouteParam(p, id));
+      const product = resolvedEntity(resolveProductParam(id, state.allProducts));
       if (product) {
         const name =
           (product as { title?: string; name?: string }).title ||
@@ -356,7 +357,7 @@ export function PageSeo() {
     }
 
     if (section === 'brands' && id) {
-      const brand = state.allBrands.find((b) => matchesRouteParam(b, id));
+      const brand = resolvedEntity(resolveBrandParam(id, state.allBrands));
       if (brand) {
         blocks.push(
           brandJsonLd({

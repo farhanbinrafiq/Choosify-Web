@@ -1,3 +1,4 @@
+import { brandPath, productPath } from '../../../lib/publicUrls';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ExternalLink, Flag, Megaphone, Sparkles } from 'lucide-react';
@@ -20,7 +21,7 @@ export function resolveEntityDisplay(entity: AnnouncementAssociatedEntity) {
           [product.brand, product.category].filter(Boolean).join(' · ') ||
           entityTypeLabel(entity.type),
         image: entity.image || product.image || PLACEHOLDER_IMAGE,
-        href: entity.href || `/products/${product.id}`,
+        href: entity.href || productPath(product),
         ctaLabel: entity.ctaLabel || 'View product',
         meta:
           product.price != null
@@ -41,7 +42,7 @@ export function resolveEntityDisplay(entity: AnnouncementAssociatedEntity) {
         : entity.type === 'campaign'
           ? '/deals'
           : entity.type === 'brand'
-            ? `/brands/${entity.id}`
+            ? brandPath({ id: entity.id })
             : entity.type === 'order'
               ? '/order-tracking'
               : '#'),

@@ -1,3 +1,4 @@
+import { brandPath } from '../../lib/publicUrls';
 import React, { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
@@ -166,7 +167,7 @@ export const BrandCardDesign = memo(function BrandCardDesign({
   const wrapperProps = isCurrentInComparison
     ? {}
     : {
-        to: `/brands/${brand.id}`,
+        to: brandPath(brand),
         onClick,
       };
 

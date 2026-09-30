@@ -1,3 +1,4 @@
+import { creatorPath } from '../../../lib/publicUrls';
 import type { SpotlightContentType } from '../../types/spotlight/experience/contentTypes';
 import { spotlightContentHref } from '../spotlight/content';
 
@@ -25,7 +26,7 @@ export const CONTENT_ROUTE_REGISTRY: ContentRouteRule[] = [
     contentType: 'creator_review',
     primaryRoute: (slug) => spotlightContentHref(slug),
     ctaLabel: 'Watch Review',
-    secondaryProfileRoute: (id) => `/creators/${id}`,
+    secondaryProfileRoute: (id) => creatorPath({ id }),
   },
   {
     contentType: 'product_review',

@@ -1,3 +1,4 @@
+import { productPath } from '../../../../lib/publicUrls';
 import type { ContentDetailSectionConfig } from '../../../types/spotlight/experience/contentDetailSections';
 import type { ContentDetailSectionContext } from '../contentDetailSectionContext';
 import { GuideOverallWinnerCard } from '../../guide/GuideOverallWinnerCard';
@@ -73,7 +74,7 @@ export function ContentDetailWinnerSection({
                 'Long-term Software Support',
               ]
             }
-            shopHref={`/products/${winner?.id ?? ''}`}
+            shopHref={productPath(winner)}
           />
         );
       })}

@@ -1,3 +1,4 @@
+import { productPath } from '../../../../lib/publicUrls';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -103,7 +104,7 @@ export function SpotlightCardRenderer({
   const isMobileFeed = feedMode === 'mobile_feed';
 
   const isSaved = product ? savedProducts.some((p) => p.id === product.id) : false;
-  const productUrl = product ? `/products/${product.slug || product.id}` : undefined;
+  const productUrl = product ? productPath(product) : undefined;
   const typeLabel = SPOTLIGHT_CONTENT_TYPE_META[content.contentType]?.label ?? 'Spotlight';
   const shopLabel = content.commerce.primaryCta?.label ?? 'Shop Now';
   const contentActionLabel = content.ctaLabel;

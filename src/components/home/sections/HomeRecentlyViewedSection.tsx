@@ -1,3 +1,4 @@
+import { productPath } from '../../../../lib/publicUrls';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
@@ -24,7 +25,7 @@ export function HomeRecentlyViewedSection({ products }: HomeRecentlyViewedSectio
         {products.slice(0, 6).map((product) => (
           <Link
             key={product.id}
-            to={`/products/${product.slug ?? product.id}`}
+            to={productPath(product)}
             className="bg-white rounded-[10px] overflow-hidden border border-[#E8EDF2] hover:border-[#FF5B00]/35 transition-colors"
           >
             <div className="relative h-[150px] bg-[#F4F7F9] overflow-hidden">

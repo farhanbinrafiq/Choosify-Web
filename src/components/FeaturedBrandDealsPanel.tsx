@@ -1,3 +1,4 @@
+import { brandPath } from '../../lib/publicUrls';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Copy } from 'lucide-react';
@@ -74,7 +75,7 @@ export function FeaturedBrandDealsPanel() {
           ) : (
             BRAND_DEALS.map((item) => (
               <Link
-                to={`/brands/${item.id}`}
+                to={brandPath(item)}
                 key={item.id}
                 className="flex items-center gap-3 bg-white border border-[#eef2f6]/60 rounded-2xl p-2 hover:shadow-soft hover:border-[#FF5B00]/10 transition-all duration-300 group cursor-pointer"
               >
@@ -114,7 +115,7 @@ export function FeaturedBrandDealsPanel() {
           ) : (
             PROMO_CODES.map((item, idx) => (
               <Link
-                to={`/brands/${item.brandId}`}
+                to={brandPath({ id: item.brandId })}
                 key={idx}
                 className="bg-white border border-[#eef2f6]/65 hover:border-[#FF5B00]/15 rounded-2xl p-2.5 hover:shadow-soft transition-all duration-300 group cursor-pointer flex flex-col gap-2 text-left"
               >

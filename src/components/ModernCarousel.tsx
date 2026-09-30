@@ -1,3 +1,4 @@
+import { brandPath } from '../../lib/publicUrls';
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { cn } from '../lib/utils';
@@ -80,7 +81,7 @@ export const ModernCarousel: React.FC = () => {
                 key={brand.id}
                 onClick={() => {
                   if (isActive) {
-                    navigate(`/brands/${brand.id}`);
+                    navigate(brandPath(brand));
                   } else {
                     setIndex(i);
                   }
@@ -148,7 +149,7 @@ export const ModernCarousel: React.FC = () => {
                        <button 
                          onClick={(e) => {
                            e.stopPropagation();
-                           navigate(`/brands/${brand.id}`);
+                           navigate(brandPath(brand));
                          }}
                          className="flex items-center gap-4 px-10 py-4 bg-white/5 backdrop-blur-sm border-2 border-white/20 hover:border-white transition-all rounded-full group/btn"
                        >

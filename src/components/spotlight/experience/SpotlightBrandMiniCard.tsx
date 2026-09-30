@@ -1,3 +1,4 @@
+import { brandPath } from '../../../../lib/publicUrls';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Star } from 'lucide-react';
@@ -13,7 +14,7 @@ export function SpotlightBrandMiniCard({
   publisher: SpotlightPublisher;
   brandId?: string;
 }) {
-  const profileHref = publisherProfileHref(publisher) ?? (brandId ? `/brands/${brandId}` : undefined);
+  const profileHref = publisherProfileHref(publisher) ?? (brandId ? brandPath({ id: brandId }) : undefined);
   const resolvedBrandId = brandId ?? publisher.publisherId;
 
   return (

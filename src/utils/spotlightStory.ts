@@ -1,3 +1,4 @@
+import { productPath } from '../../lib/publicUrls';
 import type { SpotlightStoryGroup } from '../types/spotlight/discovery/story';
 import type { SpotlightContent } from '../types/spotlight/experience/content';
 
@@ -28,7 +29,7 @@ export function buildDemoStoryGroups(allContent: SpotlightContent[]): SpotlightS
             entityId: content.connections.productIds[0],
             headline: 'Shop Now',
             ctaLabel: 'Buy',
-            href: `/products/${content.connections.productIds[0]}`,
+            href: productPath({ id: content.connections.productIds[0] }),
           }]
         : []),
       {

@@ -1,3 +1,4 @@
+import { productPath } from '../../lib/publicUrls';
 import type { SpotlightHub } from '../types/spotlight/discovery/hub';
 import type { SpotlightContent } from '../types/spotlight/experience/content';
 import type { SpotlightCampaignJourneyStep } from '../types/spotlight/discovery/journey';
@@ -25,7 +26,7 @@ export function buildSpotlightHub(content: SpotlightContent, allContent: Spotlig
     { id: 'overview' as const, title: 'Overview', contentIds: [content.contentId], href: `/spotlight/${slug}` },
     { id: 'live' as const, title: 'Live', contentIds: live.map((c) => c.contentId), href: undefined },
     { id: 'replay' as const, title: 'Replay', contentIds: live.filter((c) => c.live?.status === 'replay' || c.live?.status === 'ended').map((c) => c.contentId) },
-    { id: 'products' as const, title: 'Products', contentIds: [], href: content.connections.productIds[0] ? `/products/${content.connections.productIds[0]}` : undefined },
+    { id: 'products' as const, title: 'Products', contentIds: [], href: content.connections.productIds[0] ? productPath({ id: content.connections.productIds[0] }) : undefined },
     { id: 'guides' as const, title: 'Guides', contentIds: guides.map((c) => c.contentId) },
     { id: 'reviews' as const, title: 'Reviews', contentIds: reviews.map((c) => c.contentId) },
     { id: 'creator_content' as const, title: 'Creator Content', contentIds: creatorContent.map((c) => c.contentId) },

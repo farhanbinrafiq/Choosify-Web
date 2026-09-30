@@ -1,3 +1,4 @@
+import { brandPath, creatorPath, productPath } from '../../lib/publicUrls';
 import { useMemo } from 'react';
 import type { CustomOverview } from '../context/DashboardContext';
 import { getBrandOverviews, getProductOverviews } from '../utils/overviewRegistry';
@@ -139,7 +140,7 @@ export function useSearchSuggestions({
         title: p.title,
         subtitle: `${p.brandName} • BDT ${p.price}`,
         image: p.image,
-        route: `/products/${p.id}`,
+        route: productPath(p),
         badge: p.tags?.[0],
       }));
 
@@ -162,7 +163,7 @@ export function useSearchSuggestions({
         type: 'brand',
         title: b.name,
         subtitle: `${b.category || 'Brand'} • ${b.products ?? 0} Products`,
-        route: `/brands/${b.id}`,
+        route: brandPath(b),
         badge: (b.rating ?? 0) >= 4.8 ? 'Verified' : undefined,
       }));
 
@@ -181,7 +182,7 @@ export function useSearchSuggestions({
         title: c.name,
         subtitle: `${c.handle || '@creator'} • ${c.bestFor || 'Creator'} Expert`,
         image: c.avatar,
-        route: `/creators/${c.id}`,
+        route: creatorPath(c),
       }));
 
     const matchedCategories: SuggestionItem[] = categorySource

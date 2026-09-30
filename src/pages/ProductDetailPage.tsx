@@ -1,5 +1,6 @@
 import React, { useState, useMemo, useRef } from "react";
-import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation, Navigate } from "react-router-dom";
+import { productPath, resolveProductParam } from "../../lib/publicUrls";
 import {
   Star,
   Zap,
@@ -167,19 +168,19 @@ export function ProductDetailPage() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  const { allProducts, allBrands, productDetailsById, addToCart: globalAddToCart, isLoggedIn, currentUser, orders } = useGlobalState();
+  const { allProducts, allBrands, productDetailsById, addToCart: globalAddToCart, isLoggedIn, currentUser, orders, catalogReady } = useGlobalState();
   const { editMode: studioEditMode } = useStudioEdit();
   const canUseProductStudio = useHasRole('brand', 'admin');
 
   const productList = allProducts.length > 0 ? allProducts : PRODUCTS;
   const brandList = allBrands.length > 0 ? allBrands : BRANDS;
   
+  // Canonical key is the product slug; catalog ids and legacy numeric ids still
+  // resolve (then redirect), but only when they identify exactly one product —
+  // an ambiguous legacy id is never guessed (lib/publicUrls.ts).
+  const productRoute = React.useMemo(() => resolveProductParam(id, productList as any[]), [id, productList]);
   const baseProduct: any =
-    productList.find((p: any) => p.id === Number(id)) ||
-    productList.find((p: any) => String(p.catalogId) === String(id)) ||
-    productList.find((p: any) => String(p.slug) === String(id)) ||
-    productList.find((p: any) => p.id === Number(id) + 1000) ||
-    null;
+    productRoute.status === 'canonical' || productRoute.status === 'redirect' ? productRoute.entity : null;
 
   // The global context only pre-hydrates details for the first handful of
   // products. Always fetch THIS product's canonical detail (variants / add-ons /
@@ -1216,7 +1217,7 @@ export function ProductDetailPage() {
           listingId,
           listingTitle: product.title,
           listingImage: product.image || PLACEHOLDER_IMAGE,
-          listingHref: `/products/${product.id}`,
+          listingHref: productPath(product),
           sellerId,
           sellerName: brandName,
           buyerId: String(currentUser.id),
@@ -1284,6 +1285,14 @@ export function ProductDetailPage() {
     }
   };
 
+  // Until the catalog has loaded, a non-canonical link is neither redirected nor
+  // declared missing (it may only be resolvable against the real catalog).
+  if (!catalogReady && productRoute.status !== 'canonical') {
+    return <div className="min-h-[60vh]" aria-busy="true" />;
+  }
+  if (productRoute.status === 'redirect') {
+    return <Navigate to={`${productRoute.to}${location.search}${location.hash}`} replace />;
+  }
   if (!product) {
     return <NotFoundPage />;
   }

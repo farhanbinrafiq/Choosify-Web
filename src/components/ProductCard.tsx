@@ -1,3 +1,4 @@
+import { productPath } from '../../lib/publicUrls';
 import React, { useState, memo } from 'react';
 import {
   Star,
@@ -314,7 +315,7 @@ export const ProductCard = memo(function ProductCard({
   const ratingBadgeColor = resolveBadgeColor('Rating', DC.ratingGreen, siteConfig);
   const isOfficial = product.official !== false && product.verified !== false;
   const isService = isServiceListing(product);
-  const productHref = `/products/${product.slug ?? product.id}`;
+  const productHref = productPath(product);
   const imageSrc = product.image || product.images?.[0] || PLACEHOLDER_IMAGE;
 
   const toggleSave = (e: React.MouseEvent) => {

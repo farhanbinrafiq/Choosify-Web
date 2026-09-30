@@ -1,3 +1,4 @@
+import { creatorPath } from '../../../../lib/publicUrls';
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { PLACEHOLDER_IMAGE } from '../../../constants';
@@ -459,7 +460,7 @@ export function DiscoverLowerSections() {
                   </div>
                 </div>
                 <Link
-                  to={`/creators/${tc.id}`}
+                  to={creatorPath(tc)}
                   className="bg-white text-[#1A1A2E] border border-[#E5E7EB] px-4 py-1.5 rounded-full text-[11px] font-bold no-underline hover:border-[#FF5B00] hover:text-[#EF3C23] transition-colors shrink-0"
                 >
                   View Profile

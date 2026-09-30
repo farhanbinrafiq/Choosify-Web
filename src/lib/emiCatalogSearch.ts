@@ -1,3 +1,4 @@
+import { brandPath, productPath } from '../../lib/publicUrls';
 import type { CommerceProduct, Brand } from '../types/schemas';
 import type { CatalogDeal } from '../types/catalog';
 import type { AnnouncementAssociatedEntity } from './announcements';
@@ -60,7 +61,7 @@ export function searchEmiCatalog(
       title: p.title,
       brand: typeof p.brand === 'string' ? p.brand : undefined,
       price: p.price,
-      url: `/products/${encodeURIComponent(String(p.id))}`,
+      url: productPath(p),
       _score: scoreText(`${p.title} ${p.brand} ${p.category}`, terms),
     }))
     .filter((p) => p._score > 0)
@@ -72,7 +73,7 @@ export function searchEmiCatalog(
       type: 'brand' as const,
       id: b.id,
       name: b.name,
-      url: `/brands/${encodeURIComponent(String(b.slug || b.id))}`,
+      url: brandPath(b),
       _score: scoreText(`${b.name} ${b.category}`, terms),
     }))
     .filter((b) => b._score > 0)

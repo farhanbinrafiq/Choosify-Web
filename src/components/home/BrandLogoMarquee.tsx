@@ -1,3 +1,4 @@
+import { brandPath } from '../../../lib/publicUrls';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '../../lib/utils';
@@ -25,7 +26,7 @@ export function BrandLogoMarquee({ brands, className }: BrandLogoMarqueeProps) {
       {brands.map((brand) => (
         <Link
           key={brand.id}
-          to={`/brands/${brand.id}`}
+          to={brandPath(brand)}
           role="listitem"
           title={brand.name}
           className={cn(

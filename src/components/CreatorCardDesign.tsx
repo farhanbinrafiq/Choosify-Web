@@ -1,3 +1,4 @@
+import { creatorPath } from '../../lib/publicUrls';
 import React, { memo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
@@ -100,7 +101,7 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({
 
   return (
     <Link
-      to={`/creators/${creator.id}`}
+      to={creatorPath(creator)}
       onClick={onClick}
       className="block w-full min-w-0 h-full bg-white rounded-[10px] border border-[#E8EDF2] overflow-hidden relative group select-none"
     >

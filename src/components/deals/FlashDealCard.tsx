@@ -1,3 +1,4 @@
+import { productPath } from '../../../lib/publicUrls';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '../../lib/utils';
@@ -37,7 +38,7 @@ export function FlashDealCard({
   onAddToCart,
   className,
 }: FlashDealCardProps) {
-  const to = href ?? `/products/${id}`;
+  const to = href ?? productPath({ id });
   const discountBadge =
     badge ??
     (originalPrice != null && originalPrice > price
@@ -186,7 +187,7 @@ export function DealOfTheDayCard({
   if (slides.length === 0) return null;
 
   const deal = slides[Math.min(index, slides.length - 1)];
-  const to = deal.href ?? `/products/${deal.id}`;
+  const to = deal.href ?? productPath(deal);
   const discountBadge =
     deal.badge ??
     (deal.originalPrice != null && deal.originalPrice > deal.price

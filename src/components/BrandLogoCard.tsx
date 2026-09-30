@@ -1,3 +1,4 @@
+import { brandPath } from '../../lib/publicUrls';
 import React, { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Star } from 'lucide-react';
@@ -23,7 +24,7 @@ export const BrandLogoCard = memo(function BrandLogoCard({ brand, onClick, class
   
   return (
     <Link
-      to={`/brands/${brand.id}`}
+      to={brandPath(brand)}
       onClick={onClick}
       id={`brand-logo-card-${brand.id}`}
       className={cn(

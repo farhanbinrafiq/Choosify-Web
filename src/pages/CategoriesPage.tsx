@@ -1,3 +1,4 @@
+import { brandPath } from '../../lib/publicUrls';
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Check, PenTool, Search, Sparkles, Users, X } from 'lucide-react';
@@ -64,7 +65,7 @@ function resolveFeaturedBrandForCategory(
   const logoCandidate = brand?.logo || brand?.image;
   return {
     name: brand?.name || product.brandName,
-    href: brandKey ? `/brands/${brandKey}` : undefined,
+    href: brand ? brandPath(brand) : brandKey ? brandPath({ id: brandKey }) : undefined,
     logo: isBrandLogoImage(logoCandidate) ? logoCandidate : undefined,
   };
 }

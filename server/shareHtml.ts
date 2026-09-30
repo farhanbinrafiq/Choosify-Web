@@ -18,6 +18,15 @@ import {
   formatPageTitle,
   shouldNoIndex,
 } from '../lib/seoShared';
+import {
+  brandPath,
+  creatorPath,
+  productPath,
+  resolveCatalogBrandParam,
+  resolveCatalogCreatorParam,
+  resolveCatalogProductParam,
+  resolvedEntity,
+} from '../lib/publicUrls';
 
 function escapeHtml(value: string): string {
   return String(value)
@@ -74,6 +83,25 @@ async function fetchCatalogJson(path: string): Promise<any> {
   } catch {
     return null;
   }
+}
+
+function listFrom(body: any): any[] {
+  return Array.isArray(body?.data) ? body.data : Array.isArray(body) ? body : [];
+}
+
+/** Every product, paged exactly like the storefront's catalogApi.listProducts (same order). */
+async function fetchAllCatalogProducts(): Promise<any[]> {
+  const pageSize = 100;
+  const all: any[] = [];
+  for (let offset = 0, total = Infinity; offset < total; offset += pageSize) {
+    const body = await fetchCatalogJson(`/catalog/products?limit=${pageSize}&offset=${offset}`);
+    const rows = listFrom(body);
+    all.push(...rows);
+    total = typeof body?.meta?.total === 'number' ? body.meta.total : all.length;
+    if (rows.length < pageSize) break;
+    if (offset > 5000) break; // hard safety stop
+  }
+  return all;
 }
 
 type ShareMeta = {
@@ -145,7 +173,13 @@ async function resolveShareMeta(pathname: string, search: string): Promise<Share
   const [section, id] = segments;
 
   if (section === 'products' && id) {
-    const product = await fetchCatalogJson(`/catalog/products/${encodeURIComponent(id)}`);
+    // Same resolution as the SPA (lib/publicUrls): slug, catalog id, or a legacy
+    // numeric id that matches exactly one product. An ambiguous or unknown id
+    // keeps the requested path as canonical and never borrows another product.
+    const match = resolvedEntity(resolveCatalogProductParam(id, await fetchAllCatalogProducts()));
+    const product = match
+      ? (await fetchCatalogJson(`/catalog/products/${encodeURIComponent(match.id)}`)) ?? match
+      : null;
     const title = product?.seoTitle || product?.title || product?.name || humanize(id);
     const description =
       product?.seoDescription ||
@@ -165,7 +199,7 @@ async function resolveShareMeta(pathname: string, search: string): Promise<Share
         label: 'Product',
       }),
       ogType: 'product',
-      canonical,
+      canonical: match ? absoluteUrl(productPath({ slug: match.slug, catalogId: match.id })) : canonical,
       noindex,
     };
   }
@@ -173,9 +207,8 @@ async function resolveShareMeta(pathname: string, search: string): Promise<Share
   if (section === 'brands' && id) {
     // No singular brand-detail endpoint exists server-side -- fetch the
     // list and find the match, same as the web app's own catalogApi.ts does.
-    const brands = await fetchCatalogJson('/catalog/brands');
-    const brandList = Array.isArray(brands?.data) ? brands.data : Array.isArray(brands) ? brands : [];
-    const brand = brandList.find((b: any) => b?.id === id || b?.slug === id);
+    const brandList = listFrom(await fetchCatalogJson('/catalog/brands'));
+    const brand = resolvedEntity(resolveCatalogBrandParam(id, brandList));
     const name = brand?.name || humanize(id);
     const description = brand?.description || brand?.category || `Explore ${name} on Choosify.`;
     return {
@@ -189,7 +222,30 @@ async function resolveShareMeta(pathname: string, search: string): Promise<Share
         label: 'Brand',
       }),
       ogType: 'website',
-      canonical,
+      canonical: brand
+        ? absoluteUrl(`${brandPath({ slug: brand.slug, catalogId: brand.id })}${segments[2] === 'products' ? '/products' : ''}`)
+        : canonical,
+      noindex,
+    };
+  }
+
+  if (section === 'creators' && id) {
+    const creatorList = listFrom(await fetchCatalogJson('/catalog/creators?status=live'));
+    const creator = resolvedEntity(resolveCatalogCreatorParam(id, creatorList));
+    const name = creator?.name || humanize(id);
+    const description = creator?.bio || `Follow ${name} on Choosify.`;
+    return {
+      title: formatPageTitle(name),
+      description: clip(description, 160),
+      ogImage: buildOgImageUrl({
+        title: name,
+        description: clip(description, 120),
+        type: 'default',
+        image: creator?.avatar || '',
+        label: 'Creator',
+      }),
+      ogType: 'website',
+      canonical: creator ? absoluteUrl(creatorPath({ slug: creator.slug, id: creator.id })) : canonical,
       noindex,
     };
   }

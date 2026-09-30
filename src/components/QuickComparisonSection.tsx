@@ -1,3 +1,4 @@
+import { productPath } from '../../lib/publicUrls';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Star } from 'lucide-react';
@@ -107,7 +108,7 @@ export function ProductQuickComparison({ productId }: { productId: string }) {
                 </button>
               ) : (
                 <Link
-                  to={`/products/${card.slug || card.id}`}
+                  to={productPath(card)}
                   className="mt-1 text-[10px] font-black uppercase text-center py-2 rounded-lg bg-[#1A1A2E] text-white hover:bg-slate-800"
                 >
                   View Product

@@ -1,3 +1,4 @@
+import { brandPath, creatorPath, productPath } from '../../lib/publicUrls';
 import React, { useState, useEffect, useLayoutEffect, useRef, useMemo } from 'react';
 import { createPortal } from 'react-dom';
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom';
@@ -296,7 +297,7 @@ export function GlobalSearchBar({
       type: 'creator' as const,
       title: c.name,
       subtitle: c.handle ?? c.bio?.slice(0, 40),
-      route: `/creators/${c.id}`,
+      route: creatorPath(c),
       image: c.avatar,
       badge: 'Creator',
     }));
@@ -309,7 +310,7 @@ export function GlobalSearchBar({
         type: 'brand' as const,
         title: b.name,
         subtitle: b.category,
-        route: `/brands/${b.id}`,
+        route: brandPath(b),
         badge: 'Brand',
       }));
 
@@ -321,7 +322,7 @@ export function GlobalSearchBar({
         type: 'product' as const,
         title: p.title,
         subtitle: `${p.brandName} • BDT ${p.price}`,
-        route: `/products/${p.id}`,
+        route: productPath(p),
         image: p.image,
         badge: 'Product',
       }));
