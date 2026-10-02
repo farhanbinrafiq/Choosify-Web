@@ -19,8 +19,11 @@ import {
   shouldNoIndex,
 } from '../lib/seoShared';
 import {
+  asPublicHandleResolution,
   brandPath,
+  catalogEntityForHandleResolution,
   creatorPath,
+  handleLookupKey,
   productPath,
   resolveCatalogBrandParam,
   resolveCatalogCreatorParam,
@@ -64,6 +67,23 @@ function normalizePath(pathname: string, search: string): string {
   const normalized = pathname.length > 1 && pathname.endsWith('/') ? pathname.slice(0, -1) : pathname;
   const query = filtered.toString();
   return query ? `${normalized}?${query}` : normalized;
+}
+
+/**
+ * Public Identity C4: an entity a RETIRED (or not-yet-listed) handle points at,
+ * via the same public resolver the SPA uses, matched against the already-fetched
+ * public list. Undefined when the param cannot be a handle (no request), on 404,
+ * on failure, or when the entity is not in the public list.
+ */
+async function entityViaHandleResolver<T extends { id: string }>(
+  type: 'brand' | 'creator',
+  param: string,
+  list: readonly T[],
+): Promise<T | undefined> {
+  const key = handleLookupKey(param);
+  if (!key) return undefined;
+  const body = await fetchCatalogJson(`/catalog/handles/${encodeURIComponent(key)}/resolve?type=${type}`);
+  return catalogEntityForHandleResolution(asPublicHandleResolution(body?.data, type), type, list);
 }
 
 async function fetchCatalogJson(path: string): Promise<any> {
@@ -208,7 +228,8 @@ async function resolveShareMeta(pathname: string, search: string): Promise<Share
     // No singular brand-detail endpoint exists server-side -- fetch the
     // list and find the match, same as the web app's own catalogApi.ts does.
     const brandList = listFrom(await fetchCatalogJson('/catalog/brands'));
-    const brand = resolvedEntity(resolveCatalogBrandParam(id, brandList));
+    const brand =
+      resolvedEntity(resolveCatalogBrandParam(id, brandList)) ?? (await entityViaHandleResolver('brand', id, brandList));
     const name = brand?.name || humanize(id);
     const description = brand?.description || brand?.category || `Explore ${name} on Choosify.`;
     return {
@@ -223,7 +244,7 @@ async function resolveShareMeta(pathname: string, search: string): Promise<Share
       }),
       ogType: 'website',
       canonical: brand
-        ? absoluteUrl(`${brandPath({ slug: brand.slug, catalogId: brand.id })}${segments[2] === 'products' ? '/products' : ''}`)
+        ? absoluteUrl(`${brandPath({ publicHandle: brand.publicHandle, slug: brand.slug, catalogId: brand.id })}${segments[2] === 'products' ? '/products' : ''}`)
         : canonical,
       noindex,
     };
@@ -231,7 +252,9 @@ async function resolveShareMeta(pathname: string, search: string): Promise<Share
 
   if (section === 'creators' && id) {
     const creatorList = listFrom(await fetchCatalogJson('/catalog/creators?status=live'));
-    const creator = resolvedEntity(resolveCatalogCreatorParam(id, creatorList));
+    const creator =
+      resolvedEntity(resolveCatalogCreatorParam(id, creatorList)) ??
+      (await entityViaHandleResolver('creator', id, creatorList));
     const name = creator?.name || humanize(id);
     const description = creator?.bio || `Follow ${name} on Choosify.`;
     return {
@@ -245,7 +268,9 @@ async function resolveShareMeta(pathname: string, search: string): Promise<Share
         label: 'Creator',
       }),
       ogType: 'website',
-      canonical: creator ? absoluteUrl(creatorPath({ slug: creator.slug, id: creator.id })) : canonical,
+      canonical: creator
+        ? absoluteUrl(creatorPath({ publicHandle: creator.publicHandle, slug: creator.slug, id: creator.id }))
+        : canonical,
       noindex,
     };
   }

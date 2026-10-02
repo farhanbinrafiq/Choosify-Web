@@ -1,6 +1,8 @@
 /**
  * Deterministic probe for lib/publicUrls.ts — canonical public URLs and legacy
- * link resolution (Phase A URL stabilization).
+ * link resolution (Phase A URL stabilization), plus Brand / Creator public-handle
+ * URLs (Public Identity Phase C: handle → slug → id) and the C4 retired-handle
+ * fallback helpers.
  *
  * Pure / in-memory only: fixtures mirror the real catalog shapes (including the
  * production collision where /products/3 matched two products, and brand ids
@@ -13,6 +15,7 @@ import {
   brandPath,
   creatorPath,
   guidePath,
+  isUsableHandle,
   legacyNumericId,
   productPath,
   resolveBrandParam,
@@ -23,6 +26,11 @@ import {
   resolveProductParam,
   resolvedEntity,
   type RouteResolution,
+  asPublicHandleResolution,
+  brandForHandleResolution,
+  catalogEntityForHandleResolution,
+  creatorForHandleResolution,
+  handleLookupKey,
 } from '../lib/publicUrls';
 
 let pass = 0;
@@ -196,6 +204,208 @@ for (const route of ['/products/:id', '/brands/:id', '/brands/:id/products', '/c
 }
 const headServer = git(['show', 'HEAD:server.ts']).replace(/\r\n/g, '\n');
 assertOk('12 server routing (server.ts: /api/og, /api/share, SPA fallback) unchanged', headServer === readFileSync('server.ts', 'utf8').replace(/\r\n/g, '\n'));
+
+const phaseA = { pass, fail };
+
+// ══ Phase C — Brand / Creator public handles (additive; Products and Guides unchanged) ══
+// A record carrying an active `publicHandle` is linked as /brands/{handle} or
+// /creators/{handle}; without one (absent, null or malformed) the Phase A URL is
+// produced exactly as before. Retired handles are not resolved by this module.
+const brief = (r: RouteResolution<{ catalogId?: string | null; id?: unknown }>) =>
+  r.status === 'redirect'
+    ? `redirect:${r.to}`
+    : r.status === 'canonical'
+      ? `canonical:${String(r.entity.catalogId ?? r.entity.id)}`
+      : r.status === 'ambiguous'
+        ? `ambiguous:${r.matchedBy}`
+        : r.status;
+
+// ── C1. Builders: handle → slug → id ──
+assertEqual('C1 brand: handle wins over slug', brandPath({ publicHandle: 'samsung-bd', slug: 'samsung', catalogId: 'brand-samsung', id: 7 }), '/brands/samsung-bd');
+assertEqual('C1 brand: handle with sub-path', brandPath({ publicHandle: 'samsung-bd', slug: 'samsung' }, '/products'), '/brands/samsung-bd/products');
+assertEqual('C1 brand: absent handle → slug (Phase A unchanged)', brandPath({ slug: 'samsung', catalogId: 'brand-samsung' }), '/brands/samsung');
+assertEqual('C1 brand: null handle → slug', brandPath({ publicHandle: null, slug: 'samsung', catalogId: 'brand-samsung' }), '/brands/samsung');
+assertEqual('C1 brand: no handle, no slug → catalog id', brandPath({ publicHandle: null, slug: '', catalogId: 'brand-x' }), '/brands/brand-x');
+assertEqual('C1 brand: no handle, slug or catalog id → id', brandPath({ id: 42 }), '/brands/42');
+assertEqual('C1 brand: missing entity → /brands', brandPath(null), '/brands');
+assertEqual('C1 creator: handle wins over slug', creatorPath({ publicHandle: 'farhan', slug: 'farhan-bin-rafiq', id: 'creator-farhan' }), '/creators/farhan');
+assertEqual('C1 creator: absent handle → slug', creatorPath({ slug: 'farhan-bin-rafiq', id: 'creator-farhan' }), '/creators/farhan-bin-rafiq');
+assertEqual('C1 creator: no handle or slug → id', creatorPath({ id: 'creator-farhan' }), '/creators/creator-farhan');
+
+// ── C2. Malformed handles are ignored (never repaired) → slug ──
+for (const bad of ['Samsung', 'ab', 'sam sung', '@samsung', 'sam/sung', '-samsung', 'samsung-', 'sa--msung', 'abcdefghij-abcdefghij-abcdefghi', 'café', '1abc', '']) {
+  assertEqual(`C2 brand: malformed handle ${JSON.stringify(bad)} ignored → slug`, brandPath({ publicHandle: bad, slug: 'samsung' }), '/brands/samsung');
+}
+assertEqual('C2 isUsableHandle accepts the stored form only', ['apex', 'tech-talks-bd', 'Apex', 'ap', ' apex'].map(isUsableHandle), [true, true, false, false, false]);
+
+// ── C3. Products and Guides never use a handle ──
+assertEqual('C3 product: handle-like field ignored by the builder', productPath({ slug: 'macbook', publicHandle: 'nope' } as never), '/products/macbook');
+assertEqual('C3 guide: handle-like field ignored by the builder', guidePath({ slug: 'best-phones', publicHandle: 'nope' } as never), '/spotlight/best-phones');
+{
+  const handleLikeProducts = [{ id: 5, catalogId: 'prod-5', slug: 'macbook', publicHandle: 'macbook-x' }];
+  assertEqual('C3 product: handle-like value is not a product URL key', brief(resolveProductParam('macbook-x', handleLikeProducts)), 'not_found');
+  assertEqual('C3 product: slug stays canonical when a handle-like field is present', brief(resolveProductParam('macbook', handleLikeProducts)), 'canonical:prod-5');
+  assertEqual(
+    'C3 catalog product: id still redirects to the slug when a handle-like field is present',
+    brief(resolveCatalogProductParam('prod-5', [{ id: 'prod-5', slug: 'macbook', publicHandle: 'macbook-x' }])),
+    'redirect:/products/macbook',
+  );
+}
+
+// ── C4. Storefront resolvers: handle first, then the Phase A chain ──
+const handleBrands = [
+  { id: 1, catalogId: 'brand-samsung', slug: 'samsung', publicHandle: 'samsung-bd', name: 'Samsung' },
+  { id: 2, catalogId: 'brand-walton', slug: 'walton', publicHandle: 'walton', name: 'Walton' },
+  { id: 3, catalogId: 'brand-apex', slug: 'apex', publicHandle: null, name: 'Apex' },
+];
+assertEqual('C4 brand: handle URL is canonical', brief(resolveBrandParam('samsung-bd', handleBrands)), 'canonical:brand-samsung');
+assertEqual('C4 brand: slug URL redirects to the handle URL', brief(resolveBrandParam('samsung', handleBrands)), 'redirect:/brands/samsung-bd');
+assertEqual('C4 brand: catalog id redirects to the handle URL', brief(resolveBrandParam('brand-samsung', handleBrands)), 'redirect:/brands/samsung-bd');
+assertEqual('C4 brand: legacy numeric id redirects to the handle URL', brief(resolveBrandParam('1', handleBrands)), 'redirect:/brands/samsung-bd');
+assertEqual('C4 brand: name alias redirects to the handle URL', brief(resolveBrandParam('Samsung', handleBrands)), 'redirect:/brands/samsung-bd');
+assertEqual('C4 brand: upper-case handle redirects to the stored form', brief(resolveBrandParam('SAMSUNG-BD', handleBrands)), 'redirect:/brands/samsung-bd');
+assertEqual('C4 brand: handle equal to slug is canonical', brief(resolveBrandParam('walton', handleBrands)), 'canonical:brand-walton');
+assertEqual('C4 brand without handle: slug canonical (Phase A unchanged)', brief(resolveBrandParam('apex', handleBrands)), 'canonical:brand-apex');
+assertEqual('C4 brand without handle: id redirects to the slug (Phase A unchanged)', brief(resolveBrandParam('brand-apex', handleBrands)), 'redirect:/brands/apex');
+assertEqual('C4 brand: unknown → not_found', brief(resolveBrandParam('nokia', handleBrands)), 'not_found');
+assertEqual('C4 brand: sub-path redirect target is built from the handle', brandPath(handleBrands[0], '/products'), '/brands/samsung-bd/products');
+{
+  const dupHandle = [
+    { id: 1, catalogId: 'b1', slug: 'one', publicHandle: 'same' },
+    { id: 2, catalogId: 'b2', slug: 'two', publicHandle: 'same' },
+  ];
+  assertEqual('C4 brand: duplicate handle in data → ambiguous, never guessed', brief(resolveBrandParam('same', dupHandle)), 'ambiguous:handle');
+  const legacyCollision = [
+    { id: 3, catalogId: 'p3a', slug: 'a', publicHandle: 'alpha' },
+    { id: 3, catalogId: 'p3b', slug: 'b', publicHandle: 'beta' },
+  ];
+  assertEqual('C4 brand: colliding legacy numeric id stays ambiguous with handles', brief(resolveBrandParam('3', legacyCollision)), 'ambiguous:legacy_numeric_id');
+}
+const handleCreators = [
+  { id: 'creator-farhan', slug: 'farhan-bin-rafiq', publicHandle: 'farhan' },
+  { id: 'creator-sarah', slug: 'sarah-jenkins' },
+];
+assertEqual('C4 creator: handle URL canonical', brief(resolveCreatorParam('farhan', handleCreators)), 'canonical:creator-farhan');
+assertEqual('C4 creator: slug redirects to the handle', brief(resolveCreatorParam('farhan-bin-rafiq', handleCreators)), 'redirect:/creators/farhan');
+assertEqual('C4 creator: id redirects to the handle', brief(resolveCreatorParam('creator-farhan', handleCreators)), 'redirect:/creators/farhan');
+assertEqual('C4 creator without handle: slug canonical (Phase A unchanged)', brief(resolveCreatorParam('sarah-jenkins', handleCreators)), 'canonical:creator-sarah');
+assertEqual('C4 creator: the display @handle is not a URL key', brief(resolveCreatorParam('farhan_tech', handleCreators)), 'not_found');
+
+// ── C5. Catalog (share renderer) resolvers ──
+{
+  const catBrands = [
+    { id: 'brand-samsung', slug: 'samsung', name: 'Samsung', publicHandle: 'samsung-bd' },
+    { id: 'brand-apex', slug: 'apex', name: 'Apex' },
+  ];
+  assertEqual('C5 catalog brand: handle canonical', brief(resolveCatalogBrandParam('samsung-bd', catBrands)), 'canonical:brand-samsung');
+  assertEqual('C5 catalog brand: slug → handle', brief(resolveCatalogBrandParam('samsung', catBrands)), 'redirect:/brands/samsung-bd');
+  assertEqual('C5 catalog brand without handle unchanged', brief(resolveCatalogBrandParam('apex', catBrands)), 'canonical:brand-apex');
+  const catCreators = [{ id: 'creator-farhan', slug: 'farhan-bin-rafiq', publicHandle: 'farhan' }];
+  assertEqual('C5 catalog creator: handle canonical', brief(resolveCatalogCreatorParam('farhan', catCreators)), 'canonical:creator-farhan');
+  assertEqual('C5 catalog creator: slug → handle', brief(resolveCatalogCreatorParam('farhan-bin-rafiq', catCreators)), 'redirect:/creators/farhan');
+}
+
+// ── C6. Brand / Creator type separation: a handle only resolves within its own type ──
+{
+  const brandsT = [{ id: 1, catalogId: 'brand-nova', slug: 'nova', publicHandle: 'nova-bd', name: 'Nova' }];
+  const creatorsT = [{ id: 'creator-nova', slug: 'nova-creator', publicHandle: 'nova' }];
+  assertEqual('C6 a creator slug is not a brand URL', brief(resolveBrandParam('nova-creator', brandsT)), 'not_found');
+  assertEqual('C6 a brand handle is not a creator URL', brief(resolveCreatorParam('nova-bd', creatorsT)), 'not_found');
+  assertEqual('C6 same key, two types: /brands/nova is the brand (slug → its handle)', brief(resolveBrandParam('nova', brandsT)), 'redirect:/brands/nova-bd');
+  assertEqual('C6 same key, two types: /creators/nova is the creator (handle)', brief(resolveCreatorParam('nova', creatorsT)), 'canonical:creator-nova');
+  assertEqual(
+    'C6 share renderer keeps the types apart too',
+    [
+      brief(resolveCatalogBrandParam('nova-bd', [{ id: 'brand-nova', slug: 'nova', publicHandle: 'nova-bd' }])),
+      brief(resolveCatalogCreatorParam('nova-bd', [{ id: 'creator-nova', slug: 'nova-creator', publicHandle: 'nova' }])),
+    ],
+    ['canonical:brand-nova', 'not_found'],
+  );
+}
+
+// ── C7. Handle URLs round-trip and stay within the public path shapes ──
+for (const b of handleBrands) {
+  assertEqual(`C7 brand canonical round-trips (${b.catalogId})`, brief(resolveBrandParam(brandPath(b).split('/').pop()!, handleBrands)), `canonical:${b.catalogId}`);
+}
+for (const c of handleCreators) {
+  assertEqual(`C7 creator canonical round-trips (${c.id})`, brief(resolveCreatorParam(creatorPath(c).split('/').pop()!, handleCreators)), `canonical:${c.id}`);
+}
+{
+  const handleBuilt = [...handleBrands.map((b) => brandPath(b)), ...handleBrands.map((b) => brandPath(b, '/products')), ...handleCreators.map(creatorPath)];
+  assertOk('C7 handle builders only produce public entity paths', handleBuilt.every((u) => /^\/(brands|creators)\/[a-z0-9-]+(\/products)?$/.test(u)), handleBuilt.join(' '));
+}
+
+const phaseC = { pass: pass - phaseA.pass, fail: fail - phaseA.fail };
+console.log(`\nPhase A section: ${phaseA.pass} passed, ${phaseA.fail} failed`);
+console.log(`Phase C handle section: ${phaseC.pass} passed, ${phaseC.fail} failed`);
+
+// ══ Public Identity C4 — retired-handle fallback helpers (shared by the pages and shareHtml) ══
+const beforeC4 = { pass, fail };
+{
+  const retired = (entityType: 'brand' | 'creator', entityId: string, handle: string, currentHandle: string | null) =>
+    ({ entityType, entityId, handle, status: 'retired' as const, currentHandle });
+
+  // R1. When a lookup is made at all (malformed / reserved input never reaches the API).
+  assertEqual('R1 lookup key: a valid handle', handleLookupKey('samsung-old'), 'samsung-old');
+  assertEqual('R1 lookup key: normalized like the validator (@, case, url-encoding)', [handleLookupKey('@Samsung-Old'), handleLookupKey(encodeURIComponent('@samsung-old'))], ['samsung-old', 'samsung-old']);
+  for (const bad of ['', 'ab', 'a_b', 'sam sung', 'café', 'samsung-', '-samsung', 'sa--msung', 'products', 'brands', 'brand-apple', 'creator-1790540879009', 'prod-12', '1abc', 'abcdefghij-abcdefghij-abcdefghi']) {
+    assertEqual(`R1 no lookup (malformed/reserved): ${JSON.stringify(bad)}`, handleLookupKey(bad), null);
+  }
+  assertEqual('R1 no lookup for null/undefined', [handleLookupKey(null), handleLookupKey(undefined)], [null, null]);
+
+  // R2. Resolver answers are validated before use.
+  const good = { entityType: 'brand', entityId: 'brand-samsung', handle: 'samsung-old', status: 'retired', currentHandle: 'samsung-bd' };
+  assertEqual('R2 a well-formed answer is accepted', asPublicHandleResolution(good, 'brand'), good);
+  assertEqual('R2 wrong entity type → null', asPublicHandleResolution(good, 'creator'), null);
+  assertEqual('R2 unknown status → null', asPublicHandleResolution({ ...good, status: 'reserved' }, 'brand'), null);
+  assertEqual('R2 missing entity id → null', asPublicHandleResolution({ ...good, entityId: '' }, 'brand'), null);
+  assertEqual('R2 bad currentHandle → null', asPublicHandleResolution({ ...good, currentHandle: 5 }, 'brand'), null);
+  assertEqual('R2 garbage → null', [asPublicHandleResolution(null, 'brand'), asPublicHandleResolution('x', 'brand'), asPublicHandleResolution({}, 'brand')], [null, null, null]);
+  assertEqual('R2 extra fields are dropped (only routing fields kept)', Object.keys(asPublicHandleResolution({ ...good, name: 'Samsung', sellerId: 'u-1' }, 'brand') || {}).sort(), ['currentHandle', 'entityId', 'entityType', 'handle', 'status']);
+
+  // R3. Brand targets (storefront list).
+  const brands = [
+    { id: 1, catalogId: 'brand-samsung', slug: 'samsung', publicHandle: 'samsung-bd', name: 'Samsung' },
+    { id: 2, catalogId: 'brand-walton', slug: 'walton', publicHandle: null, name: 'Walton' },
+  ];
+  const t1 = brandForHandleResolution(retired('brand', 'brand-samsung', 'samsung-old', 'samsung-bd'), brands);
+  assertEqual('R3 retired Brand handle → current Brand handle URL', t1 ? brandPath(t1) : null, '/brands/samsung-bd');
+  const t2 = brandForHandleResolution(retired('brand', 'brand-walton', 'walton-old', null), brands);
+  assertEqual('R3 retired handle, no current handle → slug URL', t2 ? brandPath(t2) : null, '/brands/walton');
+  assertEqual('R3 active handle of a Brand absent from the loaded public list → not found', brandForHandleResolution({ entityType: 'brand', entityId: 'brand-draft', handle: 'draft-h', status: 'active', currentHandle: 'draft-h' }, brands), undefined);
+  assertEqual('R3 retired handle of a Brand absent from the list → not found', brandForHandleResolution(retired('brand', 'brand-gone', 'gone', null), brands), undefined);
+  assertEqual('R3 wrong entity type (a Creator answer on the Brand page) → not found', brandForHandleResolution(retired('creator', 'brand-samsung', 'x', null) as never, brands), undefined);
+  assertEqual('R3 null / failed lookup → not found', brandForHandleResolution(null, brands), undefined);
+  assertEqual('R3 numeric storefront ids are never matched against the resolver id', brandForHandleResolution(retired('brand', '1', 'x', null), brands), undefined);
+  assertEqual('R3 /products sub-path target is built from the current handle', t1 ? brandPath(t1, '/products') : null, '/brands/samsung-bd/products');
+  // Loop safety: the redirect target is the entity's own canonical key, which resolves locally (no second lookup).
+  assertEqual('R3 the redirect target resolves canonically (no loop, no second lookup)', summary(resolveBrandParam('samsung-bd', brands)), { status: 'canonical', slug: 'samsung' });
+  assertEqual('R3 slug-fallback target resolves canonically too', summary(resolveBrandParam('walton', brands)), { status: 'canonical', slug: 'walton' });
+  assertEqual('R3 an already-current handle never reaches the lookup (resolves locally)', resolveBrandParam('samsung-bd', brands).status !== 'not_found', true);
+  assertEqual('R3 a retired handle is not found locally (this is what triggers the lookup)', resolveBrandParam('samsung-old', brands).status, 'not_found');
+
+  // R4. Creator targets.
+  const creators = [
+    { id: 'creator-farhan', slug: 'farhan-bin-rafiq', publicHandle: 'farhan' },
+    { id: 'creator-sarah', slug: 'sarah-jenkins', publicHandle: null },
+  ];
+  const c1 = creatorForHandleResolution(retired('creator', 'creator-farhan', 'farhan-old', 'farhan'), creators);
+  assertEqual('R4 retired Creator handle → current Creator handle URL', c1 ? creatorPath(c1) : null, '/creators/farhan');
+  const c2 = creatorForHandleResolution(retired('creator', 'creator-sarah', 'sarah-old', null), creators);
+  assertEqual('R4 retired Creator handle, no current handle → slug URL', c2 ? creatorPath(c2) : null, '/creators/sarah-jenkins');
+  assertEqual('R4 a Brand answer on the Creator page → not found', creatorForHandleResolution(retired('brand', 'creator-farhan', 'x', null) as never, creators), undefined);
+  assertEqual('R4 Creator absent from the live list (draft/archived) → not found', creatorForHandleResolution({ entityType: 'creator', entityId: 'creator-draft', handle: 'd', status: 'active', currentHandle: 'd' }, creators), undefined);
+  assertEqual('R4 Creator target resolves canonically (no loop)', summary(resolveCreatorParam('farhan', creators)), { status: 'canonical', slug: 'farhan-bin-rafiq' });
+
+  // R5. Share renderer (raw catalog lists).
+  const catBrands = [{ id: 'brand-samsung', slug: 'samsung', publicHandle: 'samsung-bd' }];
+  const cb = catalogEntityForHandleResolution(retired('brand', 'brand-samsung', 'samsung-old', 'samsung-bd'), 'brand', catBrands);
+  assertEqual('R5 catalog list: retired handle → the listed entity', cb?.id, 'brand-samsung');
+  assertEqual('R5 catalog list: canonical uses the current handle', cb ? brandPath({ publicHandle: cb.publicHandle, slug: cb.slug, catalogId: cb.id }) : null, '/brands/samsung-bd');
+  assertEqual('R5 catalog list: duplicate ids are never guessed', catalogEntityForHandleResolution(retired('brand', 'b1', 'x', null), 'brand', [{ id: 'b1' }, { id: 'b1' }]), undefined);
+}
+const phaseC4 = { pass: pass - beforeC4.pass, fail: fail - beforeC4.fail };
+console.log(`\nPhase C4 retired-handle section: ${phaseC4.pass} passed, ${phaseC4.fail} failed`);
 
 console.log(`\n${fail === 0 ? 'PASS' : 'FAIL'} probe-public-urls (${pass} passed, ${fail} failed)`);
 process.exit(fail === 0 ? 0 : 1);

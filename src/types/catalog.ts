@@ -50,6 +50,8 @@ export interface CatalogBrandStores {
 export interface CatalogBrand {
   id: string;
   slug: string;
+  /** Active public handle (Public Identity Phase C) — the preferred public URL key; absent when none is assigned. */
+  publicHandle?: string | null;
   name: string;
   category: string;
   description: string;
@@ -588,6 +590,8 @@ export interface CatalogCreatorFeaturedItem {
 export interface CatalogCreator {
   id: string;
   slug: string;
+  /** Active public handle (Public Identity Phase C) — the preferred public URL key; absent when none is assigned. Not the display `handle`. */
+  publicHandle?: string | null;
   name: string;
   handle: string;
   avatar: string;

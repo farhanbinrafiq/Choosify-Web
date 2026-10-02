@@ -15,6 +15,7 @@ import type {
   StorefrontCoupon,
   StorefrontDealsCuration,
 } from '../types/catalog';
+import { asPublicHandleResolution, type HandleEntityKind, type PublicHandleResolution } from '../../lib/publicUrls';
 
 const API_BASE = ((import.meta as any).env?.VITE_API_BASE_URL as string | undefined) || '/api/v1';
 
@@ -38,6 +39,22 @@ async function request<T>(path: string, method: HttpMethod = 'GET', body?: unkno
 }
 
 export const catalogApi = {
+  /**
+   * Public handle lookup (Admin GET /catalog/handles/:handle/resolve). Resolves
+   * active AND retired handles of publicly visible Brands / Creators. Never
+   * throws: a 404, a malformed or wrong-type answer, or any network/API failure
+   * returns null, which callers treat as "not found".
+   */
+  resolvePublicHandle: async (handle: string, type: HandleEntityKind): Promise<PublicHandleResolution | null> => {
+    try {
+      const result = await request<{ data?: unknown }>(
+        `/catalog/handles/${encodeURIComponent(handle)}/resolve?type=${type}`,
+      );
+      return asPublicHandleResolution(result?.data, type);
+    } catch {
+      return null;
+    }
+  },
   /**
    * The catalog list endpoint pages at 100 rows. Walk every page so the
    * storefront sees the whole catalog (older behaviour silently dropped

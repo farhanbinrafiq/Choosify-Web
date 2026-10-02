@@ -743,6 +743,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       id: toNumericId(brand.id, idx + 1),
       catalogId: brand.id,
       slug: brand.slug,
+      publicHandle: brand.publicHandle ?? null,
       name: brand.name,
       logo: brand.logo || brand.name.slice(0, 2).toUpperCase(),
       verifiedStatus: Boolean(brand.verifiedStatus),

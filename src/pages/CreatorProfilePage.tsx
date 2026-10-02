@@ -1,6 +1,13 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useParams, useNavigate, useLocation, Link, Navigate } from 'react-router-dom';
-import { resolveCreatorParam } from '../../lib/publicUrls';
+import {
+  creatorForHandleResolution,
+  creatorPath,
+  handleLookupKey,
+  resolveCreatorParam,
+  type PublicHandleResolution,
+} from '../../lib/publicUrls';
+import { catalogApi } from '../services/catalogApi';
 import { toast } from '../lib/notify';
 import { motion, AnimatePresence } from 'motion/react';
 import {
@@ -48,6 +55,32 @@ export function CreatorProfilePage() {
   }, [id, allCreators]);
   const matchedCreator =
     creatorRoute.status === 'canonical' || creatorRoute.status === 'redirect' ? creatorRoute.entity : undefined;
+
+  // Public Identity C4: a link that matches no loaded Creator may use a RETIRED
+  // handle. Looked up once per param (promise cached per page instance) after the
+  // public list has loaded; only a Creator present in that list can be the target.
+  const handleLookup = catalogReady && creatorRoute.status === 'not_found' ? handleLookupKey(id) : null;
+  const handleLookupRequests = useRef(new Map<string, Promise<PublicHandleResolution | null>>());
+  const [handleLookupResult, setHandleLookupResult] = useState<{ key: string; target: string | null } | null>(null);
+  useEffect(() => {
+    if (!handleLookup || handleLookupResult?.key === handleLookup) return;
+    let cancelled = false;
+    let pending = handleLookupRequests.current.get(handleLookup);
+    if (!pending) {
+      pending = catalogApi.resolvePublicHandle(handleLookup, 'creator');
+      handleLookupRequests.current.set(handleLookup, pending);
+    }
+    void pending.then((resolution) => {
+      if (cancelled) return;
+      const target = creatorForHandleResolution(resolution, allCreators);
+      setHandleLookupResult({ key: handleLookup, target: target ? creatorPath(target) : null });
+    });
+    return () => {
+      cancelled = true;
+    };
+    // allCreators is read when the answer arrives; the lookup itself is keyed by the handle only.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [handleLookup]);
   // Fallback creator record only exists to keep hooks below call-safe when no
   // match is found (React hooks must run unconditionally) -- creatorNotFound
   // decides what actually renders, so an unknown :id never shows someone else's
@@ -179,6 +212,15 @@ export function CreatorProfilePage() {
 
   if (!catalogReady && creatorRoute.status !== 'canonical') {
     return <div className="min-h-[60vh]" aria-busy="true" />;
+  }
+  if (handleLookup) {
+    if (handleLookupResult?.key !== handleLookup) {
+      return <div className="min-h-[60vh]" aria-busy="true" />;
+    }
+    const currentPath = location.pathname.replace(/\/+$/, '');
+    if (handleLookupResult.target && handleLookupResult.target !== currentPath) {
+      return <Navigate to={`${handleLookupResult.target}${location.search}${location.hash}`} replace />;
+    }
   }
   if (creatorRoute.status === 'redirect') {
     return <Navigate to={`${creatorRoute.to}${location.search}${location.hash}`} replace />;

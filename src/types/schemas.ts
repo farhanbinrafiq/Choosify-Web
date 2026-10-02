@@ -49,6 +49,8 @@ export interface Brand {
   id: number;
   catalogId?: string;
   slug?: string;
+  /** Active public handle (Public Identity Phase C) — the preferred public URL key; absent when none is assigned. */
+  publicHandle?: string | null;
   name: string;
   logo: string;
   verifiedStatus: boolean;

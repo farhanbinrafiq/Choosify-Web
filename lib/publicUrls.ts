@@ -7,13 +7,15 @@
  *
  * Canonical public URLs:
  *   Product → /products/{product slug}
- *   Brand   → /brands/{brand slug}      (the Brand is the seller's public storefront)
- *   Creator → /creators/{creator slug}
+ *   Brand   → /brands/{public handle | brand slug}      (the Brand is the seller's public storefront)
+ *   Creator → /creators/{public handle | creator slug}
  *   Guide   → /spotlight/{guide slug}   (unchanged)
  *
  * Internal ids are never changed and never parsed as numbers here: identifiers
- * are strings end to end. A future public-handle phase only has to change the
- * key chosen by brandPath()/creatorPath().
+ * are strings end to end. Brands and Creators prefer their active public handle
+ * (lib/publicHandles.ts, Public Identity Phase C) when the record carries one,
+ * then the slug, then the catalog id — so a record without a handle keeps exactly
+ * the Phase A URL. Products and Guides never have handles.
  *
  * Legacy links: older builds linked with a numeric id derived by stripping every
  * non-digit from the catalog id (falling back to the list position). Those ids
@@ -22,11 +24,13 @@
  * ambiguous legacy id is reported as such and must never be resolved by guessing.
  */
 
+import { HANDLE_MAX_LENGTH, HANDLE_MIN_LENGTH, HANDLE_PATTERN, validateHandle } from './publicHandles';
+
 type IdLike = string | number | null | undefined;
 
 export type UrlProductLike = { slug?: string | null; catalogId?: string | null; id?: IdLike };
-export type UrlBrandLike = { slug?: string | null; catalogId?: string | null; id?: IdLike };
-export type UrlCreatorLike = { slug?: string | null; id?: IdLike };
+export type UrlBrandLike = { publicHandle?: string | null; slug?: string | null; catalogId?: string | null; id?: IdLike };
+export type UrlCreatorLike = { publicHandle?: string | null; slug?: string | null; id?: IdLike };
 export type UrlGuideLike = { slug?: string | null; id?: IdLike };
 
 /** A slug usable as a URL path segment: non-empty and free of path/URL delimiters. */
@@ -51,6 +55,26 @@ function publicKey(e: { slug?: string | null; catalogId?: string | null; id?: Id
   return stringId(e.id);
 }
 
+/**
+ * An active public handle in its stored form (lowercase ASCII, 3–30 characters,
+ * the public_handles CHECK pattern). Anything else is ignored, never repaired, so
+ * a malformed value falls back to the slug URL instead of producing a bad link.
+ */
+export function isUsableHandle(value: unknown): value is string {
+  return (
+    typeof value === 'string' &&
+    value.length >= HANDLE_MIN_LENGTH &&
+    value.length <= HANDLE_MAX_LENGTH &&
+    HANDLE_PATTERN.test(value)
+  );
+}
+
+/** Brand / Creator URL key: the active public handle when present, else the Phase A key. */
+function handleOrPublicKey(e: { publicHandle?: string | null; slug?: string | null; catalogId?: string | null; id?: IdLike }): string {
+  if (isUsableHandle(e.publicHandle)) return e.publicHandle;
+  return publicKey(e);
+}
+
 function build(prefix: string, key: string): string {
   return key ? `${prefix}/${segment(key)}` : prefix;
 }
@@ -60,12 +84,12 @@ export function productPath(product: UrlProductLike | null | undefined): string 
 }
 
 export function brandPath(brand: UrlBrandLike | null | undefined, subPath = ''): string {
-  const base = build('/brands', brand ? publicKey(brand) : '');
+  const base = build('/brands', brand ? handleOrPublicKey(brand) : '');
   return base === '/brands' ? base : `${base}${subPath}`;
 }
 
 export function creatorPath(creator: UrlCreatorLike | null | undefined): string {
-  return build('/creators', creator ? publicKey(creator) : '');
+  return build('/creators', creator ? handleOrPublicKey(creator) : '');
 }
 
 export function guidePath(guide: UrlGuideLike | null | undefined): string {
@@ -105,6 +129,8 @@ export type ResolveOptions<T> = {
   /** Canonical path builder for the entity type (productPath / brandPath / creatorPath). */
   pathOf: (entity: T) => string;
   slugOf: (entity: T) => string | null | undefined;
+  /** The entity's ACTIVE public handle (Brands / Creators only). Matched before the slug. */
+  handleOf?: (entity: T) => string | null | undefined;
   /** Stable string ids the entity may be linked by (catalog id, raw id). */
   idsOf: (entity: T) => Array<IdLike>;
   /** The legacy numeric URL key of the entity, if this entity type had one. */
@@ -129,8 +155,9 @@ function uniqueOrAmbiguous<T>(
 
 /**
  * Interpret a public route parameter against the current entity list.
- * Order: slug → stable id → legacy numeric id → legacy aliases. Each step must
- * match exactly one entity; a multi-match stops resolution as ambiguous.
+ * Order: active public handle (when handleOf is given) → slug → stable id →
+ * legacy numeric id → legacy aliases. Each step must match exactly one entity; a
+ * multi-match stops resolution as ambiguous. Retired handles are not known here.
  */
 export function resolveRouteParam<T>(
   rawParam: string | null | undefined,
@@ -156,6 +183,17 @@ export function resolveRouteParam<T>(
     }
     return canonicalDecoded === param ? { status: 'canonical', entity } : { status: 'redirect', entity, to };
   };
+
+  if (options.handleOf) {
+    const byHandle = uniqueOrAmbiguous(
+      entities.filter((e) => {
+        const handle = options.handleOf!(e);
+        return isUsableHandle(handle) && handle === lower;
+      }),
+      'handle',
+    );
+    if (byHandle) return 'entity' in byHandle ? done(byHandle.entity) : byHandle;
+  }
 
   const bySlug = uniqueOrAmbiguous(
     entities.filter((e) => {
@@ -214,6 +252,7 @@ export function resolveProductParam<T extends StorefrontProduct>(param: string |
 export function resolveBrandParam<T extends StorefrontBrand>(param: string | null | undefined, brands: readonly T[]) {
   return resolveRouteParam(param, brands, {
     pathOf: (b) => brandPath(b),
+    handleOf: (b) => b.publicHandle,
     slugOf: (b) => b.slug,
     idsOf: (b) => [b.catalogId, typeof b.id === 'string' ? b.id : null],
     legacyKeyOf: (b) => (typeof b.id === 'number' ? legacyNumericKey(b.id) : null),
@@ -228,6 +267,7 @@ export function resolveBrandParam<T extends StorefrontBrand>(param: string | nul
 export function resolveCreatorParam<T extends StorefrontCreator>(param: string | null | undefined, creators: readonly T[]) {
   return resolveRouteParam(param, creators, {
     pathOf: (c) => creatorPath(c),
+    handleOf: (c) => c.publicHandle,
     slugOf: (c) => c.slug,
     idsOf: (c) => [c.id],
   });
@@ -247,12 +287,12 @@ export function resolveCatalogProductParam<T extends { id: string; slug?: string
   });
 }
 
-export function resolveCatalogBrandParam<T extends { id: string; slug?: string | null; name?: string | null }>(
-  param: string,
-  brands: readonly T[],
-) {
+export function resolveCatalogBrandParam<
+  T extends { id: string; slug?: string | null; name?: string | null; publicHandle?: string | null },
+>(param: string, brands: readonly T[]) {
   return resolveRouteParam(param, brands, {
-    pathOf: (b) => brandPath({ slug: b.slug, catalogId: b.id }),
+    pathOf: (b) => brandPath({ publicHandle: b.publicHandle, slug: b.slug, catalogId: b.id }),
+    handleOf: (b) => b.publicHandle,
     slugOf: (b) => b.slug,
     idsOf: (b) => [b.id],
     legacyKeyOf: (b, i) => legacyNumericKey(legacyNumericId(b.id, i + 1)),
@@ -263,9 +303,105 @@ export function resolveCatalogBrandParam<T extends { id: string; slug?: string |
   });
 }
 
-export function resolveCatalogCreatorParam<T extends { id: string; slug?: string | null }>(param: string, creators: readonly T[]) {
+// ── Retired-handle fallback (Public Identity C4) ─────────────────────────────
+//
+// Catalog lists carry only ACTIVE handles, so a link using a handle an entity no
+// longer holds (it was renamed) matches nothing locally. Such a link is looked up
+// once with the public Admin resolver (GET /catalog/handles/:handle/resolve), and
+// the visitor is sent to the entity's CURRENT canonical URL. The resolver applies
+// every lifecycle and visibility rule server-side; these helpers only decide when
+// to ask and which already-loaded public entity an answer points at.
+
+export type HandleEntityKind = 'brand' | 'creator';
+
+/** The public resolver's answer (Admin publicHandleStore.resolveHandle). */
+export type PublicHandleResolution = {
+  entityType: HandleEntityKind;
+  entityId: string;
+  handle: string;
+  status: 'active' | 'retired';
+  currentHandle: string | null;
+};
+
+/**
+ * The handle to look up for a route parameter that matched nothing locally, or
+ * null when it can never be a handle (malformed, reserved name or reserved
+ * prefix — the shared validator decides), so no request is made.
+ */
+export function handleLookupKey(rawParam: string | null | undefined): string | null {
+  let param = String(rawParam ?? '').trim();
+  try {
+    param = decodeURIComponent(param);
+  } catch {
+    // keep the raw value
+  }
+  const result = validateHandle(param);
+  return 'reason' in result ? null : result.handle;
+}
+
+/** A well-formed resolver answer for the expected entity type, else null. */
+export function asPublicHandleResolution(value: unknown, expectedType: HandleEntityKind): PublicHandleResolution | null {
+  if (!value || typeof value !== 'object') return null;
+  const v = value as Record<string, unknown>;
+  if (v.entityType !== expectedType) return null;
+  if (v.status !== 'active' && v.status !== 'retired') return null;
+  if (typeof v.entityId !== 'string' || !v.entityId) return null;
+  if (typeof v.handle !== 'string') return null;
+  if (v.currentHandle !== null && typeof v.currentHandle !== 'string') return null;
+  return {
+    entityType: expectedType,
+    entityId: v.entityId,
+    handle: v.handle,
+    status: v.status,
+    currentHandle: (v.currentHandle as string | null) ?? null,
+  };
+}
+
+/**
+ * The already-loaded PUBLIC entity a resolver answer points at, or undefined.
+ * The resolver's id is never followed on its own: only an entity of the expected
+ * type that is present in the caller's public list qualifies, so a resolution can
+ * never link to (or reveal) anything the visitor could not already see. The
+ * redirect target is that entity's own canonical path, i.e. its current handle,
+ * else its slug.
+ */
+export function entityForHandleResolution<T>(
+  resolution: PublicHandleResolution | null | undefined,
+  expectedType: HandleEntityKind,
+  entities: readonly T[],
+  idsOf: (entity: T) => Array<IdLike>,
+): T | undefined {
+  if (!resolution || resolution.entityType !== expectedType) return undefined;
+  const matches = entities.filter((e) => idsOf(e).some((id) => stringId(id) !== '' && stringId(id) === resolution.entityId));
+  return matches.length === 1 ? matches[0] : undefined;
+}
+
+/** Storefront Brand list (GlobalStateContext): catalog id carried as catalogId. */
+export function brandForHandleResolution<T extends StorefrontBrand>(resolution: PublicHandleResolution | null | undefined, brands: readonly T[]) {
+  return entityForHandleResolution(resolution, 'brand', brands, (b) => [b.catalogId, typeof b.id === 'string' ? b.id : null]);
+}
+
+/** Storefront Creator list (creator ids are catalog ids). */
+export function creatorForHandleResolution<T extends StorefrontCreator>(resolution: PublicHandleResolution | null | undefined, creators: readonly T[]) {
+  return entityForHandleResolution(resolution, 'creator', creators, (c) => [c.id]);
+}
+
+/** Raw catalog API lists (share renderer). */
+export function catalogEntityForHandleResolution<T extends { id: string }>(
+  resolution: PublicHandleResolution | null | undefined,
+  expectedType: HandleEntityKind,
+  items: readonly T[],
+) {
+  return entityForHandleResolution(resolution, expectedType, items, (e) => [e.id]);
+}
+
+export function resolveCatalogCreatorParam<T extends { id: string; slug?: string | null; publicHandle?: string | null }>(
+  param: string,
+  creators: readonly T[],
+) {
   return resolveRouteParam(param, creators, {
-    pathOf: (c) => creatorPath({ slug: c.slug, id: c.id }),
+    pathOf: (c) => creatorPath({ publicHandle: c.publicHandle, slug: c.slug, id: c.id }),
+    handleOf: (c) => c.publicHandle,
     slugOf: (c) => c.slug,
     idsOf: (c) => [c.id],
   });
