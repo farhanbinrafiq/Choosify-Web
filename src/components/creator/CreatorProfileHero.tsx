@@ -6,6 +6,7 @@ import {
   profileSocialLinksFromCatalog,
   type ProfileSocialLink,
 } from '../design/ProfileSocialPills';
+import { publicUsernameLabel } from '../../../lib/publicUrls';
 
 export interface CreatorProfileHeroProps {
   creator: any;
@@ -74,7 +75,8 @@ export function CreatorProfileHero({
       { icon: '📍', label: 'Based in', value: String(creator.location ?? 'Dhaka') },
     ];
 
-  const handle = creator.handle || `@${String(creator.name || 'creator').toLowerCase().replace(/\s+/g, '')}`;
+  // Registered username only (matches the URL); no fallback to the free-text display handle.
+  const username = publicUsernameLabel(creator);
   const title = creator.title || creator.role || 'Creator & Product Researcher';
 
   return (
@@ -116,7 +118,8 @@ export function CreatorProfileHero({
             </div>
             <div className="text-[13px] text-[#2323FF] font-semibold">{title}</div>
             <div className="text-[12.5px] text-[#9AA0AC] mb-2.5">
-              {handle} · {creator.location || 'Dhaka, Bangladesh'}
+              {username && <span data-testid="creator-username">{username} · </span>}
+              {creator.location || 'Dhaka, Bangladesh'}
             </div>
             {claimStatus === 'verified' && (
               <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#2323FF] mb-2">

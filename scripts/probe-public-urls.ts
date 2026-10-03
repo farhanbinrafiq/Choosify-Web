@@ -31,6 +31,7 @@ import {
   catalogEntityForHandleResolution,
   creatorForHandleResolution,
   handleLookupKey,
+  publicUsernameLabel,
 } from '../lib/publicUrls';
 
 let pass = 0;
@@ -406,6 +407,34 @@ const beforeC4 = { pass, fail };
 }
 const phaseC4 = { pass: pass - beforeC4.pass, fail: fail - beforeC4.fail };
 console.log(`\nPhase C4 retired-handle section: ${phaseC4.pass} passed, ${phaseC4.fail} failed`);
+
+// ── Visible username (Creator hero F1): registered handle only, never the free-text display handle ──
+{
+  const live = [
+    { id: 'creator-farhan', slug: 'farhan-bin-rafiq', name: 'Farhan Bin Rafiq', handle: '@farhan_tech', publicHandle: 'farhan-bin-rafiq' },
+    { id: 'creator-techtalks', slug: 'tech-talks-bd', name: 'Tech Talks BD', handle: '@techtalksbd', publicHandle: 'tech-talks-bd' },
+    { id: 'creator-sarah', slug: 'sarah-jenkins', name: 'Sarah Jenkins', handle: '@sarah_style', publicHandle: 'sarah-jenkins' },
+  ];
+  assertEqual('U1 Farhan shows @farhan-bin-rafiq', publicUsernameLabel(live[0]), '@farhan-bin-rafiq');
+  assertEqual('U1 TechTalks shows @tech-talks-bd', publicUsernameLabel(live[1]), '@tech-talks-bd');
+  assertEqual('U1 Sarah shows @sarah-jenkins', publicUsernameLabel(live[2]), '@sarah-jenkins');
+  assertEqual('U2 visible username, profile URL and canonical key agree', live.map((c) => [publicUsernameLabel(c), creatorPath(c)]), [
+    ['@farhan-bin-rafiq', '/creators/farhan-bin-rafiq'],
+    ['@tech-talks-bd', '/creators/tech-talks-bd'],
+    ['@sarah-jenkins', '/creators/sarah-jenkins'],
+  ]);
+  assertEqual('U3 a free-text handle that names another account never overrides the username', publicUsernameLabel({ handle: '@walton', publicHandle: 'farhan-bin-rafiq' } as never), '@farhan-bin-rafiq');
+  assertEqual('U4 no registered username → no username shown (free-text handle ignored)', [
+    publicUsernameLabel({ handle: '@farhan_tech', publicHandle: null } as never),
+    publicUsernameLabel({ handle: '@walton' } as never),
+    publicUsernameLabel({ name: 'Draft Creator', publicHandle: undefined } as never),
+    publicUsernameLabel(null),
+  ], [null, null, null, null]);
+  assertEqual('U4 malformed stored values are not shown', ['Farhan', '@farhan', 'ab', ' farhan', 'farhan_tech', ''].map((publicHandle) => publicUsernameLabel({ publicHandle })), [null, null, null, null, null, null]);
+  assertEqual('U5 input objects are not modified', JSON.stringify(live[0]), JSON.stringify({ id: 'creator-farhan', slug: 'farhan-bin-rafiq', name: 'Farhan Bin Rafiq', handle: '@farhan_tech', publicHandle: 'farhan-bin-rafiq' }));
+  const hero = readFileSync('src/components/creator/CreatorProfileHero.tsx', 'utf8');
+  assertEqual('U6 Creator hero renders the registered username and no longer reads creator.handle', [/publicUsernameLabel\(creator\)/.test(hero), /creator\.handle\b/.test(hero)], [true, false]);
+}
 
 console.log(`\n${fail === 0 ? 'PASS' : 'FAIL'} probe-public-urls (${pass} passed, ${fail} failed)`);
 process.exit(fail === 0 ? 0 : 1);

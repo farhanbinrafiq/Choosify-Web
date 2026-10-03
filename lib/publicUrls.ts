@@ -92,6 +92,15 @@ export function creatorPath(creator: UrlCreatorLike | null | undefined): string 
   return build('/creators', creator ? handleOrPublicKey(creator) : '');
 }
 
+/**
+ * The visible "@username" for a Brand / Creator: the registered public handle only,
+ * so it always matches the profile URL. null when there is none — callers show no
+ * username then; the free-text display `handle` is never presented as one.
+ */
+export function publicUsernameLabel(entity: { publicHandle?: string | null } | null | undefined): string | null {
+  return entity && isUsableHandle(entity.publicHandle) ? `@${entity.publicHandle}` : null;
+}
+
 export function guidePath(guide: UrlGuideLike | null | undefined): string {
   return build('/spotlight', guide ? publicKey(guide) : '');
 }
