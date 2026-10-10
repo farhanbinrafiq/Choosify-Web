@@ -7,6 +7,20 @@ import { toast } from '../lib/notify';
 import { cn } from '../lib/utils';
 import { BrandLogo, isBrandLogoUrl } from './brand/BrandLogo';
 
+/**
+ * Success score: every brand starts at 100% when it joins and only real
+ * analytics move it — an explicit platform score, else its real average rating
+ * (5★ = 100%). A brand with no ratings yet shows 100%, never a made-up lower figure.
+ */
+export function brandSuccessScore(brand: { successScore?: number | null; recommended?: string; rating?: number }): number {
+  if (typeof brand.successScore === 'number' && brand.successScore > 0) return Math.min(100, Math.round(brand.successScore));
+  const recommended = brand.recommended ? parseInt(String(brand.recommended), 10) : NaN;
+  if (Number.isFinite(recommended) && recommended > 0) return Math.min(100, recommended);
+  const rating = Number(brand.rating);
+  if (Number.isFinite(rating) && rating > 0) return Math.min(100, Math.round(rating * 20));
+  return 100;
+}
+
 interface BrandCardDesignProps {
   brand: {
     id: string | number;
@@ -83,12 +97,7 @@ export function mapBrandToCardDesign(brand: any, fallback?: any) {
   // `null` on the input is an explicit "honestly unknown" signal (omit);
   // `undefined` keeps the legacy directory-tile placeholder fallback.
   const priceRangeOut = brand.priceRange === null ? null : priceRange;
-  const successScoreOut =
-    brand.successScore === null
-      ? null
-      : brand.successScore ||
-        (brand.recommended ? parseInt(String(brand.recommended), 10) : undefined) ||
-        (brand.rating > 0 ? Math.round(brand.rating * 20) : null);
+  const successScoreOut = brandSuccessScore(brand);
 
   return {
     id: brand.id,
@@ -123,12 +132,7 @@ export const BrandCardDesign = memo(function BrandCardDesign({
   const { savedBrands, setSavedBrands } = useDashboard();
   const verified = brand.verified !== false;
   const bestForText = brand.bestFor ?? brand.category ?? 'Fashion';
-  const scoreKnown = brand.successScore !== null;
-  const score = !scoreKnown
-    ? null
-    : brand.successScore ||
-      (brand.recommended ? parseInt(String(brand.recommended), 10) : null) ||
-      (brand.rating > 0 ? Math.round(brand.rating * 20) : null);
+  const score = brandSuccessScore(brand);
 
   const priceKnown = brand.priceRange !== null;
   let priceText: string | null = '৳500-2000';

@@ -259,8 +259,7 @@ export function BrandsPage() {
         bestFor: brand.category || 'General',
         // Real figures only: no placeholder price range or recommendation score.
         priceRange: null,
-        recommended: brand.ratings > 0 ? `${Math.min(99, Math.round(brand.ratings * 20))}%` : undefined,
-        successScore: brand.ratings > 0 ? undefined : null,
+        // Success score comes from real ratings only; new brands start at 100%.
         category: brand.category || 'General',
         isHot: brand.sponsoredFlag,
         isFeatured: brand.featuredFlag,
