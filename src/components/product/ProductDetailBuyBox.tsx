@@ -365,6 +365,18 @@ export function ProductDetailBuyBox({
           </>
           )}
 
+          {/* No variant / size selector to sit beside (e.g. one-of-a-kind items):
+              still surface the seller's size guide on its own. */}
+          {showSizeGuideButton &&
+            !(!isService && useGenericVariants) &&
+            !(!isService && !useGenericVariants && sizeOptions.length > 0) && (
+              <div className="mb-4">
+                <button type="button" onClick={onOpenSizeChart} className="text-[11px] font-bold text-[#FF5B00]">
+                  ↗ {(sizeGuideLabel || 'View Size Guide').toUpperCase()}
+                </button>
+              </div>
+            )}
+
           {onAskEmi && (
             <button
               type="button"
@@ -481,17 +493,22 @@ export function ProductDetailBuyBox({
           )}
 
           {(() => {
+            // Seller-entered delivery facts only; hidden when the seller hasn't filled it.
+            if (product.enableDeliveryInfo === false) return null;
             const di = product.deliveryInfo || {};
-            const facts: string[] = Array.isArray(di.bullets) && di.bullets.filter(Boolean).length
-              ? di.bullets.filter(Boolean)
-              : ['Cash on Delivery available', 'Standard delivery across Bangladesh'];
-            const region: string = di.region || 'Bangladesh';
+            const facts: string[] = Array.isArray(di.bullets)
+              ? di.bullets.map((b: unknown) => String(b ?? '').trim()).filter(Boolean)
+              : [];
+            const region = String(di.region ?? '').trim();
+            if (!facts.length && !region) return null;
             return (
               <div className="bg-white rounded-xl border border-[#E8EDF2] p-[18px] text-[12.5px] text-[#4B5563] leading-relaxed">
                 <div className="text-[11px] font-extrabold text-[#9AA0AC] uppercase mb-2">Delivery Information</div>
-                <div className="flex items-center gap-1.5 mb-2 text-[#1A1A2E] font-semibold">
-                  <MapPin size={13} className="text-[#FF5B00]" /> {region}
-                </div>
+                {region ? (
+                  <div className="flex items-center gap-1.5 mb-2 text-[#1A1A2E] font-semibold">
+                    <MapPin size={13} className="text-[#FF5B00]" /> {region}
+                  </div>
+                ) : null}
                 <ul className="m-0 p-0 list-none space-y-1">
                   {facts.map((f) => (
                     <li key={f} className="flex items-start gap-1.5">

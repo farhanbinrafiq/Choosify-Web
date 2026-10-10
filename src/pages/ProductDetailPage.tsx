@@ -102,6 +102,53 @@ function hasActiveSizeGuide(sizeGuide?: CatalogProductSizeGuide | null): boolean
   return false;
 }
 
+/** "Label: Value" spec rows the seller actually filled in. */
+function specPairs(rows: unknown): Array<{ label: string; value: string }> {
+  return (Array.isArray(rows) ? rows : [])
+    .map((row: any) => ({
+      label: String(row?.label || row?.key || '').trim(),
+      value: String(row?.value ?? '').trim(),
+    }))
+    .filter((row) => row.label && row.value);
+}
+
+const cleanStrings = (list: unknown): string[] =>
+  Array.isArray(list) ? list.map((v) => String(v ?? '').trim()).filter(Boolean) : [];
+
+/**
+ * Seller-entered Product Detail content only. Sections with nothing filled in
+ * are hidden rather than padded with placeholder copy.
+ */
+function deriveSellerContent(product: any) {
+  const studioItems = product?.studioBoxContents;
+  const boxContents: string[] =
+    product?.enableBoxContents !== false && Array.isArray(studioItems) && studioItems.length
+      ? cleanStrings(
+          studioItems
+            .filter((item: any) => item?.enabled !== false)
+            .sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
+            .map((item: any) => item.title),
+        )
+      : cleanStrings(product?.complimentaryFeatures);
+  const physicalSpecs: string[] = [
+    ...(product?.enableAdditionalSpecs !== false
+      ? specPairs(product?.additionalSpecs).map((row) => `${row.label}: ${row.value}`)
+      : []),
+    ...cleanStrings(product?.propertySpecs),
+  ];
+  const sellerBestForTags = product?.enableBestForTags !== false ? cleanStrings(product?.bestForTags) : [];
+  const filledOverviewBlocks = (Array.isArray(product?.overviewBlocks) ? product.overviewBlocks : [])
+    .map((b: any) => ({ title: String(b?.title || '').trim(), items: cleanStrings(b?.bullets) }))
+    .filter((b: { title: string; items: string[] }) => b.title && b.items.length);
+  return {
+    sellerSpecs: specPairs(product?.specs),
+    physicalSpecs,
+    sellerBestForTags,
+    filledOverviewBlocks: filledOverviewBlocks as Array<{ title: string; items: string[] }>,
+    boxContents,
+  };
+}
+
 // ── Optional Add-ons ────────────────────────────────────────────
 export interface ProductAddon {
   id: string;
@@ -345,12 +392,23 @@ export function ProductDetailPage() {
     window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
   };
 
+  const sellerContent = useMemo(() => deriveSellerContent(product), [product]);
+  const hasSpecsSection = product?.enableSpecs !== false && sellerContent.sellerSpecs.length > 0;
+  // Nav-level check; platform custom overviews (resolved later) can still show the section.
+  const hasOverviewContent =
+    product?.enableOverviewSection !== false &&
+    (sellerContent.filledOverviewBlocks.length > 0 || sellerContent.sellerBestForTags.length > 0);
   const productSectionNavItems = [
-    { id: "product-specs-section", label: "Specs", icon: <Package size={13} /> },
+    { id: "product-specs-section", label: "Specs", icon: <Package size={13} />, hidden: !hasSpecsSection },
     { id: "influencer-reviews-section", label: "Creator Reviews", icon: <Users size={13} /> },
     { id: "public-reviews-section", label: "Public Reviews", icon: <MessageCircleMore size={13} className="text-[#FF5B00]" /> },
-    { id: "product-overview-section", label: sectionLabels.overview, icon: <Info size={13} /> },
-    { id: "product-utility-section", label: "Buying Guide", icon: <ShoppingBag size={13} /> },
+    { id: "product-overview-section", label: sectionLabels.overview, icon: <Info size={13} />, hidden: !hasOverviewContent },
+    {
+      id: "product-utility-section",
+      label: "Buying Guide",
+      icon: <ShoppingBag size={13} />,
+      hidden: !sellerContent.boxContents.length && !sellerContent.physicalSpecs.length,
+    },
     ...(!isService
       ? [{ id: "where-to-buy-section", label: "Where to Buy", icon: <Tag size={13} /> }]
       : []),
@@ -876,100 +934,20 @@ export function ProductDetailPage() {
     });
   };
 
-  const getBoxContents = () => {
-    if (!product) return [];
-
-    const studioItems = (product as any).studioBoxContents;
-    if (
-      (product as any).enableBoxContents !== false &&
-      Array.isArray(studioItems) &&
-      studioItems.length
-    ) {
-      return studioItems
-        .filter((item: any) => item.enabled !== false)
-        .sort((a: any, b: any) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
-        .map((item: any) => item.title);
-    }
-
-    const fromProduct = (product as any).complimentaryFeatures;
-    if (Array.isArray(fromProduct) && fromProduct.length) return fromProduct;
-
-    const title = (product.title || "").toLowerCase();
-    const category = (product.category || "").toLowerCase();
-
-    // Smartphone matching
-    if (
-      category.includes("phone") || 
-      category.includes("mobile") || 
-      title.includes("galaxy") || 
-      title.includes("iphone") || 
-      title.includes("redmi") || 
-      title.includes("pixel") || 
-      title.includes("poco") || 
-      title.includes("realme") || 
-      title.includes("smartphone")
-    ) {
-      return ["Device", "Charger", "USB Cable", "SIM Ejector Tool", "User Guide"];
-    }
-
-    // Laptop matching
-    if (
-      category.includes("laptop") || 
-      category.includes("computer") || 
-      title.includes("macbook") || 
-      title.includes("zenbook") || 
-      title.includes("laptop")
-    ) {
-      return ["Laptop", "Power Adapter", "Charging Cable", "Documentation"];
-    }
-
-    // Eyewear matching
-    if (
-      category.includes("eyewear") || 
-      category.includes("glasses") || 
-      title.includes("sunglasses") || 
-      title.includes("eyewear")
-    ) {
-      return ["Eyewear", "Protective Case", "Cleaning Cloth", "Warranty Card"];
-    }
-
-    // Clothing / Apparel matching
-    if (
-      category.includes("fashion") || 
-      category.includes("lifestyle") || 
-      category.includes("clothing") || 
-      category.includes("apparel") || 
-      title.includes("saree") || 
-      title.includes("panjabi") || 
-      title.includes("polo") || 
-      title.includes("shirt") || 
-      title.includes("apparel") || 
-      title.includes("runner") || 
-      title.includes("shoe")
-    ) {
-      if (title.includes("saree")) {
-        return ["Saree", "Shopping Bag", "Care Instructions"];
-      }
-      return ["Product Unit", "Shopping Bag", "Care Instructions"];
-    }
-
-    // Beauty Products matching
-    if (
-      category.includes("beauty") || 
-      category.includes("skin") || 
-      category.includes("makeup") || 
-      category.includes("cosmetics") || 
-      title.includes("perfume") || 
-      title.includes("serum") || 
-      title.includes("fragrance")
-    ) {
-      return ["Product Unit", "Protective Packaging", "User Instructions"];
-    }
-
-    return [];
-  };
-
-  const boxContents = getBoxContents();
+  const {
+    sellerSpecs,
+    physicalSpecs,
+    sellerBestForTags,
+    filledOverviewBlocks,
+    boxContents,
+  } = sellerContent;
+  const productCustomOverviews = (customOverviews || []).filter(
+    (co) => co.targetType === 'product' && String(co.targetId) === String(product?.id),
+  );
+  const showOverviewSection =
+    product?.enableOverviewSection !== false &&
+    (filledOverviewBlocks.length > 0 || productCustomOverviews.length > 0 || sellerBestForTags.length > 0);
+  const showBuyingGuideSection = boxContents.length > 0 || physicalSpecs.length > 0;
 
   const selectedVariant = getSelectedVariant();
 
@@ -1466,21 +1444,25 @@ export function ProductDetailPage() {
       <DcUnderlineTabs
         flush
         tabs={[
-          { id: 'product-specs-section', label: sectionLabels.specifications, icon: '⚏' },
+          ...(hasSpecsSection
+            ? [{ id: 'product-specs-section', label: sectionLabels.specifications, icon: '⚏' }]
+            : []),
           { id: 'influencer-reviews-section', label: 'Creator Reviews', icon: '📖' },
           { id: 'public-reviews-section', label: 'Public Reviews', icon: '🛡' },
-          { id: 'product-overview-section', label: sectionLabels.overview, icon: '👁' },
+          ...(showOverviewSection
+            ? [{ id: 'product-overview-section', label: sectionLabels.overview, icon: '👁' }]
+            : []),
           ...(!isService
             ? [{ id: 'where-to-buy-section', label: 'Where to Buy', icon: '🏷' }]
             : []),
         ]}
-        activeId={activeSectionId === 'all' ? 'product-specs-section' : activeSectionId}
+        activeId={activeSectionId === 'all' ? (hasSpecsSection ? 'product-specs-section' : 'influencer-reviews-section') : activeSectionId}
         onNavigate={scrollToSection}
       />
 
       <main id="all-section" className="py-6 md:py-8">
           <div className={`${DETAIL_SINGLE_FEED}`}>
-            {product.enableSpecs !== false && (
+            {hasSpecsSection && (
             <StudioWrap sectionId="product-specs">
             <ProductSpecsOverview
               productTitle={product.title}
@@ -1490,29 +1472,7 @@ export function ProductDetailPage() {
                   ? `Service details for ${product.title}`
                   : undefined
               }
-              specs={[
-                ...(Array.isArray(product.specs) && product.specs.length
-                  ? product.specs.map((row: any) => ({
-                      label: String(row.label || row.key || ''),
-                      value: String(row.value || ''),
-                    }))
-                  : [
-                      { label: 'Brand', value: brandName },
-                      { label: 'Category', value: product.category || 'Lifestyle' },
-                      { label: 'Material', value: 'Premium Grade Build' },
-                      { label: 'Origin', value: 'Local Production / Auth' },
-                      { label: 'Warranty', value: '1 Year Care Warranty' },
-                      { label: 'Model', value: product.title?.substring(0, 16) || 'Classic' },
-                      { label: 'Rating', value: productReviewStats.count > 0 ? `${productReviewStats.avg.toFixed(1)} / 5` : 'No ratings yet' },
-                      { label: 'Status', value: isOutOfStock ? 'Out of Stock' : 'In Stock' },
-                    ]),
-                ...(product.enableAdditionalSpecs !== false && Array.isArray((product as any).additionalSpecs)
-                  ? (product as any).additionalSpecs.map((row: any) => ({
-                      label: String(row.label || row.key || ''),
-                      value: String(row.value || ''),
-                    }))
-                  : []),
-              ]}
+              specs={sellerSpecs}
             />
             </StudioWrap>
             )}
@@ -1756,6 +1716,7 @@ export function ProductDetailPage() {
             </StudioWrap>
 
             {/* PRODUCT OVERVIEW (ID: 'product-overview-section') */}
+            {showOverviewSection && (
             <StudioWrap
               sectionId="product-overview"
               className="scroll-mt-36 bg-white rounded-xl p-6 border border-[#E8EDF2] space-y-5 text-left font-sans w-full"
@@ -1770,17 +1731,11 @@ export function ProductDetailPage() {
                 </p>
               </div>
 
+              {(filledOverviewBlocks.length > 0 || productCustomOverviews.length > 0) && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
-                {(() => {
+                {filledOverviewBlocks.map((col, i) => {
                   const OV_ICONS = [<Tag size={14} />, <Award size={14} />, <Users size={14} />, <ShieldCheck size={14} />];
-                  const blocks: Array<{ title?: string; bullets?: string[] }> = Array.isArray(product.overviewBlocks)
-                    ? product.overviewBlocks
-                    : [];
-                  const filled = blocks
-                    .filter((b) => b?.title && Array.isArray(b.bullets) && b.bullets.filter(Boolean).length)
-                    .map((b) => ({ title: String(b.title), items: (b.bullets || []).filter(Boolean) }));
-                  if (!filled.length) return null;
-                  return filled.map((col, i) => (
+                  return (
                     <div key={col.title} className="bg-[#F4F7F9] rounded-[10px] px-5 py-[18px] flex flex-col gap-3">
                       <div className="flex items-center gap-2 text-[12px] font-extrabold text-[#1A1A2E]">
                         <span className="text-[#FF5B00]">{OV_ICONS[i % OV_ICONS.length]}</span>
@@ -1792,17 +1747,10 @@ export function ProductDetailPage() {
                         ))}
                       </div>
                     </div>
-                  ));
-                })()}
+                  );
+                })}
 
-                {customOverviews &&
-                  customOverviews
-                    .filter(
-                      (co) =>
-                        co.targetType === 'product' &&
-                        String(co.targetId) === String(product.id),
-                    )
-                    .map((co, idx) => (
+                {productCustomOverviews.map((co, idx) => (
                       <div
                         key={idx}
                         className="bg-[#F4F7F9] rounded-[10px] px-5 py-[18px] flex flex-col gap-3"
@@ -1821,23 +1769,13 @@ export function ProductDetailPage() {
                       </div>
                     ))}
               </div>
+              )}
 
-              {product.enableBestForTags !== false && (
+              {sellerBestForTags.length > 0 && (
               <div className="pt-1 space-y-2.5">
                 <div className="text-[11px] font-extrabold text-[#8A00C4]"># BEST FOR TAGS</div>
                 <div className="flex flex-wrap gap-2">
-                  {(Array.isArray(product.bestForTags) && product.bestForTags.length
-                    ? product.bestForTags
-                    : [
-                        'premium lifestyle',
-                        'quality driven',
-                        'modern apparel',
-                        'exclusive designs',
-                        'sustainable wear',
-                        'best in segment',
-                        'elite deshi collect',
-                      ]
-                  ).map((tag: string) => (
+                  {sellerBestForTags.map((tag: string) => (
                     <span
                       key={tag}
                       className="choosify-best-for-tag text-[11px] font-bold px-3.5 py-1.5 rounded-full"
@@ -1849,20 +1787,20 @@ export function ProductDetailPage() {
               </div>
               )}
             </StudioWrap>
+            )}
 
             {/* Box Content + Physical Specs — Choosify.dc.html */}
+            {showBuyingGuideSection && (
             <StudioWrap
               sectionId="product-buying-guide"
               className="scroll-mt-36 bg-white rounded-xl border border-[#E8EDF2] p-6 grid grid-cols-1 md:grid-cols-2 gap-3.5 w-full"
             >
+              {boxContents.length > 0 && (
               <div className="bg-[#F4F7F9] rounded-[10px] p-4 text-left">
                 <div className="text-[11px] font-extrabold text-[#1A1A2E] mb-2.5">
                   {sectionLabels.boxContent.toUpperCase()}
                 </div>
-                {(boxContents?.length
-                  ? boxContents
-                  : ['Device', 'Charging cable', 'Documentation', 'Warranty card']
-                ).map((item, i) => (
+                {boxContents.map((item: string, i: number) => (
                   <OverviewListItem
                     key={i}
                     text={item}
@@ -1871,20 +1809,13 @@ export function ProductDetailPage() {
                   />
                 ))}
               </div>
+              )}
+              {physicalSpecs.length > 0 && (
               <div className="bg-[#F4F7F9] rounded-[10px] p-4 text-left">
                 <div className="text-[11px] font-extrabold text-[#1A1A2E] mb-2.5">
                   {sectionLabels.physicalSpecs.toUpperCase()}
                 </div>
-                {(Array.isArray((product as any).propertySpecs) && (product as any).propertySpecs.length
-                  ? (product as any).propertySpecs
-                  : [
-                      `Category: ${product.category || 'General'}`,
-                      `Brand: ${brandName}`,
-                      productReviewStats.count > 0
-                        ? `Rating: ${productReviewStats.avg.toFixed(1)} / 5`
-                        : 'Rating: No ratings yet',
-                    ]
-                ).map((item: string, i: number) => (
+                {physicalSpecs.map((item: string, i: number) => (
                   <OverviewListItem
                     key={i}
                     text={item}
@@ -1893,7 +1824,9 @@ export function ProductDetailPage() {
                   />
                 ))}
               </div>
+              )}
             </StudioWrap>
+            )}
 
             {/* Warranty & After-Sales Services */}
             {(() => {
