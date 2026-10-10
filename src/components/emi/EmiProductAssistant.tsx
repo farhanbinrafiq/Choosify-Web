@@ -21,7 +21,7 @@ export function EmiProductAssistant({ product, inStock }: EmiProductAssistantPro
       productIds: [String(product.id)],
       metadata: {
         price: product.price,
-        rating: (product as { rating?: number }).rating ?? 4.5,
+        rating: (product as { rating?: number }).rating,
         brand: product.brandName ?? product.brandId,
         category: product.categoryName,
         inStock: inStock ?? product.stock > 0,

@@ -62,8 +62,9 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({
   const [isSaved, setIsSaved] = useState(false);
   // `null` is an explicit "honestly unknown" signal (omit); `undefined` keeps
   // the legacy directory-tile placeholder for callers that don't supply it.
-  const rating = creator.rating === null ? null : creator.rating || 4.7;
-  const reviewsCount = creator.reviews === null ? null : creator.reviews || 85;
+  // Real figures only — a creator without ratings/reviews shows none.
+  const rating = creator.rating ? creator.rating : null;
+  const reviewsCount = creator.reviews ? creator.reviews : null;
   const followersRaw = creator.followers;
   const followers =
     followersRaw === null

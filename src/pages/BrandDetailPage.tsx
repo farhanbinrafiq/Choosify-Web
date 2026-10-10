@@ -795,7 +795,7 @@ export function BrandDetailPage() {
       if (inStockOnlyFilter && p.inStock === false) return false;
 
       // 5. Avg Rating
-      const ratingVal = p.rating || 4.2;
+      const ratingVal = Number(p.rating) || 0;
       if (ratingFilter && ratingFilter !== "all") {
         if (ratingVal < parseFloat(ratingFilter)) return false;
       }

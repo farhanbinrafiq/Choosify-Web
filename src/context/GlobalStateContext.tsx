@@ -831,7 +831,8 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       description: product.description || '',
       category: product.categoryName || 'General',
       variants: undefined,
-      rating: 4.5,
+      // No rating until the product has real reviews — never a placeholder score.
+      rating: undefined,
       isDeal: product.isDeal,
       dealType: product.dealType,
       discountPercent: product.discountPercent,

@@ -36,8 +36,9 @@ interface Brand {
   rating: number;
   reviews: number;
   bestFor: string;
-  priceRange: string;
-  recommended: string;
+  priceRange: string | null;
+  recommended?: string;
+  successScore?: number | null;
   category: string;
   isHot?: boolean;
   isFeatured?: boolean;
@@ -256,8 +257,10 @@ export function BrandsPage() {
         reviews: brand.followers || 0,
         followers: brand.followers || 0,
         bestFor: brand.category || 'General',
-        priceRange: '৳500',
-        recommended: `${Math.min(99, Math.max(70, Math.round((brand.ratings || 4) * 20)))}%`,
+        // Real figures only: no placeholder price range or recommendation score.
+        priceRange: null,
+        recommended: brand.ratings > 0 ? `${Math.min(99, Math.round(brand.ratings * 20))}%` : undefined,
+        successScore: brand.ratings > 0 ? undefined : null,
         category: brand.category || 'General',
         isHot: brand.sponsoredFlag,
         isFeatured: brand.featuredFlag,

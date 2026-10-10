@@ -88,7 +88,7 @@ export function mapBrandToCardDesign(brand: any, fallback?: any) {
       ? null
       : brand.successScore ||
         (brand.recommended ? parseInt(String(brand.recommended), 10) : undefined) ||
-        Math.round((brand.rating || 4.8) * 20);
+        (brand.rating > 0 ? Math.round(brand.rating * 20) : null);
 
   return {
     id: brand.id,
@@ -128,7 +128,7 @@ export const BrandCardDesign = memo(function BrandCardDesign({
     ? null
     : brand.successScore ||
       (brand.recommended ? parseInt(String(brand.recommended), 10) : null) ||
-      Math.round((brand.rating || 4.5) * 20);
+      (brand.rating > 0 ? Math.round(brand.rating * 20) : null);
 
   const priceKnown = brand.priceRange !== null;
   let priceText: string | null = '৳500-2000';

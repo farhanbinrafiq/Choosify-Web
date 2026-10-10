@@ -113,11 +113,15 @@ function resolveVariantLine(product: any): string {
   return 'Official Warranty';
 }
 
-function resolveCashbackLabel(price: number): string {
-  if (price <= 0) return '';
-  const cashback = Math.round((price * 0.05) / 100) * 100;
-  if (cashback <= 0) return '';
-  return `৳${cashback.toLocaleString('en-BD')}`;
+/**
+ * Cashback is shown only when the product carries a real, platform-activated
+ * cashback amount. There is no cashback programme today, so nothing renders —
+ * never a figure derived from the price.
+ */
+function resolveCashbackLabel(product: any): string {
+  const amount = Number(product?.cashbackAmount);
+  if (!Number.isFinite(amount) || amount <= 0) return '';
+  return `৳${Math.round(amount).toLocaleString('en-BD')}`;
 }
 
 /** Real rating only -- no synthetic/seeded fallback. A product with no rating data gets no rating badge. */
@@ -306,7 +310,7 @@ export const ProductCard = memo(function ProductCard({
   const badge = resolveDcBadge(product, siteConfig);
   const isOutOfStock = product.status === 'out_of_stock' || product.stock === 0;
   const variantLine = resolveVariantLine(product);
-  const cashback = resolveCashbackLabel(priceNum);
+  const cashback = resolveCashbackLabel(product);
   const rating = resolveRating(product);
   // No existing config entry represents "Rating" today (the admin badge
   // model only covers status-flag badges) -- this reads one automatically

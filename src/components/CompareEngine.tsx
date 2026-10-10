@@ -181,7 +181,7 @@ export function CompareEngine() {
           price: typeof product.price === 'number'
             ? product.price
             : Number(String(product.price ?? 0).replace(/[^\d.]/g, '')) || 0,
-          rating: product.rating || 4.5,
+          rating: Number(product.rating) || 0,
           score: typeof product.score === 'number' ? product.score : undefined,
           category: product.category || product.categoryName || '',
           isWinner: product.isWinner || false,
@@ -196,7 +196,7 @@ export function CompareEngine() {
             price: `৳${(typeof product.price === 'number' ? product.price : Number(String(product.price ?? 0).replace(/[^\d.]/g, '')) || 0).toLocaleString()}`,
             value: product.value || 'Excellent',
             clearance: product.discount ? `${product.discount}% OFF` : 'No Offer',
-            rating: `${product.rating || 4.5}/5.0`,
+            rating: Number(product.rating) > 0 ? `${product.rating}/5.0` : 'No ratings yet',
             influence: product.influence || '90/100',
             build: product.build || 'Premium',
             durability: product.durability || 'High (3 yrs)',
@@ -475,7 +475,7 @@ export function CompareEngine() {
       const raw =
         typeof p.score === 'number'
           ? p.score
-          : Math.min(10, Math.round(((p.rating || 4.5) / 5) * 10 * 10) / 10);
+          : Math.min(10, Math.round(((Number(p.rating) || 0) / 5) * 10 * 10) / 10);
       const score = Math.max(0, Math.min(10, Number(raw) || 0));
       return {
         id: p.id,
