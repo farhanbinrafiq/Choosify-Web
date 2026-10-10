@@ -28,7 +28,8 @@ interface BrandDeal {
   bgClass: string;
 }
 
-const BRAND_DEALS: BrandDeal[] = [
+/** Sample entries for local development only — production shows real data or nothing. */
+const BRAND_DEALS: BrandDeal[] = !import.meta.env.DEV ? [] : [
   { id: 'aarong', name: "Aarong", dealHighlight: "Flat 15% OFF on Handicrafts", logo: "Aa", bgClass: "bg-orange-primary/95" },
   { id: 'apex', name: "Apex", dealHighlight: "Buy 1 Get 1 Free on Select Shoes", logo: "A", bgClass: "bg-navy" },
   { id: 'sailor', name: "Sailor", dealHighlight: "Flat 20% OFF on Casual Wear", logo: "S", bgClass: "bg-teal-700" },
@@ -43,7 +44,7 @@ interface PromoCode {
   discount: string;
 }
 
-const PROMO_CODES: PromoCode[] = [
+const PROMO_CODES: PromoCode[] = !import.meta.env.DEV ? [] : [
   { brandId: 'aarong', brandName: "Aarong", code: "AARONG15", discount: "Flat 15% OFF" },
   { brandId: 'apex', brandName: "Apex", code: "APEXFOOT26", discount: "BDT 500 FLAT" },
   { brandId: 'sailor', brandName: "Sailor", code: "SAILOREID", discount: "Flat 20% OFF" },
@@ -51,6 +52,7 @@ const PROMO_CODES: PromoCode[] = [
 ];
 
 export function FeaturedBrandDealsPanel() {
+  if (!BRAND_DEALS.length && !PROMO_CODES.length) return null;
   return (
     <>
       {/* FEATURED BRAND DEALS SECTION */}

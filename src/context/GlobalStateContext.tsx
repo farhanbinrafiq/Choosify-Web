@@ -10,6 +10,9 @@ import {
 } from '../data/mockServiceListings';
 import { buildFallbackBrandsFromMock, buildMappedProductsFromMock } from '../utils/mockCatalogHydration';
 import { MOCK_CATALOG_GUIDES } from '../data/mockCatalogGuides';
+
+/** Sample catalog data may stand in for the live API only in development. */
+const ALLOW_MOCK_CATALOG = import.meta.env.DEV;
 import { perfApiCall } from '../utils/performanceDev';
 import { notify, toast } from '../lib/notify';
 import { catalogApi } from '../services/catalogApi';
@@ -635,6 +638,8 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   const lastCatalogFetchAt = useRef(0);
 
   useEffect(() => {
+    // Sample catalog data is a development aid only — production never shows it.
+    if (!ALLOW_MOCK_CATALOG) return;
     let cancelled = false;
     loadMockCatalog().then(({ products, brands, blogs }) => {
       if (cancelled) return;
@@ -650,10 +655,14 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
 
   useEffect(() => {
     let cancelled = false;
+    let retryTimer = 0;
+    let failures = 0;
+    const detailVersions = new Map<string, string>();
 
     async function hydrateCatalogFromApi(force = false) {
       const now = Date.now();
       if (!force && now - lastCatalogFetchAt.current < 30_000) return;
+      window.clearTimeout(retryTimer);
 
       try {
         const [products, brands, categories, deals, homepage, site, creators, guides, placements] = await perfApiCall(
@@ -691,22 +700,41 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
         }
         setFeatureFlags((prev) => normalizeFeatureFlags({ ...prev, ...flags }));
 
-        const detailEntries = await Promise.all(
-          products.slice(0, 12).map(async (product) => {
-            const detail = await catalogApi.getProductDetail(product.id);
-            return detail ? ([product.id, detail] as const) : null;
-          }),
-        );
-        const detailsMap: Record<string, CatalogProductDetail> = {};
-        detailEntries.forEach((entry) => {
-          if (entry) detailsMap[entry[0]] = entry[1];
-        });
-        setProductDetailsById(detailsMap);
+        failures = 0;
         setIsUsingFallbackData(false);
+
+        // Pre-hydrate a few details; on periodic refreshes only re-fetch the ones
+        // whose product changed since (product pages fetch others on demand).
+        const stale = products
+          .slice(0, 12)
+          .filter((product) => detailVersions.get(product.id) !== String(product.updatedAt ?? ''));
+        if (stale.length) {
+          stale.forEach((product) => detailVersions.set(product.id, String(product.updatedAt ?? '')));
+          const detailEntries = await Promise.all(
+            stale.map(async (product) => {
+              const detail = await catalogApi.getProductDetail(product.id).catch(() => null);
+              return detail ? ([product.id, detail] as const) : null;
+            }),
+          );
+          if (cancelled) return;
+          const detailsMap: Record<string, CatalogProductDetail> = {};
+          detailEntries.forEach((entry) => {
+            if (entry) detailsMap[entry[0]] = entry[1];
+          });
+          setProductDetailsById((prev) => ({ ...prev, ...detailsMap }));
+        }
       } catch (error) {
-        console.warn('[GlobalStateContext] Catalog API unavailable, using static fallback.', error);
-        setIsUsingFallbackData(true);
-        setCatalogGuides((prev) => (prev.length ? prev : MOCK_CATALOG_GUIDES));
+        if (cancelled) return;
+        // Keep whatever real catalog is already on screen and try again shortly
+        // (e.g. after a 429 rate-limit response) instead of showing sample data.
+        failures += 1;
+        const delay = Math.min(60_000, 3_000 * 2 ** (failures - 1));
+        console.warn(`[GlobalStateContext] Catalog API unavailable, retrying in ${delay / 1000}s.`, error);
+        if (ALLOW_MOCK_CATALOG) {
+          setIsUsingFallbackData(true);
+          setCatalogGuides((prev) => (prev.length ? prev : MOCK_CATALOG_GUIDES));
+        }
+        retryTimer = window.setTimeout(() => hydrateCatalogFromApi(true), delay);
       }
     }
 
@@ -726,6 +754,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       cancelled = true;
       window.removeEventListener('focus', onFocus);
       window.clearInterval(interval);
+      window.clearTimeout(retryTimer);
     };
   }, []);
 
@@ -824,13 +853,14 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   });
 
   const allBrands: Brand[] = mergeServiceSeedBrands(
-    apiBrands.length > 0 ? apiBrands : mockFallbackBrands,
+    apiBrands.length > 0 || !ALLOW_MOCK_CATALOG ? apiBrands : mockFallbackBrands,
   );
   const allCategories: CatalogCategory[] = catalogCategories;
   const allDeals: CatalogDeal[] = catalogDeals;
-  const allCreators: Creator[] = catalogCreators.length > 0 ? catalogCreators.map(mapCatalogCreator) : CREATORS;
+  const allCreators: Creator[] =
+    catalogCreators.length > 0 || !ALLOW_MOCK_CATALOG ? catalogCreators.map(mapCatalogCreator) : CREATORS;
   const allGuides =
-    catalogGuides.length > 0
+    catalogGuides.length > 0 || !ALLOW_MOCK_CATALOG
       ? catalogGuides.map(mapCatalogGuide)
       : mockGuideFallback;
   const allPlacements: CatalogPlacement[] = catalogPlacements;
@@ -1079,7 +1109,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     }));
   };
 
-  const productSource = apiProducts.length > 0 ? apiProducts : mockMappedProducts;
+  const productSource = apiProducts.length > 0 || !ALLOW_MOCK_CATALOG ? apiProducts : mockMappedProducts;
   const allProducts = mergeServiceSeedProducts(productSource);
   const sellersWithSeed = mergeServiceSeedSellers(INITIAL_SELLERS);
   const productDetailsWithSeed = mergeServiceSeedProductDetails(productDetailsById);
@@ -1163,7 +1193,9 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       featureFlags,
       isFeatureEnabled: (key: string) => isFlagEnabled(featureFlags, key),
       isUsingFallbackData,
-      catalogReady: catalogProducts !== null || isUsingFallbackData,
+      // Production waits for the real catalog (retrying) rather than declaring
+      // pages "not found" against an empty or sample catalog.
+      catalogReady: catalogProducts !== null || (ALLOW_MOCK_CATALOG && isUsingFallbackData),
     }}>
       {children}
     </GlobalStateContext.Provider>

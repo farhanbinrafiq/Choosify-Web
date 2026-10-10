@@ -52,7 +52,7 @@ interface Brand {
 }
 
 export function BrandsPage() {
-  const { allBrands: globalBrands, allProducts, allCatalogProducts, allDeals, getBrandClaimStatus } = useGlobalState();
+  const { allBrands: globalBrands, allProducts, allCatalogProducts, allDeals, getBrandClaimStatus, catalogReady } = useGlobalState();
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All Brands');
@@ -269,7 +269,8 @@ export function BrandsPage() {
         coverImage: brand.coverImage,
       }));
     }
-    return fallbackBrands;
+    // The sample list is a development aid; production shows real brands only.
+    return import.meta.env.DEV ? fallbackBrands : [];
   }, [globalBrands]);
 
   const brandMaxDiscountMap = React.useMemo(() => {
@@ -1033,7 +1034,13 @@ export function BrandsPage() {
             <FeaturedBrandDealsPanel />
           </div>
 
-          {filteredBrands.length === 0 && (
+          {filteredBrands.length === 0 && !catalogReady && (
+            <div className="py-20 text-center text-sm font-semibold text-gray-400" role="status">
+              Loading brands…
+            </div>
+          )}
+
+          {filteredBrands.length === 0 && catalogReady && (
              <div className="py-20 text-center">
                 <Search size={48} className="mx-auto text-gray-300 mb-4" />
                 <h3 className="text-xl font-extrabold text-[#1A1A2E] tracking-tight mb-2">No brands found</h3>
