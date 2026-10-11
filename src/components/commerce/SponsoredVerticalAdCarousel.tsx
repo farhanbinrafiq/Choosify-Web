@@ -100,13 +100,15 @@ export function SponsoredVerticalAdCarousel({
 }) {
   const slides = useMemo(() => {
     const fromCms = placements ?? [];
+    // Demo ads are a local-dev preview aid only; production shows real bookings.
+    const demo = withDemoFallback && import.meta.env.DEV;
     let list = fromCms.length
       ? fromCms
-      : withDemoFallback
+      : demo
         ? DEMO_VERTICAL_SPONSORED_PLACEMENTS
         : [];
 
-    if (fromCms.length === 1 && withDemoFallback) {
+    if (fromCms.length === 1 && demo) {
       const rest = DEMO_VERTICAL_SPONSORED_PLACEMENTS.filter((d) => d.id !== fromCms[0].id);
       list = [fromCms[0], ...rest].slice(0, 4);
     }

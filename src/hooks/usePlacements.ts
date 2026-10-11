@@ -62,7 +62,9 @@ export function usePlacements(
       .filter((item): item is ResolvedPlacement => Boolean(item))
       .slice(0, limit);
 
-    if (resolved.length || !withFallback) return resolved;
+    // A catalog item is never presented as a sponsored placement in production
+    // when nothing is actually booked; the fallback is a local-dev preview aid.
+    if (resolved.length || !withFallback || !import.meta.env.DEV) return resolved;
 
     const fallback =
       fallbackVariant === 'landscape'

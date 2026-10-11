@@ -22,7 +22,8 @@ export function useSponsoredPlacementsForSurface(
   return useMemo(() => {
     const fromCms = sponsoredItemsFromResolved(cmsPlacements);
     if (fromCms.length) return fromCms.slice(0, limit);
-    if (!withDemo) return [];
+    // Production shows real booked placements only — demo ads are a local-dev preview aid.
+    if (!withDemo || !import.meta.env.DEV) return [];
     return getDemoSponsoredPlacements(surface, limit);
   }, [cmsPlacements, limit, surface, withDemo]);
 }
