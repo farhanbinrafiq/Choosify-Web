@@ -4,12 +4,16 @@ import { toast } from '../lib/notify';
 import { cn } from "../lib/utils";
 import { useDashboard } from "../context/DashboardContext";
 import { useGlobalState } from "../context/GlobalStateContext";
+import { useLocation, useNavigate } from "react-router-dom";
+import { followApi, BRAND_FOLLOW_COUNT_EVENT, type BrandFollowCountDetail } from "../services/followApi";
 
 export interface FollowButtonProps {
   id: string; // Unique identifier for the brand or creator (e.g. brand ID or creator name)
   name: string; // Clean display name (e.g. "Apple" or "Farhan")
   type?: "brand" | "creator"; // Entity type to customize the toast message if needed
   className?: string; // Optional custom className overrides for dimensions/layout
+  /** Catalog brand id — when given, the follow is saved on the server and counted. */
+  catalogId?: string;
 }
 
 export const FollowButton: React.FC<FollowButtonProps> = ({
@@ -17,12 +21,17 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
   name,
   type = "brand",
   className,
+  catalogId,
 }) => {
   const storageKey = `choosify_followed_${id}`;
+  const navigate = useNavigate();
+  const location = useLocation();
+  const serverBrandId = type === "brand" && catalogId ? catalogId : null;
   const { followedBrands, setFollowedBrands } = useDashboard();
-  const { allBrands, allCreators } = useGlobalState();
+  const { allBrands, allCreators, isLoggedIn } = useGlobalState();
 
-  const isFollowed = followedBrands.some((b: any) => 
+  const isFollowed = followedBrands.some((b: any) =>
+    (serverBrandId !== null && String(b.catalogId) === serverBrandId) ||
     String(b.id) === String(id) || 
     (b.name && b.name.toLowerCase().trim() === String(id).toLowerCase().trim())
   );
@@ -48,6 +57,31 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
     e.stopPropagation();
 
     const nextFollowed = !isFollowed;
+    // Brand follows belong to real accounts: they need a signed-in shopper.
+    if (serverBrandId && !isLoggedIn) {
+      toast.info(`Sign in to follow ${name}`);
+      navigate("/login", { state: { tab: "login", from: location.pathname } });
+      return;
+    }
+    if (serverBrandId) {
+      (nextFollowed ? followApi.followBrand(serverBrandId) : followApi.unfollowBrand(serverBrandId))
+        .then((r) => {
+          window.dispatchEvent(
+            new CustomEvent<BrandFollowCountDetail>(BRAND_FOLLOW_COUNT_EVENT, {
+              detail: { brandId: serverBrandId, count: r.count, following: r.following },
+            }),
+          );
+        })
+        .catch((err) => {
+          // Undo the optimistic change so the button never shows a follow that didn't save.
+          if (nextFollowed) {
+            setFollowedBrands((prev: any[]) =>
+              prev.filter((b: any) => String(b.catalogId) !== serverBrandId && String(b.id) !== String(id)),
+            );
+          }
+          toast.error(err instanceof Error ? err.message : "Could not update follow — please try again.");
+        });
+    }
     try {
       localStorage.setItem(storageKey, String(nextFollowed));
     } catch (err) {
@@ -55,8 +89,9 @@ export const FollowButton: React.FC<FollowButtonProps> = ({
     }
 
     if (!nextFollowed) {
-      setFollowedBrands((prev: any[]) => prev.filter((b: any) => 
-        String(b.id) !== String(id) && 
+      setFollowedBrands((prev: any[]) => prev.filter((b: any) =>
+        (serverBrandId === null || String(b.catalogId) !== serverBrandId) &&
+        String(b.id) !== String(id) &&
         (b.name ? b.name.toLowerCase().trim() !== String(id).toLowerCase().trim() : true)
       ));
     } else {

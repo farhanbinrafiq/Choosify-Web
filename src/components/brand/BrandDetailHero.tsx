@@ -1,6 +1,7 @@
 import React from 'react';
 import { Check, Flag, Globe, Share2, ShieldCheck } from 'lucide-react';
 import { FollowButton } from '../FollowButton';
+import { brandSuccessScore } from '../BrandCardDesign';
 import {
   ProfileSocialPills,
   profileSocialLinksFromCatalog,
@@ -134,6 +135,7 @@ export function BrandDetailHero({
           <div className="flex gap-2.5 flex-wrap justify-center lg:justify-end lg:mt-[52px] shrink-0 w-full lg:w-auto">
             <FollowButton
               id={String(brand.id)}
+              catalogId={brand.catalogId ? String(brand.catalogId) : undefined}
               name={brand.name}
               type="brand"
               className="!bg-[#2323FF] !text-white !border-[#2323FF] px-[18px] py-2.5 rounded-lg text-xs font-bold hover:!brightness-110"
@@ -187,11 +189,18 @@ export function BrandDetailHero({
         <div className="flex flex-col md:flex-row gap-4 mb-6">
           <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-5 md:w-[300px] shadow-[0_2px_10px_rgba(0,0,0,0.03)] shrink-0">
             <div className="text-[11px] font-extrabold text-[#9AA0AC] tracking-wide mb-2.5">BRAND SCORE</div>
-            <div className="flex items-baseline gap-2 mb-4">
-              <div className="text-[30px] font-extrabold text-[#1A1A2E]">{reviewCount > 0 ? score.toFixed(1) : '—'}</div>
-              <div className="text-[11.5px] text-[#9AA0AC]">
-                {reviewCount > 0 ? `/5 · ${reviewCount.toLocaleString()} reviews` : 'No reviews yet'}
+            {/* Same success score as the brand cards: 100% for a new brand, then it
+                follows the real average rating (5★ = 100%). */}
+            <div className="flex items-baseline gap-2 mb-1">
+              <div className="text-[30px] font-extrabold text-[#07A828]">
+                {brandSuccessScore({ rating: reviewCount > 0 ? score : 0 })}%
               </div>
+              <div className="text-[11.5px] text-[#9AA0AC]">Success</div>
+            </div>
+            <div className="text-[11.5px] text-[#9AA0AC] mb-4">
+              {reviewCount > 0
+                ? `${score.toFixed(1)}/5 from ${reviewCount.toLocaleString()} review${reviewCount === 1 ? '' : 's'}`
+                : 'New brand · no reviews yet'}
             </div>
           </div>
 

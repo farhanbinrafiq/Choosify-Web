@@ -32,6 +32,7 @@ import { ReportModal } from "../components/ReportModal";
 import { useGlobalState } from "../context/GlobalStateContext";
 import { toast } from '../lib/notify';
 import { BrandOverviewSection } from "../components/BrandOverviewSection";
+import { BRAND_FOLLOW_COUNT_EVENT, type BrandFollowCountDetail } from "../services/followApi";
 import { FollowButton } from "../components/FollowButton";
 import { BrandDetailHero } from "../components/brand/BrandDetailHero";
 import { BRAND_LOGO_IMG_CLASS, brandInitials } from "../components/brand/BrandLogo";
@@ -102,6 +103,16 @@ export function BrandDetailPage() {
   } = useGlobalState();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isReportOpen, setIsReportOpen] = useState(false);
+  // Live follower counts (catalog brand id -> count) from follow / unfollow on this page.
+  const [liveFollowerCounts, setLiveFollowerCounts] = useState<Record<string, number>>({});
+  useEffect(() => {
+    const onCount = (e: Event) => {
+      const { brandId, count } = (e as CustomEvent<BrandFollowCountDetail>).detail;
+      setLiveFollowerCounts((prev) => ({ ...prev, [brandId]: count }));
+    };
+    window.addEventListener(BRAND_FOLLOW_COUNT_EVENT, onCount);
+    return () => window.removeEventListener(BRAND_FOLLOW_COUNT_EVENT, onCount);
+  }, []);
   const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
 
   // Filter States (from Brand Products page)
@@ -1159,7 +1170,12 @@ export function BrandDetailPage() {
           facts={[
             { label: "Products", value: String(totalProductsFound) },
             { label: "Deals", value: String(totalDealsFound) },
-            { label: "Followers", value: String(brand.followers ?? 0) },
+            {
+              label: "Followers",
+              value: String(
+                liveFollowerCounts[String((brand as { catalogId?: string }).catalogId ?? '')] ?? brand.followers ?? 0,
+              ),
+            },
             { label: "Categories", value: String(dynamicCategories.length) },
             // "Creators" and "Since" are omitted rather than fabricated —
             // there is no real per-brand creator-collaboration count yet,

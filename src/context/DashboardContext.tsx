@@ -19,6 +19,7 @@ import type { CustomerAddress } from '../lib/address/addressTypes';
 import { ADDRESS_STORAGE_KEY, getDefaultAddress, normalizeDefaultAddress } from '../lib/address/addressUtils';
 import { db } from '../lib/firestoreClient';
 import { getAccessToken } from '../lib/authSession';
+import { followApi } from '../services/followApi';
 import { messagingApi } from '../services/messagingApi';
 import { CHOOSIFY_SUPPORT_THREAD_TITLE } from '../lib/supportConversation';
 import { PLACEHOLDER_IMAGE } from '../constants';
@@ -727,6 +728,43 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     localStorage.setItem('choosify_reviews', JSON.stringify(reviews));
   }, [reviews]);
+
+  // Brand follows live on the server (they make up each brand's follower count).
+  // On sign-in: send up follows this browser already had, then show every brand
+  // the account follows as "Following".
+  const { allBrands } = useGlobalState();
+  useEffect(() => {
+    if (!isLoggedIn || !currentUser?.id || !getAccessToken()) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const serverIds = new Set(await followApi.myBrands());
+        const localIds = followedBrands
+          .filter((b: any) => b?._entityType !== 'creator' && b?.catalogId)
+          .map((b: any) => String(b.catalogId));
+        for (const id of localIds) {
+          if (serverIds.has(id)) continue;
+          await followApi.followBrand(id).then(() => serverIds.add(id)).catch(() => undefined);
+        }
+        if (cancelled) return;
+        setFollowedBrands((prev: any[]) => {
+          const have = new Set(prev.map((b: any) => String(b?.catalogId ?? '')));
+          const additions = [...serverIds]
+            .filter((id) => !have.has(id))
+            .map((id) => allBrands.find((b) => String(b.catalogId) === id))
+            .filter(Boolean)
+            .map((b) => ({ ...(b as object), _entityType: 'brand' as const }));
+          return additions.length ? [...additions, ...prev] : prev;
+        });
+      } catch {
+        /* follows stay as they are; the next sign-in retries */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isLoggedIn, currentUser?.id, allBrands.length]);
 
   // "Reviews you wrote" — backend is source of truth; localStorage is cache only.
   useEffect(() => {

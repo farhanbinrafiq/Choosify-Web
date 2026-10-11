@@ -194,7 +194,7 @@ export function BrandOverviewSection({ brandName, overviewData, claimStatus, onC
                   <div className="flex flex-wrap gap-2">
                     {overviewData.tags.map((tag, idx) => (
                       <span key={idx} className="choosify-best-for-tag text-[9px] font-extrabold px-3 py-1.5 rounded-md uppercase tracking-wider border select-none">
-                        {tag}
+                        #{tag.replace(/^#+/, '')}
                       </span>
                     ))}
                   </div>
