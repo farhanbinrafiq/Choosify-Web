@@ -259,7 +259,7 @@ export function Footer() {
   }, [footer?.usaOffice, footer?.bangladeshOffice]);
 
   const contactEmail = footer?.contactEmail || 'support@choosify.bd';
-  const contactPhone = footer?.contactPhone || '+880 01410 423014';
+  const contactPhone = footer?.contactPhone || '+88 0141 0474014';
   const dbid = footer?.dbid?.trim() || '—';
   const tradeLicense = footer?.tradeLicense?.trim() || '—';
   const year = new Date().getFullYear();
