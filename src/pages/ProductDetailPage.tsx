@@ -1476,6 +1476,18 @@ export function ProductDetailPage() {
 
       <main id="all-section" className="py-6 md:py-8">
           <div className={`${DETAIL_SINGLE_FEED}`}>
+            {/* "About this product" from the Product Studio (detail.about, else the description). */}
+            {String((product as any).about || '').trim() && (
+              <section className="bg-white rounded-xl p-6 border border-[#E8EDF2] text-left w-full">
+                <h2 className="text-[15px] font-extrabold text-[#1A1A2E] tracking-tight m-0 mb-2">
+                  About this {isService ? 'service' : 'product'}
+                </h2>
+                <p className="text-[13px] text-[#4B5563] leading-relaxed whitespace-pre-line m-0">
+                  {String((product as any).about).trim()}
+                </p>
+              </section>
+            )}
+
             {hasSpecsSection && (
             <StudioWrap sectionId="product-specs">
             <ProductSpecsOverview
