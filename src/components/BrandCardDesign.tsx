@@ -3,6 +3,7 @@ import React, { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import { useDashboard } from '../context/DashboardContext';
+import { useGlobalState } from '../context/GlobalStateContext';
 import { toast } from '../lib/notify';
 import { formatDiscountPercent } from '../utils/discount';
 import { cn } from '../lib/utils';
@@ -106,20 +107,16 @@ function hashColor(name: string): string {
 
 export function mapBrandToCardDesign(brand: any, fallback?: any) {
   const originalBrand = fallback || brand;
-  const category = brand.category || originalBrand?.category || 'Fashion';
-  const bestFor =
-    category === 'Fashion'
-      ? 'Footwear'
-      : category === 'Tech' || category === 'Electronics'
-        ? 'Electronics'
-        : category;
-  const priceRange =
-    originalBrand?.priceRange ||
-    (category === 'Fashion' ? '৳500-2000' : '৳5000-25000');
-
-  // `null` on the input is an explicit "honestly unknown" signal (omit);
-  // `undefined` keeps the legacy directory-tile placeholder fallback.
-  const priceRangeOut = brand.priceRange === null ? null : priceRange;
+  // Real data only, so every brand card (Brands page, Following, product
+  // pages, guides…) shows the same figures: the brand's own Price Range from
+  // Brand Studio, its real category and its real rating.
+  const category = brand.category || originalBrand?.category || '';
+  const bestFor = brand.bestFor || category;
+  const ownRange =
+    brand.overview?.priceRange || originalBrand?.overview?.priceRange ||
+    (typeof brand.priceRange === 'string' ? brand.priceRange : '') ||
+    (typeof originalBrand?.priceRange === 'string' ? originalBrand.priceRange : '');
+  const priceRangeOut = String(ownRange || '').trim() || null;
   const successScoreOut = brandSuccessScore(brand);
 
   return {
@@ -129,20 +126,34 @@ export function mapBrandToCardDesign(brand: any, fallback?: any) {
     category,
     bestFor,
     priceRange: priceRangeOut,
-    rating: brand.rating || brand.ratings || 4.8,
-    reviewCount:
-      (brand.reviewCount ?? brand.reviews ?? Math.floor((brand.followers || 8400) * 0.1)) || 840,
+    rating: Number(brand.rating || brand.ratings) || 0,
+    reviewCount: Number(brand.reviewCount ?? brand.reviews) || 0,
     isFeatured: !!(brand.isFeatured || brand.featuredFlag),
     isHot: !!brand.isHot,
     successScore: successScoreOut,
-    tagline:
-      brand.tagline ||
-      brand.description ||
-      originalBrand?.description ||
-      'Traditional & contemporary clothing',
+    tagline: brand.tagline || brand.description || originalBrand?.description || '',
     coverImage: brand.coverImage,
     brandColor: brand.brandColor || brand.primaryColor,
     verified: brand.verified ?? brand.verifiedStatus,
+  };
+}
+
+/**
+ * Card data for a brand from the LIVE catalog — saved / followed lists keep a
+ * snapshot from when the shopper saved it, which goes stale (old category,
+ * price). Looks the brand up by catalog id / id / name, else uses the snapshot.
+ */
+export function useLiveBrandCard() {
+  const { allBrands } = useGlobalState();
+  return (b: any) => {
+    const live =
+      allBrands.find(
+        (x: any) =>
+          (b?.catalogId && x.catalogId === b.catalogId) ||
+          String(x.id) === String(b?.id) ||
+          (b?.name && x.name?.toLowerCase() === String(b.name).toLowerCase()),
+      ) || b;
+    return mapBrandToCardDesign(live);
   };
 }
 

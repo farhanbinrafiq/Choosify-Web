@@ -65,7 +65,7 @@ import {
 } from '../lib/dashboard/pendingActions';
 import { ProductCard } from '../components/ProductCard';
 import { AssuranceStrip } from '../components/assurance/AssuranceStrip';
-import { BrandCardDesign, mapBrandToCardDesign } from '../components/BrandCardDesign';
+import { BrandCardDesign, mapBrandToCardDesign, useLiveBrandCard } from '../components/BrandCardDesign';
 import { CreatorCardDesign } from '../components/CreatorCardDesign';
 import {
   PRODUCT_CARD_GRID,
@@ -935,6 +935,7 @@ const SavedGuidesSection = () => {
 };
 
 const SavedBrandsSection = () => {
+  const toBrandCard = useLiveBrandCard();
   const { savedBrands } = useDashboard();
 
   return (
@@ -951,7 +952,7 @@ const SavedBrandsSection = () => {
       {savedBrands.length > 0 ? (
         <div className={BRAND_CARD_GRID}>
           {savedBrands.map((brand) => (
-            <BrandCardDesign key={brand.id} brand={mapBrandToCardDesign(brand)} />
+            <BrandCardDesign key={brand.id} brand={toBrandCard(brand)} />
           ))}
         </div>
       ) : (
@@ -966,6 +967,7 @@ const SavedBrandsSection = () => {
 };
 
 const SavedItemsSection = () => {
+  const toBrandCard = useLiveBrandCard();
   const { savedProducts, savedBrands, savedGuides } = useDashboard();
   const totalSaved = savedProducts.length + savedBrands.length + savedGuides.length;
 
@@ -1015,7 +1017,7 @@ const SavedItemsSection = () => {
         {savedBrands.length > 0 ? (
           <div className={BRAND_CARD_GRID}>
             {savedBrands.map((brand) => (
-              <BrandCardDesign key={brand.id} brand={mapBrandToCardDesign(brand)} />
+              <BrandCardDesign key={brand.id} brand={toBrandCard(brand)} />
             ))}
           </div>
         ) : (
@@ -1060,6 +1062,7 @@ const SavedItemsSection = () => {
 };
 
 const LovedBrandsSection = () => {
+  const toBrandCard = useLiveBrandCard();
   const { lovedBrands, toggleLoveBrand } = useDashboard();
 
   return (
@@ -1077,7 +1080,7 @@ const LovedBrandsSection = () => {
         <div className={BRAND_CARD_GRID}>
           {lovedBrands.map((brand) => (
             <div key={brand.id} className="flex flex-col gap-2 min-w-0">
-              <BrandCardDesign brand={mapBrandToCardDesign(brand)} />
+              <BrandCardDesign brand={toBrandCard(brand)} />
               <button
                 type="button"
                 onClick={() => toggleLoveBrand(brand)}
@@ -1100,6 +1103,7 @@ const LovedBrandsSection = () => {
 };
 
 const FollowedBrandsSection = () => {
+  const toBrandCard = useLiveBrandCard();
   const { followedBrands, lovedBrands, toggleFollowBrand, toggleLoveBrand } = useDashboard();
   const { allCreators } = useGlobalState();
 
@@ -1144,7 +1148,7 @@ const FollowedBrandsSection = () => {
           <div className={BRAND_CARD_GRID}>
             {brandRows.map(({ item: brand, source }) => (
               <div key={`${source}-${brand.id}`} className="flex flex-col gap-2 min-w-0">
-                <BrandCardDesign brand={mapBrandToCardDesign(brand)} />
+                <BrandCardDesign brand={toBrandCard(brand)} />
                 <button
                   type="button"
                   onClick={() =>
