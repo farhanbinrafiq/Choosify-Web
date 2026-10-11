@@ -950,7 +950,7 @@ export function BrandDetailPage() {
       typeof p.price === "number"
         ? p.price
         : parseInt(String(p.price).replace(/[^0-9]/g, ""), 10) || 0;
-    return applySortOption(
+    const ranked = applySortOption(
       list,
       BRAND_DETAIL_SORT_OPTIONS,
       sortOption,
@@ -961,7 +961,16 @@ export function BrandDetailPage() {
         discountPercent: Number(p.discount || p.discountPercent || 0),
       }),
     );
-  }, [filteredProducts, sortOption, priorityNowMs]);
+    // Default order: the brand's pinned products lead, in pin order. An
+    // explicit shopper sort (price, newest…) is respected as chosen.
+    if (!pinnedIds.length || (sortOption && sortOption !== BRAND_DETAIL_SORT_DEFAULT)) return ranked;
+    const pinRank = (p: any) => {
+      const i = pinnedIds.findIndex((id) => id === String(p.catalogId) || id === String(p.id));
+      return i === -1 ? Number.POSITIVE_INFINITY : i;
+    };
+    const pinned = ranked.filter((p) => pinRank(p) !== Number.POSITIVE_INFINITY).sort((x, y) => pinRank(x) - pinRank(y));
+    return [...pinned, ...ranked.filter((p) => pinRank(p) === Number.POSITIVE_INFINITY)];
+  }, [filteredProducts, sortOption, priorityNowMs, pinnedIds.join('|')]);
 
   const totalPages = Math.ceil(sortedProducts.length / productsPerPage);
   const paginatedProducts = showAllProducts
