@@ -82,7 +82,7 @@ const OFFICE_ADDRESSES = [
   {
     id: 'usa',
     label: 'USA Office',
-    lines: ['1209 N Orange St', 'Wilmington, DE 19801', 'United States'],
+    lines: ['New York, NY', 'United States'],
   },
   {
     id: 'bangladesh',
