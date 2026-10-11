@@ -116,6 +116,9 @@ export interface CatalogProduct {
   brandName: string;
   categoryId: string;
   categoryName: string;
+  /** Branch category under categoryId (e.g. Home, Furniture & Appliances › Paintings & Wall Art). */
+  subcategoryId?: string;
+  subcategoryName?: string;
   image: string;
   gallery: string[];
   /** Optional single canonical storefront product video: a YouTube URL, a direct

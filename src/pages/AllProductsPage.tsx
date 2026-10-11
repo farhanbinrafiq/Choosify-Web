@@ -483,6 +483,14 @@ export function AllProductsPage() {
     if (selectedCategory) {
       result = result.filter(p => p.categoryName === selectedCategory);
     }
+    // Subcategory from /categories links (?subcategory=Name or id).
+    const subcategoryParam = (searchParams.get('subcategory') || '').trim();
+    if (subcategoryParam) {
+      const wanted = subcategoryParam.toLowerCase();
+      result = result.filter(
+        p => p.subcategoryId === subcategoryParam || (p.subcategoryName || '').toLowerCase() === wanted,
+      );
+    }
 
     // 3. Brand Selection
     if (selectedBrand) {
@@ -716,6 +724,17 @@ export function AllProductsPage() {
                 <ActiveFilterChips
                   chips={[
                     selectedCategory ? { id: 'category', label: `Cat: ${selectedCategory}`, onRemove: () => setSelectedCategory(null) } : null,
+                    searchParams.get('subcategory')
+                      ? {
+                          id: 'subcategory',
+                          label: `Sub: ${searchParams.get('subcategory')}`,
+                          onRemove: () => {
+                            const updated = new URLSearchParams(searchParams);
+                            updated.delete('subcategory');
+                            setSearchParams(updated);
+                          },
+                        }
+                      : null,
                     selectedBrand ? { id: 'brand', label: `Brand: ${selectedBrand}`, onRemove: () => setSelectedBrand(null) } : null,
                     ratingFilter ? { id: 'rating', label: `Rating: ${ratingFilter}★ +`, onRemove: () => setRatingFilter(null) } : null,
                     availabilityFilter !== 'all' ? { id: 'availability', label: `Status: ${availabilityFilter}`, onRemove: () => setAvailabilityFilter('all') } : null,

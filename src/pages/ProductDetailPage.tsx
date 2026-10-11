@@ -346,10 +346,18 @@ export function ProductDetailPage() {
               name: product.category,
               path: `/categories?category=${encodeURIComponent(slugifyPathSegment(product.category))}`,
             },
+            ...((product as any).subcategoryName
+              ? [
+                  {
+                    name: String((product as any).subcategoryName),
+                    path: `/products?category=${encodeURIComponent(product.category)}&subcategory=${encodeURIComponent(String((product as any).subcategoryName))}`,
+                  },
+                ]
+              : []),
           ]
         : [],
     },
-    [product?.category, product?.title, product?.id],
+    [product?.category, (product as any)?.subcategoryName, product?.title, product?.id],
   );
 
   const showSizeGuideButton = hasActiveSizeGuide(product?.sizeGuide);

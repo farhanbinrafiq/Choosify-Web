@@ -9,7 +9,6 @@ import { CategoryCardSkeleton } from '../components/Skeleton';
 import { CategoryPremiumCard } from '../components/categories/CategoryPremiumCard';
 import { CategorySidebarNav } from '../components/categories/CategorySidebarNav';
 import { CategorySubgroupCard } from '../components/categories/CategorySubgroupCard';
-import { getTaxonomyGroups } from '../data/categoryTaxonomy';
 import { CategoriesBrowseControls } from '../components/categories/CategoriesQuickNav';
 import { CATEGORY_QUICK_NAV_ITEMS } from '../lib/design/categoryTokens';
 import { ListingFeedHeader } from '../components/design/ListingFeedHeader';
@@ -29,6 +28,18 @@ import { SortDropdown } from '../components/SortDropdown';
 import { CATEGORY_SORT_OPTIONS, CATEGORY_SORT_DEFAULT, applySortOption } from '../lib/sorting/sortRegistry';
 
 type CategoryItem = CategoryDisplayItem;
+
+/** Category URLs from before the 26-category taxonomy → current slugs. */
+const LEGACY_CATEGORY_SLUGS: Record<string, string> = {
+  'home-living': 'home-furniture-appliances',
+  'tech-electronics': 'electronics',
+  'jewelry-accessories': 'jewelry-luxury',
+  'sporting-playstation': 'sports-fitness-outdoor',
+  'food-restaurants': 'grocery-food',
+  'baby-maternity': 'baby-kids-toys',
+  'mobile-phones': 'electronics',
+  'tv-appliances': 'home-furniture-appliances',
+};
 
 // Anchor for the category browsing section (feed header → filter pills → category
 // nav → first results row). Shared by the FilterEngine registration and the
@@ -97,8 +108,10 @@ export function CategoriesPage() {
   // taxonomy (Home "Top Categories"). Name-free: works for any category.
   const resolveCategoryName = React.useCallback(
     (raw: string | null): string | null => {
-      const needle = (raw ?? '').trim().toLowerCase();
-      if (!needle) return null;
+      const typed = (raw ?? '').trim().toLowerCase();
+      if (!typed) return null;
+      // Links from before the 26-category taxonomy keep working.
+      const needle = LEGACY_CATEGORY_SLUGS[typed] ?? typed;
       const staticHit = CATEGORIES.find(
         (c) =>
           c.id.toLowerCase() === needle ||
@@ -420,13 +433,9 @@ export function CategoriesPage() {
     );
   };
 
-  // Categories page renders the full 25-category static taxonomy (src/data/categories.ts)
-  // regardless of live backend categories — real per-category product/brand counts
-  // still come from allCatalogProducts, only the category list itself is static for now.
-  const categoriesList = React.useMemo(
-    () => buildCategoryDisplayList([], allCatalogProducts ?? []),
-    [allCatalogProducts],
-  );
+  // The live catalog taxonomy: the 26 main categories with their subcategories
+  // (including seller-added ones) and real product counts.
+  const categoriesList = catalogCategoryList;
 
   // When a category is selected, the grid swaps to that category's Level-2
   // subgroup breakdown instead of the all-categories view. Resolve the entry
@@ -436,17 +445,11 @@ export function CategoriesPage() {
     ? (categoriesList.find((cat) => cat.name === selectedMainCategory) ??
         catalogCategoryList.find((cat) => cat.name === selectedMainCategory))
     : undefined;
-  // Static taxonomy has authored Level-2/3 groups; catalog categories fall back
-  // to their own subcategory list (built from catalog children or name presets).
-  const selectedSubgroups = React.useMemo(() => {
-    if (!selectedCategoryEntry) return [];
-    const authored = getTaxonomyGroups(selectedCategoryEntry.id);
-    if (authored.length) return authored;
-    return (selectedCategoryEntry.subcategories ?? []).map((sub) => ({
-      name: sub.name,
-      items: [] as string[],
-    }));
-  }, [selectedCategoryEntry]);
+  // The selected category's real subcategories, from the live catalog.
+  const selectedSubgroups = React.useMemo(
+    () => selectedCategoryEntry?.subcategories ?? [],
+    [selectedCategoryEntry],
+  );
 
   // Dynamic filter supporting the page search system and discovery state criteria
   const filteredCategoriesList = React.useMemo(() => {
@@ -757,15 +760,21 @@ export function CategoriesPage() {
                   ))}
                 </div>
               ) : selectedMainCategory && selectedCategoryEntry ? (
-                <div className={CATEGORY_CARD_GRID}>
-                  {selectedSubgroups.map((group) => (
-                    <CategorySubgroupCard
-                      key={group.name}
-                      categoryName={selectedCategoryEntry.name}
-                      group={group}
-                    />
-                  ))}
-                </div>
+                selectedSubgroups.length ? (
+                  <div className={CATEGORY_CARD_GRID}>
+                    {selectedSubgroups.map((sub) => (
+                      <CategorySubgroupCard
+                        key={sub.id || sub.name}
+                        categoryName={selectedCategoryEntry.name}
+                        subcategory={sub}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="py-16 text-center text-sm font-semibold text-gray-400">
+                    No subcategories in {selectedCategoryEntry.name} yet.
+                  </div>
+                )
               ) : (
                 <div className={CATEGORY_CARD_GRID}>
                 <SponsoredFeedInjector

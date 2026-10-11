@@ -239,6 +239,10 @@ export function BrandDetailPage() {
   const [currentPage, setCurrentPage] = useState(1);
   // 5 rows × up to 5 columns (PRODUCT_CARD_GRID) before pagination
   const productsPerPage = 25;
+  // "View all products" expands the grid in place; when everything is already
+  // on screen it says so instead of moving the page.
+  const [showAllProducts, setShowAllProducts] = useState(false);
+  const [noMoreProductsNote, setNoMoreProductsNote] = useState(false);
 
   useEffect(() => {
     setCurrentPage(1);
@@ -960,10 +964,17 @@ export function BrandDetailPage() {
   }, [filteredProducts, sortOption, priorityNowMs]);
 
   const totalPages = Math.ceil(sortedProducts.length / productsPerPage);
-  const paginatedProducts = sortedProducts.slice(
-    (currentPage - 1) * productsPerPage,
-    currentPage * productsPerPage,
-  );
+  const paginatedProducts = showAllProducts
+    ? sortedProducts
+    : sortedProducts.slice((currentPage - 1) * productsPerPage, currentPage * productsPerPage);
+  const viewAllProducts = () => {
+    if (showAllProducts || sortedProducts.length <= paginatedProducts.length) {
+      setNoMoreProductsNote(true);
+      return;
+    }
+    setShowAllProducts(true);
+    setNoMoreProductsNote(false);
+  };
 
   // Extract deals (real sale/deal flags only) — never padded with regular
   // products relabeled as "deals" when there aren't any real ones.
@@ -1461,12 +1472,13 @@ export function BrandDetailPage() {
                 </h2>
                 <div className="flex items-center gap-3">
                   <SortDropdown options={BRAND_DETAIL_SORT_OPTIONS} value={sortOption} onChange={setSortOption} />
-                  <Link
-                    to={brandPath(brand, "/products")}
-                    className="text-[12px] font-bold text-[#1A1A2E] no-underline hover:text-[#EF3C23] shrink-0"
+                  <button
+                    type="button"
+                    onClick={viewAllProducts}
+                    className="text-[12px] font-bold text-[#1A1A2E] hover:text-[#EF3C23] shrink-0 bg-transparent border-0 p-0 cursor-pointer"
                   >
                     VIEW ALL PRODUCTS ›
-                  </Link>
+                  </button>
                 </div>
               </div>
               <p className="text-[11.5px] text-[#9AA0AC] m-0 mb-3.5">
@@ -1501,7 +1513,13 @@ export function BrandDetailPage() {
                 </div>
               )}
 
-              {totalPages > 1 && (
+              {noMoreProductsNote && (
+                <p role="status" className="text-center text-[12px] font-semibold text-[#9AA0AC] mt-4 mb-0">
+                  No more products to show.
+                </p>
+              )}
+
+              {totalPages > 1 && !showAllProducts && (
                 <PaginationBar
                   currentPage={currentPage}
                   totalPages={totalPages}

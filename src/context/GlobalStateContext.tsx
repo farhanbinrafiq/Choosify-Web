@@ -830,6 +830,8 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       price: product.price || 0,
       description: product.description || '',
       category: product.categoryName || 'General',
+      subcategoryId: product.subcategoryId || undefined,
+      subcategoryName: product.subcategoryName || undefined,
       variants: undefined,
       // No rating until the product has real reviews — never a placeholder score.
       rating: undefined,

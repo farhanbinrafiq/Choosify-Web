@@ -1,15 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { getCategoryImage } from '../../lib/categoryImages';
-import type { TaxonomyLevel2 } from '../../data/categoryTaxonomy';
 import { slugifyPathSegment } from '../../lib/seoHelpers';
-
-const LEVEL3_PREVIEW = 6;
+import type { CategorySubcategory } from '../../utils/categoryDisplay';
 
 export type CategorySubgroupCardProps = {
-  /** Level-1 category name this subgroup belongs to (used to build the products link). */
+  /** Main category this subcategory belongs to (used to build the products link). */
   categoryName: string;
-  group: TaxonomyLevel2;
+  subcategory: CategorySubcategory;
 };
 
 /** Anchor id used by the mobile vertical dock to scroll-jump to a subgroup card. */
@@ -17,63 +14,37 @@ export function subgroupDockAnchorId(groupName: string): string {
   return `subgroup-card-${slugifyPathSegment(groupName)}`;
 }
 
-function subgroupHref(categoryName: string, groupName: string) {
-  return `/products?category=${encodeURIComponent(categoryName)}&subcategory=${encodeURIComponent(groupName)}&q=${encodeURIComponent(groupName)}`;
+function subcategoryHref(categoryName: string, subName: string) {
+  return `/products?category=${encodeURIComponent(categoryName)}&subcategory=${encodeURIComponent(subName)}`;
 }
 
-function leafItemHref(categoryName: string, groupName: string, itemName: string) {
-  return `/products?category=${encodeURIComponent(categoryName)}&subcategory=${encodeURIComponent(groupName)}&q=${encodeURIComponent(itemName)}`;
-}
-
-/** One Level-2 subcategory group card, shown when a sidebar category is selected on /categories. */
-export function CategorySubgroupCard({ categoryName, group }: CategorySubgroupCardProps) {
-  const href = subgroupHref(categoryName, group.name);
-  const visible = group.items.slice(0, LEVEL3_PREVIEW);
-  const hasMore = group.items.length > LEVEL3_PREVIEW;
+/** One subcategory card, shown when a main category is selected on /categories. Real counts only. */
+export function CategorySubgroupCard({ categoryName, subcategory }: CategorySubgroupCardProps) {
+  const href = subcategoryHref(categoryName, subcategory.name);
+  const initial = subcategory.name.trim().charAt(0).toUpperCase() || '•';
 
   return (
-    <div
-      id={subgroupDockAnchorId(group.name)}
-      className="bg-white rounded-xl overflow-hidden border border-[#E8EDF2] flex flex-col h-full scroll-mt-24"
+    <Link
+      to={href}
+      id={subgroupDockAnchorId(subcategory.name)}
+      className="bg-white rounded-xl overflow-hidden border border-[#E8EDF2] flex flex-col h-full scroll-mt-24 no-underline group"
     >
-      <Link to={href} className="block no-underline">
-        <div className="relative h-[120px] w-full overflow-hidden bg-[#F4F7F9]">
-          <img
-            src={getCategoryImage(group.name)}
-            alt=""
-            className="absolute inset-0 w-full h-full object-cover"
-            loading="lazy"
-          />
-        </div>
-      </Link>
-
-      <div className="px-4 pt-5 pb-4 flex-1 flex flex-col">
-        <Link
-          to={href}
-          className="text-left text-[14px] font-bold text-[#1A1A2E] mb-2 no-underline hover:text-[#EF3C23]"
-        >
-          {group.name}
-        </Link>
-
-        {visible.map((item) => (
-          <Link
-            key={item}
-            to={leafItemHref(categoryName, group.name, item)}
-            className="block text-left text-[12px] text-[#4B5563] mb-2 truncate no-underline hover:text-[#EF3C23] hover:underline"
-          >
-            {item}
-          </Link>
-        ))}
-
-        {hasMore && (
-          <Link
-            to={href}
-            className="text-left text-[11.5px] font-bold text-orange-primary mt-0.5 no-underline hover:underline"
-          >
-            Show all ({group.items.length})
-          </Link>
-        )}
+      <div className="h-[96px] w-full flex items-center justify-center bg-gradient-to-br from-[#FFF4EC] to-[#F4F7F9]">
+        <span className="w-12 h-12 rounded-full bg-white text-[#FF5B00] text-lg font-extrabold flex items-center justify-center shadow-sm">
+          {initial}
+        </span>
       </div>
-    </div>
+      <div className="px-4 pt-4 pb-4 flex-1 flex flex-col">
+        <span className="text-left text-[14px] font-bold text-[#1A1A2E] mb-1 group-hover:text-[#EF3C23]">
+          {subcategory.name}
+        </span>
+        <span className="text-left text-[12px] text-[#6B7280]">
+          {subcategory.count === 0
+            ? 'No products yet'
+            : `${subcategory.count} product${subcategory.count === 1 ? '' : 's'}`}
+          {subcategory.brands > 0 ? ` · ${subcategory.brands} brand${subcategory.brands === 1 ? '' : 's'}` : ''}
+        </span>
+      </div>
+    </Link>
   );
 }
