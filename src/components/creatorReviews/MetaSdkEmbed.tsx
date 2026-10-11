@@ -59,19 +59,50 @@ export function FacebookSdkEmbed({ href }: { href: string }) {
  * recommended usage, not a workaround.
  */
 export function InstagramSdkEmbed({ permalink }: { permalink: string }) {
+  const hostRef = useRef<HTMLDivElement>(null);
+  const [failed, setFailed] = React.useState(false);
   useEffect(() => {
     let cancelled = false;
+    setFailed(false);
+    const stillRaw = () => Boolean(hostRef.current?.querySelector('blockquote.instagram-media'));
     loadInstagramEmbedJs().then(() => {
       if (cancelled) return;
       window.instgrm?.Embeds.process();
     });
+    // If Instagram's player hasn't replaced the blockquote (slow network, or a
+    // browser extension / privacy setting blocking instagram.com), retry once,
+    // then offer a clear way to watch it on Instagram instead of a blank card.
+    const retry = window.setTimeout(() => {
+      if (!cancelled && stillRaw()) window.instgrm?.Embeds.process();
+    }, 4000);
+    const giveUp = window.setTimeout(() => {
+      if (!cancelled && stillRaw()) setFailed(true);
+    }, 9000);
     return () => {
       cancelled = true;
+      window.clearTimeout(retry);
+      window.clearTimeout(giveUp);
     };
   }, [permalink]);
 
+  if (failed) {
+    return (
+      <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 text-center px-6 bg-black">
+        <p className="text-sm font-semibold text-white/80">Instagram&rsquo;s player didn&rsquo;t load here.</p>
+        <a
+          href={permalink}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-white text-[#1A1A2E] text-[12px] font-bold no-underline"
+        >
+          Watch on Instagram ↗
+        </a>
+      </div>
+    );
+  }
+
   return (
-    <div className="absolute inset-0 w-full h-full overflow-auto flex items-center justify-center bg-white">
+    <div ref={hostRef} className="absolute inset-0 w-full h-full overflow-auto flex items-center justify-center bg-white">
       <blockquote
         className="instagram-media"
         data-instgrm-permalink={permalink}

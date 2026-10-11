@@ -4,8 +4,7 @@ import { useGlobalState } from '../../context/GlobalStateContext';
 
 /**
  * Homepage hero — video-only fallback when CMS has no active banners.
- * Pexels: “Woman showcasing a dress” by MART PRODUCTION
- * https://www.pexels.com/video/woman-showcasing-a-dress-7679832/
+ * Choosify's own hero video (public/hero/home-hero.mp4).
  */
 const VIDEO_ONLY_SLIDE: HeroSlide = {
   id: 'home-hero-video-fashion',
@@ -15,7 +14,7 @@ const VIDEO_ONLY_SLIDE: HeroSlide = {
   primaryCtaLink: '/products',
   secondaryCtaText: 'HOW IT WORKS',
   secondaryCtaLink: '/about',
-  videoUrl: '/hero/fashion-dress-showcase.mp4',
+  videoUrl: '/hero/home-hero.mp4',
 };
 
 export function useHomepageHeroSlides(): HeroSlide[] {
