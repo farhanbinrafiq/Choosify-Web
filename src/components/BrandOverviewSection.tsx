@@ -85,8 +85,8 @@ export function BrandOverviewSection({ brandName, overviewData, claimStatus, onC
           {hasCredentials && (
             <div className="bg-white rounded-[10px] p-[18px] border border-[#E8EDF2] mb-3.5 text-left">
               <div className="flex items-center gap-2.5 mb-3">
-                <div className="w-8 h-8 rounded-lg bg-[#EAF8EE] text-[#07A828] flex items-center justify-center">
-                  <CheckCircle2 size={16} fill="currentColor" className="text-[#07A828] stroke-white" />
+                <div className="w-8 h-8 rounded-lg bg-[#FFF3EA] text-[#FF5B00] flex items-center justify-center">
+                  <CheckCircle2 size={16} fill="currentColor" className="text-[#FF5B00] stroke-white" />
                 </div>
                 <h4 className="text-[11px] font-extrabold text-[#1A1A2E] uppercase tracking-wider">Guarantees &amp; Credentials</h4>
               </div>
