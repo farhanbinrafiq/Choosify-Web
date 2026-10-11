@@ -15,7 +15,9 @@ export async function recordPageView(kind: 'product' | 'brand', id: string): Pro
     const res = await fetch(`${API_BASE}/views/${kind}/${encodeURIComponent(id)}`, {
       method: 'POST',
       credentials: 'include',
-      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+      // Where the visitor came from (Facebook, Google, inside Choosify…) for the seller's view insights.
+      body: JSON.stringify({ referrer: typeof document !== 'undefined' ? document.referrer : '' }),
     });
     if (!res.ok) return null;
     const data = (await res.json()) as { count?: number };
