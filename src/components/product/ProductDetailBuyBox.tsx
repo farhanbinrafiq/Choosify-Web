@@ -22,6 +22,8 @@ interface ProductDetailBuyBoxProps {
   stockQuantity: number;
   /** Real review count — 0 means honestly "no ratings yet", never a fake default. */
   reviewCount: number;
+  /** Real page views (server-counted, one per visitor per day). */
+  viewCount?: number;
   /** Real average rating (0 when reviewCount is 0) — never a fake "4.8" default. */
   avgRating: number;
   /** Real `product.featuredFlag` — the FEATURED badge only renders when this is true. */
@@ -76,6 +78,7 @@ export function ProductDetailBuyBox({
   isOutOfStock,
   stockQuantity,
   reviewCount,
+  viewCount,
   avgRating,
   featured = false,
   uniqueColors,
@@ -202,6 +205,9 @@ export function ProductDetailBuyBox({
               </>
             ) : (
               <span className="text-[#9AA0AC]">No ratings yet</span>
+            )}
+            {typeof viewCount === 'number' && viewCount > 0 && (
+              <span className="text-[#9AA0AC]">· {viewCount.toLocaleString()} view{viewCount === 1 ? '' : 's'}</span>
             )}
             {onReport && (
               <button

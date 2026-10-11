@@ -63,6 +63,7 @@ import { useRegisterPageFilters } from "../components/FilterEngine";
 import { getBrandOfficialWebsite, normalizeExternalUrl } from "../utils/overviewRegistry";
 import { SizeGuideModal } from "../components/SizeGuideModal";
 import { BrandCardDesign, mapBrandToCardDesign } from "../components/BrandCardDesign";
+import { usePageViews } from "../services/viewApi";
 import { DETAIL_SINGLE_FEED } from "../lib/pageLayout";
 import { DC_CONTENT_MAX } from "../lib/design/dcListingTokens";
 import { ProductSpecsOverview } from "../components/ProductSpecsOverview";
@@ -375,6 +376,8 @@ export function ProductDetailPage() {
   );
 
   const showSizeGuideButton = hasActiveSizeGuide(product?.sizeGuide);
+  // Real page views (one per visitor per day); recorded when the page opens.
+  const productViews = usePageViews('product', String(baseProduct?.catalogId || ''), Number((baseProduct as any)?.viewCount) || undefined);
 
   // ── Optional Add-ons State ───────────────────────────────────────
   const [selectedAddonIds, setSelectedAddonIds] = useState<Set<string>>(new Set());
@@ -1339,6 +1342,7 @@ export function ProductDetailPage() {
         brandName={brandName}
         isOutOfStock={!!isOutOfStock}
         stockQuantity={stockQuantity}
+        viewCount={productViews ?? undefined}
         reviewCount={productReviewStats.count}
         avgRating={productReviewStats.avg}
         featured={Boolean((product as any)?.featuredFlag)}

@@ -803,6 +803,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       marketplaceStatus: brand.marketplaceStatus,
       brandReferenceId: brand.brandReferenceId || undefined,
       credentials: brand.credentials || undefined,
+      viewCount: (brand as { viewCount?: number }).viewCount,
     };
   });
 

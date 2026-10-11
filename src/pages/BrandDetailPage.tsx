@@ -33,6 +33,7 @@ import { useGlobalState } from "../context/GlobalStateContext";
 import { toast } from '../lib/notify';
 import { BrandOverviewSection } from "../components/BrandOverviewSection";
 import { BRAND_FOLLOW_COUNT_EVENT, type BrandFollowCountDetail } from "../services/followApi";
+import { recordPageView } from "../services/viewApi";
 import { FollowButton } from "../components/FollowButton";
 import { BrandDetailHero } from "../components/brand/BrandDetailHero";
 import { BRAND_LOGO_IMG_CLASS, brandInitials } from "../components/brand/BrandLogo";
@@ -103,6 +104,9 @@ export function BrandDetailPage() {
   } = useGlobalState();
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [isReportOpen, setIsReportOpen] = useState(false);
+  // Real brand-page views (catalog brand id -> count), recorded when the page opens.
+  const [brandViewCounts, setBrandViewCounts] = useState<Record<string, number>>({});
+  const viewedBrandIdRef = useRef('');
   // Live follower counts (catalog brand id -> count) from follow / unfollow on this page.
   const [liveFollowerCounts, setLiveFollowerCounts] = useState<Record<string, number>>({});
   useEffect(() => {
@@ -237,6 +241,16 @@ export function BrandDetailPage() {
       featuredFlag: false,
       claimStatus: "community",
     } as typeof brandSource[number]);
+
+  // Count this brand-page view once per brand (server: one per visitor per day).
+  const viewCatalogId = String((brand as { catalogId?: string }).catalogId ?? '');
+  useEffect(() => {
+    if (!viewCatalogId || viewedBrandIdRef.current === viewCatalogId) return;
+    viewedBrandIdRef.current = viewCatalogId;
+    recordPageView('brand', viewCatalogId).then((n) => {
+      if (n !== null) setBrandViewCounts((prev) => ({ ...prev, [viewCatalogId]: n }));
+    });
+  }, [viewCatalogId]);
 
   const brandWhatsOnPosts = useMemo(
     () => getBrandPostsByBrandId(Number(brand.id)).slice(0, 6),
@@ -1178,6 +1192,13 @@ export function BrandDetailPage() {
               ),
             },
             { label: "Categories", value: String(dynamicCategories.length) },
+            {
+              label: "Views",
+              value: (
+                brandViewCounts[String((brand as { catalogId?: string }).catalogId ?? '')] ??
+                (Number((brand as { viewCount?: number }).viewCount) || 0)
+              ).toLocaleString(),
+            },
             // "Creators" and "Since" are omitted rather than fabricated —
             // there is no real per-brand creator-collaboration count yet,
             // and brand.createdAt (the only real timestamp available) is an
