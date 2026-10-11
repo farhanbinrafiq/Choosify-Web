@@ -802,6 +802,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       marketplaceAccess: brand.marketplaceAccess,
       marketplaceStatus: brand.marketplaceStatus,
       brandReferenceId: brand.brandReferenceId || undefined,
+      credentials: brand.credentials || undefined,
     };
   });
 

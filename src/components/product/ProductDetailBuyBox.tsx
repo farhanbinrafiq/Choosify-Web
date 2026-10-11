@@ -1,6 +1,7 @@
 import React from 'react';
 import { Check, Flag, Heart, MapPin, MessageCircleMore, Star } from 'lucide-react';
 import { cn } from '../../lib/utils';
+import { discountPercent, formatDiscountPercent } from '../../utils/discount';
 import { EmiAiLogo } from '../EmiAiLogo';
 
 /** Low stock (<15) → red urgency; mid stock (15–30) → blue; healthy stock (>30) → green. */
@@ -129,7 +130,7 @@ export function ProductDetailBuyBox({
     product.mrp ??
     0;
   const saveAmt = Math.max(0, origNum - priceNum);
-  const savePct = origNum > 0 ? Math.round((saveAmt / origNum) * 100) : 0;
+  const savePct = formatDiscountPercent(discountPercent(priceNum, origNum));
   const useGenericVariants = Array.isArray(optionGroups) && optionGroups.length > 0;
   const sku = resolvedVariant?.sku;
   const sizeOptions = uniqueSizes.length > 0 ? uniqueSizes : uniqueRams;

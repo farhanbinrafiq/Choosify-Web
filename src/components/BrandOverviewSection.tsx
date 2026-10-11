@@ -6,6 +6,8 @@ import { OverviewListItem } from './OverviewListIcon';
 interface OverviewData {
   /** "About this brand" from Brand Studio (brand.description). */
   about?: string;
+  /** "Guarantees & credentials" from Brand Studio (brand.credentials). */
+  credentials?: string;
   address?: string;
   website?: string;
   map: string;
@@ -42,13 +44,14 @@ export function BrandOverviewSection({ brandName, overviewData, claimStatus, onC
   ) : [];
 
   const hasAbout = Boolean(overviewData.about);
+  const hasCredentials = Boolean(overviewData.credentials);
   const hasAddressCard = Boolean(overviewData.address || overviewData.website);
   const hasContactCard = Boolean(overviewData.email || overviewData.phone);
   const hasPriceAudienceCard = Boolean(overviewData.priceRange || overviewData.ageRange || overviewData.audience);
   const hasServices = overviewData.services.length > 0;
   const hasTags = overviewData.tags.length > 0;
   const hasAnyOverview =
-    hasAbout || hasAddressCard || hasContactCard || hasPriceAudienceCard || hasServices || hasTags || brandCustoms.length > 0;
+    hasAbout || hasCredentials || hasAddressCard || hasContactCard || hasPriceAudienceCard || hasServices || hasTags || brandCustoms.length > 0;
 
   if (!hasAnyOverview && claimStatus !== 'community' && claimStatus !== 'pending') {
     return null;
@@ -76,6 +79,18 @@ export function BrandOverviewSection({ brandName, overviewData, claimStatus, onC
                 <h4 className="text-[11px] font-extrabold text-[#1A1A2E] uppercase tracking-wider">About {brandName}</h4>
               </div>
               <p className="text-[12.5px] text-[#4B5563] leading-relaxed whitespace-pre-line m-0">{overviewData.about}</p>
+            </div>
+          )}
+
+          {hasCredentials && (
+            <div className="bg-white rounded-[10px] p-[18px] border border-[#E8EDF2] mb-3.5 text-left">
+              <div className="flex items-center gap-2.5 mb-3">
+                <div className="w-8 h-8 rounded-lg bg-[#EAF8EE] text-[#07A828] flex items-center justify-center">
+                  <CheckCircle2 size={16} fill="currentColor" className="text-[#07A828] stroke-white" />
+                </div>
+                <h4 className="text-[11px] font-extrabold text-[#1A1A2E] uppercase tracking-wider">Guarantees &amp; Credentials</h4>
+              </div>
+              <p className="text-[12.5px] text-[#4B5563] leading-relaxed whitespace-pre-line m-0">{overviewData.credentials}</p>
             </div>
           )}
 

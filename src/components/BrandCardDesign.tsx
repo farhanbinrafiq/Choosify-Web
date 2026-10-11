@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
 import { useDashboard } from '../context/DashboardContext';
 import { toast } from '../lib/notify';
+import { formatDiscountPercent } from '../utils/discount';
 import { cn } from '../lib/utils';
 import { BrandLogo, isBrandLogoUrl } from './brand/BrandLogo';
 
@@ -228,7 +229,7 @@ export const BrandCardDesign = memo(function BrandCardDesign({
         )}
         {!isCurrentInComparison && brand.maxDiscountPercent != null && brand.maxDiscountPercent >= 1 && (
           <span className="absolute top-2 left-2 z-[11] rounded-full bg-[#FF000D] text-white text-[9px] font-extrabold px-2 py-0.5 leading-none shadow-sm pointer-events-none">
-            {Math.round(brand.maxDiscountPercent)}% Off
+            {formatDiscountPercent(brand.maxDiscountPercent)}% Off
           </span>
         )}
         <button

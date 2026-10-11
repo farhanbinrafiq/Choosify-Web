@@ -1061,6 +1061,7 @@ export function BrandDetailPage() {
   } }).overview;
   const overviewData = {
     about: (brand as { description?: string }).description?.trim() || undefined,
+    credentials: (brand as { credentials?: string }).credentials?.trim() || undefined,
     address: catalogOverview?.address || undefined,
     website: (brand as { website?: string }).website?.replace(/^https?:\/\//, '') || undefined,
     map: "https://www.google.com/maps",

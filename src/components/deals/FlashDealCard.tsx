@@ -2,6 +2,7 @@ import { productPath } from '../../../lib/publicUrls';
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '../../lib/utils';
+import { discountPercent, formatDiscountPercent } from '../../utils/discount';
 import { PLACEHOLDER_IMAGE } from '../../constants';
 import { CartIconButton } from '../commerce/CartIconButton';
 import { SponsoredCardChrome } from '../commerce/SponsoredCardChrome';
@@ -42,7 +43,7 @@ export function FlashDealCard({
   const discountBadge =
     badge ??
     (originalPrice != null && originalPrice > price
-      ? `${Math.round(((originalPrice - price) / originalPrice) * 100)}% OFF`
+      ? `${formatDiscountPercent(discountPercent(price, originalPrice))}% OFF`
       : undefined);
 
   return (
@@ -191,7 +192,7 @@ export function DealOfTheDayCard({
   const discountBadge =
     deal.badge ??
     (deal.originalPrice != null && deal.originalPrice > deal.price
-      ? `${Math.round(((deal.originalPrice - deal.price) / deal.originalPrice) * 100)}% OFF`
+      ? `${formatDiscountPercent(discountPercent(deal.price, deal.originalPrice))}% OFF`
       : undefined);
 
   const endsLabel = endsInLabel(deal.refreshLabel, deal.validUntil);

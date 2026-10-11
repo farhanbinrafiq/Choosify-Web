@@ -315,7 +315,9 @@ export function ProductsSponsoredBannerCarousel({
         ? slidesFromPlacementItems(raw as SponsoredPlacementItem[])
         : (raw as SponsoredBannerSlide[]);
 
-    if (normalized.length >= 2) return normalized;
+    // Production shows real booked banners only — never demo ads. The demo
+    // slides remain a local-development preview aid.
+    if (normalized.length >= 2 || !import.meta.env.DEV) return normalized;
     if (!withDemoFallback) {
       return normalized.length ? normalized : DEMO_SPONSORED_BANNER_SLIDES.slice(0, 1);
     }
@@ -325,6 +327,8 @@ export function ProductsSponsoredBannerCarousel({
     }
     return DEMO_SPONSORED_BANNER_SLIDES;
   }, [items, withDemoFallback]);
+
+  if (!slides.length) return null;
 
   return (
     <AdSlotCarousel

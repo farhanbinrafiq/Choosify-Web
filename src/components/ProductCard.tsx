@@ -10,6 +10,8 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
+import { formatDiscountPercent } from '../utils/discount';
+import { productDiscountPercent } from '../utils/listingRanking';
 import { CartIconButton, ServiceViewIconButton } from './commerce/CartIconButton';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
@@ -75,13 +77,11 @@ function resolveDcBadge(product: any, siteConfig: SiteConfig | null): { label: s
   if (product.status === 'out_of_stock' || product.stock === 0) {
     return { label: 'OUT OF STOCK', bg: DC.outOfStockGray };
   }
-  const discount =
-    product.discountPercent ??
-    (typeof product.discount === 'string'
-      ? parseInt(String(product.discount).replace(/[^\d]/g, ''), 10)
-      : undefined);
-  if (discount && discount > 0) {
-    return { label: `-${discount}%`, bg: DC.discountRed };
+  // Any real discount shows as "X% Off": an explicit deal %, else the exact
+  // saving between the original and the current price (18.18%, not 18%).
+  const discount = productDiscountPercent(product);
+  if (discount > 0) {
+    return { label: `${formatDiscountPercent(discount)}% Off`, bg: DC.discountRed };
   }
   // Label text matches the same canonical labels `productBadgeLabels()` derives
   // in utils/productBadges.ts, so a badge an admin configures under those exact
