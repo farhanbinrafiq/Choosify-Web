@@ -21,6 +21,19 @@ export function brandSuccessScore(brand: { successScore?: number | null; recomme
   return 100;
 }
 
+/** "20000" → "BDT 20,000"; "10000-50000" → "BDT 10,000–50,000"; free text is kept as typed. */
+export function formatBrandPriceRange(raw: string): string | null {
+  const text = raw.trim();
+  if (!text) return null;
+  const nums = text.replace(/,/g, '').replace(/৳|bdt|tk\.?/gi, ' ').match(/\d+(?:\.\d+)?/g);
+  const onlyNumbers = /^[\s৳,.\d\-–—to]*$|^\s*(bdt|tk\.?)?[\s৳,.\d\-–—to]*$/i.test(text);
+  if (nums && onlyNumbers) {
+    const fmt = (n: string) => Number(n).toLocaleString('en-US');
+    return nums.length >= 2 ? `BDT ${fmt(nums[0])}–${fmt(nums[1])}` : `BDT ${fmt(nums[0])}`;
+  }
+  return text;
+}
+
 interface BrandCardDesignProps {
   brand: {
     id: string | number;
@@ -134,14 +147,17 @@ export const BrandCardDesign = memo(function BrandCardDesign({
   const bestForText = brand.bestFor ?? brand.category ?? 'Fashion';
   const score = brandSuccessScore(brand);
 
-  const priceKnown = brand.priceRange !== null;
-  let priceText: string | null = '৳500-2000';
-  if (!priceKnown) priceText = null;
-  else if (brand.priceRange) priceText = brand.priceRange;
+  // Real figures only: the brand's own price range (Brand Studio), else the
+  // real min/max of its products; nothing when neither is known.
+  let priceText: string | null = null;
+  if (brand.priceRange) priceText = formatBrandPriceRange(brand.priceRange);
+  else if (brand.priceRange === null) priceText = null;
   else if (brand.minPrice !== undefined && brand.maxPrice !== undefined) {
-    priceText = `৳${formatNumber(brand.minPrice)}-${formatNumber(brand.maxPrice)}`;
+    priceText = brand.minPrice === brand.maxPrice
+      ? `BDT ${formatNumber(brand.minPrice)}`
+      : `BDT ${formatNumber(brand.minPrice)}–${formatNumber(brand.maxPrice)}`;
   } else if (brand.minPrice !== undefined) {
-    priceText = `From ৳${formatNumber(brand.minPrice)}`;
+    priceText = `From BDT ${formatNumber(brand.minPrice)}`;
   }
 
   const isSaved = savedBrands?.some((b: any) => String(b.id) === String(brand.id));
@@ -251,7 +267,7 @@ export const BrandCardDesign = memo(function BrandCardDesign({
           {priceText !== null && (
             <div className="min-w-0 text-center px-1">
               <div className="text-[15px] font-extrabold text-[#2323FF] truncate leading-tight">
-                {priceText.replace(/^From\s+/i, '').split('-')[0] || priceText}
+                {priceText}
               </div>
               <div className="text-[9.5px] text-[#4B5563]">Price Range</div>
             </div>

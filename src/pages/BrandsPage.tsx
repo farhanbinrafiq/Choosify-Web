@@ -258,7 +258,7 @@ export function BrandsPage() {
         followers: brand.followers || 0,
         bestFor: brand.category || 'General',
         // Real figures only: no placeholder price range or recommendation score.
-        priceRange: null,
+        priceRange: brand.overview?.priceRange?.trim() || null,
         // Success score comes from real ratings only; new brands start at 100%.
         category: brand.category || 'General',
         isHot: brand.sponsoredFlag,
