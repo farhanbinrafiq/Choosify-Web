@@ -1049,6 +1049,7 @@ export function BrandDetailPage() {
     tags?: string[];
   } }).overview;
   const overviewData = {
+    about: (brand as { description?: string }).description?.trim() || undefined,
     address: catalogOverview?.address || undefined,
     website: (brand as { website?: string }).website?.replace(/^https?:\/\//, '') || undefined,
     map: "https://www.google.com/maps",
