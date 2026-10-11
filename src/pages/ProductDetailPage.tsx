@@ -94,6 +94,13 @@ import {
   serviceMessageCtaLabel,
 } from "../utils/serviceBooking";
 
+/** A product's real stock count (0 when unknown or out of stock). */
+function productStockCount(product: any): number {
+  if (!product || product.status === 'out_of_stock') return 0;
+  const n = Number(product.stock);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : 0;
+}
+
 function hasActiveSizeGuide(sizeGuide?: CatalogProductSizeGuide | null): boolean {
   if (!sizeGuide?.enabled) return false;
   if (sizeGuide.imageUrl?.trim()) return true;
@@ -1117,10 +1124,9 @@ export function ProductDetailPage() {
       ? selectedVariant
         ? selectedVariant.stock === 0 || !variantActive(selectedVariant)
         : true
-      : product?.id === 3 ||
-        Boolean(product?.title?.includes("MacBook")) ||
-        product?.stock === 0;
+      : productStockCount(product) <= 0;
 
+  // The real quantity the seller has in stock — never a placeholder figure.
   const stockQuantity =
     product?.variants && product.variants.length > 0
       ? selectedVariant
@@ -1130,7 +1136,7 @@ export function ProductDetailPage() {
         : 0
       : isOutOfStock
         ? 0
-        : 58;
+        : productStockCount(product);
 
   const handleLoveBrand = () => {
     toast.success(`You added ${product?.brand || product?.brandName || brandName} to your Favorite Brands!`);

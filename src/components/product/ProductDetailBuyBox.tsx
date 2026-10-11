@@ -7,7 +7,7 @@ import { EmiAiLogo } from '../EmiAiLogo';
 /** Low stock (<15) → red urgency; mid stock (15–30) → blue; healthy stock (>30) → green. */
 function resolveStockDisplay(stockQuantity: number): { label: string; bgClass: string } {
   if (stockQuantity < 15) {
-    return { label: `Only ${stockQuantity} Products Left`, bgClass: 'bg-[#FF000D]' };
+    return { label: `Only ${stockQuantity} ${stockQuantity === 1 ? 'Product' : 'Products'} Left`, bgClass: 'bg-[#FF000D]' };
   }
   if (stockQuantity <= 30) {
     return { label: `${stockQuantity} Products in Stock`, bgClass: 'bg-[#2323FF]' };
