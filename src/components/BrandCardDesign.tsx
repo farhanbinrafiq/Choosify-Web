@@ -21,15 +21,24 @@ export function brandSuccessScore(brand: { successScore?: number | null; recomme
   return 100;
 }
 
-/** "20000" → "BDT 20,000"; "10000-50000" → "BDT 10,000–50,000"; free text is kept as typed. */
+/** Compact taka for tight card space: 950 → "950", 20000 → "20K", 150000 → "1.5L", 25000000 → "2.5Cr". */
+export function compactTaka(value: number): string {
+  const trim = (n: number) => String(Math.round(n * 10) / 10).replace(/\.0$/, '');
+  if (value >= 10_000_000) return `${trim(value / 10_000_000)}Cr`;
+  if (value >= 100_000) return `${trim(value / 100_000)}L`;
+  if (value >= 1_000) return `${trim(value / 1_000)}K`;
+  return trim(value);
+}
+
+/** "20000" → "৳20K"; "10000-50000" → "৳10K–50K"; free text is kept as typed. */
 export function formatBrandPriceRange(raw: string): string | null {
   const text = raw.trim();
   if (!text) return null;
   const nums = text.replace(/,/g, '').replace(/৳|bdt|tk\.?/gi, ' ').match(/\d+(?:\.\d+)?/g);
   const onlyNumbers = /^[\s৳,.\d\-–—to]*$|^\s*(bdt|tk\.?)?[\s৳,.\d\-–—to]*$/i.test(text);
   if (nums && onlyNumbers) {
-    const fmt = (n: string) => Number(n).toLocaleString('en-US');
-    return nums.length >= 2 ? `BDT ${fmt(nums[0])}–${fmt(nums[1])}` : `BDT ${fmt(nums[0])}`;
+    const [a, b] = nums.map(Number);
+    return nums.length >= 2 && b !== a ? `৳${compactTaka(a)}–${compactTaka(b)}` : `৳${compactTaka(a)}`;
   }
   return text;
 }
@@ -154,10 +163,10 @@ export const BrandCardDesign = memo(function BrandCardDesign({
   else if (brand.priceRange === null) priceText = null;
   else if (brand.minPrice !== undefined && brand.maxPrice !== undefined) {
     priceText = brand.minPrice === brand.maxPrice
-      ? `BDT ${formatNumber(brand.minPrice)}`
-      : `BDT ${formatNumber(brand.minPrice)}–${formatNumber(brand.maxPrice)}`;
+      ? `৳${compactTaka(brand.minPrice)}`
+      : `৳${compactTaka(brand.minPrice)}–${compactTaka(brand.maxPrice)}`;
   } else if (brand.minPrice !== undefined) {
-    priceText = `From BDT ${formatNumber(brand.minPrice)}`;
+    priceText = `From ৳${compactTaka(brand.minPrice)}`;
   }
 
   const isSaved = savedBrands?.some((b: any) => String(b.id) === String(brand.id));
