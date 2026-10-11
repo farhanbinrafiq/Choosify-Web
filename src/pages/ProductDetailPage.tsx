@@ -139,7 +139,14 @@ function deriveSellerContent(product: any) {
       : cleanStrings(product?.complimentaryFeatures);
   const physicalSpecs: string[] = [
     ...(product?.enableAdditionalSpecs !== false
-      ? specPairs(product?.additionalSpecs).map((row) => `${row.label}: ${row.value}`)
+      ? // "Label: Value" lines and plain items ("Wooden Frame") are both shown.
+        (Array.isArray(product?.additionalSpecs) ? product.additionalSpecs : [])
+          .map((row: any) => {
+            const label = String(row?.label || row?.key || '').trim();
+            const value = String(row?.value ?? '').trim();
+            return label && value ? `${label}: ${value}` : label || value;
+          })
+          .filter(Boolean)
       : []),
     ...cleanStrings(product?.propertySpecs),
   ];
