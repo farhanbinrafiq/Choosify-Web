@@ -24,6 +24,8 @@ interface ProductDetailBuyBoxProps {
   reviewCount: number;
   /** Real page views (server-counted, one per visitor per day). */
   viewCount?: number;
+  /** Real completed-order count for this product (omitted until tracked). */
+  orderCount?: number;
   /** Real average rating (0 when reviewCount is 0) — never a fake "4.8" default. */
   avgRating: number;
   /** Real `product.featuredFlag` — the FEATURED badge only renders when this is true. */
@@ -79,6 +81,7 @@ export function ProductDetailBuyBox({
   stockQuantity,
   reviewCount,
   viewCount,
+  orderCount,
   avgRating,
   featured = false,
   uniqueColors,
@@ -142,21 +145,21 @@ export function ProductDetailBuyBox({
 
   return (
     <div className={cn('w-full pb-10', className)}>
-      {/* Stats strip — real rating/review data only. No fabricated
-          orders/views counters and no unconditional TRENDING badge (there
-          is no real per-product "trending" signal today). */}
-      {reviewCount > 0 && (
-        <div className="grid grid-cols-2 gap-3.5 bg-white rounded-xl border border-[#E8EDF2] px-6 py-[18px] mb-4 items-center">
-          <div className="text-center">
-            <div className="text-lg font-extrabold text-[#1A1A2E]">★ {avgRating.toFixed(1)}</div>
-            <div className="text-[11px] text-[#9AA0AC]">Rating</div>
+      {/* Stats strip — the same four live metrics the seller sees in the
+          Product Studio. Real figures only; "—" until there is data. */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 bg-white rounded-xl border border-[#E8EDF2] px-6 py-[18px] mb-4 items-center">
+        {([
+          ['Rating', reviewCount > 0 ? `★ ${avgRating.toFixed(1)}` : '—'],
+          ['Reviews', reviewCount > 0 ? reviewCount.toLocaleString() : '—'],
+          ['Orders', typeof orderCount === 'number' && orderCount > 0 ? orderCount.toLocaleString() : '—'],
+          ['Views', typeof viewCount === 'number' && viewCount > 0 ? viewCount.toLocaleString() : '—'],
+        ] as const).map(([label, value]) => (
+          <div key={label} className="text-center">
+            <div className="text-lg font-extrabold text-[#1A1A2E]">{value}</div>
+            <div className="text-[11px] text-[#9AA0AC]">{label}</div>
           </div>
-          <div className="text-center">
-            <div className="text-lg font-extrabold text-[#1A1A2E]">{reviewCount.toLocaleString()}</div>
-            <div className="text-[11px] text-[#9AA0AC]">Reviews</div>
-          </div>
-        </div>
-      )}
+        ))}
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.6fr_1fr] gap-4 mb-4">
         {/* Left — product info */}
@@ -205,9 +208,6 @@ export function ProductDetailBuyBox({
               </>
             ) : (
               <span className="text-[#9AA0AC]">No ratings yet</span>
-            )}
-            {typeof viewCount === 'number' && viewCount > 0 && (
-              <span className="text-[#9AA0AC]">· {viewCount.toLocaleString()} view{viewCount === 1 ? '' : 's'}</span>
             )}
             {onReport && (
               <button
