@@ -88,8 +88,8 @@ const OFFICE_ADDRESSES = [
     id: 'bangladesh',
     label: 'Bangladesh Office',
     lines: [
-      'Level 11, Gulshan Commerce Center',
-      'Road 45, Gulshan-2, Dhaka',
+      'House-744 & 746, Road-10, Avenue-4',
+      'Mirpur DOHS, Dhaka-1216',
       'Bangladesh',
     ],
   },
