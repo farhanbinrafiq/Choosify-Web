@@ -17,7 +17,8 @@
     "seed:services": "node scripts/seed-services.mjs",
     "test:sort-registry": "tsx scripts/probe-sort-registry.ts",
     "test:public-urls": "tsx scripts/probe-public-urls.ts",
-    "test:public-handles": "tsx scripts/probe-public-handles.ts"
+    "test:public-handles": "tsx scripts/probe-public-handles.ts",
+    "test:compare-model": "tsx scripts/probe-compare-model.ts"
   },
   "dependencies": {
     "@google/genai": "^1.29.0",

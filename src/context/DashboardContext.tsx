@@ -28,6 +28,7 @@ import type { BookingOfferCard } from '../types/serviceBooking';
 import type { ManualOrderOfferCard } from '../types/manualOrder';
 import { operationsApi } from '../services/operationsApi';
 import { useGlobalState } from './GlobalStateContext';
+import { shopperSignalsApi, toSignalItem, type ShopperSignalList } from '../services/shopperSignalsApi';
 import {
   compareCategoryBrowseHref,
   compareCategoryMismatchMessage,
@@ -696,6 +697,32 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
   useEffect(() => {
     localStorage.setItem(scopedKey('choosify_saved_brands', userId), JSON.stringify(savedBrands));
   }, [savedBrands, userId]);
+
+  // Mirror saved products / brands to the signed-in account (shopper signals).
+  // The first value seen for an account is this browser's cache, so it is NOT
+  // pushed (it could wipe items saved on another device) — only later changes are.
+  const signalBaseline = useRef<Record<string, string>>({});
+  const syncSignalList = (list: ShopperSignalList, items: any[]) => {
+    if (!isLoggedIn || !userId) return;
+    const mapped = items.map(toSignalItem).filter((x): x is NonNullable<typeof x> => x !== null);
+    const key = `${userId}:${list}`;
+    const fingerprint = mapped.map((m) => m.id).join('|');
+    if (!(key in signalBaseline.current)) {
+      signalBaseline.current[key] = fingerprint;
+      return;
+    }
+    if (signalBaseline.current[key] === fingerprint) return;
+    signalBaseline.current[key] = fingerprint;
+    void shopperSignalsApi.replaceList(list, mapped);
+  };
+  useEffect(() => {
+    syncSignalList('savedProducts', savedProducts);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedProducts, userId, isLoggedIn]);
+  useEffect(() => {
+    syncSignalList('savedBrands', savedBrands);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedBrands, userId, isLoggedIn]);
 
   useEffect(() => {
     localStorage.setItem(scopedKey('choosify_loved_brands', userId), JSON.stringify(lovedBrands));

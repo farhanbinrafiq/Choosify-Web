@@ -10,6 +10,7 @@ import { useSearchSuggestions } from '../hooks/useSearchSuggestions';
 import { type SuggestionItem } from './search/searchTypes';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
+import { shopperSignalsApi } from '../services/shopperSignalsApi';
 import { resolveSpotlightExperience } from '../utils/spotlightContentResolver';
 import { spotlightContentHref } from '../lib/spotlight/content';
 import { getAllBrandPosts } from '../lib/brandPosts';
@@ -65,7 +66,7 @@ export function GlobalSearchBar({
   const [activeIndex, setActiveIndex] = useState(-1);
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
   const { customOverviews } = useDashboard();
-  const { allCatalogProducts, allBrands, allCategories, allCreators, allCatalogGuides, siteConfig } = useGlobalState();
+  const { allCatalogProducts, allBrands, allCategories, allCreators, allCatalogGuides, siteConfig, isLoggedIn } = useGlobalState();
 
   const productSource = allCatalogProducts;
   const brandSource = allBrands.length > 0
@@ -97,14 +98,10 @@ export function GlobalSearchBar({
   useEffect(() => {
     try {
       const stored = localStorage.getItem('choosify_recent_searches');
-      if (stored) {
-        setRecentSearches(JSON.parse(stored));
-      } else {
-        // Fallback default recent searches
-        setRecentSearches(['Aarong', 'Yellow', 'Sony WH-1000XM5']);
-      }
+      // Only this shopper's real searches — never placeholder "recent" terms.
+      setRecentSearches(stored ? JSON.parse(stored) : []);
     } catch (e) {
-      setRecentSearches(['Aarong', 'Yellow', 'Sony WH-1000XM5']);
+      setRecentSearches([]);
     }
   }, []);
 
@@ -116,6 +113,7 @@ export function GlobalSearchBar({
       const updated = [trimmed, ...recentSearches.filter(s => s.toLowerCase() !== trimmed.toLowerCase())].slice(0, 5);
       setRecentSearches(updated);
       localStorage.setItem('choosify_recent_searches', JSON.stringify(updated));
+      if (isLoggedIn) void shopperSignalsApi.recordSearch(trimmed);
     } catch (e) {
       console.error(e);
     }
@@ -124,9 +122,11 @@ export function GlobalSearchBar({
   const handleClearRecent = (e: React.MouseEvent, indexToRemove: number) => {
     e.stopPropagation();
     try {
+      const removed = recentSearches[indexToRemove];
       const updated = recentSearches.filter((_, idx) => idx !== indexToRemove);
       setRecentSearches(updated);
       localStorage.setItem('choosify_recent_searches', JSON.stringify(updated));
+      if (isLoggedIn && removed) void shopperSignalsApi.removeSearch(removed);
     } catch (err) {
       console.error(err);
     }
@@ -137,6 +137,7 @@ export function GlobalSearchBar({
     try {
       setRecentSearches([]);
       localStorage.setItem('choosify_recent_searches', JSON.stringify([]));
+      if (isLoggedIn) void shopperSignalsApi.clearSearches();
     } catch (err) {
       console.error(err);
     }

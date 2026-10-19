@@ -3,7 +3,6 @@ export { EmiActionButton, EmiActionSuggestion } from './EmiActionButton';
 export { EmiContextPanel, EmiInsightCard } from './EmiContextPanel';
 export { EmiAssistantCard, EmiSummaryCard, EmiRecommendationPanel } from './EmiAssistantCard';
 export { EmiShoppingCoach } from './EmiShoppingCoach';
-export { EmiComparePanel } from './EmiComparePanel';
 export { EmiSidecar } from './EmiSidecar';
 export { EmiProductAssistant } from './EmiProductAssistant';
 export { EmiSpotlightAssistant } from './EmiSpotlightAssistant';
