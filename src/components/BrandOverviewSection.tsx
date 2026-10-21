@@ -23,21 +23,17 @@ interface OverviewData {
 interface BrandOverviewSectionProps {
   brandName: string;
   overviewData: OverviewData;
-  claimStatus?: 'community' | 'pending' | 'verified';
-  /** Opens the real claim-submission flow (ClaimProfileModal). Required for
-   *  the "community" state's button to do anything real. */
-  onClaim?: () => void;
 }
 
 /**
  * Every card here is real seller-entered data (brand.overview via Brand
  * Studio) — there is no prototype/name-keyed fallback content anymore. A
  * card is only rendered when it actually has something to show; if the
- * seller hasn't filled in ANY overview field, the whole section is hidden
- * (falling through to the "community profile" claim block, which still
- * renders on its own below when applicable).
+ * seller hasn't filled in ANY overview field, the whole section is hidden.
+ * Community / claim state is shown by CommunityProfileNotice on the page,
+ * driven by the server's ownership state.
  */
-export function BrandOverviewSection({ brandName, overviewData, claimStatus, onClaim }: BrandOverviewSectionProps) {
+export function BrandOverviewSection({ brandName, overviewData }: BrandOverviewSectionProps) {
   const { customOverviews } = useDashboard();
   const brandCustoms = customOverviews ? customOverviews.filter(
     co => co.targetType === 'brand' && co.targetId.toLowerCase() === brandName.toLowerCase()
@@ -53,7 +49,7 @@ export function BrandOverviewSection({ brandName, overviewData, claimStatus, onC
   const hasAnyOverview =
     hasAbout || hasCredentials || hasAddressCard || hasContactCard || hasPriceAudienceCard || hasServices || hasTags || brandCustoms.length > 0;
 
-  if (!hasAnyOverview && claimStatus !== 'community' && claimStatus !== 'pending') {
+  if (!hasAnyOverview) {
     return null;
   }
 
@@ -246,51 +242,6 @@ export function BrandOverviewSection({ brandName, overviewData, claimStatus, onC
         </>
       )}
 
-      {/* BRAND PROFILE CLAIMING EXPERIENCE BLOCKS */}
-      {claimStatus === 'community' && (
-        <div className="mt-8 bg-white border border-dashed border-[#E8EDF2] rounded-[10px] p-6 text-center max-w-2xl mx-auto flex flex-col items-center gap-4">
-          <div className="flex items-center gap-2 bg-[#FFF3EA] px-3 py-1 rounded-md border border-[#FFD8B8]">
-            <span className="text-[#FF5B00] text-xs font-bold font-mono">ℹ</span>
-            <span className="text-[10px] font-extrabold text-[#FF5B00] uppercase tracking-wider">Community Profile State</span>
-          </div>
-          <p className="text-xs font-semibold text-[#6B7280] leading-relaxed italic max-w-lg">
-            This brand profile contains publicly available information curated by Choosify. This profile has not yet been claimed by an authorized brand representative.
-          </p>
-
-          <button
-            type="button"
-            onClick={onClaim}
-            className="bg-[#FF5B00] hover:bg-[#EF3C23] text-white py-3 px-8 rounded-lg uppercase text-[11px] font-extrabold tracking-widest transition-all active:scale-95 select-none border-0 cursor-pointer"
-          >
-            Claim Brand Ownership
-          </button>
-
-          <div className="bg-[#F4F7F9] border border-[#E8EDF2] rounded-[10px] p-5 text-left w-full mt-2">
-            <h4 className="text-[10px] font-extrabold text-[#1A1A2E] uppercase tracking-widest mb-3.5 border-b border-[#E8EDF2] pb-2 flex items-center gap-1.5">
-              <span className="text-[#FF5B00]">✦</span> Claim ownership to:
-            </h4>
-            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-[10px] text-[#6B7280] font-semibold uppercase tracking-wider">
-              <li className="flex items-center gap-2"><span className="text-[#07DD05] text-sm font-black">✓</span> Add products</li>
-              <li className="flex items-center gap-2"><span className="text-[#07DD05] text-sm font-black">✓</span> Launch promotions</li>
-              <li className="flex items-center gap-2"><span className="text-[#07DD05] text-sm font-black">✓</span> Manage coupons</li>
-              <li className="flex items-center gap-2"><span className="text-[#07DD05] text-sm font-black">✓</span> Collaborate with creators</li>
-              <li className="flex items-center gap-2 sm:col-span-2"><span className="text-[#07DD05] text-sm font-black">✓</span> Access business insights</li>
-            </ul>
-          </div>
-        </div>
-      )}
-
-      {claimStatus === 'pending' && (
-        <div className="mt-8 bg-white border border-dashed border-[#E8EDF2] rounded-[10px] p-6 text-center max-w-2xl mx-auto flex flex-col items-center gap-3">
-          <div className="flex items-center gap-2 bg-amber-50 px-3 py-1 rounded-md border border-amber-200">
-            <span className="text-amber-500 text-xs animate-pulse">●</span>
-            <span className="text-[10px] font-extrabold text-amber-600 uppercase tracking-widest">Ownership Verification Pending</span>
-          </div>
-          <p className="text-xs font-semibold text-[#6B7280] leading-relaxed italic max-w-lg">
-            A brand ownership claim application has been received for {brandName} and is currently undergoing premium administrative review. No public actions are pending.
-          </p>
-        </div>
-      )}
     </div>
   );
 }

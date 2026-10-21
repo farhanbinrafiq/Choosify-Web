@@ -29,6 +29,7 @@ const BrandsPage = lazy(() => import('./pages/BrandsPage').then(m => ({ default:
 const CategoriesPage = lazy(() => import('./pages/CategoriesPage').then(m => ({ default: m.CategoriesPage })));
 const ProductDetailPage = lazy(() => import('./pages/ProductDetailPage').then(m => ({ default: m.ProductDetailPage })));
 const BrandDetailPage = lazy(() => import('./pages/BrandDetailPage').then(m => ({ default: m.BrandDetailPage })));
+const ClaimPage = lazy(() => import('./pages/ClaimPage').then(m => ({ default: m.ClaimPage })));
 const DealsPage = lazy(() => import('./pages/DealsPage').then(m => ({ default: m.DealsPage })));
 const ComparePage = lazy(() => import('./pages/ComparePage').then(m => ({ default: m.ComparePage })));
 const GuidesPage = lazy(() => import('./pages/GuidesPage').then(m => ({ default: m.GuidesPage })));
@@ -242,6 +243,7 @@ function AppContent() {
             <Route path="/recommendations/:id" element={<LegacyRecommendationRedirect />} />
             <Route path="/guides/:id/products" element={<PageWrapper><GuideProductsPage /></PageWrapper>} />
             <Route path="/login" element={<LoginSignUpPage />} />
+            <Route path="/claim/:intentId" element={<PageWrapper><ClaimPage /></PageWrapper>} />
             {/* Full-bleed standalone auth screens — same family as /login, no site nav/footer chrome. */}
             <Route path="/forgot-password" element={<Suspense fallback={null}><ForgotPasswordPage /></Suspense>} />
             <Route path="/reset-password" element={<Suspense fallback={null}><ResetPasswordPage /></Suspense>} />

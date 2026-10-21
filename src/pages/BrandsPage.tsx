@@ -39,6 +39,8 @@ interface Brand {
   priceRange: string | null;
   recommended?: string;
   successScore?: number | null;
+  /** Server-computed ownership state (community profiles show "Unclaimed", no score). */
+  ownership?: { state?: string; claimable?: boolean } | null;
   category: string;
   isHot?: boolean;
   isFeatured?: boolean;
@@ -266,6 +268,7 @@ export function BrandsPage() {
         sponsoredFlag: brand.sponsoredFlag,
         featuredFlag: brand.featuredFlag,
         verifiedStatus: brand.verifiedStatus,
+        ownership: brand.ownership,
         createdAt: brand.createdAt,
         updatedAt: brand.updatedAt,
         coverImage: brand.coverImage,

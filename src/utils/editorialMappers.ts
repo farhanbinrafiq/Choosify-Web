@@ -5,6 +5,7 @@ export const mapCatalogCreator = (creator: CatalogCreator): Creator => ({
   id: creator.id,
   slug: creator.slug,
   publicHandle: creator.publicHandle ?? null,
+  ownership: creator.ownership,
   name: creator.name,
   handle: creator.handle,
   avatar: creator.avatar,

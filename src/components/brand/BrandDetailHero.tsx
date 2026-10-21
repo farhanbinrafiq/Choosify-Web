@@ -120,11 +120,11 @@ export function BrandDetailHero({
             )}
             {claimStatus === 'pending' && (
               <div className="inline-flex items-center gap-1.5 bg-[#FF000D] text-white text-[10px] font-bold px-2.5 py-1 rounded-full mb-2">
-                Ownership verification pending
+                Ownership claim under review
               </div>
             )}
             {claimStatus === 'community' && (
-              <div className="text-[10px] font-bold text-[#9AA0AC] mb-2">Community brand profile</div>
+              <div className="text-[10px] font-bold text-[#9AA0AC] mb-2">Community profile · Unclaimed</div>
             )}
             <ProfileSocialPills
               className="mt-2.5 justify-center lg:justify-start"
@@ -190,18 +190,28 @@ export function BrandDetailHero({
           <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-5 md:w-[300px] shadow-[0_2px_10px_rgba(0,0,0,0.03)] shrink-0">
             <div className="text-[11px] font-extrabold text-[#9AA0AC] tracking-wide mb-2.5">BRAND SCORE</div>
             {/* Same success score as the brand cards: 100% for a new brand, then it
-                follows the real average rating (5★ = 100%). */}
-            <div className="flex items-baseline gap-2 mb-1">
-              <div className="text-[30px] font-extrabold text-[#07A828]">
-                {brandSuccessScore({ rating: reviewCount > 0 ? score : 0 })}%
-              </div>
-              <div className="text-[11.5px] text-[#9AA0AC]">Success</div>
-            </div>
-            <div className="text-[11.5px] text-[#9AA0AC] mb-4">
-              {reviewCount > 0
-                ? `${score.toFixed(1)}/5 from ${reviewCount.toLocaleString()} review${reviewCount === 1 ? '' : 's'}`
-                : 'New brand · no reviews yet'}
-            </div>
+                follows the real average rating (5★ = 100%). Unclaimed community
+                profiles are not scored. */}
+            {(() => {
+              const success = brandSuccessScore({ rating: reviewCount > 0 ? score : 0, ownership: brand.ownership });
+              return (
+                <>
+                  <div className="flex items-baseline gap-2 mb-1">
+                    <div className={`text-[30px] font-extrabold ${success === null ? 'text-[#9AA0AC]' : 'text-[#07A828]'}`} data-testid="brand-hero-score">
+                      {success === null ? '—' : `${success}%`}
+                    </div>
+                    {success !== null && <div className="text-[11.5px] text-[#9AA0AC]">Success</div>}
+                  </div>
+                  <div className="text-[11.5px] text-[#9AA0AC] mb-4">
+                    {success === null
+                      ? 'Community profile · not scored until a verified owner claims it'
+                      : reviewCount > 0
+                        ? `${score.toFixed(1)}/5 from ${reviewCount.toLocaleString()} review${reviewCount === 1 ? '' : 's'}`
+                        : 'New brand · no reviews yet'}
+                  </div>
+                </>
+              );
+            })()}
           </div>
 
           <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-5 flex-1 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">

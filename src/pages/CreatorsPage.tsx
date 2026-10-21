@@ -55,7 +55,7 @@ const CREATOR_PROMOS: CreatorPromo[] = [
 ];
 
 export function CreatorsPage() {
-  const { getCreatorClaimStatus, creatorClaimStatuses, allCreators } = useGlobalState();
+  const { allCreators } = useGlobalState();
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState('All Creators');

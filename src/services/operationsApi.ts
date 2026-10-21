@@ -17,7 +17,8 @@ function doFetch(path: string, method: HttpMethod, body: unknown, token: string 
   });
 }
 
-async function request<T>(path: string, method: HttpMethod = 'GET', body?: unknown): Promise<T> {
+/** Shared authenticated JSON request (silent token refresh + structured errors). */
+export async function request<T>(path: string, method: HttpMethod = 'GET', body?: unknown): Promise<T> {
   const token = getAccessToken();
   let response = await doFetch(path, method, body, token);
 

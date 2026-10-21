@@ -1,4 +1,4 @@
-import type { CatalogSocialLinks } from './catalog';
+import type { CatalogSocialLinks, PublicOwnership } from './catalog';
 
 export type UserRole = 'customer' | 'seller' | 'brand' | 'creator' | 'moderator' | 'admin';
 
@@ -104,6 +104,9 @@ export interface Brand {
   marketplaceAccess?: boolean;
   marketplaceStatus?: 'not_granted' | 'granted' | 'restricted' | 'suspended' | 'restored' | 'revoked';
   brandReferenceId?: string;
+  /** Authoritative public ownership state computed by the server (Community
+   *  Claimable Profiles). The claim CTA shows only when `claimable` is true. */
+  ownership?: PublicOwnership;
 }
 
 export interface CommerceProduct {

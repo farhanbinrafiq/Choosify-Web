@@ -29,7 +29,7 @@ import {
   resolveSessionUser,
   signOutSession,
 } from '../lib/authSession';
-import type { CatalogBrand, CatalogCategory, CatalogCreator, CatalogDeal, CatalogGuide, CatalogPlacement, CatalogProduct, CatalogProductDetail, HomepageConfig, SiteConfig } from '../types/catalog';
+import type { CatalogBrand, CatalogCategory, CatalogCreator, CatalogDeal, CatalogGuide, CatalogPlacement, CatalogProduct, CatalogProductDetail, HomepageConfig, PublicOwnership, SiteConfig } from '../types/catalog';
 import { mapCatalogCreator, mapCatalogGuide } from '../utils/editorialMappers';
 import { legacyNumericId } from '../../lib/publicUrls';
 import { commerceProductToCatalog, resolveCatalogProducts } from '../utils/productNormalize';
@@ -109,12 +109,9 @@ export interface GlobalStateContextType {
   activeVideo: { url: string; title: string; isVertical?: boolean } | null;
   openVideo: (url: string, title: string, isVertical?: boolean) => void;
   closeVideo: () => void;
-  brandClaimStatuses: Record<string, 'verified' | 'pending' | 'community'>;
+  /** Server-derived claim label (from `ownership`); never a client simulation. */
   getBrandClaimStatus: (brandNameOrId: string | number) => 'verified' | 'pending' | 'community';
-  updateBrandClaimStatus: (brandNameOrId: string | number, status: 'verified' | 'pending' | 'community') => void;
-  creatorClaimStatuses: Record<string, 'verified' | 'pending' | 'community'>;
   getCreatorClaimStatus: (creatorIdOrName: string) => 'verified' | 'pending' | 'community';
-  updateCreatorClaimStatus: (creatorIdOrName: string, status: 'verified' | 'pending' | 'community') => void;
   featureFlags: Record<string, boolean>;
   isFeatureEnabled: (key: string) => boolean;
   /** True when catalog hydrate failed and static mock data is in use. */
@@ -326,132 +323,37 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
     };
   }, []);
 
-  const [brandClaimStatuses, setBrandClaimStatuses] = useState<Record<string, 'verified' | 'pending' | 'community'>>(() => {
-    const saved = localStorage.getItem('choosify_brand_claims_store');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        // ignore
-      }
-    }
-    return {
-      'samsung': 'verified',
-      'apple': 'verified',
-      'apex': 'verified',
-      'bata': 'verified',
-      'aarong': 'verified',
-      'sony': 'community',
-      'sailor': 'community',
-      'yellow': 'community',
-      'pickaboo': 'community',
-      'ecstasy': 'community',
-      'richman': 'pending',
-      'star tech': 'pending',
-      'star-tech': 'pending',
-      'la reve': 'pending',
-      'lotto': 'pending',
-      'perfume world': 'pending',
-      '1': 'verified',
-      '2': 'verified',
-      '3': 'verified',
-      '4': 'verified',
-      '5': 'community',
-      '6': 'pending',
-      '7': 'pending',
-      '8': 'pending',
-      '9': 'community',
-      '10': 'verified',
-      '11': 'community',
-      '12': 'community',
-      '13': 'community',
-      '14': 'pending',
-      '15': 'pending',
-      '16': 'verified',
-      '17': 'verified',
-      'choosify': 'verified',
-      'fff sourcing ltd': 'verified',
-      'fff sourcing': 'verified'
-    };
-  });
-
-  const [creatorClaimStatuses, setCreatorClaimStatuses] = useState<Record<string, 'verified' | 'pending' | 'community'>>(() => {
-    const saved = localStorage.getItem('choosify_creator_claims_store');
-    if (saved) {
-      try {
-        return JSON.parse(saved);
-      } catch (e) {
-        // ignore
-      }
-    }
-    return {
-      'creator-farhan': 'verified',
-      'creator-sarah': 'verified',
-      'creator-mily': 'pending',
-      'farhan bin rafiq': 'verified',
-      'sarah jenkins': 'verified',
-      'mily chowdhury': 'pending'
-    };
-  });
-
-  const getBrandClaimStatus = (brandNameOrId: string | number): 'verified' | 'pending' | 'community' => {
-    const key = String(brandNameOrId).toLowerCase().trim();
-    if (brandClaimStatuses[key]) {
-      return brandClaimStatuses[key];
-    }
-    if (key.includes('aarong') || key.includes('samsung') || key.includes('apple') || key.includes('apex') || key.includes('bata') || key.includes('choosify') || key.includes('fff')) {
-      return 'verified';
-    }
-    if (key.includes('richman') || key.includes('star tech') || key.includes('star-tech') || key.includes('reve') || key.includes('lotto') || key.includes('perfume')) {
-      return 'pending';
-    }
+  // Claim / ownership labels come ONLY from the server-computed `ownership`
+  // state on catalog records (Community Claimable Profiles). No name rules, no
+  // localStorage simulation: a profile is "verified" / "pending" only when the
+  // backend says so.
+  const allBrandsRef = useRef<Brand[]>([]);
+  const allCreatorsRef = useRef<Creator[]>([]);
+  const claimStatusFromOwnership = (
+    ownership: PublicOwnership | undefined,
+    verifiedFallback: boolean | undefined,
+  ): 'verified' | 'pending' | 'community' => {
+    if (!ownership) return verifiedFallback ? 'verified' : 'community';
+    if (ownership.state === 'owned_verified') return 'verified';
+    if (ownership.state === 'claim_pending') return 'pending';
     return 'community';
   };
 
-  const updateBrandClaimStatus = (brandNameOrId: string | number, status: 'verified' | 'pending' | 'community') => {
-    setBrandClaimStatuses(prev => {
-      const key = String(brandNameOrId).toLowerCase().trim();
-      const updated = { ...prev, [key]: status };
-      const foundBrand = mockBrandsRef.current.find(
-        (b) => String(b.id) === key || b.name.toLowerCase().trim() === key,
-      );
-      if (foundBrand) {
-        updated[String(foundBrand.id)] = status;
-        updated[foundBrand.name.toLowerCase().trim()] = status;
-      }
-      localStorage.setItem('choosify_brand_claims_store', JSON.stringify(updated));
-      return updated;
-    });
+  const getBrandClaimStatus = (brandNameOrId: string | number): 'verified' | 'pending' | 'community' => {
+    const key = String(brandNameOrId).toLowerCase().trim();
+    const found = allBrandsRef.current.find(
+      (b) => String(b.id) === key || String(b.catalogId || '').toLowerCase() === key || b.name.toLowerCase().trim() === key,
+    );
+    return claimStatusFromOwnership(found?.ownership, found?.verifiedStatus);
   };
 
   const getCreatorClaimStatus = (creatorIdOrName: string): 'verified' | 'pending' | 'community' => {
     const key = String(creatorIdOrName).toLowerCase().trim();
-    if (creatorClaimStatuses[key]) {
-      return creatorClaimStatuses[key];
-    }
-    if (key.includes('farhan') || key.includes('sarah')) {
-      return 'verified';
-    }
-    if (key.includes('mily')) {
-      return 'pending';
-    }
-    return 'community';
+    const found = allCreatorsRef.current.find(
+      (c) => String(c.id).toLowerCase() === key || c.name.toLowerCase().trim() === key,
+    );
+    return claimStatusFromOwnership(found?.ownership, found?.verifiedStatus);
   };
-
-  const updateCreatorClaimStatus = (creatorIdOrName: string, status: 'verified' | 'pending' | 'community') => {
-    setCreatorClaimStatuses(prev => {
-      const key = String(creatorIdOrName).toLowerCase().trim();
-      const updated = { ...prev, [key]: status };
-      localStorage.setItem('choosify_creator_claims_store', JSON.stringify(updated));
-      return updated;
-    });
-  };
-
-  useEffect(() => {
-    console.log("--- Brand Claim Global Status Store Update ---");
-    console.log("Brand: Sony | Status:", getBrandClaimStatus('Sony'), "| Source: Global Claim Status Store");
-    console.log("Brand: Samsung | Status:", getBrandClaimStatus('Samsung'), "| Source: Global Claim Status Store");
-  }, [brandClaimStatuses]);
 
   useEffect(() => {
     const handlePromo = (e: CustomEvent) => {
@@ -802,6 +704,7 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       marketplaceAccess: brand.marketplaceAccess,
       marketplaceStatus: brand.marketplaceStatus,
       brandReferenceId: brand.brandReferenceId || undefined,
+      ownership: brand.ownership,
       credentials: brand.credentials || undefined,
       viewCount: (brand as { viewCount?: number }).viewCount,
     };
@@ -864,6 +767,8 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
   const allDeals: CatalogDeal[] = catalogDeals;
   const allCreators: Creator[] =
     catalogCreators.length > 0 || !ALLOW_MOCK_CATALOG ? catalogCreators.map(mapCatalogCreator) : CREATORS;
+  allBrandsRef.current = allBrands;
+  allCreatorsRef.current = allCreators;
   const allGuides =
     catalogGuides.length > 0 || !ALLOW_MOCK_CATALOG
       ? catalogGuides.map(mapCatalogGuide)
@@ -1189,12 +1094,8 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       activeVideo,
       openVideo,
       closeVideo,
-      brandClaimStatuses,
       getBrandClaimStatus,
-      updateBrandClaimStatus,
-      creatorClaimStatuses,
       getCreatorClaimStatus,
-      updateCreatorClaimStatus,
       featureFlags,
       isFeatureEnabled: (key: string) => isFlagEnabled(featureFlags, key),
       isUsingFallbackData,

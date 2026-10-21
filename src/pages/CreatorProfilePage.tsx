@@ -12,12 +12,13 @@ import { toast } from '../lib/notify';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Heart, Send, FileText, CheckCircle2,
-  Sparkles, Clock, Lock
+  Sparkles, Lock
 } from 'lucide-react';
 import { CREATORS } from '../data/creators';
 import { cn } from '../lib/utils';
 import { useGlobalState } from '../context/GlobalStateContext';
-import { ClaimProfileModal } from '../components/ClaimProfileModal';
+import { CommunityProfileNotice } from '../components/claims/CommunityProfileNotice';
+import { useStartClaim } from '../components/claims/useStartClaim';
 import { ReportModal } from '../components/ReportModal';
 import { CreatorProfileHero } from '../components/creator/CreatorProfileHero';
 import { CreatorOverviewFeed } from '../components/creator/CreatorOverviewFeed';
@@ -44,7 +45,7 @@ export function CreatorProfilePage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { openVideo, getCreatorClaimStatus, updateCreatorClaimStatus, creatorClaimStatuses, allCreators, isLoggedIn, catalogReady } = useGlobalState();
+  const { openVideo, allCreators, isLoggedIn, catalogReady } = useGlobalState();
   const [isReportOpen, setIsReportOpen] = useState(false);
 
   // Canonical key is the creator slug; the creator id still resolves (then
@@ -103,12 +104,23 @@ export function CreatorProfilePage() {
     onClearAll: null
   }, [creator, profileTab]);
 
-  const [localClaimStatus, setLocalClaimStatus] = useState<'verified' | 'pending' | 'community'>(() => getCreatorClaimStatus(creator.id));
-  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
-
-  useEffect(() => {
-    setLocalClaimStatus(getCreatorClaimStatus(creator.id));
-  }, [creator.id, creatorClaimStatuses]);
+  // Ownership label + Claim CTA come only from the server-computed `ownership`.
+  const ownership = creator.ownership;
+  const localClaimStatus: 'verified' | 'pending' | 'community' | 'owned' = ownership
+    ? ownership.state === 'owned_verified'
+      ? 'verified'
+      : ownership.state === 'claim_pending'
+        ? 'pending'
+        : ownership.state === 'community'
+          ? 'community'
+          : 'owned'
+    : creator.verifiedStatus
+      ? 'verified'
+      : 'community';
+  // Campaign briefs need someone to receive them: locked only while nobody owns the profile.
+  const businessToolsLocked = localClaimStatus === 'community' || localClaimStatus === 'pending';
+  const { start: startClaim, starting: claimStarting } = useStartClaim();
+  const claimCreator = ownership?.claimable ? () => void startClaim('creator', creator.id) : undefined;
 
   // Canonical Trust Score only (creator.score is 0-100 → /5). No per-id demo
   // numbers. Review counts/ratings have no canonical source yet → shown as "—".
@@ -257,15 +269,13 @@ export function CreatorProfilePage() {
             toast.success('Profile link copied to clipboard!');
           }}
           onMessage={() => {
-            if (localClaimStatus !== 'verified') {
+            if (businessToolsLocked) {
               toast.error('Business Tools Locked — Creator must claim this profile to activate campaign briefs.', { duration: 4000 });
             } else {
               setIsModalOpen(true);
             }
           }}
-          onClaim={() => {
-            setIsClaimModalOpen(true);
-          }}
+          onClaim={claimCreator}
           onReport={() => {
             if (!isLoggedIn) {
               navigate('/login', { state: { from: location.pathname } });
@@ -302,30 +312,31 @@ export function CreatorProfilePage() {
               <button
                 type="button"
                 onClick={() => {
-                  if (localClaimStatus !== 'verified') {
+                  if (businessToolsLocked) {
                     toast.error('Business Tools Locked — Creator must claim this profile to activate campaign briefs.', { duration: 4000 });
                   } else {
                     setIsModalOpen(true);
                   }
                 }}
                 className={
-                  localClaimStatus !== 'verified'
+                  businessToolsLocked
                     ? 'inline-flex items-center gap-1.5 bg-[#F4F7F9] text-[#9AA0AC] border border-[#E8EDF2] px-[18px] py-2.5 rounded-lg text-xs font-semibold cursor-not-allowed opacity-80'
                     : 'inline-flex items-center gap-1.5 bg-white text-[#1A1A2E] border border-[#E5E7EB] px-[18px] py-2.5 rounded-lg text-xs font-semibold hover:bg-[#F4F7F9]'
                 }
               >
-                {localClaimStatus !== 'verified' ? <Lock size={13} /> : <Sparkles size={13} />}
+                {businessToolsLocked ? <Lock size={13} /> : <Sparkles size={13} />}
                 Ask For Branding
               </button>
-              {localClaimStatus === 'pending' && (
-                <div className="inline-flex items-center gap-1.5 bg-[#FF000D] text-white border border-[#FF000D] px-[18px] py-2.5 rounded-lg text-xs font-bold">
-                  <Clock size={13} /> Verification Pending
-                </div>
-              )}
             </>
           }
         />
       </div>
+
+      {(ownership?.state === 'community' || ownership?.state === 'claim_pending') && (
+        <div className="max-w-[1180px] mx-auto px-5 sm:px-8 lg:px-10 w-full">
+          <CommunityProfileNotice entityType="creator" ownership={ownership} onClaim={claimCreator} claiming={claimStarting} />
+        </div>
+      )}
 
       {/* Profile tabs — Choosify.dc.html green underline */}
       <div className="sticky z-40 w-full bg-choosify-feed border-b border-[#E8EDF2] choosify-sticky-section-nav">
@@ -712,17 +723,6 @@ export function CreatorProfilePage() {
          )}
       </AnimatePresence>
 
-      <ClaimProfileModal
-        isOpen={isClaimModalOpen}
-        onClose={() => setIsClaimModalOpen(false)}
-        targetType="creator"
-        targetId={creator.id}
-        targetName={creator.name}
-        onClaimSubmitted={() => {
-          setLocalClaimStatus('pending');
-          updateCreatorClaimStatus(creator.id, 'pending');
-        }}
-      />
 
       <ReportModal
         isOpen={isReportOpen}

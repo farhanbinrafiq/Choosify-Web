@@ -128,11 +128,11 @@ export function CreatorProfileHero({
             )}
             {claimStatus === 'pending' && (
               <div className="inline-flex items-center gap-1.5 bg-[#FF000D] text-white text-[10px] font-bold px-2.5 py-1 rounded-full mb-2">
-                Ownership verification pending
+                Ownership claim under review
               </div>
             )}
             {claimStatus === 'community' && (
-              <div className="text-[10px] font-bold text-[#9AA0AC] mb-2">Community creator profile</div>
+              <div className="text-[10px] font-bold text-[#9AA0AC] mb-2">Community profile · Unclaimed</div>
             )}
             <ProfileSocialPills
               className="mt-2.5 justify-center lg:justify-start"

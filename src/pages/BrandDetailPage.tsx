@@ -38,7 +38,8 @@ import { FollowButton } from "../components/FollowButton";
 import { BrandDetailHero } from "../components/brand/BrandDetailHero";
 import { BRAND_LOGO_IMG_CLASS, brandInitials } from "../components/brand/BrandLogo";
 import type { BrandStoryBlock } from "../lib/brandStory";
-import { ClaimProfileModal } from "../components/ClaimProfileModal";
+import { CommunityProfileNotice } from "../components/claims/CommunityProfileNotice";
+import { useStartClaim } from "../components/claims/useStartClaim";
 import {
   UniversalFilterRenderer,
   ActiveFilterChips,
@@ -117,7 +118,6 @@ export function BrandDetailPage() {
     window.addEventListener(BRAND_FOLLOW_COUNT_EVENT, onCount);
     return () => window.removeEventListener(BRAND_FOLLOW_COUNT_EVENT, onCount);
   }, []);
-  const [isClaimModalOpen, setIsClaimModalOpen] = useState(false);
 
   // Filter States (from Brand Products page)
   const [activeFilter, setActiveFilter] = useState("Full Experience"); // Show Component View Selector
@@ -257,9 +257,22 @@ export function BrandDetailPage() {
     [brand.id],
   );
 
-  const [localClaimStatus, setLocalClaimStatus] = useState<
-    "verified" | "pending" | "community"
-  >(() => resolveOwnershipClaimStatus(brand));
+  // Ownership label + Claim CTA come from the server-computed `ownership`
+  // state; the legacy resolver is only a fallback for records without it.
+  const localClaimStatus: "verified" | "pending" | "community" | "owned" =
+    brand.ownership
+      ? brand.ownership.state === "owned_verified"
+        ? "verified"
+        : brand.ownership.state === "claim_pending"
+          ? "pending"
+          : brand.ownership.state === "community"
+            ? "community"
+            : "owned"
+      : resolveOwnershipClaimStatus(brand);
+  const { start: startClaim, starting: claimStarting } = useStartClaim();
+  const claimBrand = brand.ownership?.claimable
+    ? () => void startClaim("brand", String(brand.catalogId || brand.id))
+    : undefined;
 
   const [currentPage, setCurrentPage] = useState(1);
   // 5 rows × up to 5 columns (PRODUCT_CARD_GRID) before pagination
@@ -297,9 +310,6 @@ export function BrandDetailPage() {
     sortOption,
   ]);
 
-  useEffect(() => {
-    setLocalClaimStatus(resolveOwnershipClaimStatus(brand));
-  }, [brand]);
 
   // Deep-link from brand list discount pill → Top Deals & Coupons (#deals-section)
   useEffect(() => {
@@ -1164,7 +1174,7 @@ export function BrandDetailPage() {
             navigator.clipboard.writeText(window.location.href);
             toast.success("Share link copied!");
           }}
-          onClaim={() => setIsClaimModalOpen(true)}
+          onClaim={claimBrand}
           onReport={() => {
             if (!isLoggedIn) {
               navigate('/login', { state: { from: location.pathname } });
@@ -1402,83 +1412,12 @@ export function BrandDetailPage() {
       {/* 4. Unified Scrollable Body Wrapper */}
       <div className="max-w-[1440px] mx-auto px-5 sm:px-8 lg:px-10 py-10 md:py-12 w-full flex flex-col gap-8">
         <div className={`${DETAIL_SINGLE_FEED}`}>
-            {/* Brand Claim Acquisition Card (Part 6) */}
-            {(localClaimStatus === "community" ||
-              localClaimStatus === "pending") && (
-              <div className="bg-gradient-to-r from-[#FFF0E8]/50 to-[#FFE5D9]/30 border-2 border-[#FFE5D9] rounded-2xl p-6 md:p-8 shadow-xs flex flex-col md:flex-row items-center gap-6 text-left animate-fade-in relative overflow-hidden mb-6">
-                <div className="absolute top-0 right-0 w-24 h-24 bg-orange-primary/5 blur-xl rounded-full" />
-                <div className="w-12 h-12 rounded-full bg-orange-primary/10 flex items-center justify-center shrink-0 font-bold text-orange-primary">
-                  <ShieldCheck className="w-6 h-6 text-orange-primary" />
-                </div>
-                <div className="flex-1 space-y-2">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-[8px] font-black uppercase tracking-wider bg-[#FFF0E8] text-orange-primary border border-[#FFE5D9]">
-                    {localClaimStatus === "pending"
-                      ? "Verification Pending Review"
-                      : "Claim Acquisition Panel"}
-                  </span>
-                  <h4 className="text-sm font-black text-navy uppercase tracking-tight leading-none mb-1 font-space">
-                    {localClaimStatus === "pending"
-                      ? "Ownership Claim Under Active Review"
-                      : "Are you an authorized representative of this brand?"}
-                  </h4>
-                  <p className="text-xs text-gray-600 font-semibold leading-relaxed">
-                    {localClaimStatus === "pending"
-                      ? "Our moderators are actively processing your submitted credentials relative to this brand representative request. Complete access will be unlocked shortly."
-                      : "This community brand profile contains curated information from public web indexes. Claim ownership to configure your premium merchant storefront, sync inventory, and unlock the seller suite."}
-                  </p>
-
-                  {/* Benefits Grid */}
-                  <div className="pt-2">
-                    <p className="text-[10px] font-black text-[#1A1D4E] uppercase tracking-widest mb-2 font-mono">
-                      Claim ownership to:
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs text-gray-700 font-bold text-left">
-                      <div className="flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#4DBC15] shrink-0" />
-                        <span>Add products</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#4DBC15] shrink-0" />
-                        <span>Launch promotions</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#4DBC15] shrink-0" />
-                        <span>Publish coupons</span>
-                      </div>
-                      <div className="flex items-center gap-1.5">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#4DBC15] shrink-0" />
-                        <span>Collaborate with creators</span>
-                      </div>
-                      <div className="flex items-center gap-1.5 sm:col-span-2">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-[#4DBC15] shrink-0" />
-                        <span>
-                          Access business insights & store diagnostics
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-                <div className="shrink-0 w-full md:w-auto self-stretch flex items-center justify-center">
-                  {localClaimStatus === "community" ? (
-                    <button
-                      onClick={() => setIsClaimModalOpen(true)}
-                      className="w-full md:w-auto px-6 py-3 bg-[#FF000D] hover:brightness-110 text-white font-bold text-[13px] tracking-tight rounded-lg shadow-sm active:scale-95 transition-all text-center cursor-pointer border-none"
-                    >
-                      Claim Ownership
-                    </button>
-                  ) : (
-                    <div className="px-5 py-3.5 bg-[#FF000D] border border-[#FF000D] rounded-[5px] flex flex-col items-center gap-1 text-center shrink-0">
-                      <span className="text-[8px] font-black text-white uppercase tracking-wider">
-                        ● Verification Active
-                      </span>
-                      <span className="text-[12px] font-bold text-white tracking-tight">
-                        Under Review
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
+            <CommunityProfileNotice
+              entityType="brand"
+              ownership={brand.ownership}
+              onClaim={claimBrand}
+              claiming={claimStarting}
+            />
 
             {/* B. DEALS — real deals only. No coupon model exists for brands
                 yet (no fabricated coupon tiles), and the whole section is
@@ -1651,8 +1590,6 @@ export function BrandDetailPage() {
             <BrandOverviewSection
               brandName={brand.name}
               overviewData={overviewData}
-              claimStatus={localClaimStatus}
-              onClaim={() => setIsClaimModalOpen(true)}
             />
 
             <BrandWhereToBuySection
@@ -1688,16 +1625,6 @@ export function BrandDetailPage() {
         source="storefront"
       />
 
-      <ClaimProfileModal
-        isOpen={isClaimModalOpen}
-        onClose={() => setIsClaimModalOpen(false)}
-        targetType="brand"
-        targetId={brand.id}
-        targetName={brand.name}
-        onClaimSubmitted={() => {
-          setLocalClaimStatus("pending");
-        }}
-      />
     </div>
   );
 }

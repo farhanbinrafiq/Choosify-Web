@@ -14,12 +14,20 @@ import { BrandLogo, isBrandLogoUrl } from './brand/BrandLogo';
  * analytics move it — an explicit platform score, else its real average rating
  * (5★ = 100%). A brand with no ratings yet shows 100%, never a made-up lower figure.
  */
-export function brandSuccessScore(brand: { successScore?: number | null; recommended?: string; rating?: number }): number {
+export function brandSuccessScore(brand: {
+  successScore?: number | null;
+  recommended?: string;
+  rating?: number;
+  ownership?: { state?: string } | null;
+}): number | null {
   if (typeof brand.successScore === 'number' && brand.successScore > 0) return Math.min(100, Math.round(brand.successScore));
   const recommended = brand.recommended ? parseInt(String(brand.recommended), 10) : NaN;
   if (Number.isFinite(recommended) && recommended > 0) return Math.min(100, recommended);
   const rating = Number(brand.rating);
   if (Number.isFinite(rating) && rating > 0) return Math.min(100, Math.round(rating * 20));
+  // An unclaimed community profile is not a merchant: no score until a verified
+  // owner exists (the "100% for a new brand" default would be fabricated).
+  if (brand.ownership?.state === 'community' || brand.ownership?.state === 'claim_pending') return null;
   return 100;
 }
 
@@ -72,6 +80,8 @@ interface BrandCardDesignProps {
     maxDiscountPercent?: number;
     /** Defaults to true (existing directory-tile behavior) when omitted. */
     verified?: boolean;
+    /** Server-computed ownership state; when present it decides the Verified / Unclaimed label. */
+    ownership?: { state?: string; claimable?: boolean } | null;
   };
   onClick?: () => void;
   /**
@@ -131,6 +141,7 @@ export function mapBrandToCardDesign(brand: any, fallback?: any) {
     isFeatured: !!(brand.isFeatured || brand.featuredFlag),
     isHot: !!brand.isHot,
     successScore: successScoreOut,
+    ownership: brand.ownership ?? originalBrand?.ownership,
     tagline: brand.tagline || brand.description || originalBrand?.description || '',
     coverImage: brand.coverImage,
     brandColor: brand.brandColor || brand.primaryColor,
@@ -164,7 +175,11 @@ export const BrandCardDesign = memo(function BrandCardDesign({
   isCurrentInComparison,
 }: BrandCardDesignProps) {
   const { savedBrands, setSavedBrands } = useDashboard();
-  const verified = brand.verified !== false;
+  // The server's ownership state wins: an unclaimed community profile is never
+  // shown as verified, and gets an explicit "Unclaimed" badge instead.
+  const ownershipState = brand.ownership?.state;
+  const unclaimed = ownershipState === 'community' || ownershipState === 'claim_pending';
+  const verified = ownershipState ? ownershipState === 'owned_verified' : brand.verified !== false;
   const bestForText = brand.bestFor ?? brand.category ?? 'Fashion';
   const score = brandSuccessScore(brand);
 
@@ -276,6 +291,13 @@ export const BrandCardDesign = memo(function BrandCardDesign({
           )}
         </div>
         {verified && <p className="text-[11px] text-[#2323FF] mb-3">✓ Verified Brand</p>}
+        {unclaimed && (
+          <p className="mb-3" data-testid="brand-card-unclaimed">
+            <span className="inline-block rounded-full border border-[#E5E7EB] bg-[#F4F7F9] px-2 py-0.5 text-[10px] font-bold text-[#6B7280]">
+              Unclaimed
+            </span>
+          </p>
+        )}
 
         {/* Stats — dc Brands List: Best For | Price Range | Success ring.
             Price Range / Success are omitted (not fabricated) when the

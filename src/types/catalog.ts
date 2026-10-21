@@ -105,6 +105,16 @@ export interface CatalogBrand {
   marketplaceAccess?: boolean;
   marketplaceStatus?: 'not_granted' | 'granted' | 'restricted' | 'suspended' | 'restored' | 'revoked';
   brandReferenceId?: string;
+  /** Authoritative public ownership state computed by the server (Community
+   *  Claimable Profiles). The claim CTA shows only when `claimable` is true. */
+  ownership?: PublicOwnership;
+}
+
+/** Server-computed public ownership state of a Brand / Creator profile. */
+export type PublicOwnershipState = 'owned_verified' | 'owned' | 'claim_pending' | 'community' | 'unavailable';
+export interface PublicOwnership {
+  state: PublicOwnershipState;
+  claimable: boolean;
 }
 
 export interface CatalogProduct {
@@ -592,6 +602,9 @@ export interface CatalogCreatorFeaturedItem {
 
 export interface CatalogCreator {
   id: string;
+  /** Authoritative public ownership state computed by the server (Community
+   *  Claimable Profiles). The claim CTA shows only when `claimable` is true. */
+  ownership?: PublicOwnership;
   slug: string;
   /** Active public handle (Public Identity Phase C) — the preferred public URL key; absent when none is assigned. Not the display `handle`. */
   publicHandle?: string | null;

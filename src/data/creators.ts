@@ -22,6 +22,8 @@ export interface Creator {
   slug?: string;
   /** Active public handle (Public Identity Phase C) — preferred over the slug in /creators/{key}. Not the display `handle`. */
   publicHandle?: string | null;
+  /** Server-computed public ownership state (absent on static mock creators). */
+  ownership?: import('../types/catalog').PublicOwnership;
   name: string;
   handle: string;
   avatar: string;

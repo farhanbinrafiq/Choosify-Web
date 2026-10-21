@@ -169,6 +169,20 @@ async function uploadViaOperationsApi(file: File): Promise<string> {
 }
 
 /**
+ * Ownership-claim evidence: ALWAYS the authenticated private upload (never a
+ * public CDN) — the server only accepts private verification uploads on claims.
+ */
+export async function uploadPrivateVerificationFile(file: File): Promise<{ url: string; name: string }> {
+  const allowed =
+    file.type.startsWith('image/') || file.type === 'application/pdf' || /\.(pdf|jpe?g|png|webp)$/i.test(file.name);
+  if (!allowed) {
+    throw new Error('Unsupported file. Upload a PDF or an image (JPEG/PNG/WebP).');
+  }
+  const url = await uploadViaOperationsApi(await compressImageFile(file));
+  return { url, name: file.name };
+}
+
+/**
  * Trade license (PDF) + NID/face photos for claim verification.
  * Prefers unsigned Cloudinary when configured; falls back to authenticated ops upload.
  */
