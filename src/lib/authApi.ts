@@ -174,12 +174,33 @@ export async function logout(): Promise<void> {
   }
 }
 
-export async function refreshSession(): Promise<RefreshResponse | null> {
-  const response = await fetch(`${API_BASE}/auth/refresh`, {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-  });
+// Refresh tokens are one-time use: the server rotates the cookie on every call
+// and refuses the old one. Parallel callers in this tab share one request, and
+// a 401 gets one short retry because another tab may have just rotated the
+// shared cookie (the browser then already holds the winner's new one).
+let inFlightRefresh: Promise<RefreshResponse | null> | null = null;
+
+export function refreshSession(): Promise<RefreshResponse | null> {
+  if (!inFlightRefresh) {
+    inFlightRefresh = doRefreshSession().finally(() => {
+      inFlightRefresh = null;
+    });
+  }
+  return inFlightRefresh;
+}
+
+async function doRefreshSession(): Promise<RefreshResponse | null> {
+  const post = () =>
+    fetch(`${API_BASE}/auth/refresh`, {
+      method: 'POST',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+    });
+  let response = await post();
+  if (response.status === 401) {
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    response = await post();
+  }
   if (response.status === 401) return null;
   if (!response.ok) {
     throw new Error(await readErrorMessage(response));
