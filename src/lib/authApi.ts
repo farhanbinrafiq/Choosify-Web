@@ -176,9 +176,18 @@ export async function logout(): Promise<void> {
 
 // Refresh tokens are one-time use: the server rotates the cookie on every call
 // and refuses the old one. Parallel callers in this tab share one request, and
-// a 401 gets one short retry because another tab may have just rotated the
-// shared cookie (the browser then already holds the winner's new one).
+// a refused token gets one short retry because another tab may have just
+// rotated the shared cookie (the browser then already holds the winner's new
+// one). A 401 coded AUTH_MISSING_TOKEN means no refresh cookie was sent at all
+// (a signed-out visitor) — there is nothing a retry could recover.
 let inFlightRefresh: Promise<RefreshResponse | null> | null = null;
+
+const REFRESH_TOKEN_MISSING = 'AUTH_MISSING_TOKEN';
+
+async function isMissingRefreshToken(response: Response): Promise<boolean> {
+  const body = (await response.clone().json().catch(() => null)) as { code?: unknown } | null;
+  return body?.code === REFRESH_TOKEN_MISSING;
+}
 
 export function refreshSession(): Promise<RefreshResponse | null> {
   if (!inFlightRefresh) {
@@ -197,7 +206,7 @@ async function doRefreshSession(): Promise<RefreshResponse | null> {
       headers: { 'Content-Type': 'application/json' },
     });
   let response = await post();
-  if (response.status === 401) {
+  if (response.status === 401 && !(await isMissingRefreshToken(response))) {
     await new Promise((resolve) => setTimeout(resolve, 300));
     response = await post();
   }
