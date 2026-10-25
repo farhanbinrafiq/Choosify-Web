@@ -6,6 +6,7 @@ import {
   claimsApi,
   type ClaimDocumentSpec,
   type ClaimIntentView,
+  type ClaimantDetails,
 } from '../services/claimsApi';
 import { uploadPrivateVerificationFile } from '../services/mediaUpload';
 import { resolvePartnerSignupUrl } from '../lib/partnerSignupOrigin';
@@ -73,7 +74,12 @@ export function ClaimPage() {
     for (const d of claim?.documents || []) if (d.status !== 'rejected' || !m.has(d.type)) m.set(d.type, d);
     return m;
   }, [claim]);
-  const missingRequired = (view?.requiredDocuments || []).filter((s) => s.required && !docsByType.has(s.type));
+  const details = claim?.claimantDetails || null;
+  // A representative claiming a Brand must also show the ID card the brand / company issued them.
+  const isRequired = (s: ClaimDocumentSpec) =>
+    s.required || (view?.intent.entityType === 'brand' && details?.relationship === 'representative' && s.type === 'Company ID Card');
+  const missingRequired = (view?.requiredDocuments || []).filter((s) => isRequired(s) && !docsByType.has(s.type));
+  const [editingDetails, setEditingDetails] = useState(false);
 
   const run = async (key: string, fn: () => Promise<unknown>, success?: string) => {
     setBusy(key);
@@ -93,6 +99,17 @@ export function ClaimPage() {
     const created = await claimsApi.openDraft(view!);
     return created.id;
   };
+
+  const saveDetails = (next: ClaimantDetails) =>
+    run(
+      'details',
+      async () => {
+        const claimId = await ensureDraft();
+        await claimsApi.saveClaimantDetails(claimId, next);
+        setEditingDetails(false);
+      },
+      'Your details were saved',
+    );
 
   const upload = (spec: ClaimDocumentSpec, file: File) =>
     run(
@@ -237,12 +254,30 @@ export function ClaimPage() {
             </Notice>
           ) : (
             <p className="text-[13px] leading-relaxed text-[#4B5563]">
-              Upload the documents below. They are stored privately and only Choosify reviewers can see them. Claiming does not
-              change the profile until Choosify verifies your documents.
+              First tell us who you are, then upload the documents below. Everything is stored privately and only Choosify reviewers
+              can see it. Claiming does not change the profile until Choosify verifies your documents.
             </p>
           )}
 
-          <ul className="divide-y divide-[#EEF1F4] rounded-xl border border-[#E8EDF2]">
+          <ClaimantDetailsSection
+            entityType={view.intent.entityType}
+            details={details}
+            editing={editingDetails || !details}
+            canEdit={!claim || editable}
+            busy={busy === 'details'}
+            disabled={Boolean(busy)}
+            onEdit={() => setEditingDetails(true)}
+            onCancel={details ? () => setEditingDetails(false) : undefined}
+            onSave={(next) => void saveDetails(next)}
+          />
+
+          <div className="text-[11px] font-bold uppercase tracking-wider text-[#9AA0AC]">2. Documents</div>
+          {!details && (
+            <p className="-mt-3 text-[12px] text-[#9AA0AC]" data-testid="claim-docs-locked">
+              Save your details above to start uploading documents.
+            </p>
+          )}
+          <ul className={`divide-y divide-[#EEF1F4] rounded-xl border border-[#E8EDF2] ${details ? '' : 'pointer-events-none opacity-50'}`}>
             {view.requiredDocuments.map((spec) => {
               const doc = docsByType.get(spec.type);
               const key = `doc:${spec.type}`;
@@ -250,7 +285,7 @@ export function ClaimPage() {
                 <li key={spec.type} className="flex flex-col gap-2 p-4 sm:flex-row sm:items-center" data-testid={`claim-doc-${spec.type}`}>
                   <div className="min-w-0 flex-1">
                     <div className="text-[13px] font-bold text-[#1A1A2E]">
-                      {spec.label} {!spec.required && <span className="font-medium text-[#9AA0AC]">(optional)</span>}
+                      {spec.label} {!isRequired(spec) && <span className="font-medium text-[#9AA0AC]">(optional)</span>}
                     </div>
                     <div className="text-[11.5px] text-[#6B7280]">{spec.hint}</div>
                     {doc && (
@@ -271,7 +306,7 @@ export function ClaimPage() {
                         type="file"
                         accept="image/*,application/pdf"
                         className="hidden"
-                        disabled={Boolean(busy)}
+                        disabled={Boolean(busy) || !details}
                         onChange={(e) => {
                           const file = e.target.files?.[0];
                           e.target.value = '';
@@ -289,7 +324,7 @@ export function ClaimPage() {
             {(!claim || claim.status === 'Draft') && (
               <button
                 type="button"
-                disabled={Boolean(busy) || missingRequired.length > 0 || !claim}
+                disabled={Boolean(busy) || missingRequired.length > 0 || !claim || !details}
                 onClick={() => void run('submit', () => claimsApi.submit(claim!.id), 'Claim submitted for review')}
                 data-testid="claim-submit"
                 className="rounded-lg border border-[#FF000D] bg-[#FF000D] px-5 py-2.5 text-xs font-bold text-white hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-50"
@@ -313,7 +348,9 @@ export function ClaimPage() {
             )}
           </div>
           {(!claim || claim.status === 'Draft') && missingRequired.length > 0 && (
-            <p className="text-[11.5px] text-[#9AA0AC]">Still needed: {missingRequired.map((s) => s.label).join(', ')}</p>
+            <p className="text-[11.5px] text-[#9AA0AC]">
+              Still needed: {[...(details ? [] : ['Your details']), ...missingRequired.map((s) => s.label)].join(', ')}
+            </p>
           )}
         </div>
       )}
@@ -331,6 +368,187 @@ export function ClaimPage() {
         </div>
       ) : null}
     </Shell>
+  );
+}
+
+const fieldClass =
+  'w-full rounded-lg border border-[#E5E7EB] bg-white px-3 py-2 text-[13px] text-[#1A1A2E] outline-none focus:border-[#2323FF]';
+const fieldLabel = 'mb-1 block text-[11px] font-bold uppercase tracking-wider text-[#6B7280]';
+
+/** Step 1 of a claim: who is claiming, their role on the profile and how Choosify reaches them. */
+function ClaimantDetailsSection({
+  entityType,
+  details,
+  editing,
+  canEdit,
+  busy,
+  disabled,
+  onEdit,
+  onCancel,
+  onSave,
+}: {
+  entityType: 'brand' | 'creator';
+  details: ClaimantDetails | null;
+  editing: boolean;
+  canEdit: boolean;
+  busy: boolean;
+  disabled: boolean;
+  onEdit: () => void;
+  onCancel?: () => void;
+  onSave: (details: ClaimantDetails) => void;
+}) {
+  const isBrand = entityType === 'brand';
+  const [form, setForm] = useState<ClaimantDetails>(
+    details || { relationship: 'owner', roleTitle: '', fullName: '', phone: '', email: '' },
+  );
+  useEffect(() => {
+    if (details) setForm(details);
+  }, [details]);
+  const set = (k: keyof ClaimantDetails, v: string) => setForm((f) => ({ ...f, [k]: v }));
+  const complete =
+    form.roleTitle.trim().length >= 2 &&
+    form.fullName.trim().length >= 2 &&
+    /^\+?\d{7,15}$/.test(form.phone.replace(/[\s()-]/g, '')) &&
+    /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email.trim());
+  const relationshipLabel = (r: ClaimantDetails['relationship']) =>
+    r === 'owner' ? (isBrand ? 'Owner of the brand' : 'I am this creator') : isBrand ? 'Authorised representative' : 'Manager / agent';
+
+  return (
+    <div className="rounded-xl border border-[#E8EDF2] p-4" data-testid="claimant-details">
+      <div className="mb-3 flex items-center justify-between gap-2">
+        <div className="text-[11px] font-bold uppercase tracking-wider text-[#9AA0AC]">1. Your details</div>
+        {!editing && canEdit && (
+          <button type="button" onClick={onEdit} disabled={disabled} className="text-[12px] font-semibold text-[#2323FF]">
+            Edit
+          </button>
+        )}
+      </div>
+      {!editing && details ? (
+        <dl className="grid grid-cols-1 gap-x-4 gap-y-2 text-[13px] sm:grid-cols-2">
+          {[
+            ['Claiming as', relationshipLabel(details.relationship)],
+            ['Role', details.roleTitle],
+            ['Full name', details.fullName],
+            ['Phone', details.phone],
+            ['Official email', details.email],
+          ].map(([k, v]) => (
+            <div key={k} className="min-w-0">
+              <dt className="text-[11px] text-[#9AA0AC]">{k}</dt>
+              <dd className="break-words font-semibold text-[#1A1A2E]">{v}</dd>
+            </div>
+          ))}
+        </dl>
+      ) : (
+        <div className="space-y-3">
+          <fieldset>
+            <legend className={fieldLabel}>You are claiming as</legend>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              {(['owner', 'representative'] as const).map((r) => (
+                <label
+                  key={r}
+                  className={`flex flex-1 cursor-pointer items-center gap-2 rounded-lg border px-3 py-2 text-[13px] font-semibold ${
+                    form.relationship === r ? 'border-[#2323FF] bg-[#F5F5FF] text-[#1A1A2E]' : 'border-[#E5E7EB] text-[#4B5563]'
+                  }`}
+                >
+                  <input
+                    type="radio"
+                    name="claimant-relationship"
+                    value={r}
+                    checked={form.relationship === r}
+                    onChange={() => set('relationship', r)}
+                    data-testid={`claimant-relationship-${r}`}
+                  />
+                  {relationshipLabel(r)}
+                </label>
+              ))}
+            </div>
+            {isBrand && form.relationship === 'representative' && (
+              <p className="mt-1.5 text-[11.5px] text-[#6B7280]">
+                Representatives also upload the ID card the brand or company issued them, and an authorisation letter naming them.
+              </p>
+            )}
+          </fieldset>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div>
+              <label className={fieldLabel} htmlFor="claimant-role">
+                Your role {isBrand ? 'at the brand' : ''}
+              </label>
+              <input
+                id="claimant-role"
+                className={fieldClass}
+                value={form.roleTitle}
+                onChange={(e) => set('roleTitle', e.target.value)}
+                maxLength={80}
+                placeholder={isBrand ? 'e.g. Founder, Managing Director, Marketing Manager' : 'e.g. Creator, Channel manager'}
+              />
+            </div>
+            <div>
+              <label className={fieldLabel} htmlFor="claimant-name">
+                Full name
+              </label>
+              <input
+                id="claimant-name"
+                className={fieldClass}
+                value={form.fullName}
+                onChange={(e) => set('fullName', e.target.value)}
+                maxLength={120}
+                autoComplete="name"
+              />
+            </div>
+            <div>
+              <label className={fieldLabel} htmlFor="claimant-phone">
+                Phone number
+              </label>
+              <input
+                id="claimant-phone"
+                className={fieldClass}
+                value={form.phone}
+                onChange={(e) => set('phone', e.target.value)}
+                maxLength={30}
+                inputMode="tel"
+                autoComplete="tel"
+                placeholder="+8801XXXXXXXXX"
+              />
+            </div>
+            <div>
+              <label className={fieldLabel} htmlFor="claimant-email">
+                Official email address
+              </label>
+              <input
+                id="claimant-email"
+                type="email"
+                className={fieldClass}
+                value={form.email}
+                onChange={(e) => set('email', e.target.value)}
+                maxLength={160}
+                autoComplete="email"
+                placeholder={isBrand ? 'name@yourbrand.com' : 'you@example.com'}
+              />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              disabled={!complete || disabled}
+              onClick={() => onSave({ ...form, email: form.email.trim(), fullName: form.fullName.trim(), roleTitle: form.roleTitle.trim(), phone: form.phone.trim() })}
+              data-testid="claimant-details-save"
+              className="rounded-lg border border-[#1A1A2E] bg-[#1A1A2E] px-4 py-2 text-xs font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {busy ? 'Saving…' : 'Save details'}
+            </button>
+            {onCancel && (
+              <button
+                type="button"
+                onClick={onCancel}
+                className="rounded-lg border border-[#E5E7EB] bg-white px-4 py-2 text-xs font-semibold text-[#6B7280]"
+              >
+                Cancel
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 

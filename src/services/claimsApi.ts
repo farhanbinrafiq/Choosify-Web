@@ -24,12 +24,22 @@ export interface ClaimDocument {
   notes: string | null;
 }
 
+/** Who is claiming — collected before the documents; the server requires it to submit. */
+export interface ClaimantDetails {
+  relationship: 'owner' | 'representative';
+  roleTitle: string;
+  fullName: string;
+  phone: string;
+  email: string;
+}
+
 export interface MyClaim {
   id: string;
   status: 'Draft' | 'Submitted' | 'Under Review' | 'Approved' | 'Rejected' | 'Withdrawn' | 'Expired';
   created_at: string;
   updated_at: string;
   closedReason: string | null;
+  claimantDetails?: ClaimantDetails | null;
   documents: ClaimDocument[];
   latestFeedback: string | null;
   history?: Array<{ at: string; action: string; details: string }>;
@@ -79,6 +89,8 @@ export const claimsApi = {
     });
     return r.data;
   },
+  saveClaimantDetails: async (claimId: string, details: ClaimantDetails) =>
+    request<{ data: unknown }>(`/operations/verifications/${encodeURIComponent(claimId)}/claimant-details`, 'PATCH', details),
   addDocument: async (claimId: string, doc: { type: string; name: string; doc_url: string }) =>
     request<{ data: unknown }>(`/operations/verifications/${encodeURIComponent(claimId)}/documents`, 'POST', doc),
   submit: async (claimId: string) =>
