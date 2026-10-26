@@ -114,6 +114,12 @@ export const catalogApi = {
     return result.data;
   },
 
+  /** Brands page: brand ids a Super Admin pinned to the top, in order (visible brands only). */
+  getBrandsCuration: async (): Promise<{ pinnedBrandIds: string[] }> => {
+    const result = await request<{ data: { pinnedBrandIds: string[] } }>('/catalog/storefront/brands-curation');
+    return result.data;
+  },
+
   /** Every coupon currently valid for storefront display ("View All Coupons"). */
   getStorefrontCoupons: async (): Promise<StorefrontCoupon[]> => {
     const result = await request<{ data: StorefrontCoupon[] }>('/catalog/storefront/coupons');

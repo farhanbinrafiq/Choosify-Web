@@ -20,7 +20,8 @@ import { PLACEMENT_KEYS, INFEED_INTERVAL, INFEED_MAX_PER_PAGE } from '../lib/pla
 import { injectPlacementsIntoFeed } from '../utils/injectFeedPlacements';
 import {BRAND_CARD_GRID, PAGE_LISTING_SINGLE_SHELL } from "../lib/pageLayout";
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
-import { rankBrands, buildBrandMaxActiveDiscountMap, lookupBrandMaxDiscount, mergeCatalogDealsIntoBrandDiscountMap } from '../utils/listingRanking';
+import { catalogApi } from '../services/catalogApi';
+import { buildBrandMaxActiveDiscountMap, lookupBrandMaxDiscount, mergeCatalogDealsIntoBrandDiscountMap } from '../utils/listingRanking';
 import { usePriorityClockMs } from '../hooks/usePriorityClockMs';
 import { FeaturedBrandDealsPanel } from '../components/FeaturedBrandDealsPanel';
 import { SortDropdown } from '../components/SortDropdown';
@@ -65,6 +66,18 @@ export function BrandsPage() {
   const [popularityFilter, setPopularityFilter] = useState<'all' | 'hot' | 'featured' | 'top-rated'>('all');
   const [sortOption, setSortOption] = useState<string>(BRAND_SORT_DEFAULT);
   const priorityNowMs = usePriorityClockMs();
+  // Default order: brands a Super Admin pinned (Storefront Curation), then everyone else A–Z.
+  const [pinnedBrandIds, setPinnedBrandIds] = useState<string[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    catalogApi
+      .getBrandsCuration()
+      .then((c) => !cancelled && setPinnedBrandIds(c.pinnedBrandIds || []))
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   const fallbackBrands: Brand[] = [
     {
@@ -394,10 +407,10 @@ export function BrandsPage() {
       BRAND_SORT_OPTIONS,
       sortOption,
       BRAND_SORT_DEFAULT,
-      (list) => rankBrands(list, { nowMs: priorityNowMs }),
+      (list) => pinnedThenAlphabetical(list, pinnedBrandIds),
       (b) => ({ createdAt: b.createdAt, name: b.name, productCount: brandProductCount(b) }),
     );
-  }, [brands, searchQuery, selectedLetter, activeTab, selectedCategory, verificationFilter, popularityFilter, getBrandClaimStatus, priorityNowMs, sortOption, brandProductCount]);
+  }, [brands, searchQuery, selectedLetter, activeTab, selectedCategory, verificationFilter, popularityFilter, getBrandClaimStatus, pinnedBrandIds, sortOption, brandProductCount]);
 
   const infeedPlacements = usePlacements(PLACEMENT_KEYS.INFEED_BRAND, {
     limit: INFEED_MAX_PER_PAGE,
@@ -1075,4 +1088,16 @@ export function BrandsPage() {
       </div>
     </div>
   );
+}
+
+/** Pinned brands first (in the curated order), then every other brand alphabetically. */
+function pinnedThenAlphabetical<T extends { id: string | number; catalogId?: string; name: string }>(list: T[], pinnedIds: string[]): T[] {
+  const rank = new Map(pinnedIds.map((id, i) => [id, i]));
+  const pinOf = (b: T) => rank.get(String(b.catalogId ?? b.id)) ?? rank.get(String(b.id));
+  return [...list].sort((a, b) => {
+    const pa = pinOf(a);
+    const pb = pinOf(b);
+    if (pa !== undefined || pb !== undefined) return (pa ?? Infinity) - (pb ?? Infinity);
+    return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+  });
 }
