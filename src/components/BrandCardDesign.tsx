@@ -20,14 +20,14 @@ export function brandSuccessScore(brand: {
   rating?: number;
   ownership?: { state?: string } | null;
 }): number | null {
+  // An unclaimed community profile is not a merchant: no score until a verified
+  // owner exists (the card shows a greyed-out 0% ring instead).
+  if (brand.ownership?.state === 'community' || brand.ownership?.state === 'claim_pending') return null;
   if (typeof brand.successScore === 'number' && brand.successScore > 0) return Math.min(100, Math.round(brand.successScore));
   const recommended = brand.recommended ? parseInt(String(brand.recommended), 10) : NaN;
   if (Number.isFinite(recommended) && recommended > 0) return Math.min(100, recommended);
   const rating = Number(brand.rating);
   if (Number.isFinite(rating) && rating > 0) return Math.min(100, Math.round(rating * 20));
-  // An unclaimed community profile is not a merchant: no score until a verified
-  // owner exists (the "100% for a new brand" default would be fabricated).
-  if (brand.ownership?.state === 'community' || brand.ownership?.state === 'claim_pending') return null;
   return 100;
 }
 
@@ -315,7 +315,7 @@ export const BrandCardDesign = memo(function BrandCardDesign({
             caller explicitly passes null for real-but-unknown data. */}
         <div
           className={`flex items-center gap-1 px-1 py-3.5 mb-3.5 ${
-            [bestForText, priceText, score].filter((v) => v !== null).length > 1 ? 'justify-between' : 'justify-center'
+            [bestForText, priceText, score ?? (unclaimed ? 0 : null)].filter((v) => v !== null).length > 1 ? 'justify-between' : 'justify-center'
           }`}
         >
           {bestForText !== null && (
@@ -353,6 +353,23 @@ export const BrandCardDesign = memo(function BrandCardDesign({
                 </svg>
                 <div className="absolute inset-0 flex items-center justify-center">
                   <span className="text-[10px] font-extrabold text-[#1A1A2E]">{score}%</span>
+                </div>
+              </div>
+              <div className="text-[9px] text-[#9AA0AC]">Success</div>
+            </div>
+          )}
+          {score === null && unclaimed && (
+            <div
+              className="min-w-0 flex flex-col items-center text-center opacity-70"
+              data-testid="brand-card-unscored"
+              title="Unclaimed profile — not scored until a verified owner joins Choosify"
+            >
+              <div className="relative w-11 h-11 mb-0.5">
+                <svg viewBox="0 0 44 44" className="w-11 h-11">
+                  <circle cx="22" cy="22" r="18" fill="none" stroke="#E5E7EB" strokeWidth="4" />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className="text-[10px] font-extrabold text-[#9AA0AC]">0%</span>
                 </div>
               </div>
               <div className="text-[9px] text-[#9AA0AC]">Success</div>
