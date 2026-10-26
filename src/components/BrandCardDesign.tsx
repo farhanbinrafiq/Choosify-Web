@@ -65,6 +65,8 @@ interface BrandCardDesignProps {
     reviewCount?: number;
     category?: string;
     bestFor?: string;
+    /** The brand's own "Best for #tags" (Brand Studio / community form) — what the card's Best For shows. */
+    bestForTags?: string[];
     /** `null` = honestly unknown, omit that stat cell. `undefined` keeps the
      *  legacy directory-tile placeholder for older callers. */
     priceRange?: string | null;
@@ -121,7 +123,10 @@ export function mapBrandToCardDesign(brand: any, fallback?: any) {
   // pages, guides…) shows the same figures: the brand's own Price Range from
   // Brand Studio, its real category and its real rating.
   const category = brand.category || originalBrand?.category || '';
-  const bestFor = brand.bestFor || category;
+  // "Best For" is the brand's own Best-for tags, never its category.
+  const rawTags = brand.overview?.tags ?? originalBrand?.overview?.tags ?? brand.bestForTags ?? originalBrand?.bestForTags;
+  const bestForTags = Array.isArray(rawTags) ? rawTags.map((t: unknown) => String(t ?? '').trim()).filter(Boolean) : [];
+  const bestFor = bestForTags.length ? bestForTags.join(' · ') : brand.bestFor && brand.bestFor !== category ? brand.bestFor : undefined;
   const ownRange =
     brand.overview?.priceRange || originalBrand?.overview?.priceRange ||
     (typeof brand.priceRange === 'string' ? brand.priceRange : '') ||
@@ -135,6 +140,7 @@ export function mapBrandToCardDesign(brand: any, fallback?: any) {
     logo: brand.logo || brand.avatar || brand.name?.slice(0, 2)?.toUpperCase() || 'BR',
     category,
     bestFor,
+    bestForTags,
     priceRange: priceRangeOut,
     rating: Number(brand.rating || brand.ratings) || 0,
     reviewCount: Number(brand.reviewCount ?? brand.reviews) || 0,
@@ -180,7 +186,12 @@ export const BrandCardDesign = memo(function BrandCardDesign({
   const ownershipState = brand.ownership?.state;
   const unclaimed = ownershipState === 'community' || ownershipState === 'claim_pending';
   const verified = ownershipState ? ownershipState === 'owned_verified' : brand.verified !== false;
-  const bestForText = brand.bestFor ?? brand.category ?? 'Fashion';
+  // The brand's Best-for tags (first two); a legacy text only when it isn't just the category. Hidden when unknown.
+  const bestForText = brand.bestForTags?.length
+    ? brand.bestForTags.slice(0, 2).join(' · ')
+    : brand.bestFor && brand.bestFor !== brand.category
+      ? brand.bestFor
+      : null;
   const score = brandSuccessScore(brand);
 
   // Real figures only: the brand's own price range (Brand Studio), else the
@@ -302,11 +313,19 @@ export const BrandCardDesign = memo(function BrandCardDesign({
         {/* Stats — dc Brands List: Best For | Price Range | Success ring.
             Price Range / Success are omitted (not fabricated) when the
             caller explicitly passes null for real-but-unknown data. */}
-        <div className="flex items-center justify-between gap-1 px-1 py-3.5 mb-3.5">
-          <div className="min-w-0 text-left">
-            <div className="text-[13px] font-extrabold text-[#1A1A2E] leading-tight">Best For</div>
-            <div className="text-[12px] font-bold text-[#8A00C4] truncate">{bestForText}</div>
-          </div>
+        <div
+          className={`flex items-center gap-1 px-1 py-3.5 mb-3.5 ${
+            [bestForText, priceText, score].filter((v) => v !== null).length > 1 ? 'justify-between' : 'justify-center'
+          }`}
+        >
+          {bestForText !== null && (
+            <div className="min-w-0 text-left" data-testid="brand-card-best-for">
+              <div className="text-[13px] font-extrabold text-[#1A1A2E] leading-tight">Best For</div>
+              <div className="text-[12px] font-bold text-[#8A00C4] truncate" title={brand.bestForTags?.join(' · ') || undefined}>
+                {bestForText}
+              </div>
+            </div>
+          )}
           {priceText !== null && (
             <div className="min-w-0 text-center px-1">
               <div className="text-[15px] font-extrabold text-[#2323FF] truncate leading-tight">

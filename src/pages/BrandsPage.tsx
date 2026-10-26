@@ -271,7 +271,9 @@ export function BrandsPage() {
         rating: brand.ratings || 0,
         reviews: brand.followers || 0,
         followers: brand.followers || 0,
-        bestFor: brand.category || 'General',
+        // Best For = the brand's own Best-for tags (never its category).
+        bestFor: (brand.overview?.tags || []).join(' · '),
+        bestForTags: brand.overview?.tags || [],
         // Real figures only: no placeholder price range or recommendation score.
         priceRange: brand.overview?.priceRange?.trim() || null,
         // Success score comes from real ratings only; new brands start at 100%.
