@@ -55,7 +55,7 @@ export function CreatorProfileHero({
     coverImage ||
     creator.coverImage ||
     creator.banner ||
-    'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=1600&q=80';
+    '';
 
   const resolvedSocials =
     socialLinks ||
@@ -88,9 +88,17 @@ export function CreatorProfileHero({
       {/* Cover — feed silhouette (not viewport edge-to-edge); matches Creator Profile max-w-[1180px] */}
       <div className="w-full px-5 sm:px-8 lg:px-10 pt-4">
         <div className="max-w-[1180px] mx-auto relative">
-          <div className="relative h-[220px] sm:h-[280px] md:h-[320px] overflow-hidden choosify-dark-surface rounded-none">
-            <img src={cover} alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-none" />
+          {/* No cover uploaded → a plain blank band (never a stock photo). */}
+          <div
+            className={`relative h-[220px] sm:h-[280px] md:h-[320px] overflow-hidden rounded-none ${cover ? 'choosify-dark-surface' : 'bg-[#E8EDF2]'}`}
+            data-testid="profile-cover"
+          >
+            {cover ? (
+              <>
+                <img src={cover} alt="" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-none" />
+              </>
+            ) : null}
           </div>
           <div className="absolute left-1/2 top-full -translate-x-1/2 -translate-y-[60px] w-[100px] h-[100px] md:w-[120px] md:h-[120px] z-[5]">
             <div className="w-full h-full rounded-full bg-[#1A1A2E] border-[5px] border-white shadow-[0_16px_36px_rgba(0,0,0,0.28),0_0_0_4px_rgba(7,208,80,0.18)] overflow-hidden flex items-center justify-center text-white text-[30px] font-extrabold">

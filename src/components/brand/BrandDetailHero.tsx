@@ -61,7 +61,7 @@ export function BrandDetailHero({
     brand.coverImage ||
     brand.banner ||
     brand.heroImage ||
-    'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=1600&q=80';
+    '';
 
   const resolvedSocials =
     socialLinks ||
@@ -91,9 +91,17 @@ export function BrandDetailHero({
       {/* Cover — feed silhouette (not viewport edge-to-edge); matches Brand Detail max-w-[1440px] */}
       <div className="w-full px-5 sm:px-8 lg:px-10 pt-4">
         <div className="max-w-[1440px] mx-auto relative">
-          <div className="relative h-[220px] sm:h-[280px] md:h-[320px] overflow-hidden choosify-dark-surface rounded-none">
-            <img src={cover} alt="" className="w-full h-full object-cover" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-none" />
+          {/* No cover uploaded → a plain blank band (never a stock photo). */}
+          <div
+            className={`relative h-[220px] sm:h-[280px] md:h-[320px] overflow-hidden rounded-none ${cover ? 'choosify-dark-surface' : 'bg-[#E8EDF2]'}`}
+            data-testid="profile-cover"
+          >
+            {cover ? (
+              <>
+                <img src={cover} alt="" className="w-full h-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent rounded-none" />
+              </>
+            ) : null}
           </div>
           <div className="absolute left-1/2 top-full -translate-x-1/2 -translate-y-[60px] w-[100px] h-[100px] md:w-[120px] md:h-[120px] z-[5]">
             <div className="w-full h-full rounded-full bg-white shadow-[0_4px_14px_rgba(0,0,0,0.2)] overflow-hidden flex items-center justify-center">
