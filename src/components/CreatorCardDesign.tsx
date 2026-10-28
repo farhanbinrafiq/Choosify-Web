@@ -25,8 +25,10 @@ interface CreatorCardDesignProps {
     coverImage?: string;
     bio?: string;
     niche?: string;
-    /** Defaults to true (existing directory-tile behavior) when omitted. */
+    /** Explicit verified flag; otherwise derived from ownership / verifiedStatus (never assumed). */
     verified?: boolean;
+    verifiedStatus?: boolean;
+    ownership?: { state?: string; verification?: 'pending' | 'none' } | null;
   };
   onClick?: () => void;
 }
@@ -78,7 +80,10 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({
             ),
           );
   const niche = creator.niche || creator.bestFor || creator.platforms?.[0] || 'Lifestyle';
-  const verified = creator.verified !== false;
+  // Server ownership state wins; "Verified" only for an approved document verification.
+  const verified = creator.ownership?.state
+    ? creator.ownership.state === 'owned_verified'
+    : (creator.verified ?? creator.verifiedStatus) === true;
   const initial = (creator.name || '?').charAt(0).toUpperCase();
   const bg = hashColor(String(creator.id || creator.name));
   const hasPhoto = Boolean(creator.avatar && (creator.avatar.startsWith('http') || creator.avatar.startsWith('/')));

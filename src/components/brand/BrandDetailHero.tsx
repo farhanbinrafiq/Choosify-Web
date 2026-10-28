@@ -1,6 +1,7 @@
 import React from 'react';
 import { Check, Flag, Globe, Share2, ShieldCheck } from 'lucide-react';
 import { FollowButton } from '../FollowButton';
+import { VerificationPill } from '../VerificationPill';
 import { brandSuccessScore } from '../BrandCardDesign';
 import {
   ProfileSocialPills,
@@ -12,6 +13,8 @@ export interface BrandDetailHeroProps {
   brand: any;
   logoNode: React.ReactNode;
   claimStatus: string;
+  /** Owned but not verified: 'pending' while documents are in review. */
+  verification?: 'pending' | 'none';
   categoryLabel: string;
   handle?: string;
   locationLabel?: string;
@@ -37,6 +40,7 @@ export function BrandDetailHero({
   brand,
   logoNode,
   claimStatus,
+  verification,
   categoryLabel,
   handle,
   locationLabel = 'Bangladesh',
@@ -125,6 +129,11 @@ export function BrandDetailHero({
             )}
             {claimStatus === 'community' && (
               <div className="text-[10px] font-bold text-[#9AA0AC] mb-2">Community profile · Unclaimed</div>
+            )}
+            {claimStatus === 'owned' && (
+              <div className="mb-2">
+                <VerificationPill verification={verification} />
+              </div>
             )}
             <ProfileSocialPills
               className="mt-2.5 justify-center lg:justify-start"

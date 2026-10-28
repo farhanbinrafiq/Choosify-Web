@@ -103,6 +103,14 @@ export interface InquiryPayload {
   placementInterest?: string;
   message?: string;
   sourcePath?: string;
+  /** Suggest a Brand: optional community-profile details. Logo / cover only when signed in. */
+  description?: string;
+  location?: string;
+  priceRange?: string;
+  tags?: string[];
+  socialLinks?: Record<string, string>;
+  logo?: string;
+  coverImage?: string;
   /** Hidden honeypot — real users never fill it. */
   companyFax?: string;
 }

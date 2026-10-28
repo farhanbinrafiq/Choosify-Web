@@ -276,6 +276,11 @@ export async function uploadUserAvatar(file: File): Promise<string> {
   return uploadViaCatalogMedia(file, 'users');
 }
 
+/** Suggest a Brand: a signed-in visitor's logo / cover image for the suggested brand. */
+export async function uploadSuggestionImage(file: File): Promise<string> {
+  return uploadViaCatalogMedia(file, 'users');
+}
+
 /** Converts a canvas-exported `data:image/...;base64,...` URL (e.g. from AvatarCropModal) into a File for upload. */
 export function dataUrlToFile(dataUrl: string, fileName: string): File {
   const [meta, base64] = dataUrl.split(',');

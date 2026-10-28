@@ -1,6 +1,7 @@
 import React from 'react';
 import { Check, Flag, MessageCircleMore, Share2, ShieldCheck } from 'lucide-react';
 import { FollowButton } from '../FollowButton';
+import { VerificationPill } from '../VerificationPill';
 import {
   ProfileSocialPills,
   profileSocialLinksFromCatalog,
@@ -11,6 +12,8 @@ import { publicUsernameLabel } from '../../../lib/publicUrls';
 export interface CreatorProfileHeroProps {
   creator: any;
   claimStatus: string;
+  /** Owned but not verified: 'pending' while documents are in review. */
+  verification?: 'pending' | 'none';
   onShare: () => void;
   onMessage?: () => void;
   onClaim?: () => void;
@@ -36,6 +39,7 @@ const DEFAULT_SCORE_ROWS = [
 export function CreatorProfileHero({
   creator,
   claimStatus,
+  verification,
   onShare,
   onMessage,
   onClaim,
@@ -124,6 +128,11 @@ export function CreatorProfileHero({
             {claimStatus === 'verified' && (
               <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#2323FF] mb-2">
                 <ShieldCheck size={12} /> Verified Creator
+              </div>
+            )}
+            {claimStatus === 'owned' && (
+              <div className="mb-2">
+                <VerificationPill verification={verification} />
               </div>
             )}
             {claimStatus === 'pending' && (

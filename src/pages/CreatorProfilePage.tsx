@@ -262,6 +262,7 @@ export function CreatorProfilePage() {
         <CreatorProfileHero
           creator={creator}
           claimStatus={localClaimStatus}
+          verification={creator.ownership?.verification}
           trustScore={ratingDisplay}
           reviewCountLabel="platform-managed"
           onShare={() => {

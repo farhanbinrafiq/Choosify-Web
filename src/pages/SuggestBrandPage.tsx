@@ -4,6 +4,7 @@ import { Award, ShieldCheck, ArrowRight } from 'lucide-react';
 import { StaticPageHero } from '../components/StaticPageHero';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { enabledSorted, fillTemplate, resolveSitePages } from '../lib/cmsSitePages';
+import { uploadSuggestionImage } from '../services/mediaUpload';
 import {
   FieldError,
   InquiryFormError,
@@ -45,7 +46,29 @@ export function SuggestBrandPage() {
     reason: '',
     email: signedIn.email,
     contactName: signedIn.name,
+    description: '',
+    location: '',
+    priceRange: '',
+    tags: '',
+    socials: {} as Record<string, string>,
+    logo: '',
+    coverImage: '',
   });
+  const [uploading, setUploading] = useState<'' | 'logo' | 'coverImage'>('');
+  const [uploadError, setUploadError] = useState('');
+  const pickImage = async (field: 'logo' | 'coverImage', file: File) => {
+    setUploading(field);
+    setUploadError('');
+    try {
+      const url = await uploadSuggestionImage(file);
+      setFormData((prev) => ({ ...prev, [field]: url }));
+      inquiry.clearFieldError(field);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : 'Upload failed.');
+    } finally {
+      setUploading('');
+    }
+  };
   const [formData, setFormData] = useState(emptyForm);
   const [honeypot, setHoneypot] = useState('');
 
@@ -69,6 +92,16 @@ export function SuggestBrandPage() {
       message: formData.reason,
       email: formData.email,
       contactPerson: formData.contactName,
+      description: formData.description || undefined,
+      location: formData.location || undefined,
+      priceRange: formData.priceRange || undefined,
+      tags: formData.tags
+        .split(',')
+        .map((t) => t.trim())
+        .filter(Boolean),
+      socialLinks: Object.fromEntries(Object.entries(formData.socials).filter(([, v]) => v.trim())),
+      ...(signedIn.email && formData.logo ? { logo: formData.logo } : {}),
+      ...(signedIn.email && formData.coverImage ? { coverImage: formData.coverImage } : {}),
       companyFax: honeypot,
     });
   };
@@ -280,6 +313,127 @@ export function SuggestBrandPage() {
                         <FieldError message={fe.country} />
                       </div>
 
+                      <fieldset className="space-y-4 rounded-xl border border-[#E8EDF2] p-4 text-left" data-testid="sb-profile-details">
+                        <legend className="px-1 text-[10px] font-black uppercase tracking-widest text-[#6B7280]">Brand details (optional)</legend>
+                        <p className="text-[11.5px] text-[#6B7280]">
+                          These help us create the brand's profile faster once it's approved.
+                        </p>
+                        <div className="space-y-1.5">
+                          <label htmlFor="sb-description" className={inquiryLabelClass}>Short description</label>
+                          <textarea
+                            id="sb-description"
+                            rows={2}
+                            maxLength={600}
+                            value={formData.description}
+                            onChange={(e) => { setFormData({ ...formData, description: e.target.value }); inquiry.clearFieldError('description'); }}
+                            placeholder="What the brand makes or sells"
+                            className={`${inquiryInputClass} resize-none`}
+                          />
+                          <FieldError message={fe.description} />
+                        </div>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          <div className="space-y-1.5">
+                            <label htmlFor="sb-location" className={inquiryLabelClass}>Location</label>
+                            <input
+                              id="sb-location"
+                              type="text"
+                              maxLength={120}
+                              value={formData.location}
+                              onChange={(e) => { setFormData({ ...formData, location: e.target.value }); inquiry.clearFieldError('location'); }}
+                              placeholder="e.g. Dhaka, Bangladesh"
+                              className={inquiryInputClass}
+                            />
+                            <FieldError message={fe.location} />
+                          </div>
+                          <div className="space-y-1.5">
+                            <label htmlFor="sb-price" className={inquiryLabelClass}>Price range</label>
+                            <input
+                              id="sb-price"
+                              type="text"
+                              maxLength={60}
+                              value={formData.priceRange}
+                              onChange={(e) => { setFormData({ ...formData, priceRange: e.target.value }); inquiry.clearFieldError('priceRange'); }}
+                              placeholder="e.g. ৳1,000 – ৳20,000"
+                              className={inquiryInputClass}
+                            />
+                            <FieldError message={fe.priceRange} />
+                          </div>
+                        </div>
+                        <div className="space-y-1.5">
+                          <label htmlFor="sb-tags" className={inquiryLabelClass}>Best for</label>
+                          <input
+                            id="sb-tags"
+                            type="text"
+                            maxLength={600}
+                            value={formData.tags}
+                            onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
+                            placeholder="What they're best known for, separated by commas — e.g. Men's Shirts, Sunglasses"
+                            className={inquiryInputClass}
+                          />
+                        </div>
+                        <div className="grid gap-4 sm:grid-cols-2">
+                          {(['facebook', 'instagram', 'youtube', 'tiktok', 'linkedin'] as const).map((k) => (
+                            <div key={k} className="space-y-1.5">
+                              <label htmlFor={`sb-${k}`} className={`${inquiryLabelClass} capitalize`}>{k}</label>
+                              <input
+                                id={`sb-${k}`}
+                                type="url"
+                                maxLength={500}
+                                value={formData.socials[k] || ''}
+                                onChange={(e) => { setFormData({ ...formData, socials: { ...formData.socials, [k]: e.target.value } }); inquiry.clearFieldError('socialLinks'); }}
+                                placeholder={`https://${k === 'youtube' ? 'youtube.com/@' : `${k}.com/`}…`}
+                                className={inquiryInputClass}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                        <FieldError message={fe.socialLinks} />
+                        {signedIn.email ? (
+                          <div className="grid gap-4 sm:grid-cols-2" data-testid="sb-images">
+                            {(['logo', 'coverImage'] as const).map((field) => (
+                              <div key={field} className="space-y-1.5">
+                                <span className={inquiryLabelClass}>{field === 'logo' ? 'Logo' : 'Cover image'}</span>
+                                <label
+                                  htmlFor={`sb-${field}`}
+                                  className="flex h-24 cursor-pointer items-center justify-center overflow-hidden rounded-lg border border-dashed border-[#D1D5DB] bg-[#F8FAFC] text-[11px] font-bold text-[#6B7280]"
+                                >
+                                  {formData[field] ? (
+                                    <img src={formData[field]} alt="" className="h-full w-full object-cover" data-testid={`sb-${field}-preview`} />
+                                  ) : uploading === field ? (
+                                    'Uploading…'
+                                  ) : (
+                                    'Choose an image'
+                                  )}
+                                </label>
+                                <input
+                                  id={`sb-${field}`}
+                                  type="file"
+                                  accept="image/jpeg,image/png,image/webp,image/avif"
+                                  className="hidden"
+                                  disabled={Boolean(uploading)}
+                                  onChange={(e) => {
+                                    const file = e.target.files?.[0];
+                                    e.target.value = '';
+                                    if (file) void pickImage(field, file);
+                                  }}
+                                />
+                                {formData[field] && (
+                                  <button type="button" className="text-[11px] font-bold text-red-600" onClick={() => setFormData({ ...formData, [field]: '' })}>
+                                    Remove
+                                  </button>
+                                )}
+                                <FieldError message={fe[field]} />
+                              </div>
+                            ))}
+                            {uploadError && <p className="text-[11px] font-semibold text-red-600 sm:col-span-2">{uploadError}</p>}
+                          </div>
+                        ) : (
+                          <p className="text-[11.5px] text-[#6B7280]" data-testid="sb-images-signin">
+                            Sign in to add the brand's logo and cover image.
+                          </p>
+                        )}
+                      </fieldset>
+
                       <div className="space-y-1.5 text-left">
                         <label htmlFor="sb-reason" className={inquiryLabelClass}>{content.fields.reason.label}</label>
                         <textarea
@@ -333,7 +487,7 @@ export function SuggestBrandPage() {
 
                       <button
                         type="submit"
-                        disabled={inquiry.submitting}
+                        disabled={inquiry.submitting || Boolean(uploading)}
                         className="w-full py-3 bg-[#050514] hover:bg-orange-primary text-white text-[10px] font-black uppercase tracking-widest rounded-lg shadow-md transition-all flex items-center justify-center gap-2 group border-none cursor-pointer mt-4 disabled:opacity-60 disabled:cursor-wait"
                       >
                         {inquiry.submitting ? 'Sending…' : content.submitLabel}

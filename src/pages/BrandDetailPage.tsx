@@ -1169,6 +1169,7 @@ export function BrandDetailPage() {
           brand={brand}
           logoNode={renderBrandLogo(brand)}
           claimStatus={localClaimStatus}
+          verification={brand.ownership?.verification}
           categoryLabel={brand.category || "Fashion & Clothing"}
           onShare={() => {
             navigator.clipboard.writeText(window.location.href);

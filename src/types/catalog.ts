@@ -115,6 +115,8 @@ export type PublicOwnershipState = 'owned_verified' | 'owned' | 'claim_pending' 
 export interface PublicOwnership {
   state: PublicOwnershipState;
   claimable: boolean;
+  /** Owned but not verified: 'pending' while documents are in review, else 'none'. */
+  verification?: 'pending' | 'none';
 }
 
 export interface CatalogProduct {

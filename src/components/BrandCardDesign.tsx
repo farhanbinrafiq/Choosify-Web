@@ -1,4 +1,5 @@
 import { brandPath } from '../../lib/publicUrls';
+import { VerificationPill } from './VerificationPill';
 import React, { memo } from 'react';
 import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
@@ -18,7 +19,7 @@ export function brandSuccessScore(brand: {
   successScore?: number | null;
   recommended?: string;
   rating?: number;
-  ownership?: { state?: string } | null;
+  ownership?: { state?: string; verification?: 'pending' | 'none' } | null;
 }): number | null {
   // An unclaimed community profile is not a merchant: no score until a verified
   // owner exists (the card shows a greyed-out 0% ring instead).
@@ -83,7 +84,7 @@ interface BrandCardDesignProps {
     /** Defaults to true (existing directory-tile behavior) when omitted. */
     verified?: boolean;
     /** Server-computed ownership state; when present it decides the Verified / Unclaimed label. */
-    ownership?: { state?: string; claimable?: boolean } | null;
+    ownership?: { state?: string; claimable?: boolean; verification?: 'pending' | 'none' } | null;
   };
   onClick?: () => void;
   /**
@@ -302,6 +303,11 @@ export const BrandCardDesign = memo(function BrandCardDesign({
           )}
         </div>
         {verified && <p className="text-[11px] text-[#2323FF] mb-3">✓ Verified Brand</p>}
+        {ownershipState === 'owned' && (
+          <p className="mb-3">
+            <VerificationPill verification={brand.ownership?.verification} />
+          </p>
+        )}
         {unclaimed && (
           <p className="mb-3" data-testid="brand-card-unclaimed">
             <span className="inline-block rounded-full border border-[#E5E7EB] bg-[#F4F7F9] px-2 py-0.5 text-[10px] font-bold text-[#6B7280]">
