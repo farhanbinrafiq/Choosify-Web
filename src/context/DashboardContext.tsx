@@ -27,6 +27,7 @@ import { useMessagingPoll } from '../hooks/useMessagingPoll';
 import type { BookingOfferCard } from '../types/serviceBooking';
 import type { ManualOrderOfferCard } from '../types/manualOrder';
 import { operationsApi } from '../services/operationsApi';
+import { addressBookApi } from '../services/addressBookApi';
 import { useGlobalState } from './GlobalStateContext';
 import { shopperSignalsApi, toSignalItem, type ShopperSignalList } from '../services/shopperSignalsApi';
 import {
@@ -738,6 +739,69 @@ export const DashboardProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     localStorage.setItem(scopedKey(ADDRESS_STORAGE_KEY, userId), JSON.stringify(customerAddresses));
+  }, [customerAddresses, userId]);
+
+  // Address book lives on the server for signed-in shoppers (cross-device, and
+  // visible to Choosify staff); localStorage stays as the offline cache. On
+  // sign-in the server copy wins; an empty server copy is seeded once from
+  // this browser's saved addresses. Later edits are saved back (debounced).
+  const addressSync = useRef<{ userId?: string; ready: boolean; lastJson: string }>({ ready: false, lastJson: '' });
+  // Latest in-memory list: on sign-in the account's scoped copy is re-read into
+  // state a render later, so read it from here when the server answers rather
+  // than from localStorage at effect time.
+  const latestAddresses = useRef(customerAddresses);
+  latestAddresses.current = customerAddresses;
+  useEffect(() => {
+    if (!isLoggedIn || !userId || userId === 'guest') {
+      addressSync.current = { ready: false, lastJson: '' };
+      return;
+    }
+    let cancelled = false;
+    addressSync.current = { userId, ready: false, lastJson: '' };
+    // Right after a reload the session token may still be restoring: retry a few times.
+    const delays = [0, 800, 2000, 5000];
+    let timer: number | undefined;
+    const attempt = (n: number) => {
+      timer = window.setTimeout(async () => {
+        try {
+          const server = await addressBookApi.get();
+          if (cancelled) return;
+          if (server.length) {
+            const next = normalizeDefaultAddress(server);
+            addressSync.current = { userId, ready: true, lastJson: JSON.stringify(next) };
+            setCustomerAddresses(next);
+          } else {
+            const local = normalizeDefaultAddress(latestAddresses.current);
+            if (local.length) await addressBookApi.save(local);
+            addressSync.current = { userId, ready: true, lastJson: JSON.stringify(local) };
+          }
+        } catch {
+          // Not signed in yet / offline: retry, then keep the local copy until the next sign-in.
+          if (!cancelled && n + 1 < delays.length) attempt(n + 1);
+        }
+      }, delays[n]);
+    };
+    attempt(0);
+    return () => {
+      cancelled = true;
+      if (timer) window.clearTimeout(timer);
+    };
+  }, [isLoggedIn, userId]);
+
+  useEffect(() => {
+    const sync = addressSync.current;
+    if (!sync.ready || sync.userId !== userId) return;
+    const json = JSON.stringify(customerAddresses);
+    if (json === sync.lastJson) return;
+    const timer = window.setTimeout(() => {
+      addressBookApi
+        .save(customerAddresses)
+        .then(() => {
+          if (addressSync.current.userId === userId) addressSync.current.lastJson = json;
+        })
+        .catch(() => toast.error('Could not save your address book to your account. It is kept on this device.'));
+    }, 600);
+    return () => window.clearTimeout(timer);
   }, [customerAddresses, userId]);
 
   useEffect(() => {
