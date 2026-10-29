@@ -9,6 +9,7 @@ import {
   facebookSignIn as apiFacebookSignIn,
   type AuthMeResponse,
 } from './authApi';
+import { toast } from './notify';
 
 export const AUTH_TOKEN_KEY = 'choosify_auth_token';
 export const AUTH_LOGIN_FLAG_KEY = 'choosify_is_logged_in';
@@ -179,8 +180,16 @@ export async function resolveSessionUser(
   return { token, user };
 }
 
+/** Signing in during the inactive / in-deletion window reactivates the account (server side). */
+function welcomeBackIfReactivated(result: unknown) {
+  if ((result as { accountReactivated?: boolean } | null)?.accountReactivated) {
+    toast.success('Welcome back! Your account is active again.');
+  }
+}
+
 export async function signInWithEmailPassword(email: string, password: string): Promise<SessionIdentity> {
   const result = await apiLogin(email, password);
+  welcomeBackIfReactivated(result);
   return {
     uid: result.uid,
     email: result.email,
@@ -215,6 +224,7 @@ export async function registerWithEmailPassword(
  *  returns the same session payload as email/password login. */
 export async function signInWithGoogle(credential: string): Promise<SessionIdentity> {
   const result = await apiGoogleSignIn(credential);
+  welcomeBackIfReactivated(result);
   return {
     uid: result.uid,
     email: result.email,
@@ -226,6 +236,7 @@ export async function signInWithGoogle(credential: string): Promise<SessionIdent
 
 export async function signInWithFacebook(accessToken: string): Promise<SessionIdentity> {
   const result = await apiFacebookSignIn(accessToken);
+  welcomeBackIfReactivated(result);
   return {
     uid: result.uid,
     email: result.email,

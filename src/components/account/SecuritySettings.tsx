@@ -11,6 +11,7 @@ import {
   verifyLocalPasswordOtp,
   type AuthMeResponse,
 } from '../../lib/authApi';
+import AccountStatusSettings from './AccountStatusSettings';
 
 const PROVIDER_LABEL: Record<string, string> = { google: 'Google', facebook: 'Facebook' };
 
@@ -597,6 +598,8 @@ export default function SecuritySettings({ accountEmail }: { accountEmail: strin
           Adding a Choosify password doesn&apos;t disconnect Google — you can use either to sign in.
         </p>
       </Card>
+
+      <AccountStatusSettings />
 
       {modalOpen ? (
         <SetupPasswordModal

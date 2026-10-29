@@ -438,3 +438,16 @@ export async function changePassword(
 ): Promise<{ success: boolean; message?: string }> {
   return postAuthed('/auth/change-password', accessToken, { currentPassword, newPassword });
 }
+
+/** Take a break: the account becomes inactive until the owner signs in again. */
+export async function deactivateMyAccount(accessToken: string, reason: string): Promise<{ success: boolean }> {
+  return postAuthed('/auth/me/deactivate', accessToken, { reason });
+}
+
+/** Ask to delete the account: inactive now, deleted after 90 days unless the owner signs in again. */
+export async function requestMyAccountDeletion(
+  accessToken: string,
+  reason: string,
+): Promise<{ success: boolean; data?: { deletionDueAt?: string } }> {
+  return postAuthed('/auth/me/delete', accessToken, { reason });
+}
