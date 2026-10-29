@@ -37,6 +37,16 @@ function isCrawlerRequest(userAgent: string, pathname: string): boolean {
 
 async function startServer() {
   const app = express();
+  app.disable('x-powered-by');
+  // Baseline security headers for the storefront (the dashboard sets the same via helmet).
+  // No CSP here yet — it needs a tested allowlist for every third-party asset first.
+  app.use((_req, res, next) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+    if (isProduction) res.setHeader('Strict-Transport-Security', 'max-age=31536000');
+    next();
+  });
   const distPath = path.join(process.cwd(), 'dist');
   const assetRoot = isProduction ? distPath : path.join(process.cwd(), 'public');
 

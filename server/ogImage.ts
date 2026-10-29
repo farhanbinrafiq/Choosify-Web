@@ -106,11 +106,55 @@ function loadWordmarkDataUri(assetRoot: string): string | null {
   }
 }
 
-async function loadMediaDataUri(imageUrl: string, type: string): Promise<string | null> {
+/**
+ * The share image only ever embeds Choosify-hosted media. `image` comes from the
+ * query string, so anything else (internal addresses, IP literals, other sites,
+ * redirects, oversized files) is refused — the server must not fetch arbitrary URLs.
+ */
+const OG_IMAGE_HOSTS = new Set(
+  (process.env.OG_IMAGE_HOSTS || 'dashboard.choosify.bd,choosify.bd,www.choosify.bd,res.cloudinary.com')
+    .split(',')
+    .map((h) => h.trim().toLowerCase())
+    .filter(Boolean),
+);
+const OG_IMAGE_MAX_BYTES = 8 * 1024 * 1024;
+
+export function isAllowedOgImageUrl(raw: string): boolean {
   try {
-    const res = await fetch(imageUrl, { signal: AbortSignal.timeout(4000) });
+    const u = new URL(raw);
+    return u.protocol === 'https:' && !u.username && !u.password && !u.port && OG_IMAGE_HOSTS.has(u.hostname.toLowerCase());
+  } catch {
+    return false;
+  }
+}
+
+async function readCapped(res: Response, max: number): Promise<Buffer | null> {
+  const declared = Number(res.headers.get('content-length') || 0);
+  if (declared > max || !res.body) return null;
+  const chunks: Buffer[] = [];
+  let total = 0;
+  const reader = res.body.getReader();
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    total += value.byteLength;
+    if (total > max) {
+      await reader.cancel().catch(() => undefined);
+      return null;
+    }
+    chunks.push(Buffer.from(value));
+  }
+  return Buffer.concat(chunks);
+}
+
+async function loadMediaDataUri(imageUrl: string, type: string): Promise<string | null> {
+  if (!isAllowedOgImageUrl(imageUrl)) return null;
+  try {
+    const res = await fetch(imageUrl, { signal: AbortSignal.timeout(4000), redirect: 'error' });
     if (!res.ok) return null;
-    const arrayBuffer = await res.arrayBuffer();
+    const body = await readCapped(res, OG_IMAGE_MAX_BYTES);
+    if (!body) return null;
+    const arrayBuffer = body;
     const fit = type === 'brand' || type === 'creator' ? 'contain' : 'cover';
     const padded = await sharp(Buffer.from(arrayBuffer))
       .resize({
