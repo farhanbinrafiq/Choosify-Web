@@ -35,6 +35,11 @@ interface CreatorCollab {
   bgClass: string;
 }
 
+/** Verified = an approved document verification (server ownership state wins). */
+function isVerifiedCreator(c: { ownership?: { state?: string } | null; verifiedStatus?: boolean }): boolean {
+  return c.ownership?.state ? c.ownership.state === 'owned_verified' : c.verifiedStatus === true;
+}
+
 const CREATOR_COLLABS: CreatorCollab[] = [
   { id: 'creator-farhan', name: "Farhan Bin Rafiq", highlight: "PC Build Masterclass Sponsor", avatar: "https://res.cloudinary.com/djdyqr8yd/image/upload/v1781880900/FBR_n3eycm.png", bgClass: "bg-orange-primary/95" },
   { id: 'creator-sarah', name: "Sarah Jenkins", highlight: "Sustainable Monsoons Drop", avatar: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&h=300&q=80", bgClass: "bg-navy" },
@@ -65,28 +70,18 @@ export function CreatorsPage() {
   const [popularityFilter, setPopularityFilter] = useState<'all' | 'high' | 'normal'>('all');
   const [sortOption, setSortOption] = useState<string>(CREATOR_SORT_DEFAULT);
 
-  // Model-level augmentation matching BrandsPage visual cards rating, reviews structure
+  // No canonical creator ratings / review counts exist yet: the card shows none
+  // (null) instead of invented numbers. Hot / Featured come from the admin
+  // Featured flag and the Choosify score.
   const mappedCreators = React.useMemo(() => {
     return allCreators.map(c => {
-      let rating = 4.7;
-      let reviews = 85;
-      let isHot = Boolean(c.featuredFlag) || c.score >= 95;
-      let isFeatured = Boolean(c.featuredFlag) || c.score >= 90;
-
-      if (c.score >= 96) {
-        rating = 4.9;
-        reviews = 240;
-        isHot = true;
-      } else if (c.score >= 92) {
-        rating = 4.8;
-        reviews = 190;
-        isFeatured = true;
-      }
+      const isHot = Boolean(c.featuredFlag) || c.score >= 95;
+      const isFeatured = Boolean(c.featuredFlag) || c.score >= 90;
 
       return {
         ...c,
-        rating,
-        reviews,
+        rating: null as number | null,
+        reviews: null as number | null,
         isHot,
         isFeatured,
         featuredFlag: c.featuredFlag ?? isFeatured,
@@ -105,13 +100,13 @@ export function CreatorsPage() {
 
     // 1. Filter by Active Tab selection
     if (activeTab === 'Trending Creators') {
-      result = result.filter(c => c.isHot || c.rating >= 4.7);
+      result = result.filter(c => c.isHot);
     } else if (activeTab === 'Featured Creators') {
-      result = result.filter(c => c.isFeatured || c.rating >= 4.8);
+      result = result.filter(c => c.isFeatured);
     } else if (activeTab === 'Hot Deals Creators') {
       result = result.filter(c => c.isHot);
     } else if (activeTab === 'Top Rated Creators') {
-      result = result.filter(c => c.rating >= 4.8);
+      result = result.filter(c => c.score >= 90);
     }
 
     // 2. Filter by search query across Name, bestFor, handle, or bio
@@ -137,16 +132,16 @@ export function CreatorsPage() {
 
     // 5. Filter by Verification
     if (verificationFilter === 'verified') {
-      result = result.filter(c => c.id === 'creator-farhan' || c.id === 'creator-sarah' || c.id === 'creator-mily');
+      result = result.filter(c => isVerifiedCreator(c));
     } else if (verificationFilter === 'unverified') {
-      result = result.filter(c => c.id !== 'creator-farhan' && c.id !== 'creator-sarah' && c.id !== 'creator-mily');
+      result = result.filter(c => !isVerifiedCreator(c));
     }
 
     // 6. Filter by Popularity
     if (popularityFilter === 'high') {
-      result = result.filter(c => c.rating >= 4.8);
+      result = result.filter(c => c.score >= 90);
     } else if (popularityFilter === 'normal') {
-      result = result.filter(c => c.rating < 4.8);
+      result = result.filter(c => c.score < 90);
     }
 
     return applySortOption(

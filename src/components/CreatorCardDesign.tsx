@@ -57,6 +57,14 @@ function hashColor(seed: string): string {
 }
 
 /** Choosify.dc.html Creators List directory tile */
+/** "12.6K" / "1.2M" / "4,500" -> number (0 when it is not a count). */
+function parseCount(raw: string): number {
+  const m = raw.trim().replace(/,/g, '').match(/^(\d+(?:\.\d+)?)\s*([kKmM])?/);
+  if (!m) return 0;
+  const n = parseFloat(m[1]) * (m[2] ? (m[2].toLowerCase() === 'm' ? 1_000_000 : 1_000) : 1);
+  return Number.isFinite(n) ? Math.round(n) : 0;
+}
+
 export const CreatorCardDesign = memo(function CreatorCardDesign({
   creator,
   onClick,
@@ -68,17 +76,13 @@ export const CreatorCardDesign = memo(function CreatorCardDesign({
   const rating = creator.rating ? creator.rating : null;
   const reviewsCount = creator.reviews ? creator.reviews : null;
   const followersRaw = creator.followers;
-  const followers =
-    followersRaw === null
-      ? null
-      : typeof followersRaw === 'number'
-        ? followersRaw
-        : Math.max(
-            1200,
-            Math.round(
-              (reviewsCount || 85) * 48 + (Number(String(creator.id).replace(/\D/g, '')) || 0) % 9000,
-            ),
-          );
+  // The creator's own follower counts (summed across platforms) — never estimated.
+  const followers = (() => {
+    if (typeof followersRaw === 'number') return followersRaw > 0 ? followersRaw : null;
+    if (!followersRaw || typeof followersRaw !== 'object') return null;
+    const total = Object.values(followersRaw).reduce((sum, v) => sum + parseCount(String(v)), 0);
+    return total > 0 ? total : null;
+  })();
   const niche = creator.niche || creator.bestFor || creator.platforms?.[0] || 'Lifestyle';
   // Server ownership state wins; "Verified" only for an approved document verification.
   const verified = creator.ownership?.state

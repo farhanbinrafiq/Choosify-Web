@@ -19,63 +19,17 @@ type CreatorOverviewFeedProps = {
   onViewAllReviews?: () => void;
 };
 
-const EXPERTISE = [
-  { name: 'Smartphones', count: '128', icon: '📱' },
-  { name: 'Laptops', count: '96', icon: '💻' },
-  { name: 'PC Components', count: '82', icon: '🖥' },
-  { name: 'Audio', count: '76', icon: '🎧' },
-  { name: 'Cameras', count: '64', icon: '📷' },
-  { name: 'Gaming', count: '52', icon: '🎮' },
-];
-
-const WHY_FOLLOW = [
-  { icon: '🔎', title: 'In-Depth Research', sub: 'Detailed analysis and real world testing' },
-  { icon: '♡', title: 'Honest Reviews', sub: 'Unbiased opinions you can trust' },
-  { icon: '⚡', title: 'Smart Recommendations', sub: 'Curated picks based on your needs' },
-  { icon: '🔄', title: 'Always Updated', sub: 'Latest trends and market insights' },
-];
-
-const BRAND_PARTNERS = [
-  { name: 'SAMSUNG', color: '#1428A0' },
-  { name: 'mi Xiaomi', color: '#FF6900' },
-  { name: 'ASUS', color: '#1A1A2E' },
-  { name: 'SONY', color: '#000000' },
-  { name: 'DELL', color: '#0076CE' },
-  { name: 'acer', color: '#16A34A' },
-];
-
-const COLLAB_TYPES = [
-  'Product Reviews',
-  'Brand Stories',
-  'Buying Guides',
-  'Tech Analysis',
-  'Comparisons',
-  'Live Sessions',
-];
-
-const COMMUNITY = [
-  {
-    name: 'Tanvir Hossain',
-    initial: 'T',
-    rating: '★★★★★ 5/5',
-    text: "Farhan bhai's reviews are so detailed and honest. Always helps me make the right decision!",
-    ref: 'Samsung Galaxy S24 Ultra Review',
-  },
-  {
-    name: 'Nusrat Jahan',
-    initial: 'N',
-    rating: '★★★★★ 5/5',
-    text: 'The most reliable tech reviewer in Bangladesh. His buying guides are gold!',
-    ref: 'Best Laptop Guide 2025',
-  },
-  {
-    name: 'Rashed Ahmed',
-    initial: 'R',
-    rating: '★★★★★ 5/5',
-    text: 'Love how he explains everything in simple terms. Super helpful for beginners like me.',
-    ref: 'PC Build Guide',
-  },
-];
+/** Platforms the creator links to, when they have not listed platforms explicitly. */
+function platformsFromLinks(links: Creator['socialLinks']): string[] {
+  const names: Array<[keyof NonNullable<Creator['socialLinks']>, string]> = [
+    ['youtube', 'YouTube'],
+    ['facebook', 'Facebook'],
+    ['instagram', 'Instagram'],
+    ['tiktok', 'TikTok'],
+    ['linkedin', 'LinkedIn'],
+  ];
+  return names.filter(([k]) => String(links?.[k] || '').trim()).map(([, n]) => n);
+}
 
 type FeaturedEntry = {
   kind: CreatorContentKind;
@@ -135,40 +89,25 @@ export function CreatorOverviewFeed({
   const featured = useMemo(() => rankFeatured(creator, nowMs), [creator, nowMs]);
   const firstName = creator.name.split(' ')[0] || creator.name;
 
+  // Real data only: everything below comes from what the creator entered in
+  // Creator Studio. Missing fields are left out (never a demo placeholder).
+  const topics = (creator.bestForTags || []).map((t) => String(t).trim()).filter(Boolean);
+  const platforms = creator.platforms?.length ? creator.platforms : platformsFromLinks(creator.socialLinks);
   const overviewBlocks = [
-    {
-      icon: '📄',
-      title: 'Background & Bio',
-      text:
-        creator.bio ||
-        `Senior Tech Analyst & Digital Product Researcher with 10+ years of experience analyzing electronic imports, consumer durables, and PC components in the Bangladesh market.`,
-    },
-    {
-      icon: '📁',
-      title: 'Areas of Expertise',
-      text: (creator.bestForTags?.length
-        ? creator.bestForTags
-        : ['Smartphones', 'Laptops', 'PC Components', 'Audio']
-      ).join(', '),
-    },
-    {
-      icon: '▷',
-      title: 'Content Platforms',
-      text: (creator.platforms?.length ? creator.platforms : ['YouTube', 'Instagram', 'TikTok']).join(', '),
-    },
-  ];
+    { icon: '📄', title: 'Background & Bio', text: (creator.bio || '').trim() },
+    { icon: '📁', title: 'Areas of Expertise', text: topics.join(', ') },
+    { icon: '▷', title: 'Content Platforms', text: platforms.join(', ') },
+  ].filter((b) => b.text);
 
   const contactRows = [
-    { icon: '✉', label: 'Business Inquiries', value: creator.email || 'creator@choosify.bd' },
-    { icon: '⏱', label: 'Response Time', value: creator.responseTime || '24 - 48 hours' },
-    { icon: '✉', label: 'Preferred Contact', value: creator.preferredContact || 'Email' },
-    { icon: '📍', label: 'Location', value: creator.location || 'Dhaka, Bangladesh' },
-  ];
+    { icon: '✉', label: 'Business Inquiries', value: (creator.email || '').trim() },
+    { icon: '⏱', label: 'Response Time', value: (creator.responseTime || '').trim() },
+    { icon: '✉', label: 'Preferred Contact', value: (creator.preferredContact || '').trim() },
+    { icon: '📍', label: 'Location', value: (creator.location || '').trim() },
+  ].filter((r) => r.value);
 
-  const brandPartners =
-    creator.brandPartners?.length ? creator.brandPartners : BRAND_PARTNERS;
-  const collabTypes =
-    creator.collabTypes?.length ? creator.collabTypes : COLLAB_TYPES;
+  const brandPartners = creator.brandPartners || [];
+  const collabTypes = creator.collabTypes || [];
 
   const matchTags = (creator.bestForTags?.length ? creator.bestForTags : [creator.bestFor]).filter(Boolean);
   const recommendedProducts = useMemo(
@@ -212,6 +151,11 @@ export function CreatorOverviewFeed({
             VIEW ALL CONTENT →
           </button>
         </div>
+        {featured.length === 0 ? (
+          <p className="text-[12px] text-[#9AA0AC] py-3 m-0" data-testid="creator-no-content">
+            {firstName} has not published any content yet.
+          </p>
+        ) : null}
         <div className={CREATOR_FEED_GRID}>
           {featured.map((entry) => {
             const model = buildCreatorContentModel(entry.kind, entry.item, creator);
@@ -234,19 +178,17 @@ export function CreatorOverviewFeed({
       <section className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-4">
         <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-5">
           <h3 className="text-[13px] font-extrabold text-[#1A1A2E] mb-3.5">Expertise & Topics</h3>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {EXPERTISE.map((ex) => (
-              <div key={ex.name} className="flex items-center gap-2">
-                <div className="w-[30px] h-[30px] rounded-lg bg-[#F4F7F9] flex items-center justify-center text-[13px] shrink-0">
-                  {ex.icon}
-                </div>
-                <div>
-                  <div className="text-[11.5px] font-bold text-[#1A1A2E]">{ex.name}</div>
-                  <div className="text-[10px] text-[#9AA0AC]">{ex.count} Guides</div>
-                </div>
-              </div>
-            ))}
-          </div>
+          {topics.length ? (
+            <div className="flex flex-wrap gap-2" data-testid="creator-topics">
+              {topics.map((t) => (
+                <span key={t} className="bg-[#F4F7F9] text-[11px] font-semibold text-[#1A1A2E] px-3 py-1.5 rounded-full">
+                  {t}
+                </span>
+              ))}
+            </div>
+          ) : (
+            <p className="text-[12px] text-[#9AA0AC] py-3 m-0">No topics added yet.</p>
+          )}
         </div>
         <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-5">
           <div className="flex justify-between items-baseline mb-3.5">
@@ -264,28 +206,13 @@ export function CreatorOverviewFeed({
         </div>
       </section>
 
-      {/* Why Follow */}
-      <section className="choosify-dark-surface rounded-xl px-[30px] py-[26px] text-white overflow-hidden">
-        <h3 className="text-sm font-extrabold mb-[18px]">Why Follow {firstName}?</h3>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {WHY_FOLLOW.map((wf) => (
-            <div key={wf.title} className="flex gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-[13px] shrink-0">
-                {wf.icon}
-              </div>
-              <div>
-                <div className="text-xs font-bold mb-0.5">{wf.title}</div>
-                <div className="text-[10.5px] text-white/50 leading-snug">{wf.sub}</div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* Creator Overview + Contact & Reach — side by side, styled like Brand/Product Overview cards */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-[18px]">
           <OverviewCardHeader title="Creator Overview" />
+          {overviewBlocks.length === 0 ? (
+            <p className="text-[11px] text-[#9AA0AC] m-0">{firstName} has not added an overview yet.</p>
+          ) : null}
           {overviewBlocks.map((ob) => (
             <div key={ob.title} className="mb-3.5 last:mb-0">
               <div className="text-[11.5px] font-bold text-[#1A1A2E] flex items-center gap-1.5 mb-1">
@@ -297,6 +224,9 @@ export function CreatorOverviewFeed({
         </div>
         <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-[18px]">
           <OverviewCardHeader title="Contact & Reach" />
+          {contactRows.length === 0 ? (
+            <p className="text-[11px] text-[#9AA0AC] m-0">No contact details shared yet.</p>
+          ) : null}
           {contactRows.map((cr) => (
             <div key={cr.label} className="flex items-start gap-2 mb-3 last:mb-0">
               <div className="text-xs shrink-0">{cr.icon}</div>
@@ -309,9 +239,12 @@ export function CreatorOverviewFeed({
         </div>
       </section>
 
-      {/* Partnerships & Collaborations — own wider section below */}
-      <section className="bg-white border border-[#E8EDF2] rounded-[10px] p-6">
+      {/* Partnerships & Collaborations — only what the creator has listed */}
+      {brandPartners.length > 0 || collabTypes.length > 0 ? (
+      <section className="bg-white border border-[#E8EDF2] rounded-[10px] p-6" data-testid="creator-partnerships">
         <OverviewCardHeader title="Partnerships & Collaborations" />
+        {brandPartners.length > 0 ? (
+        <>
         <div className="text-[10px] font-bold text-[#9AA0AC] mb-2">TOP BRAND PARTNERS</div>
         <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-2.5 mb-5">
           {brandPartners.map((bp) => (
@@ -324,6 +257,10 @@ export function CreatorOverviewFeed({
             </div>
           ))}
         </div>
+        </>
+        ) : null}
+        {collabTypes.length > 0 ? (
+        <>
         <div className="text-[10px] font-bold text-[#9AA0AC] mb-2">COLLABORATION TYPES</div>
         <div className="flex flex-wrap gap-2">
           {collabTypes.map((ct) => (
@@ -335,47 +272,10 @@ export function CreatorOverviewFeed({
             </span>
           ))}
         </div>
+        </>
+        ) : null}
       </section>
-
-      {/* Community Says */}
-      <section>
-        <div className="flex justify-between items-baseline mb-3.5">
-          <h2 className="text-sm font-extrabold text-[#1A1A2E]">What The Community Says</h2>
-          <button
-            type="button"
-            onClick={onViewAllReviews}
-            className="text-[11.5px] font-bold text-[#1A1A2E] hover:text-[#EF3C23] bg-transparent border-0 cursor-pointer"
-          >
-            VIEW ALL REVIEWS →
-          </button>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
-          {COMMUNITY.map((cs) => (
-            <div key={cs.name} className="bg-white border border-[#E8EDF2] rounded-[10px] p-4">
-              <div className="flex items-center justify-between mb-2.5">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-full bg-[#FF5B00] text-white flex items-center justify-center text-[11px] font-extrabold shrink-0">
-                    {cs.initial}
-                  </div>
-                  <div>
-                    <div className="text-xs font-bold text-[#1A1A2E] mb-px">{cs.name}</div>
-                    <div className="flex items-center gap-0.5 text-[10px] text-[#2323FF] font-bold">
-                      <svg width="10" height="10" viewBox="0 0 20 20" fill="#2323FF" aria-hidden>
-                        <circle cx="10" cy="10" r="9" />
-                        <path d="M6 10l3 3 5-6" stroke="#fff" strokeWidth="2" fill="none" />
-                      </svg>
-                      Verified Buyer
-                    </div>
-                  </div>
-                </div>
-                <div className="text-[#FBBF24] text-[11px] font-bold shrink-0">{cs.rating}</div>
-              </div>
-              <p className="text-[11.5px] text-[#374151] leading-relaxed m-0 mb-2">{cs.text}</p>
-              <div className="text-[10px] text-[#9AA0AC] pt-2 border-t border-[#F1F1F3]">{cs.ref}</div>
-            </div>
-          ))}
-        </div>
-      </section>
+      ) : null}
 
       {/* Recommendation From This Creator — products row, then brands row, both universal cards */}
       {(recommendedProducts.length > 0 || recommendedBrands.length > 0) && (

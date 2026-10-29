@@ -290,7 +290,7 @@ export function CreatorProfilePage() {
             { icon: '✍', label: 'Blogs', value: String(creator.blogs?.length ?? 0) },
             { icon: '♥', label: 'Followers', value: String(followersDisplay).replace(' Base', '') },
             { icon: '★', label: 'Reviews', value: '—' },
-            { icon: '🏷', label: 'Best for', value: String(creator.bestFor || 'Tech') },
+            { icon: '🏷', label: 'Best for', value: String(creator.bestFor || '—') },
           ]}
           extraActions={
             <>
@@ -440,9 +440,14 @@ export function CreatorProfilePage() {
                  <div className="text-[13px] text-[#4B5563] leading-relaxed space-y-4">
                    <p>{creator.bio}</p>
                    <p>
-                     {(creator as { role?: string }).role || 'Creator'} ·{' '}
-                     {(creator as { location?: string }).location || 'Dhaka, Bangladesh'} · Best for{' '}
-                     {creator.bestFor}.
+                     {[
+                       (creator as { role?: string }).role || 'Creator',
+                       (creator as { location?: string }).location,
+                       creator.bestFor ? `Best for ${creator.bestFor}` : '',
+                     ]
+                       .filter(Boolean)
+                       .join(' · ')}
+                     .
                    </p>
                    {Array.isArray((creator as { brandPartners?: { name: string; color?: string }[] }).brandPartners) &&
                      (creator as { brandPartners?: { name: string; color?: string }[] }).brandPartners!.length > 0 && (

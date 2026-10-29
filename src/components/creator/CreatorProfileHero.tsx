@@ -27,14 +27,6 @@ export interface CreatorProfileHeroProps {
   extraActions?: React.ReactNode;
 }
 
-const DEFAULT_SCORE_ROWS = [
-  { label: 'Accuracy', pct: '96%', value: '4.9' },
-  { label: 'Depth', pct: '94%', value: '4.8' },
-  { label: 'Clarity', pct: '92%', value: '4.7' },
-  { label: 'Trust', pct: '98%', value: '4.9' },
-  { label: 'Value', pct: '90%', value: '4.6' },
-];
-
 /** Choosify.dc.html Creator Profile hero — cover constrained to feed silhouette + circular avatar + trust/info cards */
 export function CreatorProfileHero({
   creator,
@@ -59,7 +51,8 @@ export function CreatorProfileHero({
 
   const resolvedSocials =
     socialLinks ||
-    profileSocialLinksFromCatalog(creator?.socialLinks);
+    // The creator's own links only — never Choosify's accounts as a stand-in.
+    profileSocialLinksFromCatalog(creator?.socialLinks, []);
 
   const initial = String(creator.name || 'C')
     .split(/\s+/)
@@ -71,17 +64,17 @@ export function CreatorProfileHero({
   const info =
     facts ||
     [
-      { icon: '📹', label: 'Guides', value: String(creator.guidesCount ?? creator.contentCount ?? '48') },
-      { icon: '👁', label: 'Views', value: String(creator.views ?? '2.1M') },
-      { icon: '♥', label: 'Followers', value: String(creator.followers ?? '120K') },
-      { icon: '★', label: 'Reviews', value: String(creator.reviewsCount ?? '860') },
-      { icon: '🏷', label: 'Niche', value: String(creator.bestFor ?? creator.niche ?? 'Tech') },
-      { icon: '📍', label: 'Based in', value: String(creator.location ?? 'Dhaka') },
+      { icon: '📹', label: 'Guides', value: String(creator.guidesCount ?? creator.contentCount ?? 0) },
+      { icon: '👁', label: 'Views', value: String(creator.views ?? '—') },
+      { icon: '♥', label: 'Followers', value: '—' },
+      { icon: '★', label: 'Reviews', value: String(creator.reviewsCount ?? '—') },
+      { icon: '🏷', label: 'Niche', value: String(creator.bestFor || creator.niche || '—') },
+      { icon: '📍', label: 'Based in', value: String(creator.location || '—') },
     ];
 
   // Registered username only (matches the URL); no fallback to the free-text display handle.
   const username = publicUsernameLabel(creator);
-  const title = creator.title || creator.role || 'Creator & Product Researcher';
+  const title = creator.title || creator.role || 'Creator';
 
   return (
     <div className="bg-choosify-feed">
@@ -130,8 +123,8 @@ export function CreatorProfileHero({
             </div>
             <div className="text-[13px] text-[#2323FF] font-semibold">{title}</div>
             <div className="text-[12.5px] text-[#9AA0AC] mb-2.5">
-              {username && <span data-testid="creator-username">{username} · </span>}
-              {creator.location || 'Dhaka, Bangladesh'}
+              {username && <span data-testid="creator-username">{username}{creator.location ? ' · ' : ''}</span>}
+              {creator.location || null}
             </div>
             {claimStatus === 'verified' && (
               <div className="inline-flex items-center gap-1.5 text-[10px] font-bold text-[#2323FF] mb-2">
@@ -212,18 +205,10 @@ export function CreatorProfileHero({
           <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-5 md:w-[300px] shadow-[0_2px_10px_rgba(0,0,0,0.03)] shrink-0">
             <div className="text-[11px] font-extrabold text-[#9AA0AC] tracking-wide mb-2.5">TRUST SCORE</div>
             <div className="flex items-baseline gap-2 mb-4">
-              <div className="text-[30px] font-extrabold text-[#1A1A2E]">{trustScore}</div>
-              <div className="text-[11.5px] text-[#9AA0AC]">/5 · {reviewCountLabel}</div>
+              <div className="text-[30px] font-extrabold text-[#1A1A2E]">{trustScore > 0 ? trustScore : '—'}</div>
+              <div className="text-[11.5px] text-[#9AA0AC]">{trustScore > 0 ? `/5 · ${reviewCountLabel}` : 'Not scored yet'}</div>
             </div>
-            {DEFAULT_SCORE_ROWS.map((r) => (
-              <div key={r.label} className="flex items-center gap-2.5 mb-2">
-                <div className="text-[11px] text-[#4B5563] font-semibold w-[74px]">{r.label}</div>
-                <div className="flex-1 h-1.5 bg-[#F1F1F3] rounded-sm overflow-hidden">
-                  <div className="h-full bg-[#2323FF] rounded-sm" style={{ width: r.pct }} />
-                </div>
-                <div className="text-[11px] font-extrabold text-[#1A1A2E] w-5 text-right">{r.value}</div>
-              </div>
-            ))}
+            {/* No per-dimension breakdown is recorded yet — never show invented sub-scores. */}
           </div>
 
           <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-5 flex-1 shadow-[0_2px_10px_rgba(0,0,0,0.03)]">
