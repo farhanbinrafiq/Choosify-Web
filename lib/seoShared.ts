@@ -1,6 +1,7 @@
 /** Server-safe SEO constants shared by Vercel API routes and the client bundle. */
 
-export const SITE_URL = 'https://www.choosify.bd';
+/** Canonical origin. www.choosify.bd 301-redirects here (server.ts). */
+export const SITE_URL = 'https://choosify.bd';
 export const SITE_NAME = 'Choosify';
 export const SITE_TAGLINE = 'Choosify — Bangladesh’s Smartest Product Discovery Platform';
 export const SITE_DEFAULT_DESCRIPTION =
@@ -50,6 +51,15 @@ export const NOINDEX_PATH_PREFIXES = [
   '/profile',
   '/overview',
   '/marketing',
+  '/claim',
+  '/cms-preview',
+  '/forgot-password',
+  '/reset-password',
+  '/verify-email',
+  '/invoice',
+  '/orders',
+  '/payment',
+  '/warranty-claims',
 ];
 
 export const SITEMAP_STATIC_PATHS: Array<{

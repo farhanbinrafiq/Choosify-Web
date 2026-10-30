@@ -194,7 +194,6 @@ export function CreatorReviewsPreview({
   if (preview.totalCount === 0 && !legacyCreatorContent?.length) {
     return (
       <section
-        id="influencer-reviews-section"
         className={cn(
           'w-full rounded-xl border border-dashed border-[#E8EDF2] bg-white p-6 text-center',
           className,
@@ -216,7 +215,6 @@ export function CreatorReviewsPreview({
 
   return (
     <section
-      id="influencer-reviews-section"
       className={cn('w-full rounded-xl border border-[#E8EDF2] bg-white p-4 sm:p-5', className)}
       aria-labelledby="creator-reviews-preview-heading"
     >

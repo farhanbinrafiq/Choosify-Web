@@ -15,6 +15,7 @@ import { HomePopularServicesSection } from '../components/home/sections/HomePopu
 import { HomeRecentlyViewedSection } from '../components/home/sections/HomeRecentlyViewedSection';
 import { getOrderedHomeSectionIds } from '../utils/homepageCms';
 import { CtaBannerSlot } from '../components/CtaBannerSlot';
+import { SITE_TAGLINE } from '../lib/seoConfig';
 
 /**
  * Homepage — layout sourced from Choosify.dc.html Home screen.
@@ -120,6 +121,8 @@ export function HomePage() {
 
   return (
     <HomepageLayout>
+      {/* The hero is image/video only, so the page heading is for screen readers and crawlers. */}
+      <h1 className="sr-only">{SITE_TAGLINE}</h1>
       {/* Hero locked at top when visible — not reordered with main sections */}
       {data.sectionVisible('hero') && (
         <div id="home-top">

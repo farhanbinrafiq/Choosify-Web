@@ -4,22 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Global defaults (crawlers + first paint). PageSeo updates these per route. -->
-    <title>Choosify — Bangladesh’s Smartest Product Discovery Platform</title>
-    <meta
-      name="description"
-      content="Compare verified brands, discover trusted products, and shop with confidence on Choosify — Bangladesh's product &amp; service discovery platform."
-    />
     <meta name="author" content="Choosify" />
     <meta name="application-name" content="Choosify" />
     <meta name="theme-color" content="#18154C" />
     <meta name="msapplication-TileColor" content="#18154C" />
     <meta name="msapplication-tap-highlight" content="no" />
+
+    <!-- Homepage defaults. In production server.ts replaces everything between
+         the seo markers with the requested page's own tags; PageSeo keeps them
+         in sync after client-side navigation. Keep both markers. -->
+    <!-- seo:start -->
+    <title>Choosify — Bangladesh’s Smartest Product Discovery Platform</title>
+    <meta
+      name="description"
+      content="Compare verified brands, discover trusted products, and shop with confidence on Choosify — Bangladesh's product &amp; service discovery platform."
+    />
     <meta
       name="robots"
       content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1"
     />
-    <link rel="canonical" href="https://www.choosify.bd/" />
+    <link rel="canonical" href="https://choosify.bd/" />
 
     <!-- Open Graph defaults -->
     <meta property="og:type" content="website" />
@@ -30,9 +34,9 @@
       property="og:description"
       content="Compare verified brands, discover trusted products, and shop with confidence on Choosify — Bangladesh's product &amp; service discovery platform."
     />
-    <meta property="og:url" content="https://www.choosify.bd/" />
-    <meta property="og:image" content="https://www.choosify.bd/og/og-image-v2.png" />
-    <meta property="og:image:secure_url" content="https://www.choosify.bd/og/og-image-v2.png" />
+    <meta property="og:url" content="https://choosify.bd/" />
+    <meta property="og:image" content="https://choosify.bd/og/og-image-v2.png" />
+    <meta property="og:image:secure_url" content="https://choosify.bd/og/og-image-v2.png" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content="Choosify — buy ORIGINAL" />
@@ -47,8 +51,9 @@
       name="twitter:description"
       content="Compare verified brands, discover trusted products, and shop with confidence on Choosify."
     />
-    <meta name="twitter:image" content="https://www.choosify.bd/og/og-image-v2.png" />
+    <meta name="twitter:image" content="https://choosify.bd/og/og-image-v2.png" />
     <meta name="twitter:image:alt" content="Choosify — buy ORIGINAL" />
+    <!-- seo:end -->
 
     <!-- PWA -->
     <meta name="apple-mobile-web-app-capable" content="yes" />

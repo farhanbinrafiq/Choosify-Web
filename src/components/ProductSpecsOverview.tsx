@@ -22,7 +22,6 @@ export function ProductSpecsOverview({
 }: ProductSpecsOverviewProps) {
   return (
     <section
-      id="product-specs-section"
       className="bg-white rounded-[5px] p-4 sm:p-6 md:p-8 border border-gray-100 shadow-sm scroll-mt-36 w-full text-left overflow-hidden"
     >
       <div className="text-center mb-6 sm:mb-8 border-b border-gray-100 pb-5">

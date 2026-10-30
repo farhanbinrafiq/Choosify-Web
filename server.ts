@@ -10,12 +10,18 @@
  * it delegates to Vite's dev middleware, matching the pattern already used by
  * the Admin repo's server.ts.
  */
+import fs from 'fs';
 import path from 'path';
 import express from 'express';
 import { createServer } from 'http';
-import { SOCIAL_CRAWLER_UA_PATTERN } from './lib/seoShared';
-import { buildShareHtml } from './server/shareHtml';
+import { SITE_URL, SOCIAL_CRAWLER_UA_PATTERN } from './lib/seoShared';
+import { buildShareHtml, injectSeoHead, resolvePageMeta } from './server/shareHtml';
+import { buildRobotsTxt, buildSitemapXml } from './server/seoRoutes';
 import { generateOgImage } from './server/ogImage';
+
+/** www.choosify.bd -> choosify.bd (the canonical host in SITE_URL). */
+const CANONICAL_HOST = new URL(SITE_URL).host;
+const WWW_HOST = `www.${CANONICAL_HOST}`;
 
 const PORT = Number(process.env.PORT) || 4000;
 const HOST = process.env.HOST || '127.0.0.1'; // Production traffic reaches this server through the local Nginx reverse proxy.
@@ -38,6 +44,14 @@ function isCrawlerRequest(userAgent: string, pathname: string): boolean {
 async function startServer() {
   const app = express();
   app.disable('x-powered-by');
+  // One public host: Nginx forwards both choosify.bd and www.choosify.bd here
+  // with the original Host header; www is permanently redirected, keeping the
+  // full path and query string.
+  app.use((req, res, next) => {
+    const host = String(req.headers.host || '').toLowerCase().replace(/:\d+$/, '');
+    if (host !== WWW_HOST) return next();
+    res.redirect(req.method === 'GET' || req.method === 'HEAD' ? 301 : 308, `${SITE_URL}${req.originalUrl}`);
+  });
   // Baseline security headers for the storefront (the dashboard sets the same via helmet).
   // No CSP here yet — it needs a tested allowlist for every third-party asset first.
   app.use((_req, res, next) => {
@@ -69,6 +83,26 @@ async function startServer() {
     } catch (error) {
       console.error('[api/og]', error);
       res.status(500).send('Failed to generate OG image');
+    }
+  });
+
+  app.get('/robots.txt', (_req, res) => {
+    res.setHeader('Content-Type', 'text/plain; charset=utf-8');
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.end(buildRobotsTxt());
+  });
+
+  app.get('/sitemap.xml', async (_req, res) => {
+    try {
+      const xml = await buildSitemapXml();
+      res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+      res.setHeader('Cache-Control', 'public, max-age=600');
+      res.end(xml);
+    } catch (error) {
+      // 503 (retry later), never a partial sitemap that would drop live pages.
+      console.error('[sitemap]', error);
+      res.setHeader('Retry-After', '600');
+      res.status(503).type('text/plain').send('Sitemap temporarily unavailable');
     }
   });
 
@@ -121,9 +155,15 @@ async function startServer() {
     // default 'ignore' silently skips any path with a dot-prefixed segment
     // and falls through to the SPA catch-all below instead of 404ing.
     app.use(express.static(distPath, { index: false, maxAge: '1h', dotfiles: 'allow' }));
-    app.use((_req, res) => {
+    // Every page gets its own title, description, canonical, robots and
+    // Open Graph tags in the HTML itself (PageSeo keeps them in sync after
+    // client-side navigation).
+    const indexHtml = fs.readFileSync(path.join(distPath, 'index.html'), 'utf8');
+    app.use(async (req, res) => {
       res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
-      res.sendFile(path.join(distPath, 'index.html'));
+      const search = req.url.includes('?') ? req.url.slice(req.url.indexOf('?')) : '';
+      const meta = await resolvePageMeta(req.path, search);
+      res.type('html').send(injectSeoHead(indexHtml, meta));
     });
   }
 

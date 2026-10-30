@@ -7,7 +7,9 @@ import {
   CATALOG_API_BASE_URL,
   DEFAULT_OG_IMAGE,
   SITE_LOCALE,
+  SITE_DEFAULT_DESCRIPTION,
   SITE_NAME,
+  SITE_TAGLINE,
   SITE_THEME_COLOR,
   SITE_TWITTER_HANDLE,
   SITE_URL,
@@ -86,7 +88,39 @@ async function entityViaHandleResolver<T extends { id: string }>(
   return catalogEntityForHandleResolution(asPublicHandleResolution(body?.data, type), type, list);
 }
 
-async function fetchCatalogJson(path: string): Promise<any> {
+/**
+ * Catalog reads are cached briefly: page HTML for every visitor now carries
+ * server-resolved metadata, so a page load must not wait on the catalog API
+ * each time. Fresh for CATALOG_CACHE_TTL_MS, then served stale while one
+ * background refresh runs; a failed refresh keeps the last good value.
+ * Failures (null) are never cached.
+ */
+const CATALOG_CACHE_TTL_MS = 120_000;
+const CATALOG_CACHE_MAX_ENTRIES = 2000;
+const catalogCache = new Map<string, { at: number; value: any; refreshing?: Promise<any> }>();
+
+async function loadCatalogJson(path: string): Promise<any> {
+  const value = await fetchCatalogJsonUncached(path);
+  if (value !== null) {
+    if (catalogCache.size >= CATALOG_CACHE_MAX_ENTRIES) catalogCache.clear();
+    catalogCache.set(path, { at: Date.now(), value });
+  } else {
+    const hit = catalogCache.get(path);
+    if (hit) hit.refreshing = undefined;
+  }
+  return value;
+}
+
+export async function fetchCatalogJson(path: string): Promise<any> {
+  const hit = catalogCache.get(path);
+  if (!hit) return loadCatalogJson(path);
+  if (Date.now() - hit.at >= CATALOG_CACHE_TTL_MS && !hit.refreshing) {
+    hit.refreshing = loadCatalogJson(path).catch(() => null);
+  }
+  return hit.value;
+}
+
+async function fetchCatalogJsonUncached(path: string): Promise<any> {
   try {
     const res = await fetch(`${CATALOG_API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`, {
       headers: { Accept: 'application/json' },
@@ -105,16 +139,20 @@ async function fetchCatalogJson(path: string): Promise<any> {
   }
 }
 
-function listFrom(body: any): any[] {
+export function listFrom(body: any): any[] {
   return Array.isArray(body?.data) ? body.data : Array.isArray(body) ? body : [];
 }
 
-/** Every product, paged exactly like the storefront's catalogApi.listProducts (same order). */
-async function fetchAllCatalogProducts(): Promise<any[]> {
+/**
+ * Every product, paged exactly like the storefront's catalogApi.listProducts (same order).
+ * `strict` throws when a page cannot be read instead of returning a partial list.
+ */
+export async function fetchAllCatalogProducts(options?: { strict?: boolean }): Promise<any[]> {
   const pageSize = 100;
   const all: any[] = [];
   for (let offset = 0, total = Infinity; offset < total; offset += pageSize) {
     const body = await fetchCatalogJson(`/catalog/products?limit=${pageSize}&offset=${offset}`);
+    if (body === null && options?.strict) throw new Error('Catalog products unavailable');
     const rows = listFrom(body);
     all.push(...rows);
     total = typeof body?.meta?.total === 'number' ? body.meta.total : all.length;
@@ -124,7 +162,7 @@ async function fetchAllCatalogProducts(): Promise<any[]> {
   return all;
 }
 
-type ShareMeta = {
+export type ShareMeta = {
   title: string;
   description: string;
   ogImage: string;
@@ -339,6 +377,78 @@ async function resolveShareMeta(pathname: string, search: string): Promise<Share
   };
 }
 
+/** Every SEO/social tag the SPA's PageSeo also manages, for one page. */
+export function renderSeoHeadTags(meta: ShareMeta, indent = '    '): string {
+  return [
+    `<title>${escapeHtml(meta.title)}</title>`,
+    `<meta name="description" content="${escapeHtml(meta.description)}" />`,
+    `<meta name="robots" content="${meta.noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'}" />`,
+    `<link rel="canonical" href="${escapeHtml(meta.canonical)}" />`,
+    `<meta property="og:type" content="${meta.ogType}" />`,
+    `<meta property="og:site_name" content="${SITE_NAME}" />`,
+    `<meta property="og:locale" content="${SITE_LOCALE}" />`,
+    `<meta property="og:title" content="${escapeHtml(meta.title)}" />`,
+    `<meta property="og:description" content="${escapeHtml(meta.description)}" />`,
+    `<meta property="og:url" content="${escapeHtml(meta.canonical)}" />`,
+    `<meta property="og:image" content="${escapeHtml(meta.ogImage)}" />`,
+    `<meta property="og:image:secure_url" content="${escapeHtml(meta.ogImage)}" />`,
+    `<meta property="og:image:width" content="${OG_IMAGE_WIDTH}" />`,
+    `<meta property="og:image:height" content="${OG_IMAGE_HEIGHT}" />`,
+    `<meta property="og:image:alt" content="${escapeHtml(meta.title)}" />`,
+    `<meta property="og:image:type" content="image/png" />`,
+    `<meta name="twitter:card" content="summary_large_image" />`,
+    `<meta name="twitter:site" content="${SITE_TWITTER_HANDLE}" />`,
+    `<meta name="twitter:creator" content="${SITE_TWITTER_HANDLE}" />`,
+    `<meta name="twitter:title" content="${escapeHtml(meta.title)}" />`,
+    `<meta name="twitter:description" content="${escapeHtml(meta.description)}" />`,
+    `<meta name="twitter:image" content="${escapeHtml(meta.ogImage)}" />`,
+    `<meta name="twitter:image:alt" content="${escapeHtml(meta.title)}" />`,
+  ].join(`\n${indent}`);
+}
+
+/** Longest a page load waits for catalog-backed metadata before using the path-only fallback. */
+const PAGE_META_BUDGET_MS = 2500;
+
+/**
+ * Metadata for a page request. Never the homepage's canonical for another
+ * route: if the catalog is slow, the fallback still uses this page's own
+ * canonical path and noindex rule (with the site-wide title/description).
+ */
+export async function resolvePageMeta(pathname: string, search: string): Promise<ShareMeta> {
+  const path = pathname || '/';
+  const fallback: ShareMeta = {
+    title: SITE_TAGLINE,
+    description: SITE_DEFAULT_DESCRIPTION,
+    ogImage: DEFAULT_OG_IMAGE,
+    ogType: 'website',
+    canonical: absoluteUrl(normalizePath(path, search)),
+    noindex: shouldNoIndex(path),
+  };
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    return await Promise.race([
+      resolveShareMeta(path, search),
+      new Promise<ShareMeta>((resolve) => {
+        timer = setTimeout(() => resolve(fallback), PAGE_META_BUDGET_MS);
+      }),
+    ]);
+  } catch {
+    return fallback;
+  } finally {
+    if (timer) clearTimeout(timer);
+  }
+}
+
+const SEO_BLOCK = /<!-- seo:start -->[\s\S]*?<!-- seo:end -->/;
+
+/** Replace index.html's default SEO block (between the seo markers) with this page's tags. */
+export function injectSeoHead(html: string, meta: ShareMeta): string {
+  if (!SEO_BLOCK.test(html)) return html;
+  return html.replace(SEO_BLOCK, () => `<!-- seo:start -->
+    ${renderSeoHeadTags(meta)}
+    <!-- seo:end -->`);
+}
+
 export async function buildShareHtml(pathname: string, search: string): Promise<string> {
   const meta = await resolveShareMeta(pathname || '/', search);
 
@@ -347,30 +457,8 @@ export async function buildShareHtml(pathname: string, search: string): Promise<
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>${escapeHtml(meta.title)}</title>
-  <meta name="description" content="${escapeHtml(meta.description)}" />
   <meta name="theme-color" content="${SITE_THEME_COLOR}" />
-  <meta name="robots" content="${meta.noindex ? 'noindex, nofollow' : 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1'}" />
-  <link rel="canonical" href="${escapeHtml(meta.canonical)}" />
-  <meta property="og:type" content="${meta.ogType}" />
-  <meta property="og:site_name" content="${SITE_NAME}" />
-  <meta property="og:locale" content="${SITE_LOCALE}" />
-  <meta property="og:title" content="${escapeHtml(meta.title)}" />
-  <meta property="og:description" content="${escapeHtml(meta.description)}" />
-  <meta property="og:url" content="${escapeHtml(meta.canonical)}" />
-  <meta property="og:image" content="${escapeHtml(meta.ogImage)}" />
-  <meta property="og:image:secure_url" content="${escapeHtml(meta.ogImage)}" />
-  <meta property="og:image:width" content="${OG_IMAGE_WIDTH}" />
-  <meta property="og:image:height" content="${OG_IMAGE_HEIGHT}" />
-  <meta property="og:image:alt" content="${escapeHtml(meta.title)}" />
-  <meta property="og:image:type" content="image/png" />
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:site" content="${SITE_TWITTER_HANDLE}" />
-  <meta name="twitter:creator" content="${SITE_TWITTER_HANDLE}" />
-  <meta name="twitter:title" content="${escapeHtml(meta.title)}" />
-  <meta name="twitter:description" content="${escapeHtml(meta.description)}" />
-  <meta name="twitter:image" content="${escapeHtml(meta.ogImage)}" />
-  <meta name="twitter:image:alt" content="${escapeHtml(meta.title)}" />
+  ${renderSeoHeadTags(meta, '  ')}
   <meta http-equiv="refresh" content="0;url=${escapeHtml(meta.canonical)}" />
 </head>
 <body>
