@@ -31,12 +31,16 @@ function fallbackSubtitle(result: ProductComparisonResult): string {
 function brandFallbackSubtitle(result: BrandComparisonResult): string {
   const { filter } = result;
   switch (filter.fallbackTier) {
+    // fallbackTier is the least-similar match shown; candidates are never unrelated brands.
     case 'primary':
-      return `Brands in ${filter.category} within ${filter.ratingTolerance.toFixed(1)} rating points`;
+      return `Brands in ${filter.category} with a similar rating`;
     case 'tier-0.5':
-      return `Widened to within 0.5 rating points to find enough matches`;
+    case 'same-category':
+      return `Other brands in ${filter.category}`;
     case 'parent-category':
-      return `Showing the closest-rated marketplace brands`;
+      return `Brands in ${filter.category} and its related categories`;
+    case 'shared-products':
+      return `Brands in ${filter.category} or selling in the same categories`;
     default:
       return `No comparable brands found right now`;
   }

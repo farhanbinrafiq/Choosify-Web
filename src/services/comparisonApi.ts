@@ -50,7 +50,7 @@ export interface BrandComparisonResult {
   filter: {
     category: string;
     ratingTolerance: number;
-    fallbackTier: 'primary' | 'tier-0.5' | 'parent-category' | 'none';
+    fallbackTier: 'primary' | 'tier-0.5' | 'same-category' | 'parent-category' | 'shared-products' | 'none';
   };
 }
 
