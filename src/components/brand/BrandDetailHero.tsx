@@ -36,6 +36,15 @@ export interface BrandDetailHeroProps {
  * cover banner constrained to feed silhouette (max-w-[1440px], square corners, top padding),
  * circular logo overlap, light identity row, score/facts, info bar.
  */
+/** "https://www.begautos.com/shop" → "begautos.com" (falls back to the raw text). */
+function websiteHost(url: string): string {
+  try {
+    return new URL(/^https?:\/\//i.test(url) ? url : `https://${url}`).hostname.replace(/^www\./, '');
+  } catch {
+    return url;
+  }
+}
+
 export function BrandDetailHero({
   brand,
   logoNode,
@@ -143,10 +152,28 @@ export function BrandDetailHero({
                 <VerificationPill verification={verification} />
               </div>
             )}
-            <ProfileSocialPills
-              className="mt-2.5 justify-center lg:justify-start"
-              links={resolvedSocials}
-            />
+            {/* Website first in the social row (same pill shape, orange globe) so it's easy to spot. */}
+            <div className="mt-2.5 flex flex-wrap gap-2 justify-center lg:justify-start">
+              {websiteUrl ? (
+                <a
+                  href={websiteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 bg-white border border-[#FF5B00]/35 rounded-full pl-1 pr-3 py-1 no-underline hover:border-[#FF5B00] hover:bg-[#FFF6F2] transition-colors"
+                  aria-label={`Visit ${brand.name} website (${websiteHost(websiteUrl)})`}
+                  data-testid="brand-website-pill"
+                >
+                  <span className="w-9 h-9 rounded-full flex items-center justify-center shrink-0 bg-gradient-to-br from-[#FF5B00] to-[#EF3C23]">
+                    <Globe size={18} className="text-white" aria-hidden />
+                  </span>
+                  <span className="flex flex-col leading-tight text-left">
+                    <span className="text-[11px] font-bold text-[#1A1A2E]">Website</span>
+                    <span className="text-[10px] text-[#6B7280] max-w-[160px] truncate">{websiteHost(websiteUrl)}</span>
+                  </span>
+                </a>
+              ) : null}
+              <ProfileSocialPills className="justify-center lg:justify-start" links={resolvedSocials} />
+            </div>
           </div>
 
           <div className="flex gap-2.5 flex-wrap justify-center lg:justify-end lg:mt-[52px] shrink-0 w-full lg:w-auto">
@@ -164,16 +191,6 @@ export function BrandDetailHero({
             >
               Explore Products
             </button>
-            {websiteUrl ? (
-              <a
-                href={websiteUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 bg-white text-[#1A1A2E] border border-[#E5E7EB] px-[18px] py-2.5 rounded-lg text-xs font-semibold hover:bg-[#F4F7F9]"
-              >
-                <Globe size={13} /> Visit Website
-              </a>
-            ) : null}
             <button
               type="button"
               onClick={onShare}
