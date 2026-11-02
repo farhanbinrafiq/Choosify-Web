@@ -1170,7 +1170,12 @@ export function BrandDetailPage() {
           logoNode={renderBrandLogo(brand)}
           claimStatus={localClaimStatus}
           verification={brand.ownership?.verification}
-          categoryLabel={brand.category || "Fashion & Clothing"}
+          // "Main › Subcategory" when the brand picked one (e.g. Fashion & Lifestyle › Footwear).
+          categoryLabel={
+            [brand.category || "Fashion & Clothing", (brand as { subcategoryName?: string }).subcategoryName]
+              .filter(Boolean)
+              .join(" › ")
+          }
           onShare={() => {
             navigator.clipboard.writeText(window.location.href);
             toast.success("Share link copied!");

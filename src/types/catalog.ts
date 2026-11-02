@@ -54,6 +54,10 @@ export interface CatalogBrand {
   publicHandle?: string | null;
   name: string;
   category: string;
+  /** Main category id + optional subcategory (two-level picker), e.g. Fashion & Lifestyle › Footwear. */
+  categoryId?: string;
+  subcategoryId?: string;
+  subcategoryName?: string;
   description: string;
   logo: string;
   coverImage?: string;
