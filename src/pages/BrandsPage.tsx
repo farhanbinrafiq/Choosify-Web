@@ -26,6 +26,7 @@ import { usePriorityClockMs } from '../hooks/usePriorityClockMs';
 import { FeaturedBrandDealsPanel } from '../components/FeaturedBrandDealsPanel';
 import { SortDropdown } from '../components/SortDropdown';
 import { BRAND_SORT_OPTIONS, BRAND_SORT_DEFAULT, applySortOption } from '../lib/sorting/sortRegistry';
+import { toBrandCardData } from '../lib/brandCardData';
 import { recommendedBrandOrder } from '../lib/sorting/brandRecommendedOrder';
 
 interface Brand {
@@ -262,33 +263,7 @@ export function BrandsPage() {
 
   const brands: Brand[] = React.useMemo(() => {
     if (globalBrands && globalBrands.length > 0) {
-      return globalBrands.map((brand) => ({
-        id: String(brand.catalogId || brand.slug || brand.id),
-        catalogId: brand.catalogId,
-        slug: brand.slug,
-        name: brand.name,
-        description: `${brand.name} official listing on Choosify`,
-        logo: typeof brand.logo === 'string' ? brand.logo : brand.name.slice(0, 2).toUpperCase(),
-        rating: brand.ratings || 0,
-        reviews: brand.followers || 0,
-        followers: brand.followers || 0,
-        // Best For = the brand's own Best-for tags (never its category).
-        bestFor: (brand.overview?.tags || []).join(' · '),
-        bestForTags: brand.overview?.tags || [],
-        // Real figures only: no placeholder price range or recommendation score.
-        priceRange: brand.overview?.priceRange?.trim() || null,
-        // Success score comes from real ratings only; new brands start at 100%.
-        category: brand.category || 'General',
-        isHot: brand.sponsoredFlag,
-        isFeatured: brand.featuredFlag,
-        sponsoredFlag: brand.sponsoredFlag,
-        featuredFlag: brand.featuredFlag,
-        verifiedStatus: brand.verifiedStatus,
-        ownership: brand.ownership,
-        createdAt: brand.createdAt,
-        updatedAt: brand.updatedAt,
-        coverImage: brand.coverImage,
-      }));
+      return globalBrands.map((brand) => toBrandCardData(brand));
     }
     // The sample list is a development aid; production shows real brands only.
     return import.meta.env.DEV ? fallbackBrands : [];

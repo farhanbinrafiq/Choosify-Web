@@ -380,8 +380,10 @@ export function BrandStorySection({
         .map((p) => String(p.id)),
     );
 
-    const filtered = all.filter((c) =>
-      belongsToBrand(c, brandId, brandName, brandProductIds),
+    // Real content only: the demo feed's synthetic items are "published" by placeholder
+    // brands (Aarong, Bata, Pickaboo...) and would otherwise appear on the real brand's page.
+    const filtered = all.filter(
+      (c) => c.sourceKind !== 'synthetic' && belongsToBrand(c, brandId, brandName, brandProductIds),
     );
 
     return rankCreatorContent(

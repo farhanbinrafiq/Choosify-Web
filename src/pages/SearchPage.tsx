@@ -3,6 +3,8 @@ import React, { useMemo, useState, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Search } from 'lucide-react';
 import { BRANDS, CATEGORIES } from '../constants';
+import { BrandCardDesign } from '../components/BrandCardDesign';
+import { toBrandCardData } from '../lib/brandCardData';
 import { ProductCard } from '../components/ProductCard';
 import { SponsoredProductTile } from '../components/commerce/AdvertiseHereCard';
 import { CtaBannerSlot } from '../components/CtaBannerSlot';
@@ -32,7 +34,6 @@ const DC_TABS: { id: SearchTab; label: string }[] = [
   { id: 'creators', label: 'Creators' },
 ];
 
-const BRAND_COLORS = ['#1428A0', '#FF6900', '#1A1A2E', '#000000', '#0076CE', '#16A34A', '#2323FF', '#EF3C23'];
 
 /** Choosify.dc.html Search Results */
 export function SearchPage() {
@@ -458,23 +459,10 @@ export function SearchPage() {
         {rawQuery.trim() && (activeTab === 'all' || activeTab === 'brands') && brandList.length > 0 && (
           <section className="mb-9">
             <h2 className="text-base font-extrabold text-[#1A1A2E] mb-3.5">TOP BRANDS</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5">
-              {brandList.map((brand: any, i: number) => (
-                <Link
-                  key={brand.id || brand.name}
-                  to={brandPath(brand)}
-                  className="bg-white rounded-[10px] border border-[#E8EDF2] p-[18px] text-center no-underline hover:border-[#FF5B00]/35 transition-colors"
-                >
-                  <div
-                    className="text-[15px] font-extrabold"
-                    style={{ color: BRAND_COLORS[i % BRAND_COLORS.length] }}
-                  >
-                    {brand.name}
-                  </div>
-                  <div className="text-[11px] text-[#9AA0AC] mt-1.5">
-                    {Number(brand.products || brand.productCount || 0).toLocaleString()} Products
-                  </div>
-                </Link>
+            {/* The same brand card as the Brands page: logo, cover, Best For, price range, status. */}
+            <div className="choosify-brand-grid w-full" data-testid="search-brand-results">
+              {brandList.map((brand: any) => (
+                <BrandCardDesign key={brand.id || brand.name} brand={toBrandCardData(brand)} />
               ))}
             </div>
             {activeTab === 'all' && results.brands.length > 5 && (
