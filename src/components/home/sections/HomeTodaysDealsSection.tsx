@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { DcHomeBlock } from '../DcHomePanel';
 import { PremiumCarousel } from '../PremiumCarousel';
+import { HomeEmptyNote } from './HomeEmptyNote';
 import { SponsoredCardChrome } from '../../commerce/SponsoredCardChrome';
 import { catalogApi } from '../../../services/catalogApi';
 import { resolveDealsBannerHref } from '../../../lib/home/dealsBannerUtils';
@@ -22,69 +23,21 @@ export type HomeDealsBannerCard = CatalogDealsBanner & { href?: string };
 /** Max ads shown in one Today's Deals horizontal row (matches admin studio cap). */
 export const TODAYS_DEALS_BANNER_MAX = 5;
 
-/** Fallback image banners when API has none yet (same card shell as before). */
-const FALLBACK_BANNERS: HomeDealsBannerCard[] = [
-  {
-    id: 'fallback-1',
-    image: 'https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=800&h=320&fit=crop',
-    destinationType: 'custom-url',
-    destinationRef: '/deals',
-    order: 0,
-    isActive: true,
-    brandName: 'Choosify',
-    createdAt: '',
-    updatedAt: '',
-    href: '/deals',
-  },
-  {
-    id: 'fallback-2',
-    image: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=320&fit=crop',
-    destinationType: 'custom-url',
-    destinationRef: '/deals',
-    order: 1,
-    isActive: true,
-    brandName: 'Deals',
-    createdAt: '',
-    updatedAt: '',
-    href: '/deals',
-  },
-  {
-    id: 'fallback-3',
-    image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&h=320&fit=crop',
-    destinationType: 'custom-url',
-    destinationRef: '/brands',
-    order: 2,
-    isActive: true,
-    brandName: 'Brands',
-    createdAt: '',
-    updatedAt: '',
-    href: '/brands',
-  },
-  {
-    id: 'fallback-4',
-    image: 'https://images.unsplash.com/photo-1556740714-a8395b3bf30f?w=800&h=320&fit=crop',
-    destinationType: 'custom-url',
-    destinationRef: '/products',
-    order: 3,
-    isActive: true,
-    brandName: 'Shop',
-    createdAt: '',
-    updatedAt: '',
-    href: '/products',
-  },
-  {
-    id: 'fallback-5',
-    image: 'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=320&fit=crop',
-    destinationType: 'custom-url',
-    destinationRef: '/deals',
-    order: 4,
-    isActive: true,
-    brandName: 'Flash',
-    createdAt: '',
-    updatedAt: '',
-    href: '/deals',
-  },
-];
+/**
+ * The four stock "deals-banner-N" banners the catalog seeds on first run (stock
+ * photos, no real advertiser). They are placeholders, so the homepage never shows
+ * them; a banner staff replaced with a real image under the same id still shows.
+ */
+const SEEDED_PLACEHOLDER_IMAGES = new Set([
+  'https://images.unsplash.com/photo-1607083206869-4c7672e72a8a?w=800&h=320&fit=crop',
+  'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&h=320&fit=crop',
+  'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=800&h=320&fit=crop',
+  'https://images.unsplash.com/photo-1556740714-a8395b3bf30f?w=800&h=320&fit=crop',
+]);
+
+function isSeededPlaceholder(banner: HomeDealsBannerCard): boolean {
+  return /^deals-banner-\d+$/.test(String(banner.id)) && SEEDED_PLACEHOLDER_IMAGES.has(String(banner.image));
+}
 
 interface HomeTodaysDealsSectionProps {
   /** @deprecated Text/product promo tiles — image banners come from deals-banners API */
@@ -132,10 +85,10 @@ export function HomeTodaysDealsSection({ banners: bannersProp }: HomeTodaysDeals
       .listDealsBanners({ active: true })
       .then((list) => {
         if (cancelled) return;
-        setFetched(list.length > 0 ? list : FALLBACK_BANNERS);
+        setFetched(list);
       })
       .catch(() => {
-        if (!cancelled) setFetched(FALLBACK_BANNERS);
+        if (!cancelled) setFetched([]);
       });
     return () => {
       cancelled = true;
@@ -143,9 +96,8 @@ export function HomeTodaysDealsSection({ banners: bannersProp }: HomeTodaysDeals
   }, [bannersProp]);
 
   const banners = useMemo(() => {
-    const source = fetched && fetched.length > 0 ? fetched : FALLBACK_BANNERS;
-    return source
-      .filter((b) => b.isActive !== false && Boolean(b.image))
+    return (fetched ?? [])
+      .filter((b) => b.isActive !== false && Boolean(b.image) && !isSeededPlaceholder(b))
       .slice()
       .sort((a, b) => a.order - b.order)
       .slice(0, TODAYS_DEALS_BANNER_MAX);
@@ -154,6 +106,8 @@ export function HomeTodaysDealsSection({ banners: bannersProp }: HomeTodaysDeals
   return (
     <DcHomeBlock id="section-deals">
       <h2 className="text-[19px] font-extrabold text-[#1A1A2E] mb-4">Today&apos;s Deals</h2>
+      {fetched !== null && banners.length === 0 && <HomeEmptyNote text="No deals running right now." linkHref="/deals" linkLabel="See all deals" />}
+      {banners.length > 0 && (
       <PremiumCarousel
         items={banners}
         itemWidth={280}
@@ -190,6 +144,7 @@ export function HomeTodaysDealsSection({ banners: bannersProp }: HomeTodaysDeals
           );
         }}
       />
+      )}
     </DcHomeBlock>
   );
 }

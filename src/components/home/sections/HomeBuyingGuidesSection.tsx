@@ -1,4 +1,5 @@
 import React from 'react';
+import { HomeEmptyNote } from './HomeEmptyNote';
 import { Link } from 'react-router-dom';
 import { PLACEHOLDER_IMAGE } from '../../../constants';
 import { DcHomeBlock } from '../DcHomePanel';
@@ -9,17 +10,6 @@ interface HomeBuyingGuidesSectionProps {
   guideSlides: Array<{ guide: any; kind: string }>;
 }
 
-/** Choosify.dc.html Top Buying Guides — demo titles when catalog empty */
-const FALLBACK_GUIDES = [
-  { id: 'demo-g1', title: 'Best Phones Under 30K in BD' },
-  { id: 'demo-g2', title: "Best Hotels in Cox's Bazar" },
-  { id: 'demo-g3', title: 'Best Air Conditioners for Home' },
-  { id: 'demo-g4', title: 'Best Running Shoes for Men' },
-  { id: 'demo-g5', title: 'Best Laptops for Students' },
-  { id: 'demo-g6', title: 'How to Choose the Right Camera' },
-  { id: 'demo-g7', title: 'Top DSLR vs Mirrorless Guide' },
-  { id: 'demo-g8', title: 'Choosing a Home Wi-Fi Router' },
-];
 
 /** Design tile is 190×130 — keep that ratio as columns fluidly resize. */
 const GUIDE_IMAGE_ASPECT = 'aspect-[190/130]';
@@ -35,10 +25,8 @@ function guideHref(guide: any): string {
  * stable from 1-col mobile through multi-col desktop.
  */
 export function HomeBuyingGuidesSection({ guideSlides }: HomeBuyingGuidesSectionProps) {
-  const slides =
-    guideSlides.length > 0
-      ? guideSlides
-      : FALLBACK_GUIDES.map((guide) => ({ guide, kind: 'blog' }));
+  // Real published guides only — no demo titles.
+  const slides = guideSlides;
 
   return (
     <DcHomeBlock id="section-buying-guides">
@@ -52,6 +40,7 @@ export function HomeBuyingGuidesSection({ guideSlides }: HomeBuyingGuidesSection
         <ViewAllLink href="/spotlight?tab=guides" label="DISCOVER ALL ›" />
       </div>
 
+      {slides.length === 0 && <HomeEmptyNote text="No buying guides published yet." />}
       <div className="grid grid-cols-1 min-[480px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5 mb-2 items-start">
         {slides.slice(0, 10).map(({ guide }) => (
           <Link

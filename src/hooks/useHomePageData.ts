@@ -1,5 +1,6 @@
 import { productPath } from '../../lib/publicUrls';
-import { useMemo, useCallback } from 'react';
+import { useMemo, useCallback, useEffect, useState } from 'react';
+import { catalogApi } from '../services/catalogApi';
 import { BRANDS } from '../constants';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { useDashboard } from '../context/DashboardContext';
@@ -15,11 +16,15 @@ import { buildHomeViralTodayItems, type ViralTodayItem } from '../utils/homeVira
 import { usePriorityClockMs } from './usePriorityClockMs';
 import { resolveSpotlightExperience } from '../utils/spotlightContentResolver';
 import { getAllBrandPosts } from '../lib/brandPosts';
+import { recommendedBrandOrder } from '../lib/sorting/brandRecommendedOrder';
 import type { HomePromoTile } from '../components/home/sections/HomeTodaysDealsSection';
 import type { HomeCategoryItem } from '../components/home/sections/HomeTopCategoriesSection';
 import type { HomepageConfig } from '../types/catalog';
 
 type HomeGuideCarouselKind = 'youtube' | 'reels' | 'blog';
+
+/** Prototype brands/demo content are for local dev only; production homepage shows real data or an empty section. */
+const ALLOW_DEMO = import.meta.env.DEV;
 
 const BRAND_IMAGES: Record<string, string> = {
   Samsung: 'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=1200&q=80',
@@ -75,7 +80,21 @@ export function useHomePageData() {
     [homepageConfig],
   );
 
-  const brandsList = allCatalogBrands.length > 0 ? allCatalogBrands : allBrands.length > 0 ? allBrands : BRANDS;
+  // Same Super Admin pins the Brands page uses for its default order.
+  const [pinnedBrandIds, setPinnedBrandIds] = useState<string[]>([]);
+  useEffect(() => {
+    let cancelled = false;
+    catalogApi
+      .getBrandsCuration()
+      .then((c) => !cancelled && setPinnedBrandIds(c.pinnedBrandIds || []))
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const brandsList =
+    allCatalogBrands.length > 0 ? allCatalogBrands : allBrands.length > 0 ? allBrands : ALLOW_DEMO ? BRANDS : [];
 
   const livePulseItems = useMemo(
     () => getHomeLivePulseItems(homepageConfig, siteConfig),
@@ -119,7 +138,7 @@ export function useHomePageData() {
         creators: allCreators ?? [],
         brandPosts: getAllBrandPosts(),
         brandLogos: BRAND_IMAGES,
-      }),
+      }).filter((item) => ALLOW_DEMO || item.sourceKind !== 'synthetic'),
     [allCatalogProducts, allGuides, allCreators],
   );
 
@@ -152,9 +171,9 @@ export function useHomePageData() {
       const ordered = orderByCatalogIds(allCatalogProducts, featuredIds);
       if (ordered.length) return ordered.slice(0, 8);
     }
-    return allCatalogProducts
-      .filter((p) => p.isNewArrival || Number.parseInt(String(p.id).replace(/\D/g, ''), 10) % 3 === 0)
-      .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    // No staff picks yet: the newest real products.
+    return [...allCatalogProducts]
+      .sort((a, b) => String(b.createdAt ?? '').localeCompare(String(a.createdAt ?? '')))
       .slice(0, 8);
   }, [allCatalogProducts, homepageConfig]);
 
@@ -202,8 +221,11 @@ export function useHomePageData() {
       const picked = pickByCatalogIds(brandsList as any[], featuredIds);
       if (picked.length) return picked.slice(0, 8);
     }
-    return brandsList.filter((b: any) => b.ratings >= 4.7 || b.featuredFlag || b.sponsoredFlag).slice(0, 8);
-  }, [brandsList, homepageConfig, allPlacements]);
+    // No staff picks yet: real brands that have a logo, in the Brands page order
+    // (pinned, then verified, then A–Z).
+    const withLogo = (brandsList as any[]).filter((b) => Boolean(b?.logo));
+    return recommendedBrandOrder(withLogo, pinnedBrandIds).slice(0, 8);
+  }, [brandsList, homepageConfig, allPlacements, pinnedBrandIds]);
 
   const trendingBrandTab = useMemo(
     () => [...brandsList].sort((a: any, b: any) => (b.ratings ?? 0) - (a.ratings ?? 0)).slice(0, 24),
@@ -305,6 +327,6 @@ export function useHomePageData() {
     homeFeaturedGuideSlides,
     featuredCreators,
     recentlyViewed: isLoggedIn ? recentlyViewed : [],
-    brandFallback: BRANDS,
+    brandFallback: ALLOW_DEMO ? BRANDS : [],
   };
 }

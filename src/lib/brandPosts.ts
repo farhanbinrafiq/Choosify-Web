@@ -8,6 +8,9 @@ const now = () => Date.now();
 
 let cachedPosts: BrandPost[] | null = null;
 
+/** Demo posts only in local dev — production shows real brand posts or none. */
+const FALLBACK_POSTS: BrandPost[] = import.meta.env.DEV ? MOCK_BRAND_POSTS : [];
+
 function mapCatalogBrandPost(post: CatalogBrandPost): BrandPost {
   return {
     id: post.id,
@@ -43,7 +46,7 @@ export async function hydrateBrandPostsFromApi(): Promise<BrandPost[]> {
   } catch (error) {
     console.warn('[brandPosts] Catalog API unavailable, using mock fallback.', error);
   }
-  cachedPosts = MOCK_BRAND_POSTS;
+  cachedPosts = FALLBACK_POSTS;
   return cachedPosts;
 }
 
@@ -54,11 +57,11 @@ function isVisible(post: BrandPost): boolean {
 }
 
 export function getAllBrandPosts(): BrandPost[] {
-  return (cachedPosts ?? MOCK_BRAND_POSTS).filter(isVisible);
+  return (cachedPosts ?? FALLBACK_POSTS).filter(isVisible);
 }
 
 export function getBrandPostBySlug(slug: string): BrandPost | undefined {
-  return (cachedPosts ?? MOCK_BRAND_POSTS).find((post) => post.slug === slug);
+  return (cachedPosts ?? FALLBACK_POSTS).find((post) => post.slug === slug);
 }
 
 export function getBrandPostsByBrandId(brandId: number): BrandPost[] {

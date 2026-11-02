@@ -1,10 +1,10 @@
 import React, { useMemo } from 'react';
-import { AdvertiseHereCard } from '../../commerce/AdvertiseHereCard';
 import { ProductCard } from '../../ProductCard';
 import { PremiumCarousel } from '../PremiumCarousel';
 import { DcHomePanel } from '../DcHomePanel';
 import { ViewAllLink } from '../../design/ViewAllLink';
 import type { SponsoredInjectedEntry } from '../../../utils/injectSponsoredIntoFeed';
+import { HomeEmptyNote } from './HomeEmptyNote';
 
 interface HomeFeaturedProductsSectionProps {
   feed: SponsoredInjectedEntry<any>[];
@@ -14,9 +14,7 @@ interface HomeFeaturedProductsSectionProps {
 const FEATURED_CARD_WIDTH = 220;
 const FEATURED_CARD_GAP = 16;
 
-type FeaturedSlide =
-  | { key: string; kind: 'product'; product: any }
-  | { key: string; kind: 'ad' };
+type FeaturedSlide = { key: string; product: any };
 
 /** Popular Products — product-list-sized cards in a horizontal carousel */
 export function HomeFeaturedProductsSection({ feed }: HomeFeaturedProductsSectionProps) {
@@ -24,17 +22,11 @@ export function HomeFeaturedProductsSection({ feed }: HomeFeaturedProductsSectio
     const products = feed
       .filter((e): e is Extract<SponsoredInjectedEntry<any>, { kind: 'item' }> => e.kind === 'item')
       .slice(0, 12)
-      .map((entry) => ({
-        key: entry.key,
-        kind: 'product' as const,
-        product: entry.item,
-      }));
+      .map((entry) => ({ key: entry.key, product: entry.item }));
 
-    if (!products.length) return [];
-    return [...products, { key: 'featured-advertise', kind: 'ad' as const }];
+    // Real products only — no "Advertise your product here" filler tile.
+    return products;
   }, [feed]);
-
-  if (!slides.length) return null;
 
   return (
     <DcHomePanel id="section-featured-products">
@@ -48,6 +40,8 @@ export function HomeFeaturedProductsSection({ feed }: HomeFeaturedProductsSectio
         <ViewAllLink href="/products" label="VIEW ALL ›" />
       </div>
       <p className="text-[12.5px] text-[#9AA0AC] m-0 mb-4">Handpicked deals you&apos;ll love</p>
+      {slides.length === 0 && <HomeEmptyNote text="No products listed yet." />}
+      {slides.length > 0 && (
       <div className="mb-4">
         <PremiumCarousel
           items={slides}
@@ -55,15 +49,12 @@ export function HomeFeaturedProductsSection({ feed }: HomeFeaturedProductsSectio
           gap={FEATURED_CARD_GAP}
           renderCard={(slide) => (
             <div className="w-full h-full min-h-[320px] flex">
-              {slide.kind === 'product' ? (
-                <ProductCard product={slide.product} variant="grid" />
-              ) : (
-                <AdvertiseHereCard variant="product-tile" className="w-full h-full" />
-              )}
+              <ProductCard product={slide.product} variant="grid" />
             </div>
           )}
         />
       </div>
+      )}
     </DcHomePanel>
   );
 }

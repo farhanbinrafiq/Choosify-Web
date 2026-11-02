@@ -6,6 +6,7 @@ import { DcHomePanel } from '../DcHomePanel';
 import { ViewAllLink } from '../../design/ViewAllLink';
 import { cn } from '../../../lib/utils';
 import { HomeFeaturedProductsSection } from './HomeFeaturedProductsSection';
+import { HomeEmptyNote } from './HomeEmptyNote';
 import type { SponsoredInjectedEntry } from '../../../utils/injectSponsoredIntoFeed';
 import { HOME_CONTENT_MAX, HOME_PANEL_GAP } from '../../../lib/design/homeTokens';
 
@@ -61,30 +62,27 @@ export function HomeSpotlightPreviewSection({
   productFeed,
 }: HomeSpotlightPreviewSectionProps) {
   const { live, youtube, reels } = useMemo(() => {
-    const liveItems = items.filter((i) => i.kind === 'live').slice(0, 2);
-    const yt = items.filter((i) => i.kind === 'youtube').slice(0, 4);
-    const rl = items.filter((i) => i.kind === 'reel').slice(0, 6);
+    // A guide can arrive both as a guide and via the spotlight feed — show each link once.
+    const seenHref = new Set<string>();
+    const unique = items.filter((i) => (seenHref.has(i.href) ? false : (seenHref.add(i.href), true)));
+    const liveItems = unique.filter((i) => i.kind === 'live').slice(0, 2);
+    const yt = unique.filter((i) => i.kind === 'youtube').slice(0, 4);
+    const rl = unique.filter((i) => i.kind === 'reel').slice(0, 6);
     return {
       live: liveItems,
       youtube: yt.length
         ? yt
-        : items
-            .filter((i) => i.kind !== 'live')
+        : unique
+            .filter((i) => i.kind !== 'live' && i.kind !== 'reel')
             .slice(0, 4)
             .map((i) => ({ ...i, kind: 'youtube' as const })),
-      reels: rl.length
-        ? rl
-        : items
-            .filter((i) => i.kind !== 'live')
-            .slice(0, 6)
-            .map((i) => ({ ...i, kind: 'reel' as const })),
+      // Real reels only — never the same videos repeated as filler reels.
+      reels: rl,
     };
   }, [items]);
 
   const hasMedia = live.length > 0 || youtube.length > 0 || reels.length > 0;
-  const hasProducts = Boolean(productFeed && productFeed.length > 0);
-
-  if (!hasMedia && !hasProducts) return null;
+  const hasProducts = Boolean(productFeed);
 
   return (
     <section id="section-spotlight-preview" aria-labelledby="section-spotlight-preview-heading">
@@ -101,6 +99,8 @@ export function HomeSpotlightPreviewSection({
           </h2>
           <ViewAllLink href="/spotlight" label="VIEW ALL ›" />
         </div>
+        {/* No real videos/reels yet: keep the section, say so honestly. */}
+        {!hasMedia && <HomeEmptyNote text="Nothing viral yet — creator videos, reels and live streams will appear here." />}
       </div>
 
       {/* Container 1 — LIVE + YouTube share one card */}

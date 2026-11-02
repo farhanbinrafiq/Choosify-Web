@@ -1,4 +1,5 @@
 import { brandPath } from '../../../../lib/publicUrls';
+import { HomeEmptyNote } from './HomeEmptyNote';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { DcHomeBlock } from '../DcHomePanel';
@@ -33,8 +34,8 @@ export function HomeFeaturedBrandsSection({
   featuredBrands,
   brandFallback = [],
 }: HomeFeaturedBrandsSectionProps) {
+  // Real brands only; the bundled sample list is a development aid (empty in production).
   const brands = (featuredBrands.length ? featuredBrands : brandFallback).slice(0, 8);
-  if (!brands.length) return null;
 
   return (
     <DcHomeBlock id="section-featured-brands">
@@ -48,6 +49,7 @@ export function HomeFeaturedBrandsSection({
         <ViewAllLink href="/brands" label="VIEW ALL BRANDS ›" />
       </div>
 
+      {brands.length === 0 && <HomeEmptyNote text="No featured brands yet." linkHref="/brands" linkLabel="Browse all brands" />}
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 mb-2">
         {brands.map((b: any, i: number) => {
           const name = b.name || b.brandName || 'Brand';

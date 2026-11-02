@@ -42,9 +42,9 @@ export function HomePage() {
     [data.homepageConfig],
   );
 
-  const showSpotlight = data.sectionVisible('spotlight') && data.hasViralToday;
-  const showStandaloneTrending =
-    data.sectionVisible('trending') && !(showSpotlight && data.hasViralToday);
+  // Viral Today keeps its place even with no real media yet (it shows an empty note).
+  const showSpotlight = data.sectionVisible('spotlight');
+  const showStandaloneTrending = data.sectionVisible('trending') && !showSpotlight;
 
   const renderSection = (sectionId: string) => {
     switch (sectionId) {
