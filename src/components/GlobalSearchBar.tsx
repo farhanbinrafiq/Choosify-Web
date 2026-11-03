@@ -14,6 +14,7 @@ import { shopperSignalsApi } from '../services/shopperSignalsApi';
 import { resolveSpotlightExperience } from '../utils/spotlightContentResolver';
 import { spotlightContentHref } from '../lib/spotlight/content';
 import { getAllBrandPosts } from '../lib/brandPosts';
+import { isVerifiedBrand } from '../lib/sorting/brandRecommendedOrder';
 
 interface GlobalSearchBarProps {
   initialValue?: string;
@@ -30,6 +31,31 @@ interface GlobalSearchBarProps {
   /** Edge-to-edge navbar layout: icon-only on xs, compact on sm/md, full on lg+ */
   layout?: 'default' | 'navbar-fluid';
   onMobileExpandedChange?: (expanded: boolean) => void;
+}
+
+
+/** Brand logo in a search suggestion (fits inside the circle, never stretched); initials when there is none. */
+function BrandSuggestionLogo({ name, logo }: { name: string; logo?: string }) {
+  const [failed, setFailed] = useState(false);
+  if (logo && !failed) {
+    return (
+      <div className="w-8 h-8 rounded-full bg-white border border-gray-100 overflow-hidden flex items-center justify-center shrink-0 shadow-sm">
+        <img
+          src={logo}
+          alt=""
+          className="w-full h-full object-contain"
+          loading="lazy"
+          onError={() => setFailed(true)}
+          data-testid="search-brand-logo"
+        />
+      </div>
+    );
+  }
+  return (
+    <div className="w-8 h-8 rounded-full bg-[#18154C] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm tracking-tight">
+      {name.substring(0, 2)}
+    </div>
+  );
 }
 
 export function GlobalSearchBar({
@@ -69,9 +95,33 @@ export function GlobalSearchBar({
   const { allCatalogProducts, allBrands, allCategories, allCreators, allCatalogGuides, siteConfig, isLoggedIn } = useGlobalState();
 
   const productSource = allCatalogProducts;
-  const brandSource = allBrands.length > 0
-    ? allBrands.map((b) => ({ ...b, products: (b as any).followers ?? (b as any).products ?? 0, rating: (b as any).ratings ?? (b as any).rating ?? 0 }))
-    : [];
+  // Real product counts per brand (by id, catalog id, slug or name), same as the Brands page.
+  const brandProductCounts = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const p of allCatalogProducts || []) {
+      for (const raw of new Set([p.brandId, p.brandName].filter((v) => v != null && String(v).trim() !== ''))) {
+        const key = String(raw).trim().toLowerCase();
+        map.set(key, (map.get(key) ?? 0) + 1);
+      }
+    }
+    return map;
+  }, [allCatalogProducts]);
+  const brandSource = useMemo(
+    () =>
+      allBrands.map((b: any) => ({
+        ...b,
+        products: Math.max(
+          0,
+          ...[b.catalogId, b.slug, b.id, b.name]
+            .filter((v) => v != null && String(v).trim() !== '')
+            .map((v) => brandProductCounts.get(String(v).trim().toLowerCase()) ?? 0),
+        ),
+        rating: b.ratings ?? b.rating ?? 0,
+        logo: b.logo || b.image || undefined,
+        verified: isVerifiedBrand(b),
+      })),
+    [allBrands, brandProductCounts],
+  );
   const creatorSource = allCreators.length > 0 ? allCreators : CREATORS;
   const categorySource = allCategories.length > 0
     ? allCategories.map((c) => ({ id: c.id, name: c.name, icon: c.icon }))
@@ -311,6 +361,7 @@ export function GlobalSearchBar({
         type: 'brand' as const,
         title: b.name,
         subtitle: b.category,
+        image: b.logo,
         route: brandPath(b),
         badge: 'Brand',
       }));
@@ -893,9 +944,7 @@ export function GlobalSearchBar({
                             }`}
                           >
                             <div className="flex items-center gap-3 min-w-0 text-left">
-                              <div className="w-8 h-8 rounded-full bg-[#18154C] text-white flex items-center justify-center font-bold text-xs shrink-0 shadow-sm tracking-tight">
-                                {item.title.substring(0, 2)}
-                              </div>
+                              <BrandSuggestionLogo name={item.title} logo={item.image} />
                               <div className="min-w-0">
                                 <h4 className="text-[11.5px] font-bold truncate leading-snug flex items-center gap-1">
                                   {item.title}

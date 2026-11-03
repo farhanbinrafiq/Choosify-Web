@@ -26,6 +26,9 @@ interface SearchSourceBrand {
   category?: string;
   products?: number;
   rating?: number;
+  logo?: string;
+  /** Verified owner (same rule as the brand card badge). */
+  verified?: boolean;
 }
 
 interface SearchSourceCreator {
@@ -162,9 +165,10 @@ export function useSearchSuggestions({
         id: `brand-${b.id}`,
         type: 'brand',
         title: b.name,
-        subtitle: `${b.category || 'Brand'} • ${b.products ?? 0} Products`,
+        subtitle: `${b.category || 'Brand'} • ${b.products ?? 0} ${b.products === 1 ? 'Product' : 'Products'}`,
+        image: b.logo || undefined,
         route: brandPath(b),
-        badge: (b.rating ?? 0) >= 4.8 ? 'Verified' : undefined,
+        badge: b.verified ? 'Verified' : undefined,
       }));
 
     const matchedCreators: SuggestionItem[] = creatorSource
