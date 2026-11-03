@@ -83,24 +83,14 @@ export function HomeFeaturedBrandsSection({
                 data-testid="home-brand-circle"
               >
                 {logo ? (
-                  <>
-                    {/* A soft, blurred copy of the logo fills the circle; the logo itself keeps
-                        its own proportions (never stretched) and is sized so even a square
-                        logo's corners stay inside the circle. */}
-                    <img
-                      src={logo}
-                      alt=""
-                      aria-hidden
-                      className="absolute inset-0 w-full h-full object-cover scale-150 blur-2xl opacity-80 pointer-events-none"
-                      loading="lazy"
-                    />
-                    <img
-                      src={logo || PLACEHOLDER_IMAGE}
-                      alt={name}
-                      className="relative w-[68%] h-[68%] object-contain rounded-[8px] group-hover:scale-[1.05] transition-transform"
-                      loading="lazy"
-                    />
-                  </>
+                  // The logo fills the whole circle, cropped round (object-cover keeps its
+                  // proportions, never stretched).
+                  <img
+                    src={logo || PLACEHOLDER_IMAGE}
+                    alt={name}
+                    className="absolute inset-0 w-full h-full object-cover group-hover:scale-[1.05] transition-transform"
+                    loading="lazy"
+                  />
                 ) : (
                   <span
                     className="text-[clamp(16px,4vw,26px)] font-extrabold leading-none"

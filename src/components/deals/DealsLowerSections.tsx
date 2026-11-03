@@ -146,22 +146,14 @@ function BrandDealTile({ brand }: { brand: StorefrontDealsCuration['brandDeals']
       {/* Same round logo bubble as the homepage Featured Brands. */}
       <span className="relative w-full max-w-[88px] aspect-square rounded-full overflow-hidden bg-white border border-[#E8EDF2] flex items-center justify-center group-hover:border-[#FF5B00]/50 transition-colors">
         {showLogo ? (
-          <>
-            <img
-              src={brand.logo!}
-              alt=""
-              aria-hidden
-              className="absolute inset-0 w-full h-full object-cover scale-150 blur-2xl opacity-80 pointer-events-none"
-              loading="lazy"
-            />
-            <img
-              src={brand.logo!}
-              alt={brand.name}
-              onError={() => setLogoFailed(true)}
-              className="relative w-[68%] h-[68%] object-contain rounded-[6px]"
-              loading="lazy"
-            />
-          </>
+          // Logo fills the circle, cropped round (never stretched).
+          <img
+            src={brand.logo!}
+            alt={brand.name}
+            onError={() => setLogoFailed(true)}
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="lazy"
+          />
         ) : (
           <span className="text-[15px] font-extrabold text-[#1A1A2E]">{brand.name.slice(0, 2).toUpperCase()}</span>
         )}
