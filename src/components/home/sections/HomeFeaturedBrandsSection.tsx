@@ -30,12 +30,35 @@ const BRAND_COLORS = [
  */
 const BRAND_TILE_ASPECT = 'aspect-[5/2]';
 
+/**
+ * Columns per screen width (2 / 3 / 4 / 6) and how many full rows each shows, so the grid
+ * never ends in a half-empty row: phone 4×2, small tablet 3×3, tablet 2×4, desktop 2×6.
+ * With fewer brands, each width rounds down to whole rows (one short row only if there are
+ * fewer brands than columns).
+ */
+const GRID_STEPS = [
+  { cols: 2, max: 8, show: 'flex', hide: 'hidden' },
+  { cols: 3, max: 9, show: 'sm:flex', hide: 'sm:hidden' },
+  { cols: 4, max: 8, show: 'md:flex', hide: 'md:hidden' },
+  { cols: 6, max: 12, show: 'lg:flex', hide: 'lg:hidden' },
+] as const;
+const MAX_FEATURED_BRANDS = 12;
+
+const wholeRows = (count: number, cols: number, max: number) => {
+  const n = Math.min(count, max);
+  return n < cols ? n : n - (n % cols);
+};
+
+/** Tailwind classes that show tile `index` only where it falls inside a whole row. */
+const visibilityClasses = (index: number, count: number) =>
+  GRID_STEPS.map((s) => (index < wholeRows(count, s.cols, s.max) ? s.show : s.hide)).join(' ');
+
 export function HomeFeaturedBrandsSection({
   featuredBrands,
   brandFallback = [],
 }: HomeFeaturedBrandsSectionProps) {
   // Real brands only; the bundled sample list is a development aid (empty in production).
-  const brands = (featuredBrands.length ? featuredBrands : brandFallback).slice(0, 8);
+  const brands = (featuredBrands.length ? featuredBrands : brandFallback).slice(0, MAX_FEATURED_BRANDS);
 
   return (
     <DcHomeBlock id="section-featured-brands">
@@ -50,7 +73,7 @@ export function HomeFeaturedBrandsSection({
       </div>
 
       {brands.length === 0 && <HomeEmptyNote text="No featured brands yet." linkHref="/brands" linkLabel="Browse all brands" />}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-3 mb-2">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-2">
         {brands.map((b: any, i: number) => {
           const name = b.name || b.brandName || 'Brand';
           const href = brandPath(b);
@@ -59,7 +82,7 @@ export function HomeFeaturedBrandsSection({
             <Link
               key={b.id ?? name}
               to={href}
-              className={`group relative overflow-hidden bg-white border border-[#E8EDF2] rounded-[10px] ${BRAND_TILE_ASPECT} w-full min-w-0 flex items-center justify-center px-2.5 hover:border-[#FF5B00]/40 transition-colors`}
+              className={`group relative overflow-hidden bg-white border border-[#E8EDF2] rounded-[10px] ${BRAND_TILE_ASPECT} w-full min-w-0 ${visibilityClasses(i, brands.length)} items-center justify-center px-2.5 hover:border-[#FF5B00]/40 transition-colors`}
               title={name}
               data-testid="home-brand-tile"
             >

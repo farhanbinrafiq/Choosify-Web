@@ -212,19 +212,20 @@ export function useHomePageData() {
       .filter((p) => isPlacementActive(p) && p.placement === 'spotlight_section' && p.entityType === 'brand')
       .map((p) => brandsList.find((b: any) => String(b.id) === p.entityId))
       .filter(Boolean);
-    if (placementBrands.length) return placementBrands.slice(0, 8);
+    // Up to 12: the home grid shows only whole rows (8 / 9 / 8 / 12 by screen width).
+    if (placementBrands.length) return placementBrands.slice(0, 12);
 
     const featuredIds = homepageConfig?.featuredBrandIds?.length
       ? homepageConfig.featuredBrandIds
       : getSectionItemIds(homepageConfig, 'featured-brands');
     if (featuredIds.length) {
       const picked = pickByCatalogIds(brandsList as any[], featuredIds);
-      if (picked.length) return picked.slice(0, 8);
+      if (picked.length) return picked.slice(0, 12);
     }
     // No staff picks yet: real brands that have a logo, in the Brands page order
     // (pinned, then verified, then A–Z).
     const withLogo = (brandsList as any[]).filter((b) => Boolean(b?.logo));
-    return recommendedBrandOrder(withLogo, pinnedBrandIds).slice(0, 8);
+    return recommendedBrandOrder(withLogo, pinnedBrandIds).slice(0, 12);
   }, [brandsList, homepageConfig, allPlacements, pinnedBrandIds]);
 
   const trendingBrandTab = useMemo(
