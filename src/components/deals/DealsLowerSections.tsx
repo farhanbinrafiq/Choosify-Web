@@ -139,23 +139,38 @@ function BrandDealTile({ brand }: { brand: StorefrontDealsCuration['brandDeals']
   return (
     <Link
       to={brandPath(brand)}
-      className="border border-[#E8EDF2] rounded-lg px-2 py-3 text-center no-underline hover:border-[#FF5B00]/40 transition-colors min-w-0"
+      className="group flex flex-col items-center gap-1.5 text-center no-underline min-w-0"
+      title={brand.name}
+      data-testid="deals-brand-tile"
     >
-      {showLogo ? (
-        <img
-          src={brand.logo!}
-          alt={brand.name}
-          onError={() => setLogoFailed(true)}
-          className="h-6 w-auto max-w-full mx-auto mb-2 object-contain"
-          loading="lazy"
-        />
-      ) : (
-        <div className="text-xs font-extrabold mb-2 text-[#1A1A2E] truncate">{brand.name}</div>
-      )}
+      {/* Same round logo bubble as the homepage Featured Brands. */}
+      <span className="relative w-full max-w-[88px] aspect-square rounded-full overflow-hidden bg-white border border-[#E8EDF2] flex items-center justify-center group-hover:border-[#FF5B00]/50 transition-colors">
+        {showLogo ? (
+          <>
+            <img
+              src={brand.logo!}
+              alt=""
+              aria-hidden
+              className="absolute inset-0 w-full h-full object-cover scale-150 blur-2xl opacity-80 pointer-events-none"
+              loading="lazy"
+            />
+            <img
+              src={brand.logo!}
+              alt={brand.name}
+              onError={() => setLogoFailed(true)}
+              className="relative w-[68%] h-[68%] object-contain rounded-[6px]"
+              loading="lazy"
+            />
+          </>
+        ) : (
+          <span className="text-[15px] font-extrabold text-[#1A1A2E]">{brand.name.slice(0, 2).toUpperCase()}</span>
+        )}
+      </span>
+      <span className="w-full text-[11px] font-bold text-[#1A1A2E] truncate leading-tight group-hover:text-[#FF5B00]">{brand.name}</span>
       {/* Only real live deal discounts — never an invented "Up to" figure. */}
-      <div className="text-[9.5px] text-[#9AA0AC] truncate">
-        {brand.upToPercent ? `Up to ${brand.upToPercent}% Off` : showLogo ? brand.name : 'View brand'}
-      </div>
+      {brand.upToPercent ? (
+        <span className="w-full text-[9.5px] font-bold text-[#07A828] truncate -mt-1">Up to {brand.upToPercent}% Off</span>
+      ) : null}
     </Link>
   );
 }
@@ -179,7 +194,7 @@ export function DealsBrandDealsCard({
           VIEW ALL BRANDS ›
         </Link>
       </div>
-      <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
+      <div className="grid grid-cols-3 sm:grid-cols-6 gap-x-2.5 gap-y-3.5">
         {brands.map((bd) => (
           <BrandDealTile key={bd.id} brand={bd} />
         ))}

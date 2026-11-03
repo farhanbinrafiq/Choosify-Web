@@ -24,23 +24,15 @@ const BRAND_COLORS = [
 ];
 
 /**
- * Featured Brands — responsive logo tiles.
- * Design bar is ~140×56 (≈5:2). Use that aspect so tiles scale as a unit
- * instead of a fixed height that squashes/stretches as column width changes.
- */
-const BRAND_TILE_ASPECT = 'aspect-[5/2]';
-
-/**
- * Columns per screen width (2 / 3 / 4 / 6) and how many full rows each shows, so the grid
- * never ends in a half-empty row: phone 4×2, small tablet 3×3, tablet 2×4, desktop 2×6.
- * With fewer brands, each width rounds down to whole rows (one short row only if there are
- * fewer brands than columns).
+ * Featured Brands — round logo bubbles with the brand name underneath.
+ * Columns per screen width (4 / 6) and how many full rows each shows, so the grid never
+ * ends in a half-empty row: phone 2 rows of 4, tablet and up 2 rows of 6. With fewer
+ * brands, each width rounds down to whole rows (one short row only if there are fewer
+ * brands than columns).
  */
 const GRID_STEPS = [
-  { cols: 2, max: 8, show: 'flex', hide: 'hidden' },
-  { cols: 3, max: 9, show: 'sm:flex', hide: 'sm:hidden' },
-  { cols: 4, max: 8, show: 'md:flex', hide: 'md:hidden' },
-  { cols: 6, max: 12, show: 'lg:flex', hide: 'lg:hidden' },
+  { cols: 4, max: 8, show: 'flex', hide: 'hidden' },
+  { cols: 6, max: 12, show: 'md:flex', hide: 'md:hidden' },
 ] as const;
 const MAX_FEATURED_BRANDS = 12;
 
@@ -73,7 +65,7 @@ export function HomeFeaturedBrandsSection({
       </div>
 
       {brands.length === 0 && <HomeEmptyNote text="No featured brands yet." linkHref="/brands" linkLabel="Browse all brands" />}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3 mb-2">
+      <div className="grid grid-cols-4 md:grid-cols-6 gap-x-3 gap-y-4 mb-2">
         {brands.map((b: any, i: number) => {
           const name = b.name || b.brandName || 'Brand';
           const href = brandPath(b);
@@ -82,37 +74,45 @@ export function HomeFeaturedBrandsSection({
             <Link
               key={b.id ?? name}
               to={href}
-              className={`group relative overflow-hidden bg-white border border-[#E8EDF2] rounded-[10px] ${BRAND_TILE_ASPECT} w-full min-w-0 ${visibilityClasses(i, brands.length)} items-center justify-center px-2.5 hover:border-[#FF5B00]/40 transition-colors`}
+              className={`group min-w-0 ${visibilityClasses(i, brands.length)} flex-col items-center gap-2 no-underline`}
               title={name}
               data-testid="home-brand-tile"
             >
-              {logo ? (
-                <>
-                  {/* Fill the tile with a soft, blurred copy of the logo, so square or dark
-                      logos don't sit as a small stamp on white; the logo itself keeps its
-                      own proportions (never stretched or cropped). */}
-                  <img
-                    src={logo}
-                    alt=""
-                    aria-hidden
-                    className="absolute inset-0 w-full h-full object-cover scale-150 blur-2xl opacity-80 pointer-events-none"
-                    loading="lazy"
-                  />
-                  <img
-                    src={logo || PLACEHOLDER_IMAGE}
-                    alt={name}
-                    className="relative h-[86%] w-auto max-w-[92%] object-contain rounded-[6px] group-hover:scale-[1.03] transition-transform"
-                    loading="lazy"
-                  />
-                </>
-              ) : (
-                <span
-                  className="text-[clamp(11px,2.8vw,13px)] font-extrabold truncate max-w-full text-center leading-tight px-0.5"
-                  style={{ color: BRAND_COLORS[i % BRAND_COLORS.length] }}
-                >
-                  {name}
-                </span>
-              )}
+              <span
+                className="relative w-full max-w-[136px] aspect-square rounded-full overflow-hidden bg-white border border-[#E8EDF2] shadow-[0_2px_10px_rgba(0,0,0,0.05)] flex items-center justify-center group-hover:border-[#FF5B00]/50 group-hover:shadow-[0_4px_16px_rgba(255,91,0,0.15)] transition-all"
+                data-testid="home-brand-circle"
+              >
+                {logo ? (
+                  <>
+                    {/* A soft, blurred copy of the logo fills the circle; the logo itself keeps
+                        its own proportions (never stretched) and is sized so even a square
+                        logo's corners stay inside the circle. */}
+                    <img
+                      src={logo}
+                      alt=""
+                      aria-hidden
+                      className="absolute inset-0 w-full h-full object-cover scale-150 blur-2xl opacity-80 pointer-events-none"
+                      loading="lazy"
+                    />
+                    <img
+                      src={logo || PLACEHOLDER_IMAGE}
+                      alt={name}
+                      className="relative w-[68%] h-[68%] object-contain rounded-[8px] group-hover:scale-[1.05] transition-transform"
+                      loading="lazy"
+                    />
+                  </>
+                ) : (
+                  <span
+                    className="text-[clamp(16px,4vw,26px)] font-extrabold leading-none"
+                    style={{ color: BRAND_COLORS[i % BRAND_COLORS.length] }}
+                  >
+                    {name.slice(0, 2).toUpperCase()}
+                  </span>
+                )}
+              </span>
+              <span className="w-full text-center text-[11px] md:text-[12px] font-bold text-[#1A1A2E] truncate leading-tight group-hover:text-[#FF5B00] transition-colors">
+                {name}
+              </span>
             </Link>
           );
         })}
