@@ -59,16 +59,29 @@ export function HomeFeaturedBrandsSection({
             <Link
               key={b.id ?? name}
               to={href}
-              className={`group bg-white border border-[#E8EDF2] rounded-[10px] ${BRAND_TILE_ASPECT} w-full min-w-0 flex items-center justify-center px-2.5 hover:border-[#FF5B00]/40 transition-colors`}
+              className={`group relative overflow-hidden bg-white border border-[#E8EDF2] rounded-[10px] ${BRAND_TILE_ASPECT} w-full min-w-0 flex items-center justify-center px-2.5 hover:border-[#FF5B00]/40 transition-colors`}
               title={name}
+              data-testid="home-brand-tile"
             >
               {logo ? (
-                <img
-                  src={logo || PLACEHOLDER_IMAGE}
-                  alt={name}
-                  className="max-h-[55%] max-w-[85%] w-auto h-auto object-contain"
-                  loading="lazy"
-                />
+                <>
+                  {/* Fill the tile with a soft, blurred copy of the logo, so square or dark
+                      logos don't sit as a small stamp on white; the logo itself keeps its
+                      own proportions (never stretched or cropped). */}
+                  <img
+                    src={logo}
+                    alt=""
+                    aria-hidden
+                    className="absolute inset-0 w-full h-full object-cover scale-150 blur-2xl opacity-80 pointer-events-none"
+                    loading="lazy"
+                  />
+                  <img
+                    src={logo || PLACEHOLDER_IMAGE}
+                    alt={name}
+                    className="relative h-[86%] w-auto max-w-[92%] object-contain rounded-[6px] group-hover:scale-[1.03] transition-transform"
+                    loading="lazy"
+                  />
+                </>
               ) : (
                 <span
                   className="text-[clamp(11px,2.8vw,13px)] font-extrabold truncate max-w-full text-center leading-tight px-0.5"
