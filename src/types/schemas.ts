@@ -304,6 +304,9 @@ export interface ReturnRequest {
   refundAmount?: number;
   refundStatus?: string;
   returnTrackingId?: string;
+  returnCourier?: string;
+  /** 'manual' = entered from the courier receipt; Choosify has no live courier tracking. */
+  returnTrackingSource?: 'manual';
   /** Buyer-visible structured history — every status transition. */
   timeline?: ReturnTimelineEntry[];
 }

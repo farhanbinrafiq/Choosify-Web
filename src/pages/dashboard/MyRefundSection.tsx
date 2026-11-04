@@ -178,7 +178,13 @@ export function MyRefundSection() {
                 {isExpanded && (
                   <div className="mt-3 pt-3 border-t border-[#F1F1F3] space-y-2 text-[11.5px] text-[#4B5563]">
                     <div>Submitted {new Date(row.createdAt).toLocaleString('en-BD')}</div>
-                    {row.returnTrackingId && <div>Return tracking: <span className="font-mono">{row.returnTrackingId}</span></div>}
+                    {row.returnTrackingId && (
+                      <div>
+                        Return shipment: {row.returnCourier ? `${row.returnCourier} · ` : ''}
+                        <span className="font-mono">{row.returnTrackingId}</span>
+                        <span className="text-[#9AA0AC]"> (recorded from the courier receipt — check with the courier for live status)</span>
+                      </div>
+                    )}
                     {row.timeline && row.timeline.length > 0 && (
                       <ol className="space-y-1 border-t border-[#E8EDF2] pt-2">
                         {row.timeline.slice().reverse().map((t) => (
