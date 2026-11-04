@@ -16,7 +16,7 @@ import { buildHomeViralTodayItems, type ViralTodayItem } from '../utils/homeVira
 import { usePriorityClockMs } from './usePriorityClockMs';
 import { resolveSpotlightExperience } from '../utils/spotlightContentResolver';
 import { getAllBrandPosts } from '../lib/brandPosts';
-import { recommendedBrandOrder } from '../lib/sorting/brandRecommendedOrder';
+import { isVerifiedBrand, recommendedBrandOrder } from '../lib/sorting/brandRecommendedOrder';
 import type { HomePromoTile } from '../components/home/sections/HomeTodaysDealsSection';
 import type { HomeCategoryItem } from '../components/home/sections/HomeTopCategoriesSection';
 import type { HomepageConfig } from '../types/catalog';
@@ -222,10 +222,24 @@ export function useHomePageData() {
       const picked = pickByCatalogIds(brandsList as any[], featuredIds);
       if (picked.length) return picked.slice(0, 12);
     }
-    // No staff picks yet: real brands that have a logo, in the Brands page order
-    // (pinned, then verified, then A–Z).
-    const withLogo = (brandsList as any[]).filter((b) => Boolean(b?.logo));
-    return recommendedBrandOrder(withLogo, pinnedBrandIds).slice(0, 12);
+    // No staff picks yet: real brands with an uploaded logo (the storefront fills a missing
+    // logo with initials, so require an image URL). Promoted brands first (Super Admin pins,
+    // Featured/Sponsored, verified owners — the Brands page order); every other brand gets a
+    // daily rotation: one shuffle per Bangladesh day, the same for everyone all day, so every
+    // brand gets homepage exposure over time instead of only the first letters of A–Z.
+    const withLogo = (brandsList as any[]).filter((b) => /^(https?:|\/|data:image)/i.test(String(b?.logo || '')));
+    const pinned = new Set(pinnedBrandIds);
+    const promoted = (b: any) =>
+      pinned.has(String(b.catalogId ?? b.id)) || pinned.has(String(b.id)) || b.sponsoredFlag || b.featuredFlag || isVerifiedBrand(b);
+    const dayKey = new Date(Date.now() + 6 * 3600_000).toISOString().slice(0, 10);
+    const dailyRank = (b: any) => {
+      let h = 2166136261;
+      for (const ch of `${dayKey}:${b.catalogId ?? b.id}`) h = Math.imul(h ^ ch.charCodeAt(0), 16777619);
+      return h >>> 0;
+    };
+    const front = recommendedBrandOrder(withLogo.filter(promoted), pinnedBrandIds);
+    const rotating = withLogo.filter((b) => !promoted(b)).sort((a, b) => dailyRank(a) - dailyRank(b));
+    return [...front, ...rotating].slice(0, 12);
   }, [brandsList, homepageConfig, allPlacements, pinnedBrandIds]);
 
   const trendingBrandTab = useMemo(
