@@ -150,7 +150,7 @@ export function StorefrontAuthShell({ children }: { children: React.ReactNode })
 
           <p className="mt-0 text-[11px] text-[#9AA0AC] lg:mt-8">
             <span className="text-[#FF5B00]">©</span> {new Date().getFullYear()}{' '}
-            <span className="font-semibold text-[#FF5B00]">Choosify Technologies Ltd</span>. All rights
+            <span className="font-semibold text-[#FF5B00]">Choosify</span>. All rights
             reserved.
           </p>
         </div>

@@ -542,12 +542,13 @@ export function Footer() {
         )}
 
         <div className="border-t border-white/10 py-5 flex items-center justify-center">
-          {/* Canonical copyright — fixed legal entity + live year, not overridable
+          {/* Canonical copyright — "Choosify" + live year (owner decision 2026-11-04: no company
+              name until incorporation is confirmed), not overridable
               by a stale CMS `copyrightText` string. © glyph and the entity name
               are Choosify orange. */}
           <p className="text-xs text-white/35">
             <span className="text-orange-primary">©</span> {year}{' '}
-            <span className="text-orange-primary font-semibold">Choosify Technologies Ltd</span>
+            <span className="text-orange-primary font-semibold">Choosify</span>
             . All rights reserved.
           </p>
         </div>
