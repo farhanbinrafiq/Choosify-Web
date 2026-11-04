@@ -89,7 +89,7 @@ export const catalogApi = {
     q: string,
   ): Promise<Array<{ mainId: string; mainName: string; subId: string | null; subName: string | null; score: number }>> => {
     const result = await request<{ data: Array<{ mainId: string; mainName: string; subId: string | null; subName: string | null; score: number }> }>(
-      `/catalog/categories/match?q=${encodeURIComponent(q)}`,
+      `/catalog/categories/match?q=${encodeURIComponent(q)}&mode=words`,
     );
     return result.data;
   },
