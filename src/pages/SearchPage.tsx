@@ -431,7 +431,10 @@ export function SearchPage() {
       : activeTab === 'all'
         ? results.products.slice(0, 5)
         : results.products;
-  const brandList = activeTab === 'all' ? results.brands.slice(0, 5) : results.brands;
+  // "All results" shows up to 12 brands (whole rows at 1 / 2 / 3 / 4 columns); "View all"
+  // only appears when there are more than that.
+  const ALL_TAB_BRANDS = 12;
+  const brandList = activeTab === 'all' ? results.brands.slice(0, ALL_TAB_BRANDS) : results.brands;
 
   return (
     <div className="min-h-screen bg-choosify-feed text-[#1A1A2E] pb-16 font-sans antialiased">
@@ -564,7 +567,7 @@ export function SearchPage() {
                 <BrandCardDesign key={brand.id || brand.name} brand={toBrandCardData(brand)} />
               ))}
             </div>
-            {activeTab === 'all' && results.brands.length > 5 && (
+            {activeTab === 'all' && results.brands.length > ALL_TAB_BRANDS && (
               <button
                 type="button"
                 onClick={() => setActiveTab('brands')}
