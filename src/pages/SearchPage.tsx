@@ -16,6 +16,7 @@ import { CREATORS } from '../data/creators';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
 import { catalogApi } from '../services/catalogApi';
+import { wholeWordMatch, wordStartMatch } from '../lib/search/textMatch';
 import { getBrandOverviews, getProductOverviews, matchOverviewContent } from '../utils/overviewRegistry';
 import { useRegisterPageFilters, UniversalFilterRenderer } from '../components/FilterEngine';
 import { catalogGuideHref } from '../lib/spotlight/content';
@@ -243,11 +244,14 @@ export function SearchPage() {
       .map((p) => {
         const overviews = getProductOverviews(p.id, p.title, p.categoryName, customOverviews);
         const matchedOverview = matchOverviewContent(overviews, q);
+        // Names/titles: word starts; subcategory and description: whole words (never mid-word).
+        // The main-category NAME is not matched word by word ("Beauty, Health & Pharmacy" is not
+        // a pharmacy) — main categories match through the category search words instead.
         const match =
-          p.title.toLowerCase().includes(q) ||
-          p.brandName?.toLowerCase().includes(q) ||
-          p.categoryName?.toLowerCase().includes(q) ||
-          (p.description || '').toLowerCase().includes(q) ||
+          wordStartMatch(p.title, q) ||
+          wordStartMatch(p.brandName, q) ||
+          wholeWordMatch(p.subcategoryName, q) ||
+          wholeWordMatch(p.description, q) ||
           !!matchedOverview;
         if (!match) return null;
         const hot = p.isBestseller || p.isNewArrival || p.tags?.includes('HOT');
@@ -300,9 +304,10 @@ export function SearchPage() {
     const tagScore = (b: any): number => {
       const tags: string[] = Array.isArray(b.overview?.tags) ? b.overview.tags.map(String) : [];
       if (!tags.length || !qWords.length) return 0;
-      if (tags.some((t) => t.toLowerCase().includes(q))) return 260;
-      const tagWords = new Set(tags.flatMap(words));
-      return qWords.every((w) => tagWords.has(w)) ? 220 : 0;
+      // A tag that is exactly the search ranks highest; otherwise every searched word must be a
+      // whole word of one tag ("ring" ≠ "Earrings", "shoe" = "Leather Shoes").
+      if (tags.some((t) => words(t).join(' ') === qWords.join(' '))) return 260;
+      return tags.some((t) => wholeWordMatch(t, q)) ? 220 : 0;
     };
     const offerScore = (b: any): number => {
       if (b.subcategoryId && subScore.has(b.subcategoryId)) return 150 + (subScore.get(b.subcategoryId) ?? 0);
@@ -315,10 +320,11 @@ export function SearchPage() {
         const overviews = getBrandOverviews(b.name, customOverviews);
         const matchedOverview = matchOverviewContent(overviews, q);
         const offers = Math.max(offerScore(b), tagScore(b));
+        // Main-category names combine several areas ("Books, Education & Arts"), so they are matched
+        // through the category search words (offerScore), not word by word here.
         const match =
-          b.name.toLowerCase().includes(q) ||
-          String(b.category || '').toLowerCase().includes(q) ||
-          String(b.subcategoryName || '').toLowerCase().includes(q) ||
+          wordStartMatch(b.name, q) ||
+          wholeWordMatch(b.subcategoryName, q) ||
           !!matchedOverview ||
           offers > 0;
         if (!match) return null;
@@ -344,11 +350,10 @@ export function SearchPage() {
 
     const guides = guideSource
       .filter((g: any) => {
-        const t = String(g.title || '').toLowerCase();
         return (
-          t.includes(q) ||
-          String(g.author || '').toLowerCase().includes(q) ||
-          (g.tags || []).some((tag: any) => String(tag).toLowerCase().includes(q))
+          wordStartMatch(g.title, q) ||
+          wordStartMatch(g.author, q) ||
+          (g.tags || []).some((tag: any) => wholeWordMatch(String(tag), q))
         );
       })
       .slice(0, 24);
@@ -356,9 +361,9 @@ export function SearchPage() {
     const creators = (creatorSource as any[])
       .filter((c) => {
         return (
-          String(c.name || '').toLowerCase().includes(q) ||
-          String(c.handle || '').toLowerCase().includes(q) ||
-          String(c.bio || '').toLowerCase().includes(q)
+          wordStartMatch(c.name, q) ||
+          wordStartMatch(c.handle, q) ||
+          wholeWordMatch(c.bio, q)
         );
       })
       .slice(0, 24);

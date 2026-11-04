@@ -1,3 +1,5 @@
+import { wordStartMatch } from '../../lib/search/textMatch';
+
 export interface SuggestionItem {
   id: string;
   type: 'query' | 'product' | 'brand' | 'creator' | 'category' | 'recent' | 'popular' | 'trending' | 'spotlight' | 'guide' | 'launch';
@@ -20,8 +22,8 @@ export interface SuggestionsGrouped {
   totalCount: number;
 }
 
-export const matchSearchText = (value: unknown, query: string) =>
-  typeof value === 'string' && value.toLowerCase().includes(query);
+/** Live typing: every typed word starts a word of the value (never the middle of a word). */
+export const matchSearchText = (value: unknown, query: string) => wordStartMatch(value, query);
 
 export const COMMON_SEARCH_KEYWORDS = [
   'iphone', 'iphone 15', 'iphone charger', 'iphone cover', 'samsung galaxy', 'samsung s24',
