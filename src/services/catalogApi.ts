@@ -83,6 +83,16 @@ export const catalogApi = {
     const result = await request<{ data: CatalogCategory[] }>('/catalog/categories');
     return result.data;
   },
+
+  /** Categories a search points to ("shoes" → Fashion & Lifestyle › Footwear), same words as the category picker. */
+  matchCategories: async (
+    q: string,
+  ): Promise<Array<{ mainId: string; mainName: string; subId: string | null; subName: string | null; score: number }>> => {
+    const result = await request<{ data: Array<{ mainId: string; mainName: string; subId: string | null; subName: string | null; score: number }> }>(
+      `/catalog/categories/match?q=${encodeURIComponent(q)}`,
+    );
+    return result.data;
+  },
   listDeals: async (): Promise<CatalogDeal[]> => {
     const result = await request<{ data: CatalogDeal[] }>('/catalog/deals');
     return result.data;

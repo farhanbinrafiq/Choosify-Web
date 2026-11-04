@@ -683,6 +683,9 @@ export function GlobalStateProvider({ children }: { children: React.ReactNode })
       sponsoredFlag: brand.sponsoredFlag,
       featuredFlag: brand.featuredFlag,
       category: brand.category,
+      categoryId: brand.categoryId || undefined,
+      subcategoryId: brand.subcategoryId || undefined,
+      subcategoryName: brand.subcategoryName || undefined,
       claimStatus: brand.claimStatus,
       pinnedProductIds: Array.isArray(brand.pinnedProductIds) ? brand.pinnedProductIds : undefined,
       pinnedShowcaseProductIds: Array.isArray(brand.pinnedShowcaseProductIds)

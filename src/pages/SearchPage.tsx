@@ -15,6 +15,7 @@ import { mockGuides } from '../data/mockGuides';
 import { CREATORS } from '../data/creators';
 import { useDashboard } from '../context/DashboardContext';
 import { useGlobalState } from '../context/GlobalStateContext';
+import { catalogApi } from '../services/catalogApi';
 import { getBrandOverviews, getProductOverviews, matchOverviewContent } from '../utils/overviewRegistry';
 import { useRegisterPageFilters, UniversalFilterRenderer } from '../components/FilterEngine';
 import { catalogGuideHref } from '../lib/spotlight/content';
@@ -61,6 +62,9 @@ export function SearchPage() {
   const { customOverviews } = useDashboard();
   const { allCatalogProducts, allBrands, allCategories, allCreators, allGuides } = useGlobalState();
 
+  // Sample brands / guides / creators are a local-development aid only; production
+  // search shows real data or nothing.
+  const allowDemo = import.meta.env.DEV;
   const productSource = allCatalogProducts;
   const brandSource =
     allBrands.length > 0
@@ -69,14 +73,37 @@ export function SearchPage() {
           products: (b as { followers?: number; products?: number }).followers ?? (b as { products?: number }).products ?? 0,
           rating: (b as { ratings?: number; rating?: number }).ratings ?? (b as { rating?: number }).rating ?? 0,
         }))
-      : BRANDS;
+      : allowDemo
+        ? BRANDS
+        : [];
   const categorySource =
     allCategories.length > 0
       ? allCategories.map((c) => ({ id: c.id, name: c.name }))
       : CATEGORIES;
-  const guideSource = allGuides.length > 0 ? allGuides : mockGuides;
+  const guideSource = allGuides.length > 0 || !allowDemo ? allGuides : mockGuides;
   const creatorSource =
-    allCreators.length > 0 ? allCreators : Array.isArray(CREATORS) ? CREATORS : Object.values(CREATORS);
+    allCreators.length > 0 || !allowDemo ? allCreators : Array.isArray(CREATORS) ? CREATORS : Object.values(CREATORS);
+
+  // Categories the search words point to ("shoes" → Fashion & Lifestyle › Footwear), so brands
+  // that offer what was searched for show up even when no product matches yet.
+  const [categoryMatches, setCategoryMatches] = useState<
+    Array<{ mainId: string; mainName: string; subId: string | null; subName: string | null; score: number }>
+  >([]);
+  useEffect(() => {
+    const q = rawQuery.trim();
+    if (!q) {
+      setCategoryMatches([]);
+      return;
+    }
+    let cancelled = false;
+    catalogApi
+      .matchCategories(q)
+      .then((m) => !cancelled && setCategoryMatches(m))
+      .catch(() => !cancelled && setCategoryMatches([]));
+    return () => {
+      cancelled = true;
+    };
+  }, [rawQuery]);
 
   useEffect(() => {
     setLocalInput(rawQuery);
@@ -200,7 +227,7 @@ export function SearchPage() {
   const results = useMemo(() => {
     const q = rawQuery.toLowerCase().trim();
     if (!q) {
-      return { products: [] as any[], brands: [] as any[], guides: [] as any[], creators: [] as any[], deals: [] as any[], total: 0 };
+      return { products: [] as any[], brands: [] as any[], guides: [] as any[], creators: [] as any[], deals: [] as any[], total: 0, brandsMayOffer: false };
     }
 
     const scoreTitle = (title: string, hot = false) => {
@@ -254,22 +281,66 @@ export function SearchPage() {
       products = [...products.filter((p) => !isOOS(p)), ...products.filter(isOOS)];
     }
 
+    // Brands also match by what they offer: a brand filed under a subcategory the search
+    // points to ("shoes" → Footwear) ranks first, then brands under a matching main category.
+    // Only strong category matches count, so a brand never shows up just for sharing a
+    // broad area with what was searched for.
+    const subScore = new Map<string, number>();
+    const mainScore = new Map<string, number>();
+    for (const m of categoryMatches) {
+      if (m.score < 50) continue;
+      if (m.subId) subScore.set(m.subId, Math.max(subScore.get(m.subId) ?? 0, m.score));
+      else mainScore.set(m.mainId, Math.max(mainScore.get(m.mainId) ?? 0, m.score));
+    }
+    // The brand's own "Best for" tags (overview.tags): a tag containing the search, or a tag word
+    // matching a searched word (singular/plural alike: "shoe" ↔ "Leather Shoes").
+    const singular = (w: string) => w.replace(/(ies)$/, 'y').replace(/(sses|shes|ches|xes)$/, (m) => m.slice(0, -2)).replace(/(?<!s)s$/, '');
+    const words = (v: string) => v.toLowerCase().split(/[^\p{L}\p{M}\p{N}]+/u).filter((x) => x.length > 1).map(singular);
+    const qWords = words(q);
+    const tagScore = (b: any): number => {
+      const tags: string[] = Array.isArray(b.overview?.tags) ? b.overview.tags.map(String) : [];
+      if (!tags.length || !qWords.length) return 0;
+      if (tags.some((t) => t.toLowerCase().includes(q))) return 260;
+      const tagWords = new Set(tags.flatMap(words));
+      return qWords.every((w) => tagWords.has(w)) ? 220 : 0;
+    };
+    const offerScore = (b: any): number => {
+      if (b.subcategoryId && subScore.has(b.subcategoryId)) return 150 + (subScore.get(b.subcategoryId) ?? 0);
+      if (b.categoryId && mainScore.has(b.categoryId)) return 100 + (mainScore.get(b.categoryId) ?? 0);
+      return 0;
+    };
+
     const brands = brandSource
       .map((b: any) => {
         const overviews = getBrandOverviews(b.name, customOverviews);
         const matchedOverview = matchOverviewContent(overviews, q);
+        const offers = Math.max(offerScore(b), tagScore(b));
         const match =
           b.name.toLowerCase().includes(q) ||
           String(b.category || '').toLowerCase().includes(q) ||
-          !!matchedOverview;
+          String(b.subcategoryName || '').toLowerCase().includes(q) ||
+          !!matchedOverview ||
+          offers > 0;
         if (!match) return null;
         return {
           ...b,
-          score: scoreTitle(b.name, (b.rating || 0) >= 4.8) + (matchedOverview ? 400 : 0),
+          score: scoreTitle(b.name, (b.rating || 0) >= 4.8) + (matchedOverview ? 400 : 0) + offers,
         };
       })
       .filter(Boolean)
       .sort((a: any, b: any) => b.score - a.score) as any[];
+
+    // Nothing matched at all, but the search clearly points to a category: show brands in that
+    // main category that haven't chosen a subcategory yet — they may offer it (labelled as such).
+    let brandsMayOffer = false;
+    const top = categoryMatches.find((m) => m.score >= 50);
+    if (!brands.length && !products.length && top) {
+      const loose = brandSource.filter((b: any) => b.categoryId === top.mainId && !b.subcategoryId);
+      if (loose.length) {
+        brands.push(...loose.map((b: any) => ({ ...b, score: 0 })));
+        brandsMayOffer = true;
+      }
+    }
 
     const guides = guideSource
       .filter((g: any) => {
@@ -298,7 +369,7 @@ export function SearchPage() {
 
     const total = products.length + brands.length + guides.length + creators.length;
 
-    return { products, brands, guides, creators, deals, total };
+    return { products, brands, guides, creators, deals, total, brandsMayOffer };
   }, [
     rawQuery,
     productSource,
@@ -310,7 +381,11 @@ export function SearchPage() {
     maxPrice,
     inStockOnly,
     sortBy,
+    categoryMatches,
   ]);
+
+  // What the search points to, for the "brands that offer …" note ("Footwear").
+  const offeringLabel = categoryMatches[0] ? categoryMatches[0].subName || categoryMatches[0].mainName : '';
 
   // Real, query-relevance-gated promoted search ad. Pulls only actual
   // configured CMS placements targeting the 'infeed_search' slot (no
@@ -458,7 +533,31 @@ export function SearchPage() {
         {/* TOP BRANDS */}
         {rawQuery.trim() && (activeTab === 'all' || activeTab === 'brands') && brandList.length > 0 && (
           <section className="mb-9">
-            <h2 className="text-base font-extrabold text-[#1A1A2E] mb-3.5">TOP BRANDS</h2>
+            {results.products.length === 0 && (activeTab === 'all' || activeTab === 'brands') && (
+              <div
+                className="mb-4 rounded-[10px] border border-[#FF5B00]/25 bg-[#FFF6F2] px-4 py-3 text-[12.5px] text-[#4B5563]"
+                data-testid="search-brands-offer-note"
+              >
+                <span className="font-extrabold text-[#1A1A2E]">No products for &ldquo;{rawQuery.trim()}&rdquo; yet</span>
+                {' — '}
+                {results.brandsMayOffer && offeringLabel ? (
+                  <>no brand is listed under <span className="font-bold text-[#FF5B00]">{offeringLabel}</span> yet, but these {categoryMatches.find((m) => m.score >= 50)?.mainName} brands may offer it.</>
+                ) : offeringLabel ? (
+                  <>these brands offer <span className="font-bold text-[#FF5B00]">{offeringLabel}</span>.</>
+                ) : (
+                  <>these brands match your search.</>
+                )}{' '}
+                Visit a brand&apos;s profile to see what they sell and how to buy from them.
+              </div>
+            )}
+            <h2 className="text-base font-extrabold text-[#1A1A2E] mb-3.5">
+              TOP BRANDS
+              {offeringLabel && (
+                <span className="ml-2 text-[11px] font-bold text-[#9AA0AC] normal-case">
+                  {results.brandsMayOffer ? `may offer ${offeringLabel}` : `offering ${offeringLabel}`}
+                </span>
+              )}
+            </h2>
             {/* The same brand card as the Brands page: logo, cover, Best For, price range, status. */}
             <div className="choosify-brand-grid w-full" data-testid="search-brand-results">
               {brandList.map((brand: any) => (

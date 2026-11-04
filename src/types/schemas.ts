@@ -59,6 +59,10 @@ export interface Brand {
   sponsoredFlag: boolean;
   featuredFlag: boolean;
   category?: string;
+  /** Main category id + optional subcategory (e.g. Fashion & Lifestyle › Footwear). */
+  categoryId?: string;
+  subcategoryId?: string;
+  subcategoryName?: string;
   claimStatus?: 'community' | 'pending' | 'verified';
   /** Original onboard timestamp — used by listing ranking (not updatedAt) */
   createdAt?: string;
