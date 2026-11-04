@@ -164,13 +164,26 @@ export function Hero({ variant, className }: HeroProps) {
               className="absolute inset-0 pointer-events-none"
               style={{ background: 'var(--choosify-hero-overlay)' }}
             />
-            {slide.primaryCtaLink && isActive && (
+            {slide.sponsoredLabel && (
+              <span className="absolute left-4 top-4 z-[2] rounded-md bg-black/60 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-white" data-testid="hero-sponsored-chip">
+                {slide.sponsoredLabel}
+              </span>
+            )}
+            {slide.primaryCtaLink && isActive && (slide.externalLink ? (
+              <a
+                href={slide.primaryCtaLink}
+                target="_blank"
+                rel="sponsored noopener noreferrer"
+                className="absolute inset-0 z-[1]"
+                aria-label={slide.primaryCtaText || slide.title || 'View campaign'}
+              />
+            ) : (
               <Link
                 to={slide.primaryCtaLink}
                 className="absolute inset-0 z-[1]"
                 aria-label={slide.primaryCtaText || slide.title || 'View campaign'}
               />
-            )}
+            ))}
           </div>
         );
       })}

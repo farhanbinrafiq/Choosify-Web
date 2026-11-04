@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { AdSlotBanner } from '../components/ads/AdSlot';
+import { AD_SLOTS } from '../lib/ads/adSlots';
 import { ProductCard } from '../components/ProductCard';
 import { FlashDealCard, DealOfTheDayCard } from '../components/deals/FlashDealCard';
 import { Timer, Zap, ArrowRight, ShoppingBag, Bookmark, ChevronDown, Shirt, Tablets as Gem, Smartphone, Eye, Gamepad2, Utensils, Monitor, Tv, Home, Star, Droplets, BookOpen, Heart, Smile, Car, Compass, Search, ChevronRight, Package, Award, CalendarDays, XCircle, ShieldCheck, Flame } from 'lucide-react';
@@ -871,6 +873,9 @@ export function DealsPage() {
 
             <CtaBannerSlot page="deals" section="deals-flash-dotd" position="after" className="mb-6" />
 
+            {/* Ads Studio slot DEALS_BANNER — wide sponsored banner in the deals feed */}
+            <AdSlotBanner slot={AD_SLOTS.DEALS_BANNER} className="mb-6" />
+
             {/* Choosify.dc.html — horizontal sponsored banner carousel */}
             <ProductsSponsoredBannerCarousel
               items={dealsSponsoredBanners}
@@ -991,6 +996,7 @@ export function DealsPage() {
              <DealsVerticalSponsoredCard />
 
              <ListingAdRail
+               adSlot={AD_SLOTS.DEALS_SIDEBAR}
                sponsoredPlacementKey={PLACEMENT_KEYS.SIDEBAR_PORTRAIT}
                sponsoredVariant="portrait"
                showAdSense

@@ -1,4 +1,5 @@
 import { brandPath } from '../../lib/publicUrls';
+import { AD_SLOTS } from '../lib/ads/adSlots';
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Check, PenTool, Search, Sparkles, Users, X } from 'lucide-react';
@@ -861,6 +862,7 @@ export function CategoriesPage() {
 
           {/* Sponsored Ad Section */}
           <ListingAdRail
+            adSlot={AD_SLOTS.CATEGORIES_SIDEBAR}
             sponsoredPlacementKey={PLACEMENT_KEYS.SIDEBAR_PORTRAIT}
             sponsoredVariant="portrait"
             sponsoredDescription="New collection available from verified partners."

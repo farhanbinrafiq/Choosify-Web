@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { AD_SLOTS } from '../lib/ads/adSlots';
 import { PAGE_LISTING_SINGLE_SHELL, GUIDE_MEDIA_GRID } from "../lib/pageLayout";
 import { StickySectionNav } from '../components/StickySectionNav';
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
@@ -1398,6 +1399,7 @@ export function GuidesPage() {
             </div>
 
             <ListingAdRail
+              adSlot={AD_SLOTS.GUIDES_SIDEBAR}
               sponsoredPlacementKey={PLACEMENT_KEYS.SIDEBAR_PORTRAIT}
               sponsoredVariant="portrait"
               showAdSense={false}

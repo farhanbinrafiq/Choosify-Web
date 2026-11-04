@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { AD_SLOTS } from '../lib/ads/adSlots';
 import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, ShoppingBag, Youtube, Twitter, Facebook, Instagram, Sparkles, PenTool, Users, Heart, Eye, Share2, Flame, Zap, Layers, Award, Gift, Copy, X, Store } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
@@ -816,6 +817,7 @@ export function BrandsPage() {
 
           {/* SPONSOR AD */}
           <ListingAdRail
+            adSlot={AD_SLOTS.BRANDS_SIDEBAR}
             sponsoredPlacementKey={PLACEMENT_KEYS.SIDEBAR_PORTRAIT}
             sponsoredVariant="portrait"
             showAdSense={false}

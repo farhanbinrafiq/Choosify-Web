@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { AdSlotBanner } from '../components/ads/AdSlot';
+import { AD_SLOTS } from '../lib/ads/adSlots';
 import { Search, ChevronDown, ChevronRight, Star, Filter, Bookmark, Grid, List as ListIcon, X, SlidersHorizontal, Layers, Award, Flame, Clock, Sparkles, ArrowRight, Package } from 'lucide-react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { cn } from '../lib/utils';
@@ -915,6 +917,7 @@ export function AllProductsPage() {
           </div>
 
           <ListingAdRail
+            adSlot={AD_SLOTS.BROWSE_SIDEBAR}
             sponsoredPlacementKey={PLACEMENT_KEYS.SIDEBAR_PORTRAIT}
             sponsoredVariant="portrait"
             sponsoredDescription="New collection highlights from verified Choosify partners."
@@ -1023,6 +1026,9 @@ export function AllProductsPage() {
               </div>
             </div>
           </div>
+
+          {/* Ads Studio slot BROWSE_BANNER — wide sponsored banner above the grid */}
+          <AdSlotBanner slot={AD_SLOTS.BROWSE_BANNER} className="mb-6" />
 
           {/* Choosify.dc.html — full-width sponsored banner carousel above grid */}
           {!isLoading && filteredProducts.length > 0 && (

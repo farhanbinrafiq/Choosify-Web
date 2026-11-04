@@ -1,0 +1,91 @@
+/**
+ * Ads Studio → storefront delivery (client side).
+ *
+ * Slot ids come from the ONE registry in the admin repo (shared/ads/placementRegistry.ts); this
+ * file only names the slots the storefront renders. All deliverable ads are fetched in ONE request
+ * (GET /ads/delivery — public, display fields only), cached for the page session (refreshed after
+ * 60s), and a failed request simply yields no ads: an ad problem never breaks a page.
+ */
+import { useEffect, useState } from 'react';
+import { brandPath, creatorPath, guidePath, productPath } from '../../../lib/publicUrls';
+
+export const AD_SLOTS = {
+  HOME_HERO: 'HOME_HERO',
+  HOME_BANNER: 'HOME_FOLLOW_BRANDS',
+  BROWSE_BANNER: 'BROWSE_BANNER',
+  BROWSE_SIDEBAR: 'BROWSE_SIDEBAR',
+  DEALS_BANNER: 'DEALS_BANNER',
+  DEALS_SIDEBAR: 'DEALS_SIDEBAR',
+  BRANDS_SIDEBAR: 'BRANDS_SIDEBAR',
+  CATEGORIES_SIDEBAR: 'CATEGORIES_SIDEBAR',
+  CREATORS_SIDEBAR: 'CREATORS_SIDEBAR',
+  GUIDES_SIDEBAR: 'GUIDES_SIDEBAR',
+  DISCOVER_FEED: 'DISCOVER_FEED',
+  PRODUCT_DETAIL_RAIL: 'PRODUCT_DETAIL_RAIL',
+} as const;
+export type AdSlotId = (typeof AD_SLOTS)[keyof typeof AD_SLOTS];
+
+export type PublicAd = {
+  id: string;
+  slot: string;
+  format: string;
+  display: 'natural' | 'cover' | 'text';
+  image?: string;
+  imageWidth?: number;
+  imageHeight?: number;
+  alt: string;
+  headline?: string;
+  subtext?: string;
+  ctaLabel?: string;
+  sponsorName?: string;
+  sponsorLogoUrl?: string;
+  link: { type: 'product' | 'brand' | 'creator' | 'guide' | 'deal' | 'url'; id?: string; url?: string; external: boolean } | null;
+};
+
+const API_BASE = (((import.meta as any).env?.VITE_API_BASE_URL as string | undefined) || '/api/v1').replace(/\/$/, '');
+const TTL_MS = 60_000;
+let cache: { at: number; promise: Promise<Record<string, PublicAd[]>> } | null = null;
+
+/** All deliverable ads by slot. Never rejects: errors resolve to {}. */
+export function loadAdSlots(): Promise<Record<string, PublicAd[]>> {
+  if (cache && Date.now() - cache.at < TTL_MS) return cache.promise;
+  const promise = fetch(`${API_BASE}/ads/delivery`, { headers: { Accept: 'application/json' } })
+    .then((r) => (r.ok ? r.json() : null))
+    .then((j) => (j?.data?.slots && typeof j.data.slots === 'object' ? (j.data.slots as Record<string, PublicAd[]>) : {}))
+    .catch(() => ({}));
+  cache = { at: Date.now(), promise };
+  return promise;
+}
+
+/** Ads for one slot ([] while loading, on error, or when nothing is booked). */
+export function useAdSlot(slot: AdSlotId): PublicAd[] {
+  const [ads, setAds] = useState<PublicAd[]>([]);
+  useEffect(() => {
+    let alive = true;
+    loadAdSlots().then((all) => {
+      if (!alive) return;
+      const list = Array.isArray(all[slot]) ? all[slot].filter((a) => a && typeof a.id === 'string') : [];
+      setAds(list);
+    });
+    return () => {
+      alive = false;
+    };
+  }, [slot]);
+  return ads;
+}
+
+/** Storefront href for an ad (null = shown without a link). */
+export function adHref(ad: PublicAd): { href: string; external: boolean } | null {
+  const l = ad.link;
+  if (!l) return null;
+  if (l.type === 'url' && l.url) return { href: l.url, external: l.external };
+  if (!l.id) return null;
+  if (l.type === 'product') return { href: productPath({ id: l.id }), external: false };
+  if (l.type === 'brand') return { href: brandPath({ id: l.id }), external: false };
+  if (l.type === 'creator') return { href: creatorPath({ id: l.id }), external: false };
+  if (l.type === 'guide') return { href: guidePath({ id: l.id }), external: false };
+  if (l.type === 'deal') return { href: '/deals', external: false };
+  return null;
+}
+
+export const sponsoredLabel = (ad: PublicAd) => (ad.sponsorName ? `Sponsored · ${ad.sponsorName}` : 'Sponsored');

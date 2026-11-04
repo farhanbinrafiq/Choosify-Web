@@ -1,4 +1,6 @@
 import React, { useState, useMemo, useRef } from "react";
+import { AD_SLOTS } from '../lib/ads/adSlots';
+import { AdSlotCard } from '../components/ads/AdSlot';
 import { useParams, Link, useNavigate, useLocation, Navigate } from "react-router-dom";
 import { productPath, resolveProductParam } from "../../lib/publicUrls";
 import {
@@ -1976,19 +1978,9 @@ export function ProductDetailPage() {
               ) : null}
             </div>
 
-            {/* Sponsored Advertisement */}
-            <div className="choosify-dark-surface text-white rounded-xl p-6 relative overflow-hidden text-left w-full">
-              <SponsoredCardChrome brandName="Choosify" size="sm" />
-              <h4 className="text-sm font-extrabold tracking-tight mb-2 text-white mt-8">
-                Upgrade To Express Delivery
-              </h4>
-              <p className="text-[11px] text-white/55 leading-relaxed mb-4">
-                Get free 1-hour home deliveries inside Dhaka metro area under Choosify Premium Club.
-              </p>
-              <p className="text-[11px] font-bold text-white/40 m-0">
-                Membership signup is not available yet.
-              </p>
-            </div>
+            {/* Sponsored card — Ads Studio slot PRODUCT_DETAIL_RAIL (nothing shown when no ad is booked).
+                Replaces a hardcoded "Choosify Premium Club / Express Delivery" promo for a service that does not exist. */}
+            <AdSlotCard slot={AD_SLOTS.PRODUCT_DETAIL_RAIL} />
           </div>
       </main>
       </div>

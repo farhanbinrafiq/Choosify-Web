@@ -1,4 +1,5 @@
 import { creatorPath } from '../../lib/publicUrls';
+import { AD_SLOTS } from '../lib/ads/adSlots';
 import React, { useState, useMemo } from 'react';
 import { PAGE_LISTING_SINGLE_SHELL, CREATOR_CARD_GRID } from "../lib/pageLayout";
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
@@ -568,6 +569,7 @@ export function CreatorsPage() {
           </div>
 
           <ListingAdRail
+            adSlot={AD_SLOTS.CREATORS_SIDEBAR}
             sponsoredPlacementKey={PLACEMENT_KEYS.SIDEBAR_PORTRAIT}
             sponsoredVariant="portrait"
             showAdSense={false}

@@ -22,6 +22,10 @@ export type HeroSlide = {
   /** Focal point in % (object-position) — which part stays visible when cropped. */
   focalX?: number;
   focalY?: number;
+  /** Ads Studio sponsored slide: the label shown on it ("Sponsored · Brand"). */
+  sponsoredLabel?: string;
+  /** primaryCtaLink is an external https URL (opens in a new tab). */
+  externalLink?: boolean;
   gradient?: string;
 };
 

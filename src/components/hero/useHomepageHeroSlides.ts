@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import type { HeroSlide } from './types';
 import { useGlobalState } from '../../context/GlobalStateContext';
+import { AD_SLOTS, adHref, sponsoredLabel, useAdSlot } from '../../lib/ads/adSlots';
 
 /**
  * Homepage hero — video-only fallback when CMS has no active banners.
@@ -19,7 +20,30 @@ const VIDEO_ONLY_SLIDE: HeroSlide = {
 
 export function useHomepageHeroSlides(): HeroSlide[] {
   const { homepageConfig } = useGlobalState();
+  const heroAds = useAdSlot(AD_SLOTS.HOME_HERO);
+  const editorial = useEditorialHeroSlides(homepageConfig);
+  // Booked Ads Studio HOME_HERO ads join AFTER the editorial slides, always labelled "Sponsored".
+  return useMemo(() => {
+    const sponsored: HeroSlide[] = heroAds
+      .filter((ad) => ad.image)
+      .map((ad) => {
+        const target = adHref(ad);
+        return {
+          id: `ad-${ad.id}`,
+          title: ad.alt,
+          primaryCtaText: ad.ctaLabel,
+          primaryCtaLink: target?.href,
+          externalLink: target?.external,
+          image: ad.image,
+          alt: ad.alt,
+          sponsoredLabel: sponsoredLabel(ad),
+        };
+      });
+    return sponsored.length ? [...editorial, ...sponsored] : editorial;
+  }, [editorial, heroAds]);
+}
 
+function useEditorialHeroSlides(homepageConfig: ReturnType<typeof useGlobalState>['homepageConfig']): HeroSlide[] {
   return useMemo(() => {
     const active = (homepageConfig?.heroBanners ?? [])
       .filter((banner) => banner.isActive)
