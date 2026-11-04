@@ -8,11 +8,20 @@ import { enabledSorted, resolveSitePages } from '../lib/cmsSitePages';
 export function AboutPage() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { siteConfig } = useGlobalState();
+  const { siteConfig, allBrands, allCatalogProducts, catalogReady } = useGlobalState();
   const content = resolveSitePages(siteConfig?.sitePages).about;
   const companyNav = enabledSorted(content.companyNav);
   const legalNav = enabledSorted(content.legalNav);
-  const stats = enabledSorted(content.stats);
+  // Only verified, live counts (what is actually listed on Choosify right now) — never stored or
+  // invented figures. A count shows once the catalog has loaded and is above zero.
+  const stats = catalogReady
+    ? [
+        { id: 'brands', icon: '🏷', label: 'Brands', bg: '#FFF3EA', count: allBrands.length },
+        { id: 'products', icon: '📦', label: 'Products', bg: '#EEF0FF', count: allCatalogProducts.length },
+      ]
+        .filter((s) => s.count > 0)
+        .map((s) => ({ ...s, value: s.count.toLocaleString('en-US') }))
+    : [];
   const whyCards = enabledSorted(content.whyCards);
   const companyRows = enabledSorted(content.companyRows);
   const legalRows = enabledSorted(content.legalRows);
@@ -96,7 +105,8 @@ export function AboutPage() {
                 {content.heroTitleLine2Prefix} <span className="text-[#2323FF]">{content.heroTitleAccent}</span>
               </h1>
               <p className="text-[13px] text-[#4B5563] leading-relaxed m-0 mb-[22px]">{content.heroDescription}</p>
-              <div className="flex gap-6 flex-wrap">
+              {stats.length > 0 && (
+              <div className="flex gap-6 flex-wrap" data-testid="about-live-stats">
                 {stats.map((st) => (
                   <div key={st.id || st.label} className="text-center">
                     <div
@@ -110,6 +120,7 @@ export function AboutPage() {
                   </div>
                 ))}
               </div>
+              )}
             </div>
             <div className="w-full h-[200px] md:h-[220px] rounded-xl overflow-hidden bg-[#18154C]">
               <img

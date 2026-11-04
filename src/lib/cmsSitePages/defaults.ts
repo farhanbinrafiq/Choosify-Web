@@ -38,12 +38,8 @@ export const DEFAULT_ABOUT: AboutPageContent = {
   heroDescription:
     "Choosify is Bangladesh's smart product discovery and decision-making platform. We help you explore trusted products, compare prices, read real reviews, and make confident choices.",
   heroImageUrl: 'https://images.unsplash.com/photo-1556742049-0cfed4f6a45d?w=800&q=80',
-  stats: [
-    { id: 'brands', icon: '🏷', value: '2,400+', label: 'Brands', bg: '#FFF3EA', enabled: true, order: 0 },
-    { id: 'products', icon: '📦', value: '48K+', label: 'Products', bg: '#EEF0FF', enabled: true, order: 1 },
-    { id: 'reviews', icon: '⭐', value: '120K+', label: 'Reviews', bg: '#ECFDF3', enabled: true, order: 2 },
-    { id: 'users', icon: '👥', value: '85K+', label: 'Users', bg: '#FFF7ED', enabled: true, order: 3 },
-  ],
+  // No invented figures: the About page shows live counts only (see AboutPage).
+  stats: [],
   whyHeading: 'Why Choosify?',
   whyCards: [
     { id: 'smart', icon: '🔍', title: 'Smart Discovery', desc: 'Find trusted products across categories with curated catalogs.', bg: '#FFF3EA', enabled: true, order: 0 },
