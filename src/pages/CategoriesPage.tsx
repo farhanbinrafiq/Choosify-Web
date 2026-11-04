@@ -1,5 +1,6 @@
 import { brandPath } from '../../lib/publicUrls';
 import { AD_SLOTS } from '../lib/ads/adSlots';
+import { AdSlotBanner } from '../components/ads/AdSlot';
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Check, PenTool, Search, Sparkles, Users, X } from 'lucide-react';
@@ -695,6 +696,8 @@ export function CategoriesPage() {
 
         <div id={CATEGORIES_SCROLL_TARGET_ID} className="choosify-middle-feed scroll-mt-40 min-w-0 pb-10 space-y-6">
           <CtaBannerSlot page="categories" section="categories-feed-header" position="before" />
+          {/* Ads Studio slot CATEGORIES_BANNER — wide sponsored banner above the category grid */}
+          <AdSlotBanner slot={AD_SLOTS.CATEGORIES_BANNER} />
           <ListingFeedHeader
             eyebrow="Shop by • Categories"
             title={

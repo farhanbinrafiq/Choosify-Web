@@ -33,7 +33,13 @@ const Chip = ({ ad }: { ad: PublicAd }) => (
   </span>
 );
 
-/** Wide banner slot: the uploaded design is shown whole; several ads rotate every 7 seconds. */
+/**
+ * Wide banner slot — a FIXED frame (4:1 on desktop, max 300px tall; 5:2 on phones) so a banner
+ * never takes more space than the slot allows. The uploaded design is fitted WHOLE inside the
+ * frame (never cropped) over a soft blurred fill of the same image, with the advertiser's orange
+ * CTA button (right side, vertically centred) when a label and destination are set. Several ads
+ * rotate every 7 seconds.
+ */
 export function AdSlotBanner({ slot, className = '' }: { slot: AdSlotId; className?: string }) {
   const ads = useAdSlot(slot).filter((a) => a.image);
   const [i, setI] = useState(0);
@@ -46,17 +52,26 @@ export function AdSlotBanner({ slot, className = '' }: { slot: AdSlotId; classNa
   const ad = ads[i % ads.length];
   return (
     <section className={`w-full ${className}`} aria-label="Sponsored" data-testid={`ad-slot-${slot}`}>
-      <AdLink ad={ad} className="relative mx-auto block w-fit max-w-full overflow-hidden rounded-xl" testId="ad-banner-link">
-        <Chip ad={ad} />
+      <AdLink ad={ad} className="relative block w-full aspect-[5/2] sm:aspect-[4/1] max-h-[300px] overflow-hidden rounded-xl bg-[#0F1238]" testId="ad-banner-link">
+        <img src={ad.image} alt="" aria-hidden className="absolute inset-0 h-full w-full scale-110 object-cover blur-xl opacity-60" loading="lazy" />
         <img
           src={ad.image}
           alt={ad.alt}
           width={ad.imageWidth}
           height={ad.imageHeight}
-          className="block h-auto w-auto max-w-full max-h-[360px] object-contain"
+          className="relative block h-full w-full object-contain"
           loading="lazy"
           data-testid="ad-banner-image"
         />
+        <Chip ad={ad} />
+        {ad.ctaLabel && adHref(ad) && (
+          <span
+            className="absolute right-2 top-1/2 z-[2] inline-flex -translate-y-1/2 items-center gap-1 rounded-lg bg-[#FF5B00] px-2.5 py-1 text-[10.5px] font-extrabold uppercase tracking-wide text-white shadow-md sm:right-5 sm:px-4 sm:py-2 sm:text-[12.5px]"
+            data-testid="ad-cta-button"
+          >
+            {ad.ctaLabel} <span aria-hidden>→</span>
+          </span>
+        )}
       </AdLink>
       {ads.length > 1 && (
         <div className="mt-2 flex justify-center gap-1.5">
@@ -89,7 +104,11 @@ export function AdSlotCard({ slot, className = '' }: { slot: AdSlotId; className
           <div className="p-3">
             {ad.display !== 'text' && ad.headline && <div className="text-[13px] font-extrabold text-[#1A1A2E] line-clamp-2">{ad.headline}</div>}
             {ad.subtext && <div className="mt-0.5 text-[11.5px] text-[#6B7280] line-clamp-2">{ad.subtext}</div>}
-            {ad.ctaLabel && adHref(ad) && <span className="mt-2 inline-block rounded-lg bg-[#FF5B00] px-3 py-1.5 text-[11px] font-extrabold text-white">{ad.ctaLabel}</span>}
+            {ad.ctaLabel && adHref(ad) && (
+              <span className="mx-auto mt-2.5 flex w-fit items-center gap-1 rounded-lg bg-[#FF5B00] px-4 py-1.5 text-[11px] font-extrabold uppercase tracking-wide text-white" data-testid="ad-card-cta">
+                {ad.ctaLabel} <span aria-hidden>→</span>
+              </span>
+            )}
           </div>
         )}
       </AdLink>

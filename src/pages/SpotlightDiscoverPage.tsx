@@ -20,6 +20,8 @@ import {
 } from '../utils/contentPriority';
 import { usePriorityClockMs } from '../hooks/usePriorityClockMs';
 import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
+import { AD_SLOTS } from '../lib/ads/adSlots';
+import { AdSlotBanner } from '../components/ads/AdSlot';
 
 const FORMAT_FILTER_TABS = new Set<SpotlightContentTabId>([
   'videos',
@@ -164,6 +166,9 @@ export function SpotlightDiscoverPage() {
             count={feedItems.length}
             itemLabel="posts"
           />
+
+          {/* Ads Studio slot DISCOVER_BANNER — wide sponsored banner above the feed */}
+          <AdSlotBanner slot={AD_SLOTS.DISCOVER_BANNER} className="mb-6" />
 
           {!hasContent ? (
             <div className="pt-10">

@@ -1,5 +1,6 @@
 import { creatorPath } from '../../lib/publicUrls';
 import { AD_SLOTS } from '../lib/ads/adSlots';
+import { AdSlotBanner } from '../components/ads/AdSlot';
 import React, { useState, useMemo } from 'react';
 import { PAGE_LISTING_SINGLE_SHELL, CREATOR_CARD_GRID } from "../lib/pageLayout";
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
@@ -579,6 +580,8 @@ export function CreatorsPage() {
         {/* Main Content Area */}
         <main id="creators-main-display" className="choosify-middle-feed scroll-mt-36 min-w-0 pb-10 space-y-6">
           <CtaBannerSlot page="creators" section="creators-feed-header" position="before" />
+          {/* Ads Studio slot CREATORS_BANNER — wide sponsored banner above the creators grid */}
+          <AdSlotBanner slot={AD_SLOTS.CREATORS_BANNER} />
           <ListingFeedHeader
             eyebrow="Our partners • Creator directory"
             title={

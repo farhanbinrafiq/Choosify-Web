@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { AD_SLOTS } from '../lib/ads/adSlots';
+import { AdSlotBanner } from '../components/ads/AdSlot';
 import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, ShoppingBag, Youtube, Twitter, Facebook, Instagram, Sparkles, PenTool, Users, Heart, Eye, Share2, Flame, Zap, Layers, Award, Gift, Copy, X, Store } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
@@ -826,6 +827,8 @@ export function BrandsPage() {
 
         {/* Main Content Area */}
         <main id="brands-main-display" className="choosify-middle-feed scroll-mt-36 min-w-0 pb-10 space-y-6">
+          {/* Ads Studio slot BRANDS_BANNER — wide sponsored banner above the brands grid */}
+          <AdSlotBanner slot={AD_SLOTS.BRANDS_BANNER} />
           <ListingFeedHeader
             eyebrow="Our partners • Brands"
             title={
