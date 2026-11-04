@@ -874,7 +874,7 @@ export function DealsPage() {
             <CtaBannerSlot page="deals" section="deals-flash-dotd" position="after" className="mb-6" />
 
             {/* Ads Studio slot DEALS_BANNER — wide sponsored banner in the deals feed */}
-            <AdSlotBanner slot={AD_SLOTS.DEALS_BANNER} className="mb-6" />
+            <AdSlotBanner slot={AD_SLOTS.DEALS_BANNER} position="top" className="mb-6" />
 
             {/* Choosify.dc.html — horizontal sponsored banner carousel */}
             <ProductsSponsoredBannerCarousel
@@ -988,6 +988,7 @@ export function DealsPage() {
             <CtaBannerSlot page="deals" section="deals-subscribe-banner" position="after" className="mb-8" />
 
             <AdSenseSlot format="infeed" className="mt-6" />
+            <AdSlotBanner slot={AD_SLOTS.DEALS_BANNER} position="bottom" />
 
           </div>
 

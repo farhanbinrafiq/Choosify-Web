@@ -828,7 +828,7 @@ export function BrandsPage() {
         {/* Main Content Area */}
         <main id="brands-main-display" className="choosify-middle-feed scroll-mt-36 min-w-0 pb-10 space-y-6">
           {/* Ads Studio slot BRANDS_BANNER — wide sponsored banner above the brands grid */}
-          <AdSlotBanner slot={AD_SLOTS.BRANDS_BANNER} />
+          <AdSlotBanner slot={AD_SLOTS.BRANDS_BANNER} position="top" />
           <ListingFeedHeader
             eyebrow="Our partners • Brands"
             title={
@@ -1018,6 +1018,7 @@ export function BrandsPage() {
             </Link>
           </div>
 
+          <AdSlotBanner slot={AD_SLOTS.BRANDS_BANNER} position="bottom" />
           <CtaBannerSlot page="brands" section="brands-follow-cta-strip" position="after" className="mb-8" />
 
           <AdSenseSlot format="infeed" className="mt-6" />

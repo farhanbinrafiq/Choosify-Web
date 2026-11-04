@@ -5,7 +5,8 @@
  * Both render nothing while loading, on error, or when no ad is booked for the slot. Every ad
  * carries a visible "Sponsored" label so paid content is never mistaken for editorial content.
  */
-import React, { useEffect, useState } from 'react';
+import React from 'react';
+import { AdSlotCarousel } from '../commerce/AdSlotCarousel';
 import { Link } from 'react-router-dom';
 import { AD_SLOTS, adHref, sponsoredLabel, useAdSlot, type AdSlotId, type PublicAd } from '../../lib/ads/adSlots';
 import type { SponsoredPlacementItem } from '../../types/commerce/sponsoredPlacement';
@@ -37,57 +38,75 @@ const Chip = ({ ad }: { ad: PublicAd }) => (
  * Wide banner slot — a FIXED frame (4:1 on desktop, max 300px tall; 5:2 on phones) so a banner
  * never takes more space than the slot allows. The uploaded design is fitted WHOLE inside the
  * frame (never cropped) over a soft blurred fill of the same image, with the advertiser's orange
- * CTA button (right side, vertically centred) when a label and destination are set. Several ads
- * rotate every 7 seconds.
+ * CTA button (right side, vertically centred) when a label and destination are set. When the
+ * advertiser ticks "show headline & subtext", they are drawn over the left of the image.
+ * Several ads in the same spot stack into a carousel with round switch icons below.
  */
-export function AdSlotBanner({ slot, className = '' }: { slot: AdSlotId; className?: string }) {
-  const ads = useAdSlot(slot).filter((a) => a.image || (a.format === 'cta_strip' && a.headline));
-  const [i, setI] = useState(0);
-  useEffect(() => {
-    if (ads.length < 2) return;
-    const t = window.setInterval(() => setI((x) => (x + 1) % ads.length), 7000);
-    return () => window.clearInterval(t);
-  }, [ads.length]);
+export function AdSlotBanner({ slot, position, className = '' }: { slot: AdSlotId; position?: string; className?: string }) {
+  const ads = useBannerAds(slot, position);
   if (!ads.length) return null;
-  const ad = ads[i % ads.length];
-  if (ad.format === 'cta_strip') {
-    return (
-      <section className={`w-full ${className}`} aria-label="Sponsored" data-testid={`ad-slot-${slot}`}>
-        <CtaStrip ad={ad} />
-      </section>
-    );
-  }
+  const testId = position ? `ad-slot-${slot}-${position}` : `ad-slot-${slot}`;
   return (
-    <section className={`w-full ${className}`} aria-label="Sponsored" data-testid={`ad-slot-${slot}`}>
-      <AdLink ad={ad} className="relative block w-full aspect-[5/2] sm:aspect-[4/1] max-h-[300px] overflow-hidden rounded-xl bg-[#0F1238]" testId="ad-banner-link">
-        <img src={ad.image} alt="" aria-hidden className="absolute inset-0 h-full w-full scale-110 object-cover blur-xl opacity-60" loading="lazy" />
-        <img
-          src={ad.image}
-          alt={ad.alt}
-          width={ad.imageWidth}
-          height={ad.imageHeight}
-          className="relative block h-full w-full object-contain"
-          loading="lazy"
-          data-testid="ad-banner-image"
-        />
-        <Chip ad={ad} />
-        {ad.ctaLabel && adHref(ad) && (
-          <span
-            className="absolute right-2 top-1/2 z-[2] inline-flex -translate-y-1/2 items-center gap-1 rounded-lg bg-[#FF5B00] px-2.5 py-1 text-[10.5px] font-extrabold uppercase tracking-wide text-white shadow-md sm:right-5 sm:px-4 sm:py-2 sm:text-[12.5px]"
-            data-testid="ad-cta-button"
-          >
-            {ad.ctaLabel} <span aria-hidden>→</span>
-          </span>
-        )}
-      </AdLink>
-      {ads.length > 1 && (
-        <div className="mt-2 flex justify-center gap-1.5">
-          {ads.map((a, j) => (
-            <button key={a.id} type="button" aria-label={`Show sponsored banner ${j + 1}`} onClick={() => setI(j)} className={`h-1.5 rounded-full ${j === i % ads.length ? 'w-4 bg-[#FF5B00]' : 'w-1.5 bg-[#CBD5E1]'}`} />
-          ))}
+    <section className={`w-full ${className}`} aria-label="Sponsored" data-testid={testId} data-ad-position={position}>
+      <AdSlotCarousel
+        items={ads}
+        getKey={(a) => a.id}
+        axis="x"
+        paginationPosition="below"
+        autoplay
+        autoplayMs={7000}
+        ariaLabel="Sponsored banners"
+        paginationRingOffsetClassName="ring-offset-[#F0F6FF]"
+        getIcon={(a) => ({ label: a.headline || 'Sponsored', imageUrl: a.sponsorLogoUrl || a.image })}
+        renderSlide={(a) => (a.format === 'cta_strip' ? <CtaStrip ad={a} /> : <BannerFrame ad={a} />)}
+      />
+    </section>
+  );
+}
+
+/** One wide designed banner inside the fixed frame. */
+function BannerFrame({ ad }: { ad: PublicAd }) {
+  return (
+    <AdLink ad={ad} className="relative block w-full aspect-[5/2] sm:aspect-[4/1] max-h-[300px] overflow-hidden rounded-xl bg-[#0F1238]" testId="ad-banner-link">
+      <img src={ad.image} alt="" aria-hidden className="absolute inset-0 h-full w-full scale-110 object-cover blur-xl opacity-60" loading="lazy" />
+      <img
+        src={ad.image}
+        alt={ad.alt}
+        width={ad.imageWidth}
+        height={ad.imageHeight}
+        className="relative block h-full w-full object-contain"
+        loading="lazy"
+        data-testid="ad-banner-image"
+      />
+      {ad.showText && (ad.headline || ad.subtext) && (
+        <div
+          className="absolute inset-y-0 left-0 z-[1] flex w-[62%] flex-col justify-center bg-gradient-to-r from-black/70 via-black/40 to-transparent px-4 pt-5 sm:w-[55%] sm:px-8"
+          data-testid="ad-banner-text"
+        >
+          {ad.headline && <div className="text-[15px] font-extrabold leading-tight text-white line-clamp-2 sm:text-[26px]">{ad.headline}</div>}
+          {ad.subtext && <div className="mt-1 text-[11px] font-medium text-white/85 line-clamp-2 sm:mt-2 sm:text-[15px]">{ad.subtext}</div>}
         </div>
       )}
-    </section>
+      <Chip ad={ad} />
+      {ad.ctaLabel && adHref(ad) && (
+        <span
+          className="absolute right-2 top-1/2 z-[2] inline-flex -translate-y-1/2 items-center gap-1 rounded-lg bg-[#FF5B00] px-2.5 py-1 text-[10.5px] font-extrabold uppercase tracking-wide text-white shadow-md sm:right-5 sm:px-4 sm:py-2 sm:text-[12.5px]"
+          data-testid="ad-cta-button"
+        >
+          {ad.ctaLabel} <span aria-hidden>→</span>
+        </span>
+      )}
+    </AdLink>
+  );
+}
+
+/**
+ * Drawable banner ads for a slot. With `position`, only the ads pinned to that exact spot on the
+ * page (the server resolves "no spot chosen" to the slot's default spot).
+ */
+export function useBannerAds(slot: AdSlotId, position?: string): PublicAd[] {
+  return useAdSlot(slot).filter(
+    (a) => (a.image || (a.format === 'cta_strip' && a.headline)) && (!position || (a.position ?? position) === position),
   );
 }
 

@@ -9,7 +9,18 @@ import { HomeFeaturedProductsSection } from '../components/home/sections/HomeFea
 import { HomeTodaysDealsSection } from '../components/home/sections/HomeTodaysDealsSection';
 import { HomeCompareSection } from '../components/home/sections/HomeCompareSection';
 import { HomeBuyingGuidesSection } from '../components/home/sections/HomeBuyingGuidesSection';
-import { HomeSponsoredBannerSection } from '../components/home/sections/HomeSponsoredBannerSection';
+import { HomeAdSpot, HomeSponsoredBannerSection } from '../components/home/sections/HomeSponsoredBannerSection';
+
+/** Ads Studio homepage spot after each section (spotlight / trending already carry theirs). */
+const AD_SPOT_AFTER: Record<string, string> = {
+  categories: 'after-categories',
+  deals: 'after-deals',
+  compare: 'after-compare',
+  recommended: 'after-guides',
+  'featured-brands': 'after-featured-brands',
+  services: 'after-services',
+  'recently-viewed': 'after-recently-viewed',
+};
 import { HomeFeaturedBrandsSection } from '../components/home/sections/HomeFeaturedBrandsSection';
 import { HomePopularServicesSection } from '../components/home/sections/HomePopularServicesSection';
 import { HomeRecentlyViewedSection } from '../components/home/sections/HomeRecentlyViewedSection';
@@ -129,11 +140,25 @@ export function HomePage() {
           <Hero variant="homepage" />
         </div>
       )}
+      {/* Top Categories pulls itself up over the hero (up to 56px); give it that room under the ad. */}
+      <HomeAdSpot position="after-hero" className="mb-[40px] sm:mb-[48px] md:mb-[64px] lg:mb-[80px]" />
 
       <main className="pb-8">
-        {sectionOrder.map((sectionId) => renderSection(sectionId))}
+        {sectionOrder.map((sectionId) => {
+          const node = renderSection(sectionId);
+          const spot = AD_SPOT_AFTER[sectionId];
+          return node && spot ? (
+            <React.Fragment key={`${sectionId}-with-ad`}>
+              {node}
+              <HomeAdSpot position={spot} />
+            </React.Fragment>
+          ) : (
+            node
+          );
+        })}
         {/* If neither spotlight nor standalone trending rendered, still show sponsored once */}
         {!showSpotlight && !showStandaloneTrending && <HomeSponsoredBannerSection />}
+        <HomeAdSpot position="page-end" />
         <CtaBannerSlot page="home" section="home-end" position="after" className="max-w-7xl mx-auto px-6 mt-8" />
       </main>
     </HomepageLayout>

@@ -168,7 +168,7 @@ export function SpotlightDiscoverPage() {
           />
 
           {/* Ads Studio slot DISCOVER_BANNER — wide sponsored banner above the feed */}
-          <AdSlotBanner slot={AD_SLOTS.DISCOVER_BANNER} className="mb-6" />
+          <AdSlotBanner slot={AD_SLOTS.DISCOVER_BANNER} position="top" className="mb-6" />
 
           {!hasContent ? (
             <div className="pt-10">
@@ -188,6 +188,8 @@ export function SpotlightDiscoverPage() {
               hasActiveLive={hasActiveLive}
             />
           )}
+
+          <AdSlotBanner slot={AD_SLOTS.DISCOVER_BANNER} position="bottom" className="mt-10" />
 
           <div className="mt-12 text-center">
             <Link

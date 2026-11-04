@@ -44,6 +44,10 @@ export type PublicAd = {
   ctaLabel?: string;
   sponsorName?: string;
   sponsorLogoUrl?: string;
+  /** Wide banners: draw the headline + subtext over the image (advertiser's choice). */
+  showText?: boolean;
+  /** Wide banners: the exact spot on the page (slot default when the advertiser chose none). */
+  position?: string;
   /** Category Promoted Slot only: which category card carries this sponsor footer. */
   categoryId?: string;
   categoryName?: string;
@@ -96,4 +100,5 @@ export function adHref(ad: PublicAd): { href: string; external: boolean } | null
   return null;
 }
 
-export const sponsoredLabel = (ad: PublicAd) => (ad.sponsorName ? `Sponsored · ${ad.sponsorName}` : 'Sponsored');
+/** The paid-content label is always just "Sponsored" (the advertiser's own design names them). */
+export const sponsoredLabel = (_ad?: PublicAd) => 'Sponsored';

@@ -1028,7 +1028,7 @@ export function AllProductsPage() {
           </div>
 
           {/* Ads Studio slot BROWSE_BANNER — wide sponsored banner above the grid */}
-          <AdSlotBanner slot={AD_SLOTS.BROWSE_BANNER} className="mb-6" />
+          <AdSlotBanner slot={AD_SLOTS.BROWSE_BANNER} position="top" className="mb-6" />
 
           {/* Choosify.dc.html — full-width sponsored banner carousel above grid */}
           {!isLoading && filteredProducts.length > 0 && (
@@ -1095,6 +1095,7 @@ export function AllProductsPage() {
             onPageChange={setCurrentPage}
           />
 
+          <AdSlotBanner slot={AD_SLOTS.BROWSE_BANNER} position="bottom" className="mt-6" />
           <AdSenseSlot format="infeed" className="mt-6" />
           <CtaBannerSlot page="products" section="products-end" position="after" className="mt-6" />
         </main>

@@ -699,7 +699,7 @@ export function CategoriesPage() {
         <div id={CATEGORIES_SCROLL_TARGET_ID} className="choosify-middle-feed scroll-mt-40 min-w-0 pb-10 space-y-6">
           <CtaBannerSlot page="categories" section="categories-feed-header" position="before" />
           {/* Ads Studio slot CATEGORIES_BANNER — wide sponsored banner above the category grid */}
-          <AdSlotBanner slot={AD_SLOTS.CATEGORIES_BANNER} />
+          <AdSlotBanner slot={AD_SLOTS.CATEGORIES_BANNER} position="top" />
           <ListingFeedHeader
             eyebrow="Shop by • Categories"
             title={
@@ -826,6 +826,7 @@ export function CategoriesPage() {
               )}
             </div>
           </div>
+          <AdSlotBanner slot={AD_SLOTS.CATEGORIES_BANNER} position="bottom" />
         </div>
 
         {/* RIGHT COLUMN: FOR BUSINESS & SELLERS CARD & SPONSORED AD */}

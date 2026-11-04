@@ -581,7 +581,7 @@ export function CreatorsPage() {
         <main id="creators-main-display" className="choosify-middle-feed scroll-mt-36 min-w-0 pb-10 space-y-6">
           <CtaBannerSlot page="creators" section="creators-feed-header" position="before" />
           {/* Ads Studio slot CREATORS_BANNER — wide sponsored banner above the creators grid */}
-          <AdSlotBanner slot={AD_SLOTS.CREATORS_BANNER} />
+          <AdSlotBanner slot={AD_SLOTS.CREATORS_BANNER} position="top" />
           <ListingFeedHeader
             eyebrow="Our partners • Creator directory"
             title={
@@ -764,6 +764,7 @@ export function CreatorsPage() {
                 </button>
              </div>
           )}
+          <AdSlotBanner slot={AD_SLOTS.CREATORS_BANNER} position="bottom" />
         </main>
 
         {/* RIGHT SIDEBAR WITH SPONSOR & SELLERS CARD */}
