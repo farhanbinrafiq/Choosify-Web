@@ -101,16 +101,35 @@ export function Navbar() {
     setIsCartOpen((open) => !open);
   };
 
-  const navItems = resolveSiteNavigation(siteConfig?.navigation);
+  // Published Website Studio navigation wins; otherwise the built-in primary navigation.
+  const studioNav = siteConfig?.websiteStudio?.navigation;
+  const navItems: Array<{ id: string; path: string; label: string; external?: boolean; desktop?: boolean; mobile?: boolean }> = studioNav
+    ? studioNav.items.map((i) => ({ id: i.id, path: i.url, label: i.label, external: i.external, desktop: i.showOnDesktop, mobile: i.showOnMobile }))
+    : resolveSiteNavigation(siteConfig?.navigation);
+  const announcement = studioNav
+    ? studioNav.announcement.enabled && studioNav.announcement.text.trim()
+      ? { text: studioNav.announcement.text, link: studioNav.announcement.linkUrl }
+      : null
+    : siteConfig?.announcementBarEnabled && siteConfig.announcementBarText?.trim()
+      ? { text: siteConfig.announcementBarText, link: '' }
+      : null;
+  const studioLogo = siteConfig?.websiteStudio?.brandAssets?.primaryLogo;
 
   const renderNavLinks = (linkClass: (path: string) => string) =>
     navItems
-      .filter((item) => isNavPathEnabled(item.path, featureFlags))
-      .map((item) => (
-        <Link key={item.id} to={item.path} className={linkClass(item.path)}>
-          {item.label}
-        </Link>
-      ));
+      .filter((item) => item.desktop !== false)
+      .filter((item) => item.external || isNavPathEnabled(item.path, featureFlags))
+      .map((item) =>
+        item.external ? (
+          <a key={item.id} href={item.path} target="_blank" rel="noopener noreferrer" className={linkClass(item.path)}>
+            {item.label}
+          </a>
+        ) : (
+          <Link key={item.id} to={item.path} className={linkClass(item.path)}>
+            {item.label}
+          </Link>
+        ),
+      );
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,9 +228,17 @@ export function Navbar() {
 
   return (
     <>
-      {siteConfig?.announcementBarEnabled && siteConfig.announcementBarText?.trim() && (
-        <div className="w-full bg-[#FF5B00] text-white text-center text-[11px] sm:text-xs py-1.5 px-4 font-semibold tracking-wide">
-          {siteConfig.announcementBarText}
+      {announcement && (
+        <div className="w-full bg-[#FF5B00] text-white text-center text-[11px] sm:text-xs py-1.5 px-4 font-semibold tracking-wide" data-testid="announcement-bar">
+          {announcement.link ? (
+            announcement.link.startsWith('/') ? (
+              <Link to={announcement.link} className="underline-offset-2 hover:underline">{announcement.text}</Link>
+            ) : (
+              <a href={announcement.link} target="_blank" rel="noopener noreferrer" className="underline-offset-2 hover:underline">{announcement.text}</a>
+            )
+          ) : (
+            announcement.text
+          )}
         </div>
       )}
       <header className="w-full min-w-0 z-50 sticky top-0 shadow-sm border-b border-white/[0.07]" id="main-navbar">
@@ -231,7 +258,13 @@ export function Navbar() {
         {/* LOGO — official Choosify wordmark (shrinks on narrow mobile so it never covers search) */}
         <div className="flex items-center min-w-0 shrink max-w-[min(132px,34vw)] sm:max-w-[min(300px,64vw)] sm:shrink-0">
           <Link to="/" className="flex min-w-0 items-center group" aria-label="Choosify Home">
-            {siteConfig?.websiteAssets?.navbarLogo ? (
+            {studioLogo?.url ? (
+              <img
+                src={studioLogo.url}
+                alt={studioLogo.alt || 'Choosify'}
+                className="h-9 sm:h-[3.25rem] w-auto max-w-full group-hover:opacity-95 transition-opacity object-contain"
+              />
+            ) : siteConfig?.websiteAssets?.navbarLogo ? (
               <img
                 src={siteConfig.websiteAssets.navbarLogo}
                 alt="Choosify"
@@ -495,17 +528,31 @@ export function Navbar() {
                   </span>
                   {navItems
                     .filter((item) => item.path !== '/messages')
-                    .filter((item) => isNavPathEnabled(item.path, featureFlags))
-                    .map((item) => (
-                      <Link
-                        key={item.id}
-                        to={item.path}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={getMobileLinkClass(item.path)}
-                      >
-                        <span>{item.label}</span>
-                      </Link>
-                    ))}
+                    .filter((item) => item.mobile !== false)
+                    .filter((item) => item.external || isNavPathEnabled(item.path, featureFlags))
+                    .map((item) =>
+                      item.external ? (
+                        <a
+                          key={item.id}
+                          href={item.path}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className={getMobileLinkClass(item.path)}
+                        >
+                          <span>{item.label}</span>
+                        </a>
+                      ) : (
+                        <Link
+                          key={item.id}
+                          to={item.path}
+                          onClick={() => setIsMobileMenuOpen(false)}
+                          className={getMobileLinkClass(item.path)}
+                        >
+                          <span>{item.label}</span>
+                        </Link>
+                      ),
+                    )}
                 </div>
 
               </div>

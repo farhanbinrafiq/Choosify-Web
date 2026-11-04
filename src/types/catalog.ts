@@ -298,6 +298,34 @@ export interface HomepageConfig {
   updatedAt: string;
 }
 
+/** Published Website Studio parts carried by GET /catalog/site (absent until published). */
+export interface WebsiteStudioSite {
+  navigation?: {
+    items: Array<{ id: string; label: string; url: string; external: boolean; showOnDesktop: boolean; showOnMobile: boolean }>;
+    announcement: { enabled: boolean; text: string; linkUrl: string };
+  };
+  footer?: {
+    description: string;
+    columns: Array<{ id: string; title: string; links: Array<{ label: string; url: string; external: boolean }> }>;
+    showOffices: boolean;
+    showBusinessIds: boolean;
+    paymentMethods: string[];
+    deliveryPartners: Array<{ id: string; name: string; logoUrl: string }>;
+    apps: Array<{ platform: 'android' | 'ios'; url: string }>;
+  };
+  social?: { links: Array<{ platform: string; url: string; visible: boolean }> };
+  company?: {
+    displayName: string;
+    supportEmail: string;
+    supportPhone: string;
+    offices: Array<{ id: string; label: string; lines: string[] }>;
+    dbid: string;
+    tradeLicense: string;
+    copyrightHolder: string;
+  };
+  brandAssets?: Record<string, { url: string; alt: string }>;
+}
+
 export interface SiteNavItem {
   id: string;
   label: string;
@@ -387,6 +415,8 @@ export interface SiteWebsiteAssets {
 export interface SiteConfig {
   id: 'default';
   navigation: SiteNavItem[];
+  /** Published Website Studio parts (Phase 3); each one overrides the matching legacy field. */
+  websiteStudio?: WebsiteStudioSite;
   footer: {
     description: string;
     copyrightText: string;

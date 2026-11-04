@@ -58,6 +58,32 @@ export function PaymentMethodBadge({ id, className }: PaymentMethodBadgeProps) {
   );
 }
 
+/** Website Studio ids → icon ids (only methods checkout really takes are ever passed in). */
+const STUDIO_METHOD_ICON: Record<string, PaymentMethodId | undefined> = {
+  visa: 'visa',
+  mastercard: 'mastercard',
+  amex: 'amex',
+  bkash: 'bkash',
+  nagad: 'nagad',
+};
+
+/** Only the payment methods published in Website Studio (verified available at publish time). */
+export function StudioPaymentMethods({ ids, className }: { ids: string[]; className?: string }) {
+  return (
+    <div className={cn('flex flex-wrap gap-2 max-w-[440px]', className)} data-testid="footer-payment-methods">
+      {ids.map((id) =>
+        id === 'cod' ? (
+          <span key={id} className="inline-flex items-center h-9 px-3 rounded-md bg-white text-[11px] font-bold text-[#1A1A2E]">
+            Cash on Delivery
+          </span>
+        ) : STUDIO_METHOD_ICON[id] ? (
+          <PaymentMethodBadge key={id} id={STUDIO_METHOD_ICON[id]!} className="inline-flex items-center justify-center h-9 w-[52px] px-1.5 rounded-md overflow-hidden bg-white" />
+        ) : null,
+      )}
+    </div>
+  );
+}
+
 export function PaymentMethodsGrid({
   className,
   layout = 'grid',

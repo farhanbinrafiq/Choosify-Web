@@ -8,7 +8,17 @@ import { ChoosifyTextWordmarkLogo } from './ChoosifyTextWordmarkLogo';
 import { ChoosifyWordmarkLogo } from './ChoosifyWordmarkLogo';
 import { BrandIcon } from './icons/BrandIcon';
 import { APP_STORE_ICON, socialIconSrc } from './icons/brandIcons';
-import { PaymentMethodsGrid } from './icons/PaymentMethodIcons';
+import { PaymentMethodsGrid, StudioPaymentMethods } from './icons/PaymentMethodIcons';
+
+const SOCIAL_LABELS: Record<string, string> = {
+  facebook: 'Facebook',
+  instagram: 'Instagram',
+  youtube: 'YouTube',
+  linkedin: 'LinkedIn',
+  tiktok: 'TikTok',
+  x: 'X',
+  whatsapp: 'WhatsApp',
+};
 
 /**
  * A visitor who hasn't signed up as a buyer at all still needs a way to
@@ -217,15 +227,25 @@ function SellOrCreateWithUs() {
 export function Footer() {
   const { siteConfig } = useGlobalState();
   const footer = siteConfig?.footer;
+  // Published Website Studio parts (each absent until published → built-in footer below).
+  const studio = siteConfig?.websiteStudio;
+  const sFooter = studio?.footer;
+  const sCompany = studio?.company;
   const cmsSocials = (siteConfig?.socialLinks || [])
     .filter((link) => link.isVisible)
     .sort((a, b) => a.order - b.order);
 
-  const socials = cmsSocials.length ? cmsSocials : DEFAULT_SOCIALS;
+  const socials = studio?.social
+    ? studio.social.links
+        .filter((l) => l.visible)
+        .map((l, order) => ({ id: l.platform, platform: SOCIAL_LABELS[l.platform] || l.platform, url: l.url, isVisible: true, order }))
+    : cmsSocials.length
+      ? cmsSocials
+      : DEFAULT_SOCIALS;
 
   const footerColumns = useMemo(
-    () => (footer?.columns?.length ? footer.columns : DEFAULT_FOOTER_COLUMNS),
-    [footer?.columns],
+    () => (sFooter ? sFooter.columns : footer?.columns?.length ? footer.columns : DEFAULT_FOOTER_COLUMNS),
+    [sFooter, footer?.columns],
   );
 
   // "Sell Or Create With Us" hangs under the Discover column; fall back to the
@@ -255,21 +275,39 @@ export function Footer() {
         };
       })
       .filter((o) => o.lines.length > 0);
+    if (sFooter && !sFooter.showOffices) return [];
+    if (sCompany) return sCompany.offices;
     return fromCms.length ? fromCms : OFFICE_ADDRESSES;
-  }, [footer?.usaOffice, footer?.bangladeshOffice]);
+  }, [footer?.usaOffice, footer?.bangladeshOffice, sFooter, sCompany]);
 
-  const contactEmail = footer?.contactEmail || 'support@choosify.bd';
-  const contactPhone = footer?.contactPhone || '+88 0141 0474014';
-  const dbid = footer?.dbid?.trim() || '—';
-  const tradeLicense = footer?.tradeLicense?.trim() || '—';
+  const contactEmail = sCompany?.supportEmail || footer?.contactEmail || 'support@choosify.bd';
+  const contactPhone = sCompany ? sCompany.supportPhone : footer?.contactPhone || '+88 0141 0474014';
+  const dbid = (sCompany ? sCompany.dbid : footer?.dbid)?.trim() || '—';
+  const tradeLicense = (sCompany ? sCompany.tradeLicense : footer?.tradeLicense)?.trim() || '—';
+  const showBusinessIds = sFooter ? sFooter.showBusinessIds : true;
+  const copyrightHolder = sCompany?.copyrightHolder || 'Choosify';
+  const footerLogo = studio?.brandAssets?.footerLogo;
   const year = new Date().getFullYear();
 
-  const deliveryPartners = (footer?.deliveryPartners || [])
-    .filter((p) => p.enabled !== false)
-    .sort((a, b) => (a.order || 0) - (b.order || 0));
+  const deliveryPartners = sFooter
+    ? sFooter.deliveryPartners.map((p, order) => ({ id: p.id, label: p.name, image: p.logoUrl, enabled: true, order }))
+    : (footer?.deliveryPartners || [])
+        .filter((p) => p.enabled !== false)
+        .sort((a, b) => (a.order || 0) - (b.order || 0));
 
-  const platforms =
-    footer?.platforms?.filter((p) => p.enabled !== false).length
+  const studioApps = sFooter
+    ? sFooter.apps.map((a) => {
+        const def = APP_DOWNLOADS.find((x) => (a.platform === 'ios' ? x.id === 'apple' : x.id === 'android'))!;
+        return { id: def.id, platform: def.platform, store: def.store, href: a.url, qrImage: undefined as string | undefined, storeIcon: def.storeIcon, platformIcon: def.platformIcon };
+      })
+    : null;
+  const showPaymentsBlock = sFooter ? sFooter.paymentMethods.length > 0 : true;
+  const showAppsBlock = studioApps ? studioApps.length > 0 : true;
+  const showDeliveryBlock = sFooter ? sFooter.deliveryPartners.length > 0 : true;
+
+  const platforms = studioApps
+    ? studioApps
+    : footer?.platforms?.filter((p) => p.enabled !== false).length
       ? footer.platforms.filter((p) => p.enabled !== false)
       : APP_DOWNLOADS.map((app) => ({
           id: app.id,
@@ -292,7 +330,9 @@ export function Footer() {
           <div>
           <div className="max-w-sm">
             <Link to="/" className="inline-flex items-center mb-4" aria-label="Choosify Home">
-              {siteConfig?.websiteAssets?.footerLogo ? (
+              {footerLogo?.url ? (
+                <img src={footerLogo.url} alt={footerLogo.alt || 'Choosify'} className="h-12 w-auto object-contain" />
+              ) : siteConfig?.websiteAssets?.footerLogo ? (
                 <img
                   src={siteConfig.websiteAssets.footerLogo}
                   alt="Choosify"
@@ -303,7 +343,8 @@ export function Footer() {
               )}
             </Link>
             <p className="text-white/50 text-[13px] leading-relaxed mb-6">
-              {footer?.tagline ||
+              {(sFooter ? sFooter.description : '') ||
+                footer?.tagline ||
                 footer?.description ||
                 "Bangladesh's smartest product discovery platform. Find the best brand, compare price, and shop with confidence."}
             </p>
@@ -346,12 +387,14 @@ export function Footer() {
                 >
                   Email: {contactEmail}
                 </a>
-                <a
-                  href={`tel:${contactPhone.replace(/\s+/g, '')}`}
-                  className="text-[13px] font-medium text-white/70 hover:text-white transition-colors"
-                >
-                  Phone: {contactPhone}
-                </a>
+                {contactPhone && (
+                  <a
+                    href={`tel:${contactPhone.replace(/\s+/g, '')}`}
+                    className="text-[13px] font-medium text-white/70 hover:text-white transition-colors"
+                  >
+                    Phone: {contactPhone}
+                  </a>
+                )}
               </div>
             </div>
           </div>
@@ -378,6 +421,7 @@ export function Footer() {
               </div>
             ))}
 
+            {officeAddresses.length > 0 && (
             <div>
               <FooterHeading>Address</FooterHeading>
               <div className="flex flex-col gap-4">
@@ -395,18 +439,24 @@ export function Footer() {
                 ))}
               </div>
             </div>
+            )}
           </div>
         </div>
 
         {/* Bottom strip: payments + apps — same column split as brand/links above */}
-        {footer?.showPaymentIcons !== false && (
+        {footer?.showPaymentIcons !== false && (showPaymentsBlock || showAppsBlock) && (
           <div className="border-t border-white/10 pt-8 pb-8">
             <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_1.85fr] gap-10 lg:gap-16 items-start">
-              <div>
-                <FooterHeading>Payments Accepted</FooterHeading>
-                <PaymentMethodsGrid layout="row" />
-              </div>
+              {showPaymentsBlock ? (
+                <div>
+                  <FooterHeading>Payments Accepted</FooterHeading>
+                  {sFooter ? <StudioPaymentMethods ids={sFooter.paymentMethods} /> : <PaymentMethodsGrid layout="row" />}
+                </div>
+              ) : (
+                <div />
+              )}
 
+              {showAppsBlock && (
               <div className="w-full lg:flex lg:flex-col lg:items-end lg:text-right">
                 <FooterHeading>Available On Platforms</FooterHeading>
                 <p className="text-white/45 text-xs mb-4 lg:max-w-md">
@@ -486,14 +536,16 @@ export function Footer() {
                   })}
                 </div>
               </div>
+              )}
             </div>
           </div>
         )}
 
         {/* Delivery partner + business IDs */}
-        {footer?.showDeliveryPartners !== false && (
+        {footer?.showDeliveryPartners !== false && (showDeliveryBlock || showBusinessIds) && (
           <div className="border-t border-white/10 pt-8 pb-8">
             <div className="flex flex-wrap gap-8 lg:gap-16">
+              {showDeliveryBlock && (
               <div>
                 <FooterHeading>Delivery Partner</FooterHeading>
                 <div className="flex flex-wrap items-center gap-2">
@@ -525,7 +577,9 @@ export function Footer() {
                   ))}
                 </div>
               </div>
+              )}
 
+              {showBusinessIds && (
               <div className="flex flex-wrap gap-8 lg:gap-16 lg:ml-auto lg:text-right">
                 <div>
                   <FooterHeading>DBID</FooterHeading>
@@ -537,6 +591,7 @@ export function Footer() {
                   <p className="text-[13px] font-medium text-white/70">Trade License No: {tradeLicense}</p>
                 </div>
               </div>
+              )}
             </div>
           </div>
         )}
@@ -548,7 +603,7 @@ export function Footer() {
               are Choosify orange. */}
           <p className="text-xs text-white/35">
             <span className="text-orange-primary">©</span> {year}{' '}
-            <span className="text-orange-primary font-semibold">Choosify</span>
+            <span className="text-orange-primary font-semibold">{copyrightHolder}</span>
             . All rights reserved.
           </p>
         </div>
