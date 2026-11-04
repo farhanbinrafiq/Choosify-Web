@@ -1,6 +1,7 @@
 import { brandPath } from '../../lib/publicUrls';
 import { AD_SLOTS } from '../lib/ads/adSlots';
-import { AdSlotBanner } from '../components/ads/AdSlot';
+import { AdSlotBanner, useCategorySponsors } from '../components/ads/AdSlot';
+import { adHref } from '../lib/ads/adSlots';
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { Check, PenTool, Search, Sparkles, Users, X } from 'lucide-react';
@@ -84,6 +85,7 @@ function resolveFeaturedBrandForCategory(
 }
 
 export function CategoriesPage() {
+  const sponsorFor = useCategorySponsors();
   const {
     allCatalogProducts,
     allCatalogBrands,
@@ -810,6 +812,11 @@ export function CategoriesPage() {
                           featuredBrand={featured?.name}
                           featuredBrandHref={featured?.href}
                           featuredBrandLogo={featured?.logo}
+                          sponsor={(() => {
+                            const ad = sponsorFor({ id: (cat as { id?: string }).id, name: cat.name });
+                            const target = ad ? adHref(ad) : null;
+                            return ad && target ? { name: ad.sponsorName || ad.headline || 'Sponsor', logo: ad.sponsorLogoUrl, href: target.href, external: target.external } : undefined;
+                          })()}
                         />
                       );
                     })

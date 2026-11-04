@@ -15,6 +15,8 @@ export type CategoryPremiumCardProps = {
   /** Dedicated Brand Details route, e.g. `/brands/bata` */
   featuredBrandHref?: string;
   featuredBrandLogo?: string;
+  /** Paid Ads Studio sponsor for this card (Category Promoted Slot). Only then is it "Promoted". */
+  sponsor?: { name: string; logo?: string; href: string; external: boolean };
   onClick?: () => void;
   className?: string;
 };
@@ -30,19 +32,23 @@ export function CategoryPremiumCard({
   featuredBrand,
   featuredBrandHref,
   featuredBrandLogo,
+  sponsor,
   onClick,
   className,
 }: CategoryPremiumCardProps) {
   const navigate = useNavigate();
   const [expanded, setExpanded] = useState(false);
   const [logoFailed, setLogoFailed] = useState(false);
-  const featured = featuredBrand || name.split(/\s+/)[0] || 'Brand';
+  // Footer: a paid sponsor (labelled Promoted) or the category's real top brand (labelled Top brand).
+  // Never a made-up name: with neither, the footer is not drawn.
+  const featured = sponsor?.name || featuredBrand || '';
+  const footerLogo = sponsor ? sponsor.logo : featuredBrandLogo;
   const featuredInitial = featured.charAt(0).toUpperCase();
-  const brandHref = featuredBrandHref || `/brands?q=${encodeURIComponent(featured)}`;
-  const showLogo = Boolean(featuredBrandLogo) && !logoFailed;
+  const brandHref = sponsor?.href || featuredBrandHref || `/brands?q=${encodeURIComponent(featured)}`;
+  const showLogo = Boolean(footerLogo) && !logoFailed;
   useEffect(() => {
     setLogoFailed(false);
-  }, [featuredBrandLogo]);
+  }, [footerLogo]);
   const visible = expanded ? subcategories : subcategories.slice(0, SUBCAT_PREVIEW);
   const hasMore = subcategories.length > SUBCAT_PREVIEW;
   const moreLabel = expanded ? 'Show less' : 'Show All';
@@ -122,34 +128,51 @@ export function CategoryPremiumCard({
         )}
       </div>
 
-      <Link
-        to={brandHref}
-        className="mt-auto choosify-dark-surface text-white px-4 py-3 flex items-center gap-2.5 no-underline hover:brightness-110"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-extrabold shrink-0 overflow-hidden">
-          {showLogo ? (
-            <img
-              src={featuredBrandLogo}
-              alt=""
-              className="w-full h-full object-cover"
-              loading="lazy"
-              onError={() => setLogoFailed(true)}
-            />
-          ) : (
-            featuredInitial
-          )}
-        </div>
-        <div className="text-[11px] text-white font-bold min-w-0 flex-1 truncate">
-          <span className="text-white font-extrabold">{featured}</span>
-        </div>
-        <span
-          className="shrink-0 text-[9px] font-extrabold uppercase tracking-wide text-white bg-[#2323FF] rounded-full px-1.5 py-0.5"
-          title="Promoted"
+      {featured ? (
+        <FooterLink
+          href={brandHref}
+          external={Boolean(sponsor?.external)}
+          className="mt-auto choosify-dark-surface text-white px-4 py-3 flex items-center gap-2.5 no-underline hover:brightness-110"
+          testId={sponsor ? 'category-sponsor-footer' : 'category-top-brand-footer'}
         >
-          Promoted
-        </span>
-      </Link>
+          <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-extrabold shrink-0 overflow-hidden">
+            {showLogo ? (
+              <img src={footerLogo} alt="" className="w-full h-full object-cover" loading="lazy" onError={() => setLogoFailed(true)} />
+            ) : (
+              featuredInitial
+            )}
+          </div>
+          <div className="text-[11px] text-white font-bold min-w-0 flex-1 truncate">
+            <span className="text-white font-extrabold">{featured}</span>
+          </div>
+          {sponsor ? (
+            <span className="shrink-0 text-[9px] font-extrabold uppercase tracking-wide text-white bg-[#2323FF] rounded-full px-1.5 py-0.5" title="Paid placement">
+              Promoted
+            </span>
+          ) : (
+            <span className="shrink-0 text-[9px] font-extrabold uppercase tracking-wide text-white/80 border border-white/30 rounded-full px-1.5 py-0.5" title="Top brand in this category">
+              Top brand
+            </span>
+          )}
+        </FooterLink>
+      ) : null}
     </div>
+  );
+}
+
+/** Footer link: internal route or a paid sponsor's external site (rel=sponsored). */
+function FooterLink({ href, external, className, testId, children }: { href: string; external: boolean; className: string; testId: string; children: React.ReactNode }) {
+  const stop = (e: React.MouseEvent) => e.stopPropagation();
+  if (external || /^https?:/i.test(href)) {
+    return (
+      <a href={href} target="_blank" rel="sponsored noopener noreferrer" className={className} onClick={stop} data-testid={testId}>
+        {children}
+      </a>
+    );
+  }
+  return (
+    <Link to={href} className={className} onClick={stop} data-testid={testId}>
+      {children}
+    </Link>
   );
 }

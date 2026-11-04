@@ -7,7 +7,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { adHref, sponsoredLabel, useAdSlot, type AdSlotId, type PublicAd } from '../../lib/ads/adSlots';
+import { AD_SLOTS, adHref, sponsoredLabel, useAdSlot, type AdSlotId, type PublicAd } from '../../lib/ads/adSlots';
 import type { SponsoredPlacementItem } from '../../types/commerce/sponsoredPlacement';
 
 function AdLink({ ad, className, children, testId }: { ad: PublicAd; className?: string; children: React.ReactNode; testId?: string }) {
@@ -41,7 +41,7 @@ const Chip = ({ ad }: { ad: PublicAd }) => (
  * rotate every 7 seconds.
  */
 export function AdSlotBanner({ slot, className = '' }: { slot: AdSlotId; className?: string }) {
-  const ads = useAdSlot(slot).filter((a) => a.image);
+  const ads = useAdSlot(slot).filter((a) => a.image || (a.format === 'cta_strip' && a.headline));
   const [i, setI] = useState(0);
   useEffect(() => {
     if (ads.length < 2) return;
@@ -50,6 +50,13 @@ export function AdSlotBanner({ slot, className = '' }: { slot: AdSlotId; classNa
   }, [ads.length]);
   if (!ads.length) return null;
   const ad = ads[i % ads.length];
+  if (ad.format === 'cta_strip') {
+    return (
+      <section className={`w-full ${className}`} aria-label="Sponsored" data-testid={`ad-slot-${slot}`}>
+        <CtaStrip ad={ad} />
+      </section>
+    );
+  }
   return (
     <section className={`w-full ${className}`} aria-label="Sponsored" data-testid={`ad-slot-${slot}`}>
       <AdLink ad={ad} className="relative block w-full aspect-[5/2] sm:aspect-[4/1] max-h-[300px] overflow-hidden rounded-xl bg-[#0F1238]" testId="ad-banner-link">
@@ -82,6 +89,37 @@ export function AdSlotBanner({ slot, className = '' }: { slot: AdSlotId; classNa
       )}
     </section>
   );
+}
+
+/** Text CTA strip (no artwork): headline + line on the dark brand gradient, orange button right. */
+function CtaStrip({ ad }: { ad: PublicAd }) {
+  return (
+    <AdLink
+      ad={ad}
+      className="relative flex flex-col gap-3 overflow-hidden rounded-xl bg-gradient-to-r from-[#3B1E3F] via-[#2A1846] to-[#2B1A4A] px-5 pb-5 pt-8 text-left no-underline sm:flex-row sm:items-center sm:gap-5 sm:px-8 sm:py-7"
+      testId="ad-strip-link"
+    >
+      <Chip ad={ad} />
+      {ad.sponsorLogoUrl && <img src={ad.sponsorLogoUrl} alt="" className="h-10 w-10 shrink-0 rounded-full bg-white object-contain p-0.5" loading="lazy" />}
+      <div className="min-w-0 flex-1">
+        <div className="text-[16px] font-extrabold leading-tight text-white sm:text-[18px]">{ad.headline}</div>
+        {ad.subtext && <div className="mt-1 text-[12.5px] text-white/70 sm:text-[13.5px]">{ad.subtext}</div>}
+      </div>
+      {ad.ctaLabel && adHref(ad) && (
+        <span className="inline-flex shrink-0 items-center justify-center rounded-lg bg-[#FF5B00] px-5 py-2.5 text-[12.5px] font-extrabold uppercase tracking-wide text-white shadow-md sm:px-6 sm:py-3" data-testid="ad-cta-button">
+          {ad.ctaLabel}
+        </span>
+      )}
+    </AdLink>
+  );
+}
+
+/** Category Promoted Slot: the booked sponsor for a category card (matched by id, then name). */
+export function useCategorySponsors(): (category: { id?: string; name: string }) => PublicAd | undefined {
+  const ads = useAdSlot(AD_SLOTS.CATEGORY_CARD_FOOTER);
+  return (category) =>
+    ads.find((a) => a.categoryId && category.id && a.categoryId === category.id) ??
+    ads.find((a) => a.categoryName && a.categoryName.trim().toLowerCase() === category.name.trim().toLowerCase());
 }
 
 /** One sponsored card (first booked ad for the slot). */

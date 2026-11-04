@@ -20,6 +20,7 @@ export const AD_SLOTS = {
   CATEGORIES_BANNER: 'CATEGORIES_BANNER',
   CREATORS_BANNER: 'CREATORS_BANNER',
   DISCOVER_BANNER: 'DISCOVER_BANNER',
+  CATEGORY_CARD_FOOTER: 'CATEGORY_CARD_FOOTER',
   BRANDS_SIDEBAR: 'BRANDS_SIDEBAR',
   CATEGORIES_SIDEBAR: 'CATEGORIES_SIDEBAR',
   CREATORS_SIDEBAR: 'CREATORS_SIDEBAR',
@@ -43,6 +44,9 @@ export type PublicAd = {
   ctaLabel?: string;
   sponsorName?: string;
   sponsorLogoUrl?: string;
+  /** Category Promoted Slot only: which category card carries this sponsor footer. */
+  categoryId?: string;
+  categoryName?: string;
   link: { type: 'product' | 'brand' | 'creator' | 'guide' | 'deal' | 'url'; id?: string; url?: string; external: boolean } | null;
 };
 
