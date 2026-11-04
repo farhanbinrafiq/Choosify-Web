@@ -1,4 +1,5 @@
 import { productPath } from '../../../../lib/publicUrls';
+import { useHomeSectionCopy } from '../useHomeSectionCopy';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Heart } from 'lucide-react';
@@ -11,6 +12,7 @@ interface HomeRecentlyViewedSectionProps {
 
 /** Choosify.dc.html — 6-col product tiles with price */
 export function HomeRecentlyViewedSection({ products }: HomeRecentlyViewedSectionProps) {
+  const copy = useHomeSectionCopy('recently-viewed', 'Recently Viewed');
   if (!products.length) return null;
 
   return (
@@ -19,8 +21,9 @@ export function HomeRecentlyViewedSection({ products }: HomeRecentlyViewedSectio
         id="section-recently-viewed-heading"
         className="text-[19px] font-extrabold text-[#1A1A2E] mb-4"
       >
-        Recently Viewed
+        {copy.title}
       </h2>
+      {copy.subtitle && <p className="text-[12.5px] text-[#6B7280] -mt-2 mb-4">{copy.subtitle}</p>}
       <div className="grid grid-cols-3 md:grid-cols-6 gap-3.5">
         {products.slice(0, 6).map((product) => (
           <Link

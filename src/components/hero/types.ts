@@ -14,6 +14,14 @@ export type HeroSlide = {
   image?: string;
   /** Optional muted looping background video — hybrid banner support. */
   videoUrl?: string;
+  /** Website Studio: phone-specific image / video (same type as the desktop media). */
+  mobileImage?: string;
+  mobileVideoUrl?: string;
+  /** Image description for screen readers (empty = decorative). */
+  alt?: string;
+  /** Focal point in % (object-position) — which part stays visible when cropped. */
+  focalX?: number;
+  focalY?: number;
   gradient?: string;
 };
 

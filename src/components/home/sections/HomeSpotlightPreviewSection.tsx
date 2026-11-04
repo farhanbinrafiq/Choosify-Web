@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import { useHomeSectionCopy } from '../useHomeSectionCopy';
 import { Link } from 'react-router-dom';
 import { Heart, Package } from 'lucide-react';
 import type { ViralTodayItem } from '../../../utils/homeViralToday';
@@ -83,6 +84,7 @@ export function HomeSpotlightPreviewSection({
 
   const hasMedia = live.length > 0 || youtube.length > 0 || reels.length > 0;
   const hasProducts = Boolean(productFeed);
+  const copy = useHomeSectionCopy('spotlight', 'Viral Today');
 
   return (
     <section id="section-spotlight-preview" aria-labelledby="section-spotlight-preview-heading">
@@ -95,10 +97,11 @@ export function HomeSpotlightPreviewSection({
             <span className="text-[#FF000D] text-[17px]" aria-hidden>
               ✦
             </span>
-            Viral Today
+            {copy.title}
           </h2>
           <ViewAllLink href="/spotlight" label="VIEW ALL ›" />
         </div>
+        {copy.subtitle && <p className="text-[12.5px] text-[#6B7280] -mt-2 mb-4">{copy.subtitle}</p>}
         {/* No real videos/reels yet: keep the section, say so honestly. */}
         {!hasMedia && <HomeEmptyNote text="Nothing viral yet — creator videos, reels and live streams will appear here." />}
       </div>

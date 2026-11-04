@@ -232,8 +232,17 @@ export interface HomepageHeroBanner {
   backgroundImage: string;
   /** Optional muted looping video for hybrid photo/video hero slides. */
   backgroundVideo?: string;
-  mediaType?: 'photo' | 'video';
+  mediaType?: 'photo' | 'image' | 'video';
   mediaUrl?: string;
+  /** Website Studio: separate media for phones (same type as mediaUrl). */
+  mobileMediaUrl?: string;
+  /** Website Studio: still frame for a video slide. */
+  posterUrl?: string;
+  /** Website Studio: image description for screen readers. */
+  alt?: string;
+  /** Website Studio: focal point in % — which part stays visible when the image is cropped. */
+  focalX?: number;
+  focalY?: number;
   isActive: boolean;
   order: number;
 }
@@ -260,6 +269,10 @@ export interface HomepageSectionConfig {
   isVisible: boolean;
   order: number;
   itemIds: string[];
+  /** Website Studio: custom heading (blank = built-in heading). */
+  title?: string;
+  /** Website Studio: optional line under the heading. */
+  subtitle?: string;
 }
 
 export interface HomepageConfig {

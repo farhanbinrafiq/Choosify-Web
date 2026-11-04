@@ -14,6 +14,25 @@ interface HeroProps {
 }
 
 const PHOTO_AUTOPLAY_MS = 6000;
+const MOBILE_QUERY = '(max-width: 767px)';
+
+/** True on phone-width screens — picks a slide's mobile video (images use <picture>). */
+function useIsMobileViewport(): boolean {
+  const [mobile, setMobile] = useState(() =>
+    typeof window !== 'undefined' && typeof window.matchMedia === 'function' ? window.matchMedia(MOBILE_QUERY).matches : false,
+  );
+  useEffect(() => {
+    if (typeof window.matchMedia !== 'function') return;
+    const mq = window.matchMedia(MOBILE_QUERY);
+    const on = () => setMobile(mq.matches);
+    mq.addEventListener?.('change', on);
+    return () => mq.removeEventListener?.('change', on);
+  }, []);
+  return mobile;
+}
+
+const focalStyle = (x?: number, y?: number): React.CSSProperties | undefined =>
+  typeof x === 'number' || typeof y === 'number' ? { objectPosition: `${x ?? 50}% ${y ?? 50}%` } : undefined;
 const VIDEO_AUTOPLAY_MS = 10000;
 
 /**
@@ -23,6 +42,7 @@ const VIDEO_AUTOPLAY_MS = 10000;
  */
 export function Hero({ variant, className }: HeroProps) {
   const slides = useHomepageHeroSlides();
+  const isMobile = useIsMobileViewport();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [autoplay, setAutoplay] = useState(true);
   const autoplayTimer = useRef<ReturnType<typeof setInterval> | null>(null);
@@ -107,22 +127,27 @@ export function Hero({ variant, className }: HeroProps) {
                   if (el) videoRefs.current.set(slide.id, el);
                   else videoRefs.current.delete(slide.id);
                 }}
-                src={slide.videoUrl}
+                src={isMobile && slide.mobileVideoUrl ? slide.mobileVideoUrl : slide.videoUrl}
                 poster={slide.image}
                 muted
                 loop
                 playsInline
                 preload={i === 0 ? 'auto' : 'metadata'}
                 className="w-full h-full object-cover"
+                style={focalStyle(slide.focalX, slide.focalY)}
                 aria-label={slide.title || 'Hero video'}
               />
             ) : slide.image ? (
-              <img
-                src={slide.image}
-                alt=""
-                className="w-full h-full object-cover"
-                loading={i === 0 ? 'eager' : 'lazy'}
-              />
+              <picture className="block w-full h-full">
+                {slide.mobileImage && <source media={MOBILE_QUERY} srcSet={slide.mobileImage} />}
+                <img
+                  src={slide.image}
+                  alt={slide.alt || ''}
+                  className="w-full h-full object-cover"
+                  style={focalStyle(slide.focalX, slide.focalY)}
+                  loading={i === 0 ? 'eager' : 'lazy'}
+                />
+              </picture>
             ) : (
               <div
                 className="w-full h-full"

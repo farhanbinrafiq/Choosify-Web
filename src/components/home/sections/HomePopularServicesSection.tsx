@@ -1,4 +1,5 @@
 import React from 'react';
+import { useHomeSectionCopy } from '../useHomeSectionCopy';
 import { Link } from 'react-router-dom';
 import { DcHomeBlock } from '../DcHomePanel';
 import {
@@ -26,12 +27,14 @@ export function HomePopularServicesSection({ services }: HomePopularServicesSect
       })
     : POPULAR_SERVICE_TILES;
   const display = items.slice(0, 6);
+  const copy = useHomeSectionCopy('services', 'Popular Services');
 
   return (
     <DcHomeBlock id="section-services">
       <h2 id="section-services-heading" className="text-[19px] font-extrabold text-[#1A1A2E] mb-4">
-        Popular Services
+        {copy.title}
       </h2>
+      {copy.subtitle && <p className="text-[12.5px] text-[#6B7280] -mt-2 mb-4">{copy.subtitle}</p>}
       <div className="grid grid-cols-3 md:grid-cols-6 gap-3 mb-2">
         {display.map(({ id, label, letter, href, bg, fg, icon: Icon }) => (
           <Link

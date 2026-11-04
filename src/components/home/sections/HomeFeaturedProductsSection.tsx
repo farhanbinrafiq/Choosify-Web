@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { useHomeSectionCopy } from '../useHomeSectionCopy';
 import { ProductCard } from '../../ProductCard';
 import { PremiumCarousel } from '../PremiumCarousel';
 import { DcHomePanel } from '../DcHomePanel';
@@ -28,6 +29,8 @@ export function HomeFeaturedProductsSection({ feed }: HomeFeaturedProductsSectio
     return products;
   }, [feed]);
 
+  const copy = useHomeSectionCopy('trending', 'Popular Products', "Handpicked deals you'll love");
+
   return (
     <DcHomePanel id="section-featured-products">
       <div className="flex items-baseline justify-between gap-3 mb-1">
@@ -35,11 +38,11 @@ export function HomeFeaturedProductsSection({ feed }: HomeFeaturedProductsSectio
           id="section-featured-products-heading"
           className="text-[19px] font-extrabold text-[#1A1A2E]"
         >
-          Popular Products
+          {copy.title}
         </h2>
         <ViewAllLink href="/products" label="VIEW ALL ›" />
       </div>
-      <p className="text-[12.5px] text-[#9AA0AC] m-0 mb-4">Handpicked deals you&apos;ll love</p>
+      <p className="text-[12.5px] text-[#9AA0AC] m-0 mb-4">{copy.subtitle}</p>
       {slides.length === 0 && <HomeEmptyNote text="No products listed yet." />}
       {slides.length > 0 && (
       <div className="mb-4">

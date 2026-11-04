@@ -113,8 +113,9 @@ export function useHomePageData() {
           const catalogMatch = (allCategories ?? []).find((c) => c.id === item.id);
           return {
             id: item.id,
-            slug: catalogMatch?.slug || slugifyPathSegment(item.label),
-            name: item.label,
+            slug: catalogMatch?.slug || slugifyPathSegment(item.label || catalogMatch?.name || item.id),
+            // Website Studio may leave the label blank = use the catalog category's own name.
+            name: item.label?.trim() || catalogMatch?.name || item.id,
             count: 0,
             image: item.image,
           };

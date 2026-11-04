@@ -1,4 +1,5 @@
 import { brandPath } from '../../../../lib/publicUrls';
+import { useHomeSectionCopy } from '../useHomeSectionCopy';
 import { HomeEmptyNote } from './HomeEmptyNote';
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -52,6 +53,8 @@ export function HomeFeaturedBrandsSection({
   // Real brands only; the bundled sample list is a development aid (empty in production).
   const brands = (featuredBrands.length ? featuredBrands : brandFallback).slice(0, MAX_FEATURED_BRANDS);
 
+  const copy = useHomeSectionCopy('featured-brands', 'Featured Brands');
+
   return (
     <DcHomeBlock id="section-featured-brands">
       <div className="flex items-baseline justify-between gap-3 mb-4">
@@ -59,10 +62,11 @@ export function HomeFeaturedBrandsSection({
           id="section-featured-brands-heading"
           className="text-[19px] font-extrabold text-[#1A1A2E]"
         >
-          Featured Brands
+          {copy.title}
         </h2>
         <ViewAllLink href="/brands" label="VIEW ALL BRANDS ›" />
       </div>
+      {copy.subtitle && <p className="text-[12.5px] text-[#6B7280] -mt-2 mb-4">{copy.subtitle}</p>}
 
       {brands.length === 0 && <HomeEmptyNote text="No featured brands yet." linkHref="/brands" linkLabel="Browse all brands" />}
       <div className="grid grid-cols-4 md:grid-cols-6 gap-x-3 gap-y-4 mb-2">

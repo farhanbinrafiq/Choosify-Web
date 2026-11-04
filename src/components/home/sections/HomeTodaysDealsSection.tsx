@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useHomeSectionCopy } from '../useHomeSectionCopy';
 import { Link } from 'react-router-dom';
 import { DcHomeBlock } from '../DcHomePanel';
 import { PremiumCarousel } from '../PremiumCarousel';
@@ -71,6 +72,7 @@ function BannerCardLink({
 
 /** Today's Deals — image-only carousel (card shell keeps prior min-h / rounded size). */
 export function HomeTodaysDealsSection({ banners: bannersProp }: HomeTodaysDealsSectionProps) {
+  const copy = useHomeSectionCopy('deals', "Today's Deals");
   const [fetched, setFetched] = useState<HomeDealsBannerCard[] | null>(
     bannersProp && bannersProp.length > 0 ? bannersProp : null,
   );
@@ -105,7 +107,8 @@ export function HomeTodaysDealsSection({ banners: bannersProp }: HomeTodaysDeals
 
   return (
     <DcHomeBlock id="section-deals">
-      <h2 className="text-[19px] font-extrabold text-[#1A1A2E] mb-4">Today&apos;s Deals</h2>
+      <h2 className="text-[19px] font-extrabold text-[#1A1A2E] mb-4">{copy.title}</h2>
+      {copy.subtitle && <p className="text-[12.5px] text-[#6B7280] -mt-2 mb-4">{copy.subtitle}</p>}
       {fetched !== null && banners.length === 0 && <HomeEmptyNote text="No deals running right now." linkHref="/deals" linkLabel="See all deals" />}
       {banners.length > 0 && (
       <PremiumCarousel

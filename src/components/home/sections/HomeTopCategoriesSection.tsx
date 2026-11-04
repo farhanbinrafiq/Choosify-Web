@@ -1,4 +1,5 @@
 import React from 'react';
+import { useHomeSectionCopy } from '../useHomeSectionCopy';
 import { Link } from 'react-router-dom';
 import { DcHomePanel } from '../DcHomePanel';
 import { ViewAllLink } from '../../design/ViewAllLink';
@@ -47,6 +48,7 @@ interface HomeTopCategoriesSectionProps {
 
 /** Choosify.dc.html — overlapping white panel, 6-col icon tiles */
 export function HomeTopCategoriesSection({ categories }: HomeTopCategoriesSectionProps) {
+  const copy = useHomeSectionCopy('categories', 'Top Categories');
   if (!categories.length) return null;
 
   const display = categories.slice(0, 6);
@@ -58,10 +60,11 @@ export function HomeTopCategoriesSection({ categories }: HomeTopCategoriesSectio
           id="section-categories-heading"
           className="text-[19px] font-extrabold text-[#1A1A2E]"
         >
-          Top Categories
+          {copy.title}
         </h2>
         <ViewAllLink href="/categories" label="VIEW ALL CATEGORIES ›" className="text-xs font-bold" />
       </div>
+      {copy.subtitle && <p className="text-[12.5px] text-[#6B7280] -mt-2 mb-4">{copy.subtitle}</p>}
       <div className="grid grid-cols-3 md:grid-cols-6 gap-3.5 mb-8">
         {display.map((cat, i) => {
           const chip = HOME_CATEGORY_CHIP_COLORS[i % HOME_CATEGORY_CHIP_COLORS.length];

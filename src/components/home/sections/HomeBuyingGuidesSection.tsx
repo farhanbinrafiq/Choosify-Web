@@ -1,4 +1,5 @@
 import React from 'react';
+import { useHomeSectionCopy } from '../useHomeSectionCopy';
 import { HomeEmptyNote } from './HomeEmptyNote';
 import { Link } from 'react-router-dom';
 import { PLACEHOLDER_IMAGE } from '../../../constants';
@@ -28,6 +29,8 @@ export function HomeBuyingGuidesSection({ guideSlides }: HomeBuyingGuidesSection
   // Real published guides only — no demo titles.
   const slides = guideSlides;
 
+  const copy = useHomeSectionCopy('recommended', 'Top Buying Guides');
+
   return (
     <DcHomeBlock id="section-buying-guides">
       <div className="flex items-baseline justify-between gap-3 mb-4">
@@ -35,10 +38,11 @@ export function HomeBuyingGuidesSection({ guideSlides }: HomeBuyingGuidesSection
           id="section-buying-guides-heading"
           className="text-[19px] font-extrabold text-[#1A1A2E]"
         >
-          Top Buying Guides
+          {copy.title}
         </h2>
         <ViewAllLink href="/spotlight?tab=guides" label="DISCOVER ALL ›" />
       </div>
+      {copy.subtitle && <p className="text-[12.5px] text-[#6B7280] -mt-2 mb-4">{copy.subtitle}</p>}
 
       {slides.length === 0 && <HomeEmptyNote text="No buying guides published yet." />}
       <div className="grid grid-cols-1 min-[480px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3.5 mb-2 items-start">

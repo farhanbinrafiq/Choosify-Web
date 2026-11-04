@@ -38,13 +38,19 @@ export function useHomepageHeroSlides(): HeroSlide[] {
         const mediaUrl = banner.mediaUrl || banner.backgroundVideo || banner.backgroundImage;
         const resolvedMedia = isVideo ? mediaUrl || banner.backgroundImage : banner.mediaUrl || banner.backgroundImage;
         if (!resolvedMedia) return null;
+        const mobile = banner.mobileMediaUrl || undefined;
         return {
           id: banner.id,
           title: banner.headline,
           subtitle: banner.subtitle,
           primaryCtaText: banner.ctaText,
-          primaryCtaLink: banner.ctaUrl,
-          ...(isVideo ? { videoUrl: resolvedMedia } : { image: resolvedMedia }),
+          primaryCtaLink: banner.ctaUrl || undefined,
+          alt: banner.alt || '',
+          focalX: banner.focalX,
+          focalY: banner.focalY,
+          ...(isVideo
+            ? { videoUrl: resolvedMedia, mobileVideoUrl: mobile, image: banner.posterUrl || undefined }
+            : { image: resolvedMedia, mobileImage: mobile }),
         };
       })
       .filter((slide): slide is HeroSlide => slide !== null);
