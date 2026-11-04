@@ -1,5 +1,13 @@
 import { CustomOverview } from '../context/DashboardContext';
 
+/**
+ * The built-in overview text below is prototype filler (made-up addresses, phone numbers,
+ * "custom gift box" etc. matched by brand-name keywords). It is a local-development aid only:
+ * in production, overviews are only what staff entered in admin, so search never matches a
+ * brand or product on invented content.
+ */
+const ALLOW_DEMO_OVERVIEWS = import.meta.env.DEV;
+
 export function getBrandOverviews(brandName: string, customOverviews: CustomOverview[] = []) {
   const name = brandName.toLowerCase();
   
@@ -74,12 +82,13 @@ export function getBrandOverviews(brandName: string, customOverviews: CustomOver
   }
 
   // Merge with custom overviews from Admin
+  const result: Record<string, any> = ALLOW_DEMO_OVERVIEWS ? baseOverview : {};
   const brandCustoms = customOverviews.filter(co => co.targetType === 'brand' && co.targetId.toLowerCase() === name);
   brandCustoms.forEach(co => {
-    baseOverview[co.sectionName] = co.content;
+    result[co.sectionName] = co.content;
   });
 
-  return baseOverview;
+  return result;
 }
 
 export function normalizeExternalUrl(website: string): string {
@@ -159,12 +168,13 @@ export function getProductOverviews(productId: number | string, productTitle: st
   };
 
   // Merge with custom overviews from Admin
+  const result: Record<string, any> = ALLOW_DEMO_OVERVIEWS ? baseOverview : {};
   const productCustoms = customOverviews.filter(co => co.targetType === 'product' && String(co.targetId) === String(productId));
   productCustoms.forEach(co => {
-    baseOverview[co.sectionName] = co.content;
+    result[co.sectionName] = co.content;
   });
 
-  return baseOverview;
+  return result;
 }
 
 export interface SearchMatch {
