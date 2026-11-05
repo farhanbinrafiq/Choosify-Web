@@ -24,6 +24,8 @@ export type HeroSlide = {
   focalY?: number;
   /** Ads Studio sponsored slide: the label shown on it ("Sponsored · Brand"). */
   sponsoredLabel?: string;
+  /** Ads Studio HOME_HERO ad shown in this slide (view / click reports). */
+  adId?: string;
   /** primaryCtaLink is an external https URL (opens in a new tab). */
   externalLink?: boolean;
   gradient?: string;

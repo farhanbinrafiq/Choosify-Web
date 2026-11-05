@@ -818,7 +818,7 @@ export function CategoriesPage() {
                           sponsor={(() => {
                             const ad = sponsorFor({ id: (cat as { id?: string }).id, name: cat.name });
                             const target = ad ? adHref(ad) : null;
-                            return ad && target ? { name: ad.sponsorName || ad.headline || 'Sponsor', logo: ad.sponsorLogoUrl, href: target.href, external: target.external } : undefined;
+                            return ad && target ? { name: ad.sponsorName || ad.headline || 'Sponsor', logo: ad.sponsorLogoUrl, href: target.href, external: target.external, adId: ad.id, adSlot: ad.slot } : undefined;
                           })()}
                         />
                       );

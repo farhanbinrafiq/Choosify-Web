@@ -8,6 +8,7 @@
  */
 import React from 'react';
 import { useAdSlot, type AdSlotId, type PublicAd } from '../../lib/ads/adSlots';
+import { adAttrs } from '../../lib/ads/adEvents';
 
 export type ListedItem<T> = { item: T; sponsored?: PublicAd };
 
@@ -56,7 +57,7 @@ export function useSponsoredListings<T extends { id: string | number }>(
 /** Wraps a normal card with the "Sponsored" label (top-left, above the card's own badges). */
 export function SponsoredFrame({ ad, children }: { ad: PublicAd; children: React.ReactNode }) {
   return (
-    <div className="relative h-full" data-testid={`sponsored-listing-${ad.slot}`} data-ad-id={ad.id}>
+    <div className="relative h-full" data-testid={`sponsored-listing-${ad.slot}`} {...adAttrs(ad)}>
       {children}
       <span
         className="pointer-events-none absolute left-1/2 top-2 z-20 -translate-x-1/2 rounded-full bg-black/70 px-2 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wide text-white backdrop-blur-sm"

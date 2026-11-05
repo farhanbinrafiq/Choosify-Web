@@ -9,6 +9,7 @@
  * pop-up shows at most once per page load and still closes normally.
  */
 import React, { useEffect, useRef, useState } from 'react';
+import { adAttrs } from '../../lib/ads/adEvents';
 import { useLocation } from 'react-router-dom';
 import { AD_SLOTS, adHref, useAdSlot, type PublicAd } from '../../lib/ads/adSlots';
 
@@ -120,7 +121,7 @@ export function AdPopup() {
       onClick={close}
       data-testid="ad-popup"
     >
-      <div className="relative w-full max-w-[900px]" onClick={(e) => e.stopPropagation()}>
+      <div className="relative w-full max-w-[900px]" onClick={(e) => e.stopPropagation()} {...adAttrs(ad)}>
         {target ? (
           <a
             href={target.href}

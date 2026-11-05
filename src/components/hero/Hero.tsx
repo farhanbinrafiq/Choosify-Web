@@ -115,6 +115,7 @@ export function Hero({ variant, className }: HeroProps) {
         return (
           <div
             key={slide.id}
+            {...(isActive && slide.adId ? { 'data-ad-id': slide.adId, 'data-ad-slot': 'HOME_HERO' } : {})}
             className={cn(
               'absolute inset-0 transition-opacity duration-500',
               isActive ? 'opacity-100 z-[1]' : 'opacity-0 z-0 pointer-events-none',

@@ -37,6 +37,7 @@ export function useHomepageHeroSlides(): HeroSlide[] {
           image: ad.image,
           alt: ad.alt,
           sponsoredLabel: sponsoredLabel(ad),
+          adId: ad.id,
         };
       });
     return sponsored.length ? [...editorial, ...sponsored] : editorial;

@@ -6,6 +6,7 @@
  * carries a visible "Sponsored" label so paid content is never mistaken for editorial content.
  */
 import React from 'react';
+import { adAttrs } from '../../lib/ads/adEvents';
 import { AdSlotCarousel } from '../commerce/AdSlotCarousel';
 import { Link } from 'react-router-dom';
 import { AD_SLOTS, adHref, sponsoredLabel, useAdSlot, type AdSlotId, type PublicAd } from '../../lib/ads/adSlots';
@@ -13,16 +14,17 @@ import type { SponsoredPlacementItem } from '../../types/commerce/sponsoredPlace
 
 function AdLink({ ad, className, children, testId, style }: { ad: PublicAd; className?: string; children: React.ReactNode; testId?: string; style?: React.CSSProperties }) {
   const target = adHref(ad);
-  if (!target) return <div className={className} style={style} data-testid={testId}>{children}</div>;
+  const track = adAttrs(ad);
+  if (!target) return <div className={className} style={style} data-testid={testId} {...track}>{children}</div>;
   if (target.external || /^https?:/i.test(target.href)) {
     return (
-      <a href={target.href} target="_blank" rel="sponsored noopener noreferrer" className={className} style={style} data-testid={testId}>
+      <a href={target.href} target="_blank" rel="sponsored noopener noreferrer" className={className} style={style} data-testid={testId} {...track}>
         {children}
       </a>
     );
   }
   return (
-    <Link to={target.href} className={className} style={style} data-testid={testId}>
+    <Link to={target.href} className={className} style={style} data-testid={testId} {...track}>
       {children}
     </Link>
   );

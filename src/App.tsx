@@ -118,6 +118,22 @@ import { useGlobalState } from './context/GlobalStateContext';
 import { isNavPathEnabled } from './lib/featureFlags';
 import { perfRouteTransition } from './utils/performanceDev';
 import { AdPopup } from './components/ads/AdPopup';
+import { newAdPageView, startAdTracking } from './lib/ads/adEvents';
+
+/** Ad views / clicks for Ads Studio reports (no personal data; see lib/ads/adEvents). */
+function AdEventTracker() {
+  const { pathname } = useLocation();
+  React.useEffect(() => startAdTracking(), []);
+  const first = React.useRef(true);
+  React.useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    newAdPageView();
+  }, [pathname]);
+  return null;
+}
 const CustomPage = lazy(() => import('./pages/CustomPage').then((m) => ({ default: m.CustomPage })));
 
 function FeatureFlagRoute({
@@ -340,6 +356,7 @@ function AppContent() {
       {!isCompactShell && <FloatingOverlays />}
       {/* Ads Studio pop-up (pages / times per visit / delay chosen per ad; closed = gone for this tab) */}
       {!isCompactShell && !cmsPreviewActive && <AdPopup />}
+      {!cmsPreviewActive && <AdEventTracker />}
       {!isCompactShell && !isMessagesShell && <Footer />}
     </div>
   );

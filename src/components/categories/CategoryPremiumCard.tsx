@@ -16,7 +16,7 @@ export type CategoryPremiumCardProps = {
   featuredBrandHref?: string;
   featuredBrandLogo?: string;
   /** Paid Ads Studio sponsor for this card (Category Promoted Slot). Only then is it "Promoted". */
-  sponsor?: { name: string; logo?: string; href: string; external: boolean };
+  sponsor?: { name: string; logo?: string; href: string; external: boolean; adId?: string; adSlot?: string };
   onClick?: () => void;
   className?: string;
 };
@@ -134,6 +134,7 @@ export function CategoryPremiumCard({
           external={Boolean(sponsor?.external)}
           className="mt-auto choosify-dark-surface text-white px-4 py-3 flex items-center gap-2.5 no-underline hover:brightness-110"
           testId={sponsor ? 'category-sponsor-footer' : 'category-top-brand-footer'}
+          extra={sponsor?.adId && sponsor.adSlot ? { 'data-ad-id': sponsor.adId, 'data-ad-slot': sponsor.adSlot } : undefined}
         >
           <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-extrabold shrink-0 overflow-hidden">
             {showLogo ? (
@@ -161,17 +162,17 @@ export function CategoryPremiumCard({
 }
 
 /** Footer link: internal route or a paid sponsor's external site (rel=sponsored). */
-function FooterLink({ href, external, className, testId, children }: { href: string; external: boolean; className: string; testId: string; children: React.ReactNode }) {
+function FooterLink({ href, external, className, testId, children, extra }: { href: string; external: boolean; className: string; testId: string; children: React.ReactNode; extra?: Record<string, string> }) {
   const stop = (e: React.MouseEvent) => e.stopPropagation();
   if (external || /^https?:/i.test(href)) {
     return (
-      <a href={href} target="_blank" rel="sponsored noopener noreferrer" className={className} onClick={stop} data-testid={testId}>
+      <a href={href} target="_blank" rel="sponsored noopener noreferrer" className={className} onClick={stop} data-testid={testId} {...extra}>
         {children}
       </a>
     );
   }
   return (
-    <Link to={href} className={className} onClick={stop} data-testid={testId}>
+    <Link to={href} className={className} onClick={stop} data-testid={testId} {...extra}>
       {children}
     </Link>
   );
