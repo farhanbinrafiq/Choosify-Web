@@ -21,7 +21,7 @@ import { AdSenseSlot } from '../components/AdSenseSlot';
 import { CtaBannerSlot } from '../components/CtaBannerSlot';
 import { ProductsSponsoredBannerCarousel } from '../components/commerce/AdvertiseHereCard';
 import { SponsoredCardChrome } from '../components/commerce/SponsoredCardChrome';
-import { useSponsoredFeedEntries } from '../hooks/useSponsoredFeedEntries';
+import { SponsoredFrame, useSponsoredListings } from '../components/ads/SponsoredListing';
 import { useSponsoredPlacementsForSurface } from '../hooks/useSponsoredPlacementsForSurface';
 import { PLACEMENT_KEYS } from '../lib/placements';
 import { resolveServiceKeywords } from '../lib/home/popularServices';
@@ -612,12 +612,8 @@ export function AllProductsPage() {
     [filteredProducts, currentPage],
   );
 
-  const productFeed = useSponsoredFeedEntries(
-    'products',
-    paginatedProducts,
-    (product) => `product-${product.id}`,
-    { enabled: viewMode === 'grid' },
-  );
+  // Ads Studio Sponsored Listings (PRODUCTS_FEED): a promoted product matching the current filters.
+  const productFeed = useSponsoredListings(AD_SLOTS.PRODUCTS_FEED, paginatedProducts, 'product', filteredProducts);
 
   const productsSponsoredBanners = useSponsoredPlacementsForSurface('products', {
     limit: 4,
@@ -1070,21 +1066,16 @@ export function AllProductsPage() {
                 ? PRODUCT_CARD_GRID
                 : "flex flex-col gap-6"
             )}>
-              {productFeed.map((entry) =>
-                entry.kind === 'sponsored' ? null : viewMode === 'list' ? (
-                  <ProductCard
-                    key={entry.key}
-                    product={entry.item}
-                    variant="list"
-                  />
+              {productFeed.map((entry) => {
+                const card = <ProductCard product={entry.item} variant={viewMode === 'list' ? 'list' : 'grid'} />;
+                return entry.sponsored ? (
+                  <SponsoredFrame key={`product-${entry.item.id}-sponsored`} ad={entry.sponsored}>
+                    {card}
+                  </SponsoredFrame>
                 ) : (
-                  <ProductCard
-                    key={entry.key}
-                    product={entry.item}
-                    variant="grid"
-                  />
-                ),
-              )}
+                  <React.Fragment key={`product-${entry.item.id}`}>{card}</React.Fragment>
+                );
+              })}
             </div>
           )}
 

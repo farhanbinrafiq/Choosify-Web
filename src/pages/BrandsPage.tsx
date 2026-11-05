@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { AD_SLOTS } from '../lib/ads/adSlots';
 import { AdGridCard, AdSlotBanner, useGridAds } from '../components/ads/AdSlot';
+import { SponsoredFrame, useSponsoredListings } from '../components/ads/SponsoredListing';
 import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, ShoppingBag, Youtube, Twitter, Facebook, Instagram, Sparkles, PenTool, Users, Heart, Eye, Share2, Flame, Zap, Layers, Award, Gift, Copy, X, Store } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
@@ -397,16 +398,18 @@ export function BrandsPage() {
     limit: INFEED_MAX_PER_PAGE,
   });
 
+  // Ads Studio Sponsored Listings (BRANDS_FEED): a promoted brand from this list, labelled.
+  const listedBrands = useSponsoredListings(AD_SLOTS.BRANDS_FEED, filteredBrands, 'brand');
   const brandFeed = useMemo(
     () =>
       injectPlacementsIntoFeed(
-        filteredBrands,
-        (brand) => `brand-${brand.id}`,
+        listedBrands,
+        (e) => `brand-${e.item.id}${e.sponsored ? '-sponsored' : ''}`,
         infeedPlacements,
         INFEED_INTERVAL.brand,
         3,
       ),
-    [filteredBrands, infeedPlacements],
+    [listedBrands, infeedPlacements],
   );
 
   const {
@@ -987,13 +990,24 @@ export function BrandsPage() {
                   ) : entry.kind === 'placement' ? (
                     null /* no placeholder ads: only real Ads Studio bookings show */
                   ) : (
-                    <BrandCardDesign
-                      key={entry.key}
-                      brand={{
-                        ...entry.item,
-                        maxDiscountPercent: lookupBrandMaxDiscount(brandMaxDiscountMap, entry.item),
-                      }}
-                    />
+                    entry.item.sponsored ? (
+                      <SponsoredFrame key={entry.key} ad={entry.item.sponsored}>
+                        <BrandCardDesign
+                          brand={{
+                            ...entry.item.item,
+                            maxDiscountPercent: lookupBrandMaxDiscount(brandMaxDiscountMap, entry.item.item),
+                          }}
+                        />
+                      </SponsoredFrame>
+                    ) : (
+                      <BrandCardDesign
+                        key={entry.key}
+                        brand={{
+                          ...entry.item.item,
+                          maxDiscountPercent: lookupBrandMaxDiscount(brandMaxDiscountMap, entry.item.item),
+                        }}
+                      />
+                    )
                   ),
                 )}
               </div>

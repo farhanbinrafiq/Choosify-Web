@@ -23,6 +23,8 @@ export const AD_SLOTS = {
   CATEGORY_CARD_FOOTER: 'CATEGORY_CARD_FOOTER',
   DEALS_GRID_CARD: 'DEALS_GRID_CARD',
   BRANDS_GRID_CARD: 'BRANDS_GRID_CARD',
+  PRODUCTS_FEED: 'PRODUCTS_FEED',
+  BRANDS_FEED: 'BRANDS_FEED',
   CREATORS_GRID_CARD: 'CREATORS_GRID_CARD',
   DISCOVER_SIDEBAR: 'DISCOVER_SIDEBAR',
   COMPARE_BANNER: 'COMPARE_BANNER',
@@ -65,6 +67,8 @@ export type PublicAd = {
   popup?: { pages: string[]; maxPerSession: number; delaySec: number };
   /** In-grid cards: after every N cards (0 = once, after the last card). */
   gridEvery?: number;
+  /** Sponsored Listing: the promoted product / brand (drawn as its normal card). */
+  entity?: { type: 'product' | 'brand'; id: string };
   /** Category Promoted Slot only: which category card carries this sponsor footer. */
   categoryId?: string;
   categoryName?: string;
