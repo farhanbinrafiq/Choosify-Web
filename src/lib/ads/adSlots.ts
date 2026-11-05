@@ -21,6 +21,15 @@ export const AD_SLOTS = {
   CREATORS_BANNER: 'CREATORS_BANNER',
   DISCOVER_BANNER: 'DISCOVER_BANNER',
   CATEGORY_CARD_FOOTER: 'CATEGORY_CARD_FOOTER',
+  DEALS_GRID_CARD: 'DEALS_GRID_CARD',
+  BRANDS_GRID_CARD: 'BRANDS_GRID_CARD',
+  CREATORS_GRID_CARD: 'CREATORS_GRID_CARD',
+  DISCOVER_SIDEBAR: 'DISCOVER_SIDEBAR',
+  COMPARE_BANNER: 'COMPARE_BANNER',
+  COMPARE_SIDEBAR: 'COMPARE_SIDEBAR',
+  ORDER_TRACKING_BANNER: 'ORDER_TRACKING_BANNER',
+  DASHBOARD_BANNER: 'DASHBOARD_BANNER',
+  DASHBOARD_SIDEBAR: 'DASHBOARD_SIDEBAR',
   BRANDS_SIDEBAR: 'BRANDS_SIDEBAR',
   CATEGORIES_SIDEBAR: 'CATEGORIES_SIDEBAR',
   CREATORS_SIDEBAR: 'CREATORS_SIDEBAR',
@@ -46,6 +55,9 @@ export type PublicAd = {
   sponsorLogoUrl?: string;
   /** Wide banners: draw the headline + subtext over the image (advertiser's choice). */
   showText?: boolean;
+  /** Wide banners on desktop: fill the frame edge to edge (crop top/bottom) instead of showing the whole design. */
+  fit?: 'fill';
+  focusY?: 'top' | 'center' | 'bottom';
   /** Wide banners: the exact spot on the page (slot default when the advertiser chose none). */
   position?: string;
   /** Category Promoted Slot only: which category card carries this sponsor footer. */

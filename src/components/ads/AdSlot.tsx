@@ -11,18 +11,18 @@ import { Link } from 'react-router-dom';
 import { AD_SLOTS, adHref, sponsoredLabel, useAdSlot, type AdSlotId, type PublicAd } from '../../lib/ads/adSlots';
 import type { SponsoredPlacementItem } from '../../types/commerce/sponsoredPlacement';
 
-function AdLink({ ad, className, children, testId }: { ad: PublicAd; className?: string; children: React.ReactNode; testId?: string }) {
+function AdLink({ ad, className, children, testId, style }: { ad: PublicAd; className?: string; children: React.ReactNode; testId?: string; style?: React.CSSProperties }) {
   const target = adHref(ad);
-  if (!target) return <div className={className} data-testid={testId}>{children}</div>;
+  if (!target) return <div className={className} style={style} data-testid={testId}>{children}</div>;
   if (target.external || /^https?:/i.test(target.href)) {
     return (
-      <a href={target.href} target="_blank" rel="sponsored noopener noreferrer" className={className} data-testid={testId}>
+      <a href={target.href} target="_blank" rel="sponsored noopener noreferrer" className={className} style={style} data-testid={testId}>
         {children}
       </a>
     );
   }
   return (
-    <Link to={target.href} className={className} data-testid={testId}>
+    <Link to={target.href} className={className} style={style} data-testid={testId}>
       {children}
     </Link>
   );
@@ -66,15 +66,26 @@ export function AdSlotBanner({ slot, position, className = '' }: { slot: AdSlotI
 
 /** One wide designed banner inside the fixed frame. */
 function BannerFrame({ ad }: { ad: PublicAd }) {
+  // Phones: the frame takes the design's own shape (2:1–4:1), so it fills edge to edge uncropped.
+  // Desktop: fixed 4:1 frame; the whole design with a soft side fill, or (advertiser's choice)
+  // filled edge to edge, cropping top/bottom around the chosen focus.
+  const ratio = ad.imageWidth && ad.imageHeight ? Math.min(4, Math.max(2, ad.imageWidth / ad.imageHeight)) : 2.5;
+  const fill = ad.fit === 'fill';
   return (
-    <AdLink ad={ad} className="relative block w-full aspect-[5/2] sm:aspect-[4/1] max-h-[300px] overflow-hidden rounded-xl bg-[#0F1238]" testId="ad-banner-link">
-      <img src={ad.image} alt="" aria-hidden className="absolute inset-0 h-full w-full scale-110 object-cover blur-xl opacity-60" loading="lazy" />
+    <AdLink
+      ad={ad}
+      className="relative block w-full aspect-[var(--ad-ratio)] sm:aspect-[4/1] max-h-[300px] overflow-hidden rounded-xl bg-[#0F1238]"
+      style={{ ['--ad-ratio' as string]: `${ratio.toFixed(3)} / 1` }}
+      testId="ad-banner-link"
+    >
+      <img src={ad.image} alt="" aria-hidden className={`absolute inset-0 h-full w-full scale-110 object-cover blur-xl opacity-60 ${fill ? 'sm:hidden' : ''}`} loading="lazy" />
       <img
         src={ad.image}
         alt={ad.alt}
         width={ad.imageWidth}
         height={ad.imageHeight}
-        className="relative block h-full w-full object-contain"
+        className={`relative block h-full w-full object-contain ${fill ? 'sm:object-cover' : ''}`}
+        style={fill ? { objectPosition: `center ${ad.focusY || 'center'}` } : undefined}
         loading="lazy"
         data-testid="ad-banner-image"
       />
@@ -141,12 +152,79 @@ export function useCategorySponsors(): (category: { id?: string; name: string })
     ads.find((a) => a.categoryName && a.categoryName.trim().toLowerCase() === category.name.trim().toLowerCase());
 }
 
-/** One sponsored card (first booked ad for the slot). */
+/** Sponsored side card(s): one card, or several taking turns with round switch icons below. */
 export function AdSlotCard({ slot, className = '' }: { slot: AdSlotId; className?: string }) {
-  const ad = useAdSlot(slot)[0];
-  if (!ad) return null;
+  const ads = useAdSlot(slot);
+  if (!ads.length) return null;
   return (
     <div className={`w-full ${className}`} data-testid={`ad-slot-${slot}`}>
+      <AdSlotCarousel
+        items={ads}
+        getKey={(a) => a.id}
+        axis="x"
+        paginationPosition="below"
+        autoplay
+        autoplayMs={7000}
+        ariaLabel="Sponsored cards"
+        getIcon={(a) => ({ label: a.headline || 'Sponsored', imageUrl: a.sponsorLogoUrl || a.image })}
+        renderSlide={(a) => <SideCard ad={a} />}
+      />
+    </div>
+  );
+}
+
+/** Ads booked for a slot (for "booked ad or house card" choices). */
+export function useSlotHasAds(slot: AdSlotId): boolean {
+  return useAdSlot(slot).length > 0;
+}
+
+/**
+ * In-grid sponsored cards — the same shell and size as the cards around them (brand / creator /
+ * deal grids). Renders the booked ads, or `fallback` (the house "Advertise here" card) if none.
+ */
+export function GridAdCards({ slot, fallback = null }: { slot: AdSlotId; fallback?: React.ReactNode }) {
+  const ads = useAdSlot(slot);
+  if (!ads.length) return <>{fallback}</>;
+  return (
+    <>
+      {ads.map((ad) => (
+        <AdGridCard key={ad.id} ad={ad} />
+      ))}
+    </>
+  );
+}
+
+function AdGridCard({ ad }: { ad: PublicAd }) {
+  const target = adHref(ad);
+  return (
+    <AdLink
+      ad={ad}
+      className="choosify-dark-surface relative flex h-full min-h-[300px] flex-col overflow-hidden rounded-[10px] text-left no-underline"
+      testId={`ad-grid-card-${ad.slot}`}
+    >
+      <div className="relative min-h-0 flex-[7] overflow-hidden bg-gradient-to-br from-[#FF5B00] to-[#2323FF]">
+        {ad.display !== 'text' && ad.image ? (
+          <img src={ad.image} alt={ad.alt} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+        ) : ad.sponsorLogoUrl ? (
+          <img src={ad.sponsorLogoUrl} alt="" className="absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white object-contain p-1.5" loading="lazy" />
+        ) : null}
+        <Chip ad={ad} />
+      </div>
+      <div className="flex min-h-0 flex-[3] flex-col justify-center p-3.5">
+        {ad.headline && <div className="mb-1 text-[13.5px] font-bold leading-snug text-white line-clamp-2">{ad.headline}</div>}
+        {ad.subtext && <div className="mb-3 text-[11px] leading-snug text-white/60 line-clamp-2">{ad.subtext}</div>}
+        {ad.ctaLabel && target && (
+          <span className="mt-auto w-full rounded-md bg-[#FF5B00] py-2.5 text-center text-[11.5px] font-extrabold uppercase text-white" data-testid="ad-cta-button">
+            {ad.ctaLabel} →
+          </span>
+        )}
+      </div>
+    </AdLink>
+  );
+}
+
+function SideCard({ ad }: { ad: PublicAd }) {
+  return (
       <AdLink ad={ad} className="relative block overflow-hidden rounded-xl border border-[#E8EDF2] bg-white text-left">
         <Chip ad={ad} />
         {ad.display !== 'text' && ad.image ? (
@@ -169,7 +247,6 @@ export function AdSlotCard({ slot, className = '' }: { slot: AdSlotId; className
           </div>
         )}
       </AdLink>
-    </div>
   );
 }
 

@@ -15,6 +15,8 @@ import { openEmiPanel } from '../lib/emi';
 import { Link, useLocation } from 'react-router-dom';
 import { ProductCard } from './ProductCard';
 import { SponsoredProductTile } from './commerce/AdvertiseHereCard';
+import { AdSlotCard } from './ads/AdSlot';
+import { AD_SLOTS } from '../lib/ads/adSlots';
 import { useSponsoredPlacementsForSurface } from '../hooks/useSponsoredPlacementsForSurface';
 import { getCompareLockedCategory, isSameCompareCategory } from '../utils/compareCategory';
 import {
@@ -846,6 +848,8 @@ export function CompareEngine() {
               Ask Emi to Compare
             </button>
           </div>
+          {/* Ads Studio COMPARE_SIDEBAR — card under "Need help deciding?" */}
+          <AdSlotCard slot={AD_SLOTS.COMPARE_SIDEBAR} />
         </aside>
       </div>
 

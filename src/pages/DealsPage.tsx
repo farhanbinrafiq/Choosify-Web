@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { AdSlotBanner } from '../components/ads/AdSlot';
+import { AdSlotBanner, AdSlotCard, GridAdCards, useSlotHasAds } from '../components/ads/AdSlot';
 import { AD_SLOTS } from '../lib/ads/adSlots';
 import { ProductCard } from '../components/ProductCard';
 import { FlashDealCard, DealOfTheDayCard } from '../components/deals/FlashDealCard';
@@ -89,6 +89,7 @@ function FlashDealCountdown({ validUntil }: { validUntil: string }) {
 }
 
 export function DealsPage() {
+  const dealsSideBooked = useSlotHasAds(AD_SLOTS.DEALS_SIDEBAR);
   const navigate = useNavigate();
   const { allProducts, allBrands } = useGlobalState();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -931,7 +932,8 @@ export function DealsPage() {
                             </div>
                           ),
                         )}
-                        <AdvertiseHereCard variant="product-tile" />
+                        {/* Ads Studio DEALS_GRID_CARD (deal-card sized); house card when none is booked */}
+                        <GridAdCards slot={AD_SLOTS.DEALS_GRID_CARD} fallback={<AdvertiseHereCard variant="product-tile" />} />
                       </>
                     )}
                   </div>
@@ -949,8 +951,8 @@ export function DealsPage() {
 
                 <div className="flex flex-col gap-4 self-start lg:sticky lg:top-28 w-full min-w-0">
                   <DealsTopCouponsCard coupons={dealsCuration?.topCoupons ?? []} onViewAllCoupons={handleViewAllCoupons} />
-                  {/* Fill remaining right-column height while the deals feed scrolls */}
-                  <DealsVerticalSponsoredCard />
+                  {/* Ads Studio DEALS_SIDEBAR (right-hand column card); house cards fill the rest */}
+                  {dealsSideBooked ? <AdSlotCard slot={AD_SLOTS.DEALS_SIDEBAR} /> : <DealsVerticalSponsoredCard />}
                   <DealsVerticalSponsoredCard />
                 </div>
               </div>

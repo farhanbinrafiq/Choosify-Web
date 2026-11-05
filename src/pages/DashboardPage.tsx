@@ -101,6 +101,8 @@ import { DealsVerticalSponsoredCard } from '../components/deals/DealsLowerSectio
 import { UniversalCarousel } from '../components/design/UniversalCarousel';
 import { SellerAccountSidebarCard } from '../components/dashboard/SellerAccountSidebarCard';
 import { BecomeCreatorSidebarCard } from '../components/dashboard/BecomeCreatorSidebarCard';
+import { AdSlotBanner, AdSlotCard, useSlotHasAds } from '../components/ads/AdSlot';
+import { AD_SLOTS } from '../lib/ads/adSlots';
 
 /** Tabs with their own right column / dense forms — do not inject sponsored rail */
 const DASHBOARD_TABS_WITH_RIGHT_CONTENT = new Set([
@@ -178,12 +180,14 @@ function ScoreRing({ score, max = 100 }: { score: number; max?: number }) {
 }
 
 function DashboardSponsoredRail() {
+  const dashSideBooked = useSlotHasAds(AD_SLOTS.DASHBOARD_SIDEBAR);
   return (
     <aside
       className="hidden lg:block w-full max-w-[240px] shrink-0 sticky top-[88px] self-start isolate z-0"
       aria-label="Promoted advertisement"
     >
-      <DealsVerticalSponsoredCard />
+      {/* Ads Studio DASHBOARD_SIDEBAR; house card when none is booked */}
+      {dashSideBooked ? <AdSlotCard slot={AD_SLOTS.DASHBOARD_SIDEBAR} /> : <DealsVerticalSponsoredCard />}
     </aside>
   );
 }
@@ -457,6 +461,9 @@ const OverviewSection = ({
           Bangladesh&apos;s smartest product discovery platform.
         </p>
       </div>
+
+      {/* Ads Studio DASHBOARD_BANNER — under the greeting / end of the overview */}
+      <AdSlotBanner slot={AD_SLOTS.DASHBOARD_BANNER} position="top" />
 
       {currentUser?.role && currentUser.role !== 'customer' ? (
         <a
@@ -815,8 +822,11 @@ const OverviewSection = ({
               </p>
             )}
           </div>
+          {/* Ads Studio DASHBOARD_SIDEBAR — overview's own right column (other tabs use the side rail) */}
+          <AdSlotCard slot={AD_SLOTS.DASHBOARD_SIDEBAR} />
         </aside>
       </div>
+      <AdSlotBanner slot={AD_SLOTS.DASHBOARD_BANNER} position="bottom" />
     </div>
   );
 };

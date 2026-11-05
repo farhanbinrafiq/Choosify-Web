@@ -68,7 +68,7 @@ const COPY: Record<
   'product-tile': {
     headline: 'Advertise your product here',
     sub: '',
-    bannerLabel: 'PROMOTED',
+    bannerLabel: 'YOUR PRODUCT HERE',
     brandName: 'Sponsor',
   },
 };
@@ -101,7 +101,8 @@ export function AdvertiseHereCard({
           variant !== 'product-tile' && 'items-end pb-2.5',
         )}
       >
-        <SponsoredCardChrome brandName={copy.brandName} size="md" />
+        {/* Choosify's own "advertise with us" card, not a paid ad: never labelled PROMOTED. */}
+        <SponsoredCardChrome brandName={copy.brandName} size="md" badgeLabel="AD SPACE" tone="editorial" />
         {copy.bannerLabel ? (
           <span
             className={cn(

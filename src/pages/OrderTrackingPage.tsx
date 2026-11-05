@@ -15,6 +15,8 @@ import { SponsoredCardChrome } from '../components/commerce/SponsoredCardChrome'
 import { PRODUCT_CARD_GRID } from '../lib/pageLayout';
 import { useDashboard } from '../context/DashboardContext';
 import { ensureStorefrontSupportThread } from '../lib/supportConversation';
+import { AdSlotBanner } from '../components/ads/AdSlot';
+import { AD_SLOTS } from '../lib/ads/adSlots';
 
 type TrackingStatus = 'pending' | 'dispatched' | 'transit' | 'delivered';
 
@@ -233,6 +235,8 @@ export function OrderTrackingPage() {
 
       {/* Overlapping body */}
       <div className="max-w-[1100px] mx-auto w-full px-5 sm:px-10 pb-16 -mt-4 relative z-[2] flex-1">
+        {/* Ads Studio ORDER_TRACKING_BANNER — top / bottom of the tracking details */}
+        <AdSlotBanner slot={AD_SLOTS.ORDER_TRACKING_BANNER} position="top" className="mb-5" />
         {order === null && orders.length === 0 ? (
           renderEmptyCard(
             'No orders yet',
@@ -508,6 +512,7 @@ export function OrderTrackingPage() {
             )}
           </div>
         )}
+        <AdSlotBanner slot={AD_SLOTS.ORDER_TRACKING_BANNER} position="bottom" className="mt-8" />
       </div>
     </div>
   );

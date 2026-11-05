@@ -53,7 +53,7 @@ export function VerticalAdvertisePlaceholder({ className }: { className?: string
       )}
     >
       <div className="flex-[7] min-h-0 bg-gradient-to-br from-[#FF5B00] to-[#2323FF] flex items-end justify-center pb-3 relative">
-        <SponsoredCardChrome brandName="Advertise" size="md" />
+        <SponsoredCardChrome brandName="Advertise" size="md" badgeLabel="AD SPACE" tone="editorial" />
         <span className="text-white text-[12px] font-extrabold text-center px-3 relative z-[1]">
           PROMOTE YOUR DEAL
         </span>

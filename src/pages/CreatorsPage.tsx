@@ -1,6 +1,6 @@
 import { creatorPath } from '../../lib/publicUrls';
 import { AD_SLOTS } from '../lib/ads/adSlots';
-import { AdSlotBanner } from '../components/ads/AdSlot';
+import { AdSlotBanner, GridAdCards } from '../components/ads/AdSlot';
 import React, { useState, useMemo } from 'react';
 import { PAGE_LISTING_SINGLE_SHELL, CREATOR_CARD_GRID } from "../lib/pageLayout";
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
@@ -738,7 +738,8 @@ export function CreatorsPage() {
                     <CreatorCardDesign key={entry.key} creator={entry.item} />
                   ),
                 )}
-                {infeedPlacements.length === 0 && <AdvertiseHereCard variant="creator" />}
+                {/* Ads Studio CREATORS_GRID_CARD (creator-card sized); house card when none is booked */}
+                <GridAdCards slot={AD_SLOTS.CREATORS_GRID_CARD} fallback={infeedPlacements.length === 0 ? <AdvertiseHereCard variant="creator" /> : null} />
               </div>
               <div ref={sentinelRef} className="h-8" aria-hidden />
               {hasMore && (

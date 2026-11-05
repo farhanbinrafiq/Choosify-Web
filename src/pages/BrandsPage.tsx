@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { AD_SLOTS } from '../lib/ads/adSlots';
-import { AdSlotBanner } from '../components/ads/AdSlot';
+import { AdSlotBanner, GridAdCards } from '../components/ads/AdSlot';
 import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, ShoppingBag, Youtube, Twitter, Facebook, Instagram, Sparkles, PenTool, Users, Heart, Eye, Share2, Flame, Zap, Layers, Award, Gift, Copy, X, Store } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
@@ -990,7 +990,8 @@ export function BrandsPage() {
                     />
                   ),
                 )}
-                {infeedPlacements.length === 0 && <AdvertiseHereCard variant="brand" />}
+                {/* Ads Studio BRANDS_GRID_CARD (brand-card sized); house card when none is booked */}
+                <GridAdCards slot={AD_SLOTS.BRANDS_GRID_CARD} fallback={infeedPlacements.length === 0 ? <AdvertiseHereCard variant="brand" /> : null} />
               </div>
               <div ref={sentinelRef} className="h-8" aria-hidden />
               {hasMore && (

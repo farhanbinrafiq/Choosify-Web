@@ -22,6 +22,8 @@ import { usePriorityClockMs } from '../../../hooks/usePriorityClockMs';
 import { ListingFilterPills, type ListingFilterPillItem } from '../../design/ListingFilterPills';
 import { DISCOVER_FORMAT_TABS } from './DiscoverStickyFormatNav';
 import { PLACEHOLDER_IMAGE } from '../../../constants';
+import { AdSlotCard } from '../../ads/AdSlot';
+import { AD_SLOTS } from '../../../lib/ads/adSlots';
 
 function resolveEditorsPickMediaKind(content: SpotlightContent): 'image' | 'video' {
   const media = content.media;
@@ -454,6 +456,8 @@ export function DiscoverStructuredFeed({
             )}
 
             {editorsPicks.length > 0 && <EditorsPickCarousel items={editorsPicks} />}
+            {/* Ads Studio DISCOVER_SIDEBAR — card under Editor's Pick */}
+            <AdSlotCard slot={AD_SLOTS.DISCOVER_SIDEBAR} />
           </aside>
         </div>
       )}
