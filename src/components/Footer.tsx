@@ -196,10 +196,11 @@ function FooterLink({
   any Choosify account at all. Rendered directly under the Discover column so
   the "become a partner" path sits with the other discovery links.
 */
-function SellOrCreateWithUs() {
+function SellOrCreateWithUs({ copy }: { copy?: { show: boolean; title: string; sellerLabel: string; creatorLabel: string } }) {
+  if (copy && copy.show === false) return null;
   return (
     <div>
-      <FooterHeading>Sell Or Create With Us</FooterHeading>
+      <FooterHeading>{copy?.title || 'Sell Or Create With Us'}</FooterHeading>
       <div className="flex flex-col gap-2">
         <a
           href={SELLER_SIGNUP_URL}
@@ -208,7 +209,7 @@ function SellOrCreateWithUs() {
           className="flex items-center gap-2 text-[13px] font-semibold text-white/70 hover:text-white transition-colors"
         >
           <Store size={14} className="text-orange-primary shrink-0" />
-          Sign Up As A Seller
+          {copy?.sellerLabel || 'Sign Up As A Seller'}
         </a>
         <a
           href={CREATOR_SIGNUP_URL}
@@ -217,7 +218,7 @@ function SellOrCreateWithUs() {
           className="flex items-center gap-2 text-[13px] font-semibold text-white/70 hover:text-white transition-colors"
         >
           <Award size={14} className="text-orange-primary shrink-0" />
-          Join As A Creator
+          {copy?.creatorLabel || 'Join As A Creator'}
         </a>
       </div>
     </div>
@@ -231,6 +232,17 @@ export function Footer() {
   const studio = siteConfig?.websiteStudio;
   const sFooter = studio?.footer;
   const sCompany = studio?.company;
+  // Section headings from Website Studio → Footer (built-in wording until published).
+  const hd = {
+    connect: 'Connect',
+    contact: 'Contact Us',
+    address: 'Address',
+    payments: 'Payments Accepted',
+    apps: 'Available On Platforms',
+    appsNote: 'Download the app — or scan to open the store',
+    delivery: 'Delivery Partner',
+    ...(sFooter?.headings || {}),
+  };
   const cmsSocials = (siteConfig?.socialLinks || [])
     .filter((link) => link.isVisible)
     .sort((a, b) => a.order - b.order);
@@ -348,7 +360,7 @@ export function Footer() {
                 footer?.description ||
                 "Bangladesh's smartest product discovery platform. Find the best brand, compare price, and shop with confidence."}
             </p>
-            <FooterHeading>Connect</FooterHeading>
+            <FooterHeading>{hd.connect}</FooterHeading>
             <div className="flex flex-wrap gap-2 mb-6">
               {socials.map((social) => (
                 <a
@@ -379,7 +391,7 @@ export function Footer() {
           */}
           <div className="flex flex-wrap gap-x-10 gap-y-6 sm:gap-x-16 mt-6">
             <div>
-              <FooterHeading>Contact Us</FooterHeading>
+              <FooterHeading>{hd.contact}</FooterHeading>
               <div className="flex flex-col gap-2">
                 <a
                   href={`mailto:${contactEmail}`}
@@ -401,6 +413,8 @@ export function Footer() {
           </div>
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 sm:gap-8">
+            {/* No link columns: the sign-up block still shows on its own. */}
+            {footerColumns.length === 0 ? <SellOrCreateWithUs copy={sFooter?.partner} /> : null}
             {footerColumns.map((column) => (
               <div key={column.id}>
                 <FooterHeading>{column.title}</FooterHeading>
@@ -415,7 +429,7 @@ export function Footer() {
                 </div>
                 {column.id === sellCreateColumnId && (
                   <div className="mt-8">
-                    <SellOrCreateWithUs />
+                    <SellOrCreateWithUs copy={sFooter?.partner} />
                   </div>
                 )}
               </div>
@@ -423,7 +437,7 @@ export function Footer() {
 
             {officeAddresses.length > 0 && (
             <div>
-              <FooterHeading>Address</FooterHeading>
+              <FooterHeading>{hd.address}</FooterHeading>
               <div className="flex flex-col gap-4">
                 {officeAddresses.map((office) => (
                   <div key={office.id}>
@@ -449,7 +463,7 @@ export function Footer() {
             <div className="grid grid-cols-1 lg:grid-cols-[1.15fr_1.85fr] gap-10 lg:gap-16 items-start">
               {showPaymentsBlock ? (
                 <div>
-                  <FooterHeading>Payments Accepted</FooterHeading>
+                  <FooterHeading>{hd.payments}</FooterHeading>
                   {sFooter ? <StudioPaymentMethods ids={sFooter.paymentMethods} /> : <PaymentMethodsGrid layout="row" />}
                 </div>
               ) : (
@@ -458,9 +472,9 @@ export function Footer() {
 
               {showAppsBlock && (
               <div className="w-full lg:flex lg:flex-col lg:items-end lg:text-right">
-                <FooterHeading>Available On Platforms</FooterHeading>
+                <FooterHeading>{hd.apps}</FooterHeading>
                 <p className="text-white/45 text-xs mb-4 lg:max-w-md">
-                  Download the app — or scan to open the store
+                  {hd.appsNote}
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full lg:w-auto lg:max-w-[520px]">
                   {platforms.map((app) => {
@@ -547,7 +561,7 @@ export function Footer() {
             <div className="flex flex-wrap gap-8 lg:gap-16">
               {showDeliveryBlock && (
               <div>
-                <FooterHeading>Delivery Partner</FooterHeading>
+                <FooterHeading>{hd.delivery}</FooterHeading>
                 <div className="flex flex-wrap items-center gap-2">
                   {(deliveryPartners.length
                     ? deliveryPartners.map((logo) => ({

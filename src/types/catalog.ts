@@ -309,6 +309,8 @@ export interface WebsiteStudioSite {
     announcement: { enabled: boolean; text: string; linkUrl: string };
   };
   footer?: {
+    headings?: { connect: string; contact: string; address: string; payments: string; apps: string; appsNote: string; delivery: string };
+    partner?: { show: boolean; title: string; sellerLabel: string; creatorLabel: string };
     description: string;
     columns: Array<{ id: string; title: string; links: Array<{ label: string; url: string; external: boolean }> }>;
     showOffices: boolean;
