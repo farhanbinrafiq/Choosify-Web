@@ -29,7 +29,7 @@ function AdLink({ ad, className, children, testId, style }: { ad: PublicAd; clas
 }
 
 const Chip = ({ ad }: { ad: PublicAd }) => (
-  <span className="absolute left-2 top-2 z-[2] rounded-md bg-black/60 px-1.5 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wide text-white" data-testid="ad-sponsored-chip">
+  <span className="absolute left-1.5 top-1.5 z-[2] rounded bg-black/60 px-1 py-px text-[7.5px] font-extrabold uppercase tracking-wide text-white sm:left-2 sm:top-2 sm:rounded-md sm:px-1.5 sm:py-0.5 sm:text-[9.5px]" data-testid="ad-sponsored-chip">
     {sponsoredLabel(ad)}
   </span>
 );
@@ -101,7 +101,7 @@ function BannerFrame({ ad }: { ad: PublicAd }) {
       <Chip ad={ad} />
       {ad.ctaLabel && adHref(ad) && (
         <span
-          className="absolute right-2 top-1/2 z-[2] inline-flex -translate-y-1/2 items-center gap-1 rounded-lg bg-[#FF5B00] px-2.5 py-1 text-[10.5px] font-extrabold uppercase tracking-wide text-white shadow-md sm:right-5 sm:px-4 sm:py-2 sm:text-[12.5px]"
+          className="absolute bottom-1.5 right-1.5 z-[2] inline-flex items-center gap-0.5 rounded-md bg-[#FF5B00] px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wide text-white shadow-md sm:bottom-auto sm:right-5 sm:top-1/2 sm:-translate-y-1/2 sm:gap-1 sm:rounded-lg sm:px-4 sm:py-2 sm:text-[12.5px]"
           data-testid="ad-cta-button"
         >
           {ad.ctaLabel} <span aria-hidden>→</span>
