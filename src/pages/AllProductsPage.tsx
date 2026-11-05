@@ -21,7 +21,7 @@ import { AdSenseSlot } from '../components/AdSenseSlot';
 import { CtaBannerSlot } from '../components/CtaBannerSlot';
 import { ProductsSponsoredBannerCarousel } from '../components/commerce/AdvertiseHereCard';
 import { SponsoredCardChrome } from '../components/commerce/SponsoredCardChrome';
-import { SponsoredFrame, useSponsoredListings } from '../components/ads/SponsoredListing';
+import { SponsoredFrame, useGridColumns, useSponsoredListings } from '../components/ads/SponsoredListing';
 import { useSponsoredPlacementsForSurface } from '../hooks/useSponsoredPlacementsForSurface';
 import { PLACEMENT_KEYS } from '../lib/placements';
 import { resolveServiceKeywords } from '../lib/home/popularServices';
@@ -613,7 +613,8 @@ export function AllProductsPage() {
   );
 
   // Ads Studio Sponsored Listings (PRODUCTS_FEED): a promoted product matching the current filters.
-  const productFeed = useSponsoredListings(AD_SLOTS.PRODUCTS_FEED, paginatedProducts, 'product', filteredProducts);
+  const [productGridRef, productCols] = useGridColumns<HTMLDivElement>();
+  const productFeed = useSponsoredListings(AD_SLOTS.PRODUCTS_FEED, paginatedProducts, 'product', filteredProducts, viewMode === 'grid' ? productCols : 1);
 
   const productsSponsoredBanners = useSponsoredPlacementsForSurface('products', {
     limit: 4,
@@ -1060,7 +1061,7 @@ export function AllProductsPage() {
               <button onClick={handleResetFilters} className="px-5 py-2.5 bg-[#FF5B00] text-white text-[13px] font-bold tracking-tight rounded-lg shadow-sm hover:brightness-110">Clear Filters</button>
             </div>
           ) : (
-            <div className={cn(
+            <div ref={productGridRef} className={cn(
               "mb-20 w-full",
               viewMode === 'grid' 
                 ? PRODUCT_CARD_GRID

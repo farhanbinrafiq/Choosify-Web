@@ -69,6 +69,8 @@ export type PublicAd = {
   gridEvery?: number;
   /** Sponsored Listing: the promoted product / brand (drawn as its normal card). */
   entity?: { type: 'product' | 'brand'; id: string };
+  /** Sponsored Listing: the row it starts (first card of that row). */
+  listRow?: number;
   /** Category Promoted Slot only: which category card carries this sponsor footer. */
   categoryId?: string;
   categoryName?: string;

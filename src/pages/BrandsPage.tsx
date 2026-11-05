@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { AD_SLOTS } from '../lib/ads/adSlots';
 import { AdGridCard, AdSlotBanner, useGridAds } from '../components/ads/AdSlot';
-import { SponsoredFrame, useSponsoredListings } from '../components/ads/SponsoredListing';
+import { SponsoredFrame, useGridColumns, useSponsoredListings } from '../components/ads/SponsoredListing';
 import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, ShoppingBag, Youtube, Twitter, Facebook, Instagram, Sparkles, PenTool, Users, Heart, Eye, Share2, Flame, Zap, Layers, Award, Gift, Copy, X, Store } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
@@ -399,7 +399,8 @@ export function BrandsPage() {
   });
 
   // Ads Studio Sponsored Listings (BRANDS_FEED): a promoted brand from this list, labelled.
-  const listedBrands = useSponsoredListings(AD_SLOTS.BRANDS_FEED, filteredBrands, 'brand');
+  const [brandGridRef, brandCols] = useGridColumns<HTMLDivElement>();
+  const listedBrands = useSponsoredListings(AD_SLOTS.BRANDS_FEED, filteredBrands, 'brand', undefined, brandCols);
   const brandFeed = useMemo(
     () =>
       injectPlacementsIntoFeed(
@@ -982,7 +983,7 @@ export function BrandsPage() {
 
           {filteredBrands.length > 0 ? (
             <>
-              <div className={cn(BRAND_CARD_GRID, 'mb-8')}>
+              <div ref={brandGridRef} className={cn(BRAND_CARD_GRID, 'mb-8')}>
                 {/* Ads Studio BRANDS_GRID_CARD: brand-card sized ads after every N brands (the ad's setting) */}
                 {brandGridFeed.map((entry) =>
                   entry.kind === 'gridAd' ? (

@@ -47,6 +47,29 @@ export function Hero({ variant, className }: HeroProps) {
   const [autoplay, setAutoplay] = useState(true);
   const autoplayTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const videoRefs = useRef<Map<string, HTMLVideoElement>>(new Map());
+  // Desktop / tablet: the hero takes the EXACT shape of the slide's design (edge to edge, never
+  // zoomed or cropped). Ratios are read from the loaded image / video.
+  const [ratios, setRatios] = useState<Record<string, number>>({});
+  const noteRatio = (id: string, w: number, h: number) => {
+    if (!w || !h) return;
+    const r = w / h;
+    setRatios((prev) => (prev[id] && Math.abs(prev[id] - r) < 0.001 ? prev : { ...prev, [id]: r }));
+  };
+  const sectionRef = useRef<HTMLElement | null>(null);
+  // The first panel overlaps only the faded bottom 20% of the hero (DcHomePanel reads this).
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return;
+    const ro = new ResizeObserver(() => {
+      const h = el.getBoundingClientRect().height;
+      document.documentElement.style.setProperty('--home-hero-overlap', `${Math.round(h * 0.2)}px`);
+    });
+    ro.observe(el);
+    return () => {
+      ro.disconnect();
+      document.documentElement.style.removeProperty('--home-hero-overlap');
+    };
+  }, [slides.length]);
 
   useEffect(() => {
     setCurrentIndex(0);
@@ -99,13 +122,27 @@ export function Hero({ variant, className }: HeroProps) {
     setCurrentIndex((prev) => (prev + 1) % slides.length);
   };
 
+  // One steady frame (no page jump between slides): the FIRST slide's exact shape. A slide of a
+  // different shape is shown whole (fitted) over a soft blurred copy of itself — never zoomed or cut.
+  const first = slides[0];
+  const frameRatio = Math.min(4.5, Math.max(1.6, (first && ratios[first.id]) || 1920 / 750));
+  const phoneCrop = isMobile && slides.some((s) => s.mobileImage);
+  const fits = (id: string) => {
+    const r = ratios[id];
+    return !r || Math.abs(r - frameRatio) / frameRatio < 0.04;
+  };
+
   return (
     <section
+      ref={sectionRef}
       className={cn(
-        // Tall, Amazon-style on desktop: the lower part fades into the page and the first panel sits over it.
-        'relative isolate z-0 w-full h-[320px] sm:h-[400px] md:h-[460px] lg:h-[clamp(560px,38.5vw,745px)] overflow-hidden select-none',
+        // Phones: fixed height (phone image or centred crop). From tablets up: the slide's own shape,
+        // full width — the design shows whole; its bottom fades into the page under the first panel.
+        'relative isolate z-0 w-full overflow-hidden select-none',
+        phoneCrop ? 'h-[320px] sm:h-[400px]' : '[aspect-ratio:var(--hero-ratio)]',
         className,
       )}
+      style={{ ['--hero-ratio' as string]: String(frameRatio) } as React.CSSProperties}
       aria-label="Homepage hero"
       aria-roledescription="carousel"
       onMouseEnter={() => setAutoplay(false)}
@@ -135,19 +172,25 @@ export function Hero({ variant, className }: HeroProps) {
                 loop
                 playsInline
                 preload={i === 0 ? 'auto' : 'metadata'}
+                onLoadedMetadata={(e) => noteRatio(slide.id, e.currentTarget.videoWidth, e.currentTarget.videoHeight)}
                 className="w-full h-full object-cover"
                 style={focalStyle(slide.focalX, slide.focalY)}
                 aria-label={slide.title || 'Hero video'}
               />
             ) : slide.image ? (
-              <picture className="block w-full h-full">
+              <picture className="relative block w-full h-full">
                 {slide.mobileImage && <source media={MOBILE_QUERY} srcSet={slide.mobileImage} />}
+                {!phoneCrop && !fits(slide.id) ? (
+                  <img src={slide.image} alt="" aria-hidden className="absolute inset-0 h-full w-full scale-110 object-cover blur-2xl opacity-80" />
+                ) : null}
                 <img
                   src={slide.image}
                   alt={slide.alt || ''}
-                  className="w-full h-full object-cover"
-                  style={focalStyle(slide.focalX, slide.focalY)}
+                  className={cn('relative w-full h-full', phoneCrop || fits(slide.id) ? 'object-cover' : 'object-contain object-top')}
+                  style={phoneCrop ? focalStyle(slide.focalX, slide.focalY) : undefined}
                   loading={i === 0 ? 'eager' : 'lazy'}
+                  data-testid="hero-slide-image"
+                  onLoad={(e) => noteRatio(slide.id, e.currentTarget.naturalWidth, e.currentTarget.naturalHeight)}
                 />
               </picture>
             ) : (
@@ -160,12 +203,13 @@ export function Hero({ variant, className }: HeroProps) {
                 }}
               />
             )}
-            {/* Readability layer + transparent branded wash — still image/video-led */}
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/5 pointer-events-none" />
-            <div
-              className="absolute inset-0 pointer-events-none"
-              style={{ background: 'var(--choosify-hero-overlay)' }}
-            />
+            {/* Uploaded designs are shown clean (no tint); only the built-in fallback gets the branded wash. */}
+            {!slide.image && !slide.videoUrl ? (
+              <>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-black/5 pointer-events-none" />
+                <div className="absolute inset-0 pointer-events-none" style={{ background: 'var(--choosify-hero-overlay)' }} />
+              </>
+            ) : null}
             {slide.sponsoredLabel && (
               <span className="absolute left-4 top-4 z-[2] rounded-md bg-black/60 px-2 py-0.5 text-[10px] font-extrabold uppercase tracking-wide text-white" data-testid="hero-sponsored-chip">
                 {slide.sponsoredLabel}
@@ -193,12 +237,12 @@ export function Hero({ variant, className }: HeroProps) {
       {/* Soft bottom fade: a progressive blur + the page colour, so the hero melts into the page. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-[30%] lg:h-[48%] backdrop-blur-[6px]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-[22%] backdrop-blur-[5px]"
         style={{ WebkitMaskImage: 'linear-gradient(to bottom, transparent, #000 85%)', maskImage: 'linear-gradient(to bottom, transparent, #000 85%)' }}
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 bottom-0 z-[6] h-[32%] lg:h-[52%] bg-gradient-to-b from-transparent via-[#F0F8FF]/55 to-[#F0F8FF]"
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[6] h-[26%] bg-gradient-to-b from-transparent via-[#F0F8FF]/50 to-[#F0F8FF]"
         data-testid="hero-bottom-fade"
       />
 
@@ -207,7 +251,7 @@ export function Hero({ variant, className }: HeroProps) {
           <button
             type="button"
             onClick={goPrev}
-            className="absolute left-4 md:left-5 top-1/2 lg:top-[200px] -translate-y-1/2 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/45 bg-white/15 text-white backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_1px_rgba(255,255,255,0.65),inset_0_-1px_2px_rgba(0,0,0,0.12),0_8px_24px_rgba(0,0,0,0.25)] transition-all duration-200 hover:scale-105 hover:bg-white/25 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+            className="absolute left-4 md:left-5 top-[40%] -translate-y-1/2 z-20 flex h-8 w-8 md:h-11 md:w-11 items-center justify-center rounded-full border border-white/45 bg-white/15 text-white backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_1px_rgba(255,255,255,0.65),inset_0_-1px_2px_rgba(0,0,0,0.12),0_8px_24px_rgba(0,0,0,0.25)] transition-all duration-200 hover:scale-105 hover:bg-white/25 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
             aria-label="Previous slide"
             data-testid="hero-arrow-prev"
           >
@@ -216,13 +260,13 @@ export function Hero({ variant, className }: HeroProps) {
           <button
             type="button"
             onClick={goNext}
-            className="absolute right-4 md:right-[100px] top-1/2 lg:top-[200px] -translate-y-1/2 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/45 bg-white/15 text-white backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_1px_rgba(255,255,255,0.65),inset_0_-1px_2px_rgba(0,0,0,0.12),0_8px_24px_rgba(0,0,0,0.25)] transition-all duration-200 hover:scale-105 hover:bg-white/25 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+            className="absolute right-4 md:right-[100px] top-[40%] -translate-y-1/2 z-20 flex h-8 w-8 md:h-11 md:w-11 items-center justify-center rounded-full border border-white/45 bg-white/15 text-white backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_1px_rgba(255,255,255,0.65),inset_0_-1px_2px_rgba(0,0,0,0.12),0_8px_24px_rgba(0,0,0,0.25)] transition-all duration-200 hover:scale-105 hover:bg-white/25 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
             aria-label="Next slide"
             data-testid="hero-arrow-next"
           >
             <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)]" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
           </button>
-          <div className="absolute left-1/2 -translate-x-1/2 bottom-[34%] lg:bottom-auto lg:top-[368px] z-20 flex gap-1.5">
+          <div className="absolute left-1/2 -translate-x-1/2 bottom-[30%] md:bottom-[24%] z-20 flex gap-1.5">
             {slides.map((slide, i) => (
               <button
                 key={slide.id}
