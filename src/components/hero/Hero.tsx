@@ -173,7 +173,7 @@ export function Hero({ variant, className }: HeroProps) {
               <a
                 href={slide.primaryCtaLink}
                 target="_blank"
-                rel="sponsored noopener noreferrer"
+                rel={slide.sponsoredLabel ? 'sponsored noopener noreferrer' : 'noopener noreferrer'}
                 className="absolute inset-0 z-[1]"
                 aria-label={slide.primaryCtaText || slide.title || 'View campaign'}
               />

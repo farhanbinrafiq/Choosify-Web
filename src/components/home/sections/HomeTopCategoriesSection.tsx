@@ -44,17 +44,19 @@ function categoryIcon(name: string): string {
 
 interface HomeTopCategoriesSectionProps {
   categories: HomeCategoryItem[];
+  /** Tuck up over the hero image — only when this is the first block directly under the hero. */
+  overlapHero?: boolean;
 }
 
 /** Choosify.dc.html — overlapping white panel, 6-col icon tiles */
-export function HomeTopCategoriesSection({ categories }: HomeTopCategoriesSectionProps) {
+export function HomeTopCategoriesSection({ categories, overlapHero = true }: HomeTopCategoriesSectionProps) {
   const copy = useHomeSectionCopy('categories', 'Top Categories');
   if (!categories.length) return null;
 
   const display = categories.slice(0, 6);
 
   return (
-    <DcHomePanel id="section-categories" overlapHero>
+    <DcHomePanel id="section-categories" overlapHero={overlapHero}>
       <div className="flex items-baseline justify-between gap-3 mb-4">
         <h2
           id="section-categories-heading"

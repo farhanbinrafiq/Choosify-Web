@@ -69,6 +69,8 @@ function useEditorialHeroSlides(homepageConfig: ReturnType<typeof useGlobalState
           subtitle: banner.subtitle,
           primaryCtaText: banner.ctaText,
           primaryCtaLink: banner.ctaUrl || undefined,
+          // Links to another website open in a new tab (and must not go through the router).
+          externalLink: /^https?:\/\//i.test(banner.ctaUrl || ''),
           alt: banner.alt || '',
           focalX: banner.focalX,
           focalY: banner.focalY,

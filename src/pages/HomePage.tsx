@@ -27,6 +27,8 @@ import { HomeRecentlyViewedSection } from '../components/home/sections/HomeRecen
 import { getOrderedHomeSectionIds } from '../utils/homepageCms';
 import { CtaBannerSlot } from '../components/CtaBannerSlot';
 import { SITE_TAGLINE } from '../lib/seoConfig';
+import { useBannerAds } from '../components/ads/AdSlot';
+import { AD_SLOTS } from '../lib/ads/adSlots';
 
 /**
  * Homepage — layout sourced from Choosify.dc.html Home screen.
@@ -54,35 +56,41 @@ export function HomePage() {
   );
 
   // Viral Today keeps its place even with no real media yet (it shows an empty note).
+  // Viral Today and Popular Products are separate sections: each keeps its own place in the
+  // Website Studio order and can be moved or hidden on its own.
   const showSpotlight = data.sectionVisible('spotlight');
-  const showStandaloneTrending = data.sectionVisible('trending') && !showSpotlight;
+  const showTrending = data.sectionVisible('trending');
+
+  // Top Categories tucks up over the hero image only when it is the first block right under the
+  // hero (no ad between). Anywhere else (reordered in Website Studio, or an ad above it) it keeps a
+  // normal gap, so it never merges with an ad banner or another section.
+  const topHeroAds = useBannerAds(AD_SLOTS.HOME_BANNER, 'after-hero');
+  const firstSection = sectionOrder.find(
+    (id) => data.sectionVisible(id) && (id !== 'recently-viewed' || data.recentlyViewed.length > 0),
+  );
+  const categoriesTouchHero = data.sectionVisible('hero') && firstSection === 'categories' && topHeroAds.length === 0;
 
   const renderSection = (sectionId: string) => {
     switch (sectionId) {
       case 'categories':
         return data.sectionVisible('categories') ? (
-          <HomeTopCategoriesSection key="categories" categories={data.categories} />
+          <HomeTopCategoriesSection key="categories" categories={data.categories} overlapHero={categoriesTouchHero} />
         ) : null;
 
       case 'spotlight':
         return showSpotlight ? (
           <React.Fragment key="spotlight">
-            <HomeSpotlightPreviewSection
-              items={data.viralTodayItems}
-              productFeed={
-                data.sectionVisible('trending') ? data.featuredProductFeed : undefined
-              }
-            />
-            <HomeSponsoredBannerSection />
+            <HomeSpotlightPreviewSection items={data.viralTodayItems} />
+            <HomeAdSpot position="after-viral-today" />
           </React.Fragment>
         ) : null;
 
       case 'trending':
-        return showStandaloneTrending ? (
+        return showTrending ? (
           <React.Fragment key="trending">
             <HomeFeaturedProductsSection feed={data.featuredProductFeed} />
-            {/* Sponsored banner after featured products when spotlight did not already render it */}
-            {!showSpotlight && <HomeSponsoredBannerSection />}
+            {/* Ads Studio spot "after-popular-products" (+ legacy booked carousel) */}
+            <HomeSponsoredBannerSection />
           </React.Fragment>
         ) : null;
 
@@ -140,8 +148,7 @@ export function HomePage() {
           <Hero variant="homepage" />
         </div>
       )}
-      {/* Top Categories pulls itself up over the hero (up to 56px); give it that room under the ad. */}
-      <HomeAdSpot position="after-hero" className="mb-[40px] sm:mb-[48px] md:mb-[64px] lg:mb-[80px]" />
+      <HomeAdSpot position="after-hero" />
 
       <main className="pb-8">
         {sectionOrder.map((sectionId) => {
@@ -157,7 +164,6 @@ export function HomePage() {
           );
         })}
         {/* If neither spotlight nor standalone trending rendered, still show sponsored once */}
-        {!showSpotlight && !showStandaloneTrending && <HomeSponsoredBannerSection />}
         <HomeAdSpot position="page-end" />
         <CtaBannerSlot page="home" section="home-end" position="after" className="max-w-7xl mx-auto px-6 mt-8" />
       </main>
