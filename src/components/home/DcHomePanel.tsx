@@ -26,7 +26,8 @@ export function DcHomePanel({
       className={cn(
         HOME_CONTENT_MAX,
         'relative z-[3]',
-        overlapHero ? '-mt-4 sm:mt-[-24px] md:mt-[-40px] lg:mt-[-56px]' : spaced ? HOME_PANEL_GAP : undefined,
+        // lg: the hero is tall (Hero.tsx) — the panel starts 405px down it, over the faded part.
+        overlapHero ? '-mt-4 sm:mt-[-24px] md:mt-[-40px] lg:mt-[calc(405px-clamp(560px,38.5vw,745px))]' : spaced ? HOME_PANEL_GAP : undefined,
         className,
       )}
     >

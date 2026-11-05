@@ -102,7 +102,8 @@ export function Hero({ variant, className }: HeroProps) {
   return (
     <section
       className={cn(
-        'relative w-full h-[320px] sm:h-[400px] md:h-[460px] overflow-hidden select-none',
+        // Tall, Amazon-style on desktop: the lower part fades into the page and the first panel sits over it.
+        'relative isolate z-0 w-full h-[320px] sm:h-[400px] md:h-[460px] lg:h-[clamp(560px,38.5vw,745px)] overflow-hidden select-none',
         className,
       )}
       aria-label="Homepage hero"
@@ -189,12 +190,24 @@ export function Hero({ variant, className }: HeroProps) {
         );
       })}
 
+      {/* Soft bottom fade: a progressive blur + the page colour, so the hero melts into the page. */}
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-[30%] lg:h-[48%] backdrop-blur-[6px]"
+        style={{ WebkitMaskImage: 'linear-gradient(to bottom, transparent, #000 85%)', maskImage: 'linear-gradient(to bottom, transparent, #000 85%)' }}
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 z-[6] h-[32%] lg:h-[52%] bg-gradient-to-b from-transparent via-[#F0F8FF]/55 to-[#F0F8FF]"
+        data-testid="hero-bottom-fade"
+      />
+
       {slides.length > 1 && (
         <>
           <button
             type="button"
             onClick={goPrev}
-            className="absolute left-4 md:left-5 top-1/2 -translate-y-1/2 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/45 bg-white/15 text-white backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_1px_rgba(255,255,255,0.65),inset_0_-1px_2px_rgba(0,0,0,0.12),0_8px_24px_rgba(0,0,0,0.25)] transition-all duration-200 hover:scale-105 hover:bg-white/25 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+            className="absolute left-4 md:left-5 top-1/2 lg:top-[200px] -translate-y-1/2 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/45 bg-white/15 text-white backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_1px_rgba(255,255,255,0.65),inset_0_-1px_2px_rgba(0,0,0,0.12),0_8px_24px_rgba(0,0,0,0.25)] transition-all duration-200 hover:scale-105 hover:bg-white/25 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
             aria-label="Previous slide"
             data-testid="hero-arrow-prev"
           >
@@ -203,13 +216,13 @@ export function Hero({ variant, className }: HeroProps) {
           <button
             type="button"
             onClick={goNext}
-            className="absolute right-4 md:right-[100px] top-1/2 -translate-y-1/2 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/45 bg-white/15 text-white backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_1px_rgba(255,255,255,0.65),inset_0_-1px_2px_rgba(0,0,0,0.12),0_8px_24px_rgba(0,0,0,0.25)] transition-all duration-200 hover:scale-105 hover:bg-white/25 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
+            className="absolute right-4 md:right-[100px] top-1/2 lg:top-[200px] -translate-y-1/2 z-20 flex h-11 w-11 items-center justify-center rounded-full border border-white/45 bg-white/15 text-white backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_1px_rgba(255,255,255,0.65),inset_0_-1px_2px_rgba(0,0,0,0.12),0_8px_24px_rgba(0,0,0,0.25)] transition-all duration-200 hover:scale-105 hover:bg-white/25 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
             aria-label="Next slide"
             data-testid="hero-arrow-next"
           >
             <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)]" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
           </button>
-          <div className="absolute left-1/2 -translate-x-1/2 bottom-5 z-20 flex gap-1.5">
+          <div className="absolute left-1/2 -translate-x-1/2 bottom-[34%] lg:bottom-auto lg:top-[368px] z-20 flex gap-1.5">
             {slides.map((slide, i) => (
               <button
                 key={slide.id}
