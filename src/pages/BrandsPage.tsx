@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { AD_SLOTS } from '../lib/ads/adSlots';
-import { AdSlotBanner, GridAdCards } from '../components/ads/AdSlot';
+import { AdGridCard, AdSlotBanner, useGridAds } from '../components/ads/AdSlot';
 import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, ShoppingBag, Youtube, Twitter, Facebook, Instagram, Sparkles, PenTool, Users, Heart, Eye, Share2, Flame, Zap, Layers, Award, Gift, Copy, X, Store } from 'lucide-react';
 import { motion } from 'motion/react';
 import { Link } from 'react-router-dom';
@@ -15,7 +15,6 @@ import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
 import { useInfiniteListBatch } from '../hooks/useInfiniteListBatch';
 import { ListingAdRail } from '../components/ListingAdRail';
 import { AdSenseSlot } from '../components/AdSenseSlot';
-import { AdvertiseHereCard } from '../components/commerce/AdvertiseHereCard';
 import { CtaBannerSlot } from '../components/CtaBannerSlot';
 import { usePlacements } from '../hooks/usePlacements';
 import { PLACEMENT_KEYS, INFEED_INTERVAL, INFEED_MAX_PER_PAGE } from '../lib/placements';
@@ -418,6 +417,7 @@ export function BrandsPage() {
     loadMore: 12,
     resetKey: searchQuery + (selectedLetter ?? '') + sortOption,
   });
+  const brandGridFeed = useGridAds(AD_SLOTS.BRANDS_GRID_CARD, visibleBrandFeed, (e) => e.kind !== 'placement');
 
   const sectionNavItems = useMemo(
     () => [{ id: 'brands-main-display', label: 'Directory', icon: <Store size={13} /> }],
@@ -977,9 +977,12 @@ export function BrandsPage() {
           {filteredBrands.length > 0 ? (
             <>
               <div className={cn(BRAND_CARD_GRID, 'mb-8')}>
-                {visibleBrandFeed.map((entry) =>
-                  entry.kind === 'placement' ? (
-                    <AdvertiseHereCard key={entry.key} variant="brand" />
+                {/* Ads Studio BRANDS_GRID_CARD: brand-card sized ads after every N brands (the ad's setting) */}
+                {brandGridFeed.map((entry) =>
+                  entry.kind === 'gridAd' ? (
+                    <AdGridCard key={entry.key} ad={entry.ad} />
+                  ) : entry.kind === 'placement' ? (
+                    null /* no placeholder ads: only real Ads Studio bookings show */
                   ) : (
                     <BrandCardDesign
                       key={entry.key}
@@ -990,8 +993,6 @@ export function BrandsPage() {
                     />
                   ),
                 )}
-                {/* Ads Studio BRANDS_GRID_CARD (brand-card sized); house card when none is booked */}
-                <GridAdCards slot={AD_SLOTS.BRANDS_GRID_CARD} fallback={infeedPlacements.length === 0 ? <AdvertiseHereCard variant="brand" /> : null} />
               </div>
               <div ref={sentinelRef} className="h-8" aria-hidden />
               {hasMore && (

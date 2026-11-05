@@ -194,7 +194,39 @@ export function GridAdCards({ slot, fallback = null }: { slot: AdSlotId; fallbac
   );
 }
 
-function AdGridCard({ ad }: { ad: PublicAd }) {
+export type GridAdEntry = { kind: 'gridAd'; key: string; ad: PublicAd };
+
+/**
+ * Inserts the slot's booked in-grid ads into a card list: after every N real cards (the smallest
+ * "after every N cards" chosen on the booked ads), several ads taking turns. With fewer cards
+ * than N — or "once, after the last card" — one ad follows the last card.
+ */
+export function useGridAds<T extends { key: string }>(slot: AdSlotId, entries: T[], isCard: (e: T) => boolean): Array<T | GridAdEntry> {
+  const ads = useAdSlot(slot);
+  if (!ads.length) return entries;
+  const steps = ads.map((a) => (Number.isFinite(a.gridEvery) ? Number(a.gridEvery) : 8)).filter((n) => n > 0);
+  const every = steps.length ? Math.min(...steps) : 0;
+  const total = entries.filter(isCard).length;
+  const out: Array<T | GridAdEntry> = [];
+  let n = 0;
+  let shown = 0;
+  for (const e of entries) {
+    out.push(e);
+    if (!isCard(e)) continue;
+    n++;
+    if (every > 0 && n % every === 0) {
+      const ad = ads[shown % ads.length];
+      out.push({ kind: 'gridAd', key: `grid-ad-${ad.id}-${n}`, ad });
+      shown++;
+    } else if (n === total && shown === 0) {
+      out.push({ kind: 'gridAd', key: `grid-ad-${ads[0].id}-end`, ad: ads[0] });
+      shown++;
+    }
+  }
+  return out;
+}
+
+export function AdGridCard({ ad }: { ad: PublicAd }) {
   const target = adHref(ad);
   return (
     <AdLink

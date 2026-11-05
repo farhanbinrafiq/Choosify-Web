@@ -366,6 +366,16 @@ export function resolveSitePages(cms?: SitePagesConfig | null): SitePagesConfig 
   return normalizeSitePages(cms ?? null, null);
 }
 
+/**
+ * The page content the storefront shows: a page published in Website Studio wins, then the legacy
+ * site-config copy, then the built-in defaults (missing fields always come from the defaults).
+ */
+export function sitePagesFrom(siteConfig?: { sitePages?: unknown; websiteStudio?: { sitePages?: Record<string, unknown> } } | null): SitePagesConfig {
+  const legacy = (siteConfig?.sitePages ?? {}) as Record<string, unknown>;
+  const studio = siteConfig?.websiteStudio?.sitePages ?? {};
+  return normalizeSitePages({ ...legacy, ...studio }, null);
+}
+
 export function enabledSorted<T extends { enabled?: boolean; order?: number }>(items: T[]): T[] {
   return [...items]
     .filter((item) => item.enabled !== false)

@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { StaticPageHero } from '../components/StaticPageHero';
 import { useGlobalState } from '../context/GlobalStateContext';
-import { enabledSorted, fillTemplate, resolveSitePages } from '../lib/cmsSitePages';
+import { enabledSorted, fillTemplate, sitePagesFrom } from '../lib/cmsSitePages';
 import {
   FieldError,
   InquiryFormError,
@@ -30,7 +30,7 @@ function partnershipIcon(key?: string) {
 
 export function PartnershipPage() {
   const { siteConfig } = useGlobalState();
-  const content = resolveSitePages(siteConfig?.sitePages).partnership;
+  const content = sitePagesFrom(siteConfig).partnership;
   const categories = enabledSorted(content.categories);
   const { options, error: optionsError, retry: retryOptions } = useInquiryOptions();
   const modelOptions = options?.partnershipModels ?? [];

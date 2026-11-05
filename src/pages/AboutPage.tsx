@@ -2,14 +2,14 @@ import React, { useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { useGlobalState } from '../context/GlobalStateContext';
-import { enabledSorted, resolveSitePages } from '../lib/cmsSitePages';
+import { enabledSorted, sitePagesFrom } from '../lib/cmsSitePages';
 
 /** Choosify.dc.html About — sticky left nav + light hero panel + company/legal rows */
 export function AboutPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const { siteConfig, allBrands, allCatalogProducts, catalogReady } = useGlobalState();
-  const content = resolveSitePages(siteConfig?.sitePages).about;
+  const content = sitePagesFrom(siteConfig).about;
   const companyNav = enabledSorted(content.companyNav);
   const legalNav = enabledSorted(content.legalNav);
   // Only verified, live counts (what is actually listed on Choosify right now) — never stored or

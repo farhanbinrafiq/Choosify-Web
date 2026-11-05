@@ -97,7 +97,6 @@ import { AvatarCropModal } from '../components/account/AvatarCropModal';
 import { getConsumerStorefrontDashboardNav, isConsumerDashboardTabAllowed } from '../lib/platform/dashboardRegistry';
 import { SellerWorkspaceSection } from './ReviewDetailPage';
 import { CustomerOrdersPage } from './CustomerOrdersPage';
-import { DealsVerticalSponsoredCard } from '../components/deals/DealsLowerSections';
 import { UniversalCarousel } from '../components/design/UniversalCarousel';
 import { SellerAccountSidebarCard } from '../components/dashboard/SellerAccountSidebarCard';
 import { BecomeCreatorSidebarCard } from '../components/dashboard/BecomeCreatorSidebarCard';
@@ -187,7 +186,7 @@ function DashboardSponsoredRail() {
       aria-label="Promoted advertisement"
     >
       {/* Ads Studio DASHBOARD_SIDEBAR; house card when none is booked */}
-      {dashSideBooked ? <AdSlotCard slot={AD_SLOTS.DASHBOARD_SIDEBAR} /> : <DealsVerticalSponsoredCard />}
+      {dashSideBooked ? <AdSlotCard slot={AD_SLOTS.DASHBOARD_SIDEBAR} /> : null}
     </aside>
   );
 }
@@ -1952,6 +1951,8 @@ function MyReviewsSection() {
 // --- MAIN PAGE ---
 
 export function DashboardPage() {
+  // The side rail only takes space when an Ads Studio side card is booked (no placeholder ads).
+  const dashRailBooked = useSlotHasAds(AD_SLOTS.DASHBOARD_SIDEBAR);
   const { logout, currentUser, orders } = useGlobalState();
   const { 
     savedProducts, 
@@ -2381,9 +2382,9 @@ export function DashboardPage() {
           {DASHBOARD_TABS_WITH_RIGHT_CONTENT.has(activeTab) ? (
             <div className="animate-in fade-in transition-all duration-700 min-w-0">{renderContent()}</div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_240px] gap-5 items-start animate-in fade-in transition-all duration-700">
+            <div className={`grid grid-cols-1 ${dashRailBooked ? 'lg:grid-cols-[minmax(0,1fr)_240px]' : ''} gap-5 items-start animate-in fade-in transition-all duration-700`}>
               <div className="min-w-0 overflow-x-clip relative z-[1]">{renderContent()}</div>
-              <DashboardSponsoredRail />
+              {dashRailBooked ? <DashboardSponsoredRail /> : null}
             </div>
           )}
         </main>

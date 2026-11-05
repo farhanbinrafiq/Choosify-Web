@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { AdSlotBanner, AdSlotCard, GridAdCards, useSlotHasAds } from '../components/ads/AdSlot';
+import { AdGridCard, AdSlotBanner, AdSlotCard, useGridAds, useSlotHasAds } from '../components/ads/AdSlot';
 import { AD_SLOTS } from '../lib/ads/adSlots';
 import { ProductCard } from '../components/ProductCard';
 import { FlashDealCard, DealOfTheDayCard } from '../components/deals/FlashDealCard';
@@ -26,7 +26,7 @@ import { rankDeals, dealDiscountPercent, parseTs } from '../utils/listingRanking
 import { usePriorityClockMs } from '../hooks/usePriorityClockMs';
 import { SortDropdown } from '../components/SortDropdown';
 import { DEAL_SORT_OPTIONS, DEAL_SORT_DEFAULT, applySortOption, resolveSortIdFromParam } from '../lib/sorting/sortRegistry';
-import { ProductsSponsoredBannerCarousel, AdvertiseHereCard } from '../components/commerce/AdvertiseHereCard';
+import { ProductsSponsoredBannerCarousel } from '../components/commerce/AdvertiseHereCard';
 import { useSponsoredPlacementsForSurface } from '../hooks/useSponsoredPlacementsForSurface';
 import {
   DealsAuthenticationStrip,
@@ -34,7 +34,6 @@ import {
   DealsPopularCategoriesCard,
   DealsSubscribeBanner,
   DealsTopCouponsCard,
-  DealsVerticalSponsoredCard,
 } from '../components/deals/DealsLowerSections';
 import { catalogApi } from '../services/catalogApi';
 import type { StorefrontCoupon, StorefrontDealsCuration } from '../types/catalog';
@@ -312,6 +311,7 @@ export function DealsPage() {
       ),
     [paginatedProducts, infeedPlacements],
   );
+  const dealGridFeed = useGridAds(AD_SLOTS.DEALS_GRID_CARD, dealFeed, (e) => e.kind !== 'placement');
 
   const categoriesList = React.useMemo(() => {
     const defs = [
@@ -916,9 +916,12 @@ export function DealsPage() {
                       ))
                     ) : (
                       <>
-                        {dealFeed.map((entry) =>
-                          entry.kind === 'placement' ? (
-                            <AdvertiseHereCard key={entry.key} variant="product-tile" />
+                        {/* Ads Studio DEALS_GRID_CARD: deal-card sized ads after every N deals */}
+                        {dealGridFeed.map((entry) =>
+                          entry.kind === 'gridAd' ? (
+                            <AdGridCard key={entry.key} ad={entry.ad} />
+                          ) : entry.kind === 'placement' ? (
+                            null /* no placeholder ads: only real Ads Studio bookings show */
                           ) : (
                             <div key={entry.key} className="w-full h-full">
                               <ProductCard
@@ -932,8 +935,6 @@ export function DealsPage() {
                             </div>
                           ),
                         )}
-                        {/* Ads Studio DEALS_GRID_CARD (deal-card sized); house card when none is booked */}
-                        <GridAdCards slot={AD_SLOTS.DEALS_GRID_CARD} fallback={<AdvertiseHereCard variant="product-tile" />} />
                       </>
                     )}
                   </div>
@@ -952,8 +953,7 @@ export function DealsPage() {
                 <div className="flex flex-col gap-4 self-start lg:sticky lg:top-28 w-full min-w-0">
                   <DealsTopCouponsCard coupons={dealsCuration?.topCoupons ?? []} onViewAllCoupons={handleViewAllCoupons} />
                   {/* Ads Studio DEALS_SIDEBAR (right-hand column card); house cards fill the rest */}
-                  {dealsSideBooked ? <AdSlotCard slot={AD_SLOTS.DEALS_SIDEBAR} /> : <DealsVerticalSponsoredCard />}
-                  <DealsVerticalSponsoredCard />
+                  {dealsSideBooked ? <AdSlotCard slot={AD_SLOTS.DEALS_SIDEBAR} /> : null}
                 </div>
               </div>
             </section>
@@ -996,7 +996,6 @@ export function DealsPage() {
 
           {/* RIGHT SIDEBAR — vertical sponsored + listing rail */}
           <aside className="hidden lg:flex flex-col gap-4 lg:sticky lg:top-24 pb-10 pr-2 flex-shrink-0 animate-fade-in">
-             <DealsVerticalSponsoredCard />
 
              <ListingAdRail
                adSlot={AD_SLOTS.DEALS_SIDEBAR}

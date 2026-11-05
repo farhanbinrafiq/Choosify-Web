@@ -2,11 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Lock, FileText } from 'lucide-react';
 import { StaticPageHero } from '../components/StaticPageHero';
 import { useGlobalState } from '../context/GlobalStateContext';
-import { enabledSorted, resolveSitePages } from '../lib/cmsSitePages';
+import { enabledSorted, sitePagesFrom } from '../lib/cmsSitePages';
 
 export function PrivacyPage() {
   const { siteConfig } = useGlobalState();
-  const doc = resolveSitePages(siteConfig?.sitePages).privacy;
+  const doc = sitePagesFrom(siteConfig).privacy;
   const sections = useMemo(() => enabledSorted(doc.sections), [doc.sections]);
   const [activeSection, setActiveSection] = useState(sections[0]?.id || 'collect');
   const [scrollProgress, setScrollProgress] = useState(0);

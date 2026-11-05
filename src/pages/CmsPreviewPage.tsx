@@ -7,6 +7,24 @@ import {
 } from '../contexts/CmsDraftPreviewContext';
 import { isValidCmsPreviewToken } from '../lib/cmsPreview';
 import { HomePage } from './HomePage';
+import { AboutPage } from './AboutPage';
+import { ContactPage } from './ContactPage';
+import { SuggestBrandPage } from './SuggestBrandPage';
+import { PartnershipPage } from './PartnershipPage';
+import { AdvertisePage } from './AdvertisePage';
+import { TermsPage } from './TermsPage';
+import { PrivacyPage } from './PrivacyPage';
+
+/** Website Studio page drafts preview on their real page (?page=<SitePagesConfig key>). */
+const PREVIEW_PAGES: Record<string, React.ComponentType> = {
+  about: AboutPage,
+  contact: ContactPage,
+  suggestBrand: SuggestBrandPage,
+  partnership: PartnershipPage,
+  advertise: AdvertisePage,
+  terms: TermsPage,
+  privacy: PrivacyPage,
+};
 
 function PreviewUnavailable({ message = 'Preview unavailable' }: { message?: string }) {
   return (
@@ -50,10 +68,11 @@ function CmsPreviewBody() {
     return <PreviewUnavailable message={error || 'Preview unavailable'} />;
   }
 
+  const Page = PREVIEW_PAGES[new URLSearchParams(window.location.search).get('page') || ''] || HomePage;
   return (
     <>
       <CmsDraftPreviewBanner />
-      <HomePage />
+      <Page />
     </>
   );
 }

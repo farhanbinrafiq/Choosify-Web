@@ -138,10 +138,13 @@ export function HomeTodaysDealsSection({ banners: bannersProp }: HomeTodaysDeals
                 loading="lazy"
                 draggable={false}
               />
+              {/* Editorial deals banner (Website Studio), not a paid ad — never labelled PROMOTED */}
               <SponsoredCardChrome
                 brandName={banner.brandName || 'Deal'}
                 logoUrl={banner.brandLogoUrl}
                 size="sm"
+                badgeLabel="TODAY'S DEAL"
+                tone="editorial"
               />
             </BannerCardLink>
           );

@@ -63,6 +63,8 @@ export type PublicAd = {
   position?: string;
   /** Pop-up rules: pages ("all" or page keys), times per visit, delay in seconds. */
   popup?: { pages: string[]; maxPerSession: number; delaySec: number };
+  /** In-grid cards: after every N cards (0 = once, after the last card). */
+  gridEvery?: number;
   /** Category Promoted Slot only: which category card carries this sponsor footer. */
   categoryId?: string;
   categoryName?: string;

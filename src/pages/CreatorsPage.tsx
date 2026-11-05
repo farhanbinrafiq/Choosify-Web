@@ -1,6 +1,6 @@
 import { creatorPath } from '../../lib/publicUrls';
 import { AD_SLOTS } from '../lib/ads/adSlots';
-import { AdSlotBanner, GridAdCards } from '../components/ads/AdSlot';
+import { AdGridCard, AdSlotBanner, useGridAds } from '../components/ads/AdSlot';
 import React, { useState, useMemo } from 'react';
 import { PAGE_LISTING_SINGLE_SHELL, CREATOR_CARD_GRID } from "../lib/pageLayout";
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
@@ -19,7 +19,6 @@ import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
 import { useInfiniteListBatch } from '../hooks/useInfiniteListBatch';
 import { ListingAdRail } from '../components/ListingAdRail';
 import { AdSenseSlot } from '../components/AdSenseSlot';
-import { AdvertiseHereCard } from '../components/commerce/AdvertiseHereCard';
 import { usePlacements } from '../hooks/usePlacements';
 import { PLACEMENT_KEYS, INFEED_INTERVAL, INFEED_MAX_PER_PAGE } from '../lib/placements';
 import { injectPlacementsIntoFeed } from '../utils/injectFeedPlacements';
@@ -187,6 +186,7 @@ export function CreatorsPage() {
     loadMore: 12,
     resetKey: searchQuery + (selectedLetter ?? '') + sortOption,
   });
+  const creatorGridFeed = useGridAds(AD_SLOTS.CREATORS_GRID_CARD, visibleCreatorFeed, (e) => e.kind !== 'placement');
 
   const sectionNavItems = useMemo(
     () => [{ id: 'creators-main-display', label: 'Creators', icon: <Users size={13} /> }],
@@ -731,15 +731,16 @@ export function CreatorsPage() {
           {filteredCreators.length > 0 ? (
             <>
               <div className={cn(CREATOR_CARD_GRID, 'mb-8')}>
-                {visibleCreatorFeed.map((entry) =>
-                  entry.kind === 'placement' ? (
-                    <AdvertiseHereCard key={entry.key} variant="creator" />
+                {/* Ads Studio CREATORS_GRID_CARD: creator-card sized ads after every N creators */}
+                {creatorGridFeed.map((entry) =>
+                  entry.kind === 'gridAd' ? (
+                    <AdGridCard key={entry.key} ad={entry.ad} />
+                  ) : entry.kind === 'placement' ? (
+                    null /* no placeholder ads: only real Ads Studio bookings show */
                   ) : (
                     <CreatorCardDesign key={entry.key} creator={entry.item} />
                   ),
                 )}
-                {/* Ads Studio CREATORS_GRID_CARD (creator-card sized); house card when none is booked */}
-                <GridAdCards slot={AD_SLOTS.CREATORS_GRID_CARD} fallback={infeedPlacements.length === 0 ? <AdvertiseHereCard variant="creator" /> : null} />
               </div>
               <div ref={sentinelRef} className="h-8" aria-hidden />
               {hasMore && (

@@ -2,11 +2,11 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Scale, FileText } from 'lucide-react';
 import { StaticPageHero } from '../components/StaticPageHero';
 import { useGlobalState } from '../context/GlobalStateContext';
-import { enabledSorted, resolveSitePages } from '../lib/cmsSitePages';
+import { enabledSorted, sitePagesFrom } from '../lib/cmsSitePages';
 
 export function TermsPage() {
   const { siteConfig } = useGlobalState();
-  const doc = resolveSitePages(siteConfig?.sitePages).terms;
+  const doc = sitePagesFrom(siteConfig).terms;
   const sections = useMemo(() => enabledSorted(doc.sections), [doc.sections]);
   const [activeSection, setActiveSection] = useState(sections[0]?.id || 'intro');
   const [scrollProgress, setScrollProgress] = useState(0);

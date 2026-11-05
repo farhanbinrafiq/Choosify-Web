@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { StaticPageHero } from '../components/StaticPageHero';
 import { useGlobalState } from '../context/GlobalStateContext';
-import { enabledSorted, fillTemplate, resolveSitePages } from '../lib/cmsSitePages';
+import { enabledSorted, fillTemplate, sitePagesFrom } from '../lib/cmsSitePages';
 import {
   FieldError,
   InquiryFormError,
@@ -33,7 +33,7 @@ function placementIcon(key?: string) {
 
 export function AdvertisePage() {
   const { siteConfig } = useGlobalState();
-  const content = resolveSitePages(siteConfig?.sitePages).advertise;
+  const content = sitePagesFrom(siteConfig).advertise;
   const audienceStats = enabledSorted(content.audienceStats);
   const placements = enabledSorted(content.placements);
   const { options, error: optionsError, retry: retryOptions } = useInquiryOptions();

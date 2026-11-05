@@ -261,10 +261,13 @@ export function DealOfTheDayCard({
             className="w-full h-full object-cover"
             loading="lazy"
           />
+          {/* Organic deal (not paid) — never labelled PROMOTED */}
           <SponsoredCardChrome
             brandName={deal.brandName || deal.name}
             logoUrl={deal.brandLogoUrl}
             size="md"
+            badgeLabel="DEAL OF THE DAY"
+            tone="editorial"
           />
           {discountBadge && (
             <span className="absolute bottom-2 right-2 z-[4] bg-[#FF000D] text-white text-[9px] font-extrabold px-1.5 py-0.5 rounded-full pointer-events-none max-w-[70%] truncate">

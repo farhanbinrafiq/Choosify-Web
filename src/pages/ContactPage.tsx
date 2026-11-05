@@ -6,7 +6,7 @@ import {
 } from 'lucide-react';
 import { StaticPageHero } from '../components/StaticPageHero';
 import { useGlobalState } from '../context/GlobalStateContext';
-import { enabledSorted, fillTemplate, resolveSitePages } from '../lib/cmsSitePages';
+import { enabledSorted, fillTemplate, sitePagesFrom } from '../lib/cmsSitePages';
 import {
   FieldError,
   InquiryFormError,
@@ -26,7 +26,7 @@ function methodIcon(iconKey?: string) {
 
 export function ContactPage() {
   const { siteConfig } = useGlobalState();
-  const content = resolveSitePages(siteConfig?.sitePages).contact;
+  const content = sitePagesFrom(siteConfig).contact;
   const channels = enabledSorted(content.channels);
   const methods = enabledSorted(content.methods);
   const footer = siteConfig?.footer;

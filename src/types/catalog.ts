@@ -300,6 +300,8 @@ export interface HomepageConfig {
 
 /** Published Website Studio parts carried by GET /catalog/site (absent until published). */
 export interface WebsiteStudioSite {
+  /** Published information / legal pages (About, Contact, Terms…), keyed like SitePagesConfig. */
+  sitePages?: Record<string, unknown>;
   navigation?: {
     items: Array<{ id: string; label: string; url: string; external: boolean; showOnDesktop: boolean; showOnMobile: boolean }>;
     announcement: { enabled: boolean; text: string; linkUrl: string };

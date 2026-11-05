@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Award, ShieldCheck, ArrowRight } from 'lucide-react';
 import { StaticPageHero } from '../components/StaticPageHero';
 import { useGlobalState } from '../context/GlobalStateContext';
-import { enabledSorted, fillTemplate, resolveSitePages } from '../lib/cmsSitePages';
+import { enabledSorted, fillTemplate, sitePagesFrom } from '../lib/cmsSitePages';
 import { uploadSuggestionImage } from '../services/mediaUpload';
 import {
   FieldError,
@@ -27,7 +27,7 @@ function whyCardIcon(id: string, index: number) {
 
 export function SuggestBrandPage() {
   const { siteConfig } = useGlobalState();
-  const content = resolveSitePages(siteConfig?.sitePages).suggestBrand;
+  const content = sitePagesFrom(siteConfig).suggestBrand;
   const whyCards = enabledSorted(content.whyCards);
   const howSteps = enabledSorted(content.howSteps);
   const { options, error: optionsError, retry: retryOptions } = useInquiryOptions();
