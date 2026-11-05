@@ -37,6 +37,7 @@ import {
 } from '../components/deals/DealsLowerSections';
 import { catalogApi } from '../services/catalogApi';
 import type { StorefrontCoupon, StorefrontDealsCuration } from '../types/catalog';
+import { ListingCtaStrip, ListingIntro, useListingPage } from '../components/cms/ListingPageExtras';
 import {
   BrandCouponCarouselCard,
   type BrandCoupon,
@@ -88,6 +89,7 @@ function FlashDealCountdown({ validUntil }: { validUntil: string }) {
 }
 
 export function DealsPage() {
+  const lp = useListingPage('deals');
   const dealsSideBooked = useSlotHasAds(AD_SLOTS.DEALS_SIDEBAR);
   const navigate = useNavigate();
   const { allProducts, allBrands } = useGlobalState();
@@ -557,7 +559,7 @@ export function DealsPage() {
              {/* LAYER 2: FULL SIDEBAR FILTER PANEL */}
              <div id="deals-sidebar-filters" className="transition-all duration-300 rounded-2xl w-full">
                <FullSidebarFilterPanel
-                 title="Filter Deals"
+                 title={lp.filterTitle}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
                   searchPlaceholder="Search active deals and promos..."
@@ -565,7 +567,7 @@ export function DealsPage() {
                   sorting={<SortDropdown options={DEAL_SORT_OPTIONS} value={sortOption} onChange={setSortOption} />}
                   quickFilters={
                     <QuickFilterBar
-                      title="Deals Quick Specs"
+                      title={lp.quickSpecsTitle}
                       onOpenFullFilters={() => {}}
                       filters={[
                         { id: 'savings-20', label: 'ðŸ”¥ 20%+ Off', active: minDiscount === 20, onClick: () => setMinDiscount(minDiscount === 20 ? 0 : 20) },
@@ -696,7 +698,7 @@ export function DealsPage() {
           {/* LEFT MAIN AREA */}
           <div className="choosify-middle-feed scroll-mt-36 min-w-0 pb-10 flex flex-col gap-10">
             <ListingFeedHeader
-              eyebrow="Savings • Deals"
+              eyebrow={lp.eyebrow}
               title={
                 `${activeTab === 'All Deals' ? 'All Deals' : activeTab}` +
                 (selectedCategory ? ` · ${selectedCategory}` : '') +
@@ -714,6 +716,7 @@ export function DealsPage() {
               }
               itemLabel={activeTab === 'Promo Codes' ? 'coupons' : 'deals'}
             />
+            <ListingIntro text={lp.intro} className="-mt-3" />
 
             <ListingFilterPills
               pills={dealsBrowseItems.map((item) => ({
@@ -1007,6 +1010,7 @@ export function DealsPage() {
           </aside>
 
         </div>
+        <ListingCtaStrip cta={lp.ctaStrip} />
       </main>
 
       <style>{`

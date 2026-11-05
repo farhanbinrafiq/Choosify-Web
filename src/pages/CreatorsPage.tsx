@@ -27,6 +27,7 @@ import { usePriorityClockMs } from '../hooks/usePriorityClockMs';
 import { CtaBannerSlot } from '../components/CtaBannerSlot';
 import { SortDropdown } from '../components/SortDropdown';
 import { CREATOR_SORT_OPTIONS, CREATOR_SORT_DEFAULT, applySortOption } from '../lib/sorting/sortRegistry';
+import { ListingCtaStrip, ListingIntro, useListingPage } from '../components/cms/ListingPageExtras';
 
 interface CreatorCollab {
   id: string;
@@ -61,6 +62,7 @@ const CREATOR_PROMOS: CreatorPromo[] = [
 ];
 
 export function CreatorsPage() {
+  const lp = useListingPage('creators');
   const { allCreators } = useGlobalState();
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -412,7 +414,7 @@ export function CreatorsPage() {
           {/* LAYER 2: FULL SIDEBAR FILTER PANEL */}
           <div id="creators-sidebar-filters" className="transition-all duration-300 rounded-2xl w-full">
             <FullSidebarFilterPanel
-              title="Filter Creators"
+              title={lp.filterTitle}
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               searchPlaceholder="Search creators, niche, handle or bio..."
@@ -583,7 +585,7 @@ export function CreatorsPage() {
           {/* Ads Studio slot CREATORS_BANNER — wide sponsored banner above the creators grid */}
           <AdSlotBanner slot={AD_SLOTS.CREATORS_BANNER} position="top" />
           <ListingFeedHeader
-            eyebrow="Our partners • Creator directory"
+            eyebrow={lp.eyebrow}
             title={
               `${activeTab === 'All Creators' ? 'All Creators' : activeTab}` +
               (selectedLetter ? ` · Starting with “${selectedLetter}”` : '') +
@@ -612,6 +614,7 @@ export function CreatorsPage() {
               ) : null
             }
           />
+          <ListingIntro text={lp.intro} className="-mt-3" />
           <CtaBannerSlot page="creators" section="creators-feed-header" position="after" />
 
           <ListingFilterPills
@@ -767,6 +770,7 @@ export function CreatorsPage() {
              </div>
           )}
           <AdSlotBanner slot={AD_SLOTS.CREATORS_BANNER} position="bottom" />
+          <ListingCtaStrip cta={lp.ctaStrip} />
         </main>
 
         {/* RIGHT SIDEBAR WITH SPONSOR & SELLERS CARD */}

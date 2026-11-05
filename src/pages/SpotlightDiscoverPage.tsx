@@ -22,6 +22,7 @@ import { usePriorityClockMs } from '../hooks/usePriorityClockMs';
 import { LISTING_PAGE_MAX_WIDTH } from '../lib/design/dcListingTokens';
 import { AD_SLOTS } from '../lib/ads/adSlots';
 import { AdSlotBanner } from '../components/ads/AdSlot';
+import { ListingCtaStrip, ListingIntro, useListingPage } from '../components/cms/ListingPageExtras';
 
 const FORMAT_FILTER_TABS = new Set<SpotlightContentTabId>([
   'videos',
@@ -37,6 +38,7 @@ const FORMAT_FILTER_TABS = new Set<SpotlightContentTabId>([
 ]);
 
 export function SpotlightDiscoverPage() {
+  const lp = useListingPage('recommendations');
   const { allContent, filters, setFilters, resetFilters, hasContent } = useSpotlightExperience();
   const { allCatalogProducts } = useGlobalState();
   const navigate = useNavigate();
@@ -157,7 +159,7 @@ export function SpotlightDiscoverPage() {
         <div className={`${PAGE_MIDDLE_FEED} choosify-listing-single-feed`}>
           <ListingFeedHeader
             className="mb-6"
-            eyebrow="Spotlight • Discover"
+            eyebrow={lp.eyebrow}
             title={
               activeTab === 'featured'
                 ? 'Discover'
@@ -166,6 +168,7 @@ export function SpotlightDiscoverPage() {
             count={feedItems.length}
             itemLabel="posts"
           />
+          <ListingIntro text={lp.intro} className="-mt-3" />
 
           {/* Ads Studio slot DISCOVER_BANNER — wide sponsored banner above the feed */}
           <AdSlotBanner slot={AD_SLOTS.DISCOVER_BANNER} position="top" className="mb-6" />
@@ -201,6 +204,7 @@ export function SpotlightDiscoverPage() {
             </Link>
           </div>
         </div>
+        <ListingCtaStrip cta={lp.ctaStrip} />
       </main>
     </div>
   );

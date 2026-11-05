@@ -192,6 +192,11 @@ export function CustomPage({ slug: slugProp }: { slug?: string }) {
 
   useEffect(() => {
     if (previewDraft) return;
+    // listing-* documents hold the listing pages' words, never a custom page.
+    if (!slug || slug.startsWith('listing-')) {
+      setState({ status: 'missing' });
+      return;
+    }
     let alive = true;
     setState({ status: 'loading' });
     fetch(`${API_BASE}/website/published/${encodeURIComponent(`page:${slug}`)}`)

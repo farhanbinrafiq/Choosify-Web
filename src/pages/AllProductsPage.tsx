@@ -29,6 +29,7 @@ import { rankProducts } from '../utils/listingRanking';
 import { usePriorityClockMs } from '../hooks/usePriorityClockMs';
 import { SortDropdown } from '../components/SortDropdown';
 import { PRODUCT_SORT_OPTIONS, PRODUCT_SORT_DEFAULT, applySortOption, resolveSortIdFromParam } from '../lib/sorting/sortRegistry';
+import { ListingCtaStrip, ListingIntro, useListingPage } from '../components/cms/ListingPageExtras';
 
 const SPONSORED_RECOMMENDATIONS = [
   {
@@ -61,6 +62,7 @@ const SPONSORED_RECOMMENDATIONS = [
 ];
 
 export function AllProductsPage() {
+  const lp = useListingPage('products');
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchParams, setSearchParams] = useSearchParams();
   const { allCatalogProducts, allBrands } = useGlobalState();
@@ -703,7 +705,7 @@ export function AllProductsPage() {
           {/* LAYER 2: FULL SIDEBAR FILTER PANEL */}
           <div id="global-sidebar-filters" className="transition-all duration-300 rounded-2xl">
             <FullSidebarFilterPanel
-              title="Filter Catalog"
+              title={lp.filterTitle}
               onReset={handleResetFilters}
               searchQuery={sidebarSearch}
               setSearchQuery={setSidebarSearch}
@@ -712,7 +714,7 @@ export function AllProductsPage() {
               browseControls={productsBrowseControls}
               quickFilters={
                 <QuickFilterBar
-                  title="Products Quick Specs"
+                  title={lp.quickSpecsTitle}
                   onOpenFullFilters={() => {}}
                   filters={[
                     { id: 'in-stock', label: 'In Stock Only', active: availabilityFilter === 'in-stock', onClick: () => setAvailabilityFilter(availabilityFilter === 'in-stock' ? 'all' : 'in-stock') },
@@ -929,7 +931,7 @@ export function AllProductsPage() {
         <main id="all-products-display" className="choosify-middle-feed scroll-mt-36 min-w-0 pb-10">
           <ListingFeedHeader
             className="mb-6"
-            eyebrow="Catalog • Products"
+            eyebrow={lp.eyebrow}
             title={
               `${activeTab === 'All Products' ? 'All Products' : activeTab}` +
               (selectedCategory ? ` · ${selectedCategory}` : '') +
@@ -940,6 +942,7 @@ export function AllProductsPage() {
             showingTo={(currentPage - 1) * PRODUCTS_PER_PAGE + paginatedProducts.length}
             itemLabel="products"
           />
+          <ListingIntro text={lp.intro} className="-mt-3" />
 
           <ListingFilterPills
             className="mb-6"
@@ -1098,6 +1101,7 @@ export function AllProductsPage() {
           <AdSlotBanner slot={AD_SLOTS.BROWSE_BANNER} position="bottom" className="mt-6" />
           <AdSenseSlot format="infeed" className="mt-6" />
           <CtaBannerSlot page="products" section="products-end" position="after" className="mt-6" />
+          <ListingCtaStrip cta={lp.ctaStrip} />
         </main>
 
         {/* RIGHT SIDEBAR WITH PREMIUM AARONG AD BANNER */}

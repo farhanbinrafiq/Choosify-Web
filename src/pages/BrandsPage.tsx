@@ -29,6 +29,7 @@ import { SortDropdown } from '../components/SortDropdown';
 import { BRAND_SORT_OPTIONS, BRAND_SORT_DEFAULT, applySortOption } from '../lib/sorting/sortRegistry';
 import { toBrandCardData } from '../lib/brandCardData';
 import { recommendedBrandOrder } from '../lib/sorting/brandRecommendedOrder';
+import { ListingCtaStrip, ListingIntro, useListingPage } from '../components/cms/ListingPageExtras';
 
 interface Brand {
   id: string;
@@ -59,6 +60,7 @@ interface Brand {
 }
 
 export function BrandsPage() {
+  const lp = useListingPage('brands');
   const { allBrands: globalBrands, allProducts, allCatalogProducts, allDeals, getBrandClaimStatus, catalogReady } = useGlobalState();
   const [selectedLetter, setSelectedLetter] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
@@ -645,7 +647,7 @@ export function BrandsPage() {
           {/* LAYER 2: FULL SIDEBAR FILTER PANEL */}
           <div id="brands-sidebar-filters" className="transition-all duration-300 rounded-2xl">
             <FullSidebarFilterPanel
-              title="Filter Brands"
+              title={lp.filterTitle}
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               searchPlaceholder="Search brands, category or best for..."
@@ -653,7 +655,7 @@ export function BrandsPage() {
               sorting={<SortDropdown options={BRAND_SORT_OPTIONS} value={sortOption} onChange={setSortOption} />}
               quickFilters={
                 <QuickFilterBar
-                  title="Brands Quick Specs"
+                  title={lp.quickSpecsTitle}
                   onOpenFullFilters={() => {}}
                   filters={[
                     { id: 'verified', label: '✓ Verified Claims', active: verificationFilter === 'verified', onClick: () => setVerificationFilter(verificationFilter === 'verified' ? 'all' : 'verified') },
@@ -830,7 +832,7 @@ export function BrandsPage() {
           {/* Ads Studio slot BRANDS_BANNER — wide sponsored banner above the brands grid */}
           <AdSlotBanner slot={AD_SLOTS.BRANDS_BANNER} position="top" />
           <ListingFeedHeader
-            eyebrow="Our partners • Brands"
+            eyebrow={lp.eyebrow}
             title={
               `${activeTab === 'All Brands' ? 'All Brands' : activeTab}` +
               (selectedLetter ? ` · Starting with “${selectedLetter}”` : '') +
@@ -859,6 +861,7 @@ export function BrandsPage() {
               ) : null
             }
           />
+          <ListingIntro text={lp.intro} className="-mt-3" />
 
           <ListingFilterPills
             pills={brandsBrowseItems.map((item) => ({
@@ -1057,6 +1060,7 @@ export function BrandsPage() {
                 </button>
              </div>
           )}
+          <ListingCtaStrip cta={lp.ctaStrip} />
         </main>
 
         {/* RIGHT SIDEBAR WITH SPONSOR & SELLERS CARD */}

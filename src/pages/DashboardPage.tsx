@@ -80,7 +80,6 @@ import {
   spotlightToContentCardModel,
   resolveCommerceCardVariant,
 } from '../components/content';
-import { PRODUCTS } from '../constants';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { cn } from '../lib/utils';
 import { PLACEHOLDER_IMAGE } from '../constants';
@@ -121,11 +120,11 @@ const DASHBOARD_TABS_WITH_RIGHT_CONTENT = new Set([
 ]);
 
 
+/** Badges are EARNED from the customer's own activity (never shown to everyone). */
 const OVERVIEW_BADGES = [
-  { id: 'verified-buyer', label: 'Verified Buyer', emoji: '✓' },
-  { id: 'top-reviewer', label: 'Top Reviewer', emoji: '★' },
-  { id: 'early-adopter', label: 'Early Adopter', emoji: '◆' },
-  { id: 'deal-hunter', label: 'Deal Hunter', emoji: '৳' },
+  { id: 'verified-buyer', label: 'Verified Buyer — received an order', emoji: '✓' },
+  { id: 'top-reviewer', label: 'Top Reviewer — 3 or more reviews', emoji: '★' },
+  { id: 'deal-hunter', label: 'Deal Hunter — saved money on a discounted product', emoji: '৳' },
 ] as const;
 
 function formatOrderStatus(status: string): { label: string; className: string } {
@@ -313,7 +312,12 @@ const OverviewSection = ({
   userName?: string;
 }) => {
   const { savedProducts } = useDashboard();
-  const { orders, currentUser } = useGlobalState();
+  const { orders, currentUser, allProducts } = useGlobalState();
+  const { reviews: dashReviews } = useDashboard();
+  // Real catalog only (never the built-in prototype product list).
+  const catalog = (Array.isArray(allProducts) ? allProducts : []) as unknown as Array<Record<string, unknown> & { id: string | number; title: string; image?: string }>;
+  const findProduct = (id: unknown, title: string) =>
+    catalog.find((p) => (id != null && String(p.id) === String(id)) || p.title === title);
   const displayName = userName?.trim() || 'there';
 
   const pendingToPayCount = getPendingToPayOrders(orders).length;
@@ -375,8 +379,8 @@ const OverviewSection = ({
         title: item.productTitle,
         price: item.price * item.quantity,
         quantity: item.quantity,
-        image:
-          PRODUCTS.find((p) => p.title === item.productTitle)?.image || PLACEHOLDER_IMAGE,
+        productId: item.productId,
+        image: findProduct(item.productId, item.productTitle)?.image || PLACEHOLDER_IMAGE,
       })),
     ),
   );
@@ -410,7 +414,7 @@ const OverviewSection = ({
   const totalSpent = orders.reduce((sum, o) => sum + (o.overallTotal || 0), 0);
 
   const totalSavings = flatItems.reduce((sum, row) => {
-    const prod = PRODUCTS.find((p) => p.title === row.title) as
+    const prod = findProduct(row.productId, row.title) as
       | { price?: string | number; originalPrice?: string | number }
       | undefined;
     if (!prod) return sum;
@@ -424,16 +428,20 @@ const OverviewSection = ({
 
   const recentOrderRows = flatItems.slice(0, 5);
 
-  const recommended = PRODUCTS.filter((p) => {
-    const price = parseMoney((p as { price?: string | number }).price);
-    const original = parseMoney((p as { originalPrice?: string | number }).originalPrice);
-    const tag = String((p as { tag?: string }).tag || '').toLowerCase();
-    return original > price || tag.includes('off') || tag.includes('deal') || tag.includes('%');
+  const liveCatalog = catalog.filter((p) => p.status === undefined || p.status === 'live' || p.status === 'active');
+  const recommended = liveCatalog.filter((p) => {
+    const price = parseMoney(p.price);
+    const original = parseMoney(p.originalPrice);
+    return original > price || Number(p.discountPercent || 0) > 0;
   }).slice(0, 8);
-  const recommendedFallback =
-    recommended.length > 0 ? recommended : PRODUCTS.slice(0, 8);
+  const recommendedFallback = (recommended.length > 0 ? recommended : liveCatalog.slice(0, 8)) as unknown as typeof allProducts;
+
+  const myReviewCount = (Array.isArray(dashReviews) ? dashReviews : []).filter((r: { userId?: unknown }) => r?.userId && String(r.userId) === String(currentUser?.id)).length;
 
   const wishlistPreview = savedProducts.slice(0, 6);
+  const earnedBadges = OVERVIEW_BADGES.filter((b) =>
+    b.id === 'verified-buyer' ? deliveredCount > 0 : b.id === 'top-reviewer' ? myReviewCount >= 3 : totalSavings > 0,
+  );
 
   const scoreBenefits = [
     { label: 'Priority COD', unlocked: choosifyScore >= 70 },
@@ -682,6 +690,7 @@ const OverviewSection = ({
             )}
           </div>
 
+          {recommendedFallback.length > 0 ? (
           <div className="bg-white border border-[#E8EDF2] rounded-[10px] p-4 sm:p-5 min-w-0 overflow-hidden">
             <div className="flex items-start sm:items-center justify-between mb-4 gap-2">
               <h3 className="text-[14px] font-extrabold text-[#1A1A2E] flex items-center gap-2 min-w-0">
@@ -704,6 +713,7 @@ const OverviewSection = ({
               className="min-w-0"
             />
           </div>
+          ) : null}
 
           {/* Admin → Storefront Curation → Trust & Assurance (account.overview_trust) */}
           <AssuranceStrip placement="account.overview_trust" />
@@ -768,8 +778,14 @@ const OverviewSection = ({
               </button>
             </div>
             <div className="flex flex-wrap gap-2">
-              {OVERVIEW_BADGES.map((b) => (
+              {earnedBadges.length === 0 ? (
+                <p className="m-0 text-[11.5px] text-[#9AA0AC]" data-testid="dash-no-badges">
+                  No badges yet — receive an order or write reviews to earn them.
+                </p>
+              ) : null}
+              {earnedBadges.map((b) => (
                 <div
+                  data-testid={`dash-badge-${b.id}`}
                   key={b.id}
                   title={b.label}
                   className="w-10 h-10 rounded-full bg-[#F4F7F9] border border-[#E8EDF2] flex items-center justify-center text-[13px] font-extrabold text-[#FF5B00]"
@@ -1858,7 +1874,7 @@ const SettingsSection = ({ initialSubTab = 'personal' }: { initialSubTab?: Setti
 
 
 function MyReviewsSection() {
-  const { currentUser } = useGlobalState();
+  const { currentUser, allProducts } = useGlobalState();
   const { reviews } = useDashboard();
   const myReviews = (Array.isArray(reviews) ? reviews : []).filter((r: any) => {
     if (r.userId) return String(r.userId) === String(currentUser.id);
@@ -1911,7 +1927,7 @@ function MyReviewsSection() {
             myReviews.map((r, idx) => {
               const productName = r.product || r.productTitle;
               const productImage =
-                PRODUCTS.find((p) => p.title === productName)?.image || PLACEHOLDER_IMAGE;
+                (allProducts || []).find((p) => p.title === productName)?.image || PLACEHOLDER_IMAGE;
               return (
                 <PublicReviewCard
                   key={r.id || idx}

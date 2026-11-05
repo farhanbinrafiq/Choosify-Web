@@ -29,6 +29,7 @@ import { SponsoredFeedInjector } from '../components/commerce/SponsoredFeedInjec
 import { CategorySponsoredAdCard } from '../components/categories/CategorySponsoredAdCard';
 import { SortDropdown } from '../components/SortDropdown';
 import { CATEGORY_SORT_OPTIONS, CATEGORY_SORT_DEFAULT, applySortOption } from '../lib/sorting/sortRegistry';
+import { ListingCtaStrip, ListingIntro, useListingPage } from '../components/cms/ListingPageExtras';
 
 type CategoryItem = CategoryDisplayItem;
 
@@ -85,6 +86,7 @@ function resolveFeaturedBrandForCategory(
 }
 
 export function CategoriesPage() {
+  const lp = useListingPage('categories');
   const sponsorFor = useCategorySponsors();
   const {
     allCatalogProducts,
@@ -331,7 +333,7 @@ export function CategoriesPage() {
   const renderFilterPanel = () => {
     return (
       <FullSidebarFilterPanel
-        title="Category Discovery"
+        title={lp.filterTitle}
         onReset={handleClearAllFilters}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
@@ -701,7 +703,7 @@ export function CategoriesPage() {
           {/* Ads Studio slot CATEGORIES_BANNER — wide sponsored banner above the category grid */}
           <AdSlotBanner slot={AD_SLOTS.CATEGORIES_BANNER} position="top" />
           <ListingFeedHeader
-            eyebrow="Shop by • Categories"
+            eyebrow={lp.eyebrow}
             title={
               selectedMainCategory
                 ? selectedMainCategory
@@ -723,6 +725,7 @@ export function CategoriesPage() {
               ) : undefined
             }
           />
+          <ListingIntro text={lp.intro} className="-mt-3" />
           <CtaBannerSlot page="categories" section="categories-feed-header" position="after" />
 
           <ListingFilterPills
@@ -827,6 +830,7 @@ export function CategoriesPage() {
             </div>
           </div>
           <AdSlotBanner slot={AD_SLOTS.CATEGORIES_BANNER} position="bottom" />
+          <ListingCtaStrip cta={lp.ctaStrip} />
         </div>
 
         {/* RIGHT COLUMN: FOR BUSINESS & SELLERS CARD & SPONSORED AD */}

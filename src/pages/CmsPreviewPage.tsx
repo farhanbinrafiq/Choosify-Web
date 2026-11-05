@@ -15,6 +15,24 @@ import { AdvertisePage } from './AdvertisePage';
 import { TermsPage } from './TermsPage';
 import { PrivacyPage } from './PrivacyPage';
 import { CustomPage } from './CustomPage';
+import { CategoriesPage } from './CategoriesPage';
+import { AllProductsPage } from './AllProductsPage';
+import { BrandsPage } from './BrandsPage';
+import { SpotlightDiscoverPage } from './SpotlightDiscoverPage';
+import { DealsPage } from './DealsPage';
+import { CreatorsPage } from './CreatorsPage';
+import { ComparePage } from './ComparePage';
+
+/** Storefront listing pages (Website Studio → Pages → Storefront pages): ?page=listing:<key>. */
+const LISTING_PREVIEW_PAGES: Record<string, React.ComponentType> = {
+  categories: CategoriesPage,
+  products: AllProductsPage,
+  brands: BrandsPage,
+  recommendations: SpotlightDiscoverPage,
+  deals: DealsPage,
+  creators: CreatorsPage,
+  compare: ComparePage,
+};
 
 /** Website Studio page drafts preview on their real page (?page=<SitePagesConfig key>). */
 const PREVIEW_PAGES: Record<string, React.ComponentType> = {
@@ -78,7 +96,7 @@ function CmsPreviewBody() {
       </>
     );
   }
-  const Page = PREVIEW_PAGES[pageParam] || HomePage;
+  const Page = (pageParam.startsWith('listing:') ? LISTING_PREVIEW_PAGES[pageParam.slice(8)] : PREVIEW_PAGES[pageParam]) || HomePage;
   return (
     <>
       <CmsDraftPreviewBanner />
