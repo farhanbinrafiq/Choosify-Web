@@ -117,6 +117,7 @@ import { RequireRole } from './components/auth/RequireRole';
 import { useGlobalState } from './context/GlobalStateContext';
 import { isNavPathEnabled } from './lib/featureFlags';
 import { perfRouteTransition } from './utils/performanceDev';
+import { AdPopup } from './components/ads/AdPopup';
 
 function FeatureFlagRoute({
   flag,
@@ -335,6 +336,8 @@ function AppContent() {
         </Suspense>
       </MaintenanceGate>
       {!isCompactShell && <FloatingOverlays />}
+      {/* Ads Studio pop-up (pages / times per visit / delay chosen per ad; closed = gone for this tab) */}
+      {!isCompactShell && !cmsPreviewActive && <AdPopup />}
       {!isCompactShell && !isMessagesShell && <Footer />}
     </div>
   );

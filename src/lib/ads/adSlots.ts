@@ -30,6 +30,7 @@ export const AD_SLOTS = {
   ORDER_TRACKING_BANNER: 'ORDER_TRACKING_BANNER',
   DASHBOARD_BANNER: 'DASHBOARD_BANNER',
   DASHBOARD_SIDEBAR: 'DASHBOARD_SIDEBAR',
+  SITE_POPUP: 'SITE_POPUP',
   BRANDS_SIDEBAR: 'BRANDS_SIDEBAR',
   CATEGORIES_SIDEBAR: 'CATEGORIES_SIDEBAR',
   CREATORS_SIDEBAR: 'CREATORS_SIDEBAR',
@@ -60,6 +61,8 @@ export type PublicAd = {
   focusY?: 'top' | 'center' | 'bottom';
   /** Wide banners: the exact spot on the page (slot default when the advertiser chose none). */
   position?: string;
+  /** Pop-up rules: pages ("all" or page keys), times per visit, delay in seconds. */
+  popup?: { pages: string[]; maxPerSession: number; delaySec: number };
   /** Category Promoted Slot only: which category card carries this sponsor footer. */
   categoryId?: string;
   categoryName?: string;
