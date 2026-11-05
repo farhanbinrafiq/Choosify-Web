@@ -118,6 +118,7 @@ import { useGlobalState } from './context/GlobalStateContext';
 import { isNavPathEnabled } from './lib/featureFlags';
 import { perfRouteTransition } from './utils/performanceDev';
 import { AdPopup } from './components/ads/AdPopup';
+const CustomPage = lazy(() => import('./pages/CustomPage').then((m) => ({ default: m.CustomPage })));
 
 function FeatureFlagRoute({
   flag,
@@ -270,6 +271,7 @@ function AppContent() {
             <Route path="/privacy" element={<PageWrapper><PrivacyPage /></PageWrapper>} />
             <Route path="/contact" element={<PageWrapper><ContactPage /></PageWrapper>} />
             <Route path="/about" element={<PageWrapper><AboutPage /></PageWrapper>} />
+            <Route path="/pages/:slug" element={<PageWrapper><CustomPage /></PageWrapper>} />
             <Route path="/faq" element={<PageWrapper><FAQPage /></PageWrapper>} />
             <Route path="/careers" element={<PageWrapper><CareersPage /></PageWrapper>} />
             <Route path="/careers/:slug" element={<PageWrapper><CareerDetailPage /></PageWrapper>} />

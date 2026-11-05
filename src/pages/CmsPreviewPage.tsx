@@ -14,6 +14,7 @@ import { PartnershipPage } from './PartnershipPage';
 import { AdvertisePage } from './AdvertisePage';
 import { TermsPage } from './TermsPage';
 import { PrivacyPage } from './PrivacyPage';
+import { CustomPage } from './CustomPage';
 
 /** Website Studio page drafts preview on their real page (?page=<SitePagesConfig key>). */
 const PREVIEW_PAGES: Record<string, React.ComponentType> = {
@@ -68,7 +69,16 @@ function CmsPreviewBody() {
     return <PreviewUnavailable message={error || 'Preview unavailable'} />;
   }
 
-  const Page = PREVIEW_PAGES[new URLSearchParams(window.location.search).get('page') || ''] || HomePage;
+  const pageParam = new URLSearchParams(window.location.search).get('page') || '';
+  if (pageParam.startsWith('custom:')) {
+    return (
+      <>
+        <CmsDraftPreviewBanner />
+        <CustomPage slug={pageParam.slice(7)} />
+      </>
+    );
+  }
+  const Page = PREVIEW_PAGES[pageParam] || HomePage;
   return (
     <>
       <CmsDraftPreviewBanner />
