@@ -21,6 +21,8 @@ export type CategoryDisplayItem = {
   count: number;
   image?: string;
   subcategories: CategorySubcategory[];
+  /** Brand Choosify staff featured for this category (card footer). */
+  featuredBrandId?: string | null;
 };
 
 /** Products filed under a main category — by catalog id, else by exact name. */
@@ -89,6 +91,7 @@ export function buildCategoryDisplayList(
           count: inCategory.length,
           image: getCategoryImage(cat.name),
           subcategories,
+          featuredBrandId: cat.featuredBrandId ?? null,
         };
       });
   }

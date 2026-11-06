@@ -41,10 +41,9 @@ export function CategoryPremiumCard({
   const [logoFailed, setLogoFailed] = useState(false);
   // Footer: a paid sponsor (labelled Promoted) or the category's real top brand (labelled Top brand).
   // Never a made-up name: with neither, the footer is not drawn.
-  // The card footer is ONLY for a paid sponsor (labelled "Promoted"). No unpaid "Top brand" footer:
-  // in that spot it looked like an ad. (featuredBrand* props are kept for callers but not shown.)
-  const featured = sponsor?.name || '';
-  void featuredBrand;
+  // Footer: a paid sponsor (Ads Studio, "Promoted") or the brand Choosify staff featured for this
+  // category in Category Management ("Featured"). Nothing is picked automatically.
+  const featured = sponsor?.name || featuredBrand || '';
   const footerLogo = sponsor ? sponsor.logo : featuredBrandLogo;
   const featuredInitial = featured.charAt(0).toUpperCase();
   const brandHref = sponsor?.href || featuredBrandHref || `/brands?q=${encodeURIComponent(featured)}`;
@@ -156,8 +155,8 @@ export function CategoryPremiumCard({
               Promoted
             </span>
           ) : (
-            <span className="shrink-0 text-[9px] font-extrabold uppercase tracking-wide text-[#6B7280] border border-[#E2E8F0] rounded-full px-1.5 py-0.5" title="The brand with the most products in this category (not an ad)">
-              Top brand
+            <span className="shrink-0 text-[9px] font-extrabold uppercase tracking-wide text-[#6B7280] border border-[#E2E8F0] rounded-full px-1.5 py-0.5" title="Featured by Choosify for this category">
+              Featured
             </span>
           )}
         </FooterLink>

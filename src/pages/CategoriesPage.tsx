@@ -57,36 +57,17 @@ function isBrandLogoImage(value?: string): value is string {
   return Boolean(value && /^(https?:|data:|\/)/.test(value));
 }
 
-/** The category's top brand: the brand with the most products REALLY in this category (same
- *  matching as the card's product / brand counts). No products there → no footer. Not an ad. */
+/** The brand Choosify staff featured for this category (Category Management). Never automatic. */
 function resolveFeaturedBrandForCategory(
-  category: Parameters<typeof productsInMainCategory>[1],
-  products: CatalogProduct[],
+  category: { featuredBrandId?: string | null },
   brands: Array<{ id: string | number; name: string; slug?: string; logo?: string; image?: string }>,
 ) {
-  const slice = productsInMainCategory(products, category).filter((p) => p.brandName || p.brandId);
-  if (!slice.length) return undefined;
-  const counts = new Map<string, { n: number; product: CatalogProduct }>();
-  for (const p of slice) {
-    const key = String(p.brandId ?? p.brandName ?? '').toLowerCase();
-    const e = counts.get(key) || { n: 0, product: p };
-    e.n += 1;
-    counts.set(key, e);
-  }
-  const top = [...counts.values()].sort((x, y) => y.n - x.n)[0].product;
-  const brand =
-    brands.find(
-      (b) =>
-        (top.brandId != null && String(b.id) === String(top.brandId)) ||
-        (top.brandName && b.name.toLowerCase() === String(top.brandName).toLowerCase()),
-    ) ?? undefined;
-  const brandKey = brand?.id || top.brandId || brand?.slug;
-  const logoCandidate = brand?.logo || brand?.image;
-  return {
-    name: brand?.name || String(top.brandName || ''),
-    href: brand ? brandPath(brand) : brandKey ? brandPath({ id: brandKey }) : undefined,
-    logo: isBrandLogoImage(logoCandidate) ? logoCandidate : undefined,
-  };
+  const id = category.featuredBrandId;
+  if (!id) return undefined;
+  const brand = brands.find((b) => String(b.id) === String(id));
+  if (!brand) return undefined;
+  const logoCandidate = brand.logo || brand.image;
+  return { name: brand.name, href: brandPath(brand), logo: isBrandLogoImage(logoCandidate) ? logoCandidate : undefined };
 }
 
 export function CategoriesPage() {
@@ -825,7 +806,6 @@ export function CategoriesPage() {
                       const cat = entry.item;
                       const featured = resolveFeaturedBrandForCategory(
                         cat,
-                        (allCatalogProducts ?? []) as CatalogProduct[],
                         (allCatalogBrands?.length ? allCatalogBrands : allBrands) ?? [],
                       );
 
