@@ -257,8 +257,8 @@ export function Hero({ variant, className }: HeroProps) {
 
       {slides.length > 1 && (
         <>
-          {/* No arrow buttons (owner preference): slides auto-advance; the dots switch slides. */}
-          <div className="absolute left-1/2 -translate-x-1/2 bottom-[30%] md:bottom-[24%] z-20 flex gap-1.5">
+          {/* No arrow buttons: round picture icons switch slides (same style as the banner-ad switcher). */}
+          <div className="absolute left-1/2 -translate-x-1/2 bottom-[30%] md:bottom-[24%] z-20 flex items-center gap-2 rounded-full bg-black/25 px-2 py-1.5 backdrop-blur-sm" data-testid="hero-slide-icons">
             {slides.map((slide, i) => (
               <button
                 key={slide.id}
@@ -267,15 +267,24 @@ export function Hero({ variant, className }: HeroProps) {
                   setAutoplay(false);
                   setCurrentIndex(i);
                 }}
+                title={slide.title || `Slide ${i + 1}`}
                 className={cn(
-                  'rounded-full transition-all',
+                  'shrink-0 overflow-hidden rounded-full border-0 p-0 transition-all duration-300 h-7 w-7 sm:h-9 sm:w-9',
                   i === currentIndex
-                    ? 'w-5 h-2 bg-white'
-                    : 'w-2 h-2 bg-white/55 hover:bg-white/80',
+                    ? 'ring-2 ring-[#FF5B00] ring-offset-1 ring-offset-black/20 scale-110'
+                    : 'opacity-60 hover:opacity-90 grayscale-[30%]',
                 )}
                 aria-label={`Go to slide ${i + 1}`}
                 aria-current={i === currentIndex}
-              />
+              >
+                {slide.image ? (
+                  <img src={slide.image} alt="" className="h-full w-full object-cover" loading="lazy" />
+                ) : (
+                  <span className="flex h-full w-full items-center justify-center bg-[#1A1D4E] text-[10px] font-extrabold text-white">
+                    {(slide.title || String(i + 1)).trim().charAt(0).toUpperCase()}
+                  </span>
+                )}
+              </button>
             ))}
           </div>
         </>
