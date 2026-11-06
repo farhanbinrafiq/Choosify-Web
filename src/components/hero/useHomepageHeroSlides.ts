@@ -12,6 +12,7 @@ const VIDEO_ONLY_SLIDE: HeroSlide = {
   title: 'Style that moves with you.',
   subtitle: "Bangladesh's most trusted product discovery platform.",
   primaryCtaText: 'EXPLORE NOW',
+  buttonText: 'Explore now',
   primaryCtaLink: '/products',
   secondaryCtaText: 'HOW IT WORKS',
   secondaryCtaLink: '/about',
@@ -32,6 +33,7 @@ export function useHomepageHeroSlides(): HeroSlide[] {
           id: `ad-${ad.id}`,
           title: ad.alt,
           primaryCtaText: ad.ctaLabel,
+          buttonText: ad.ctaLabel || undefined,
           primaryCtaLink: target?.href,
           externalLink: target?.external,
           image: ad.image,
@@ -69,6 +71,7 @@ function useEditorialHeroSlides(homepageConfig: ReturnType<typeof useGlobalState
           title: banner.headline,
           subtitle: banner.subtitle,
           primaryCtaText: banner.ctaText,
+          buttonText: banner.buttonText || undefined,
           primaryCtaLink: banner.ctaUrl || undefined,
           // Links to another website open in a new tab (and must not go through the router).
           externalLink: /^https?:\/\//i.test(banner.ctaUrl || ''),

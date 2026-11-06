@@ -132,26 +132,28 @@ export function CategoryPremiumCard({
         <FooterLink
           href={brandHref}
           external={Boolean(sponsor?.external)}
-          className="mt-auto choosify-dark-surface text-white px-4 py-3 flex items-center gap-2.5 no-underline hover:brightness-110"
+          className={sponsor
+            ? 'mt-auto choosify-dark-surface text-white px-4 py-3 flex items-center gap-2.5 no-underline hover:brightness-110'
+            : 'mt-auto border-t border-[#EEF2F6] bg-[#F8FAFC] px-4 py-2.5 flex items-center gap-2.5 no-underline hover:bg-[#F1F5F9]'}
           testId={sponsor ? 'category-sponsor-footer' : 'category-top-brand-footer'}
           extra={sponsor?.adId && sponsor.adSlot ? { 'data-ad-id': sponsor.adId, 'data-ad-slot': sponsor.adSlot } : undefined}
         >
-          <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center text-[10px] font-extrabold shrink-0 overflow-hidden">
+          <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-extrabold shrink-0 overflow-hidden ${sponsor ? 'bg-white/20' : 'bg-white border border-[#E8EDF2] text-[#1A1A2E]'}`}>
             {showLogo ? (
               <img src={footerLogo} alt="" className="w-full h-full object-cover" loading="lazy" onError={() => setLogoFailed(true)} />
             ) : (
               featuredInitial
             )}
           </div>
-          <div className="text-[11px] text-white font-bold min-w-0 flex-1 truncate">
-            <span className="text-white font-extrabold">{featured}</span>
+          <div className={`text-[11px] font-bold min-w-0 flex-1 truncate ${sponsor ? 'text-white' : 'text-[#1A1A2E]'}`}>
+            <span className={sponsor ? 'text-white font-extrabold' : 'font-extrabold text-[#1A1A2E]'}>{featured}</span>
           </div>
           {sponsor ? (
             <span className="shrink-0 text-[9px] font-extrabold uppercase tracking-wide text-white bg-[#2323FF] rounded-full px-1.5 py-0.5" title="Paid placement">
               Promoted
             </span>
           ) : (
-            <span className="shrink-0 text-[9px] font-extrabold uppercase tracking-wide text-white/80 border border-white/30 rounded-full px-1.5 py-0.5" title="Top brand in this category">
+            <span className="shrink-0 text-[9px] font-extrabold uppercase tracking-wide text-[#6B7280] border border-[#E2E8F0] rounded-full px-1.5 py-0.5" title="The brand with the most products in this category (not an ad)">
               Top brand
             </span>
           )}

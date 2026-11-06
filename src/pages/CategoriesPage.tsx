@@ -1,6 +1,7 @@
 import { brandPath } from '../../lib/publicUrls';
 import { AD_SLOTS } from '../lib/ads/adSlots';
-import { AdSlotBanner, useCategorySponsors } from '../components/ads/AdSlot';
+import { AdGridCard, AdSlotBanner, useCategorySponsors } from '../components/ads/AdSlot';
+import { useAdSlot } from '../lib/ads/adSlots';
 import { adHref } from '../lib/ads/adSlots';
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
@@ -18,6 +19,8 @@ import { ListingFeedHeader } from '../components/design/ListingFeedHeader';
 import { ListingFilterPills } from '../components/design/ListingFilterPills';
 import { buildCategoryDisplayList, type CategoryDisplayItem } from '../utils/categoryDisplay';
 import { getCategoryStatBlock } from '../utils/categoryStats';
+import { productsInMainCategory } from '../utils/categoryDisplay';
+import type { CatalogProduct } from '../types/catalog';
 import { CATEGORIES } from '../data/categories';
 import { slugifyPathSegment } from '../lib/seoHelpers';
 import { ActiveFilterChips, FullSidebarFilterPanel, useRegisterPageFilters, scrollToFilterResultsTarget } from '../components/FilterEngine';
@@ -54,32 +57,33 @@ function isBrandLogoImage(value?: string): value is string {
   return Boolean(value && /^(https?:|data:|\/)/.test(value));
 }
 
+/** The category's top brand: the brand with the most products REALLY in this category (same
+ *  matching as the card's product / brand counts). No products there → no footer. Not an ad. */
 function resolveFeaturedBrandForCategory(
-  categoryName: string,
-  products: Array<{ brandId?: string; brandName?: string; categoryName?: string }>,
+  category: Parameters<typeof productsInMainCategory>[1],
+  products: CatalogProduct[],
   brands: Array<{ id: string | number; name: string; slug?: string; logo?: string; image?: string }>,
 ) {
-  const needle = categoryName.toLowerCase().split(/\s+/)[0] ?? '';
-  const product = products.find(
-    (p) =>
-      Boolean(p.brandName) &&
-      String(p.categoryName ?? '')
-        .toLowerCase()
-        .includes(needle),
-  );
-  if (!product?.brandName) return undefined;
-
+  const slice = productsInMainCategory(products, category).filter((p) => p.brandName || p.brandId);
+  if (!slice.length) return undefined;
+  const counts = new Map<string, { n: number; product: CatalogProduct }>();
+  for (const p of slice) {
+    const key = String(p.brandId ?? p.brandName ?? '').toLowerCase();
+    const e = counts.get(key) || { n: 0, product: p };
+    e.n += 1;
+    counts.set(key, e);
+  }
+  const top = [...counts.values()].sort((x, y) => y.n - x.n)[0].product;
   const brand =
     brands.find(
       (b) =>
-        (product.brandId != null && String(b.id) === String(product.brandId)) ||
-        b.name.toLowerCase() === product.brandName!.toLowerCase(),
+        (top.brandId != null && String(b.id) === String(top.brandId)) ||
+        (top.brandName && b.name.toLowerCase() === String(top.brandName).toLowerCase()),
     ) ?? undefined;
-
-  const brandKey = brand?.id || product.brandId || brand?.slug;
+  const brandKey = brand?.id || top.brandId || brand?.slug;
   const logoCandidate = brand?.logo || brand?.image;
   return {
-    name: brand?.name || product.brandName,
+    name: brand?.name || String(top.brandName || ''),
     href: brand ? brandPath(brand) : brandKey ? brandPath({ id: brandKey }) : undefined,
     logo: isBrandLogoImage(logoCandidate) ? logoCandidate : undefined,
   };
@@ -88,6 +92,12 @@ function resolveFeaturedBrandForCategory(
 export function CategoriesPage() {
   const lp = useListingPage('categories');
   const sponsorFor = useCategorySponsors();
+  // Ads Studio CATEGORIES_GRID_CARD: a full category-card-sized ad after every N category cards.
+  const catGridAds = useAdSlot(AD_SLOTS.CATEGORIES_GRID_CARD);
+  const catGridEvery = (() => {
+    const steps = catGridAds.map((a) => (Number.isFinite(a.gridEvery) ? Number(a.gridEvery) : 8)).filter((n) => n > 0);
+    return steps.length ? Math.min(...steps) : 0;
+  })();
   const {
     allCatalogProducts,
     allCatalogBrands,
@@ -791,20 +801,35 @@ export function CategoriesPage() {
                   items={filteredCategoriesList}
                   getItemKey={(cat) => cat.name}
                 >
-                  {(entries) =>
-                    entries.map((entry) => {
+                  {(entries) => {
+                    const cardCount = entries.filter((e) => e.kind !== 'sponsored').length;
+                    let n = 0;
+                    let shown = 0;
+                    return entries.flatMap((entry) => {
                       if (entry.kind === 'sponsored') {
-                        return <CategorySponsoredAdCard key={entry.key} item={entry.sponsored} />;
+                        return [<CategorySponsoredAdCard key={entry.key} item={entry.sponsored} />];
+                      }
+                      n += 1;
+                      let gridAd: React.ReactNode = null;
+                      if (catGridAds.length && ((catGridEvery > 0 && n % catGridEvery === 0) || (n === cardCount && shown === 0))) {
+                        const ad = catGridAds[shown % catGridAds.length];
+                        shown += 1;
+                        // fills the whole grid cell: exactly one category card in width AND height
+                        gridAd = (
+                          <div key={`cat-grid-ad-${ad.id}-${n}`} className="flex h-full self-stretch [&>*]:w-full">
+                            <AdGridCard ad={ad} />
+                          </div>
+                        );
                       }
 
                       const cat = entry.item;
                       const featured = resolveFeaturedBrandForCategory(
-                        cat.name,
-                        allCatalogProducts ?? [],
+                        cat,
+                        (allCatalogProducts ?? []) as CatalogProduct[],
                         (allCatalogBrands?.length ? allCatalogBrands : allBrands) ?? [],
                       );
 
-                      return (
+                      return [
                         <CategoryPremiumCard
                           key={entry.key}
                           name={cat.name}
@@ -820,10 +845,11 @@ export function CategoriesPage() {
                             const target = ad ? adHref(ad) : null;
                             return ad && target ? { name: ad.sponsorName || ad.headline || 'Sponsor', logo: ad.sponsorLogoUrl, href: target.href, external: target.external, adId: ad.id, adSlot: ad.slot } : undefined;
                           })()}
-                        />
-                      );
-                    })
-                  }
+                        />,
+                        gridAd,
+                      ].filter(Boolean);
+                    });
+                  }}
                 </SponsoredFeedInjector>
                 </div>
               )}

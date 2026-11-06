@@ -229,6 +229,8 @@ export interface HomepageHeroBanner {
   subtitle: string;
   ctaText: string;
   ctaUrl: string;
+  /** Button shown on the slide (Website Studio); empty + link = "Learn more". */
+  buttonText?: string;
   backgroundImage: string;
   /** Optional muted looping video for hybrid photo/video hero slides. */
   backgroundVideo?: string;

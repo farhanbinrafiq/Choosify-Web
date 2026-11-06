@@ -7,6 +7,8 @@ export type HeroSlide = {
   title: string;
   subtitle?: string;
   primaryCtaText?: string;
+  /** Visible button text on the slide (only when it links somewhere). */
+  buttonText?: string;
   primaryCtaLink?: string;
   secondaryCtaText?: string;
   secondaryCtaLink?: string;

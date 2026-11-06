@@ -4,7 +4,8 @@
  *  - after the chosen delay;
  *  - at most `maxPerSession` times per visit — counted per page view in sessionStorage, which the
  *    browser keeps only for this tab;
- *  - once closed (×, Esc, or a click on the dimmed page) it does not come back in this tab.
+ *  - once closed (×, Esc, or a click on the dimmed page) it does not come back on THAT page in this
+ *    tab, but may still appear on other pages until it has been shown maxPerSession times.
  * Closing the tab clears sessionStorage, so a new tab starts fresh. If storage is unavailable the
  * pop-up shows at most once per page load and still closes normally.
  */
@@ -48,7 +49,7 @@ const store = {
   },
 };
 const shownKey = (id: string) => `choosify.popup.${id}.shown`;
-const closedKey = (id: string) => `choosify.popup.${id}.closed`;
+const closedKey = (id: string, page: string) => `choosify.popup.${id}.closed.${page}`;
 
 export function AdPopup() {
   const { pathname } = useLocation();
@@ -67,12 +68,12 @@ export function AdPopup() {
       if (!a.image || !a.popup) return false;
       const pages = a.popup.pages;
       if (!pages.includes('all') && !pages.includes(page)) return false;
-      if (store.get(closedKey(a.id)) === '1') return false;
+      if (store.get(closedKey(a.id, page)) === '1') return false;
       return Number(store.get(shownKey(a.id)) || 0) < a.popup.maxPerSession;
     });
     if (!eligible?.popup) return;
     const t = window.setTimeout(() => {
-      if (store.get(closedKey(eligible.id)) === '1') return;
+      if (store.get(closedKey(eligible.id, page)) === '1') return;
       store.set(shownKey(eligible.id), String(Number(store.get(shownKey(eligible.id)) || 0) + 1));
       setAd(eligible);
     }, eligible.popup.delaySec * 1000);
@@ -81,7 +82,7 @@ export function AdPopup() {
   }, [adsKey, pathname, page]);
 
   const close = () => {
-    if (ad) store.set(closedKey(ad.id), '1');
+    if (ad) store.set(closedKey(ad.id, page), '1');
     setAd(null);
   };
 
@@ -103,14 +104,17 @@ export function AdPopup() {
   const target = adHref(ad);
   const external = Boolean(target && (target.external || /^https?:/i.test(target.href)));
   const media = (
-    <img
-      src={ad.image}
-      alt={ad.alt}
-      width={ad.imageWidth}
-      height={ad.imageHeight}
-      className="block max-h-[80vh] w-full rounded-2xl object-contain"
-      data-testid="ad-popup-image"
-    />
+    <picture>
+      {ad.mobileImage ? <source media="(max-width: 639px)" srcSet={ad.mobileImage} /> : null}
+      <img
+        src={ad.image}
+        alt={ad.alt}
+        width={ad.imageWidth}
+        height={ad.imageHeight}
+        className="block max-h-[80vh] w-full rounded-2xl object-contain"
+        data-testid="ad-popup-image"
+      />
+    </picture>
   );
   return (
     <div
@@ -128,7 +132,7 @@ export function AdPopup() {
             target={external ? '_blank' : undefined}
             rel={external ? 'sponsored noopener noreferrer' : undefined}
             onClick={() => {
-              store.set(closedKey(ad.id), '1');
+              store.set(closedKey(ad.id, page), '1');
               if (!external) setAd(null);
             }}
             className="relative block"
@@ -136,7 +140,7 @@ export function AdPopup() {
           >
             {media}
             {ad.ctaLabel ? (
-              <span className="absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-lg bg-[#FF5B00] px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wide text-white shadow-md sm:bottom-5 sm:right-5 sm:px-4 sm:py-2 sm:text-[13px]" data-testid="ad-popup-cta">
+              <span className="absolute bottom-3 left-1/2 inline-flex -translate-x-1/2 items-center gap-1 whitespace-nowrap rounded-lg bg-[#FF5B00] px-4 py-2 text-[12px] font-extrabold uppercase tracking-wide text-white shadow-lg sm:bottom-5 sm:px-6 sm:py-2.5 sm:text-[14px]" data-testid="ad-popup-cta">
                 {ad.ctaLabel} <span aria-hidden>→</span>
               </span>
             ) : null}

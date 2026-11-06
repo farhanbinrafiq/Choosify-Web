@@ -72,15 +72,21 @@ function BannerFrame({ ad }: { ad: PublicAd }) {
   // Phones: the frame takes the design's own shape (2:1–4:1), so it fills edge to edge uncropped.
   // Desktop: fixed 4:1 frame; the whole design with a soft side fill, or (advertiser's choice)
   // filled edge to edge, cropping top/bottom around the chosen focus.
-  const ratio = ad.imageWidth && ad.imageHeight ? Math.min(4, Math.max(2, ad.imageWidth / ad.imageHeight)) : 2.5;
+  // Phones: a separate taller phone picture when the advertiser gave one (its own shape),
+  // otherwise the wide design in a slightly taller frame (never thinner than 2.2:1).
+  const phonePic = ad.mobileImage;
+  const ratio = phonePic
+    ? ad.mobileImageWidth && ad.mobileImageHeight ? Math.min(2, Math.max(0.8, ad.mobileImageWidth / ad.mobileImageHeight)) : 1
+    : ad.imageWidth && ad.imageHeight ? Math.min(2.2, Math.max(1.8, ad.imageWidth / ad.imageHeight)) : 2.2;
   const fill = ad.fit === 'fill';
   return (
     <AdLink
       ad={ad}
-      className="relative block w-full aspect-[var(--ad-ratio)] sm:aspect-[4/1] max-h-[300px] overflow-hidden rounded-xl bg-[#0F1238]"
+      className={`relative block w-full aspect-[var(--ad-ratio)] sm:aspect-[4/1] ${phonePic ? 'max-h-[460px]' : 'max-h-[300px]'} sm:max-h-[300px] overflow-hidden rounded-xl bg-[#0F1238]`}
       style={{ ['--ad-ratio' as string]: `${ratio.toFixed(3)} / 1` }}
       testId="ad-banner-link"
     >
+      {phonePic ? <img src={phonePic} alt={ad.alt} className="absolute inset-0 z-[1] h-full w-full object-cover sm:hidden" loading="lazy" data-testid="ad-banner-phone-image" /> : null}
       <img src={ad.image} alt="" aria-hidden className={`absolute inset-0 h-full w-full scale-110 object-cover blur-xl opacity-60 ${fill ? 'sm:hidden' : ''}`} loading="lazy" />
       <img
         src={ad.image}
@@ -129,12 +135,16 @@ function CtaStrip({ ad }: { ad: PublicAd }) {
   return (
     <AdLink
       ad={ad}
-      className={`relative flex flex-col gap-3 overflow-hidden rounded-xl px-5 pb-5 pt-8 text-left no-underline sm:flex-row sm:items-center sm:gap-5 sm:px-8 sm:py-7 ${brandGradient(ad.brandColor) ? '' : 'bg-gradient-to-r from-[#3B1E3F] via-[#2A1846] to-[#2B1A4A]'}`}
-      style={brandGradient(ad.brandColor) ? { background: brandGradient(ad.brandColor)! } : undefined}
+      className={`relative flex flex-col items-center gap-3 overflow-hidden rounded-xl px-5 pb-5 pt-8 text-center no-underline sm:flex-row sm:items-center sm:gap-5 sm:px-8 sm:py-7 sm:text-left ${brandGradient(ad.brandColor, 110, ad.brandColor2) ? '' : 'bg-gradient-to-r from-[#3B1E3F] via-[#2A1846] to-[#2B1A4A]'}`}
+      style={brandGradient(ad.brandColor, 110, ad.brandColor2) ? { background: brandGradient(ad.brandColor, 110, ad.brandColor2)! } : undefined}
       testId="ad-strip-link"
     >
       <Chip ad={ad} />
-      {ad.sponsorLogoUrl && <img src={ad.sponsorLogoUrl} alt="" className="h-14 w-14 shrink-0 rounded-full bg-white object-cover ring-2 ring-white/70 sm:h-[72px] sm:w-[72px]" loading="lazy" data-testid="ad-strip-logo" />}
+      {ad.sponsorLogoUrl && (
+        <span className="h-16 w-16 shrink-0 self-center overflow-hidden rounded-full bg-white ring-2 ring-white/70 sm:h-[72px] sm:w-[72px]">
+          <img src={ad.sponsorLogoUrl} alt="" className="h-full w-full object-cover" style={ad.logoZoom ? { transform: `scale(${ad.logoZoom})` } : undefined} loading="lazy" data-testid="ad-strip-logo" />
+        </span>
+      )}
       <div className="min-w-0 flex-1">
         <div className="text-[16px] font-extrabold leading-tight text-white sm:text-[18px]">{ad.headline}</div>
         {ad.subtext && <div className="mt-1 text-[12.5px] text-white/70 sm:text-[13.5px]">{ad.subtext}</div>}
@@ -238,7 +248,7 @@ export function AdGridCard({ ad }: { ad: PublicAd }) {
       className="choosify-dark-surface relative flex h-full min-h-[300px] flex-col overflow-hidden rounded-[10px] text-left no-underline"
       testId={`ad-grid-card-${ad.slot}`}
     >
-      <div className={`relative min-h-0 flex-[7] overflow-hidden ${brandGradient(ad.brandColor) ? '' : 'bg-gradient-to-br from-[#FF5B00] to-[#2323FF]'}`} style={brandGradient(ad.brandColor, 135) ? { background: brandGradient(ad.brandColor, 135)! } : undefined}>
+      <div className={`relative min-h-0 flex-[7] overflow-hidden ${brandGradient(ad.brandColor, 110, ad.brandColor2) ? '' : 'bg-gradient-to-br from-[#FF5B00] to-[#2323FF]'}`} style={brandGradient(ad.brandColor, 135, ad.brandColor2) ? { background: brandGradient(ad.brandColor, 135, ad.brandColor2)! } : undefined}>
         {ad.display !== 'text' && ad.image ? (
           <img src={ad.image} alt={ad.alt} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
         ) : ad.sponsorLogoUrl ? (
@@ -266,7 +276,7 @@ function SideCard({ ad }: { ad: PublicAd }) {
         {ad.display !== 'text' && ad.image ? (
           <img src={ad.image} alt={ad.alt} className="block aspect-[3/4] w-full object-cover" loading="lazy" />
         ) : (
-          <div className={`flex aspect-[3/4] w-full flex-col justify-end p-4 ${brandGradient(ad.brandColor) ? '' : 'bg-gradient-to-br from-[#1A1D4E] to-[#FF5B00]'}`} style={brandGradient(ad.brandColor, 160) ? { background: brandGradient(ad.brandColor, 160)! } : undefined}>
+          <div className={`flex aspect-[3/4] w-full flex-col justify-end p-4 ${brandGradient(ad.brandColor, 110, ad.brandColor2) ? '' : 'bg-gradient-to-br from-[#1A1D4E] to-[#FF5B00]'}`} style={brandGradient(ad.brandColor, 160, ad.brandColor2) ? { background: brandGradient(ad.brandColor, 160, ad.brandColor2)! } : undefined}>
             {ad.sponsorLogoUrl && <img src={ad.sponsorLogoUrl} alt="" className="mb-auto h-12 w-12 rounded-full bg-white object-cover ring-2 ring-white/70" />}
             <div className="text-[15px] font-extrabold leading-tight text-white">{ad.headline}</div>
           </div>

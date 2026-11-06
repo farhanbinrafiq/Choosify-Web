@@ -215,6 +215,15 @@ export function Hero({ variant, className }: HeroProps) {
                 {slide.sponsoredLabel}
               </span>
             )}
+            {slide.primaryCtaLink && isActive ? (
+              <span
+                className="pointer-events-none absolute bottom-[30%] right-4 z-[3] inline-flex items-center gap-1.5 rounded-full bg-[#FF5B00] px-3 py-1.5 text-[11px] font-extrabold uppercase tracking-wide text-white shadow-lg sm:right-8 sm:px-5 sm:py-2.5 sm:text-[13px] md:bottom-[26%] lg:right-[120px]"
+                data-testid="hero-slide-button"
+              >
+                {slide.buttonText || 'Learn more'}
+                <svg aria-hidden viewBox="0 0 24 24" className="h-3.5 w-3.5 sm:h-4 sm:w-4" fill="none" stroke="currentColor" strokeWidth={2.6} strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+              </span>
+            ) : null}
             {slide.primaryCtaLink && isActive && (slide.externalLink ? (
               <a
                 href={slide.primaryCtaLink}
@@ -248,24 +257,7 @@ export function Hero({ variant, className }: HeroProps) {
 
       {slides.length > 1 && (
         <>
-          <button
-            type="button"
-            onClick={goPrev}
-            className="absolute left-4 md:left-5 top-[40%] -translate-y-1/2 z-20 flex h-8 w-8 md:h-11 md:w-11 items-center justify-center rounded-full border border-white/45 bg-white/15 text-white backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_1px_rgba(255,255,255,0.65),inset_0_-1px_2px_rgba(0,0,0,0.12),0_8px_24px_rgba(0,0,0,0.25)] transition-all duration-200 hover:scale-105 hover:bg-white/25 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
-            aria-label="Previous slide"
-            data-testid="hero-arrow-prev"
-          >
-            <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)]" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6" /></svg>
-          </button>
-          <button
-            type="button"
-            onClick={goNext}
-            className="absolute right-4 md:right-[100px] top-[40%] -translate-y-1/2 z-20 flex h-8 w-8 md:h-11 md:w-11 items-center justify-center rounded-full border border-white/45 bg-white/15 text-white backdrop-blur-xl backdrop-saturate-150 shadow-[inset_0_1px_1px_rgba(255,255,255,0.65),inset_0_-1px_2px_rgba(0,0,0,0.12),0_8px_24px_rgba(0,0,0,0.25)] transition-all duration-200 hover:scale-105 hover:bg-white/25 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/80"
-            aria-label="Next slide"
-            data-testid="hero-arrow-next"
-          >
-            <svg aria-hidden viewBox="0 0 24 24" className="h-5 w-5 drop-shadow-[0_1px_2px_rgba(0,0,0,0.45)]" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
-          </button>
+          {/* No arrow buttons (owner preference): slides auto-advance; the dots switch slides. */}
           <div className="absolute left-1/2 -translate-x-1/2 bottom-[30%] md:bottom-[24%] z-20 flex gap-1.5">
             {slides.map((slide, i) => (
               <button

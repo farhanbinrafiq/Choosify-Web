@@ -23,6 +23,7 @@ export const AD_SLOTS = {
   CATEGORY_CARD_FOOTER: 'CATEGORY_CARD_FOOTER',
   DEALS_GRID_CARD: 'DEALS_GRID_CARD',
   BRANDS_GRID_CARD: 'BRANDS_GRID_CARD',
+  CATEGORIES_GRID_CARD: 'CATEGORIES_GRID_CARD',
   PRODUCTS_FEED: 'PRODUCTS_FEED',
   BRANDS_FEED: 'BRANDS_FEED',
   CREATORS_GRID_CARD: 'CREATORS_GRID_CARD',
@@ -69,6 +70,11 @@ export type PublicAd = {
   gridEvery?: number;
   /** Text cards: the logo's main colour → card gradient. */
   brandColor?: string;
+  logoZoom?: number;
+  mobileImage?: string;
+  mobileImageWidth?: number;
+  mobileImageHeight?: number;
+  brandColor2?: string;
   /** Sponsored Listing: the promoted product / brand (drawn as its normal card). */
   entity?: { type: 'product' | 'brand'; id: string };
   /** Sponsored Listing: the row it starts (first card of that row). */
