@@ -141,7 +141,7 @@ function CtaStrip({ ad }: { ad: PublicAd }) {
     >
       <Chip ad={ad} />
       {ad.sponsorLogoUrl && (
-        <span className="h-16 w-16 shrink-0 self-center overflow-hidden rounded-full bg-white ring-2 ring-white/70 sm:h-[72px] sm:w-[72px]">
+        <span className="h-16 w-16 shrink-0 self-center overflow-hidden rounded-full shadow-[0_4px_14px_rgba(0,0,0,.35)] sm:h-[72px] sm:w-[72px]">
           <img src={ad.sponsorLogoUrl} alt="" className="h-full w-full object-cover" style={ad.logoZoom ? { transform: `scale(${ad.logoZoom})` } : undefined} loading="lazy" data-testid="ad-strip-logo" />
         </span>
       )}
@@ -252,7 +252,7 @@ export function AdGridCard({ ad }: { ad: PublicAd }) {
         {ad.display !== 'text' && ad.image ? (
           <img src={ad.image} alt={ad.alt} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
         ) : ad.sponsorLogoUrl ? (
-          <img src={ad.sponsorLogoUrl} alt="" className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white object-cover ring-2 ring-white/70" loading="lazy" />
+          <img src={ad.sponsorLogoUrl} alt="" className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full object-cover shadow-[0_4px_14px_rgba(0,0,0,.35)]" loading="lazy" />
         ) : null}
         <Chip ad={ad} />
       </div>
@@ -277,7 +277,7 @@ function SideCard({ ad }: { ad: PublicAd }) {
           <img src={ad.image} alt={ad.alt} className="block aspect-[3/4] w-full object-cover" loading="lazy" />
         ) : (
           <div className={`flex aspect-[3/4] w-full flex-col justify-end p-4 ${brandGradient(ad.brandColor, 110, ad.brandColor2) ? '' : 'bg-gradient-to-br from-[#1A1D4E] to-[#FF5B00]'}`} style={brandGradient(ad.brandColor, 160, ad.brandColor2) ? { background: brandGradient(ad.brandColor, 160, ad.brandColor2)! } : undefined}>
-            {ad.sponsorLogoUrl && <img src={ad.sponsorLogoUrl} alt="" className="mb-auto h-12 w-12 rounded-full bg-white object-cover ring-2 ring-white/70" />}
+            {ad.sponsorLogoUrl && <img src={ad.sponsorLogoUrl} alt="" className="mb-auto h-12 w-12 rounded-full object-cover shadow-[0_4px_14px_rgba(0,0,0,.35)]" />}
             <div className="text-[15px] font-extrabold leading-tight text-white">{ad.headline}</div>
           </div>
         )}
