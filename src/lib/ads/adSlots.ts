@@ -71,6 +71,7 @@ export type PublicAd = {
   /** Text cards: the logo's main colour → card gradient. */
   brandColor?: string;
   logoZoom?: number;
+  logoFit?: 'fill' | 'fit';
   mobileImage?: string;
   mobileImageWidth?: number;
   mobileImageHeight?: number;
