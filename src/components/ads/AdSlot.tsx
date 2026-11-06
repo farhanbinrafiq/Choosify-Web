@@ -135,11 +135,10 @@ function CtaStrip({ ad }: { ad: PublicAd }) {
   return (
     <AdLink
       ad={ad}
-      className={`relative flex flex-col items-center gap-3 overflow-hidden rounded-xl px-5 pb-5 pt-8 text-center no-underline sm:flex-row sm:items-center sm:gap-5 sm:px-8 sm:py-7 sm:text-left ${brandGradient(ad.brandColor, 110, ad.brandColor2) ? '' : 'bg-gradient-to-r from-[#3B1E3F] via-[#2A1846] to-[#2B1A4A]'}`}
+      className={`relative flex flex-col items-center gap-3 overflow-hidden rounded-xl px-5 py-5 text-center no-underline sm:flex-row sm:items-center sm:gap-5 sm:px-8 sm:py-7 sm:text-left ${brandGradient(ad.brandColor, 110, ad.brandColor2) ? '' : 'bg-gradient-to-r from-[#3B1E3F] via-[#2A1846] to-[#2B1A4A]'}`}
       style={brandGradient(ad.brandColor, 110, ad.brandColor2) ? { background: brandGradient(ad.brandColor, 110, ad.brandColor2)! } : undefined}
       testId="ad-strip-link"
     >
-      <Chip ad={ad} />
       {ad.sponsorLogoUrl && (
         <span className={`h-16 w-16 shrink-0 self-center overflow-hidden rounded-full shadow-[0_4px_14px_rgba(0,0,0,.35)] sm:h-[72px] sm:w-[72px] ${ad.logoFit === 'fit' ? 'bg-white p-2' : ''}`}>
           <img
@@ -153,6 +152,8 @@ function CtaStrip({ ad }: { ad: PublicAd }) {
         </span>
       )}
       <div className="min-w-0 flex-1">
+        {/* "Sponsored" sits with the text (above the title), not in the corner by the logo. */}
+        <div className="mb-1 text-[10px] font-extrabold uppercase tracking-[0.14em] text-white/60" data-testid="ad-sponsored-chip">{sponsoredLabel(ad)}</div>
         <div className="text-[16px] font-extrabold leading-tight text-white sm:text-[18px]">{ad.headline}</div>
         {ad.subtext && <div className="mt-1 text-[12.5px] text-white/70 sm:text-[13.5px]">{ad.subtext}</div>}
       </div>
@@ -279,12 +280,13 @@ export function AdGridCard({ ad }: { ad: PublicAd }) {
 function SideCard({ ad }: { ad: PublicAd }) {
   return (
       <AdLink ad={ad} className="relative block overflow-hidden rounded-xl border border-[#E8EDF2] bg-white text-left">
-        <Chip ad={ad} />
+        {ad.display !== 'text' && ad.image ? <Chip ad={ad} /> : null}
         {ad.display !== 'text' && ad.image ? (
           <img src={ad.image} alt={ad.alt} className="block aspect-[3/4] w-full object-cover" loading="lazy" />
         ) : (
           <div className={`flex aspect-[3/4] w-full flex-col justify-end p-4 ${brandGradient(ad.brandColor, 110, ad.brandColor2) ? '' : 'bg-gradient-to-br from-[#1A1D4E] to-[#FF5B00]'}`} style={brandGradient(ad.brandColor, 160, ad.brandColor2) ? { background: brandGradient(ad.brandColor, 160, ad.brandColor2)! } : undefined}>
             {ad.sponsorLogoUrl && <img src={ad.sponsorLogoUrl} alt="" className={`mb-auto h-12 w-12 rounded-full shadow-[0_4px_14px_rgba(0,0,0,.35)] ${ad.logoFit === 'fit' ? 'bg-white object-contain p-1.5' : 'object-cover'}`} />}
+            <div className="mb-1 text-[10px] font-extrabold uppercase tracking-[0.14em] text-white/60" data-testid="ad-sponsored-chip">{sponsoredLabel(ad)}</div>
             <div className="text-[15px] font-extrabold leading-tight text-white">{ad.headline}</div>
           </div>
         )}
