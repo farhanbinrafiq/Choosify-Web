@@ -67,6 +67,8 @@ export type PublicAd = {
   popup?: { pages: string[]; maxPerSession: number; delaySec: number };
   /** In-grid cards: after every N cards (0 = once, after the last card). */
   gridEvery?: number;
+  /** Text cards: the logo's main colour → card gradient. */
+  brandColor?: string;
   /** Sponsored Listing: the promoted product / brand (drawn as its normal card). */
   entity?: { type: 'product' | 'brand'; id: string };
   /** Sponsored Listing: the row it starts (first card of that row). */

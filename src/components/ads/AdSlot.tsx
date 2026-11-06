@@ -7,6 +7,7 @@
  */
 import React from 'react';
 import { adAttrs } from '../../lib/ads/adEvents';
+import { brandGradient } from '../../lib/ads/brandColor';
 import { AdSlotCarousel } from '../commerce/AdSlotCarousel';
 import { Link } from 'react-router-dom';
 import { AD_SLOTS, adHref, sponsoredLabel, useAdSlot, type AdSlotId, type PublicAd } from '../../lib/ads/adSlots';
@@ -128,11 +129,12 @@ function CtaStrip({ ad }: { ad: PublicAd }) {
   return (
     <AdLink
       ad={ad}
-      className="relative flex flex-col gap-3 overflow-hidden rounded-xl bg-gradient-to-r from-[#3B1E3F] via-[#2A1846] to-[#2B1A4A] px-5 pb-5 pt-8 text-left no-underline sm:flex-row sm:items-center sm:gap-5 sm:px-8 sm:py-7"
+      className={`relative flex flex-col gap-3 overflow-hidden rounded-xl px-5 pb-5 pt-8 text-left no-underline sm:flex-row sm:items-center sm:gap-5 sm:px-8 sm:py-7 ${brandGradient(ad.brandColor) ? '' : 'bg-gradient-to-r from-[#3B1E3F] via-[#2A1846] to-[#2B1A4A]'}`}
+      style={brandGradient(ad.brandColor) ? { background: brandGradient(ad.brandColor)! } : undefined}
       testId="ad-strip-link"
     >
       <Chip ad={ad} />
-      {ad.sponsorLogoUrl && <img src={ad.sponsorLogoUrl} alt="" className="h-10 w-10 shrink-0 rounded-full bg-white object-contain p-0.5" loading="lazy" />}
+      {ad.sponsorLogoUrl && <img src={ad.sponsorLogoUrl} alt="" className="h-14 w-14 shrink-0 rounded-full bg-white object-cover ring-2 ring-white/70 sm:h-[72px] sm:w-[72px]" loading="lazy" data-testid="ad-strip-logo" />}
       <div className="min-w-0 flex-1">
         <div className="text-[16px] font-extrabold leading-tight text-white sm:text-[18px]">{ad.headline}</div>
         {ad.subtext && <div className="mt-1 text-[12.5px] text-white/70 sm:text-[13.5px]">{ad.subtext}</div>}
@@ -236,11 +238,11 @@ export function AdGridCard({ ad }: { ad: PublicAd }) {
       className="choosify-dark-surface relative flex h-full min-h-[300px] flex-col overflow-hidden rounded-[10px] text-left no-underline"
       testId={`ad-grid-card-${ad.slot}`}
     >
-      <div className="relative min-h-0 flex-[7] overflow-hidden bg-gradient-to-br from-[#FF5B00] to-[#2323FF]">
+      <div className={`relative min-h-0 flex-[7] overflow-hidden ${brandGradient(ad.brandColor) ? '' : 'bg-gradient-to-br from-[#FF5B00] to-[#2323FF]'}`} style={brandGradient(ad.brandColor, 135) ? { background: brandGradient(ad.brandColor, 135)! } : undefined}>
         {ad.display !== 'text' && ad.image ? (
           <img src={ad.image} alt={ad.alt} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
         ) : ad.sponsorLogoUrl ? (
-          <img src={ad.sponsorLogoUrl} alt="" className="absolute left-1/2 top-1/2 h-16 w-16 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white object-contain p-1.5" loading="lazy" />
+          <img src={ad.sponsorLogoUrl} alt="" className="absolute left-1/2 top-1/2 h-20 w-20 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white object-cover ring-2 ring-white/70" loading="lazy" />
         ) : null}
         <Chip ad={ad} />
       </div>
@@ -264,8 +266,8 @@ function SideCard({ ad }: { ad: PublicAd }) {
         {ad.display !== 'text' && ad.image ? (
           <img src={ad.image} alt={ad.alt} className="block aspect-[3/4] w-full object-cover" loading="lazy" />
         ) : (
-          <div className="flex aspect-[3/4] w-full flex-col justify-end bg-gradient-to-br from-[#1A1D4E] to-[#FF5B00] p-4">
-            {ad.sponsorLogoUrl && <img src={ad.sponsorLogoUrl} alt="" className="mb-auto h-10 w-10 rounded-full bg-white object-contain p-1" />}
+          <div className={`flex aspect-[3/4] w-full flex-col justify-end p-4 ${brandGradient(ad.brandColor) ? '' : 'bg-gradient-to-br from-[#1A1D4E] to-[#FF5B00]'}`} style={brandGradient(ad.brandColor, 160) ? { background: brandGradient(ad.brandColor, 160)! } : undefined}>
+            {ad.sponsorLogoUrl && <img src={ad.sponsorLogoUrl} alt="" className="mb-auto h-12 w-12 rounded-full bg-white object-cover ring-2 ring-white/70" />}
             <div className="text-[15px] font-extrabold leading-tight text-white">{ad.headline}</div>
           </div>
         )}
