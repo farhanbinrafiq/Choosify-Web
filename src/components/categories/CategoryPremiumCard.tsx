@@ -41,7 +41,10 @@ export function CategoryPremiumCard({
   const [logoFailed, setLogoFailed] = useState(false);
   // Footer: a paid sponsor (labelled Promoted) or the category's real top brand (labelled Top brand).
   // Never a made-up name: with neither, the footer is not drawn.
-  const featured = sponsor?.name || featuredBrand || '';
+  // The card footer is ONLY for a paid sponsor (labelled "Promoted"). No unpaid "Top brand" footer:
+  // in that spot it looked like an ad. (featuredBrand* props are kept for callers but not shown.)
+  const featured = sponsor?.name || '';
+  void featuredBrand;
   const footerLogo = sponsor ? sponsor.logo : featuredBrandLogo;
   const featuredInitial = featured.charAt(0).toUpperCase();
   const brandHref = sponsor?.href || featuredBrandHref || `/brands?q=${encodeURIComponent(featured)}`;
