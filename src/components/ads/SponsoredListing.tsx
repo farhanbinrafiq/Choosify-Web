@@ -13,11 +13,11 @@ import { adAttrs } from '../../lib/ads/adEvents';
 export type ListedItem<T> = { item: T; sponsored?: PublicAd };
 
 /** Columns of a CSS grid (re-measured on resize) — so a sponsored card can start a row. */
-export function useGridColumns<T extends HTMLElement>(): [React.RefObject<T>, number] {
-  const ref = React.useRef<T>(null);
+export function useGridColumns<T extends HTMLElement>(): [(el: T | null) => void, number] {
+  // callback ref: the grid is often mounted after loading, so measure whenever it appears
+  const [el, setEl] = React.useState<T | null>(null);
   const [cols, setCols] = React.useState(4);
   React.useEffect(() => {
-    const el = ref.current;
     if (!el) return;
     const read = () => {
       const t = getComputedStyle(el).gridTemplateColumns;
@@ -29,8 +29,8 @@ export function useGridColumns<T extends HTMLElement>(): [React.RefObject<T>, nu
     const ro = new ResizeObserver(read);
     ro.observe(el);
     return () => ro.disconnect();
-  }, []);
-  return [ref, cols];
+  }, [el]);
+  return [setEl, cols];
 }
 
 export function useSponsoredListings<T extends { id: string | number }>(

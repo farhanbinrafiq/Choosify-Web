@@ -22,7 +22,7 @@ import { usePriorityClockMs } from '../../../hooks/usePriorityClockMs';
 import { ListingFilterPills, type ListingFilterPillItem } from '../../design/ListingFilterPills';
 import { DISCOVER_FORMAT_TABS } from './DiscoverStickyFormatNav';
 import { PLACEHOLDER_IMAGE } from '../../../constants';
-import { AdSlotCard } from '../../ads/AdSlot';
+import { AdSlotCard, useGridRowBanners } from '../../ads/AdSlot';
 import { AD_SLOTS } from '../../../lib/ads/adSlots';
 
 function resolveEditorsPickMediaKind(content: SpotlightContent): 'image' | 'video' {
@@ -243,6 +243,7 @@ export function DiscoverStructuredFeed({
   const blogsAside = showsAllLanes ? lanes.blogs.slice(0, LANE_LIMITS.blogs) : [];
   const blogsMain = isBlogsLaneFocused ? lanes.blogs : [];
   const blogsFocused = isBlogsLaneFocused;
+  const withRowBanners = useGridRowBanners(AD_SLOTS.DISCOVER_BANNER);
 
   /** Up to 5 editorial slides for Editor's Pick stacked carousel (below Blog Stories) */
   const editorsPicks = useMemo((): EditorsPickItem[] => {
@@ -312,8 +313,12 @@ export function DiscoverStructuredFeed({
           className="grid grid-cols-1 lg:grid-cols-[minmax(0,2.4fr)_minmax(0,1fr)] gap-6 mb-11"
         >
           <div className="min-w-0">
-            {live.length > 0 && (
+            {/* Ads Studio DISCOVER_BANNER "Inside the grid": a wide banner after lane N (row N) —
+                the main column only, so the right-hand sidebar is not covered. */}
+            {withRowBanners([
+              live.length > 0 ? (
               <section
+                key="live"
                 className="mb-9 bg-white border border-[#E8EDF2] rounded-[10px] p-4"
                 aria-label="Live Now"
               >
@@ -335,10 +340,10 @@ export function DiscoverStructuredFeed({
                   ))}
                 </div>
               </section>
-            )}
-
-            {youtube.length > 0 && (
+              ) : null,
+              youtube.length > 0 ? (
               <section
+                key="youtube"
                 className="mb-9 bg-white border border-[#E8EDF2] rounded-[10px] p-4"
                 aria-label="YouTube Picks"
               >
@@ -360,10 +365,10 @@ export function DiscoverStructuredFeed({
                   ))}
                 </div>
               </section>
-            )}
-
-            {reels.length > 0 && (
+              ) : null,
+              reels.length > 0 ? (
               <section
+                key="reels"
                 className="mb-9 bg-white border border-[#E8EDF2] rounded-[10px] p-4"
                 aria-label="Reels & Shorts"
               >
@@ -386,10 +391,10 @@ export function DiscoverStructuredFeed({
                   ))}
                 </div>
               </section>
-            )}
-
-            {blogsMain.length > 0 && (
+              ) : null,
+              blogsMain.length > 0 ? (
               <section
+                key="blogsMain"
                 className="mb-9 bg-white border border-[#E8EDF2] rounded-[10px] p-4"
                 aria-label={activeFormatId === 'guides' ? 'Buying Guides' : 'Blog Stories'}
               >
@@ -412,7 +417,8 @@ export function DiscoverStructuredFeed({
                   ))}
                 </div>
               </section>
-            )}
+              ) : null,
+            ], 1, 'mb-9')}
           </div>
 
           <aside className="flex flex-col gap-4 self-start min-w-0">

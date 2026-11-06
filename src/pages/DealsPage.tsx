@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { AdGridCard, AdSlotBanner, AdSlotCard, useGridAds, useSlotHasAds } from '../components/ads/AdSlot';
+import { AdGridCard, AdSlotBanner, AdSlotCard, useGridAds, useGridCols, useGridRowBanners, useSlotHasAds } from '../components/ads/AdSlot';
 import { AD_SLOTS } from '../lib/ads/adSlots';
 import { ProductCard } from '../components/ProductCard';
 import { FlashDealCard, DealOfTheDayCard } from '../components/deals/FlashDealCard';
@@ -313,6 +313,9 @@ export function DealsPage() {
       ),
     [paginatedProducts, infeedPlacements],
   );
+  // Ads Studio DEALS_BANNER "Inside the grid": a wide banner row between two rows of deals.
+  const withRowBanners = useGridRowBanners(AD_SLOTS.DEALS_BANNER);
+  const [dealGridRef, dealCols] = useGridCols<HTMLDivElement>();
   const dealGridFeed = useGridAds(AD_SLOTS.DEALS_GRID_CARD, dealFeed, (e) => e.kind !== 'placement');
 
   const categoriesList = React.useMemo(() => {
@@ -910,7 +913,7 @@ export function DealsPage() {
                   </div>
 
                   {/* Top Deals — capped at 4 per row on desktop */}
-                  <div className="grid grid-cols-1 min-[520px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch text-left">
+                  <div ref={dealGridRef} className="grid grid-cols-1 min-[520px]:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 items-stretch text-left">
                     {activeTab === 'Promo Codes' ? (
                       paginatedCoupons.map((coupon) => (
                         <div key={coupon.code} className="w-full h-full">
@@ -920,7 +923,7 @@ export function DealsPage() {
                     ) : (
                       <>
                         {/* Ads Studio DEALS_GRID_CARD: deal-card sized ads after every N deals */}
-                        {dealGridFeed.map((entry) =>
+                        {withRowBanners(dealGridFeed.map((entry) =>
                           entry.kind === 'gridAd' ? (
                             <AdGridCard key={entry.key} ad={entry.ad} />
                           ) : entry.kind === 'placement' ? (
@@ -937,7 +940,7 @@ export function DealsPage() {
                               />
                             </div>
                           ),
-                        )}
+                        ), dealCols)}
                       </>
                     )}
                   </div>

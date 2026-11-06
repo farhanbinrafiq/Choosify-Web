@@ -47,6 +47,50 @@ const Chip = ({ ad }: { ad: PublicAd }) => (
  */
 export function AdSlotBanner({ slot, position, className = '' }: { slot: AdSlotId; position?: string; className?: string }) {
   const ads = useBannerAds(slot, position);
+  return <BannerCarousel ads={ads} slot={slot} position={position} className={className} />;
+}
+
+/** Spot key of a wide banner drawn inside a results grid (Ads Studio "Inside the grid"). */
+export const IN_GRID_POSITION = 'in-grid';
+
+/** Column count of a CSS grid (callback ref; see SponsoredListing). */
+export { useGridColumns as useGridCols } from './SponsoredListing';
+
+/**
+ * Wide banners booked "inside the grid": returns a function that puts them into the grid's
+ * cells as full-width rows (grid-column 1 / -1) after the row each advertiser chose. The row
+ * spans the grid only, so a side menu next to the grid is not covered. Several banners after
+ * the same row take turns in one carousel; a short list shows them after its last card.
+ */
+export function useGridRowBanners(slot: AdSlotId) {
+  const ads = useBannerAds(slot, IN_GRID_POSITION);
+  return React.useCallback(
+    (cells: React.ReactNode[], cols: number, rowClassName = ''): React.ReactNode[] => {
+      const list = cells.filter((c) => c !== null && c !== undefined && c !== false);
+      if (!ads.length || !list.length) return list;
+      const byIndex = new Map<number, PublicAd[]>();
+      for (const ad of ads) {
+        const row = Math.max(1, Math.round(Number(ad.listRow) || 1));
+        const at = Math.min(list.length, row * Math.max(1, cols));
+        byIndex.set(at, [...(byIndex.get(at) || []), ad]);
+      }
+      const out = [...list];
+      [...byIndex.keys()].sort((a, b) => b - a).forEach((at) => {
+        out.splice(
+          at,
+          0,
+          <div key={`ad-grid-row-${at}`} className={`col-span-full min-w-0 ${rowClassName}`} style={{ gridColumn: '1 / -1' }} data-testid="ad-grid-row">
+            <BannerCarousel ads={byIndex.get(at)!} slot={slot} position={IN_GRID_POSITION} />
+          </div>,
+        );
+      });
+      return out;
+    },
+    [ads, slot],
+  );
+}
+
+function BannerCarousel({ ads, slot, position, className = '' }: { ads: PublicAd[]; slot: AdSlotId; position?: string; className?: string }) {
   if (!ads.length) return null;
   const testId = position ? `ad-slot-${slot}-${position}` : `ad-slot-${slot}`;
   return (

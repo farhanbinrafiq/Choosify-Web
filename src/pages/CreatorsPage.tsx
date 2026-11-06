@@ -1,6 +1,6 @@
 import { creatorPath } from '../../lib/publicUrls';
 import { AD_SLOTS } from '../lib/ads/adSlots';
-import { AdGridCard, AdSlotBanner, useGridAds } from '../components/ads/AdSlot';
+import { AdGridCard, AdSlotBanner, useGridAds, useGridCols, useGridRowBanners } from '../components/ads/AdSlot';
 import React, { useState, useMemo } from 'react';
 import { PAGE_LISTING_SINGLE_SHELL, CREATOR_CARD_GRID } from "../lib/pageLayout";
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
@@ -188,6 +188,9 @@ export function CreatorsPage() {
     loadMore: 12,
     resetKey: searchQuery + (selectedLetter ?? '') + sortOption,
   });
+  // Ads Studio CREATORS_BANNER "Inside the grid": a wide banner row between two rows of creators.
+  const withRowBanners = useGridRowBanners(AD_SLOTS.CREATORS_BANNER);
+  const [creatorGridRef, creatorCols] = useGridCols<HTMLDivElement>();
   const creatorGridFeed = useGridAds(AD_SLOTS.CREATORS_GRID_CARD, visibleCreatorFeed, (e) => e.kind !== 'placement');
 
   const sectionNavItems = useMemo(
@@ -733,9 +736,9 @@ export function CreatorsPage() {
 
           {filteredCreators.length > 0 ? (
             <>
-              <div className={cn(CREATOR_CARD_GRID, 'mb-8')}>
+              <div ref={creatorGridRef} className={cn(CREATOR_CARD_GRID, 'mb-8')}>
                 {/* Ads Studio CREATORS_GRID_CARD: creator-card sized ads after every N creators */}
-                {creatorGridFeed.map((entry) =>
+                {withRowBanners(creatorGridFeed.map((entry) =>
                   entry.kind === 'gridAd' ? (
                     <AdGridCard key={entry.key} ad={entry.ad} />
                   ) : entry.kind === 'placement' ? (
@@ -743,7 +746,7 @@ export function CreatorsPage() {
                   ) : (
                     <CreatorCardDesign key={entry.key} creator={entry.item} />
                   ),
-                )}
+                ), creatorCols)}
               </div>
               <div ref={sentinelRef} className="h-8" aria-hidden />
               {hasMore && (

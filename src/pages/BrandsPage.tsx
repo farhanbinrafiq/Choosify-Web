@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { AD_SLOTS } from '../lib/ads/adSlots';
-import { AdGridCard, AdSlotBanner, useGridAds } from '../components/ads/AdSlot';
+import { AdGridCard, AdSlotBanner, useGridAds, useGridRowBanners } from '../components/ads/AdSlot';
 import { SponsoredFrame, useGridColumns, useSponsoredListings } from '../components/ads/SponsoredListing';
 import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, ShoppingBag, Youtube, Twitter, Facebook, Instagram, Sparkles, PenTool, Users, Heart, Eye, Share2, Flame, Zap, Layers, Award, Gift, Copy, X, Store } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -400,6 +400,8 @@ export function BrandsPage() {
 
   // Ads Studio Sponsored Listings (BRANDS_FEED): a promoted brand from this list, labelled.
   const [brandGridRef, brandCols] = useGridColumns<HTMLDivElement>();
+  // Ads Studio BRANDS_BANNER "Inside the grid": a wide banner row between two rows of brands.
+  const withRowBanners = useGridRowBanners(AD_SLOTS.BRANDS_BANNER);
   const listedBrands = useSponsoredListings(AD_SLOTS.BRANDS_FEED, filteredBrands, 'brand', undefined, brandCols);
   const brandFeed = useMemo(
     () =>
@@ -985,7 +987,7 @@ export function BrandsPage() {
             <>
               <div ref={brandGridRef} className={cn(BRAND_CARD_GRID, 'mb-8')}>
                 {/* Ads Studio BRANDS_GRID_CARD: brand-card sized ads after every N brands (the ad's setting) */}
-                {brandGridFeed.map((entry) =>
+                {withRowBanners(brandGridFeed.map((entry) =>
                   entry.kind === 'gridAd' ? (
                     <AdGridCard key={entry.key} ad={entry.ad} />
                   ) : entry.kind === 'placement' ? (
@@ -1010,7 +1012,7 @@ export function BrandsPage() {
                       />
                     )
                   ),
-                )}
+                ), brandCols)}
               </div>
               <div ref={sentinelRef} className="h-8" aria-hidden />
               {hasMore && (

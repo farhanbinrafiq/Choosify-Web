@@ -1,6 +1,6 @@
 import { brandPath } from '../../lib/publicUrls';
 import { AD_SLOTS } from '../lib/ads/adSlots';
-import { AdGridCard, AdSlotBanner, useCategorySponsors } from '../components/ads/AdSlot';
+import { AdGridCard, AdSlotBanner, useCategorySponsors, useGridCols, useGridRowBanners } from '../components/ads/AdSlot';
 import { useAdSlot } from '../lib/ads/adSlots';
 import { adHref } from '../lib/ads/adSlots';
 import React, { useState, useEffect, useMemo } from 'react';
@@ -75,6 +75,10 @@ export function CategoriesPage() {
   const sponsorFor = useCategorySponsors();
   // Ads Studio CATEGORIES_GRID_CARD: a full category-card-sized ad after every N category cards.
   const catGridAds = useAdSlot(AD_SLOTS.CATEGORIES_GRID_CARD);
+  // Ads Studio CATEGORIES_BANNER "Inside the grid": a wide banner row between two rows of cards.
+  const withRowBanners = useGridRowBanners(AD_SLOTS.CATEGORIES_BANNER);
+  const [catGridRef, catCols] = useGridCols<HTMLDivElement>();
+  const [subGridRef, subCols] = useGridCols<HTMLDivElement>();
   const catGridEvery = (() => {
     const steps = catGridAds.map((a) => (Number.isFinite(a.gridEvery) ? Number(a.gridEvery) : 8)).filter((n) => n > 0);
     return steps.length ? Math.min(...steps) : 0;
@@ -761,14 +765,17 @@ export function CategoriesPage() {
                 </div>
               ) : selectedMainCategory && selectedCategoryEntry ? (
                 selectedSubgroups.length ? (
-                  <div className={CATEGORY_CARD_GRID}>
-                    {selectedSubgroups.map((sub) => (
-                      <CategorySubgroupCard
-                        key={sub.id || sub.name}
-                        categoryName={selectedCategoryEntry.name}
-                        subcategory={sub}
-                      />
-                    ))}
+                  <div className={CATEGORY_CARD_GRID} ref={subGridRef}>
+                    {withRowBanners(
+                      selectedSubgroups.map((sub) => (
+                        <CategorySubgroupCard
+                          key={sub.id || sub.name}
+                          categoryName={selectedCategoryEntry.name}
+                          subcategory={sub}
+                        />
+                      )),
+                      subCols,
+                    )}
                   </div>
                 ) : (
                   <div className="py-16 text-center text-sm font-semibold text-gray-400">
@@ -776,7 +783,7 @@ export function CategoriesPage() {
                   </div>
                 )
               ) : (
-                <div className={CATEGORY_CARD_GRID}>
+                <div className={CATEGORY_CARD_GRID} ref={catGridRef}>
                 <SponsoredFeedInjector
                   surface="categories"
                   items={filteredCategoriesList}
@@ -786,7 +793,7 @@ export function CategoriesPage() {
                     const cardCount = entries.filter((e) => e.kind !== 'sponsored').length;
                     let n = 0;
                     let shown = 0;
-                    return entries.flatMap((entry) => {
+                    return withRowBanners(entries.flatMap((entry) => {
                       if (entry.kind === 'sponsored') {
                         return [<CategorySponsoredAdCard key={entry.key} item={entry.sponsored} />];
                       }
@@ -828,7 +835,7 @@ export function CategoriesPage() {
                         />,
                         gridAd,
                       ].filter(Boolean);
-                    });
+                    }), catCols);
                   }}
                 </SponsoredFeedInjector>
                 </div>

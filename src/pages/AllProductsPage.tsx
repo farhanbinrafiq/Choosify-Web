@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { AdSlotBanner } from '../components/ads/AdSlot';
+import { AdSlotBanner, useGridRowBanners } from '../components/ads/AdSlot';
 import { AD_SLOTS } from '../lib/ads/adSlots';
 import { Search, ChevronDown, ChevronRight, Star, Filter, Bookmark, Grid, List as ListIcon, X, SlidersHorizontal, Layers, Award, Flame, Clock, Sparkles, ArrowRight, Package } from 'lucide-react';
 import { useSearchParams, Link } from 'react-router-dom';
@@ -614,6 +614,8 @@ export function AllProductsPage() {
 
   // Ads Studio Sponsored Listings (PRODUCTS_FEED): a promoted product matching the current filters.
   const [productGridRef, productCols] = useGridColumns<HTMLDivElement>();
+  // Ads Studio BROWSE_BANNER "Inside the grid": a wide banner row between two rows of products.
+  const withRowBanners = useGridRowBanners(AD_SLOTS.BROWSE_BANNER);
   const productFeed = useSponsoredListings(AD_SLOTS.PRODUCTS_FEED, paginatedProducts, 'product', filteredProducts, viewMode === 'grid' ? productCols : 1);
 
   const productsSponsoredBanners = useSponsoredPlacementsForSurface('products', {
@@ -1067,7 +1069,7 @@ export function AllProductsPage() {
                 ? PRODUCT_CARD_GRID
                 : "flex flex-col gap-6"
             )}>
-              {productFeed.map((entry) => {
+              {withRowBanners(productFeed.map((entry) => {
                 const card = <ProductCard product={entry.item} variant={viewMode === 'list' ? 'list' : 'grid'} />;
                 return entry.sponsored ? (
                   <SponsoredFrame key={`product-${entry.item.id}-sponsored`} ad={entry.sponsored}>
@@ -1076,7 +1078,7 @@ export function AllProductsPage() {
                 ) : (
                   <React.Fragment key={`product-${entry.item.id}`}>{card}</React.Fragment>
                 );
-              })}
+              }), viewMode === 'grid' ? productCols : 1)}
             </div>
           )}
 
