@@ -1072,7 +1072,8 @@ export function AllProductsPage() {
               {withRowBanners(productFeed.map((entry) => {
                 const card = <ProductCard product={entry.item} variant={viewMode === 'list' ? 'list' : 'grid'} />;
                 return entry.sponsored ? (
-                  <SponsoredFrame key={`product-${entry.item.id}-sponsored`} ad={entry.sponsored}>
+                  // grid card: chip at the bottom-left of the 170px photo, clear of the discount badge (top-left)
+                  <SponsoredFrame key={`product-${entry.item.id}-sponsored`} ad={entry.sponsored} chipClassName={viewMode === 'grid' ? 'left-2 top-[144px]' : undefined}>
                     {card}
                   </SponsoredFrame>
                 ) : (

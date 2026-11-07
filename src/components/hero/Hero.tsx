@@ -127,6 +127,9 @@ export function Hero({ variant, className }: HeroProps) {
   const first = slides[0];
   const frameRatio = Math.min(4.5, Math.max(1.6, (first && ratios[first.id]) || 1920 / 750));
   const phoneCrop = isMobile && slides.some((s) => s.mobileImage);
+  // Phones: a taller frame (at most 1.8:1); slides fill it, trimming the sides a little.
+  const shownRatio = isMobile ? Math.min(frameRatio, 1.8) : frameRatio;
+  const coverAll = phoneCrop || isMobile;
   const fits = (id: string) => {
     const r = ratios[id];
     return !r || Math.abs(r - frameRatio) / frameRatio < 0.04;
@@ -142,7 +145,7 @@ export function Hero({ variant, className }: HeroProps) {
         phoneCrop ? 'h-[320px] sm:h-[400px]' : '[aspect-ratio:var(--hero-ratio)]',
         className,
       )}
-      style={{ ['--hero-ratio' as string]: String(frameRatio) } as React.CSSProperties}
+      style={{ ['--hero-ratio' as string]: String(shownRatio) } as React.CSSProperties}
       aria-label="Homepage hero"
       aria-roledescription="carousel"
       onMouseEnter={() => setAutoplay(false)}
@@ -180,13 +183,13 @@ export function Hero({ variant, className }: HeroProps) {
             ) : slide.image ? (
               <picture className="relative block w-full h-full">
                 {slide.mobileImage && <source media={MOBILE_QUERY} srcSet={slide.mobileImage} />}
-                {!phoneCrop && !fits(slide.id) ? (
+                {!coverAll && !fits(slide.id) ? (
                   <img src={slide.image} alt="" aria-hidden className="absolute inset-0 h-full w-full scale-110 object-cover blur-2xl opacity-80" />
                 ) : null}
                 <img
                   src={slide.image}
                   alt={slide.alt || ''}
-                  className={cn('relative w-full h-full', phoneCrop || fits(slide.id) ? 'object-cover' : 'object-contain object-top')}
+                  className={cn('relative w-full h-full', coverAll || fits(slide.id) ? 'object-cover' : 'object-contain object-top')}
                   style={phoneCrop ? focalStyle(slide.focalX, slide.focalY) : undefined}
                   loading={i === 0 ? 'eager' : 'lazy'}
                   data-testid="hero-slide-image"
@@ -258,7 +261,7 @@ export function Hero({ variant, className }: HeroProps) {
       {slides.length > 1 && (
         <>
           {/* No arrow buttons: round picture icons switch slides (same style as the banner-ad switcher). */}
-          <div className="absolute left-1/2 -translate-x-1/2 bottom-[30%] md:bottom-[24%] z-20 flex items-center gap-2 rounded-full bg-black/25 px-2 py-1.5 backdrop-blur-sm" data-testid="hero-slide-icons">
+          <div className="absolute left-3 bottom-[30%] sm:left-1/2 sm:-translate-x-1/2 md:bottom-[24%] z-20 flex items-center gap-2 rounded-full bg-black/25 px-2 py-1.5 backdrop-blur-sm" data-testid="hero-slide-icons">
             {slides.map((slide, i) => (
               <button
                 key={slide.id}

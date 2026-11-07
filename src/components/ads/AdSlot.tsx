@@ -121,8 +121,11 @@ function BannerFrame({ ad }: { ad: PublicAd }) {
   const phonePic = ad.mobileImage;
   const ratio = phonePic
     ? ad.mobileImageWidth && ad.mobileImageHeight ? Math.min(2, Math.max(0.8, ad.mobileImageWidth / ad.mobileImageHeight)) : 1
-    : ad.imageWidth && ad.imageHeight ? Math.min(2.2, Math.max(1.8, ad.imageWidth / ad.imageHeight)) : 2.2;
+    : ad.imageWidth && ad.imageHeight ? Math.min(1.8, Math.max(1.6, ad.imageWidth / ad.imageHeight)) : 1.8;
   const fill = ad.fit === 'fill';
+  // Phones: designs up to 2.6:1 fill the taller frame (sides trimmed a little); wider ones show whole.
+  const designRatio = ad.imageWidth && ad.imageHeight ? ad.imageWidth / ad.imageHeight : 4;
+  const phoneCover = !phonePic && designRatio <= 2.6;
   return (
     <AdLink
       ad={ad}
@@ -137,7 +140,7 @@ function BannerFrame({ ad }: { ad: PublicAd }) {
         alt={ad.alt}
         width={ad.imageWidth}
         height={ad.imageHeight}
-        className={`relative block h-full w-full object-contain ${fill ? 'sm:object-cover' : ''}`}
+        className={`relative block h-full w-full ${phoneCover ? 'object-cover' : 'object-contain'} ${fill ? 'sm:object-cover' : 'sm:object-contain'}`}
         style={fill ? { objectPosition: `center ${ad.focusY || 'center'}` } : undefined}
         loading="lazy"
         data-testid="ad-banner-image"
@@ -154,7 +157,7 @@ function BannerFrame({ ad }: { ad: PublicAd }) {
       <Chip ad={ad} />
       {ad.ctaLabel && adHref(ad) && (
         <span
-          className="absolute bottom-1.5 right-1.5 z-[2] inline-flex items-center gap-0.5 rounded-md bg-[#FF5B00] px-2 py-0.5 text-[9px] font-extrabold uppercase tracking-wide text-white shadow-md sm:bottom-auto sm:right-5 sm:top-1/2 sm:-translate-y-1/2 sm:gap-1 sm:rounded-lg sm:px-4 sm:py-2 sm:text-[12.5px]"
+          className="absolute right-3 top-1/2 z-[2] inline-flex -translate-y-1/2 items-center gap-1 rounded-lg bg-[#FF5B00] px-3 py-1.5 text-[10.5px] font-extrabold uppercase tracking-wide text-white shadow-md sm:right-5 sm:px-4 sm:py-2 sm:text-[12.5px]"
           data-testid="ad-cta-button"
         >
           {ad.ctaLabel} <span aria-hidden>→</span>

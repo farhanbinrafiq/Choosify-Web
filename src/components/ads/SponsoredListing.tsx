@@ -88,12 +88,12 @@ export function useSponsoredListings<T extends { id: string | number }>(
 }
 
 /** Wraps a normal card with the "Sponsored" label (top-left, above the card's own badges). */
-export function SponsoredFrame({ ad, children }: { ad: PublicAd; children: React.ReactNode }) {
+export function SponsoredFrame({ ad, children, chipClassName }: { ad: PublicAd; children: React.ReactNode; /** Where the chip sits (default: top centre). */ chipClassName?: string }) {
   return (
     <div className="relative h-full" data-testid={`sponsored-listing-${ad.slot}`} {...adAttrs(ad)}>
       {children}
       <span
-        className="pointer-events-none absolute left-1/2 top-2 z-20 -translate-x-1/2 rounded-full bg-black/70 px-2 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wide text-white backdrop-blur-sm"
+        className={`pointer-events-none absolute z-20 ${chipClassName || 'left-1/2 top-2 -translate-x-1/2'} rounded-full bg-black/70 px-2 py-0.5 text-[9.5px] font-extrabold uppercase tracking-wide text-white backdrop-blur-sm`}
         data-testid="sponsored-chip"
       >
         Sponsored

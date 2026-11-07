@@ -103,15 +103,19 @@ export function AdPopup() {
   if (!ad) return null;
   const target = adHref(ad);
   const external = Boolean(target && (target.external || /^https?:/i.test(target.href)));
+  // Phones without a phone picture: a taller card (at least 320px) with the design shown WHOLE in
+  // the middle over a soft blurred copy of itself, so nothing is cut and the button sits below it.
+  const phoneTall = !ad.mobileImage;
   const media = (
-    <picture>
+    <picture className={`relative block overflow-hidden rounded-2xl ${phoneTall ? 'min-h-[320px] bg-[#0F1238] sm:min-h-0 sm:bg-transparent' : ''}`}>
       {ad.mobileImage ? <source media="(max-width: 639px)" srcSet={ad.mobileImage} /> : null}
+      {phoneTall ? <img src={ad.image} alt="" aria-hidden className="absolute inset-0 h-full w-full scale-110 object-cover blur-xl opacity-70 sm:hidden" /> : null}
       <img
         src={ad.image}
         alt={ad.alt}
         width={ad.imageWidth}
         height={ad.imageHeight}
-        className="block max-h-[80vh] w-full rounded-2xl object-contain"
+        className={`block max-h-[80vh] w-full object-contain ${phoneTall ? 'absolute inset-x-0 top-[44%] h-auto -translate-y-1/2 sm:static sm:translate-y-0' : ''} sm:rounded-2xl`}
         data-testid="ad-popup-image"
       />
     </picture>
