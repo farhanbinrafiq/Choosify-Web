@@ -68,6 +68,8 @@ export type PublicAd = {
   popup?: { pages: string[]; maxPerSession: number; delaySec: number };
   /** In-grid cards: after every N cards (0 = once, after the last card). */
   gridEvery?: number;
+  /** In-grid card shown once (after card gridEvery), not repeated. */
+  gridOnce?: boolean;
   /** Text cards: the logo's main colour → card gradient. */
   brandColor?: string;
   logoZoom?: number;

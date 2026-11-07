@@ -272,12 +272,13 @@ export type GridAdEntry = { kind: 'gridAd'; key: string; ad: PublicAd; ads: Publ
  * stack after the last card.
  */
 export function planGridAds(ads: PublicAd[], total: number): Map<number, PublicAd[]> {
+  // Each ad keeps its own setting; "only once" ads appear after card N and never again.
   const plan = new Map<number, PublicAd[]>();
   if (!ads.length || total <= 0) return plan;
   const every = (a: PublicAd) => (Number.isFinite(a.gridEvery) ? Number(a.gridEvery) : 8);
   const seen = new Set<string>();
   for (let n = 1; n <= total; n++) {
-    const due = ads.filter((a) => every(a) > 0 && n % every(a) === 0);
+    const due = ads.filter((a) => every(a) > 0 && (a.gridOnce ? n === every(a) : n % every(a) === 0));
     if (due.length) {
       plan.set(n, due);
       due.forEach((a) => seen.add(a.id));
