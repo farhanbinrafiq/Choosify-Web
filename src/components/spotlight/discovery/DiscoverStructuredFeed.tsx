@@ -22,8 +22,8 @@ import { usePriorityClockMs } from '../../../hooks/usePriorityClockMs';
 import { ListingFilterPills, type ListingFilterPillItem } from '../../design/ListingFilterPills';
 import { DISCOVER_FORMAT_TABS } from './DiscoverStickyFormatNav';
 import { PLACEHOLDER_IMAGE } from '../../../constants';
-import { AdSlotCard, useGridRowBanners } from '../../ads/AdSlot';
-import { AD_SLOTS } from '../../../lib/ads/adSlots';
+import { AdGridStack, AdSlotCard, useGridRowBanners } from '../../ads/AdSlot';
+import { AD_SLOTS, useAdSlot } from '../../../lib/ads/adSlots';
 
 function resolveEditorsPickMediaKind(content: SpotlightContent): 'image' | 'video' {
   const media = content.media;
@@ -244,6 +244,21 @@ export function DiscoverStructuredFeed({
   const blogsMain = isBlogsLaneFocused ? lanes.blogs : [];
   const blogsFocused = isBlogsLaneFocused;
   const withRowBanners = useGridRowBanners(AD_SLOTS.DISCOVER_BANNER);
+  // Ads Studio DISCOVER_FEED: a sponsored card between feed items — in the YouTube Picks lane
+  // (after the 3rd video), else in Blog Stories (after the 1st), else in Live Now. Several ads stack.
+  const feedAds = useAdSlot(AD_SLOTS.DISCOVER_FEED).filter((a) => a.format !== 'sponsored_listing');
+  const feedLane: 'youtube' | 'blogs' | 'live' | 'reels' | null = youtube.length ? 'youtube' : blogsMain.length ? 'blogs' : live.length ? 'live' : reels.length ? 'reels' : null;
+  const feedAdCard = feedAds.length ? (
+    <div key="discover-feed-ad" className="flex h-full self-stretch [&>*]:w-full" data-testid="discover-feed-ad">
+      <AdGridStack ads={feedAds} fit />
+    </div>
+  ) : null;
+  const withFeedAd = (cards: React.ReactNode[], at: number) => {
+    if (!feedAdCard || !Number.isFinite(at)) return cards;
+    const out = [...cards];
+    out.splice(Math.min(at, out.length), 0, feedAdCard);
+    return out;
+  };
 
   /** Up to 5 editorial slides for Editor's Pick stacked carousel (below Blog Stories) */
   const editorsPicks = useMemo((): EditorsPickItem[] => {
@@ -328,16 +343,30 @@ export function DiscoverStructuredFeed({
                   onViewAll={() => triggerFilter('live')}
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {live.map((content) => (
-                    <FeedCard
-                      key={content.contentId}
-                      content={content}
-                      products={products}
-                      onNavigate={onNavigateCard}
-                      forceVariant="live"
-                      nowMs={nowMs}
-                    />
-                  ))}
+                  {feedLane === 'live'
+                    ? withFeedAd(
+                        live.map((content) => (
+                          <FeedCard
+                            key={content.contentId}
+                            content={content}
+                            products={products}
+                            onNavigate={onNavigateCard}
+                            forceVariant="live"
+                            nowMs={nowMs}
+                          />
+                        )),
+                        1,
+                      )
+                    : live.map((content) => (
+                        <FeedCard
+                          key={content.contentId}
+                          content={content}
+                          products={products}
+                          onNavigate={onNavigateCard}
+                          forceVariant="live"
+                          nowMs={nowMs}
+                        />
+                      ))}
                 </div>
               </section>
               ) : null,
@@ -353,16 +382,19 @@ export function DiscoverStructuredFeed({
                   onViewAll={() => triggerFilter('videos')}
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                  {youtube.map((content) => (
-                    <FeedCard
-                      key={content.contentId}
-                      content={content}
-                      products={products}
-                      onNavigate={onNavigateCard}
-                      forceVariant="landscape-video"
-                      nowMs={nowMs}
-                    />
-                  ))}
+                  {withFeedAd(
+                    youtube.map((content) => (
+                      <FeedCard
+                        key={content.contentId}
+                        content={content}
+                        products={products}
+                        onNavigate={onNavigateCard}
+                        forceVariant="landscape-video"
+                        nowMs={nowMs}
+                      />
+                    )),
+                    feedLane === 'youtube' ? 3 : Infinity,
+                  )}
                 </div>
               </section>
               ) : null,
@@ -378,17 +410,20 @@ export function DiscoverStructuredFeed({
                   onViewAll={() => triggerFilter('reels')}
                 />
                 <div className="grid grid-cols-2 min-[480px]:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 gap-3">
-                  {reels.map((content) => (
-                    <FeedCard
-                      key={content.contentId}
-                      content={content}
-                      products={products}
-                      onNavigate={onNavigateCard}
-                      forceVariant="portrait-reel"
-                      className="w-full"
-                      nowMs={nowMs}
-                    />
-                  ))}
+                  {withFeedAd(
+                    reels.map((content) => (
+                      <FeedCard
+                        key={content.contentId}
+                        content={content}
+                        products={products}
+                        onNavigate={onNavigateCard}
+                        forceVariant="portrait-reel"
+                        className="w-full"
+                        nowMs={nowMs}
+                      />
+                    )),
+                    feedLane === 'reels' ? 4 : Infinity,
+                  )}
                 </div>
               </section>
               ) : null,
@@ -405,16 +440,30 @@ export function DiscoverStructuredFeed({
                   onViewAll={() => triggerFilter(activeFormatId === 'guides' ? 'guides' : 'blogs')}
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {blogsMain.map((content) => (
-                    <FeedCard
-                      key={content.contentId}
-                      content={content}
-                      products={products}
-                      onNavigate={onNavigateCard}
-                      forceVariant="guide"
-                      nowMs={nowMs}
-                    />
-                  ))}
+                  {feedLane === 'blogs'
+                    ? withFeedAd(
+                        blogsMain.map((content) => (
+                          <FeedCard
+                            key={content.contentId}
+                            content={content}
+                            products={products}
+                            onNavigate={onNavigateCard}
+                            forceVariant="guide"
+                            nowMs={nowMs}
+                          />
+                        )),
+                        1,
+                      )
+                    : blogsMain.map((content) => (
+                        <FeedCard
+                          key={content.contentId}
+                          content={content}
+                          products={products}
+                          onNavigate={onNavigateCard}
+                          forceVariant="guide"
+                          nowMs={nowMs}
+                        />
+                      ))}
                 </div>
               </section>
               ) : null,

@@ -307,7 +307,7 @@ export function useGridAds<T extends { key: string }>(slot: AdSlotId, entries: T
 }
 
 /** One in-grid card spot: a single ad, or several stacked that slide (round logo switches top-right). */
-export function AdGridStack({ ads }: { ads: PublicAd[] }) {
+export function AdGridStack({ ads, fit = false }: { ads: PublicAd[]; /** Take the height of the cards in the row (no 300px minimum). */ fit?: boolean }) {
   const [i, setI] = React.useState(0);
   const [paused, setPaused] = React.useState(false);
   const count = ads.length;
@@ -318,10 +318,10 @@ export function AdGridStack({ ads }: { ads: PublicAd[] }) {
   }, [count, paused]);
   if (!count) return null;
   const at = i % count;
-  if (count === 1) return <AdGridCard ad={ads[0]} />;
+  if (count === 1) return <AdGridCard ad={ads[0]} fit={fit} />;
   return (
     <div className="relative h-full w-full" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} data-testid="ad-grid-stack">
-      <AdGridCard key={ads[at].id} ad={ads[at]} />
+      <AdGridCard key={ads[at].id} ad={ads[at]} fit={fit} />
       <div className="absolute right-2 top-2 z-[3] flex items-center gap-1 rounded-full bg-black/35 px-1 py-1 backdrop-blur-sm" data-testid="ad-grid-stack-switch">
         {ads.map((a, k) => (
           <button
@@ -347,15 +347,15 @@ export function AdGridStack({ ads }: { ads: PublicAd[] }) {
   );
 }
 
-export function AdGridCard({ ad }: { ad: PublicAd }) {
+export function AdGridCard({ ad, fit = false }: { ad: PublicAd; fit?: boolean }) {
   const target = adHref(ad);
   return (
     <AdLink
       ad={ad}
-      className="choosify-dark-surface relative flex h-full min-h-[300px] flex-col overflow-hidden rounded-[10px] text-left no-underline"
+      className={`choosify-dark-surface relative flex h-full flex-col overflow-hidden rounded-[10px] text-left no-underline ${fit ? 'min-h-[220px]' : 'min-h-[300px]'}`}
       testId={`ad-grid-card-${ad.slot}`}
     >
-      <div className={`relative min-h-[130px] flex-1 overflow-hidden ${brandGradient(ad.brandColor, 110, ad.brandColor2) ? '' : 'bg-gradient-to-br from-[#FF5B00] to-[#2323FF]'}`} style={brandGradient(ad.brandColor, 135, ad.brandColor2) ? { background: brandGradient(ad.brandColor, 135, ad.brandColor2)! } : undefined}>
+      <div className={`relative ${fit ? "min-h-[90px]" : "min-h-[130px]"} flex-1 overflow-hidden ${brandGradient(ad.brandColor, 110, ad.brandColor2) ? '' : 'bg-gradient-to-br from-[#FF5B00] to-[#2323FF]'}`} style={brandGradient(ad.brandColor, 135, ad.brandColor2) ? { background: brandGradient(ad.brandColor, 135, ad.brandColor2)! } : undefined}>
         {ad.display !== 'text' && ad.image ? (
           <img src={ad.image} alt={ad.alt} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
         ) : ad.sponsorLogoUrl ? (
