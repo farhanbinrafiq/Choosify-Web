@@ -283,7 +283,7 @@ export function Navbar() {
         <div className="flex-1 min-w-0 flex items-center justify-end sm:justify-stretch px-1 sm:px-3 md:px-4 lg:px-5">
           <div className="flex items-center gap-1.5 sm:flex-1 sm:min-w-0 sm:gap-0 shrink-0">
             <GlobalSearchBar
-              initialValue={searchQuery}
+              initialValue={location.pathname === '/search' ? searchQuery : ''}
               placeholder="Search Products, Brands, Reviews..."
               onSubmit={(val) => {
                 setSearchQuery(val);

@@ -211,6 +211,11 @@ export function GlobalSearchBar({
 
   useEffect(() => {
     setMobileExpandedState(false);
+    // Typed text does not follow you to another page (the search results page keeps its ?q=).
+    if (!isControlled && location.pathname !== '/search') {
+      setQuery('');
+      setIsOpen(false);
+    }
   }, [location.pathname]);
 
   useEffect(() => {
@@ -511,6 +516,7 @@ export function GlobalSearchBar({
         <input
           ref={inputRef}
           type="text"
+          autoComplete="off"
           value={queryValue}
           onChange={(e) => {
             setQueryValue(e.target.value);
@@ -529,18 +535,38 @@ export function GlobalSearchBar({
           className={cn(
             'w-full min-w-0 bg-transparent outline-none text-navy font-semibold placeholder-gray-500 focus:outline-none focus:ring-0 border-none',
             mode === 'overlay'
-              ? 'h-10 pl-2 pr-24 text-xs'
-              : 'h-9 sm:h-9 md:h-10 pl-2 sm:pl-3 pr-[4.25rem] sm:pr-14 md:pr-20 lg:pr-24 text-[11px] sm:text-xs',
+              ? cn('h-10 pl-2 text-xs', queryValue ? 'pr-32' : 'pr-24')
+              : cn(
+                  'h-9 sm:h-9 md:h-10 pl-2 sm:pl-3 text-[11px] sm:text-xs',
+                  queryValue ? 'pr-[6rem] sm:pr-[5rem] md:pr-[6.5rem] lg:pr-[7.5rem]' : 'pr-[4.25rem] sm:pr-14 md:pr-20 lg:pr-24',
+                ),
           )}
         />
+        <div className="absolute right-1 sm:right-1.5 top-1 sm:top-1.5 bottom-1 sm:bottom-1.5 flex items-stretch gap-1">
+        {queryValue ? (
+          <button
+            type="button"
+            aria-label="Clear search"
+            title="Clear"
+            onClick={() => {
+              setQueryValue('');
+              setActiveIndex(-1);
+              inputRef.current?.focus();
+            }}
+            className="self-center flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[#F1F3F5] text-gray-500 hover:bg-[#E5E7EB] hover:text-[#EF3C23] transition-colors cursor-pointer border-0 p-0"
+            data-testid="search-clear"
+          >
+            <X className="w-3.5 h-3.5" strokeWidth={2.5} />
+          </button>
+        ) : null}
         <button
           type="submit"
           aria-label={submitLabel}
           className={cn(
-            'absolute right-1 sm:right-1.5 top-1 sm:top-1.5 bottom-1 sm:bottom-1.5 rounded-full bg-[#FF5B00] hover:bg-[#EF3C23] text-white font-bold tracking-wide uppercase flex items-center justify-center gap-1 transition-all duration-200 cursor-pointer',
+            'rounded-full bg-[#FF5B00] hover:bg-[#EF3C23] text-white font-bold tracking-wide uppercase flex items-center justify-center gap-1 transition-all duration-200 cursor-pointer',
             mode === 'overlay'
               ? 'px-4 text-[9px]'
-              : 'px-2 sm:px-2.5 md:px-4 lg:px-5 text-[8px] sm:text-[8px] md:text-[9px] min-w-[3.25rem] sm:min-w-[2.25rem] md:min-w-0 max-w-[42%] sm:max-w-none',
+              : 'px-2 sm:px-2.5 md:px-4 lg:px-5 text-[8px] sm:text-[8px] md:text-[9px] min-w-[3.25rem] sm:min-w-[2.25rem] md:min-w-0',
           )}
         >
           {mode === 'overlay' ? (
@@ -552,6 +578,7 @@ export function GlobalSearchBar({
             </>
           )}
         </button>
+        </div>
       </div>
     </form>
   );
