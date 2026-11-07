@@ -244,19 +244,21 @@ export function DiscoverStructuredFeed({
   const blogsMain = isBlogsLaneFocused ? lanes.blogs : [];
   const blogsFocused = isBlogsLaneFocused;
   const withRowBanners = useGridRowBanners(AD_SLOTS.DISCOVER_BANNER);
-  // Ads Studio DISCOVER_FEED: a sponsored card between feed items — in the YouTube Picks lane
-  // (after the 3rd video), else in Blog Stories (after the 1st), else in Live Now. Several ads stack.
+  // Ads Studio DISCOVER_FEED: a sponsored card inside the lane the advertiser chose (Live Now,
+  // YouTube Picks, Reels & Shorts, Blog Stories), sized like that lane's cards. Several ads stack.
   const feedAds = useAdSlot(AD_SLOTS.DISCOVER_FEED).filter((a) => a.format !== 'sponsored_listing');
-  const feedLane: 'youtube' | 'blogs' | 'live' | 'reels' | null = youtube.length ? 'youtube' : blogsMain.length ? 'blogs' : live.length ? 'live' : reels.length ? 'reels' : null;
-  const feedAdCard = feedAds.length ? (
-    <div key="discover-feed-ad" className="flex h-full self-stretch [&>*]:w-full" data-testid="discover-feed-ad">
-      <AdGridStack ads={feedAds} fit />
-    </div>
-  ) : null;
-  const withFeedAd = (cards: React.ReactNode[], at: number) => {
-    if (!feedAdCard || !Number.isFinite(at)) return cards;
+  const laneAds = (lane: 'live' | 'youtube' | 'reels' | 'blogs') => feedAds.filter((a) => (a.position || 'lane-youtube') === `lane-${lane}`);
+  const withFeedAd = (cards: React.ReactNode[], lane: 'live' | 'youtube' | 'reels' | 'blogs', at: number) => {
+    const ads = laneAds(lane);
+    if (!ads.length || !cards.length) return cards;
     const out = [...cards];
-    out.splice(Math.min(at, out.length), 0, feedAdCard);
+    out.splice(
+      Math.min(at, out.length),
+      0,
+      <div key={`discover-feed-ad-${lane}`} className="flex h-full self-stretch [&>*]:w-full" data-testid="discover-feed-ad" data-lane={lane}>
+        <AdGridStack ads={ads} fit />
+      </div>,
+    );
     return out;
   };
 
@@ -343,30 +345,20 @@ export function DiscoverStructuredFeed({
                   onViewAll={() => triggerFilter('live')}
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {feedLane === 'live'
-                    ? withFeedAd(
-                        live.map((content) => (
-                          <FeedCard
-                            key={content.contentId}
-                            content={content}
-                            products={products}
-                            onNavigate={onNavigateCard}
-                            forceVariant="live"
-                            nowMs={nowMs}
-                          />
-                        )),
-                        1,
-                      )
-                    : live.map((content) => (
-                        <FeedCard
-                          key={content.contentId}
-                          content={content}
-                          products={products}
-                          onNavigate={onNavigateCard}
-                          forceVariant="live"
-                          nowMs={nowMs}
-                        />
-                      ))}
+                  {withFeedAd(
+                    live.map((content) => (
+                      <FeedCard
+                        key={content.contentId}
+                        content={content}
+                        products={products}
+                        onNavigate={onNavigateCard}
+                        forceVariant="live"
+                        nowMs={nowMs}
+                      />
+                    )),
+                    'live',
+                    1,
+                  )}
                 </div>
               </section>
               ) : null,
@@ -393,7 +385,8 @@ export function DiscoverStructuredFeed({
                         nowMs={nowMs}
                       />
                     )),
-                    feedLane === 'youtube' ? 3 : Infinity,
+                    'youtube',
+                    3,
                   )}
                 </div>
               </section>
@@ -422,7 +415,8 @@ export function DiscoverStructuredFeed({
                         nowMs={nowMs}
                       />
                     )),
-                    feedLane === 'reels' ? 4 : Infinity,
+                    'reels',
+                    4,
                   )}
                 </div>
               </section>
@@ -440,30 +434,20 @@ export function DiscoverStructuredFeed({
                   onViewAll={() => triggerFilter(activeFormatId === 'guides' ? 'guides' : 'blogs')}
                 />
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {feedLane === 'blogs'
-                    ? withFeedAd(
-                        blogsMain.map((content) => (
-                          <FeedCard
-                            key={content.contentId}
-                            content={content}
-                            products={products}
-                            onNavigate={onNavigateCard}
-                            forceVariant="guide"
-                            nowMs={nowMs}
-                          />
-                        )),
-                        1,
-                      )
-                    : blogsMain.map((content) => (
-                        <FeedCard
-                          key={content.contentId}
-                          content={content}
-                          products={products}
-                          onNavigate={onNavigateCard}
-                          forceVariant="guide"
-                          nowMs={nowMs}
-                        />
-                      ))}
+                  {withFeedAd(
+                    blogsMain.map((content) => (
+                      <FeedCard
+                        key={content.contentId}
+                        content={content}
+                        products={products}
+                        onNavigate={onNavigateCard}
+                        forceVariant="guide"
+                        nowMs={nowMs}
+                      />
+                    )),
+                    'blogs',
+                    1,
+                  )}
                 </div>
               </section>
               ) : null,
