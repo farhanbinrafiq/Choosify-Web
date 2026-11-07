@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { AD_SLOTS } from '../lib/ads/adSlots';
-import { AdGridCard, AdSlotBanner, useGridAds, useGridRowBanners } from '../components/ads/AdSlot';
+import { AdGridStack, AdSlotBanner, useGridAds, useGridRowBanners } from '../components/ads/AdSlot';
 import { SponsoredFrame, useGridColumns, useSponsoredListings } from '../components/ads/SponsoredListing';
 import { Search, Star, Filter, ArrowRight, ExternalLink, ChevronLeft, ChevronRight, CheckCircle2, ShoppingBag, Youtube, Twitter, Facebook, Instagram, Sparkles, PenTool, Users, Heart, Eye, Share2, Flame, Zap, Layers, Award, Gift, Copy, X, Store } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -989,7 +989,7 @@ export function BrandsPage() {
                 {/* Ads Studio BRANDS_GRID_CARD: brand-card sized ads after every N brands (the ad's setting) */}
                 {withRowBanners(brandGridFeed.map((entry) =>
                   entry.kind === 'gridAd' ? (
-                    <AdGridCard key={entry.key} ad={entry.ad} />
+                    <AdGridStack key={entry.key} ads={entry.ads} />
                   ) : entry.kind === 'placement' ? (
                     null /* no placeholder ads: only real Ads Studio bookings show */
                   ) : (

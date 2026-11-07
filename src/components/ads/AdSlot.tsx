@@ -263,36 +263,87 @@ export function GridAdCards({ slot, fallback = null }: { slot: AdSlotId; fallbac
   );
 }
 
-export type GridAdEntry = { kind: 'gridAd'; key: string; ad: PublicAd };
+export type GridAdEntry = { kind: 'gridAd'; key: string; ad: PublicAd; ads: PublicAd[] };
 
 /**
- * Inserts the slot's booked in-grid ads into a card list: after every N real cards (the smallest
- * "after every N cards" chosen on the booked ads), several ads taking turns. With fewer cards
- * than N — or "once, after the last card" — one ad follows the last card.
+ * Where in-grid card ads go: after card n → the ads due there. Each ad keeps its OWN
+ * "after every N cards"; ads due at the same spot are STACKED into one card that slides between
+ * them. Ads that never came up (list shorter than N, or "once, after the last card") join the
+ * stack after the last card.
  */
+export function planGridAds(ads: PublicAd[], total: number): Map<number, PublicAd[]> {
+  const plan = new Map<number, PublicAd[]>();
+  if (!ads.length || total <= 0) return plan;
+  const every = (a: PublicAd) => (Number.isFinite(a.gridEvery) ? Number(a.gridEvery) : 8);
+  const seen = new Set<string>();
+  for (let n = 1; n <= total; n++) {
+    const due = ads.filter((a) => every(a) > 0 && n % every(a) === 0);
+    if (due.length) {
+      plan.set(n, due);
+      due.forEach((a) => seen.add(a.id));
+    }
+  }
+  const rest = ads.filter((a) => !seen.has(a.id));
+  if (rest.length) plan.set(total, [...(plan.get(total) || []), ...rest]);
+  return plan;
+}
+
+/** Inserts the slot's in-grid card ads into a card list (see planGridAds). */
 export function useGridAds<T extends { key: string }>(slot: AdSlotId, entries: T[], isCard: (e: T) => boolean): Array<T | GridAdEntry> {
   const ads = useAdSlot(slot);
   if (!ads.length) return entries;
-  const steps = ads.map((a) => (Number.isFinite(a.gridEvery) ? Number(a.gridEvery) : 8)).filter((n) => n > 0);
-  const every = steps.length ? Math.min(...steps) : 0;
-  const total = entries.filter(isCard).length;
+  const plan = planGridAds(ads, entries.filter(isCard).length);
   const out: Array<T | GridAdEntry> = [];
   let n = 0;
-  let shown = 0;
   for (const e of entries) {
     out.push(e);
     if (!isCard(e)) continue;
     n++;
-    if (every > 0 && n % every === 0) {
-      const ad = ads[shown % ads.length];
-      out.push({ kind: 'gridAd', key: `grid-ad-${ad.id}-${n}`, ad });
-      shown++;
-    } else if (n === total && shown === 0) {
-      out.push({ kind: 'gridAd', key: `grid-ad-${ads[0].id}-end`, ad: ads[0] });
-      shown++;
-    }
+    const due = plan.get(n);
+    if (due) out.push({ kind: 'gridAd', key: `grid-ad-${n}`, ad: due[0], ads: due });
   }
   return out;
+}
+
+/** One in-grid card spot: a single ad, or several stacked that slide (round logo switches top-right). */
+export function AdGridStack({ ads }: { ads: PublicAd[] }) {
+  const [i, setI] = React.useState(0);
+  const [paused, setPaused] = React.useState(false);
+  const count = ads.length;
+  React.useEffect(() => {
+    if (count < 2 || paused) return;
+    const t = window.setInterval(() => setI((v) => (v + 1) % count), 7000);
+    return () => window.clearInterval(t);
+  }, [count, paused]);
+  if (!count) return null;
+  const at = i % count;
+  if (count === 1) return <AdGridCard ad={ads[0]} />;
+  return (
+    <div className="relative h-full w-full" onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} data-testid="ad-grid-stack">
+      <AdGridCard key={ads[at].id} ad={ads[at]} />
+      <div className="absolute right-2 top-2 z-[3] flex items-center gap-1 rounded-full bg-black/35 px-1 py-1 backdrop-blur-sm" data-testid="ad-grid-stack-switch">
+        {ads.map((a, k) => (
+          <button
+            key={a.id}
+            type="button"
+            onClick={() => {
+              setI(k);
+              setPaused(true);
+            }}
+            aria-label={`Show sponsored ad ${k + 1} of ${count}`}
+            aria-current={k === at}
+            className={`h-5 w-5 shrink-0 overflow-hidden rounded-full border-0 p-0 transition ${k === at ? 'ring-2 ring-[#FF5B00]' : 'opacity-60 hover:opacity-90'}`}
+          >
+            {a.sponsorLogoUrl || a.image ? (
+              <img src={a.sponsorLogoUrl || a.image} alt="" className="h-full w-full bg-white object-cover" loading="lazy" />
+            ) : (
+              <span className="flex h-full w-full items-center justify-center bg-[#1A1D4E] text-[8px] font-extrabold text-white">{(a.headline || 'A').trim().charAt(0).toUpperCase()}</span>
+            )}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export function AdGridCard({ ad }: { ad: PublicAd }) {
@@ -303,7 +354,7 @@ export function AdGridCard({ ad }: { ad: PublicAd }) {
       className="choosify-dark-surface relative flex h-full min-h-[300px] flex-col overflow-hidden rounded-[10px] text-left no-underline"
       testId={`ad-grid-card-${ad.slot}`}
     >
-      <div className={`relative min-h-0 flex-[7] overflow-hidden ${brandGradient(ad.brandColor, 110, ad.brandColor2) ? '' : 'bg-gradient-to-br from-[#FF5B00] to-[#2323FF]'}`} style={brandGradient(ad.brandColor, 135, ad.brandColor2) ? { background: brandGradient(ad.brandColor, 135, ad.brandColor2)! } : undefined}>
+      <div className={`relative min-h-[130px] flex-1 overflow-hidden ${brandGradient(ad.brandColor, 110, ad.brandColor2) ? '' : 'bg-gradient-to-br from-[#FF5B00] to-[#2323FF]'}`} style={brandGradient(ad.brandColor, 135, ad.brandColor2) ? { background: brandGradient(ad.brandColor, 135, ad.brandColor2)! } : undefined}>
         {ad.display !== 'text' && ad.image ? (
           <img src={ad.image} alt={ad.alt} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
         ) : ad.sponsorLogoUrl ? (
@@ -311,7 +362,7 @@ export function AdGridCard({ ad }: { ad: PublicAd }) {
         ) : null}
         <Chip ad={ad} />
       </div>
-      <div className="flex min-h-0 flex-[3] flex-col justify-center p-3.5">
+      <div className="flex shrink-0 flex-col justify-center p-3.5" data-testid="ad-grid-card-text">
         {ad.headline && <div className="mb-1 text-[13.5px] font-bold leading-snug text-white line-clamp-2">{ad.headline}</div>}
         {ad.subtext && <div className="mb-3 text-[11px] leading-snug text-white/60 line-clamp-2">{ad.subtext}</div>}
         {ad.ctaLabel && target && (

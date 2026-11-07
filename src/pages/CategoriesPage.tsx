@@ -1,6 +1,6 @@
 import { brandPath } from '../../lib/publicUrls';
 import { AD_SLOTS } from '../lib/ads/adSlots';
-import { AdGridCard, AdSlotBanner, useCategorySponsors, useGridCols, useGridRowBanners } from '../components/ads/AdSlot';
+import { AdGridStack, AdSlotBanner, planGridAds, useCategorySponsors, useGridCols, useGridRowBanners } from '../components/ads/AdSlot';
 import { useAdSlot } from '../lib/ads/adSlots';
 import { adHref } from '../lib/ads/adSlots';
 import React, { useState, useEffect, useMemo } from 'react';
@@ -79,10 +79,6 @@ export function CategoriesPage() {
   const withRowBanners = useGridRowBanners(AD_SLOTS.CATEGORIES_BANNER);
   const [catGridRef, catCols] = useGridCols<HTMLDivElement>();
   const [subGridRef, subCols] = useGridCols<HTMLDivElement>();
-  const catGridEvery = (() => {
-    const steps = catGridAds.map((a) => (Number.isFinite(a.gridEvery) ? Number(a.gridEvery) : 8)).filter((n) => n > 0);
-    return steps.length ? Math.min(...steps) : 0;
-  })();
   const {
     allCatalogProducts,
     allCatalogBrands,
@@ -791,21 +787,21 @@ export function CategoriesPage() {
                 >
                   {(entries) => {
                     const cardCount = entries.filter((e) => e.kind !== 'sponsored').length;
+                    const gridPlan = planGridAds(catGridAds, cardCount);
                     let n = 0;
-                    let shown = 0;
                     return withRowBanners(entries.flatMap((entry) => {
                       if (entry.kind === 'sponsored') {
                         return [<CategorySponsoredAdCard key={entry.key} item={entry.sponsored} />];
                       }
                       n += 1;
                       let gridAd: React.ReactNode = null;
-                      if (catGridAds.length && ((catGridEvery > 0 && n % catGridEvery === 0) || (n === cardCount && shown === 0))) {
-                        const ad = catGridAds[shown % catGridAds.length];
-                        shown += 1;
-                        // fills the whole grid cell: exactly one category card in width AND height
+                      const due = gridPlan.get(n);
+                      if (due) {
+                        // fills the whole grid cell: exactly one category card in width AND height;
+                        // several ads due here are stacked and slide
                         gridAd = (
-                          <div key={`cat-grid-ad-${ad.id}-${n}`} className="flex h-full self-stretch [&>*]:w-full">
-                            <AdGridCard ad={ad} />
+                          <div key={`cat-grid-ad-${n}`} className="flex h-full self-stretch [&>*]:w-full">
+                            <AdGridStack ads={due} />
                           </div>
                         );
                       }

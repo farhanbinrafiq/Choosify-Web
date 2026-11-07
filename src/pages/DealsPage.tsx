@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { AdGridCard, AdSlotBanner, AdSlotCard, useGridAds, useGridCols, useGridRowBanners, useSlotHasAds } from '../components/ads/AdSlot';
+import { AdGridStack, AdSlotBanner, AdSlotCard, useGridAds, useGridCols, useGridRowBanners, useSlotHasAds } from '../components/ads/AdSlot';
 import { AD_SLOTS } from '../lib/ads/adSlots';
 import { ProductCard } from '../components/ProductCard';
 import { FlashDealCard, DealOfTheDayCard } from '../components/deals/FlashDealCard';
@@ -925,7 +925,7 @@ export function DealsPage() {
                         {/* Ads Studio DEALS_GRID_CARD: deal-card sized ads after every N deals */}
                         {withRowBanners(dealGridFeed.map((entry) =>
                           entry.kind === 'gridAd' ? (
-                            <AdGridCard key={entry.key} ad={entry.ad} />
+                            <AdGridStack key={entry.key} ads={entry.ads} />
                           ) : entry.kind === 'placement' ? (
                             null /* no placeholder ads: only real Ads Studio bookings show */
                           ) : (

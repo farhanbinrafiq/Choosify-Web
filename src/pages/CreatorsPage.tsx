@@ -1,6 +1,6 @@
 import { creatorPath } from '../../lib/publicUrls';
 import { AD_SLOTS } from '../lib/ads/adSlots';
-import { AdGridCard, AdSlotBanner, useGridAds, useGridCols, useGridRowBanners } from '../components/ads/AdSlot';
+import { AdGridStack, AdSlotBanner, useGridAds, useGridCols, useGridRowBanners } from '../components/ads/AdSlot';
 import React, { useState, useMemo } from 'react';
 import { PAGE_LISTING_SINGLE_SHELL, CREATOR_CARD_GRID } from "../lib/pageLayout";
 import { useSectionScrollSpy } from '../hooks/useSectionScrollSpy';
@@ -740,7 +740,7 @@ export function CreatorsPage() {
                 {/* Ads Studio CREATORS_GRID_CARD: creator-card sized ads after every N creators */}
                 {withRowBanners(creatorGridFeed.map((entry) =>
                   entry.kind === 'gridAd' ? (
-                    <AdGridCard key={entry.key} ad={entry.ad} />
+                    <AdGridStack key={entry.key} ads={entry.ads} />
                   ) : entry.kind === 'placement' ? (
                     null /* no placeholder ads: only real Ads Studio bookings show */
                   ) : (
